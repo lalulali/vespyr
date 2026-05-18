@@ -1,0 +1,120 @@
+---
+name: product-exploration
+description: Validates a concept through market, competitor, and user research — turns a validated idea into evidence-backed research
+---
+
+## What this skill does
+
+Takes a validated idea (from `idea-validation`) and runs the research pipeline. Specialist agents validate market potential, competitive landscape, and user needs in parallel.
+
+**Previous skill:** `idea-validation` (produces the validation brief with demand evidence and open questions)
+**Next skill:** After research, load `product-design` to define requirements and create specs.
+
+## Prerequisites
+
+Before starting, check for a validation brief:
+
+**Path A — Has validation brief (recommended):**
+- [ ] `artifacts/output/00-discovery/validation-brief.md` exists with a GO verdict
+- Skip Phase 1 entirely. Go straight to Phase 2 research.
+
+**Path B — No validation brief (direct entry):**
+- If the user skips idea-validation and comes here directly with a clear concept, run Phase 1 (founder synthesis) to produce an idea brief first.
+- Consider suggesting `idea-validation` if the idea seems unvalidated.
+
+## Workflow steps
+
+### Phase 1: Synthesize (skip if validation brief exists)
+
+Invoke `@founder` to take the concept and produce a structured brief:
+- Synthesize into a clear, one-sentence concept
+- Stress-test with Golden Circle (WHY / HOW / WHAT)
+- Generate alternatives using SCAMPER, Crazy 8s, analogies
+- Converge to ONE strongest direction with rationale
+- Define the value proposition and target user
+- Identify fatal assumptions for researchers to validate
+- Decide which optional agents to summon (§5 of workflow.md)
+
+**Output:** `artifacts/output/00-discovery/idea-brief.md`
+
+**Gate check:** Before proceeding to Phase 2, verify:
+- [ ] Brief contains a one-sentence summary
+- [ ] At least 3 assumptions are identified with assigned researchers
+- [ ] Optional agent decisions are documented
+
+### Phase 2: Research (parallelizable)
+
+Research agents use the validation brief (or idea brief) as their primary input. If a validation brief exists, agents should focus on the **open questions** listed in it.
+
+Steps 2a and 2b can run **in parallel**. Step 2c depends on 2b's output.
+
+#### Step 2a: Market Research ⟨parallel⟩
+Invoke `@market-researcher` to validate market potential:
+- Market size (TAM, SAM, SOM)
+- Industry trends and growth rates
+- Target customer segments
+- Market risks and opportunities
+
+**Context adaptation:**
+- **Startup mode:** Full external market research
+- **Company mode:** Internal market analysis — which teams/orgs benefit? What budget exists? What similar initiatives have been tried?
+- **Personal mode:** Lightweight — is anyone else building this? What's the landscape?
+
+**Input:** validation brief or idea brief
+**Output:** `artifacts/output/01-research/market-analysis.md`
+
+#### Step 2b: Competitor Analysis ⟨parallel with 2a⟩
+Invoke `@competitor-analyzer` to map the landscape:
+- Direct and indirect competitors
+- Competitive comparison matrix
+- White-space opportunities
+- Pricing and positioning
+
+**Context adaptation:**
+- **Startup mode:** Full competitive landscape
+- **Company mode:** Internal alternatives — what existing tools, teams, or vendors solve this partially? Build vs. buy analysis.
+- **Personal mode:** What open source or free tools exist? What's different about your approach?
+
+**Input:** validation brief or idea brief
+**Output:** `artifacts/output/01-research/competitive-analysis.md`
+
+#### Step 2c: User Research ⟨after 2b⟩
+Invoke `@user-researcher` to validate user needs:
+- Target users and their goals
+- Pain points and workarounds
+- User personas and journeys
+- "How might we" statements
+
+**Context adaptation:**
+- **Startup mode:** Full persona development, jobs-to-be-done, user journeys
+- **Company mode:** Stakeholder interviews, internal workflow analysis, team pain points
+- **Personal mode:** Self-research — your own pain points and use cases
+
+**Input:** validation brief or idea brief + `artifacts/output/01-research/competitive-analysis.md`
+**Output:** `artifacts/output/01-research/user-personas.md`
+
+### Phase 3: Founder Review (gate)
+
+After all research completes, review findings against the brief:
+- Does the market validate the opportunity? (Check GO/NO-GO in market analysis)
+- Does user research confirm the target persona and pain points?
+- Does competitive analysis reveal viable positioning?
+- **Cross-reference against the validation brief's premises** — do the premises still hold after research?
+
+**If research contradicts assumptions:**
+- @founder decides: **pivot** (revise brief and re-run Phase 2), **refine** (adjust scope), or **proceed with documented risk**
+- Maximum 1 pivot before committing to a direction
+
+## Output artifacts
+- `artifacts/output/00-discovery/idea-brief.md` (only if no validation brief existed)
+- `artifacts/output/01-research/market-analysis.md`
+- `artifacts/output/01-research/competitive-analysis.md`
+- `artifacts/output/01-research/user-personas.md`
+
+## Handoff to product-design
+When exploration is complete:
+1. All research artifacts exist and are complete
+2. The concept is validated by evidence
+3. No unresolved GO/NO-GO blockers from research
+4. Premises from the validation brief still hold (or have been revised)
+5. Load `product-design` to define requirements and create specs
