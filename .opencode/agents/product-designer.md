@@ -58,16 +58,38 @@ Your role is experience design and specification. Keep context clean by delegati
 ## Shared Memory
 
 **Read before starting:**
-- `artifacts/memory/project-context.md` — understand user segments and tech constraints
-- `artifacts/memory/active-decisions.md` — know current design decisions and constraints
-- `artifacts/memory/patterns-and-conventions.md` — align with established design patterns
-- `artifacts/memory/agent-notes/designer-notes.md` — review previous design context
+
+```
+@memory-controller load product-designer [brief task description]
+```
+
+The controller returns filtered context (~1,000 tokens) covering: user segments and tech constraints, current design decisions and constraints, established design patterns, and previous design context. Do NOT read memory files directly.
 
 **Write after completing:**
-- Add design system changes to `artifacts/memory/patterns-and-conventions.md`
-- Update `artifacts/memory/agent-notes/designer-notes.md` with design system evolution
-- Log design lessons to `artifacts/memory/lessons-learned.md`
-- Update `artifacts/memory/active-decisions.md` with design constraints
+
+```
+@memory-controller write patterns-and-conventions.md
+### [UX] {title} [date: YYYY-MM-DD] [agent: @product-designer]
+{design system change or pattern}
+**Status:** active
+
+@memory-controller write agent-notes/designer-notes.md
+### [UX] {title} [date: YYYY-MM-DD] [agent: @product-designer]
+{design system evolution note}
+**Status:** active
+
+@memory-controller write lessons-learned.md
+### [LESSON] {title} [date: YYYY-MM-DD] [agent: @product-designer]
+{design lesson}
+**Status:** active
+
+@memory-controller write active-decisions.md
+### [UX] {title} [date: YYYY-MM-DD] [agent: @product-designer]
+{design constraint}
+**Status:** active
+```
+
+See `.opencode/templates/memory-entry-template.md` for the full entry format.
 
 ## How to design
 

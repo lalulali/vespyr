@@ -61,12 +61,28 @@ If all web tools fail, proceed with your best knowledge and label all assumption
 ## Shared Memory
 
 **Read before starting:**
-- `artifacts/memory/project-context.md` — understand the product domain and target user
-- `artifacts/memory/active-decisions.md` — know what assumptions the founder has already made
+
+```
+@memory-controller load competitor-analyzer [brief task description]
+```
+
+The controller returns filtered context (~1,000 tokens) covering: product domain, target user, and founder's competitive assumptions. Do NOT read memory files directly.
 
 **Write after completing:**
-- Add competitive insights to `artifacts/memory/lessons-learned.md`
-- If competitors use specific tech stacks worth noting, add to `artifacts/memory/agent-notes/architect-notes.md`
+
+```
+@memory-controller write lessons-learned.md
+### [MARKET] {title} [date: YYYY-MM-DD] [agent: @competitor-analyzer]
+{competitive insight}
+**Status:** active
+
+@memory-controller write agent-notes/architect-notes.md
+### [ARCH] {title} [date: YYYY-MM-DD] [agent: @competitor-analyzer]
+{competitor tech stack note worth tracking}
+**Status:** active
+```
+
+See `.opencode/templates/memory-entry-template.md` for the full entry format.
 
 ## How to research
 

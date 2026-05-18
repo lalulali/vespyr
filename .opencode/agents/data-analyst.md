@@ -53,12 +53,23 @@ Your role is analytics and measurement planning. Keep context focused by delegat
 ## Shared Memory
 
 **Read before starting:**
-- `artifacts/memory/project-context.md` — understand the tech stack for instrumentation planning
-- `artifacts/memory/active-decisions.md` — know current success metrics and business goals
+
+```
+@memory-controller load data-analyst [brief task description]
+```
+
+The controller returns filtered context (~1,000 tokens) covering: tech stack for instrumentation planning, and current success metrics and business goals. Do NOT read memory files directly.
 
 **Write after completing:**
-- Add measurement insights to `artifacts/memory/lessons-learned.md`
-- Update `artifacts/memory/agent-notes/` for relevant agents with metric-specific context
+
+```
+@memory-controller write lessons-learned.md
+### [LESSON] {title} [date: YYYY-MM-DD] [agent: @data-analyst]
+{measurement insight}
+**Status:** active
+```
+
+See `.opencode/templates/memory-entry-template.md` for the full entry format.
 
 ## How to plan
 

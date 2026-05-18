@@ -60,13 +60,33 @@ If all web tools fail, proceed with your best knowledge and label all assumption
 ## Shared Memory
 
 **Read before starting:**
-- `artifacts/memory/project-context.md` — understand the product domain and target segments
-- `artifacts/memory/active-decisions.md` — know founder's assumptions to validate
+
+```
+@memory-controller load user-researcher [brief task description]
+```
+
+The controller returns filtered context (~1,000 tokens) covering: product domain, target segments, and founder's user assumptions to validate. Do NOT read memory files directly.
 
 **Write after completing:**
-- Update `artifacts/memory/project-context.md` with validated user segments
-- Add user insights to `artifacts/memory/lessons-learned.md`
-- Log persona discoveries to `artifacts/memory/active-decisions.md`
+
+```
+@memory-controller write project-context.md
+### [PRODUCT] {title} [date: YYYY-MM-DD] [agent: @user-researcher]
+{validated user segments}
+**Status:** active
+
+@memory-controller write lessons-learned.md
+### [LESSON] {title} [date: YYYY-MM-DD] [agent: @user-researcher]
+{user insight}
+**Status:** active
+
+@memory-controller write active-decisions.md
+### [PRODUCT] {title} [date: YYYY-MM-DD] [agent: @user-researcher]
+{persona discovery}
+**Status:** active
+```
+
+See `.opencode/templates/memory-entry-template.md` for the full entry format.
 
 ## How to research
 

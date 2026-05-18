@@ -53,14 +53,33 @@ Your role is infrastructure and deployment. Keep context focused by delegating o
 ## Shared Memory
 
 **Read before starting:**
-- `artifacts/memory/project-context.md` — understand current infrastructure and deployment setup
-- `artifacts/memory/active-decisions.md` — know scaling targets and environment constraints
-- `artifacts/memory/agent-notes/architect-notes.md` — review infrastructure decisions
+
+```
+@memory-controller load devops-engineer [brief task description]
+```
+
+The controller returns filtered context (~1,000 tokens) covering: current infrastructure and deployment setup, scaling targets and environment constraints, and infrastructure decisions. Do NOT read memory files directly.
 
 **Write after completing:**
-- Add infrastructure changes to `artifacts/memory/active-decisions.md`
-- Update `artifacts/memory/patterns-and-conventions.md` with deployment patterns
-- Log operational insights to `artifacts/memory/lessons-learned.md`
+
+```
+@memory-controller write active-decisions.md
+### [INFRA] {title} [date: YYYY-MM-DD] [agent: @devops-engineer]
+{infrastructure change}
+**Status:** active
+
+@memory-controller write patterns-and-conventions.md
+### [INFRA] {title} [date: YYYY-MM-DD] [agent: @devops-engineer]
+{deployment pattern established}
+**Status:** active
+
+@memory-controller write lessons-learned.md
+### [LESSON] {title} [date: YYYY-MM-DD] [agent: @devops-engineer]
+{operational insight}
+**Status:** active
+```
+
+See `.opencode/templates/memory-entry-template.md` for the full entry format.
 
 ## How to operate
 

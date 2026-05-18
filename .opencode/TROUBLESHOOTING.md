@@ -145,9 +145,45 @@ Common issues and how to resolve them when running the agent system.
 
 **Problem:** `active-decisions.md` or `lessons-learned.md` has grown to 5,000+ words with many resolved/historical items that waste context and confuse agents.
 
-**Fix:** Run the **memory compaction protocol** (see `workflow.md` §12). This is built into the `retrospective` skill (Step 5) and should happen every 3 iteration cycles or monthly. It archives resolved items and keeps active memory under ~2,000 words.
+**Fix:** Run `@memory-controller compact [filename]` explicitly, or it triggers automatically when a write pushes a file past its threshold. Compaction moves `resolved` and `stale` entries to `artifacts/memory/archive/YYYY-QN/` and updates the searchable index at `artifacts/memory/archive/index.json`.
 
-**Prevention:** The retrospective skill now includes compaction as a mandatory step. Track when the last compaction occurred in `artifacts/memory/session-summaries/latest.md`.
+**Prevention:** The retrospective skill (Step 5) calls `@memory-controller compact` on all files as a mandatory step. Track when the last compaction occurred in `artifacts/memory/session-summaries/latest.md`.
+
+---
+
+## What is `artifacts/memory/archive/`?
+
+**Context:** After compaction runs for the first time, you'll see an `archive/` folder appear inside `artifacts/memory/`. This is created automatically by `@memory-controller` — you don't need to create it manually.
+
+**Structure:**
+```
+artifacts/memory/archive/
+├── index.json          # Searchable index of all archived entries (auto-created)
+└── YYYY-QN/            # Quarterly folders, e.g. 2026-Q2/
+    ├── active-decisions.md
+    ├── blockers-and-risks.md
+    └── lessons-learned.md
+```
+
+**`index.json`** is created automatically the first time compaction runs. It contains metadata (title, keywords, date, summary, file location) for every archived entry so agents can search without loading full archive files.
+
+**Nothing is ever deleted.** Archived entries are always retrievable via `@memory-controller search [query]`.
+
+**The full archive protocol** is documented in `.opencode/agents/memory-controller.md`.
+
+---
+
+## Agent can't find historical context after compaction
+
+**Problem:** An agent asks about a past decision (e.g., "why did we choose PostgreSQL?") but the entry was compacted out of `active-decisions.md`.
+
+**Fix:** Use the archive search:
+```
+@memory-controller search why did we choose PostgreSQL
+```
+The controller scores archived entries against the query and returns the top matches with summaries and file locations.
+
+**Prevention:** Entries tagged `[CRITICAL]` are never archived. Tag decisions that are likely to be referenced long-term with `[CRITICAL]` when writing them.
 
 ---
 

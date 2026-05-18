@@ -60,16 +60,38 @@ Your role is delivery management and coordination. Keep context focused by deleg
 ## Shared Memory
 
 **Read before starting:**
-- `artifacts/memory/project-context.md` — understand project scope, team capacity, and constraints
-- `artifacts/memory/active-decisions.md` — know current decisions affecting scope and timeline
-- `artifacts/memory/blockers-and-risks.md` — check for active blockers
-- `artifacts/memory/agent-notes/tech-lead-notes.md` — review estimation calibration and velocity
+
+```
+@memory-controller load project-manager [brief task description]
+```
+
+The controller returns filtered context (~1,000 tokens) covering: project scope and constraints, active decisions affecting timeline, active blockers, and tech-lead notes on velocity. Do NOT read memory files directly.
 
 **Write after completing:**
-- Update `artifacts/memory/active-decisions.md` with scope and timeline decisions
-- Update `artifacts/memory/blockers-and-risks.md` with project-level risks and mitigations
-- Log coordination lessons to `artifacts/memory/lessons-learned.md`
-- Update `artifacts/memory/agent-notes/project-manager-notes.md` with velocity tracking, stakeholder updates, and retrospective items
+
+```
+@memory-controller write active-decisions.md
+### [PROCESS] {title} [date: YYYY-MM-DD] [agent: @project-manager]
+{scope or timeline decision}
+**Status:** active
+
+@memory-controller write blockers-and-risks.md
+### [RISK] {title} [date: YYYY-MM-DD] [agent: @project-manager]
+{project-level risk and mitigation}
+**Status:** active
+
+@memory-controller write lessons-learned.md
+### [LESSON] {title} [date: YYYY-MM-DD] [agent: @project-manager]
+{coordination lesson}
+**Status:** active
+
+@memory-controller write agent-notes/project-manager-notes.md
+### [PROCESS] {title} [date: YYYY-MM-DD] [agent: @project-manager]
+{velocity tracking, stakeholder update, or retrospective item}
+**Status:** active
+```
+
+See `.opencode/templates/memory-entry-template.md` for the full entry format.
 
 ## How to manage delivery
 

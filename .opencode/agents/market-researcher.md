@@ -59,12 +59,28 @@ If all web tools fail, proceed with your best knowledge and label all assumption
 ## Shared Memory
 
 **Read before starting:**
-- `artifacts/memory/project-context.md` — understand the product domain
-- `artifacts/memory/active-decisions.md` — know founder's key assumptions
+
+```
+@memory-controller load market-researcher [brief task description]
+```
+
+The controller returns filtered context (~1,000 tokens) covering: product domain and target segments, and founder's key assumptions to validate. Do NOT read memory files directly.
 
 **Write after completing:**
-- Add market sizing assumptions to `artifacts/memory/active-decisions.md`
-- Log market insights to `artifacts/memory/lessons-learned.md`
+
+```
+@memory-controller write active-decisions.md
+### [MARKET] {title} [date: YYYY-MM-DD] [agent: @market-researcher]
+{market sizing assumption}
+**Status:** active
+
+@memory-controller write lessons-learned.md
+### [LESSON] {title} [date: YYYY-MM-DD] [agent: @market-researcher]
+{market insight}
+**Status:** active
+```
+
+See `.opencode/templates/memory-entry-template.md` for the full entry format.
 
 ## How to research
 

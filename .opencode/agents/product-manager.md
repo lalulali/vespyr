@@ -70,18 +70,33 @@ Keep context clean by delegating operational tasks:
 ## Shared Memory
 
 **Read before starting (always):**
-- `artifacts/memory/project-context.md` — understand user segments and business goals
-- `artifacts/memory/active-decisions.md` — know founder's key decisions
-- `artifacts/memory/lessons-learned.md` — learn from previous iterations
-- `artifacts/output/05-project-management/kanban.md` — current backlog and priorities
-- `artifacts/output/02-strategy/roadmap.md` — current roadmap (if exists)
+
+```
+@memory-controller load product-manager [brief task description]
+```
+
+The controller returns filtered context (~1,000 tokens) covering: project context and user segments, active product decisions, lessons from previous iterations, and task-relevant chunks. Do NOT read memory files directly.
 
 **Write after completing:**
-- Add product decisions to `artifacts/memory/active-decisions.md`
-- Log prioritization rationale to `artifacts/memory/lessons-learned.md`
-- Update `artifacts/memory/project-context.md` if scope changes
-- Update `artifacts/output/05-project-management/kanban.md` — add new items, set priority, reprioritize as needed
-- Update `artifacts/output/02-strategy/roadmap.md` when roadmap changes
+
+```
+@memory-controller write active-decisions.md
+### [PRODUCT] {title} [date: YYYY-MM-DD] [agent: @product-manager]
+{product decision and rationale}
+**Status:** active
+
+@memory-controller write lessons-learned.md
+### [LESSON] {title} [date: YYYY-MM-DD] [agent: @product-manager]
+{prioritization rationale or insight}
+**Status:** active
+
+@memory-controller write project-context.md
+### [PRODUCT] {title} [date: YYYY-MM-DD] [agent: @product-manager]
+{scope change or updated context}
+**Status:** active
+```
+
+See `.opencode/templates/memory-entry-template.md` for the full entry format.
 
 ## Workflows
 

@@ -50,15 +50,38 @@ Your role is security auditing. Keep context focused by delegating operational t
 ## Shared Memory
 
 **Read before starting:**
-- `artifacts/memory/project-context.md` — understand tech stack and compliance requirements
-- `artifacts/memory/active-decisions.md` — know security boundaries and trust zones
-- `artifacts/memory/patterns-and-conventions.md` — review security patterns
+
+```
+@memory-controller load security-engineer [brief task description]
+```
+
+The controller returns filtered context (~1,000 tokens) covering: tech stack and compliance requirements, security boundaries and trust zones, and established security patterns. Do NOT read memory files directly.
 
 **Write after completing:**
-- Add security findings to `artifacts/memory/active-decisions.md`
-- Log security patterns to `artifacts/memory/patterns-and-conventions.md`
-- Update `artifacts/memory/blockers-and-risks.md` with security risks
-- Add security lessons to `artifacts/memory/lessons-learned.md`
+
+```
+@memory-controller write active-decisions.md
+### [SECURITY] {title} [date: YYYY-MM-DD] [agent: @security-engineer]
+{security finding or decision}
+**Status:** active
+
+@memory-controller write patterns-and-conventions.md
+### [SECURITY] {title} [date: YYYY-MM-DD] [agent: @security-engineer]
+{security pattern established}
+**Status:** active
+
+@memory-controller write blockers-and-risks.md
+### [RISK] {title} [date: YYYY-MM-DD] [agent: @security-engineer]
+{security risk — include severity: critical/high/medium/low}
+**Status:** active
+
+@memory-controller write lessons-learned.md
+### [LESSON] {title} [date: YYYY-MM-DD] [agent: @security-engineer]
+{security lesson}
+**Status:** active
+```
+
+See `.opencode/templates/memory-entry-template.md` for the full entry format.
 
 ## Boundary Clarification
 

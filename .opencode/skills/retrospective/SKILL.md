@@ -99,26 +99,37 @@ Categorize action items:
 
 ### Step 5: Update Shared Memory + Compaction
 
-Invoke `@project-manager` to update the team's collective knowledge:
+Invoke `@project-manager` to update the team's collective knowledge via `@memory-controller`:
 
-**Updates:**
+**Updates (use @memory-controller write for each):**
 - Append process improvements to `artifacts/memory/patterns-and-conventions.md`
 - Append estimation benchmarks to `artifacts/memory/agent-notes/tech-lead-notes.md`
 - Update `artifacts/memory/project-context.md` with new technical decisions
-- Clear resolved blockers in `artifacts/memory/blockers-and-risks.md`
+- Clear resolved blockers in `artifacts/memory/blockers-and-risks.md` (set status to `resolved`)
 - Update `artifacts/memory/active-decisions.md` with new process decisions
 - Append lessons to `artifacts/memory/lessons-learned.md`
 - Write session summary to `artifacts/memory/session-summaries/latest.md`
 
-**Memory compaction (every 3 retros or monthly):**
-Following the compaction protocol in workflow.md §12:
-1. Archive resolved decisions → `artifacts/memory/archive/decisions-YYYY-MM.md`
-2. Archive resolved blockers → `artifacts/memory/archive/blockers-YYYY-MM.md`
-3. Summarize old lessons (keep only last 3 months active)
-4. Compact agent notes (keep only 10 most recent entries per agent)
-5. Remove superseded patterns from `patterns-and-conventions.md`
+**Memory compaction (automatic — triggered by @memory-controller):**
 
-**Target:** Each active memory file stays under ~2,000 words.
+`@memory-controller` compacts files automatically when they exceed their word thresholds. During retrospective, explicitly trigger compaction on all files to ensure they are clean:
+
+```
+@memory-controller compact active-decisions.md
+@memory-controller compact patterns-and-conventions.md
+@memory-controller compact lessons-learned.md
+@memory-controller compact blockers-and-risks.md
+```
+
+The controller will:
+1. Move `resolved` and `stale` entries (> 90 days, no `[CRITICAL]` tag) to `artifacts/memory/archive/YYYY-QN/`
+2. Update `artifacts/memory/archive/index.json` with searchable metadata for every archived entry
+3. Rewrite each file with only active entries
+4. Report: entries kept, entries archived, new file size
+
+**Nothing is deleted.** All archived content remains searchable via `@memory-controller search [query]`.
+
+**Target:** Each active memory file stays under its word threshold after compaction.
 
 ## Output artifacts
 - `artifacts/output/09-retro/data-collection.md`

@@ -54,17 +54,38 @@ Your role is implementation planning and task breakdown. Keep context focused by
 ## Shared Memory
 
 **Read before starting:**
-- `artifacts/memory/project-context.md` — understand team size, timeline, and constraints
-- `artifacts/memory/active-decisions.md` — know current architectural and product decisions
-- `artifacts/memory/patterns-and-conventions.md` — align with established patterns
-- `artifacts/memory/blockers-and-risks.md` — check for active blockers
-- `artifacts/memory/agent-notes/tech-lead-notes.md` — review estimation calibration and velocity
+
+```
+@memory-controller load tech-lead [brief task description]
+```
+
+The controller returns filtered context (~1,000 tokens) covering: project constraints and timeline, active architectural and product decisions, established patterns, active blockers, and tech-lead notes on velocity. Do NOT read memory files directly.
 
 **Write after completing:**
-- Update `artifacts/memory/agent-notes/tech-lead-notes.md` with estimation calibration and velocity
-- Add planning decisions to `artifacts/memory/active-decisions.md`
-- Update `artifacts/memory/blockers-and-risks.md` with new risks
-- Log planning lessons to `artifacts/memory/lessons-learned.md`
+
+```
+@memory-controller write agent-notes/tech-lead-notes.md
+### [PROCESS] {title} [date: YYYY-MM-DD] [agent: @tech-lead]
+{estimation calibration or velocity data}
+**Status:** active
+
+@memory-controller write active-decisions.md
+### [ARCH] {title} [date: YYYY-MM-DD] [agent: @tech-lead]
+{planning decision}
+**Status:** active
+
+@memory-controller write blockers-and-risks.md
+### [RISK] {title} [date: YYYY-MM-DD] [agent: @tech-lead]
+{new risk and mitigation}
+**Status:** active
+
+@memory-controller write lessons-learned.md
+### [LESSON] {title} [date: YYYY-MM-DD] [agent: @tech-lead]
+{planning lesson}
+**Status:** active
+```
+
+See `.opencode/templates/memory-entry-template.md` for the full entry format.
 
 ## How to plan
 

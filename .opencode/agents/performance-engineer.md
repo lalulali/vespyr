@@ -48,16 +48,38 @@ Your role is performance analysis. Keep context focused by delegating operationa
 ## Shared Memory
 
 **Read before starting:**
-- `artifacts/memory/project-context.md` — understand the tech stack and infrastructure
-- `artifacts/memory/active-decisions.md` — know performance SLAs and targets
-- `artifacts/memory/patterns-and-conventions.md` — review known performance patterns
-- `artifacts/memory/agent-notes/architect-notes.md` — check previous performance notes
+
+```
+@memory-controller load performance-engineer [brief task description]
+```
+
+The controller returns filtered context (~1,000 tokens) covering: tech stack and infrastructure, performance SLAs and targets, known performance patterns, and previous performance notes. Do NOT read memory files directly.
 
 **Write after completing:**
-- Add performance findings to `artifacts/memory/active-decisions.md`
-- Log performance patterns to `artifacts/memory/patterns-and-conventions.md`
-- Update `artifacts/memory/agent-notes/architect-notes.md` with performance insights
-- Add performance lessons to `artifacts/memory/lessons-learned.md`
+
+```
+@memory-controller write active-decisions.md
+### [PERF] {title} [date: YYYY-MM-DD] [agent: @performance-engineer]
+{performance finding or decision}
+**Status:** active
+
+@memory-controller write patterns-and-conventions.md
+### [PERF] {title} [date: YYYY-MM-DD] [agent: @performance-engineer]
+{performance pattern established}
+**Status:** active
+
+@memory-controller write agent-notes/architect-notes.md
+### [PERF] {title} [date: YYYY-MM-DD] [agent: @performance-engineer]
+{performance insight for architecture}
+**Status:** active
+
+@memory-controller write lessons-learned.md
+### [LESSON] {title} [date: YYYY-MM-DD] [agent: @performance-engineer]
+{performance lesson}
+**Status:** active
+```
+
+See `.opencode/templates/memory-entry-template.md` for the full entry format.
 
 ## What you measure (vs @data-analyst)
 

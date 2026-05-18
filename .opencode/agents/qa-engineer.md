@@ -53,16 +53,33 @@ Your role is quality validation. Keep context focused by delegating operational 
 ## Shared Memory
 
 **Read before starting:**
-- `artifacts/memory/project-context.md` — understand testing framework and coverage targets
-- `artifacts/memory/patterns-and-conventions.md` — know established testing patterns
-- `artifacts/memory/agent-notes/qa-notes.md` — review known flaky tests and coverage gaps
-- `artifacts/memory/agent-notes/developer-notes.md` — check known pitfalls
+
+```
+@memory-controller load qa-engineer [brief task description]
+```
+
+The controller returns filtered context (~1,000 tokens) covering: testing framework and coverage targets, established testing patterns, QA notes on flaky tests and coverage gaps, and developer pitfalls. Do NOT read memory files directly.
 
 **Write after completing:**
-- Add flaky tests to `artifacts/memory/agent-notes/qa-notes.md`
-- Log coverage gaps to `artifacts/memory/agent-notes/qa-notes.md`
-- Update `artifacts/memory/patterns-and-conventions.md` with testing patterns
-- Add QA lessons to `artifacts/memory/lessons-learned.md`
+
+```
+@memory-controller write agent-notes/qa-notes.md
+### [TEST] {title} [date: YYYY-MM-DD] [agent: @qa-engineer]
+{flaky test or coverage gap}
+**Status:** active
+
+@memory-controller write patterns-and-conventions.md
+### [TEST] {title} [date: YYYY-MM-DD] [agent: @qa-engineer]
+{testing pattern established}
+**Status:** active
+
+@memory-controller write lessons-learned.md
+### [LESSON] {title} [date: YYYY-MM-DD] [agent: @qa-engineer]
+{QA lesson}
+**Status:** active
+```
+
+See `.opencode/templates/memory-entry-template.md` for the full entry format.
 
 ## How to test
 

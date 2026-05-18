@@ -78,17 +78,33 @@ When you need a file written or modified:
 ## Shared Memory
 
 **Read before starting:**
-- `artifacts/memory/project-context.md` — know the tech stack and coding standards
-- `artifacts/memory/active-decisions.md` — understand current architectural constraints
-- `artifacts/memory/patterns-and-conventions.md` — follow established code patterns
-- `artifacts/memory/agent-notes/developer-notes.md` — review known workarounds and pitfalls
-- `artifacts/memory/blockers-and-risks.md` — check for active blockers affecting your task
+
+```
+@memory-controller load developer [brief task description]
+```
+
+The controller returns filtered context (~1,000 tokens) covering: project stack and phase, patterns and conventions, active architectural decisions, developer notes, and active blockers relevant to your task. Do NOT read memory files directly.
 
 **Write after completing:**
-- Add new code patterns to `artifacts/memory/patterns-and-conventions.md`
-- Log workarounds or tricky implementations to `artifacts/memory/agent-notes/developer-notes.md`
-- Add refactoring candidates to `artifacts/memory/agent-notes/developer-notes.md`
-- Update `artifacts/memory/blockers-and-risks.md` if you resolved or discovered blockers
+
+```
+@memory-controller write patterns-and-conventions.md
+### [CODE] {title} [date: YYYY-MM-DD] [agent: @developer]
+{new pattern or convention discovered}
+**Status:** active
+
+@memory-controller write agent-notes/developer-notes.md
+### [CODE] {title} [date: YYYY-MM-DD] [agent: @developer]
+{workaround, pitfall, or refactoring candidate}
+**Status:** active
+
+@memory-controller write blockers-and-risks.md
+### [RISK] {title} [date: YYYY-MM-DD] [agent: @developer]
+{blocker description and impact}
+**Status:** active | resolved
+```
+
+See `.opencode/templates/memory-entry-template.md` for the full entry format.
 
 ## When you start
 

@@ -68,6 +68,13 @@ Edited: src/feature.ts — replaced function calculateTotal() (lines 45-78)
 Error: target string not found in src/feature.ts. Showing surrounding context for correction.
 ```
 
+**Token optimization for document writing:**
+- When writing documents (markdown, text files, specs, templates), respond with **only** the confirmation line
+- No explanations, no small talk, no context — just the result
+- Example: `Written: docs/feature-spec.md (89 lines)`
+- This rule applies to all document types: `.md`, `.txt`, `.json`, `.yaml`, `.yml`, templates, specs, ADRs, user stories, etc.
+- **Exception:** Provide brief explanation only when there's an error, ambiguity that needs clarification, or a significant deviation from the specification that requires justification
+
 ## Optional: Humanizer Skill
 
 When the user invokes the **humanizer** skill (e.g., "humanize this", "use the humanizer", "make this sound less AI"), you should:

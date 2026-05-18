@@ -126,29 +126,70 @@ All agents follow the rules in [GUARDRAILS.md](./GUARDRAILS.md). This includes:
 
 ## Shared Memory
 
-All agents read from and write to `artifacts/memory/` for cross-session continuity:
+All agents read from and write to `artifacts/memory/` through `@memory-controller` for cross-session continuity and token-optimized context loading.
 
 | File | Purpose | Read By | Written By |
 |------|---------|---------|------------|
-| `project-context.md` | Project basics, tech stack | All agents | @founder, @architect |
-| `active-decisions.md` | Current decisions and rationale | All agents | Any agent making decisions |
-| `patterns-and-conventions.md` | Discovered patterns | All agents | @developer, @architect, @product-designer |
-| `lessons-learned.md` | Insights from each phase | All agents | Any agent |
-| `blockers-and-risks.md` | Active blockers | All agents | @tech-lead, any agent |
-| `agent-notes/*.md` | Per-agent accumulated knowledge | Specific agent | Specific agent |
-| `session-summaries/latest.md` | Most recent session context | All agents | Any agent ending a session |
+| `project-context.md` | Project basics, tech stack | All agents (via @memory-controller Tier 1) | @founder, @architect |
+| `active-decisions.md` | Current decisions and rationale | All agents (filtered by relevance) | Any agent via @memory-controller write |
+| `patterns-and-conventions.md` | Discovered patterns | All agents (filtered by relevance) | @developer, @architect, @product-designer via @memory-controller write |
+| `lessons-learned.md` | Insights from each phase | All agents (filtered by relevance) | Any agent via @memory-controller write |
+| `blockers-and-risks.md` | Active blockers | All agents (filtered by relevance) | @tech-lead, any agent via @memory-controller write |
+| `agent-notes/*.md` | Per-agent accumulated knowledge | Specific agent (Tier 2) | Specific agent via @memory-controller write |
+| `session-summaries/latest.md` | Most recent session context | All agents (Tier 2) | Any agent ending a session |
+| `archive/` | Compacted historical entries | On-demand via @memory-controller search | @memory-controller (automatic) |
 
-**Protocol:** Read memory before starting. Write memory after completing.
+**Protocol:**
+- **Read:** Invoke `@memory-controller load [agent-type] [task-description]` before starting. Do NOT read memory files directly — the controller filters and compresses context for you.
+- **Write:** Invoke `@memory-controller write [file] [entry]` after completing. Use the format in `.opencode/templates/memory-entry-template.md`.
 
-### Memory Compaction
+### Memory Entry Format
 
-Memory files grow over time. To prevent unbounded growth:
-- **Every 3 iterations (or monthly):** @project-manager runs a memory compaction during retrospective:
-  1. Archive resolved decisions from `active-decisions.md` to `artifacts/memory/archive/decisions-YYYY-MM.md`
-  2. Archive resolved blockers from `blockers-and-risks.md` to `artifacts/memory/archive/blockers-YYYY-MM.md`
-  3. Summarize and archive old lessons from `lessons-learned.md` (keep only last 3 months active)
-  4. Compact agent notes — keep only the 10 most recent entries per agent
-- **Target:** Each active memory file should stay under 2,000 words.
+Every entry written to memory must follow the structured format in `.opencode/templates/memory-entry-template.md`:
+- Domain tag: `[AUTH]`, `[CODE]`, `[RISK]`, etc.
+- Date tag: `[date: YYYY-MM-DD]`
+- Agent tag: `[agent: @agent-name]`
+- Status field: `active`, `resolved`, or `superseded`
+
+Entries without this format will be rejected by `@memory-controller`.
+
+### Progressive Context Loading
+
+`@memory-controller` loads memory in three tiers to minimize token consumption:
+
+| Tier | Content | Approx. tokens |
+|------|---------|----------------|
+| Tier 1 — Core | Project name, stack, phase, sprint, blocker count | ~200 |
+| Tier 2 — Agent-specific | Files relevant to the agent's role | ~300 |
+| Tier 3 — Task-specific | Chunks scoring ≥ 4 against task keywords | ~500 |
+| **Total** | | **~1,000 tokens** |
+
+Without the controller, loading all memory files costs ~10,000–20,000 tokens per agent invocation. The controller reduces this by 85–95%.
+
+### Automatic Compaction
+
+`@memory-controller` compacts memory files automatically when they exceed their word thresholds:
+
+| File | Threshold |
+|------|-----------|
+| `active-decisions.md` | 1,800 words |
+| `patterns-and-conventions.md` | 1,500 words |
+| `lessons-learned.md` | 1,300 words |
+| `blockers-and-risks.md` | 900 words |
+| `agent-notes/*.md` (each) | 1,100 words |
+| `session-summaries/latest.md` | 600 words |
+
+Compaction moves `resolved` and `stale` entries to `artifacts/memory/archive/YYYY-QN/` and updates the searchable `archive/index.json`. Entries tagged `[CRITICAL]` are never archived. Nothing is ever deleted.
+
+### Archive Search
+
+To retrieve historical context that has been compacted:
+
+```
+@memory-controller search [your query]
+```
+
+The controller scores archived entries against your query keywords and returns the top 5 matches with summaries and file locations.
 
 *See [workflow.md](./workflow.md) for the full orchestration graph and handoff contracts.*
 *See [GUARDRAILS.md](./GUARDRAILS.md) for the full guardrails specification.*

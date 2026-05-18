@@ -79,8 +79,17 @@ lessons-learned.md           Dynamic: insights from each phase
 blockers-and-risks.md        Dynamic: active blockers
 agent-notes/*.md             Per-agent accumulated knowledge
 session-summaries/latest.md  Most recent session context
+archive/                     Compacted historical entries (searchable)
 
-Rule: Read before starting. Write after completing.
+Rule: Never read memory files directly. Use @memory-controller.
+
+READ:  @memory-controller load [agent-type] [task-description]
+WRITE: @memory-controller write [file] [entry]
+FIND:  @memory-controller search [query]
+
+Progressive loading: ~1,000 tokens vs ~15,000 tokens raw (85-95% savings)
+Auto-compaction: triggers when files exceed word thresholds
+Archive: resolved/stale entries moved to archive/YYYY-QN/ with index
 
 ──────────────────────────────────────────────────
 

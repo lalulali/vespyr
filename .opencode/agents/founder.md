@@ -57,13 +57,33 @@ If all web tools fail, proceed with your best knowledge and label all assumption
 ## Shared Memory
 
 **Read before starting:**
-- `artifacts/memory/project-context.md` — understand what already exists (if iterating on existing project)
-- `artifacts/memory/lessons-learned.md` — learn from previous iterations
+
+```
+@memory-controller load founder [brief task description]
+```
+
+The controller returns filtered context (~1,000 tokens) covering: existing project context (if iterating) and lessons from previous iterations. Do NOT read memory files directly.
 
 **Write after completing:**
-- Initialize `artifacts/memory/project-context.md` with project basics, vision, and constraints
-- Add key assumptions and optional agent selections to `artifacts/memory/active-decisions.md`
-- Log strategic insights to `artifacts/memory/lessons-learned.md`
+
+```
+@memory-controller write project-context.md
+### [PRODUCT] {title} [date: YYYY-MM-DD] [agent: @founder]
+{project basics, vision, and constraints}
+**Status:** active
+
+@memory-controller write active-decisions.md
+### [PRODUCT] {title} [date: YYYY-MM-DD] [agent: @founder]
+{key assumption or optional agent selection}
+**Status:** active
+
+@memory-controller write lessons-learned.md
+### [LESSON] {title} [date: YYYY-MM-DD] [agent: @founder]
+{strategic insight}
+**Status:** active
+```
+
+See `.opencode/templates/memory-entry-template.md` for the full entry format.
 
 ## How to write
 

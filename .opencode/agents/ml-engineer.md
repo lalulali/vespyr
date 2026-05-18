@@ -37,16 +37,38 @@ Your role is ML system design and implementation. Keep context focused by delega
 ## Shared Memory
 
 **Read before starting:**
-- `artifacts/memory/project-context.md` — understand tech stack and infrastructure
-- `artifacts/memory/active-decisions.md` — know current architectural constraints
-- `artifacts/memory/patterns-and-conventions.md` — align with data pipeline patterns
-- `artifacts/memory/agent-notes/architect-notes.md` — review system design context
+
+```
+@memory-controller load ml-engineer [brief task description]
+```
+
+The controller returns filtered context (~1,000 tokens) covering: tech stack and infrastructure, current architectural constraints, data pipeline patterns, and system design context. Do NOT read memory files directly.
 
 **Write after completing:**
-- Add ML architecture decisions to `artifacts/memory/active-decisions.md`
-- Log model patterns to `artifacts/memory/patterns-and-conventions.md`
-- Update `artifacts/memory/agent-notes/architect-notes.md` with ML infrastructure notes
-- Add ML-specific lessons to `artifacts/memory/lessons-learned.md`
+
+```
+@memory-controller write active-decisions.md
+### [ML] {title} [date: YYYY-MM-DD] [agent: @ml-engineer]
+{ML architecture decision}
+**Status:** active
+
+@memory-controller write patterns-and-conventions.md
+### [ML] {title} [date: YYYY-MM-DD] [agent: @ml-engineer]
+{model pattern established}
+**Status:** active
+
+@memory-controller write agent-notes/architect-notes.md
+### [ML] {title} [date: YYYY-MM-DD] [agent: @ml-engineer]
+{ML infrastructure note}
+**Status:** active
+
+@memory-controller write lessons-learned.md
+### [LESSON] {title} [date: YYYY-MM-DD] [agent: @ml-engineer]
+{ML-specific lesson}
+**Status:** active
+```
+
+See `.opencode/templates/memory-entry-template.md` for the full entry format.
 
 ## How to build
 

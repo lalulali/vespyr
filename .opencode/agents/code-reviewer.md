@@ -39,14 +39,35 @@ Your role is code review — assessing correctness, security, and patterns. Keep
 ## Shared Memory
 
 **Read before starting:**
-- `artifacts/memory/patterns-and-conventions.md` — know established patterns to enforce
-- `artifacts/memory/agent-notes/developer-notes.md` — understand known workarounds and pitfalls
-- `artifacts/memory/active-decisions.md` — verify code follows current architectural decisions
+
+```
+@memory-controller load code-reviewer [brief description of what's being reviewed]
+```
+
+The controller returns filtered context (~1,000 tokens) covering: established patterns to enforce, known developer workarounds and pitfalls, and active architectural decisions the code must follow. Do NOT read memory files directly.
 
 **Write after completing:**
-- Add recurring issues to `artifacts/memory/agent-notes/qa-notes.md` if they indicate systemic problems
-- Update `artifacts/memory/patterns-and-conventions.md` if you discover new anti-patterns
-- Log systemic review findings to `artifacts/memory/lessons-learned.md`
+
+```
+@memory-controller write agent-notes/qa-notes.md
+### [CODE] {title} [date: YYYY-MM-DD] [agent: @code-reviewer]
+{systemic issue or recurring pattern found across multiple files}
+**Status:** active
+
+@memory-controller write patterns-and-conventions.md
+### [CODE] {title} [date: YYYY-MM-DD] [agent: @code-reviewer]
+{new anti-pattern discovered — what to avoid and why}
+**Status:** active
+
+@memory-controller write lessons-learned.md
+### [LESSON] {title} [date: YYYY-MM-DD] [agent: @code-reviewer]
+{systemic review finding worth sharing with the team}
+**Status:** active
+```
+
+Only write to memory when you find a **systemic pattern** — not for individual PR comments. If the same issue appears in 3+ places, it belongs in memory. Single-instance findings stay in the PR.
+
+See `.opencode/templates/memory-entry-template.md` for the full entry format.
 
 ## What you check
 

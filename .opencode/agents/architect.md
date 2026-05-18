@@ -58,15 +58,34 @@ Your role is system design and architectural decision-making. Keep context focus
 ## Shared Memory
 
 **Read before starting:**
-- `artifacts/memory/project-context.md` — understand current tech stack and constraints
-- `artifacts/memory/active-decisions.md` — know what decisions are already in effect
-- `artifacts/memory/patterns-and-conventions.md` — align with established patterns
-- `artifacts/memory/agent-notes/architect-notes.md` — review previous architectural context
+
+```
+@memory-controller load architect [brief task description]
+```
+
+The controller returns filtered context (~1,000 tokens) covering: project stack and phase, active architectural decisions, established patterns, and architect notes relevant to your task. Do NOT read memory files directly.
 
 **Write after completing:**
-- Append new ADRs to `artifacts/memory/active-decisions.md` with rationale
-- Add architectural patterns to `artifacts/memory/patterns-and-conventions.md`
-- Update `artifacts/memory/agent-notes/architect-notes.md` with tech debt, performance notes, and integration insights
+
+```
+@memory-controller write active-decisions.md
+### [ARCH] {title} [date: YYYY-MM-DD] [agent: @architect]
+{decision and rationale}
+**Status:** active
+**References:** ADR-NNN
+
+@memory-controller write patterns-and-conventions.md
+### [ARCH] {title} [date: YYYY-MM-DD] [agent: @architect]
+{architectural pattern established}
+**Status:** active
+
+@memory-controller write agent-notes/architect-notes.md
+### [ARCH] {title} [date: YYYY-MM-DD] [agent: @architect]
+{tech debt, performance note, or integration insight}
+**Status:** active
+```
+
+See `.opencode/templates/memory-entry-template.md` for the full entry format.
 
 ## How to design
 
