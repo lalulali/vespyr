@@ -4,6 +4,8 @@ Vespyr is built for [opencode](https://opencode.ai) by default. The agent defini
 
 This guide covers how to port the system to other harnesses. The core idea — specialized agents with defined roles, shared memory, and I/O delegation — translates to every major tool. The mechanics differ.
 
+**Note on shared memory:** In opencode, all memory access goes through `@memory-controller` — a dedicated agent that handles progressive context loading (hybrid keyword+semantic scoring), automatic compaction, archiving, and session continuity. When porting to other harnesses, this controller cannot be replicated exactly. The sections below describe the closest equivalent for each harness. For the full memory protocol, see `.opencode/agents/memory-controller.md`.
+
 ---
 
 ## Quick Start for AI Agents
@@ -128,14 +130,20 @@ This project uses a multi-agent system. Agents are defined in .claude/agents/.
 Invoke them with @agent-name or let the orchestrator spawn them.
 
 ## Shared memory
-- artifacts/memory/active-decisions.md — architectural decisions in effect
-- artifacts/memory/patterns-and-conventions.md — coding standards
-- artifacts/memory/blockers-and-risks.md — active blockers
+All memory access goes through @memory-controller. Never read artifacts/memory/
+files directly. Use:
+- @memory-controller load [agent-type] [task] — before starting any task
+- @memory-controller write [file] [entry] — after completing work
+- @memory-controller session-write [content] — at end of session
+- @memory-controller search [query] — to find archived context
+- @memory-controller status — health check
+
+See .claude/agents/memory-controller.md for the full protocol.
 ```
 
 **2. Convert agent files**
 
-Copy `.opencode/agents/*.md` to `.claude/agents/*.md`. The prompt body stays identical. Update the frontmatter:
+Copy `.opencode/agents/*.md` to `.claude/agents/*.md`. The prompt body stays identical. **Also copy `.opencode/agents/memory-controller.md` to `.claude/agents/memory-controller.md`** — this is the memory gatekeeper all other agents depend on. Update the frontmatter:
 
 ```markdown
 ---
@@ -234,6 +242,11 @@ Read these files before starting any task:
 - artifacts/memory/project-context.md
 - artifacts/memory/active-decisions.md
 - artifacts/memory/patterns-and-conventions.md
+
+> **Note:** In the native opencode version, memory access goes through
+> `@memory-controller` which handles filtering, compaction, and semantic search.
+> In this single-agent port, read the files directly and apply your own judgment
+> about which sections are relevant to the current task.
 
 ## Agents
 
@@ -352,6 +365,8 @@ You are a software architect. Your job is to design the system blueprint...
 .cursor/rules/patterns.mdc           (alwaysApply: true)
 ```
 
+> **Note:** In the native opencode version, memory access goes through `@memory-controller` which handles filtering, compaction, and semantic search. In this Cursor port, the always-on rules are a simplified equivalent — they load the full files rather than filtered context. Keep these files under ~500 words each to avoid context bloat.
+
 **4. Invoke agents in chat**
 
 ```
@@ -420,6 +435,8 @@ This project uses a multi-agent workflow defined in AGENTS.md.
 Always read artifacts/memory/active-decisions.md before making architectural changes.
 Always read artifacts/memory/patterns-and-conventions.md before writing code.
 ```
+
+> **Note:** In the native opencode version, memory access goes through `@memory-controller` which handles filtering, compaction, and semantic search. In this Windsurf port, the `.windsurfrules` directives are a simplified equivalent. Keep `active-decisions.md` and `patterns-and-conventions.md` under ~500 words each to avoid context bloat.
 
 **3. Convert skills to workflows**
 
@@ -608,6 +625,16 @@ Zed is an IDE with an agent panel. It reads `.rules` files (and also `.cursorrul
 ## Coding conventions
 [From artifacts/memory/patterns-and-conventions.md]
 
+## Shared memory
+Read these files before starting any task:
+- artifacts/memory/active-decisions.md
+- artifacts/memory/patterns-and-conventions.md
+
+> **Note:** In the native opencode version, memory access goes through
+> `@memory-controller` which handles filtering, compaction, and semantic search.
+> In this Zed port, read the files directly and focus on sections relevant
+> to your current task. Keep these files under ~500 words each.
+
 ## Agents
 When asked to act as a specific agent, follow that agent's role exactly.
 Agent definitions are in .opencode/agents/ — read the relevant file before responding.
@@ -662,8 +689,14 @@ This project uses a multi-agent workflow. When asked to act as a specific agent,
 follow that agent's role exactly. Agent definitions are in .augment/rules/agents.md.
 
 ## Shared memory
+Read these files before starting any task:
 - artifacts/memory/active-decisions.md
 - artifacts/memory/patterns-and-conventions.md
+
+> **Note:** In the native opencode version, memory access goes through
+> `@memory-controller` which handles filtering, compaction, and semantic search.
+> In this Augment port, read the files directly and focus on sections relevant
+> to your current task. Keep these files under ~500 words each.
 ```
 
 **2. Create `.augment/rules/agents.md`**
@@ -735,6 +768,11 @@ Read these files before starting any task:
 - artifacts/memory/active-decisions.md
 - artifacts/memory/patterns-and-conventions.md
 
+> **Note:** In the native opencode version, memory access goes through
+> `@memory-controller` which handles filtering, compaction, and semantic search.
+> In this Goose port, read the files directly and focus on sections relevant
+> to your current task. Keep these files under ~500 words each.
+
 ## Agent team
 This project uses a multi-agent workflow. When asked to act as a specific agent,
 follow that agent's role exactly.
@@ -802,6 +840,11 @@ Use a directory for better organization:
 Read these files before starting any task:
 - artifacts/memory/active-decisions.md
 - artifacts/memory/patterns-and-conventions.md
+
+> **Note:** In the native opencode version, memory access goes through
+> `@memory-controller` which handles filtering, compaction, and semantic search.
+> In this Cline port, read the files directly and focus on sections relevant
+> to your current task. Keep these files under ~500 words each.
 ```
 
 **3. Create `.clinerules/01-agents.md`**
@@ -850,7 +893,14 @@ This project uses a multi-agent workflow. When asked to act as a specific agent,
 follow that agent's role, responsibilities, and output format exactly.
 
 ## Shared memory
-[List of artifact paths]
+Read these files before starting any task:
+- artifacts/memory/active-decisions.md
+- artifacts/memory/patterns-and-conventions.md
+
+> **Note:** In the native opencode version, memory access goes through
+> `@memory-controller` which handles filtering, compaction, and semantic search.
+> In this single-agent port, read the files directly and focus on sections
+> relevant to your current task. Keep these files under ~500 words each.
 
 ## Agents
 ### @founder

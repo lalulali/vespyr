@@ -181,9 +181,70 @@ artifacts/memory/archive/
 ```
 @memory-controller search why did we choose PostgreSQL
 ```
-The controller scores archived entries against the query and returns the top matches with summaries and file locations.
+The controller uses hybrid scoring (keyword + semantic) and returns the top matches with summaries and file locations. It understands synonyms — "database choice" and "storage decision" will also find the PostgreSQL entry.
 
 **Prevention:** Entries tagged `[CRITICAL]` are never archived. Tag decisions that are likely to be referenced long-term with `[CRITICAL]` when writing them.
+
+---
+
+## Tier 3 is loading irrelevant chunks
+
+**Problem:** The memory controller is including chunks that don't seem related to the current task.
+
+**Fix:** Use the explain operation to see the scoring:
+```
+@memory-controller explain "{section title}"
+```
+This shows the Stage 1 keyword score, Stage 2 semantic score, and the reasoning. If the chunk is genuinely irrelevant, the semantic score should be low — if it's high, the controller found a connection you may not have noticed.
+
+If the chunk is consistently irrelevant for your agent type, tune the profile:
+```
+@memory-controller tune developer "skip lessons-learned entries about market research"
+```
+
+**Prevention:** Write more specific task descriptions when calling `@memory-controller load`. "implement OAuth2 login with Google" gives much better Tier 3 results than "work on auth".
+
+---
+
+## Tier 3 is missing relevant chunks
+
+**Problem:** The memory controller isn't loading a chunk you know is relevant.
+
+**Fix:** Check if the chunk uses different vocabulary than your task description. The hybrid scorer handles common synonyms (auth≈login, deploy≈release, etc.) but domain-specific terms may not be covered. Try:
+```
+@memory-controller load developer "implement OAuth2 authentication token refresh"
+```
+Adding more specific terms improves Stage 1 keyword matching.
+
+If the chunk is in the archive (was compacted), use search instead:
+```
+@memory-controller search OAuth2 token refresh
+```
+
+**Prevention:** Use domain tags consistently when writing entries (`[AUTH]`, `[CODE]`, etc.) — the domain tag match gives +2 points in Stage 1 scoring.
+
+---
+
+## Agent profile loads too much / too little context
+
+**Problem:** A specific agent type consistently gets too much noise or misses important context.
+
+**Fix:** Tune the profile:
+```
+@memory-controller tune architect "always include security-engineer notes"
+@memory-controller tune developer "weight recent entries higher"
+@memory-controller tune product-manager "skip agent-notes, too technical"
+```
+
+Profile adjustments are stored in `artifacts/memory/archive/profiles.json` and apply to all future loads for that agent type.
+
+To see current profile adjustments:
+```
+@memory-controller status
+```
+The status report includes active profile adjustments per agent.
+
+**Prevention:** Tune profiles early in a project when you notice patterns. A well-tuned profile saves tokens on every subsequent agent invocation.
 
 ---
 

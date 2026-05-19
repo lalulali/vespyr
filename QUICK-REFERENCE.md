@@ -92,8 +92,12 @@ FULL:    @memory-controller load-full [filename]
 BLOCKERS:@memory-controller load blockers
 SESSION: @memory-controller session-write [content]
 STATUS:  @memory-controller status
+EXPLAIN: @memory-controller explain [chunk-title]
+TUNE:    @memory-controller tune [agent-type] [feedback]
 
 Progressive loading: ~1,000 tokens vs ~15,000 tokens raw (85-95% savings)
+Hybrid scoring: keyword pre-filter (Stage 1) + semantic refinement (Stage 2)
+Synonym expansion: auth≈login, db≈database, deploy≈release, etc.
 Session continuity: ~100 tokens for last-session context
 Auto-compaction: triggers when files exceed word thresholds
 Archive: resolved/stale entries moved to archive/YYYY-QN/ with index

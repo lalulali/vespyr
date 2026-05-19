@@ -2,7 +2,7 @@
 
 > A multi-agent system that runs a full product development team — from raw idea to production code.
 
-**Vespyr** (from *vespula* + *zephyr*) is a set of 22 AI agents, each with a defined role, that coordinate through a shared workflow to build software products. Think of it as a staffed team you configure once and invoke per project.
+**Vespyr** (from *vespula* + *zephyr*) is a set of 23 AI agents, each with a defined role, that coordinate through a shared workflow to build software products. Think of it as a staffed team you configure once and invoke per project.
 
 ---
 
@@ -16,7 +16,7 @@ Vespyr covers the full product development lifecycle:
 - Development & Quality — implementation, code review, testing, security
 - Infrastructure & Deployment — CI/CD, infra as code, release management
 
-The system separates reasoning from I/O. Thinking agents design and decide; utility agents handle file reads, writes, and command execution. This keeps context lean and costs down.
+The system separates reasoning from I/O. Thinking agents design and decide; utility agents handle file reads, writes, and command execution. A dedicated memory controller manages shared context — filtering, compressing, and serving only what each agent needs. This keeps context lean and costs down.
 
 ---
 
@@ -44,7 +44,7 @@ mkdir -p /path/to/your-project/artifacts/output/{00-discovery,01-research,02-str
 
 ### 3. Set project context
 
-Edit `artifacts/memory/project-context.md` with your tech stack, team size, and timeline. Agents read this before starting any task.
+Edit `artifacts/memory/project-context.md` with your tech stack, team size, and timeline. Use the `[CORE]` section format from `.opencode/templates/project-context-template.md` — `@memory-controller` reads this section for every agent's Tier 1 context.
 
 ### 4. Start with @founder
 
@@ -62,7 +62,7 @@ I have an idea: [your idea]
 Discovery → Research → Strategy → Architecture → Planning → Execution → Quality → Deployment
 ```
 
-Each agent reads from shared memory, produces its output, and the next agent picks up from there.
+Each agent loads context from shared memory via `@memory-controller`, produces its output, and the next agent picks up from there.
 
 ---
 
@@ -70,10 +70,11 @@ Each agent reads from shared memory, produces its output, and the next agent pic
 
 ```
 .opencode/
-├── agents/                    # Agent definitions (22 agents)
+├── agents/                    # Agent definitions (23 agents)
 │   ├── founder.md
 │   ├── product-manager.md
 │   ├── developer.md
+│   ├── memory-controller.md   # Memory gatekeeper
 │   └── ...
 ├── skills/                    # Reusable workflows
 │   ├── product-development/
@@ -81,20 +82,26 @@ Each agent reads from shared memory, produces its output, and the next agent pic
 │   └── ...
 ├── templates/                 # Output templates
 │   ├── idea-brief-template.md
-│   ├── requirements-template.md
+│   ├── memory-entry-template.md
+│   ├── session-summary-template.md
 │   └── ...
 ├── delegation-pattern.md      # I/O delegation architecture
 ├── GUARDRAILS.md              # Shared safety rules
 └── skills.md                  # Skills index
 
 artifacts/
-├── memory/                    # Shared agent memory
+├── memory/                    # Shared agent memory (accessed via @memory-controller)
 │   ├── project-context.md
 │   ├── active-decisions.md
 │   ├── patterns-and-conventions.md
 │   ├── blockers-and-risks.md
 │   ├── lessons-learned.md
-│   └── agent-notes/
+│   ├── agent-notes/
+│   ├── session-summaries/     # Cross-session continuity
+│   │   ├── latest.md          # Most recent session (~100 tokens)
+│   │   └── history.md         # Full session log
+│   └── archive/               # Compacted historical entries
+│       └── index.json         # Searchable archive index
 └── output/                    # Agent outputs by phase
     ├── 00-discovery/
     ├── 01-research/
@@ -125,18 +132,29 @@ artifacts/
 │  • @executor — command execution with summarized output     │
 │  • @reader — file reading and codebase search               │
 └─────────────────────────────────────────────────────────────┘
-                            ↓ operates on
+                            ↓ reads/writes via
+┌─────────────────────────────────────────────────────────────┐
+│                  @memory-controller                         │
+│  (Hybrid keyword+semantic filtering, ~1,000 tokens/load)    │
+│  • Progressive 3-tier context loading                       │
+│  • Automatic compaction + searchable archive                │
+│  • Session continuity across agent invocations              │
+│  • Deduplication, explain, and per-agent profile tuning     │
+└─────────────────────────────────────────────────────────────┘
+                            ↓ manages
 ┌─────────────────────────────────────────────────────────────┐
 │                    SHARED MEMORY                            │
 │  • Project context, active decisions, patterns              │
 │  • Agent notes, blockers, lessons learned                   │
+│  • Session summaries, archive                               │
 └─────────────────────────────────────────────────────────────┘
 ```
 
 Core design rules:
 - Each agent owns one concern
 - Agents delegate I/O to @writer, @executor, @reader
-- All agents coordinate through shared memory in `artifacts/memory/`
+- All agents access shared memory through `@memory-controller` — never directly
+- `@memory-controller` loads ~1,000 tokens of filtered context per agent vs ~15,000 raw (85–95% savings)
 - Upstream/downstream dependencies are explicit in each agent file
 - Multiple review stages act as quality gates before handoff
 
@@ -345,6 +363,12 @@ Summon when: the feature needs adoption or business impact tracking.
 ---
 
 ### Utility agents (always available)
+
+#### @memory-controller
+
+The memory gatekeeper. Loads filtered, relevant context for every agent using a two-stage hybrid pipeline — keyword pre-filter then LLM semantic refinement. Handles automatic compaction, archive search, session continuity, deduplication, and per-agent profile tuning. Runs on a lightweight model (DeepSeek Flash) to keep costs minimal.
+
+Commands: `load`, `write`, `search`, `compact`, `session-write`, `status`, `explain`, `tune`
 
 #### @writer
 
@@ -603,12 +627,15 @@ Templates in `.opencode/templates/` define output formats. Add required fields, 
 
 ### Adjusting shared memory
 
-`artifacts/memory/` is where agents coordinate. The key files:
+`artifacts/memory/` is where agents coordinate, accessed through `@memory-controller`. The key files:
 
-- `project-context.md` — tech stack, team size, constraints
+- `project-context.md` — tech stack, team size, constraints (use `[CORE]` section format)
 - `patterns-and-conventions.md` — coding standards and established patterns
 - `active-decisions.md` — architectural and product decisions in effect
 - `agent-notes/*.md` — per-agent knowledge bases
+- `session-summaries/latest.md` — most recent session context (~100 tokens)
+
+Agents never read these files directly. They call `@memory-controller load [agent-type] [task]` which returns filtered, relevant context using hybrid keyword+semantic scoring (~1,000 tokens vs ~15,000 raw). See `.opencode/agents/memory-controller.md` for the full protocol.
 
 ### Configuring optional agents
 
@@ -641,16 +668,20 @@ Skills are reusable workflows in `.opencode/skills/`. Create a directory with a 
 - Give @founder enough detail to stress-test. Vague inputs produce vague outputs.
 - Review each phase's artifacts before the next phase starts. Catching a bad assumption in research is cheaper than catching it in development.
 - Agents can iterate. If an output is wrong, say so and they'll revise.
+- Use `@memory-controller status` to check memory health. Use `@memory-controller search [query]` to find archived context.
 
 **For customizers:**
 - Keep agent boundaries clean. One agent, one concern.
 - Don't bypass the delegation pattern. If a thinking agent writes files directly, context bloat follows.
+- Don't read memory files directly. Always use `@memory-controller load` — it filters and compresses context automatically.
+- Use `@memory-controller tune [agent] [feedback]` to adjust what gets loaded for specific agent types.
 - Test workflow changes end-to-end before using on a real project.
 
 **For contributors:**
 - Use the standard frontmatter structure.
 - Don't break upstream/downstream contracts without updating both sides.
 - Bump the version number in the frontmatter when behavior changes.
+- Memory entries must follow the format in `.opencode/templates/memory-entry-template.md` — the controller validates on write.
 
 ---
 
@@ -709,8 +740,10 @@ To add a skill: create the directory, write `SKILL.md`, add activation condition
 
 - [ROADMAP.md](./ROADMAP.md) — what's planned: npx installer, squad presets, docs site, continuous improvement
 - [PORTING.md](./PORTING.md) — how to use Vespyr with Claude Code, Cursor, Windsurf, Copilot, Codex CLI, Aider, and Zed
+- `.opencode/agents/memory-controller.md` — full memory protocol: hybrid scoring, compaction, archive, session continuity
 - `.opencode/delegation-pattern.md` — how the I/O separation works and why
 - `.opencode/GUARDRAILS.md` — shared safety rules all agents follow
+- `.opencode/TROUBLESHOOTING.md` — common issues and fixes including memory tuning
 - `.opencode/skills.md` — skills index
 - `.opencode/templates/` — output format examples
 

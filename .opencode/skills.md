@@ -155,15 +155,28 @@ Every entry written to memory must follow the structured format in `.opencode/te
 
 Entries without this format will be rejected by `@memory-controller`.
 
+### Hybrid Scoring (Phase 3)
+
+`@memory-controller` uses a two-stage hybrid pipeline for Tier 3 and archive search:
+
+- **Stage 1 — Keyword pre-filter:** Fast elimination using exact keyword matching + synonym expansion. Eliminates ~70% of sections immediately.
+- **Stage 2 — Semantic refinement:** LLM reasoning scores surviving chunks for direct relevance, synonym matches, causal connections, and cross-references. Catches what keywords miss.
+
+**Synonym expansion** is built in — `auth` matches `authentication/login/session/token`, `deploy` matches `release/ship/ci-cd/rollout`, etc.
+
+**Adaptive threshold** adjusts based on query complexity — narrow tasks get a higher bar (score ≥ 6), broad tasks get a lower bar (score ≥ 4).
+
+**Expected token savings: 85–95%** vs loading all memory files raw.
+
 ### Progressive Context Loading
 
-`@memory-controller` loads memory in three tiers to minimize token consumption:
+`@memory-controller` loads memory in three tiers:
 
 | Tier | Content | Approx. tokens |
 |------|---------|----------------|
 | Tier 1 — Core | Project name, stack, phase, sprint, blocker count + last session (5 lines) | ~200 |
 | Tier 2 — Agent-specific | Files relevant to the agent's role | ~300 |
-| Tier 3 — Task-specific | Chunks scoring ≥ 4 against task keywords | ~500 |
+| Tier 3 — Task-specific | Hybrid-scored chunks (keyword + semantic) | ~500 |
 | **Total** | | **~1,000 tokens** |
 
 Without the controller, loading all memory files costs ~10,000–20,000 tokens per agent invocation. The controller reduces this by 85–95%.
@@ -191,7 +204,14 @@ To retrieve historical context that has been compacted:
 @memory-controller search [your query]
 ```
 
-The controller scores archived entries against your query keywords and returns the top 5 matches with summaries and file locations.
+The controller uses the same hybrid scoring pipeline — keyword pre-filter then semantic refinement. Returns top 5 matches with relevance scores, summaries, and file locations.
+
+### Tuning and Transparency
+
+```
+@memory-controller explain [chunk-title]   — why was this chunk included?
+@memory-controller tune [agent] [feedback] — adjust what gets loaded for an agent
+```
 
 *See [workflow.md](./workflow.md) for the full orchestration graph and handoff contracts.*
 *See [GUARDRAILS.md](./GUARDRAILS.md) for the full guardrails specification.*
