@@ -489,13 +489,12 @@ Optional agents add time to the schedule. Planning guidance:
 
 ## 9. Shared Memory & Context
 
-All agents share a persistent memory layer in `artifacts/memory/`. This enables cross-session continuity, accumulated knowledge, and context passing between agents.
+All agents share a persistent memory layer in `artifacts/memory/`. Access is always through `@memory-controller` — never by reading files directly. This keeps token consumption at ~1,000 tokens per agent invocation instead of ~15,000.
 
 ### Memory Architecture
 
 ```
 artifacts/memory/
-├── memory-index.md              # Directory of all memory files
 ├── project-context.md           # Static: project basics, tech stack, conventions
 ├── active-decisions.md          # Dynamic: current decisions and rationale
 ├── patterns-and-conventions.md  # Dynamic: discovered patterns and anti-patterns
@@ -506,12 +505,14 @@ artifacts/memory/
 │   ├── developer-notes.md
 │   ├── designer-notes.md
 │   ├── tech-lead-notes.md
+│   ├── qa-notes.md
 │   └── project-manager-notes.md
-└── session-summaries/           # Per-session continuity
-    └── latest.md
-
-artifacts/output/05-project-management/
-└── kanban.md                    # LIVE: single source of truth for project progress
+├── session-summaries/           # Cross-session continuity
+│   ├── latest.md                # Most recent session (~100 tokens, Tier 1)
+│   └── history.md               # Full session log (append-only, never loaded directly)
+└── archive/                     # Compacted historical entries
+    ├── index.json               # Searchable index (auto-created on first compaction)
+    └── YYYY-QN/                 # Quarterly archive folders
 ```
 
 **The Kanban board (`artifacts/output/05-project-management/kanban.md`) is a persistent project artifact, not just a template.** It is initialized during Phase 4 (Planning) by @project-manager and updated continuously throughout the project lifecycle. Every cross-agent handoff, blocker resolution, and scope change must be reflected in the Kanban.
@@ -519,24 +520,47 @@ artifacts/output/05-project-management/
 ### Memory Protocol
 
 **Before starting work, every agent MUST:**
-1. Read `artifacts/memory/project-context.md` for project basics
-2. Read `artifacts/memory/active-decisions.md` for current constraints
-3. Read `artifacts/memory/patterns-and-conventions.md` for established patterns
-4. Read their own agent notes in `artifacts/memory/agent-notes/`
+```
+@memory-controller load [agent-type] [brief task description]
+```
+The controller returns ~1,000 tokens of filtered context across three tiers:
+- **Tier 1** (~200 tokens): project name, stack, phase, sprint, blocker count, last session summary
+- **Tier 2** (~300 tokens): files specific to the agent's role
+- **Tier 3** (~500 tokens): chunks from any file scoring ≥ 4 against the task keywords
 
 **After completing work, every agent MUST:**
-1. Append new decisions to `artifacts/memory/active-decisions.md`
-2. Append new patterns to `artifacts/memory/patterns-and-conventions.md`
-3. Append lessons to `artifacts/memory/lessons-learned.md`
-4. Update their agent notes in `artifacts/memory/agent-notes/`
-5. If ending a session, write a summary to `artifacts/memory/session-summaries/latest.md`
+```
+@memory-controller write [file] [entry]
+```
+Use the format in `.opencode/templates/memory-entry-template.md`. The controller validates the entry, checks for duplicates, persists it, and triggers compaction if the file exceeds its threshold.
+
+**At the end of a significant session, every agent MUST:**
+```
+@memory-controller session-write [content]
+```
+Use the format in `.opencode/templates/session-summary-template.md`. This writes to `session-summaries/latest.md` (overwrite) and appends to `session-summaries/history.md`. The next session loads this as part of Tier 1 — ~100 tokens of recent context.
 
 **Memory Rules:**
-- **Append, don't overwrite.** Memory files grow over time. Use dated headings.
-- **Be specific.** Include file paths, decision IDs, and rationale.
+- **Never read memory files directly.** Always use `@memory-controller load`.
+- **Never write memory files directly.** Always use `@memory-controller write`.
+- **Be specific.** Include domain tags, file paths, decision IDs, and rationale.
 - **Link, don't duplicate.** Reference full artifacts in `artifacts/output/` rather than copying content.
-- **Mark resolved items.** Use strikethrough or "RESOLVED" tags for blockers and deprecated decisions.
-- **Initialize on first use.** If a memory file doesn't exist yet, create it using the template in `artifacts/memory/`.
+- **Mark resolved items.** Set `**Status:** resolved` on blockers and deprecated decisions.
+- **Nothing is deleted.** Compaction moves resolved/stale entries to `archive/` — always retrievable via `@memory-controller search [query]`.
+
+### Memory Operations Reference
+
+| Command | What it does |
+|---------|-------------|
+| `@memory-controller load [agent] [task]` | Progressive 3-tier context load |
+| `@memory-controller load blockers` | Load only active blockers in full |
+| `@memory-controller load-full [file]` | Load a complete file without filtering |
+| `@memory-controller load-archive [id]` | Load a specific archived entry by ID |
+| `@memory-controller write [file] [content]` | Validate and persist a memory entry |
+| `@memory-controller search [query]` | Search the archive index by keywords |
+| `@memory-controller compact [file]` | Compact a file and archive resolved entries |
+| `@memory-controller session-write [content]` | Write session summary for continuity |
+| `@memory-controller status` | Health snapshot of all memory files |
 
 ### Cross-Agent Memory Handoffs
 
@@ -555,6 +579,7 @@ artifacts/output/05-project-management/
 | @data-analyst observes metric shift | Metric, threshold, context | `active-decisions.md` |
 | Any agent hits blocker | Blocker description, owner, ETA | `blockers-and-risks.md` |
 | Any agent learns lesson | Phase, context, lesson, action item | `lessons-learned.md` |
+| Any agent ends a session | What was done, decisions, next step, blockers | `session-summaries/latest.md` (via session-write) |
 
 ---
 

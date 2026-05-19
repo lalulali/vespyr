@@ -93,7 +93,25 @@ Invoke `@data-analyst` to measure the impact:
 - Compare metrics before and after iteration
 - Validate that the change achieved its hypothesis
 - Document lessons learned
-- **Update shared memory** — append to `artifacts/memory/lessons-learned.md`
+
+Write results to memory:
+```
+@memory-controller write lessons-learned.md
+### [LESSON] {title} [date: YYYY-MM-DD] [agent: @data-analyst]
+{what the iteration achieved and what was learned}
+**Status:** active
+```
+
+Write session summary:
+```
+@memory-controller session-write
+Worked on: Iteration cycle — {what was improved}
+Decisions made:
+- {hypothesis tested}
+- {result: positive/neutral/negative}
+Next step: {continue iterating / load retrospective / load product-development}
+New blockers: {any issues, or "none"}
+```
 
 **Output:** `artifacts/output/07-iteration/iteration-results.md`
 

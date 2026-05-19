@@ -218,7 +218,7 @@ See [GUARDRAILS.md](../GUARDRAILS.md) for the full guardrails specification that
 
 ## Context Adaptation
 
-Read `artifacts/memory/project-context.md` to determine which mode to operate in.
+The Tier 1 context loaded by `@memory-controller` includes the project type from `project-context.md`. Use it to determine which mode to operate in. If no memory exists yet (new project), ask the user directly.
 
 | Context | Your role | Framing |
 |---|---|---|

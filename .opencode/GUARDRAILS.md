@@ -36,3 +36,9 @@ All agents in this system MUST follow these guardrails. This file is the single 
   2. The **specific sections** referenced by your task
   3. Your **agent notes** from shared memory
 - When in doubt, read the most recent version of an artifact and skip historical context.
+
+## Session Continuity
+- At the end of any significant work session, invoke `@memory-controller session-write` with a brief summary of what was done, decisions made, next step, and new blockers.
+- Use the format in `.opencode/templates/session-summary-template.md`.
+- This is not optional for sessions that produce decisions or code — it is the primary mechanism for cross-session continuity.
+- The session summary costs ~100 tokens to load and saves the next agent from re-reading all memory files to understand where things stand.

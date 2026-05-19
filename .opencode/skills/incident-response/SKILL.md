@@ -93,12 +93,37 @@ Invoke `@project-manager` to conduct a blameless post-incident review:
 
 ### Step 6: Update Knowledge Base
 
-Invoke `@project-manager` to:
-- Update `artifacts/memory/blockers-and-risks.md` with new risks identified
-- Update `artifacts/memory/lessons-learned.md` with incident lessons
-- Update `artifacts/memory/patterns-and-conventions.md` with new guardrails
-- Add monitoring/alerting recommendations to project context
-- Share post-incident review with all agents via memory
+Invoke `@project-manager` to write incident learnings to memory via `@memory-controller`:
+
+```
+@memory-controller write blockers-and-risks.md
+### [RISK] {incident title} [date: YYYY-MM-DD] [agent: @project-manager] [RESOLVED: YYYY-MM-DD]
+{new risks identified from this incident}
+**Status:** resolved
+
+@memory-controller write lessons-learned.md
+### [LESSON] {title} [date: YYYY-MM-DD] [agent: @project-manager]
+{incident lessons — what happened, root cause, prevention}
+**Status:** active
+
+@memory-controller write patterns-and-conventions.md
+### [PROCESS] {title} [date: YYYY-MM-DD] [agent: @project-manager]
+{new guardrail or operational pattern established}
+**Status:** active
+```
+
+Write session summary:
+```
+@memory-controller session-write
+Worked on: Incident response — INC-NNN ({brief description})
+Decisions made:
+- Severity: {SEV level}
+- Mitigation: {what was done to stop user impact}
+- Root cause: {one sentence}
+- Prevention: {key action item}
+Next step: {follow-up improvements via product-iteration, or "monitoring for recurrence"}
+New blockers: {any new risks identified, or "none"}
+```
 
 ## Output artifacts
 - `artifacts/output/08-incidents/INC-NNN/triage.md`

@@ -168,15 +168,67 @@ Every action item must have an owner, deadline, and verification method.
 
 ## 6. Memory Updates
 
-Action items for updating shared memory:
+Use `@memory-controller` for all memory updates — do not write files directly.
 
-- [ ] Append process improvements to `artifacts/memory/patterns-and-conventions.md`
-- [ ] Append estimation benchmarks to `artifacts/memory/agent-notes/tech-lead-notes.md`
-- [ ] Update `artifacts/memory/project-context.md` with new technical decisions
-- [ ] Clear resolved blockers in `artifacts/memory/blockers-and-risks.md`
-- [ ] Update `artifacts/memory/active-decisions.md` with new process decisions
-- [ ] Append lessons to `artifacts/memory/lessons-learned.md`
-- [ ] Write session summary to `artifacts/memory/session-summaries/latest.md`
+```
+@memory-controller write patterns-and-conventions.md
+### [PROCESS] {title} [date: YYYY-MM-DD] [agent: @project-manager]
+{process improvement}
+**Status:** active
+
+@memory-controller write agent-notes/tech-lead-notes.md
+### [PROCESS] {title} [date: YYYY-MM-DD] [agent: @tech-lead]
+{estimation benchmark update}
+**Status:** active
+
+@memory-controller write project-context.md
+### [ARCH] {title} [date: YYYY-MM-DD] [agent: @architect]
+{new technical decision}
+**Status:** active
+
+@memory-controller write active-decisions.md
+### [PROCESS] {title} [date: YYYY-MM-DD] [agent: @project-manager]
+{new process decision}
+**Status:** active
+
+@memory-controller write lessons-learned.md
+### [LESSON] {title} [date: YYYY-MM-DD] [agent: @project-manager]
+{lesson learned this cycle}
+**Status:** active
+```
+
+For resolved blockers, update their status:
+```
+@memory-controller write blockers-and-risks.md
+### [RISK] {original title} [date: YYYY-MM-DD] [agent: @project-manager] [RESOLVED: YYYY-MM-DD]
+{resolution summary}
+**Status:** resolved
+```
+
+Then run compaction to archive resolved entries:
+```
+@memory-controller compact active-decisions.md
+@memory-controller compact patterns-and-conventions.md
+@memory-controller compact lessons-learned.md
+@memory-controller compact blockers-and-risks.md
+```
+
+Finally, write the session summary:
+```
+@memory-controller session-write
+Worked on: Retrospective — {cycle name}
+Decisions made:
+- {top action item 1}
+- {top action item 2}
+- {top action item 3}
+Next step: {first action item from section 5 with owner}
+New blockers: {any new risks identified, or "none"}
+```
+
+Run a health check to confirm all files are within thresholds:
+```
+@memory-controller status
+```
 
 ---
 

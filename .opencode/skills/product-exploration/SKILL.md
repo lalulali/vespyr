@@ -26,7 +26,10 @@ Before starting, check for a validation brief:
 
 ### Phase 1: Synthesize (skip if validation brief exists)
 
-Invoke `@founder` to take the concept and produce a structured brief:
+Invoke `@founder` to take the concept and produce a structured brief. Before starting, load context:
+```
+@memory-controller load founder [product exploration — synthesize concept]
+```
 - Synthesize into a clear, one-sentence concept
 - Stress-test with Golden Circle (WHY / HOW / WHAT)
 - Generate alternatives using SCAMPER, Crazy 8s, analogies
@@ -117,4 +120,15 @@ When exploration is complete:
 2. The concept is validated by evidence
 3. No unresolved GO/NO-GO blockers from research
 4. Premises from the validation brief still hold (or have been revised)
-5. Load `product-design` to define requirements and create specs
+5. Write session summary before handing off:
+   ```
+   @memory-controller session-write
+   Worked on: Product exploration — {concept name}
+   Decisions made:
+   - {market verdict: GO/NO-GO and key finding}
+   - {target user confirmed/revised}
+   - {key competitive positioning}
+   Next step: Load product-design to define requirements and create specs
+   New blockers: {any research gaps or unresolved questions, or "none"}
+   ```
+6. Load `product-design` to define requirements and create specs

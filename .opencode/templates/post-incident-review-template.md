@@ -113,9 +113,26 @@ What systemic changes will prevent this *class* of incident from happening again
 
 ## 7. Follow-Up
 
-- [ ] All action items tracked in `artifacts/memory/blockers-and-risks.md`
-- [ ] Prevention mechanisms added to `artifacts/memory/patterns-and-conventions.md`
-- [ ] Lessons learned appended to `artifacts/memory/lessons-learned.md`
+Use `@memory-controller` to persist all incident learnings:
+
+```
+@memory-controller write blockers-and-risks.md
+### [RISK] INC-NNN: {incident title} [date: YYYY-MM-DD] [agent: @project-manager] [RESOLVED: YYYY-MM-DD]
+{new risks identified from this incident and their mitigations}
+**Status:** resolved
+
+@memory-controller write patterns-and-conventions.md
+### [PROCESS] {prevention mechanism title} [date: YYYY-MM-DD] [agent: @project-manager]
+{new guardrail or operational pattern established to prevent recurrence}
+**Status:** active
+
+@memory-controller write lessons-learned.md
+### [LESSON] INC-NNN: {title} [date: YYYY-MM-DD] [agent: @project-manager]
+{what happened, root cause, what was done, what prevents recurrence}
+**Status:** active
+```
+
+Operational follow-up:
 - [ ] Monitoring alerts configured and tested
 - [ ] Regression tests added and verified passing
 - [ ] Runbook updated with new failure mode

@@ -108,4 +108,18 @@ Review the complete spec package:
 - `artifacts/output/01-research/ux-research-report.md` (optional)
 
 ## Handoff to product-development
-When design is complete and all gate checks pass, load the `product-development` skill to proceed.
+When design is complete and all gate checks pass:
+
+Write session summary before handing off:
+```
+@memory-controller session-write
+Worked on: Product design — {feature/product name}
+Decisions made:
+- {key PRD scope decision}
+- {key design decision}
+- {UX validation result: passed / critical issues resolved / skipped with rationale}
+Next step: Load product-development to build
+New blockers: {any open design questions or dependencies, or "none"}
+```
+
+Load the `product-development` skill to proceed.

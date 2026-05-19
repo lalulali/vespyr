@@ -28,7 +28,10 @@ Before starting, check for a validation brief:
 
 **Template:** Use `.opencode/templates/game-idea-brief-template.md` for the founder memo.
 
-Invoke `@founder` to take the concept and produce a structured brief:
+Invoke `@founder` to take the concept and produce a structured brief. Before starting, load context:
+```
+@memory-controller load founder [game product exploration — synthesize concept]
+```
 - Synthesize into a clear, one-sentence concept (the "pitch sentence")
 - Stress-test with Golden Circle (WHY this experience matters / HOW it's different / WHAT the player actually does)
 - Generate alternatives using genre remixing, mechanic mashups, lateral analogies
@@ -134,4 +137,15 @@ When exploration is complete:
 2. The concept is validated by evidence
 3. No unresolved GO/NO-GO blockers from research
 4. Premises from the validation brief still hold (or have been revised)
-5. Load `product-design` to define requirements and create specs
+5. Write session summary before handing off:
+   ```
+   @memory-controller session-write
+   Worked on: Game product exploration — {concept name}
+   Decisions made:
+   - {genre market verdict: GO/NO-GO and key finding}
+   - {target player confirmed/revised}
+   - {key competitive positioning in genre}
+   Next step: Load product-design to define requirements and create specs
+   New blockers: {any research gaps or unresolved questions, or "none"}
+   ```
+6. Load `product-design` to define requirements and create specs

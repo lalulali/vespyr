@@ -19,15 +19,26 @@ Steps 1a and 1b can run **in parallel** to save time.
 Invoke `@project-manager` to collect:
 - `artifacts/output/04-planning/execution-plan.md` — planned vs. actual effort
 - `artifacts/output/05-project-management/project-plan.md` — timeline adherence
-- `artifacts/memory/blockers-and-risks.md` — blockers encountered and resolution times
+- Active blockers and resolution times:
+  ```
+  @memory-controller load blockers
+  ```
 - Code review metrics — number of review cycles, blocking issues found
 - QA metrics — bugs found, test coverage, regression rate
 - Launch metrics — deployment success rate, rollback frequency
 
 #### Step 1b: Qualitative Data ⟨parallel⟩
 Invoke `@project-manager` to collect:
-- `artifacts/memory/lessons-learned.md` — accumulated insights from all agents
-- `artifacts/memory/agent-notes/` — per-agent observations and frustrations
+- Lessons and agent notes from this cycle:
+  ```
+  @memory-controller load project-manager [retrospective data gathering]
+  ```
+  Then load full files for deep review:
+  ```
+  @memory-controller load-full lessons-learned.md
+  @memory-controller load-full agent-notes/developer-notes.md
+  @memory-controller load-full agent-notes/tech-lead-notes.md
+  ```
 - Any incident post-mortems from `artifacts/output/08-incidents/`
 - User feedback and support tickets (if applicable)
 
@@ -101,14 +112,59 @@ Categorize action items:
 
 Invoke `@project-manager` to update the team's collective knowledge via `@memory-controller`:
 
-**Updates (use @memory-controller write for each):**
-- Append process improvements to `artifacts/memory/patterns-and-conventions.md`
-- Append estimation benchmarks to `artifacts/memory/agent-notes/tech-lead-notes.md`
-- Update `artifacts/memory/project-context.md` with new technical decisions
-- Clear resolved blockers in `artifacts/memory/blockers-and-risks.md` (set status to `resolved`)
-- Update `artifacts/memory/active-decisions.md` with new process decisions
-- Append lessons to `artifacts/memory/lessons-learned.md`
-- Write session summary to `artifacts/memory/session-summaries/latest.md`
+**Updates — use these exact commands:**
+
+```
+@memory-controller write patterns-and-conventions.md
+### [PROCESS] {title} [date: YYYY-MM-DD] [agent: @project-manager]
+{process improvement discovered this cycle}
+**Status:** active
+
+@memory-controller write agent-notes/tech-lead-notes.md
+### [PROCESS] {title} [date: YYYY-MM-DD] [agent: @tech-lead]
+{estimation benchmark — planned vs actual, variance reason}
+**Status:** active
+
+@memory-controller write project-context.md
+### [ARCH] {title} [date: YYYY-MM-DD] [agent: @architect]
+{new technical decision or constraint}
+**Status:** active
+
+@memory-controller write active-decisions.md
+### [PROCESS] {title} [date: YYYY-MM-DD] [agent: @project-manager]
+{new process decision}
+**Status:** active
+
+@memory-controller write lessons-learned.md
+### [LESSON] {title} [date: YYYY-MM-DD] [agent: @project-manager]
+{lesson learned this cycle}
+**Status:** active
+```
+
+For each resolved blocker, mark it resolved:
+```
+@memory-controller write blockers-and-risks.md
+### [RISK] {original title} [date: YYYY-MM-DD] [agent: @project-manager] [RESOLVED: YYYY-MM-DD]
+{resolution summary}
+**Status:** resolved
+```
+
+**Session summary (always last):**
+
+After all memory updates are written, write the session summary:
+
+```
+@memory-controller session-write
+Worked on: {what was done this retrospective cycle}
+Decisions made:
+- {key decision 1}
+- {key decision 2}
+- {key decision 3}
+Next step: {first action item from action-items.md}
+New blockers: {any new blockers, or "none"}
+```
+
+This compresses the entire retrospective into ~100 tokens for the next session's Tier 1 context.
 
 **Memory compaction (automatic — triggered by @memory-controller):**
 
@@ -128,6 +184,14 @@ The controller will:
 4. Report: entries kept, entries archived, new file size
 
 **Nothing is deleted.** All archived content remains searchable via `@memory-controller search [query]`.
+
+**Run status check after compaction:**
+
+```
+@memory-controller status
+```
+
+Confirms all files are within thresholds and the archive index is up to date.
 
 **Target:** Each active memory file stays under its word threshold after compaction.
 

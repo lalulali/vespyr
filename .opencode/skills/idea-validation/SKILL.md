@@ -38,7 +38,11 @@ Determine at the start. This changes the questions and the bar for evidence.
 
 ### Phase 1: Context
 
-1. Read `artifacts/memory/project-context.md` if it exists
+1. Load existing project context if available:
+   ```
+   @memory-controller load founder [idea validation]
+   ```
+   If memory files don't exist yet (new project), the controller will return "File not found" — that's fine, proceed without context.
 2. Check `artifacts/output/` for prior validation briefs or design docs
 3. Ask: **What's your context?** (startup / company / personal)
 4. Ask: **Is this greenfield or brownfield?** (new thing / improving existing thing)

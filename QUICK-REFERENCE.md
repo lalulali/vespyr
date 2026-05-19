@@ -78,18 +78,26 @@ patterns-and-conventions.md  Dynamic: discovered patterns
 lessons-learned.md           Dynamic: insights from each phase
 blockers-and-risks.md        Dynamic: active blockers
 agent-notes/*.md             Per-agent accumulated knowledge
-session-summaries/latest.md  Most recent session context
+session-summaries/latest.md  Most recent session context (~100 tokens)
+session-summaries/history.md Full session log (never loaded directly)
 archive/                     Compacted historical entries (searchable)
 
 Rule: Never read memory files directly. Use @memory-controller.
 
-READ:  @memory-controller load [agent-type] [task-description]
-WRITE: @memory-controller write [file] [entry]
-FIND:  @memory-controller search [query]
+LOAD:    @memory-controller load [agent-type] [task-description]
+WRITE:   @memory-controller write [file] [entry]
+FIND:    @memory-controller search [query]
+ARCHIVE: @memory-controller load-archive [entry-id]
+FULL:    @memory-controller load-full [filename]
+BLOCKERS:@memory-controller load blockers
+SESSION: @memory-controller session-write [content]
+STATUS:  @memory-controller status
 
 Progressive loading: ~1,000 tokens vs ~15,000 tokens raw (85-95% savings)
+Session continuity: ~100 tokens for last-session context
 Auto-compaction: triggers when files exceed word thresholds
 Archive: resolved/stale entries moved to archive/YYYY-QN/ with index
+Deduplication: write validation rejects near-identical entries
 
 ──────────────────────────────────────────────────
 

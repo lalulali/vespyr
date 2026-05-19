@@ -108,7 +108,25 @@ Invoke `@project-manager` to conduct a launch retrospective:
 - What could be improved for next time?
 - Were there any near-misses?
 - Update runbook and checklist based on learnings
-- **Update shared memory** — append learnings to `artifacts/memory/lessons-learned.md`
+
+Write learnings to memory:
+```
+@memory-controller write lessons-learned.md
+### [LESSON] {title} [date: YYYY-MM-DD] [agent: @project-manager]
+{launch lesson}
+**Status:** active
+```
+
+Write session summary:
+```
+@memory-controller session-write
+Worked on: Product launch — {feature name}
+Decisions made:
+- {go/no-go decision and rationale}
+- {any rollout decisions}
+Next step: Monitor post-launch metrics for 24-72h, then load product-iteration
+New blockers: {any issues found during launch, or "none"}
+```
 
 **Output:** `artifacts/output/06-launch/launch-retro.md`
 

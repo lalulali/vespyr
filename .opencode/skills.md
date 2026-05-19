@@ -136,12 +136,14 @@ All agents read from and write to `artifacts/memory/` through `@memory-controlle
 | `lessons-learned.md` | Insights from each phase | All agents (filtered by relevance) | Any agent via @memory-controller write |
 | `blockers-and-risks.md` | Active blockers | All agents (filtered by relevance) | @tech-lead, any agent via @memory-controller write |
 | `agent-notes/*.md` | Per-agent accumulated knowledge | Specific agent (Tier 2) | Specific agent via @memory-controller write |
-| `session-summaries/latest.md` | Most recent session context | All agents (Tier 2) | Any agent ending a session |
+| `session-summaries/latest.md` | Most recent session context (~100 tokens) | Tier 1 (5 lines only) | @memory-controller session-write |
+| `session-summaries/history.md` | Full session log | Never loaded directly — search only | @memory-controller session-write (append) |
 | `archive/` | Compacted historical entries | On-demand via @memory-controller search | @memory-controller (automatic) |
 
 **Protocol:**
 - **Read:** Invoke `@memory-controller load [agent-type] [task-description]` before starting. Do NOT read memory files directly — the controller filters and compresses context for you.
 - **Write:** Invoke `@memory-controller write [file] [entry]` after completing. Use the format in `.opencode/templates/memory-entry-template.md`.
+- **End of session:** Invoke `@memory-controller session-write [content]` when wrapping up. Use the format in `.opencode/templates/session-summary-template.md`. This gives the next session ~100 tokens of recent context instead of re-reading everything.
 
 ### Memory Entry Format
 
@@ -159,7 +161,7 @@ Entries without this format will be rejected by `@memory-controller`.
 
 | Tier | Content | Approx. tokens |
 |------|---------|----------------|
-| Tier 1 — Core | Project name, stack, phase, sprint, blocker count | ~200 |
+| Tier 1 — Core | Project name, stack, phase, sprint, blocker count + last session (5 lines) | ~200 |
 | Tier 2 — Agent-specific | Files relevant to the agent's role | ~300 |
 | Tier 3 — Task-specific | Chunks scoring ≥ 4 against task keywords | ~500 |
 | **Total** | | **~1,000 tokens** |

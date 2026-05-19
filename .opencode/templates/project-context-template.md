@@ -1,9 +1,24 @@
 # Project Context Template
 
-> **Used by:** @founder (to initialize) → **Read by:** All agents
+> **Used by:** @founder (to initialize) → **Read by:** All agents via `@memory-controller`
 > **Save to:** `artifacts/memory/project-context.md`
 
-This is the single source of truth for project-level context. Every agent reads this before starting work.
+This is the single source of truth for project-level context. Every agent reads this before starting work — but always through `@memory-controller`, never directly.
+
+---
+
+## [CORE] — Machine-readable header (required, do not rename this section)
+
+> `@memory-controller` reads ONLY this section for Tier 1 context loading.
+> Keep every field on a single line. Do not add sub-bullets here.
+
+```
+Project: {project name} ({type: SaaS / Game / API / Mobile / Internal Tool / Other})
+Stack: {comma-separated primary technologies, max 8}
+Phase: {Validation / Exploration / Design / Development / Launch / Iteration / Maintenance}
+Sprint: {current sprint name or milestone, e.g. "Sprint 5: Auth" — or "none"}
+Blockers: {integer count of active entries in blockers-and-risks.md — update when blockers change}
+```
 
 ---
 

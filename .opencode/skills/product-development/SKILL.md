@@ -110,7 +110,13 @@ If the tech lead identified unknowns or risks, investigate before committing:
 - Write code + tests in assigned worktree
 - Run lints and unit tests locally
 - Commit to feature branch
-- Signal completion in `artifacts/memory/agent-notes/developer-notes.md`
+- Signal completion via memory:
+  ```
+  @memory-controller write agent-notes/developer-notes.md
+  ### [CODE] [dev-N] Task complete: {task name} [date: YYYY-MM-DD] [agent: @developer]
+  {brief note on implementation, any patterns discovered, or pitfalls}
+  **Status:** active
+  ```
 
 #### 6.3 Review (`@code-reviewer` — per developer branch)
 - Review each developer's branch independently
