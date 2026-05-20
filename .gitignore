@@ -45,3 +45,5 @@ coverage/
 
 # Temporary files within tracked directories should use *.tmp naming
 # and those ARE ignored by the rule above.
+
+.DS_Store

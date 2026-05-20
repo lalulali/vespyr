@@ -82,12 +82,12 @@ Create these directories under `artifacts/output/`:
 Create `artifacts/telemetry/` — agent execution logs, token usage, and performance metrics.
 
 Create these directories under `artifacts/`:
-- `directions/` — strategic direction documents
-- `input/` — raw input materials
+- `directions/` — document templates direction
+- `input/` — raw input materials folder
 - `input/example/` — reference examples
 - `input/data/` — datasets and analytics exports
 - `input/designs/` — design files, mockups, assets
-- `input/documents/` — external documents, briefs, research
+- `input/documents/` — external documents, briefs, research, raw notes
 - `input/flows/` — user flows, journey maps, wireframes
 
 Create `artifacts/memory/` with:
