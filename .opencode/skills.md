@@ -15,9 +15,9 @@ Games follow the same phases but use **game-specific skills** that speak in play
 
 | Phase | Tab Color | Primary Skill | When to use |
 |-------|-----------|---------------|-------------|
-| **Validation** | Pink | `game-idea-validation` | Game concept needs stress-testing before production |
-| **Exploration** | Purple | `game-product-exploration` | Validated concept needs genre market, competitive landscape, and player research |
-| **Design → Development** | Amber → Green | `product-design` → `product-development` | Same as product pipeline |
+| **Validation** | Pink | `validate-game-idea` | Game concept needs stress-testing before production |
+| **Exploration** | Purple | `explore-game-idea` | Validated concept needs genre market, competitive landscape, and player research |
+| **Design → Development** | Amber → Green | `design` → `develop` | Same as product pipeline |
 
 > **Note:** After exploration, game and product pipelines converge. Design and development skills are domain-agnostic.
 
@@ -78,20 +78,20 @@ The model tier doesn't matter as much as the architecture: even if all agents us
 
 ```
 Validation (Red) → Exploration (Indigo) → Design (Amber) → Development (Green)
-     ↓ GO              ↓                      ↓                    ↓
-   idea-validation   product-exploration   product-design    product-development
-      ↓ KILL
-    Stop (save time)
+      ↓ GO              ↓                      ↓                    ↓
+    validate-idea     explore-idea           design            develop
+       ↓ KILL
+     Stop (save time)
 ```
 
 ### Game Development Pipeline
 
 ```
 Validation (Pink) → Exploration (Purple) → Design (Amber) → Development (Green)
-     ↓ GO               ↓                       ↓                    ↓
- game-idea-validation  game-product-exploration  product-design    product-development
-      ↓ KILL
-    Stop (save time)
+      ↓ GO               ↓                       ↓                    ↓
+  validate-game-idea  explore-game-idea         design            develop
+       ↓ KILL
+     Stop (save time)
 ```
 
 Within each phase, subagents are invoked by **@mention** (e.g., `@founder`, `@architect`).
@@ -101,7 +101,7 @@ Validation is optional but recommended — you can skip to Exploration if the id
 
 | Skill | Loads Into | When to invoke | How to invoke |
 |-------|-----------|----------------|---------------|
-| **humanizer** | @writer | Any text needs to sound less like AI — email, docs, specs, comments, PR descriptions | Say "humanize this" or "use the humanizer skill" |
+| **humanize** | @writer | Any text needs to sound less like AI — email, docs, specs, comments, PR descriptions | Say "humanize this" or "use the humanize skill" |
 
 ## Optional Agents — Invoke on Demand
 

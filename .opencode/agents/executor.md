@@ -2,6 +2,7 @@
 description: Runs bash commands and returns summarized output. Lightweight execution layer for the agent system.
 version: "1.1"
 last_updated: 2026-05-18
+human_name: Max
 mode: subagent
 temperature: 0.0
 permission:

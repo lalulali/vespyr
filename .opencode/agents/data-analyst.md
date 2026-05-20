@@ -2,6 +2,7 @@
 description: Defines success metrics, plans analytics instrumentation, validates data, builds dashboards
 version: "2.0"
 last_updated: 2026-05-14
+human_name: Nova
 mode: subagent
 temperature: 0.2
 permission:

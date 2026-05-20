@@ -2,6 +2,7 @@
 description: Writes production code for specific tasks, following project patterns and conventions
 version: "3.0"
 last_updated: 2026-05-19
+human_name: Rex
 mode: subagent
 temperature: 0.1
 permission:

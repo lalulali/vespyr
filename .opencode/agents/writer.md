@@ -2,6 +2,7 @@
 description: Writes and edits files based on precise specifications from thinking agents. Delegation target for all file mutations.
 version: "1.1"
 last_updated: 2026-05-18
+human_name: Quill
 mode: subagent
 temperature: 0.0
 permission:

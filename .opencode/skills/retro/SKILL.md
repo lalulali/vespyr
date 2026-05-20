@@ -1,5 +1,5 @@
 ---
-name: retrospective
+name: retro
 description: Post-cycle review — extract lessons, calibrate estimates, improve processes, compact memory, and update team knowledge
 ---
 
@@ -241,7 +241,7 @@ Use this when:
 2. After a product launch (after the initial monitoring period)
 3. After resolving a production incident (blameless review)
 4. At regular intervals (every 2-4 weeks during ongoing iteration)
-5. After 5 iteration cycles (mandatory — see product-iteration §Step 6)
+5. After 5 iteration cycles (mandatory — see iterate §Step 6)
 6. When the team feels "something isn't working" but can't articulate what
 
 ## Key principles
@@ -252,6 +252,6 @@ Use this when:
 - **Follow-up.** Action items from retros must be tracked in the next cycle's planning. If they're not actionable in the next cycle, refine them until they are.
 
 ## Handoff
-- After retro, load `product-iteration` to apply learnings to the next cycle
-- After retro, load `product-development` if new features emerged from the retrospective
-- After retro, load `product-exploration` (or `game-product-exploration` for game projects) if strategic pivot is needed based on findings
+- After retro, load `iterate` to apply learnings to the next cycle
+- After retro, load `develop` if new features emerged from the retrospective
+- After retro, load `explore-idea` (or `explore-game-idea` for game projects) if strategic pivot is needed based on findings

@@ -2,6 +2,7 @@
 description: Breaks specs into implementable tasks, estimates effort, manages dependencies and execution plan
 version: "2.0"
 last_updated: 2026-05-14
+human_name: Grant
 mode: subagent
 temperature: 0.1
 permission:

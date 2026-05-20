@@ -1,5 +1,5 @@
 ---
-name: product-design
+name: design
 description: Defines product requirements from validated ideas, then produces detailed developer-ready specs
 ---
 
@@ -7,8 +7,8 @@ description: Defines product requirements from validated ideas, then produces de
 
 Bridges exploration and development. Takes validated ideas from exploration and turns them into a PRD with requirements, then detailed product specs with flows, interactions, and visual direction.
 
-**Previous skill:** `product-exploration` or `game-product-exploration` (produces validated idea + research)
-**Next skill:** After this completes, load `product-development` to build.
+**Previous skill:** `explore-idea` or `game-explore-idea` (produces validated idea + research)
+**Next skill:** After this completes, load `develop` to develop.
 
 ## Prerequisites
 
@@ -18,7 +18,7 @@ Before starting, verify these artifacts exist:
 - [ ] `artifacts/output/01-research/competitive-analysis.md`
 - [ ] `artifacts/output/01-research/user-personas.md`
 
-If any are missing, load `product-exploration` (or `game-product-exploration` for game projects) first.
+If any are missing, load `explore-idea` (or `game-explore-idea` for game projects) first.
 
 ## Workflow steps
 
@@ -90,7 +90,7 @@ Review the complete spec package:
 - Are open questions documented for dev?
 - If @ux-researcher was invoked, are all critical/serious findings resolved?
 
-**Gate check:** Before handing off to `product-development`:
+**Gate check:** Before handing off to `develop`:
 - [ ] `artifacts/output/02-strategy/requirements.md` exists
 - [ ] `artifacts/output/02-strategy/user-stories.md` exists
 - [ ] `artifacts/output/02-strategy/product-spec.md` exists
@@ -107,7 +107,7 @@ Review the complete spec package:
 - `artifacts/output/02-strategy/measurement-plan.md` (optional)
 - `artifacts/output/01-research/ux-research-report.md` (optional)
 
-## Handoff to product-development
+## Handoff to develop
 When design is complete and all gate checks pass:
 
 Write session summary before handing off:
@@ -118,8 +118,8 @@ Decisions made:
 - {key PRD scope decision}
 - {key design decision}
 - {UX validation result: passed / critical issues resolved / skipped with rationale}
-Next step: Load product-development to build
+Next step: Load develop to develop
 New blockers: {any open design questions or dependencies, or "none"}
 ```
 
-Load the `product-development` skill to proceed.
+Load the `develop` skill to proceed.

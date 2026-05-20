@@ -2,6 +2,7 @@
 description: Writes and runs tests, ensures quality coverage, validates behavior against specs
 version: "2.0"
 last_updated: 2026-05-14
+human_name: Nina
 mode: subagent
 temperature: 0.1
 permission:

@@ -1,14 +1,14 @@
 ---
-name: game-product-exploration
+name: explore-game-idea
 description: Validates a game concept through genre market, competitive landscape, and player research — turns a validated game idea into evidence-backed research
 ---
 
 ## What this skill does
 
-Takes a validated game concept (from `game-idea-validation`) and runs the research pipeline. Specialist agents validate genre market potential, competitive landscape, and player needs in parallel.
+Takes a validated game concept (from `validate-game-idea`) and runs the research pipeline. Specialist agents validate genre market potential, competitive landscape, and player needs in parallel.
 
-**Previous skill:** `game-idea-validation` (produces the validation brief with demand evidence and open questions)
-**Next skill:** After research, load `product-design` to define requirements and create specs.
+**Previous skill:** `validate-game-idea` (produces the validation brief with demand evidence and open questions)
+**Next skill:** After research, load `design` to define requirements and create specs.
 
 ## Prerequisites
 
@@ -19,8 +19,8 @@ Before starting, check for a validation brief:
 - Skip Phase 1 entirely. Go straight to Phase 2 research.
 
 **Path B — No validation brief (direct entry):**
-- If the user skips game-idea-validation and comes here directly with a clear concept, run Phase 1 (founder synthesis) to produce an idea brief first.
-- Consider suggesting `game-idea-validation` if the idea seems unvalidated.
+- If the user skips validate-game-idea and comes here directly with a clear concept, run Phase 1 (founder synthesis) to produce an idea brief first.
+- Consider suggesting `validate-game-idea` if the idea seems unvalidated.
 
 ## Workflow steps
 
@@ -130,7 +130,7 @@ After all research completes, review findings against the brief:
 - `artifacts/output/01-research/competitive-analysis.md`
 - `artifacts/output/01-research/user-personas.md`
 
-## Handoff to product-design
+## Handoff to design
 
 When exploration is complete:
 1. All research artifacts exist and are complete
@@ -145,7 +145,7 @@ When exploration is complete:
    - {genre market verdict: GO/NO-GO and key finding}
    - {target player confirmed/revised}
    - {key competitive positioning in genre}
-   Next step: Load product-design to define requirements and create specs
+   Next step: Load design to define requirements and create specs
    New blockers: {any research gaps or unresolved questions, or "none"}
    ```
-6. Load `product-design` to define requirements and create specs
+6. Load `design` to define requirements and create specs

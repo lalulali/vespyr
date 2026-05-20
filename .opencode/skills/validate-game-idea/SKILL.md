@@ -1,5 +1,5 @@
 ---
-name: game-idea-validation
+name: validate-game-idea
 description: Stress-test a game concept before investing production cycles — Socratic diagnostic for indie devs, game studios, and hobbyists
 ---
 
@@ -9,7 +9,7 @@ A tough thinking partner, not a cheerleader. Stress-test a game concept through 
 
 This is the gate BEFORE `product-exploration`. If the concept survives, it enters the research pipeline with evidence. If it doesn't, you save weeks of wasted dev time.
 
-**Next skill:** If GO → load `game-product-exploration` (the validation brief replaces the concept brief).
+**Next skill:** If GO → load `explore-game-idea` (the validation brief replaces the concept brief).
 
 ## When to use
 
@@ -18,7 +18,7 @@ This is the gate BEFORE `product-exploration`. If the concept survives, it enter
 - "Should we add feature Y?" — feature proposal for an existing game
 - "Help me think through Z" — strategic game design decision
 
-**Skip when:** You already have paying players, retention data, or a live game with metrics. Go directly to `product-iteration` or `product-design`.
+**Skip when:** You already have paying players, retention data, or a live game with metrics. Go directly to `iterate` or `design`.
 
 ## Context modes
 
@@ -232,7 +232,7 @@ Use the template: `.opencode/templates/game-validation-brief-template.md`
 
 ## Handoff
 
-**GO →** Load `game-product-exploration`. The validation brief replaces the concept brief — `@founder` uses it as input instead of synthesizing from scratch. Research agents focus on the open questions listed in the brief.
+**GO →** Load `explore-game-idea`. The validation brief replaces the concept brief — `@founder` uses it as input instead of synthesizing from scratch. Research agents focus on the open questions listed in the brief.
 
 **PIVOT →** Re-run `game-idea-validation` with the revised framing.
 

@@ -16,14 +16,14 @@ Agents execute in dependency order. An agent cannot start until its upstream age
 
 ```
 PHASE -1: VALIDATION
-  ├── Product track (idea-validation skill)
+  ├── Product track (validate-idea skill)
   │     └── @founder — Socratic diagnostic: stress-test the idea before investing research cycles
   │           │         Adapts by context: startup | company | personal
   │           │         Adapts by maturity: greenfield | brownfield
   │           │         Produces: artifacts/output/00-discovery/validation-brief.md
   │           │
   │           ├── GO ──────────▼
-  │           │          PHASE 0: DISCOVERY (product-exploration skill)
+  │           │          PHASE 0: DISCOVERY (explore-idea skill)
   │           │            └── @founder — synthesizes validated concept (or uses validation brief directly)
   │           │                  │         produces: artifacts/output/00-discovery/idea-brief.md (only if no validation brief)
   │           │                  ▼
@@ -31,14 +31,14 @@ PHASE -1: VALIDATION
   │           │
   │           └── KILL ──▶ Stop. Brief documents why. Save research cycles.
   │
-  └── Game track (game-idea-validation skill)
+  └── Game track (validate-game-idea skill)
         └── @founder — Socratic diagnostic: stress-test the game concept before investing production cycles
               │         Adapts by context: startup | company | personal
               │         Adapts by maturity: greenfield | brownfield
               │         Produces: artifacts/output/00-discovery/validation-brief.md
               │
               ├── GO ──────────▼
-              │          PHASE 0: DISCOVERY (game-product-exploration skill)
+              │          PHASE 0: DISCOVERY (explore-game-idea skill)
               │            └── @founder — synthesizes validated concept (or uses validation brief directly)
               │                  │         produces: artifacts/output/00-discovery/idea-brief.md (only if no validation brief)
               │                  ▼
@@ -269,8 +269,8 @@ Each handoff specifies what the upstream agent MUST produce before the downstrea
 
 | From | To | Required Artifacts | Contract |
 |------|-----|-------------------|----------|
-| @founder (idea-validation) | @founder (product-exploration) | `artifacts/output/00-discovery/validation-brief.md` | Must contain GO verdict, value proposition, target user, narrowest wedge, agreed premises, and open questions for exploration |
-| @founder (game-idea-validation) | @founder (game-product-exploration) | `artifacts/output/00-discovery/validation-brief.md` | Must contain GO verdict, value proposition, target player, core fun loop, agreed premises, and open questions for exploration |
+| @founder (validate-idea) | @founder (explore-idea) | `artifacts/output/00-discovery/validation-brief.md` | Must contain GO verdict, value proposition, target user, narrowest wedge, agreed premises, and open questions for exploration |
+| @founder (validate-game-idea) | @founder (explore-game-idea) | `artifacts/output/00-discovery/validation-brief.md` | Must contain GO verdict, value proposition, target player, core fun loop, agreed premises, and open questions for exploration |
 
 **Note:** If the validation brief exists with a GO verdict, Phase 0 (Discovery) can be skipped — the validation brief directly feeds into Phase 1 (Research). Research agents focus on the "Open questions for exploration" section.
 
@@ -472,16 +472,16 @@ Optional agents add time to the schedule. Planning guidance:
 
 | Skill | Phase | Primary Agents | Key Output |
 |-------|-------|----------------|------------|
-| `idea-validation` | -1 | @founder | Validation brief with GO/PIVOT/KILL verdict |
-| `game-idea-validation` | -1 | @founder | Game validation brief with GO/PIVOT/KILL verdict |
-| `product-exploration` | 0-1 | @founder, @researcher, @user-researcher | Validated idea brief, market analysis, personas |
-| `game-product-exploration` | 0-1 | @founder, @researcher, @user-researcher | Validated game brief, genre analysis, player personas |
-| `product-design` | 2 | @product-manager, @product-designer | PRD, user stories, product spec |
-| `product-development` | 3-5 | @architect, @tech-lead, @developer, @qa-engineer | Working, tested feature |
-| `product-launch` | 7 | @project-manager, @devops-engineer | Shipped feature in production |
-| `product-iteration` | 8 | @data-analyst, @product-manager, @developer | Measured improvement |
-| `incident-response` | Any | @project-manager, @devops-engineer, @developer | Mitigated incident, RCA, prevention |
-| `retrospective` | 9 | @project-manager, @tech-lead, @architect | Action items for improvement |
+| `validate-idea` | -1 | @founder | Validation brief with GO/PIVOT/KILL verdict |
+| `validate-game-idea` | -1 | @founder | Game validation brief with GO/PIVOT/KILL verdict |
+| `explore-idea` | 0-1 | @founder, @researcher, @user-researcher | Validated idea brief, market analysis, personas |
+| `explore-game-idea` | 0-1 | @founder, @researcher, @user-researcher | Validated game brief, genre analysis, player personas |
+| `design` | 2 | @product-manager, @product-designer | PRD, user stories, product spec |
+| `develop` | 3-5 | @architect, @tech-lead, @developer, @qa-engineer | Working, tested feature |
+| `launch` | 7 | @project-manager, @devops-engineer | Shipped feature in production |
+| `iterate` | 8 | @data-analyst, @product-manager, @developer | Measured improvement |
+| `incident` | Any | @project-manager, @devops-engineer, @developer | Mitigated incident, RCA, prevention |
+| `retro` | 9 | @project-manager, @tech-lead, @architect | Action items for improvement |
 
 ---
 

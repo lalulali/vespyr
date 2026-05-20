@@ -1,194 +1,6 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "agent": {
-    "idea-validation": {
-      "description": "Validate ideas before investing research — Socratic diagnostic that tests demand, specificity, and viability. Use before product-exploration.",
-      "mode": "primary",
-      "color": "#8b5cf6",
-      "permission": {
-        "edit": "ask",
-        "bash": "ask",
-        "task": {
-          "*": "deny",
-          "memory-controller": "allow",
-          "founder": "allow"
-        }
-      }
-    },
-    "game-idea-validation": {
-      "description": "Validate game concepts before investing production — Socratic diagnostic framed for player experience, fun loops, and genre landscape. Use before product-exploration.",
-      "mode": "primary",
-      "color": "#ec4899",
-      "permission": {
-        "edit": "ask",
-        "bash": "ask",
-        "task": {
-          "*": "deny",
-          "memory-controller": "allow",
-          "founder": "allow"
-        }
-      }
-    },
-    "product-exploration": {
-      "description": "Idea phase — brainstorm concepts then validate through market, competitor, and user research",
-      "mode": "primary",
-      "color": "#6366f1",
-      "permission": {
-        "edit": "ask",
-        "bash": "ask",
-        "task": {
-          "*": "deny",
-          "memory-controller": "allow",
-          "brainstormer": "allow",
-          "market-researcher": "allow",
-          "competitor-analyzer": "allow",
-          "user-researcher": "allow"
-        }
-      }
-    },
-    "game-product-exploration": {
-      "description": "Game concept phase — validate through genre market, competitive landscape, and player research",
-      "mode": "primary",
-      "color": "#a855f7",
-      "permission": {
-        "edit": "ask",
-        "bash": "ask",
-        "task": {
-          "*": "deny",
-          "memory-controller": "allow",
-          "brainstormer": "allow",
-          "market-researcher": "allow",
-          "competitor-analyzer": "allow",
-          "user-researcher": "allow"
-        }
-      }
-    },
-    "product-design": {
-      "description": "Spec phase — define requirements, then produce detailed product specs with flows, interactions, and visual direction",
-      "mode": "primary",
-      "color": "#f59e0b",
-      "permission": {
-        "edit": "ask",
-        "bash": "ask",
-        "task": {
-          "*": "deny",
-          "memory-controller": "allow",
-          "product-manager": "allow",
-          "product-designer": "allow",
-          "data-analyst": "allow"
-        }
-      }
-    },
-    "product-development": {
-      "description": "Core MVP workflow: spec review, architecture, planning, implementation, QA, verification, and documentation",
-      "mode": "primary",
-      "color": "#22c55e",
-      "permission": {
-        "edit": "allow",
-        "bash": "allow",
-        "task": {
-          "*": "deny",
-          "memory-controller": "allow",
-          "product-manager": "allow",
-          "product-designer": "allow",
-          "architect": "allow",
-          "tech-lead": "allow",
-          "project-manager": "allow",
-          "developer": "allow",
-          "code-reviewer": "allow",
-          "qa-engineer": "allow",
-          "technical-writer": "allow",
-          "data-analyst": "allow",
-          "security-engineer": "allow",
-          "performance-engineer": "allow",
-          "devops-engineer": "allow"
-        }
-      }
-    },
-    "product-launch": {
-      "description": "Launch phase — release readiness, go/no-go, deployment, and post-launch monitoring",
-      "mode": "primary",
-      "color": "#f97316",
-      "permission": {
-        "edit": "ask",
-        "bash": "ask",
-        "task": {
-          "*": "deny",
-          "memory-controller": "allow",
-          "project-manager": "allow",
-          "product-manager": "allow",
-          "devops-engineer": "allow",
-          "data-analyst": "allow",
-          "technical-writer": "allow",
-          "qa-engineer": "allow",
-          "security-engineer": "allow",
-          "performance-engineer": "allow"
-        }
-      }
-    },
-    "product-iteration": {
-      "description": "Post-launch iteration — analyze user data, prioritize improvements, ship incremental value",
-      "mode": "primary",
-      "color": "#3b82f6",
-      "permission": {
-        "edit": "ask",
-        "bash": "ask",
-        "task": {
-          "*": "deny",
-          "memory-controller": "allow",
-          "product-manager": "allow",
-          "product-designer": "allow",
-          "data-analyst": "allow",
-          "project-manager": "allow",
-          "architect": "allow",
-          "tech-lead": "allow",
-          "developer": "allow",
-          "code-reviewer": "allow",
-          "qa-engineer": "allow",
-          "devops-engineer": "allow"
-        }
-      }
-    },
-    "incident-response": {
-      "description": "Production incident — triage, mitigate, root-cause analysis, remediation, and post-incident review",
-      "mode": "primary",
-      "color": "#ef4444",
-      "permission": {
-        "edit": "allow",
-        "bash": "allow",
-        "task": {
-          "*": "deny",
-          "memory-controller": "allow",
-          "project-manager": "allow",
-          "devops-engineer": "allow",
-          "developer": "allow",
-          "tech-lead": "allow",
-          "architect": "allow",
-          "security-engineer": "allow",
-          "performance-engineer": "allow",
-          "code-reviewer": "allow",
-          "qa-engineer": "allow"
-        }
-      }
-    },
-    "retrospective": {
-      "description": "Post-cycle review — extract lessons, calibrate estimates, improve processes, and update team knowledge",
-      "mode": "primary",
-      "color": "#a855f7",
-      "permission": {
-        "edit": "ask",
-        "bash": "ask",
-        "task": {
-          "*": "deny",
-          "memory-controller": "allow",
-          "project-manager": "allow",
-          "product-manager": "allow",
-          "tech-lead": "allow",
-          "architect": "allow",
-          "data-analyst": "allow"
-        }
-      }
-    },
     "reader": {
       "description": "Specialized sub-agent for reading files and searching code — returns summarized results to conserve context",
       "model": "opencode-go/deepseek-v4-flash",
@@ -229,20 +41,26 @@
       "~/.local/share/opencode/worktree/**": "allow"
     },
     "skill": {
-      "idea-validation": "allow",
-      "product-exploration": "allow",
-      "product-design": "allow",
-      "product-development": "allow",
-      "product-launch": "allow",
-      "product-iteration": "allow",
-      "incident-response": "allow",
-      "retrospective": "allow",
-      "humanizer": "allow",
-      "game-idea-validation": "allow",
-      "game-product-exploration": "allow"
+      "validate-idea": "allow",
+      "explore-idea": "allow",
+      "design": "allow",
+      "develop": "allow",
+      "launch": "allow",
+      "iterate": "allow",
+      "incident": "allow",
+      "retro": "allow",
+      "humanize": "allow",
+      "validate-game-idea": "allow",
+      "explore-game-idea": "allow",
+      "status": "allow",
+      "memory": "allow",
+      "phase": "allow",
+      "delegate": "allow",
+      "plan": "allow",
+      "review": "allow",
+      "test": "allow",
+      "kanban": "allow"
     }
   },
-  "plugin": [
-    "opencode-websearch-cited@1.2.0"
-  ]
+  "plugin": ["opencode-websearch-cited@1.2.0"]
 }

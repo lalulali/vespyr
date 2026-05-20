@@ -2,6 +2,7 @@
 description: Load testing, profiling, bottleneck analysis, query optimization, and caching strategy
 version: "2.0"
 last_updated: 2026-05-14
+human_name: Felix
 mode: subagent
 temperature: 0.1
 permission:

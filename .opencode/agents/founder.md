@@ -2,6 +2,7 @@
 description: Acts as a strategic founder — takes rough ideas, makes hard decisions, and produces a single validated concept before spending research cycles
 version: "2.1"
 last_updated: 2026-05-14
+human_name: Elena
 mode: subagent
 temperature: 0.3
 permission:

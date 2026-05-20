@@ -2,6 +2,7 @@
 description: Designs system architecture, tech stack, data models, API contracts, and produces ADRs
 version: "2.0"
 last_updated: 2026-05-14
+human_name: Vera
 mode: subagent
 temperature: 0.1
 permission:

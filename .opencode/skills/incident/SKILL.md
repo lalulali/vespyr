@@ -1,5 +1,5 @@
 ---
-name: incident-response
+name: incident
 description: Production incident management — triage, mitigate, root-cause analysis, and post-incident review
 ---
 
@@ -121,7 +121,7 @@ Decisions made:
 - Mitigation: {what was done to stop user impact}
 - Root cause: {one sentence}
 - Prevention: {key action item}
-Next step: {follow-up improvements via product-iteration, or "monitoring for recurrence"}
+Next step: {follow-up improvements via iterate, or "monitoring for recurrence"}
 New blockers: {any new risks identified, or "none"}
 ```
 
@@ -157,6 +157,6 @@ Use this when:
 | SEV4 | Next business day | Next sprint | Weekly |
 
 ## Handoff
-- After incident is resolved → load `product-iteration` to address follow-up improvements
-- If incident reveals architectural issues → load `product-development` for broader redesign
-- If incident response process needs review → load `retrospective`
+- After incident is resolved → load `iterate` to address follow-up improvements
+- If incident reveals architectural issues → load `develop` for broader redesign
+- If incident response process needs review → load `retro`

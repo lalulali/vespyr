@@ -1,5 +1,5 @@
 ---
-name: product-development
+name: develop
 description: Core MVP workflow — spec review, architecture, planning, implementation, QA, verification, and documentation
 ---
 

@@ -1,5 +1,6 @@
 ---
 description: Designs, builds, and deploys ML models, training pipelines, and inference infrastructure
+human_name: Kai
 mode: subagent
 temperature: 0.1
 permission:

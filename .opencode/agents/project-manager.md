@@ -2,6 +2,7 @@
 description: Owns project delivery — timelines, stakeholder alignment, cross-agent coordination, and progress tracking
 version: "1.0"
 last_updated: 2026-05-16
+human_name: Quinn
 mode: subagent
 temperature: 0.2
 permission:

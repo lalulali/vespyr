@@ -2,6 +2,7 @@
 description: Orchestrates pipeline execution — reads state, invokes agents in order, validates outputs, handles CRs and blockers
 version: "1.0"
 last_updated: 2026-05-19
+human_name: Reed
 mode: subagent
 temperature: 0.0
 permission:

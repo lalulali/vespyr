@@ -2,6 +2,7 @@
 description: Performs security audits, threat modeling, dependency scanning, and vulnerability assessment
 version: "2.0"
 last_updated: 2026-05-14
+human_name: Victor
 mode: subagent
 temperature: 0.1
 permission:

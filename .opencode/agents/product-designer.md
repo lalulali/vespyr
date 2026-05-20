@@ -2,6 +2,7 @@
 description: End-to-end product design — user flows, interaction design, wireframes, visual design, and design system
 version: "2.0"
 last_updated: 2026-05-14
+human_name: Ivy
 mode: subagent
 temperature: 0.2
 permission:

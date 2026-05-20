@@ -1,14 +1,14 @@
 ---
-name: product-iteration
+name: iterate
 description: Post-launch feature iteration — analyze user data, prioritize improvements, ship incremental value
 ---
 
 ## What this skill does
 
-After a product launches, the work shifts from "build it right" to "make it better." This skill handles the post-launch iteration cycle: analyze real user data, prioritize improvements, and ship incremental value in rapid cycles.
+After a product launches, the work shifts from "develop it right" to "make it better." This skill handles the post-launch iteration cycle: analyze real user data, prioritize improvements, and ship incremental value in rapid cycles.
 
-**Previous skill:** `product-launch` (product is live and monitored)
-**Next skill:** Continue iterating, or load `retrospective` for process review.
+**Previous skill:** `launch` (product is live and monitored)
+**Next skill:** Continue iterating, or load `retro` for process review.
 
 ## Prerequisites
 
@@ -78,7 +78,7 @@ Invoke `@project-manager` to:
 - Manage scope and timeline trade-offs
 - Coordinate with any ongoing development work
 
-Then execute the same dev loop from `product-development`:
+Then execute the same dev loop from `develop`:
 - `@developer` implements
 - `@code-reviewer` reviews (max 2 review cycles)
 - `@qa-engineer` validates (max 2 QA cycles)
@@ -109,7 +109,7 @@ Worked on: Iteration cycle — {what was improved}
 Decisions made:
 - {hypothesis tested}
 - {result: positive/neutral/negative}
-Next step: {continue iterating / load retrospective / load product-development}
+Next step: {continue iterating / load retro / load develop}
 New blockers: {any issues, or "none"}
 ```
 
@@ -121,9 +121,9 @@ Based on results:
 - **Positive signal:** Continue iterating on adjacent improvements → back to Step 1
 - **Neutral signal:** Revisit the hypothesis, consider larger redesign → back to Step 2
 - **Negative signal:** Roll back if needed, reanalyze → back to Step 1 with new data
-- **Feature stabilized:** Move on to next feature or load `retrospective`
+- **Feature stabilized:** Move on to next feature or load `retro`
 
-**Iteration limit:** Maximum 5 iteration cycles before a mandatory `retrospective` to assess whether the iteration strategy is working. This prevents endless polish on a feature that may need a fundamentally different approach.
+**Iteration limit:** Maximum 5 iteration cycles before a mandatory `retro` to assess whether the iteration strategy is working. This prevents endless polish on a feature that may need a fundamentally different approach.
 
 ## Output artifacts
 - `artifacts/output/07-iteration/analytics-insights.md`
@@ -146,7 +146,7 @@ Use this when:
 - **Close the loop.** Always measure the impact of what you shipped before moving on.
 
 ## Handoff
-- Need to ship a completely new feature? → load `product-development`
-- Production incident? → load `incident-response`
-- Want to review how the team is working? → load `retrospective`
-- Hit 5 iteration cycles? → **mandatory** `retrospective` before continuing
+- Need to ship a completely new feature? → load `develop`
+- Production incident? → load `incident`
+- Want to review how the team is working? → load `retro`
+- Hit 5 iteration cycles? → **mandatory** `retro` before continuing

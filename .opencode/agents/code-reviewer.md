@@ -2,6 +2,7 @@
 description: Reviews code for correctness, security, performance, and adherence to team standards
 version: "2.0"
 last_updated: 2026-05-14
+human_name: Scout
 mode: subagent
 temperature: 0.1
 permission:

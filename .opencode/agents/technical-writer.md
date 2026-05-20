@@ -2,6 +2,7 @@
 description: Writes and maintains project documentation, API references, README, and user guides
 version: "2.0"
 last_updated: 2026-05-14
+human_name: Clara
 mode: subagent
 temperature: 0.2
 permission:

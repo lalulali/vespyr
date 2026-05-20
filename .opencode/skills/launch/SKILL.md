@@ -1,5 +1,5 @@
 ---
-name: product-launch
+name: launch
 description: Go-to-market coordination — release readiness, stakeholder alignment, launch orchestration, and post-launch monitoring
 ---
 
@@ -7,8 +7,8 @@ description: Go-to-market coordination — release readiness, stakeholder alignm
 
 Takes a completed feature from development and ships it. Coordinates release readiness, launch orchestration, stakeholder communication, and post-launch monitoring. This is the bridge between "code is done" and "users have it."
 
-**Previous skill:** `product-development` (produces working, tested code)
-**Next skill:** After launch, load `product-iteration` for post-launch improvements or `retrospective` for process review.
+**Previous skill:** `develop` (produces working, tested code)
+**Next skill:** After launch, load `iterate` for post-launch improvements or `retro` for process review.
 
 ## Prerequisites
 
@@ -95,15 +95,15 @@ Invoke `@data-analyst` and `@project-manager` to monitor:
 **Duration:** Monitor for 24-72 hours depending on feature scope.
 
 **If issues are found:**
-- **Critical:** Rollback immediately, invoke `incident-response` skill
+- **Critical:** Rollback immediately, invoke `incident` skill
 - **Medium:** Hotfix path via `@developer` → `@code-reviewer` → `@qa-engineer`
-- **Low:** Log for next iteration via `product-iteration` skill
+- **Low:** Log for next iteration via `iterate` skill
 
 **Output:** `artifacts/output/06-launch/post-launch-report.md`
 
 ### Step 6: Launch Retrospective (quick)
 
-Invoke `@project-manager` to conduct a launch retrospective:
+Invoke `@project-manager` to conduct a launch retro:
 - What went well in the launch process?
 - What could be improved for next time?
 - Were there any near-misses?
@@ -124,7 +124,7 @@ Worked on: Product launch — {feature name}
 Decisions made:
 - {go/no-go decision and rationale}
 - {any rollout decisions}
-Next step: Monitor post-launch metrics for 24-72h, then load product-iteration
+Next step: Monitor post-launch metrics for 24-72h, then load iterate
 New blockers: {any issues found during launch, or "none"}
 ```
 
@@ -145,6 +145,6 @@ Use this when:
 
 ## Handoff
 After launch:
-- For feature improvements based on user data → load `product-iteration`
-- For process review and team improvement → load `retrospective`
-- For production incidents → load `incident-response`
+- For feature improvements based on user data → load `iterate`
+- For process review and team improvement → load `retro`
+- For production incidents → load `incident`

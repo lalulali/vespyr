@@ -1,5 +1,5 @@
 ---
-name: idea-validation
+name: validate-idea
 description: Stress-test an idea before investing research cycles — Socratic diagnostic for startup, company, and personal contexts
 ---
 
@@ -7,9 +7,9 @@ description: Stress-test an idea before investing research cycles — Socratic d
 
 A tough thinking partner, not a cheerleader. Stress-test an idea through Socratic questioning before any agent does research work.
 
-This is the gate BEFORE `product-exploration`. If the idea survives, it enters the research pipeline with evidence. If it doesn't, you save hours of wasted agent time.
+This is the gate BEFORE `explore-idea`. If the idea survives, it enters the research pipeline with evidence. If it doesn't, you save hours of wasted agent time.
 
-**Next skill:** If GO → load `product-exploration` (the validation brief replaces the idea brief).
+**Next skill:** If GO → load `explore-idea` (the validation brief replaces the idea brief).
 
 ## When to use
 
@@ -18,7 +18,7 @@ This is the gate BEFORE `product-exploration`. If the idea survives, it enters t
 - "Should we add feature Y?" — feature proposal at work
 - "Help me think through Z" — strategic product decision
 
-**Skip when:** You already have paying customers, measured demand, or a live product with user data. Go directly to `product-iteration` or `product-design`.
+**Skip when:** You already have paying customers, measured demand, or a live product with user data. Go directly to `iterate` or `design`.
 
 ## Context modes
 
@@ -213,7 +213,7 @@ Rules:
 Based on diagnostic, premises, and alternatives, give ONE verdict:
 
 **GO** — Worth exploring. Demand evidence exists or the problem is clear enough to validate through research.
-→ Produce validation brief. Handoff to `product-exploration`.
+→ Produce validation brief. Handoff to `explore-idea`.
 
 **PIVOT** — The core problem is real, but this approach is wrong.
 → Propose a reframed direction. Re-run this skill with the revised framing.
@@ -231,7 +231,7 @@ Use the template: `.opencode/templates/validation-brief-template.md`
 
 ## Handoff
 
-**GO →** Load `product-exploration`. The validation brief replaces the idea brief — `@founder` uses it as input instead of synthesizing from scratch. Research agents focus on the open questions listed in the brief.
+**GO →** Load `explore-idea`. The validation brief replaces the idea brief — `@founder` uses it as input instead of synthesizing from scratch. Research agents focus on the open questions listed in the brief.
 
 **PIVOT →** Re-run `idea-validation` with the revised framing.
 

@@ -2,6 +2,7 @@
 description: Researches market trends, TAM/SAM/SOM, competitive landscape, pricing, and strategic gaps
 version: "1.0"
 last_updated: 2026-05-19
+human_name: Iris
 mode: subagent
 temperature: 0.2
 permission:

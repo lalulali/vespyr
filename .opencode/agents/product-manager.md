@@ -2,6 +2,7 @@
 description: Product manager for strategy, roadmapping, prioritization, and requirements — from initial PRDs to iterative backlog management
 version: "2.1"
 last_updated: 2026-05-18
+human_name: Sarah
 mode: subagent
 temperature: 0.1
 permission:

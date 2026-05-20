@@ -2,6 +2,7 @@
 description: Synthesizes user needs, pain points, jobs-to-be-done, and generates personas
 version: "2.0"
 last_updated: 2026-05-14
+human_name: Paige
 mode: subagent
 temperature: 0.2
 permission:

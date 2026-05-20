@@ -2,6 +2,7 @@
 description: Reads files and searches codebase — returns summarized, structured results. Delegation target for thinking agents.
 version: "1.1"
 last_updated: 2026-05-18
+human_name: Page
 mode: subagent
 temperature: 0.0
 permission:

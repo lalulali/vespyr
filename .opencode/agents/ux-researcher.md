@@ -2,6 +2,7 @@
 description: Evaluates usability, interaction patterns, information architecture, and accessibility through structured research methods
 version: "1.0"
 last_updated: 2026-05-14
+human_name: Zara
 mode: subagent
 temperature: 0.2
 permission:

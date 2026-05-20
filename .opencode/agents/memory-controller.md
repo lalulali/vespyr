@@ -2,6 +2,7 @@
 description: Manages shared memory reads and writes — delegates scoring to memory_filter.js, incremental writes, automatic compaction, and session continuity
 version: "4.0"
 last_updated: 2026-05-19
+human_name: Mnemos
 mode: subagent
 temperature: 0.1
 permission:
