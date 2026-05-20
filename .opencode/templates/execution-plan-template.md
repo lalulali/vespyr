@@ -3,6 +3,11 @@
 > **Used by:** @tech-lead → **Feeds into:** @developer, @data-analyst, @ml-engineer
 > **Save to:** `artifacts/output/04-planning/execution-plan.md`
 
+**Version:** 1
+**Last changed:** YYYY-MM-DD
+**Change log:**
+- v1: Initial draft
+
 Use this template when writing the development execution plan.
 
 This document breaks the work into tasks that developers can pick up and complete independently. It is the bridge between architecture and code.
@@ -52,6 +57,7 @@ Based on `idea-brief.md`, which optional agents are engaged?
 **Story IDs:** US-001, US-002
 **Priority:** Must-have
 **Effort:** Small / Medium / Large
+**Delegation:** required / optional / none
 **Assigned:** [Developer name or "TBD"]
 **Dependencies:** T-XXX (must complete before), T-YYY (can run in parallel)
 **ML-related:** [Yes/No — if Yes, reference ML engineer task M-XX]

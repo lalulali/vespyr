@@ -32,14 +32,13 @@ Games follow the same phases but use **game-specific skills** that speak in play
 | @writer | **deny** | allow | ask | yes | **Lightweight** (DS Flash) | Write/edit files — precise execution |
 | @executor | allow | **deny** | **deny** | no | **Lightweight** (DS Flash) | Run commands — summarized output |
 | @founder | **deny** | **deny** | allow | yes | Premium (default) | Strategic ideation, writes idea brief via @writer |
-| @market-researcher | **deny** | **deny** | allow | yes | Premium (default) | Market research synthesis via @writer |
-| @competitor-analyzer | **deny** | **deny** | allow | yes | Premium (default) | Competitive intelligence via @writer |
+| @researcher | **deny** | **deny** | allow | yes | Premium (default) | Market + competitive research via @writer |
 | @user-researcher | **deny** | **deny** | allow | yes | Premium (default) | User research synthesis via @writer |
 | @product-manager | **deny** | **deny** | allow | yes | Premium (default) | Writes PRD + user stories via @writer |
 | @product-designer | **deny** | **deny** | allow | yes | Premium (default) | Writes product specs + design tokens via @writer |
 | @architect | **deny** | **deny** | allow | yes | Premium (default) | Writes ADRs via @writer |
 | @tech-lead | allow | allow | allow | yes | Premium (default) | Writes execution plans, runs git worktrees |
-| @developer | **deny** | **deny** | allow | no | Premium (default) | Writes production code and tests (via @writer/@executor) |
+| @developer | allow | allow | allow | yes | Premium (default) | Writes production code and tests. Delegation: required/optional/none per task. |
 | @ml-engineer | allow | allow | allow | yes | Premium (default) | Writes ML pipelines, models, serving code |
 | @data-analyst | **deny** | **deny** | allow | yes | Premium (default) | Writes measurement plans, instrument code via @writer |
 | @code-reviewer | allow | **deny** | allow | no | Premium (default) | Read code, report findings — no edits |
@@ -50,6 +49,8 @@ Games follow the same phases but use **game-specific skills** that speak in play
 | @ux-researcher | **deny** | **deny** | allow | yes | Premium (default) | Evaluates usability — writes report via @writer |
 | @technical-writer | **deny** | allow | allow | yes | Premium (default) | Writes and updates documentation (no commands allowed) |
 | @project-manager | **deny** | **deny** | allow | yes | Premium (default) | Writes project plans, Kanban, status via @writer |
+| @memory-controller | **deny** | **deny** | allow | yes | Premium (default) | Memory I/O, preflight checks, compaction |
+| @orchestrator | allow | **deny** | allow | yes | Premium (default) | Pipeline state management, agent coordination |
 
 ## Delegation Layer
 
@@ -68,7 +69,7 @@ Thinking Agent
 
 The model tier doesn't matter as much as the architecture: even if all agents used the same model, the separation is valuable because each sub-agent's context stays narrow and focused.
 
-**Enforced delegation (bash + edit denied):** @developer, @founder, @architect, @product-manager, @product-designer, @project-manager, @data-analyst, @market-researcher, @competitor-analyzer, @user-researcher, @ux-researcher.
+**Enforced delegation (bash + edit denied):** @developer, @founder, @architect, @product-manager, @product-designer, @project-manager, @data-analyst, @researcher, @user-researcher, @ux-researcher.
 **Partially enforced (bash denied, edit allowed):** @technical-writer (writes directly, but never runs commands).
 
 ## Flow
@@ -157,16 +158,41 @@ Entries without this format will be rejected by `@memory-controller`.
 
 ### Hybrid Scoring (Phase 3)
 
-`@memory-controller` uses a two-stage hybrid pipeline for Tier 3 and archive search:
+`@memory-controller` delegates Tier 3 scoring to `.opencode/scripts/memory_filter.js` — a deterministic Node.js script. No LLM mental arithmetic.
 
-- **Stage 1 — Keyword pre-filter:** Fast elimination using exact keyword matching + synonym expansion. Eliminates ~70% of sections immediately.
-- **Stage 2 — Semantic refinement:** LLM reasoning scores surviving chunks for direct relevance, synonym matches, causal connections, and cross-references. Catches what keywords miss.
+- **Keyword matching:** Stop word removal + synonym expansion (hardcoded map)
+- **Recency weighting:** Sections < 14 days get +1, > 90 days get -1, > 180 days get -2
+- **Threshold:** Sections scoring >= 2 are returned, capped at 10 results
+- **Archive search:** Same script, `--search` mode, scans `archive/index.ndjson`
 
-**Synonym expansion** is built in — `auth` matches `authentication/login/session/token`, `deploy` matches `release/ship/ci-cd/rollout`, etc.
+**Usage:**
+```
+node .opencode/scripts/memory_filter.js --agent developer --task "implement auth login"
+node .opencode/scripts/memory_filter.js --search "JWT authentication decision"
+```
 
-**Adaptive threshold** adjusts based on query complexity — narrow tasks get a higher bar (score ≥ 6), broad tasks get a lower bar (score ≥ 4).
+### Incremental Graph Scan
 
-**Expected token savings: 85–95%** vs loading all memory files raw.
+`@architect`, `@tech-lead`, and `@memory-controller` (Operation 7) use `.opencode/scripts/incremental_graph.js` for structural analysis.
+
+- **First run:** Full scan of all source files
+- **Subsequent runs:** Only scans changed files (mtime-based)
+- **Output:** `artifacts/memory/structural/graph.json` with imports, exports, imported_by
+
+**Usage:**
+```
+node .opencode/scripts/incremental_graph.js --src src/ --out artifacts/memory/structural/graph.json
+```
+
+### Archive Format (NDJSON)
+
+The archive index uses newline-delimited JSON for append-only writes:
+
+- **First line:** Metadata (`schema_version`, `created`, `last_updated`)
+- **Each subsequent line:** One archive entry as JSON
+- **Append:** Zero read, ~100 bytes write
+- **Search:** `node .opencode/scripts/archive_manager.js search-ndjson --file index.ndjson --query "auth"`
+- **Migration:** `node .opencode/scripts/archive_manager.js migrate --from index.json --to index.ndjson`
 
 ### Progressive Context Loading
 
@@ -194,7 +220,7 @@ Without the controller, loading all memory files costs ~10,000–20,000 tokens p
 | `agent-notes/*.md` (each) | 1,100 words |
 | `session-summaries/latest.md` | 600 words |
 
-Compaction moves `resolved` and `stale` entries to `artifacts/memory/archive/YYYY-QN/` and updates the searchable `archive/index.json`. Entries tagged `[CRITICAL]` are never archived. Nothing is ever deleted.
+Compaction moves `resolved` and `stale` entries to `artifacts/memory/archive/YYYY-QN/` and appends to the searchable `archive/index.ndjson`. Entries tagged `[CRITICAL]` are never archived. Nothing is ever deleted.
 
 ### Archive Search
 
@@ -204,14 +230,7 @@ To retrieve historical context that has been compacted:
 @memory-controller search [your query]
 ```
 
-The controller uses the same hybrid scoring pipeline — keyword pre-filter then semantic refinement. Returns top 5 matches with relevance scores, summaries, and file locations.
-
-### Tuning and Transparency
-
-```
-@memory-controller explain [chunk-title]   — why was this chunk included?
-@memory-controller tune [agent] [feedback] — adjust what gets loaded for an agent
-```
+The controller delegates to `memory_filter.js --search` which scans `archive/index.ndjson` using keyword matching + recency weighting. Returns top 5 matches with relevance scores, summaries, and file locations.
 
 *See [workflow.md](./workflow.md) for the full orchestration graph and handoff contracts.*
 *See [GUARDRAILS.md](./GUARDRAILS.md) for the full guardrails specification.*

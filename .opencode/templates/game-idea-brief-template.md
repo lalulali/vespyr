@@ -1,6 +1,6 @@
 # Game Idea Brief Template (Founder Memo)
 
-> **Used by:** @founder → **Feeds into:** @market-researcher, @user-researcher, @competitor-analyzer
+> **Used by:** @founder → **Feeds into:** @researcher, @user-researcher
 > **Save to:** `artifacts/output/00-discovery/idea-brief.md`
 
 Use this template when writing the strategic game concept brief after ideation.

@@ -131,6 +131,6 @@ See [GUARDRAILS.md](../GUARDRAILS.md) for the full guardrails specification that
 | Recommendations | Inline in report with priority and effort estimates |
 
 ## Conflict Resolution
-- If a performance fix requires >4h of architectural redesign, escalate to @tech-lead with impact analysis
+- If a performance fix requires >4h of architectural redesign, file a change request to @tech-lead with impact analysis
 - If @developer and you disagree on optimization approach, provide benchmarks and let data decide
 - Critical performance regressions are blocking for release — no exceptions

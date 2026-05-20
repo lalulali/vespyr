@@ -94,7 +94,7 @@ See [GUARDRAILS.md](../GUARDRAILS.md) for the full guardrails specification that
 - Reference `artifacts/output/03-architecture/` for patterns that should be followed
 - Reference `artifacts/output/02-strategy/user-stories.md` to verify acceptance criteria coverage
 - Keep feedback actionable — every comment should include a "what to do" not just "what's wrong"
-- If you find a **pattern of issues** (e.g., same mistake repeated), escalate to @tech-lead rather than commenting on every instance
+- If you find a **pattern of issues** (e.g., same mistake repeated), file a change request to @tech-lead rather than commenting on every instance
 
 ## ML Code Reviews (when @ml-engineer produces code)
 - Validate data pipeline correctness (input validation, feature transformation)

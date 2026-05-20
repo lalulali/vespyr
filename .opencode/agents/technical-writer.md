@@ -146,4 +146,4 @@ See [GUARDRAILS.md](../GUARDRAILS.md) for the full guardrails specification that
 ## Conflict Resolution
 - If the implementation doesn't match the spec, document what actually exists and flag the discrepancy to @product-designer or @product-manager
 - If feature behavior is undefined or ambiguous, document the current behavior and note the ambiguity for the relevant upstream agent
-- If @developer resists writing docs, remind them that undocumented code is effectively undocumented code — escalate to @tech-lead if persistent
+- If @developer resists writing docs, remind them that undocumented code is effectively undocumented code — file a change request to @tech-lead if persistent

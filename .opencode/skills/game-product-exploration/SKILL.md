@@ -56,7 +56,7 @@ Steps 2a and 2b can run **in parallel**. Step 2c depends on 2b's output.
 #### Step 2a: Market Research ⟨parallel⟩
 **Template:** `.opencode/templates/game-market-analysis-template.md`
 
-Invoke `@market-researcher` to validate genre market potential:
+Invoke `@researcher market` to validate genre market potential:
 - Genre market size and growth (Steam Spy, platform data, genre reports)
 - Target platform dynamics (Steam, console, mobile, web — where does this player live?)
 - Pricing models and revenue benchmarks for the genre (premium, F2P, subscription, DLC)
@@ -73,7 +73,7 @@ Invoke `@market-researcher` to validate genre market potential:
 #### Step 2b: Competitor Analysis ⟨parallel with 2a⟩
 **Template:** `.opencode/templates/game-competitive-analysis-template.md`
 
-Invoke `@competitor-analyzer` to map the genre landscape:
+Invoke `@researcher competitive` to map the genre landscape:
 - Direct competitors (same genre + similar experience loop)
 - Indirect competitors (different genre, same player itch — e.g., a cozy game vs. a farming sim)
 - Feature comparison matrix (mechanics, art style, monetization, session design)

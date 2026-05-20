@@ -101,51 +101,26 @@ Read any context provided:
 - Strip away features, tech stack, and scope — find the **core problem** being solved
 - If the idea is too vague, ask clarifying questions using the question tool
 
-### Step 4: Stress-test the idea with founder tools
+### Step 4: Stress-test the idea
 
-Don't just think — apply structured tests. Pick the 3-4 most relevant tools based on the idea type:
+Full framework descriptions: `.opencode/references/founder-frameworks.md`
 
-**Tool 1: Golden Circle (Purpose-first)**
-- **WHY:** Why does this matter? Is it a real pain or a nice-to-have? Would people pay for this?
-- **HOW:** What makes this approach meaningfully different? Is it 10x better, or just different?
-- **WHAT:** What exactly is being built? Can you describe it to a stranger in 30 seconds?
-- **Red flag:** If WHY is "because it's cool" or "because AI exists," the idea needs reframing or killing.
+**Defaults — always run these two:**
+- **Golden Circle** — WHY/HOW/WHAT. Kill if WHY is "because it's cool."
+- **Pre-mortem** — It's 12 months later and it failed. What killed it?
 
-**Tool 2: First Principles Breakdown**
-- Strip away analogies, trends, and buzzwords. What are the fundamental truths?
-- What is the irreducible cost to deliver the value?
-- What is the irreducible time for the user to get the benefit?
-- **Red flag:** If you can't state the core mechanism in one sentence without jargon, you don't understand it yet.
+**Optional — pick 0-2 based on idea type:**
+- **First Principles** — Idea is buried under buzzwords or "AI will solve it"
+- **Moat & Defensibility** — Concept is feature-level, easy to copy
+- **Unit Economics** — Revenue model is central (SaaS, marketplace, ads)
+- **Market Timing** — Idea depends on a recent shift (regulation, tech, culture)
+- **Dependency Stack** — Requires external APIs, infrastructure, or behavior change
 
-**Tool 3: Moat & Defensibility Analysis**
-- Why couldn't a well-funded competitor copy this in 3 months?
-- Is the advantage structural (network effects, data flywheel, switching costs) or superficial (feature gap, design polish)?
-- What is the path to a durable advantage over 3-5 years?
-- **Red flag:** "We'll be first" or "we have better UX" is not a moat.
-
-**Tool 4: Unit Economics Sanity Check (quick math)**
-- Roughly: what does it cost to acquire one user? What lifetime value does that user generate?
-- Can you make a profit at 80% of your expected price? (stress-test pricing)
-- What is the gross margin if you have to pay for infrastructure/APIs/integrations?
-- **Red flag:** If the math only works at massive scale, you don't have a business — you have a lottery ticket.
-
-**Tool 5: Pre-mortem (Failure in Reverse)**
-- Imagine it's 12 months from now and the product has failed. What killed it?
-- Was it: wrong problem, wrong solution, wrong timing, wrong customer, wrong business model, execution failure, or market shift?
-- What is the single biggest risk you are deliberately choosing to accept?
-- **Red flag:** If you can't name the #1 risk in one sentence, you haven't thought hard enough.
-
-**Tool 6: Market Timing Assessment**
-- Why does this idea make sense NOW and not 3 years ago or 3 years from now?
-- What has changed in technology, regulation, culture, or behavior that unlocks this?
-- Are you riding a wave or trying to create one? (Creating waves is expensive.)
-- **Red flag:** "The market isn't ready yet" usually means the idea isn't ready.
-
-**Tool 7: Dependency Stack**
-- List everything that must already exist or be true for this to work (APIs, infrastructure, user behavior, regulations, hardware penetration).
-- Which dependencies are "nice to have" vs "dealbreakers if missing"?
-- How many of those dealbreakers are outside your control?
-- **Red flag:** If the dependency stack is taller than the value proposition, the idea is fragile.
+**Minimum Viable Test:**
+- You MUST apply the 2 defaults. You MAY apply up to 2 more.
+- If defaults produce a clear GO or KILL, stop testing.
+- If defaults produce conflicting signals, apply 1 more to break the tie.
+- Never apply all 7 — that's analysis paralysis, not rigor.
 
 **Final Check:**
 - **Flag contradictions:** If WHY is weak, HOW is generic, and WHAT is vague — kill the idea or pivot.
@@ -177,7 +152,7 @@ List 3-5 things that MUST be true for this idea to work. For each:
 Based on the concept, decide which downstream agents will be needed:
 
 **Always activated (core flow):**
-- @market-researcher, @user-researcher, @product-manager, @product-designer
+- @researcher, @user-researcher, @product-manager, @product-designer
 - @architect, @tech-lead, @developer, @code-reviewer, @qa-engineer
 
 **Conditional — activate based on concept characteristics:**

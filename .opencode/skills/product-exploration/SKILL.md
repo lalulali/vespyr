@@ -52,7 +52,7 @@ Research agents use the validation brief (or idea brief) as their primary input.
 Steps 2a and 2b can run **in parallel**. Step 2c depends on 2b's output.
 
 #### Step 2a: Market Research ⟨parallel⟩
-Invoke `@market-researcher` to validate market potential:
+Invoke `@researcher market` to validate market potential:
 - Market size (TAM, SAM, SOM)
 - Industry trends and growth rates
 - Target customer segments
@@ -67,7 +67,7 @@ Invoke `@market-researcher` to validate market potential:
 **Output:** `artifacts/output/01-research/market-analysis.md`
 
 #### Step 2b: Competitor Analysis ⟨parallel with 2a⟩
-Invoke `@competitor-analyzer` to map the landscape:
+Invoke `@researcher competitive` to map the landscape:
 - Direct and indirect competitors
 - Competitive comparison matrix
 - White-space opportunities

@@ -3,6 +3,11 @@
 > **Used by:** @product-manager → **Feeds into:** @developer, @qa-engineer, @tech-lead, @data-analyst
 > **Save to:** `artifacts/output/02-strategy/user-stories.md`
 
+**Version:** 1
+**Last changed:** YYYY-MM-DD
+**Change log:**
+- v1: Initial draft
+
 Use this template when writing user stories.
 
 This document is for **the dev team** — it must be exhaustive, precise, and testable. Every story must be independently implementable and verifiable.

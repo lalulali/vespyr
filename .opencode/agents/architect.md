@@ -52,7 +52,7 @@ Your role is system design and architectural decision-making. Keep context focus
 | @product-manager (PRD, user stories) | @tech-lead (execution plan) |
 | @product-designer (product spec, flows) | @developer (implementation patterns) |
 | @founder (idea brief, business context) | @security-engineer (trust zones, boundaries) |
-| @market-researcher (market constraints) | @devops-engineer (infra requirements) |
+| @researcher (market constraints) | @devops-engineer (infra requirements) |
 | @user-researcher (user context) | @performance-engineer (performance constraints) |
 
 ## Shared Memory
@@ -87,10 +87,29 @@ The controller returns filtered context (~1,000 tokens) covering: project stack 
 
 See `.opencode/templates/memory-entry-template.md` for the full entry format.
 
+## Structural Awareness
+
+Before proposing any structural change, you MUST read `artifacts/memory/structural/graph.json` to identify all files that import or are imported by the target. Report the blast radius: list every affected file and why.
+
+If `graph.json` does not exist or is stale, trigger regeneration via `@executor`:
+```
+node .opencode/scripts/shallow_graph.js --src src/ --out artifacts/memory/structural/graph.json
+```
+
 ## How to design
 
 ### Step 1: Read all upstream artifacts
-Before designing, absorb the full context:
+Before designing, absorb the full context from upstream agents.
+
+**Missing-file guardrail (per GUARDRAILS.md §Upstream Artifact Read Policy):**
+1. Check if each file exists before reading it.
+2. If a file is missing, collect all missing files into a list.
+3. If any are missing, present the user with these options:
+   - **Continue** — proceed with available context, explicitly flagging gaps as `[MISSING]`.
+   - **Restart from beginning** — I will tell you exactly which upstream agents to invoke first.
+4. Do NOT hallucinate missing content. Never invent requirements, personas, or competitive data.
+
+Files to read (check existence first):
 - `artifacts/output/00-discovery/idea-brief.md` — the founder's vision and key assumptions
 - `artifacts/output/02-strategy/requirements.md` — business goals, success metrics, NFRs
 - `artifacts/output/02-strategy/user-stories.md` — technical requirements, integrations, data needs

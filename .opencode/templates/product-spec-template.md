@@ -2,6 +2,11 @@
 
 > **Used by:** @product-designer → **Feeds into:** @architect, @developer, @tech-lead, @qa-engineer, @technical-writer
 
+**Version:** 1
+**Last changed:** YYYY-MM-DD
+**Change log:**
+- v1: Initial draft
+
 ## Output format
 
 **Always generate both files:**

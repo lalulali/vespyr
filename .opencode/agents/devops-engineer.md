@@ -123,6 +123,6 @@ See [GUARDRAILS.md](../GUARDRAILS.md) for the full guardrails specification that
 | Environment config templates | `env/` with per-environment overrides |
 
 ## Conflict Resolution
-- If @developer's code doesn't follow deployment conventions, escalate to @tech-lead before silently patching
-- If @security-engineer requires infrastructure changes that affect deployability, escalate to @tech-lead for trade-off decision
+- If @developer's code doesn't follow deployment conventions, file a change request to @tech-lead before silently patching
+- If @security-engineer requires infrastructure changes that affect deployability, file a change request to @tech-lead for trade-off decision
 - Rollback decisions are yours during deployment — if something looks wrong, roll back first, investigate second

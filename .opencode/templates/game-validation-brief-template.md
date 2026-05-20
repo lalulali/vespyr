@@ -117,7 +117,7 @@
 
 | Question | Why it matters | Researcher |
 |----------|---------------|------------|
-| ... | ... | @market-researcher / @user-researcher / @competitor-analyzer |
+| ... | ... | @researcher / @user-researcher |
 
 ---
 

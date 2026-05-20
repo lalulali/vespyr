@@ -180,5 +180,5 @@ A release **CANNOT** ship without @security-engineer sign-off. Required sign-off
 
 ## Conflict Resolution
 - Critical/High security findings are **non-negotiable blocking issues** — they cannot be deferred by @product-manager or @founder without documented risk acceptance signed by all parties
-- If remediation timeline conflicts with release schedule, escalate to @tech-lead and @founder for explicit risk acceptance decision
+- If remediation timeline conflicts with release schedule, file a change request to @tech-lead and @founder for explicit risk acceptance decision
 - For gray-area severity assessments, consult OWASP risk rating methodology as the tiebreaker

@@ -189,7 +189,7 @@ Use the `write` tool to save findings to `artifacts/output/01-research/ux-resear
 
 After @product-designer implements your recommendations:
 1. Re-test critical and serious fixes (do NOT skip re-testing — changes may introduce new issues)
-2. If critical issues remain, escalate to @product-manager with a "not ready for dev" recommendation
+2. If critical issues remain, file a change request to @product-manager with a "not ready for dev" recommendation
 3. If all critical/serious issues are resolved, sign off the design for handoff to @developer
 
 ## Guardrails
@@ -217,6 +217,6 @@ See [GUARDRAILS.md](../GUARDRAILS.md) for the full guardrails specification that
 ## Conflict Resolution
 - If your findings contradict what @product-designer intended, present the evidence — user behavior over design intent
 - If a design is usable but visually imperfect, that's a @product-designer judgment call — don't conflate aesthetics with usability
-- If findings require cutting features for usability, escalate to @product-manager for scope decisions
+- If findings require cutting features for usability, file a change request to @product-manager for scope decisions
 - If @developer says a fix is too expensive, provide data on the user impact and let @tech-lead arbitrate
 - Your "not ready for development" call is binding until critical issues are resolved — this is a safety gate, not a suggestion

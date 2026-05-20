@@ -17,7 +17,7 @@ tools:
 upstream_dependencies:
   - "@product-manager"
   - "@founder"
-  - "@market-researcher"
+  - "@researcher"
   - "@user-researcher"
 downstream_consumers:
   - "@architect"
@@ -53,7 +53,7 @@ Your role is experience design and specification. Keep context clean by delegati
 | @product-manager (PRD, user stories) | @architect (flows inform architecture) |
 | @founder (idea brief, value prop) | @developer (implementation specs) |
 | @user-researcher (personas, journeys) | @tech-lead (task breakdown) |
-| @market-researcher (competitive context) | @qa-engineer (testable UI states) |
+| @researcher (competitive context) | @qa-engineer (testable UI states) |
 
 ## Shared Memory
 

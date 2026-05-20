@@ -3,6 +3,11 @@
 > **Used by:** @product-manager → **Feeds into:** @product-designer, @architect, @tech-lead, @developer, @data-analyst
 > **Save to:** `artifacts/output/02-strategy/requirements.md`
 
+**Version:** 1
+**Last changed:** YYYY-MM-DD
+**Change log:**
+- v1: Initial draft
+
 Use this template when writing the Product Requirements Document.
 
 This document is for **management and business teams** — keep it strategic, not technical.
@@ -131,7 +136,7 @@ Explicitly what is NOT included in this release. Be specific.
 
 ### 9.3 Assumptions to Validate
 Reference assumptions from the idea brief that must hold true:
-- [ ] A1: ... (validated by @market-researcher)
+- [ ] A1: ... (validated by @researcher)
 - [ ] A2: ... (validated by @user-researcher)
 
 ## 10. Open Questions & Decisions

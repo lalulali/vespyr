@@ -278,17 +278,15 @@ Each handoff specifies what the upstream agent MUST produce before the downstrea
 
 | From | To | Required Artifacts | Contract |
 |------|-----|-------------------|----------|
-| @founder | @market-researcher | `validation-brief.md` OR `idea-brief.md` | Must contain target user, value proposition, key assumptions, and recommended next step |
+| @founder | @researcher | `validation-brief.md` OR `idea-brief.md` | Must contain target user, value proposition, key assumptions, and recommended next step |
 | @founder | @user-researcher | `validation-brief.md` OR `idea-brief.md` | Must contain primary user definition and assumptions to validate |
-| @founder | @competitor-analyzer | `validation-brief.md` OR `idea-brief.md`, `artifacts/output/01-research/market-analysis.md` | Must contain concept and market context |
 | @founder | @ux-researcher | `validation-brief.md` OR `idea-brief.md` | Must contain target user profile and key user-facing features |
 
 ### Research → Strategy
 
 | From | To | Required Artifacts | Contract |
 |------|-----|-------------------|----------|
-| @market-researcher | @product-manager | `artifacts/output/01-research/market-analysis.md` | Must contain GO/NO-GO verdict |
-| @competitor-analyzer | @product-manager | `artifacts/output/01-research/competitive-analysis.md` | Must contain feature matrix and strategic recommendations |
+| @researcher | @product-manager | `artifacts/output/01-research/market-analysis.md`, `competitive-analysis.md` | Must contain market sizing, competitive matrix, and GO/NO-GO verdict |
 | @user-researcher | @product-manager | `artifacts/output/01-research/user-personas.md` | Must contain primary persona and prioritized needs |
 | @user-researcher | @ux-researcher | `artifacts/output/01-research/user-personas.md` | Must contain persona details for usability test participant selection |
 
@@ -382,7 +380,7 @@ When agents produce contradictory outputs, the following escalation path applies
 | **Security vs. Developer** (security blocks shipping feature) | @security-engineer's Critical/High findings are **blocking**. Medium/Low can be deferred with documented risk acceptance. |
 | **QA vs. Developer** (test failure disputes) | QA's test results against documented acceptance criteria are authoritative. Developer may challenge if acceptance criteria are ambiguous — resolved by @product-manager. |
 | **Performance vs. Developer** (performance requires redesign) | @performance-engineer documents finding with impact metrics. If fix requires >4h redesign, escalate to @tech-lead for scope/schedule trade-off decision. |
-| **Research contradicts Founder** (market/user/player research invalidates assumptions) | @market-researcher or @user-researcher presents evidence. @founder decides: pivot, refine, or proceed with documented risk acceptance. |
+| **Research contradicts Founder** (market/user/player research invalidates assumptions) | @researcher or @user-researcher presents evidence. @founder decides: pivot, refine, or proceed with documented risk acceptance. |
 | **Product Manager vs. Project Manager** (scope vs. timeline conflict) | @product-manager owns WHAT (scope and priority). @project-manager owns WHEN (timeline and coordination). If scope cannot fit timeline, @project-manager presents options with trade-offs; @product-manager decides which scope to cut. Escalate to @founder if unresolved. |
 | **Project Manager vs. Tech Lead** (delivery pressure vs. technical quality) | @project-manager raises timeline concern; @tech-lead provides rebuild/refactor trade-off. Escalate to @product-manager for business impact assessment if unresolved in 24h. |
 
@@ -476,8 +474,8 @@ Optional agents add time to the schedule. Planning guidance:
 |-------|-------|----------------|------------|
 | `idea-validation` | -1 | @founder | Validation brief with GO/PIVOT/KILL verdict |
 | `game-idea-validation` | -1 | @founder | Game validation brief with GO/PIVOT/KILL verdict |
-| `product-exploration` | 0-1 | @founder, @market-researcher, @user-researcher, @competitor-analyzer | Validated idea brief, market analysis, personas |
-| `game-product-exploration` | 0-1 | @founder, @market-researcher, @user-researcher, @competitor-analyzer | Validated game brief, genre analysis, player personas |
+| `product-exploration` | 0-1 | @founder, @researcher, @user-researcher | Validated idea brief, market analysis, personas |
+| `game-product-exploration` | 0-1 | @founder, @researcher, @user-researcher | Validated game brief, genre analysis, player personas |
 | `product-design` | 2 | @product-manager, @product-designer | PRD, user stories, product spec |
 | `product-development` | 3-5 | @architect, @tech-lead, @developer, @qa-engineer | Working, tested feature |
 | `product-launch` | 7 | @project-manager, @devops-engineer | Shipped feature in production |

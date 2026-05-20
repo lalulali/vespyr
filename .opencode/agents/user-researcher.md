@@ -16,7 +16,7 @@ tools:
   write: true
 upstream_dependencies:
   - "@founder"
-  - "@competitor-analyzer"
+  - "@researcher"
 downstream_consumers:
   - "@product-manager"
   - "@product-designer"
@@ -55,7 +55,7 @@ If all web tools fail, proceed with your best knowledge and label all assumption
 | Upstream: receives from | Downstream: feeds into |
 |------------------------|----------------------|
 | @founder (idea brief, target assumptions) | @product-manager (PRD, user stories) |
-| @competitor-analyzer (competitive context) | @product-designer (personas, flows) |
+| @researcher (competitive context) | @product-designer (personas, flows) |
 
 ## Shared Memory
 

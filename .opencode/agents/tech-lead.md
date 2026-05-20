@@ -87,10 +87,29 @@ The controller returns filtered context (~1,000 tokens) covering: project constr
 
 See `.opencode/templates/memory-entry-template.md` for the full entry format.
 
+## Structural Awareness
+
+Before breaking architecture into tasks, read `artifacts/memory/structural/graph.json` to understand the codebase topology. For each task that modifies multiple files, identify the blast radius: list all files that import or are imported by the target, and note dependency ordering.
+
+If `graph.json` does not exist or is stale, trigger regeneration via `@executor`:
+```
+node .opencode/scripts/shallow_graph.js --src src/ --out artifacts/memory/structural/graph.json
+```
+
 ## How to plan
 
 ### Step 1: Read all upstream artifacts
-Thoroughly absorb:
+Thoroughly absorb context from upstream agents.
+
+**Missing-file guardrail (per GUARDRAILS.md §Upstream Artifact Read Policy):**
+1. Check if each file exists before reading it.
+2. If a file is missing, collect all missing files into a list.
+3. If any are missing, present the user with these options:
+   - **Continue** — proceed with available context, explicitly flagging gaps as `[MISSING]`.
+   - **Restart from beginning** — I will tell you exactly which upstream agents to invoke first.
+4. Do NOT hallucinate missing content.
+
+Files to read (check existence first):
 - `artifacts/output/02-strategy/product-spec.md` (design specs)
 - `artifacts/output/02-strategy/user-stories.md` (acceptance criteria and technical requirements)
 - `artifacts/output/03-architecture/` (system design and ADRs)
@@ -110,12 +129,18 @@ When given product specs, user stories, and architecture design:
    - Use the formula: "Verb + noun + context" (e.g., "Implement user authentication API endpoint")
 
 3. **For each task specify:**
-   - Clear definition of done (measurable, testable)
-   - Files to create or modify (with paths)
-   - Key implementation details and edge cases (reference user story AC codes)
-   - Testing requirements (map to AC-H, AC-U, AC-E from user stories)
-   - Estimated effort (Small / Medium / Large)
-   - Risk level and unknowns
+    - Clear definition of done (measurable, testable)
+    - Files to create or modify (with paths)
+    - Key implementation details and edge cases (reference user story AC codes)
+    - Testing requirements (map to AC-H, AC-U, AC-E from user stories)
+    - Estimated effort (Small / Medium / Large)
+    - **Delegation mode** (see rules below)
+    - Risk level and unknowns
+
+**Delegation mode rules:**
+- `required` — Task touches 3+ files, involves architectural changes, or is a large refactor. Developer must delegate all I/O to @writer/@executor.
+- `optional` — Task touches 1-2 files, moderate complexity. Developer uses judgment: delegate for large changes, direct access for small focused edits.
+- `none` — Task is a single-file change under 50 lines (bug fix, config update, small feature). Developer edits and runs commands directly.
 
 4. **Identify task dependencies and parallelization opportunities**
    - What must happen before what?
@@ -145,6 +170,23 @@ When given product specs, user stories, and architecture design:
 
 ### Step 3: Coordinate with @data-analyst
 Before finalizing the plan, ensure @data-analyst knows which tasks require instrumentation so tracking calls are included from day one.
+
+### Step 4: Triage Change Requests
+
+When CRs are filed against execution-plan.md or technical artifacts:
+
+1. Read open CRs from `artifacts/output/04-planning/change-requests.md`
+2. For each CR targeting your domain:
+   - **Route to decision authority** if the CR is a spec vs. implementation dispute (see GUARDRAILS.md decision table)
+   - **Resolve directly** if the CR is about task scoping, dependency ordering, or effort estimates
+   - **Reject** if the CR misunderstands a technical constraint — explain why
+3. Update CR status to RESOLVED
+4. If a CR requires re-scoping tasks, update only the affected tasks in the execution plan — bump version
+
+Rules:
+- You are the final arbiter on technical feasibility disputes
+- If a CR reveals a systemic planning error, document the lesson in shared memory
+- Never re-process the entire execution plan for a single-task CR
 
 ## Guardrails
 

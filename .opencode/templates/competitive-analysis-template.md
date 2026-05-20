@@ -1,6 +1,6 @@
 # Competitive Analysis Template
 
-> **Used by:** @competitor-analyzer → **Feeds into:** @product-manager, @product-designer
+> **Used by:** @researcher (competitive mode) → **Feeds into:** @product-manager, @product-designer
 > **Save to:** `artifacts/output/01-research/competitive-analysis.md`
 
 Use this template when writing the competitive analysis report.
@@ -132,7 +132,7 @@ Reference the founder's idea brief (`artifacts/output/00-discovery/idea-brief.md
 
 **Document info:**
 - Version: 2.0
-- Author: @competitor-analyzer
+- Author: @researcher
 - Date: ...
 - Input: `artifacts/output/00-discovery/idea-brief.md` + `artifacts/output/01-research/market-analysis.md`
 - Supersedes: v1.0 (added ML/AI column to feature matrix, §6.4 downstream implications)

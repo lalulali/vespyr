@@ -193,7 +193,39 @@ The controller will:
 
 Confirms all files are within thresholds and the archive index is up to date.
 
-**Target:** Each active memory file stays under its word threshold after compaction.
+### Step 5b: Automated Archive Review (new)
+
+After compaction, run an automated review of entries about to be archived:
+
+1. **Generate archive digest** — query `artifacts/memory/archive/index.json` for entries archived in this session
+2. **Auto-exclude protected entries:**
+   - Entries with `[CRITICAL]` tag → NEVER archive (keep active)
+   - Entries with `referenced_by.length > 3` → NEVER archive (highly connected)
+   - Entries less than 7 days old → NEVER archive
+3. **Write digest to:** `artifacts/output/09-retro/archive-review.md`
+
+   ```markdown
+   # Archive Review Digest
+   *Generated: {YYYY-MM-DD}*
+
+   ## Auto-Protected (stayed active)
+   | Entry | Reason |
+   |-------|--------|
+   | [{domain}] {title} | [CRITICAL] tag |
+   | [{domain}] {title} | 5 references |
+
+   ## Auto-Archived
+   | Entry | Age | Status | Summary |
+   |-------|-----|--------|---------|
+   | [{domain}] {title} | 95 days | stale | {summary} |
+
+   ## Human Override Queue
+   Review the auto-archived entries above. If any should remain active:
+  1. Edit the source memory file and remove `[RESOLVED]` or `[ARCHIVED]` status
+  2. Or add `[CRITICAL]` tag to permanently protect it
+  ```
+
+4. **The swarm does NOT block on human input.** Archive proceeds automatically. Humans review asynchronously.
 
 ## Output artifacts
 - `artifacts/output/09-retro/data-collection.md`

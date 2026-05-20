@@ -1,6 +1,6 @@
 # Game Market Analysis Template
 
-> **Used by:** @market-researcher → **Feeds into:** @product-manager, @competitor-analyzer
+> **Used by:** @researcher (market mode) → **Feeds into:** @product-manager
 > **Save to:** `artifacts/output/01-research/market-analysis.md`
 
 Use this template when writing the genre market analysis report.
@@ -158,7 +158,7 @@ Rules:
 
 **Document info:**
 - Version: 1.0
-- Author: @market-researcher
+- Author: @researcher
 - Date: ...
 - Input: `artifacts/output/00-discovery/idea-brief.md`
 - Supersedes: v1.0 (initial)

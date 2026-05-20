@@ -1,1 +1,47 @@
-/.DS_Store
+# macOS
+.DS_Store
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+
+# AI scratchpads, logs, and ephemeral data
+artifacts/telemetry/
+.opencode/logs/
+*.scratch.md
+*.tmp
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Build outputs
+dist/
+build/
+coverage/
+
+# --- STRICTLY TRACKED: Agent cognitive memory and specs ---
+# These must remain tracked to maintain the commit "time machine" effect.
+# Do NOT add artifacts/memory/ or artifacts/specs/ to the ignore list.
+# If you need to exclude specific memory files, list them individually below
+# with a `!` exception, or move them to a scratch directory.
+
+# Example of what NOT to do:
+# artifacts/memory/        ← WRONG: this breaks swarm continuity
+# artifacts/specs/         ← WRONG: this breaks spec traceability
+
+# Temporary files within tracked directories should use *.tmp naming
+# and those ARE ignored by the rule above.

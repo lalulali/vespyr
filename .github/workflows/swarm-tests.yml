@@ -1,0 +1,54 @@
+name: Swarm Infrastructure Tests
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - '.opencode/**'
+      - 'artifacts/**'
+      - '.github/workflows/swarm-tests.yml'
+  pull_request:
+    branches: [main, master]
+    paths:
+      - '.opencode/**'
+      - 'artifacts/**'
+      - '.github/workflows/swarm-tests.yml'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x, 22.x]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Run swarm test harness
+        run: node .opencode/tests/test_swarm.js --verbose
+
+      - name: Verify scripts are executable
+        run: |
+          for script in .opencode/scripts/*.js; do
+            echo "Checking: $script"
+            node "$script" || true
+          done
+
+      - name: Check telemetry baseline
+        run: |
+          node .opencode/scripts/swarm_telemetry.js baseline
+          node .opencode/scripts/swarm_telemetry.js summary --days 1
+
+      - name: Test merge conflict resolution
+        run: |
+          # Create two index files with overlapping entries
+          echo '{"schema_version":"1.0","created":"2026-05-01","last_updated":"2026-05-01","entries":[{"id":"A","title":"A","domain":"TEST","keywords":[],"date":"2026-05-01","status":"resolved","summary":"A","location":"a"},{"id":"B","title":"B","domain":"TEST","keywords":[],"date":"2026-05-02","status":"resolved","summary":"B","location":"b"}]}' > /tmp/ours.json
+          echo '{"schema_version":"1.0","created":"2026-05-01","last_updated":"2026-05-03","entries":[{"id":"B","title":"B","domain":"TEST","keywords":[],"date":"2026-05-02","status":"resolved","summary":"B","location":"b"},{"id":"C","title":"C","domain":"TEST","keywords":[],"date":"2026-05-03","status":"resolved","summary":"C","location":"c"}]}' > /tmp/theirs.json
+          node .opencode/scripts/archive_manager.js merge --ours /tmp/ours.json --theirs /tmp/theirs.json --out /tmp/merged.json
+          node .opencode/scripts/archive_manager.js validate --file /tmp/merged.json

@@ -87,6 +87,17 @@ When the user invokes the **humanizer** skill (e.g., "humanize this", "use the h
 
 The humanizer can be used as a pre-writing edit before `write`/`edit` operations, or as a standalone text polish.
 
+## Structural Graph Maintenance
+
+When you create, move, or delete files in `src/`, `lib/`, or `app/`:
+
+1. After completing the file operation, append this line to your confirmation:
+   ```
+   [GRAPH UPDATE NEEDED] Source files changed. Caller should regenerate structural graph.
+   ```
+2. Do NOT attempt to run `shallow_graph.js` yourself — you do not have bash permission.
+3. The calling agent (e.g., `@developer`, `@architect`) will trigger regeneration via `@executor`.
+
 ## Guardrails
 
 See [GUARDRAILS.md](../GUARDRAILS.md) for the full guardrails specification that applies to all agents.

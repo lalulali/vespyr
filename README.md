@@ -33,28 +33,23 @@ cd vespyr
 
 ### 2. Copy the agent system to your project
 
-Copy the `.opencode` system and create the required directory structure in your target project:
+Copy the `.opencode` system to your target project. Agents auto-create the `artifacts/` directory structure on first use — no manual setup required.
 
 ```bash
 cp -r .opencode /path/to/your-project/.opencode
-
-mkdir -p /path/to/your-project/artifacts/memory
-mkdir -p /path/to/your-project/artifacts/output/{00-discovery,01-research,02-strategy,03-architecture,04-planning,05-execution,06-quality,07-infrastructure,08-documentation}
 ```
 
-### 3. Set project context
+### 3. Start a session
 
-Edit `artifacts/memory/project-context.md` with your tech stack, team size, and timeline. Use the `[CORE]` section format from `.opencode/templates/project-context-template.md` — `@memory-controller` reads this section for every agent's Tier 1 context.
+Invoke a skill via slash command or mention the founder agent directly:
 
-### 4. Start with @founder
+| Command | When to use |
+|---------|-------------|
+| `/idea-validation` | Product concepts — stress-test before investing research cycles |
+| `/game-idea-validation` | Game concepts — player experience, core loop, genre fit |
+| `@founder` or `#founder`| Raw idea — shortcut to jump straight to the founder agent |
 
-```
-@founder
-
-I have an idea: [your idea]
-```
-
-@founder will stress-test the concept, produce an idea brief, activate the right optional agents, and hand off to the research phase.
+Each skill runs its workflow — stress-test the concept, activate the right optional agents, produce an idea brief or validation brief, and hand off to the research phase.
 
 ### 5. Let the workflow run
 
@@ -76,6 +71,16 @@ Each agent loads context from shared memory via `@memory-controller`, produces i
 │   ├── developer.md
 │   ├── memory-controller.md   # Memory gatekeeper
 │   └── ...
+├── scripts/                   # Infrastructure scripts
+│   ├── archive_manager.js     # NDJSON archive operations
+│   ├── memory_filter.js       # Deterministic keyword + recency scoring
+│   ├── incremental_graph.js   # mtime-based structural scan
+│   ├── orchestrator_state.js  # DAG pipeline state machine
+│   ├── swarm_telemetry.js     # Token usage tracking
+│   ├── token_profiler.js      # Static token analysis
+│   ├── pipeline_simulator.js  # Telemetry generation
+│   ├── hot_path_analyzer.js   # Cost analysis
+│   └── ...
 ├── skills/                    # Reusable workflows
 │   ├── product-development/
 │   ├── game-idea-validation/
@@ -85,33 +90,13 @@ Each agent loads context from shared memory via `@memory-controller`, produces i
 │   ├── memory-entry-template.md
 │   ├── session-summary-template.md
 │   └── ...
+├── references/                # Reference documents
+│   └── founder-frameworks.md  # Stress-testing frameworks
 ├── delegation-pattern.md      # I/O delegation architecture
 ├── GUARDRAILS.md              # Shared safety rules
-└── skills.md                  # Skills index
-
-artifacts/
-├── memory/                    # Shared agent memory (accessed via @memory-controller)
-│   ├── project-context.md
-│   ├── active-decisions.md
-│   ├── patterns-and-conventions.md
-│   ├── blockers-and-risks.md
-│   ├── lessons-learned.md
-│   ├── agent-notes/
-│   ├── session-summaries/     # Cross-session continuity
-│   │   ├── latest.md          # Most recent session (~100 tokens)
-│   │   └── history.md         # Full session log
-│   └── archive/               # Compacted historical entries
-│       └── index.json         # Searchable archive index
-└── output/                    # Agent outputs by phase
-    ├── 00-discovery/
-    ├── 01-research/
-    ├── 02-strategy/
-    ├── 03-architecture/
-    ├── 04-planning/
-    ├── 05-execution/
-    ├── 06-quality/
-    ├── 07-infrastructure/
-    └── 08-documentation/
+├── skills.md                  # Skills index
+├── workflow.md                # Execution graph and handoff contracts
+└── improvement-plan.md        # System optimization changelog
 ```
 
 ---
@@ -135,11 +120,12 @@ artifacts/
                             ↓ reads/writes via
 ┌─────────────────────────────────────────────────────────────┐
 │                  @memory-controller                         │
-│  (Hybrid keyword+semantic filtering, ~1,000 tokens/load)    │
-│  • Progressive 3-tier context loading                       │
-│  • Automatic compaction + searchable archive                │
+│  (Script-based scoring, ~1,000 tokens/load)                 │
+│  • 3-tier context loading (core → agent → task)             │
+│  • Deterministic keyword + recency scoring (memory_filter)  │
+│  • Automatic compaction + searchable archive (NDJSON)       │
 │  • Session continuity across agent invocations              │
-│  • Deduplication, explain, and per-agent profile tuning     │
+│  • Preflight checks for high-risk operations                │
 └─────────────────────────────────────────────────────────────┘
                             ↓ manages
 ┌─────────────────────────────────────────────────────────────┐
@@ -152,11 +138,13 @@ artifacts/
 
 Core design rules:
 - Each agent owns one concern
-- Agents delegate I/O to @writer, @executor, @reader
+- Agents delegate I/O to @writer, @executor, @reader (configurable per task)
 - All agents access shared memory through `@memory-controller` — never directly
 - `@memory-controller` loads ~1,000 tokens of filtered context per agent vs ~15,000 raw (85–95% savings)
 - Upstream/downstream dependencies are explicit in each agent file
 - Multiple review stages act as quality gates before handoff
+- Change Request Protocol prevents circular dependency loops
+- Small files (< 200 lines) can be written directly by thinking agents
 
 ---
 
@@ -174,23 +162,13 @@ To customize: edit the stress-testing tools, add industry-specific validation cr
 
 ---
 
-#### @market-researcher
+#### @researcher
 
-Researches market size (TAM/SAM/SOM), trends, and customer segments. States methodology and confidence levels explicitly. Will tell you the market is too small if the data says so.
+Researches market size (TAM/SAM/SOM), trends, customer segments, and competitive landscape. Operates in two modes: `market` for market analysis and `competitive` for competitor intelligence. States methodology and confidence levels explicitly. Will tell you the market is too small if the data says so.
 
-Output: `market-analysis.md`
+Outputs: `market-analysis.md`, `competitive-analysis.md`
 
-To customize: add industry-specific data sources or change the sizing methodology.
-
----
-
-#### @competitor-analyzer
-
-Maps 3–7 direct and indirect competitors. Builds a feature comparison matrix, identifies gaps, and challenges the founder's competitive assumptions with specifics.
-
-Output: `competitive-analysis.md`
-
-To customize: add industry-specific frameworks or change the minimum competitor count.
+To customize: add industry-specific data sources, change the sizing methodology, or adjust competitor analysis frameworks.
 
 ---
 
@@ -366,9 +344,9 @@ Summon when: the feature needs adoption or business impact tracking.
 
 #### @memory-controller
 
-The memory gatekeeper. Loads filtered, relevant context for every agent using a two-stage hybrid pipeline — keyword pre-filter then LLM semantic refinement. Handles automatic compaction, archive search, session continuity, deduplication, and per-agent profile tuning. Runs on a lightweight model (DeepSeek Flash) to keep costs minimal.
+The memory gatekeeper. Loads filtered, relevant context for every agent using a 3-tier pipeline — core context, agent-specific files, and task-relevant keyword scoring via `memory_filter.js`. Handles automatic compaction, NDJSON archive search, session continuity, deduplication, preflight checks for high-risk operations, and per-agent profile tuning. Runs on a lightweight model (DeepSeek Flash) to keep costs minimal.
 
-Commands: `load`, `write`, `search`, `compact`, `session-write`, `status`, `explain`, `tune`
+Commands: `load`, `load-full`, `load blockers`, `write`, `search`, `compact`, `session-write`, `status`, `preflight`
 
 #### @writer
 
@@ -456,7 +434,7 @@ Vespyr organizes complex, multi-agent operations into highly structured **skills
 #### 2. `product-exploration`
 * **Purpose**: Conduct deep-dive market, competitor, and user research to build a comprehensive foundation for product strategy.
 * **When to use**: Once an idea is successfully validated.
-* **Key Agents**: Led by `@founder` and research agents (`@market-researcher`, `@competitor-analyzer`, `@user-researcher`).
+* **Key Agents**: Led by `@founder` and research agents (`@researcher` with `market` and `competitive` modes, `@user-researcher`).
 * **Outputs**: `market-analysis.md`, `competitive-analysis.md`, `user-personas.md`.
 
 #### 3. `product-design`
@@ -672,10 +650,14 @@ Skills are reusable workflows in `.opencode/skills/`. Create a directory with a 
 
 **For customizers:**
 - Keep agent boundaries clean. One agent, one concern.
-- Don't bypass the delegation pattern. If a thinking agent writes files directly, context bloat follows.
+- The delegation pattern is configurable: `required`, `optional`, or `none` per task (see @developer).
+- Small files (< 200 lines) can be written directly by thinking agents — no double-hop tax.
 - Don't read memory files directly. Always use `@memory-controller load` — it filters and compresses context automatically.
 - Use `@memory-controller tune [agent] [feedback]` to adjust what gets loaded for specific agent types.
 - Test workflow changes end-to-end before using on a real project.
+- Profile token usage with `node .opencode/scripts/token_profiler.js --verbose`.
+- Simulate pipeline runs with `node .opencode/scripts/pipeline_simulator.js`.
+- Analyze hot paths with `node .opencode/scripts/hot_path_analyzer.js`.
 
 **For contributors:**
 - Use the standard frontmatter structure.
@@ -736,16 +718,60 @@ To add a skill: create the directory, write `SKILL.md`, add activation condition
 
 ---
 
+## Infrastructure scripts
+
+Vespyr includes a suite of scripts for memory management, profiling, and telemetry:
+
+| Script | Purpose |
+|--------|---------|
+| `archive_manager.js` | NDJSON archive operations (append, search, migrate, merge) |
+| `memory_filter.js` | Deterministic keyword + recency scoring for memory loading |
+| `incremental_graph.js` | mtime-based structural codebase scan (only changed files) |
+| `orchestrator_state.js` | DAG pipeline state machine (init, status, next, complete, file-cr, validate) |
+| `swarm_telemetry.js` | Token usage tracking per agent per phase (record, summary, report, baseline) |
+| `token_profiler.js` | Static token analysis of agent prompts, templates, and scripts |
+| `pipeline_simulator.js` | Simulates full pipeline runs to generate telemetry data |
+| `hot_path_analyzer.js` | Identifies highest-cost paths and optimization opportunities |
+| `dedupe_validator.js` | Duplicate detection for memory writes |
+| `compaction_guard.js` | Threshold checking for memory file compaction |
+| `shallow_graph.js` | Full structural codebase scan (imports/exports) |
+
+### Telemetry
+
+Token and duration tracking is built into the orchestrator state machine. When agents complete artifacts, they pass `--tokens` and `--duration-ms` flags which are automatically recorded as telemetry events.
+
+```bash
+# View per-agent-per-phase breakdown
+node .opencode/scripts/swarm_telemetry.js report
+
+# View general summary (last 7 days)
+node .opencode/scripts/swarm_telemetry.js summary --days 7
+
+# Profile static token sizes
+node .opencode/scripts/token_profiler.js --verbose
+
+# Simulate a pipeline run
+node .opencode/scripts/pipeline_simulator.js --runs 3
+
+# Analyze hot paths
+node .opencode/scripts/hot_path_analyzer.js
+```
+
+---
+
 ## Learn more
 
 - [ROADMAP.md](./ROADMAP.md) — what's planned: npx installer, squad presets, docs site, continuous improvement
 - [PORTING.md](./PORTING.md) — how to use Vespyr with Claude Code, Cursor, Windsurf, Copilot, Codex CLI, Aider, and Zed
-- `.opencode/agents/memory-controller.md` — full memory protocol: hybrid scoring, compaction, archive, session continuity
+- `.opencode/agents/memory-controller.md` — full memory protocol: 3-tier loading, NDJSON compaction, preflight checks
 - `.opencode/delegation-pattern.md` — how the I/O separation works and why
-- `.opencode/GUARDRAILS.md` — shared safety rules all agents follow
+- `.opencode/GUARDRAILS.md` — shared safety rules all agents follow, including Change Request Protocol
 - `.opencode/TROUBLESHOOTING.md` — common issues and fixes including memory tuning
+- `.opencode/workflow.md` — execution graph, handoff contracts, and conflict resolution
 - `.opencode/skills.md` — skills index
 - `.opencode/templates/` — output format examples
+- `.opencode/profiling-report.md` — token profiling analysis and optimization recommendations
+- `.opencode/improvement-plan.md` — system optimization changelog and decision log
 
 ---
 
@@ -767,7 +793,7 @@ The name combines *vespula* (yellowjacket — organized, efficient colonies) wit
 
 ## Support
 
-Open an issue on [GitHub Issues](https://github.com/christianhadianto/vespyr/issues).
+Open an issue on [GitHub Issues](https://github.com/lalulali/vespyr/issues).
 
 ---
 

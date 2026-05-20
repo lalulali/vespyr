@@ -25,7 +25,7 @@ Items being explored, researched, or validated.
 
 | ID | Item | Owner | Since | Notes |
 |----|------|-------|-------|-------|
-| US-001 | [Feature name] | @market-researcher | ... | [Key assumption being validated] |
+| US-001 | [Feature name] | @researcher | ... | [Key assumption being validated] |
 | ... | ... | ... | ... | ... |
 
 ### 📐 Design
