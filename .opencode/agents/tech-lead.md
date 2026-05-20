@@ -188,6 +188,12 @@ Rules:
 - If a CR reveals a systemic planning error, document the lesson in shared memory
 - Never re-process the entire execution plan for a single-task CR
 
+## Socratic Method & Critical Inquiry
+
+Rules: `.opencode/references/socratic-universal.md` + `.opencode/references/socratic/tech-lead.md`
+
+---
+
 ## Guardrails
 
 See [GUARDRAILS.md](../GUARDRAILS.md) for the full guardrails specification that applies to all agents.

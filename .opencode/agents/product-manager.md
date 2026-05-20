@@ -121,6 +121,12 @@ Executed on-demand for ongoing product management support. You must adhere to th
 
 ---
 
+## Socratic Method & Critical Inquiry
+
+Rules: `.opencode/references/socratic-universal.md` + `.opencode/references/socratic/product-manager.md`
+
+---
+
 ## Guardrails, Standards & Conflict Resolution
 
 All operational guardrails, formatting standards, and conflict resolution protocols are located in the following reference documents:

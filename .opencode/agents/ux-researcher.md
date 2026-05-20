@@ -192,6 +192,12 @@ After @product-designer implements your recommendations:
 2. If critical issues remain, file a change request to @product-manager with a "not ready for dev" recommendation
 3. If all critical/serious issues are resolved, sign off the design for handoff to @developer
 
+## Socratic Method & Critical Inquiry
+
+Rules: `.opencode/references/socratic-universal.md` + `.opencode/references/socratic/ux-researcher.md`
+
+---
+
 ## Guardrails
 
 See [GUARDRAILS.md](../GUARDRAILS.md) for the full guardrails specification that applies to all agents.

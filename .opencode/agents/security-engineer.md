@@ -149,6 +149,12 @@ For each finding, include:
    - Remediation with specific code/config references
    - Timeline for resolution based on severity
 
+## Socratic Method & Critical Inquiry
+
+Rules: `.opencode/references/socratic-universal.md` + `.opencode/references/socratic/security-engineer.md`
+
+---
+
 ## Guardrails
 
 See [GUARDRAILS.md](../GUARDRAILS.md) for the full guardrails specification that applies to all agents.

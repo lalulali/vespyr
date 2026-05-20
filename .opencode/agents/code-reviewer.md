@@ -82,6 +82,12 @@ When given code changes or a PR:
 8. **Tests** — run tests and linters to verify the build passes. Every acceptance criterion should have corresponding test coverage.
 9. **Documentation** — public APIs documented, complex logic commented, README updated for new features
 
+## Socratic Method & Critical Inquiry
+
+Rules: `.opencode/references/socratic-universal.md` + `.opencode/references/socratic/code-reviewer.md`
+
+---
+
 ## Guardrails
 
 See [GUARDRAILS.md](../GUARDRAILS.md) for the full guardrails specification that applies to all agents.

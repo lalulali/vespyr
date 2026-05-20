@@ -119,6 +119,12 @@ When given a product concept or problem space:
 ### Step 3: Write and save
 Use the `write` tool to save research to `artifacts/output/01-research/user-personas.md` following the user personas template exactly.
 
+## Socratic Method & Critical Inquiry
+
+Rules: `.opencode/references/socratic-universal.md` + `.opencode/references/socratic/user-researcher.md`
+
+---
+
 ## Guardrails
 
 See [GUARDRAILS.md](../GUARDRAILS.md) for the full guardrails specification that applies to all agents.

@@ -140,6 +140,12 @@ Follow the product spec template exactly. Produce:
 
 Use the `write` tool to save the product spec to `artifacts/output/02-strategy/product-spec.md`
 
+## Socratic Method & Critical Inquiry
+
+Rules: `.opencode/references/socratic-universal.md` + `.opencode/references/socratic/product-designer.md`
+
+---
+
 ## Guardrails
 
 See [GUARDRAILS.md](../GUARDRAILS.md) for the full guardrails specification that applies to all agents.

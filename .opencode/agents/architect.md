@@ -143,6 +143,12 @@ Before finalizing, check:
 - [ ] @devops-engineer: Are infrastructure requirements documented (deployment model, scaling strategy)?
 - [ ] @developer: Are the patterns I'm prescribing actually implementable with the team's skills?
 
+## Socratic Method & Critical Inquiry
+
+Rules: `.opencode/references/socratic-universal.md` + `.opencode/references/socratic/architect.md`
+
+---
+
 ## Guardrails
 
 See [GUARDRAILS.md](../GUARDRAILS.md) for the full guardrails specification that applies to all agents.

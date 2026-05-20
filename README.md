@@ -90,8 +90,14 @@ Each agent loads context from shared memory via `@memory-controller`, produces i
 │   ├── memory-entry-template.md
 │   ├── session-summary-template.md
 │   └── ...
-├── references/                # Reference documents
-│   └── founder-frameworks.md  # Stress-testing frameworks
+├── references/                # Reference documents and guidelines
+│   ├── founder-frameworks.md  # Stress-testing frameworks
+│   ├── developer-guidelines.md# Coding standards and patterns
+│   ├── pm-frameworks.md       # Product management frameworks
+│   ├── pm-workflows.md        # PM operational workflows
+│   ├── socratic-universal.md  # Universal Socratic rules for critical inquiry
+│   ├── socratic/              # Per-agent Socratic rules
+│   └── templates/             # Reference templates for agent instructions
 ├── delegation-pattern.md      # I/O delegation architecture
 ├── GUARDRAILS.md              # Shared safety rules
 ├── skills.md                  # Skills index
@@ -145,6 +151,7 @@ Core design rules:
 - Multiple review stages act as quality gates before handoff
 - Change Request Protocol prevents circular dependency loops
 - Small files (< 200 lines) can be written directly by thinking agents
+- Every thinking agent applies Socratic critical inquiry — universal rules plus per-agent diagnostics — to surface blind spots and challenge assumptions
 
 ---
 
@@ -154,7 +161,7 @@ Core design rules:
 
 #### @founder
 
-Takes a raw idea and produces one validated concept before any research cycles start. Applies structured stress-tests (Golden Circle, First Principles, Pre-mortem, unit economics) and kills weak directions early. Decides which optional agents to activate.
+Takes a raw idea and produces one validated concept before any research cycles start. Applies structured stress-tests (Golden Circle, First Principles, Pre-mortem, unit economics) paired with Socratic questioning to expose hidden assumptions and kill weak directions early. Decides which optional agents to activate.
 
 Output: `idea-brief.md`
 
@@ -426,7 +433,7 @@ Vespyr organizes complex, multi-agent operations into highly structured **skills
 ### Core Product Pipeline Skills
 
 #### 1. `idea-validation`
-* **Purpose**: Stress-test new product concepts before wasting research or development resources. Serves as a Socratic thinking partner rather than a cheerleader.
+* **Purpose**: Stress-test new product concepts before wasting research or development resources. Serves as a Socratic thinking partner rather than a cheerleader — applies critical inquiry to expose blind spots, test assumptions, and kill weak directions early.
 * **When to use**: Whenever you have a rough idea, a problem space, or a feature proposal without validated demand.
 * **Key Agents**: Led by `@founder` with I/O delegated to `@writer` and `@reader`.
 * **Output**: `artifacts/output/00-discovery/validation-brief.md` (using `validation-brief-template.md`).
@@ -454,7 +461,7 @@ Vespyr organizes complex, multi-agent operations into highly structured **skills
 ### Game Studio Mode Skills
 
 #### 5. `game-idea-validation`
-* **Purpose**: A creative-first validation diagnostic that evaluates the concept's core loops, player emotions, platform suitability, and genre landscape rather than standard SaaS/startup metrics.
+* **Purpose**: A creative-first Socratic validation diagnostic that evaluates the concept's core loops, player emotions, platform suitability, and genre landscape rather than standard SaaS/startup metrics.
 * **When to use**: Game concept needs stress-testing before investing production time.
 * **Key Agents**: `@founder` acting as Creative Director.
 * **Output**: `artifacts/output/00-discovery/game-validation-brief.md`.
@@ -638,6 +645,14 @@ Skills are reusable workflows in `.opencode/skills/`. Create a directory with a 
   └── SKILL.md
 ```
 
+### Customizing Socratic rules
+
+Every thinking agent applies Socratic critical inquiry via shared universal rules (`.opencode/references/socratic-universal.md`) plus a per-agent rule file (`.opencode/references/socratic/{agent}.md`). Edit these to tune how aggressively agents challenge assumptions, or add domain-specific diagnostic questions.
+
+### Adjusting output tone
+
+The `@technical-writer` agent matches the tone and style of existing documentation. For text artifacts, the `humanizer` skill removes AI-writing tells and adjusts formality level. See `.opencode/skills/humanizer/SKILL.md`.
+
 ---
 
 ## Tips
@@ -762,7 +777,7 @@ node .opencode/scripts/hot_path_analyzer.js
 ## Learn more
 
 - [ROADMAP.md](./ROADMAP.md) — what's planned: npx installer, squad presets, docs site, continuous improvement
-- [PORTING.md](./PORTING.md) — how to use Vespyr with Claude Code, Cursor, Windsurf, Copilot, Codex CLI, Aider, and Zed
+- [PORTING.md](./PORTING.md) — how to use Vespyr with Claude Code, Cursor, Windsurf, Copilot, Codex CLI, Aider, Zed, Hermes Agent, OpenClaw, and more
 - `.opencode/agents/memory-controller.md` — full memory protocol: 3-tier loading, NDJSON compaction, preflight checks
 - `.opencode/delegation-pattern.md` — how the I/O separation works and why
 - `.opencode/GUARDRAILS.md` — shared safety rules all agents follow, including Change Request Protocol
@@ -783,11 +798,11 @@ MIT — see [LICENSE](./LICENSE) for details.
 
 ## Acknowledgments
 
-The delegation pattern and agent architecture work in any AI coding harness — Cursor, Windsurf, Claude Code, opencode, or raw API.
+The delegation pattern and agent architecture work in any AI coding harness — Cursor, Windsurf, Claude Code, opencode, Hermes Agent, OpenClaw, or raw API.
 
 The name combines *vespula* (yellowjacket — organized, efficient colonies) with *zephyr* (a light wind — the idea that the right process should feel effortless).
 
-**Third-party credits:** The `@writer` agent's humanizer capability uses the [humanizer](https://github.com/blader/humanizer) skill by [@blader](https://github.com/blader), MIT licensed. Based on Wikipedia's ["Signs of AI writing"](https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing) guide. Version 2.5.1.
+**Third-party credits:** The `@writer` agent's humanizer capability uses the [humanizer](https://github.com/blader/humanizer) skill by [@blader](https://github.com/blader), MIT licensed. Based on Wikipedia's ["Signs of AI writing"](https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing) guide. Extended with tone-aware rewriting for formality, voice consistency, and domain-appropriate language. Version 2.5.1.
 
 ---
 

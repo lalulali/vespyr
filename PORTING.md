@@ -47,6 +47,7 @@ If you are an AI agent reading this document to port the project to a new harnes
 | **Gemini CLI** | Terminal | Native subagents | `.gemini/agents/*.md` | Tools |
 | **GitHub Copilot** | IDE extension | Custom agents (VS Code) | `.github/copilot-instructions.md` | `.github/instructions/*.instructions.md` |
 | **Google Antigravity** | IDE | Native subagents + Browser agent | `AGENTS.md` | Artifacts |
+| **Hermes Agent** | Terminal/Gateway | Single agent + subagents | `AGENTS.md` / `SOUL.md` | `skills/` (SKILL.md) |
 | **IBM Bob** | IDE/Terminal | Subagents + modes | `AGENTS.md` | Skills (platform) |
 | **iFlow** | Terminal | SubAgent system | `IFLOW.md` | None native |
 | **Junie** | IDE (JetBrains) | Single agent | `.junie/guidelines.md` / `AGENTS.md` | Agent skills |
@@ -58,7 +59,7 @@ If you are an AI agent reading this document to port the project to a new harnes
 | **Mux** | Terminal | Single agent | `AGENTS.md` | None native |
 | **Neovate** | IDE | Single agent | `AGENTS.md` | None native |
 | **Ona** | Terminal | Single agent | `AGENTS.md` | None native |
-| **OpenClaw** | Terminal | Single agent | `AGENTS.md` | None native |
+| **OpenClaw** | Terminal/Gateway | Multi-agent (routing) | `AGENTS.md` / `SOUL.md` | `skills/` + clawhub |
 | **OpenHands** | Web/Terminal | Single agent | `.openhands/microagents/repo.md` | Microagents |
 | **Pi** | Terminal | Single agent | `AGENTS.md` | None native |
 | **Pochi** | IDE | Single agent | `AGENTS.md` | None native |
@@ -874,9 +875,191 @@ artifacts/output/02-strategy/requirements.md.
 
 ---
 
+## Hermes Agent
+
+Hermes Agent (Nous Research) is an open-source terminal and messaging gateway agent. It reads `AGENTS.md` as its primary project context file, supports subagent delegation, and has a built-in skill-generation loop.
+
+### How Hermes handles instructions
+
+Hermes discovers context files from the working directory. It loads `AGENTS.md` at startup and progressively discovers subdirectory `AGENTS.md` files as the agent navigates. `SOUL.md` (in `~/.hermes/`) defines the agent's persistent identity. Skills are stored in `skills/` directories and can be auto-generated from experience.
+
+### What maps to what
+
+| Vespyr (opencode) | Hermes Agent equivalent |
+|---|---|
+| `.opencode/agents/*.md` | Sections in `AGENTS.md` or `skills/` files |
+| Agent invocation (`@founder`) | Prompt prefix ("Act as the founder agent...") |
+| `.opencode/skills/*/SKILL.md` | `skills/*/SKILL.md` (same format — Hermes auto-generates these) |
+| `AGENTS.md` (project root) | `AGENTS.md` (project root) — same file |
+| `artifacts/memory/` | Hermes persistent memory (SQLite + FTS5) or `MEMORY.md` |
+
+### Steps to port
+
+**1. Create or update `AGENTS.md`**
+
+Hermes already reads `AGENTS.md` from the project root. Flatten the agent team into sections:
+
+```markdown
+# Vespyr Agent Team
+
+This project uses a multi-agent workflow. When asked to act as a specific agent,
+follow that agent's role, responsibilities, and output format exactly.
+
+## Shared memory
+Read these files before starting any task:
+- artifacts/memory/active-decisions.md
+- artifacts/memory/patterns-and-conventions.md
+
+> **Note:** In the native opencode version, memory access goes through
+> `@memory-controller` which handles filtering, compaction, and semantic search.
+> In this Hermes port, read the files directly and focus on sections relevant
+> to your current task.
+
+## Agents
+### @founder
+[Body of founder.md]
+
+### @architect
+[Body of architect.md]
+
+...
+```
+
+**2. Convert skills to Hermes skills**
+
+Copy `.opencode/skills/*/SKILL.md` to `skills/*/SKILL.md`:
+
+```
+.opencode/skills/humanizer/SKILL.md  →  skills/humanizer/SKILL.md
+```
+
+Hermes loads skills from these locations (highest precedence first): project `skills/`, `.agents/skills/`, `~/.agents/skills/`, and `~/.hermes/skills/`.
+
+**3. Optional: Create `SOUL.md` for agent identity**
+
+Hermes reads `SOUL.md` from `~/.hermes/SOUL.md` as its persistent identity. This can reference the agent team structure:
+
+```markdown
+# SOUL.md
+
+This Hermes instance runs the Vespyr project. When asked, adopt the role of
+the relevant agent from AGENTS.md. Always read AGENTS.md first before
+responding to project tasks.
+```
+
+**4. Invoke agents**
+
+```
+Act as @architect. Design the system for the PRD at
+artifacts/output/02-strategy/requirements.md.
+```
+
+**Docs:** [hermes-agent.nousresearch.com/docs/user-guide/configuration](https://hermes-agent.nousresearch.com/docs/user-guide/configuration/)
+
+---
+
+## OpenClaw
+
+OpenClaw is an open-source terminal and messaging gateway agent. It supports multi-agent routing, workspace isolation, and a skills ecosystem. Instructions are provided through bootstrap markdown files injected into every session.
+
+### How OpenClaw handles agents
+
+OpenClaw runs a single embedded agent runtime per workspace. Each session, it injects bootstrap files from the workspace directory into the agent context:
+
+- `AGENTS.md` — operating instructions and "memory"
+- `SOUL.md` — persona, boundaries, tone
+- `TOOLS.md` — user-maintained tool notes
+- `USER.md` — user profile and preferences
+
+Multi-agent setups use routing bindings to pin channel traffic to specific agents with their own workspaces. Skills are loaded from project and user `skills/` directories — plus clawhub for community skills.
+
+### What maps to what
+
+| Vespyr (opencode) | OpenClaw equivalent |
+|---|---|
+| `.opencode/agents/*.md` | Sections in `AGENTS.md` or `skills/` files |
+| Agent invocation (`@founder`) | Prompt prefix in the channel or `AGENTS.md` role section |
+| `.opencode/skills/*/SKILL.md` | `skills/*/SKILL.md` — same SKILL.md format |
+| `AGENTS.md` (project root) | `AGENTS.md` in workspace — primary instructions |
+| `artifacts/memory/` | `AGENTS.md` sections or workspace `MEMORY.md` |
+
+### Steps to port
+
+**1. Create workspace bootstrap files**
+
+OpenClaw expects these files in the agent workspace (default: `~/.openclaw/workspace/`):
+
+```
+~/.openclaw/workspace/
+  AGENTS.md
+  SOUL.md
+  TOOLS.md
+  USER.md
+```
+
+**2. Create `AGENTS.md`**
+
+Flatten the agent team into a single file as done for Codex CLI:
+
+```markdown
+# Vespyr Agent Team
+
+This project uses a multi-agent workflow. When asked to act as a specific agent,
+follow that agent's role, responsibilities, and output format exactly.
+
+## Shared memory
+Read these files before starting any task:
+- artifacts/memory/active-decisions.md
+- artifacts/memory/patterns-and-conventions.md
+
+> **Note:** In the native opencode version, memory access goes through
+> `@memory-controller` which handles filtering, compaction, and semantic search.
+> In this OpenClaw port, read the files directly and focus on sections relevant
+> to your current task.
+
+## Agents
+### @founder
+[Body of founder.md]
+
+### @architect
+[Body of architect.md]
+
+...
+```
+
+**3. Create `SOUL.md`**
+
+Define the agent's identity and operating principles:
+
+```markdown
+# SOUL.md
+
+You are the Vespyr agent team lead. Your job is to coordinate specialized
+agents for product development. When a task arrives, identify which agent
+role is needed, load AGENTS.md for their instructions, and follow their
+output format exactly.
+```
+
+**4. Convert skills**
+
+Copy `.opencode/skills/*/SKILL.md` to the workspace `skills/` directory or install from clawhub.
+
+**5. Invoke agents**
+
+OpenClaw agents are invoked through channels (CLI, Telegram, Discord, etc.):
+
+```
+Act as @architect. Design the system for the PRD at
+artifacts/output/02-strategy/requirements.md.
+```
+
+**Docs:** [docs.openclaw.ai](https://docs.openclaw.ai)
+
+---
+
 ## Other Harnesses
 
-For harnesses not explicitly detailed above (e.g., Adal, Auggie, Command Code, Google Antigravity, iFlow, Kode, Mux, Neovate, Ona, OpenClaw, Pi, Pochi, Qoder, Snowflake Cortex Code, Zencode, and others), Vespyr can be ported using the **Universal Single-Agent Pattern**.
+For harnesses not explicitly detailed above (e.g., Adal, Auggie, Command Code, iFlow, Kode, Mux, Neovate, Ona, Pi, Pochi, Qoder, Snowflake Cortex Code, Zencode, and others), Vespyr can be ported using the **Universal Single-Agent Pattern**.
 
 ### The Universal Single-Agent Pattern
 

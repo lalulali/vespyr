@@ -118,6 +118,12 @@ Write to `artifacts/output/01-research/market-analysis.md`
 ### Step 3: Save
 Write to `artifacts/output/01-research/competitive-analysis.md`
 
+## Socratic Method & Critical Inquiry
+
+Rules: `.opencode/references/socratic-universal.md` + `.opencode/references/socratic/researcher.md`
+
+---
+
 ## Guardrails
 
 See [GUARDRAILS.md](../GUARDRAILS.md) for the full guardrails specification.
