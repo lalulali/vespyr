@@ -79,6 +79,17 @@ Create these directories under `artifacts/output/`:
 - `08-incidents/`
 - `09-retro/`
 
+Create `artifacts/telemetry/` — agent execution logs, token usage, and performance metrics.
+
+Create these directories under `artifacts/`:
+- `directions/` — strategic direction documents
+- `input/` — raw input materials
+- `input/example/` — reference examples
+- `input/data/` — datasets and analytics exports
+- `input/designs/` — design files, mockups, assets
+- `input/documents/` — external documents, briefs, research
+- `input/flows/` — user flows, journey maps, wireframes
+
 Create `artifacts/memory/` with:
 - `project-context.md` — pre-populate with discovered project info
 - `active-decisions.md` — empty, ready for entries
