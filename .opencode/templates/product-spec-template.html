@@ -527,6 +527,14 @@
         </table>
       </div>
     </div>
+
+    <div class="subsection" style="margin-top:20px">
+      <h3>ML Integration Points <span style="font-size:11px;font-weight:400;color:var(--text-muted);font-style:italic">(if applicable)</span></h3>
+      <div class="callout info">
+        <span class="callout-icon">🤖</span>
+        <p>{Specify ML output appearance, confidence representation, and service failure fallback.}</p>
+      </div>
+    </div>
   </section>
 
   <!-- ─────────────────────────────────────────────────────────
@@ -561,6 +569,15 @@
         <strong style="color:var(--text);font-size:13px">Flow 3A — {Error Name}</strong>
         <p style="margin-top:6px">{What happens. How does the user recover? Every error flow must show a recovery path.}</p>
         <div class="flow-block" style="margin-top:10px">Mermaid diagram placeholder</div>
+      </div>
+    </div>
+
+    <div class="subsection">
+      <h3>ML-Specific Flows <span style="font-size:11px;font-weight:400;color:var(--text-muted);font-style:italic">(if applicable)</span></h3>
+      <div class="card">
+        <strong style="color:var(--text);font-size:13px">Flow 4A — ML Inference / Uncertainty</strong>
+        <p style="margin-top:6px">{Describe ML inference flow, confidence thresholds, and how uncertainty is surfaced to the user.}</p>
+        <div class="flow-block" style="margin-top:10px">ML inference / uncertainty flow diagram placeholder</div>
       </div>
     </div>
   </section>

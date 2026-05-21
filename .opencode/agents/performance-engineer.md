@@ -135,3 +135,7 @@ See [GUARDRAILS.md](../GUARDRAILS.md) for the full guardrails specification that
 - If a performance fix requires >4h of architectural redesign, file a change request to @tech-lead with impact analysis
 - If @developer and you disagree on optimization approach, provide benchmarks and let data decide
 - Critical performance regressions are blocking for release — no exceptions
+
+## Socratic Method & Critical Inquiry
+
+Rules: `.opencode/references/socratic-universal.md` + `.opencode/references/socratic/performance-engineer.md`

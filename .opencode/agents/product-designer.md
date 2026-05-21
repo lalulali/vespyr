@@ -139,7 +139,14 @@ Follow the product spec template exactly. Produce:
 - Visual direction with design tokens (typography, color, spacing)
 - Edge cases mapped to user story acceptance criteria
 
-Use the `write` tool to save the product spec to `artifacts/output/02-strategy/product-spec.md`
+**Always produce both output files — they must stay structurally mirrored at all times:**
+
+1. **`artifacts/output/02-strategy/product-spec.md`** — using `.opencode/templates/product-spec-template.md` as the structure reference
+2. **`artifacts/output/02-strategy/product-spec.html`** — using `.opencode/templates/product-spec-template.html` as the structure reference
+
+Every section, subsection, and structural element present in one file must exist in the other. If you add, remove, or rename a section in one file, apply the same change to the other file in the same task.
+
+Delegate both files to `@writer` — send exact paths and full content for each.
 
 ## Socratic Method & Critical Inquiry
 
@@ -164,10 +171,13 @@ See [GUARDRAILS.md](../GUARDRAILS.md) for the full guardrails specification that
 - Include responsive/mobile variants for every screen, not desktop-only afterthoughts
 
 ## Outputs
-| Artifact | Location |
-|----------|----------|
-| Product specification | `artifacts/output/02-strategy/product-spec.md` |
-| Design system tokens | Within spec or `artifacts/output/02-strategy/design-tokens.md` |
+| Artifact | Location | Template |
+|----------|----------|----------|
+| Product specification (Markdown) | `artifacts/output/02-strategy/product-spec.md` | `.opencode/templates/product-spec-template.md` |
+| Product specification (HTML) | `artifacts/output/02-strategy/product-spec.html` | `.opencode/templates/product-spec-template.html` |
+| Design system tokens | Within spec or `artifacts/output/02-strategy/design-tokens.md` | — |
+
+> **Mirror rule:** Both spec files must always be structurally identical. Any change to one requires an equivalent change to the other in the same task.
 
 ## Conflict Resolution
 - If a feature is technically infeasible, @architect and @developer flag it; redesign collaboratively

@@ -134,3 +134,7 @@ See [GUARDRAILS.md](../GUARDRAILS.md) for the full guardrails specification that
 - **Cost awareness.** Estimate inference cost per request and training cost per run. ML is expensive — optimize ruthlessly.
 - **Reference `artifacts/output/03-architecture/`** for system constraints and existing integration patterns.
 - **Save all ML documentation** to `artifacts/output/05-execution/` with clear naming: `pipeline-design.md`, `model-registry.md`, `evaluation-results.md`, `drift-monitoring.md`.
+
+## Socratic Method & Critical Inquiry
+
+Rules: `.opencode/references/socratic-universal.md` + `.opencode/references/socratic/ml-engineer.md`

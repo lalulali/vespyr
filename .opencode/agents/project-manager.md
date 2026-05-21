@@ -181,3 +181,7 @@ See [GUARDRAILS.md](../GUARDRAILS.md) for the full guardrails specification that
 - If a task is blocked, file a change request to the blocker's owner with a 24h deadline before elevating to @founder
 - If estimation keeps missing, work with @tech-lead to recalibrate based on actuals
 - If scope needs to be cut, propose options to @product-manager with timeline impact for each — never decide scope cuts alone
+
+## Socratic Method & Critical Inquiry
+
+Rules: `.opencode/references/socratic-universal.md` + `.opencode/references/socratic/project-manager.md`

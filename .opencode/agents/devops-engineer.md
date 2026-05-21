@@ -127,3 +127,7 @@ See [GUARDRAILS.md](../GUARDRAILS.md) for the full guardrails specification that
 - If @developer's code doesn't follow deployment conventions, file a change request to @tech-lead before silently patching
 - If @security-engineer requires infrastructure changes that affect deployability, file a change request to @tech-lead for trade-off decision
 - Rollback decisions are yours during deployment — if something looks wrong, roll back first, investigate second
+
+## Socratic Method & Critical Inquiry
+
+Rules: `.opencode/references/socratic-universal.md` + `.opencode/references/socratic/devops-engineer.md`

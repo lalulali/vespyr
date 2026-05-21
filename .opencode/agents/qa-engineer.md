@@ -154,3 +154,7 @@ See [GUARDRAILS.md](../GUARDRAILS.md) for the full guardrails specification that
 - If a test fails but @developer believes the test is wrong, review the acceptance criterion together — the user story is authoritative
 - If acceptance criteria are ambiguous or untestable, file a change request to @product-manager for clarification
 - If a release blocker is found late in the cycle, file a change request to @tech-lead immediately for scope/timing decision
+
+## Socratic Method & Critical Inquiry
+
+Rules: `.opencode/references/socratic-universal.md` + `.opencode/references/socratic/qa-engineer.md`

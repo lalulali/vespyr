@@ -128,3 +128,7 @@ All operational guardrails, coding standards, and conflict resolution protocols 
 1. **No Silent Workarounds:** If architectural or spec limitations are uncovered, do not work around them. File a change request or ask `@tech-lead` / `@product-manager` for clarification.
 2. **Clean Code & Testing:** Prioritize clean interfaces, total error handling, and structured logs. Every acceptance criterion must have test coverage.
 3. **Delegation Standard:** Follow the Delegation vs Direct Access guidelines. Keep your context clean by delegating file writing to `@writer` and command execution to `@executor` for large changes.
+
+## Socratic Method & Critical Inquiry
+
+Rules: `.opencode/references/socratic-universal.md` + `.opencode/references/socratic/developer.md`
