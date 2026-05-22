@@ -5,9 +5,11 @@ description: Stress-test an idea before investing research cycles — Socratic d
 
 ## What this skill does
 
-A tough thinking partner, not a cheerleader. Stress-test an idea through Socratic questioning before any agent does research work.
+Led by `@founder` acting as a tough thinking partner, not a cheerleader. Stress-test an idea through Socratic questioning before any agent does research work.
 
 This is the gate BEFORE `explore-idea`. If the idea survives, it enters the research pipeline with evidence. If it doesn't, you save hours of wasted agent time.
+
+**Key Agent:** `@founder` ( Elena )
 
 **Next skill:** If GO → load `explore-idea` (the validation brief replaces the idea brief).
 
@@ -38,7 +40,7 @@ Determine at the start. This changes the questions and the bar for evidence.
 
 ### Phase 1: Context
 
-1. Load existing project context if available:
+1. Invoke `@founder` to load existing project context if available:
    ```
    @memory-controller load founder [idea validation]
    ```
@@ -58,7 +60,7 @@ Determine at the start. This changes the questions and the bar for evidence.
 
 ### Phase 2: Diagnostic (one question at a time)
 
-Ask questions **one at a time**. Wait for the answer. Push on vague answers.
+`@founder` asks questions **one at a time**. Wait for the answer. Push on vague answers.
 
 **How to push:** Category-level answers ("enterprises," "developers") → ask for a name. Hypothetical ("people would want...") → ask for observed behavior. "Everyone needs this" → ask who panics when it breaks.
 

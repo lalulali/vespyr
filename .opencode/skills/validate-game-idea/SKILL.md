@@ -5,9 +5,11 @@ description: Stress-test a game concept before investing production cycles — S
 
 ## What this skill does
 
-A tough thinking partner, not a cheerleader. Stress-test a game concept through Socratic questioning before any agent does research or production work.
+Led by `@founder` acting as a tough thinking partner, not a cheerleader. Stress-test a game concept through Socratic questioning before any agent does research or production work.
 
 This is the gate BEFORE `product-exploration`. If the concept survives, it enters the research pipeline with evidence. If it doesn't, you save weeks of wasted dev time.
+
+**Key Agent:** `@founder` ( Elena )
 
 **Next skill:** If GO → load `explore-game-idea` (the validation brief replaces the concept brief).
 
@@ -38,7 +40,7 @@ Determine at the start. This changes the questions and the bar for evidence.
 
 ### Phase 1: Context
 
-1. Load existing project context if available:
+1. Invoke `@founder` to load existing project context if available:
    ```
    @memory-controller load founder [game idea validation]
    ```
@@ -58,7 +60,7 @@ Determine at the start. This changes the questions and the bar for evidence.
 
 ### Phase 2: Diagnostic (one question at a time)
 
-Ask questions **one at a time**. Wait for the answer. Push on vague answers.
+`@founder` asks questions **one at a time**. Wait for the answer. Push on vague answers.
 
 **How to push:** Category-level answers ("RPG fans," "action gamers") → ask for a specific player. Hypothetical ("players would love...") → ask for observed playtest behavior. "Everyone will play this" → ask who'll refund it in the first hour.
 
