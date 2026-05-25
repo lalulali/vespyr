@@ -130,6 +130,20 @@ See [GUARDRAILS.md](../GUARDRAILS.md) for the full guardrails specification that
 - If a spec requirement cannot be tested, flag it as a **spec gap** — this is a defect in the spec, not the code
 - **Do not approve a release** with unresolved blocking bugs or untested acceptance criteria
 
+## Kanban Update Protocol (NON-NEGOTIABLE)
+
+Update `artifacts/output/04-planning/kanban.md` via `@writer` at each QA milestone.
+
+| Event | Kanban action |
+|-------|---------------|
+| **QA testing started** | Add `🧪 In QA` label to task card |
+| **Test failure (blocking bug)** | Add `🚧 BLOCKED — QA` label; append bug summary with AC reference in task notes |
+| **Spec gap found** | Add `⚠️ Spec Gap` label; append gap description and link to filed CR |
+| **All tests pass** | Remove `🧪 In QA` label; append `✅ QA passed [date]` note |
+| **Release certified** | Append `🚀 QA sign-off [date]` note on all tasks in the release scope |
+
+> QA sign-off on the Kanban card is the official hand-off signal to @product-manager for the GO/NO-GO decision. Do not omit it.
+
 ## Outputs
 | Artifact | Location |
 |----------|----------|

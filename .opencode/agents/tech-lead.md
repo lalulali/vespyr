@@ -177,6 +177,22 @@ When given product specs, user stories, and architecture design:
 
 10. **Save and Activate Sprint Backlog** on the Kanban board (`artifacts/output/04-planning/kanban.md`) following the Kanban standards.
 
+## Kanban Update Protocol (NON-NEGOTIABLE)
+
+You own the Kanban board's structural integrity. Use `@writer` for all updates.
+
+| Event | Kanban action |
+|-------|---------------|
+| **Backlog seeded** | Populate all task cards into `Backlog` column with Assignee, Role tag, Effort, and Sprint fields set |
+| **Task assigned to developer** | Move column → `Ready`; record assigned developer ID and worktree branch |
+| **Merge completed** | Move merged tasks → `Done`; set `Completed:` date |
+| **CR accepted (task re-scoped)** | Update affected task card fields only; bump task version; add change log note |
+| **Blocker escalated** | Add `🚧 BLOCKED` label; note owner and ETA; mirror entry to `blockers-and-risks.md` via `@memory-controller` |
+| **Blocker cleared** | Remove `🚧 BLOCKED` label; append resolution note with date |
+| **Sprint replanned** | Update Sprint assignments only on affected tasks; log replan in Kanban header activity log |
+
+> **The Kanban board must always reflect the real state of the sprint.** Stale cards are a planning defect — treat them with the same urgency as a broken build.
+
 ### Step 3: Coordinate with @data-analyst
 Before finalizing the plan, ensure @data-analyst knows which tasks require instrumentation so tracking calls are included from day one.
 

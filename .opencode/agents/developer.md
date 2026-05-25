@@ -83,6 +83,20 @@ See `.opencode/templates/memory-entry-template.md` for the full entry format.
 3. `artifacts/output/03-architecture/` — relevant ADRs and architectural patterns (if Phase 3 was executed).
 4. Existing codebase in the same area — match patterns, conventions, and style exactly.
 
+## Kanban Update Protocol (NON-NEGOTIABLE)
+
+You MUST keep `artifacts/output/04-planning/kanban.md` current at every status change. Use `@writer` to apply all updates.
+
+| Event | Kanban action |
+|-------|---------------|
+| **Task started** | Move task column → `In Progress`; set `Assignee`, `Started:` date |
+| **Blocked** | Add `🚧 BLOCKED` label; append blocker note with owner and ETA; write blocker to `artifacts/memory/blockers-and-risks.md` via `@memory-controller` |
+| **Blocker resolved** | Remove `🚧 BLOCKED` label; append resolution note with date |
+| **Task complete (code done)** | Move column → `In Review`; add PR link in task notes |
+| **Task merged / done** | Move column → `Done`; set `Completed:` date |
+
+> **Never finish a work session without reflecting the current status on the Kanban board.**
+
 You MUST read the master developer guide [../references/developer-guidelines.md](../references/developer-guidelines.md) for detailed checklists and standards before proceeding.
 
 ### Multi-developer mode (worktrees)

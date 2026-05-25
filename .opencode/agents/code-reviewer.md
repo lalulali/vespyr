@@ -110,6 +110,19 @@ See [GUARDRAILS.md](../GUARDRAILS.md) for the full guardrails specification that
 - Ensure experiment tracking and model versioning are in place
 - Do NOT deep-audit model accuracy — that's the ML engineer's and @data-analyst's domain
 
+## Kanban Update Protocol (NON-NEGOTIABLE)
+
+After every review, update `artifacts/output/04-planning/kanban.md` via `@writer`.
+
+| Event | Kanban action |
+|-------|---------------|
+| **Review started** | Add `🔍 In Review` label to task card |
+| **Review passed (no blockers)** | Remove `🔍 In Review` label; append `✅ Review approved [date]` note |
+| **Review blocked** | Add `🚧 BLOCKED — Review` label; append finding summary with severity in task notes |
+| **Blocking issues resolved by developer** | Remove `🚧 BLOCKED` label; re-add `🔍 In Review` to signal re-review cycle |
+
+> Update the board immediately after issuing your review verdict. Do not leave task status ambiguous between agents.
+
 ## Outputs
 | Artifact | When |
 |----------|------|
