@@ -13,7 +13,7 @@ Bridges exploration and development. Takes validated ideas from exploration and 
 ## Prerequisites
 
 Before starting, verify these artifacts exist:
-- [ ] `artifacts/output/00-discovery/idea-brief.md`
+- [ ] `artifacts/output/00-discovery/validation-brief.md` OR `artifacts/output/00-discovery/idea-brief.md` (exactly 1 required)
 - [ ] `artifacts/output/01-research/market-analysis.md`
 - [ ] `artifacts/output/01-research/competitive-analysis.md`
 - [ ] `artifacts/output/01-research/user-personas.md`
@@ -23,18 +23,39 @@ If any are missing, load `explore-idea` (or `game-explore-idea` for game project
 ## Workflow steps
 
 ### Step 1: Requirements (sequential)
-Invoke `@product-manager` to produce two documents:
-- **PRD** (`artifacts/output/02-strategy/requirements.md`) — strategic document for business/management
-- **User Stories** (`artifacts/output/02-strategy/user-stories.md`) — exhaustive, testable stories for engineering
+
+#### Step 1a: Preliminary Feature Proposal (Interactive Gate)
+- Invoke `@product-manager` to draft a high-level feature list and scope summary.
+- **If operating in `semi-autonomous` mode** and the bypass flag `FeatureDesignInteraction` is not `false` in `project-context.md`:
+  - **Pause** and present the proposed list of capabilities/features to the user for feedback.
+  - The user can select, add, modify, or delete features to explicitly define scope.
+  - The user's input directly shapes what features will be developed.
+- **If operating in `autonomous` mode** or if `FeatureDesignInteraction: false` is configured:
+  - Skip the pause, and the `@product-manager` will automatically/autonomously select the feature scope.
+
+#### Step 1b: PRD Creation & Validation (Interactive Gate)
+- The `@product-manager` incorporates the finalized feature scope to generate the **PRD** (`artifacts/output/02-strategy/requirements.md`) — the strategic document for business/management.
+- **If operating in `semi-autonomous` mode** and the bypass flag `FeatureDesignInteraction` is not `false`:
+  - **Pause** and present the generated PRD to the user for validation.
+  - Ask the user to confirm that the requirements are correct.
+  - Incorporate user feedback into the PRD until approved.
+- **If operating in `autonomous` mode** or if `FeatureDesignInteraction: false`:
+  - Skip the pause and assume the PRD is validated.
+
+#### Step 1c: User Stories Creation
+- Only AFTER the PRD is finalized and validated, the `@product-manager` generates the **User Stories** (`artifacts/output/02-strategy/user-stories.md`) — exhaustive, testable stories for engineering.
+- **Crucial PRD & Product Spec Alignment:** The user stories MUST strictly align with the validated PRD and conform exactly to the detailed designs, layouts, states, and flows in the Product Spec (`product-spec.md`). Screen transitions and UI edge cases in the spec must map directly to story acceptance criteria.
 
 Both documents are required. The PRD provides the "what and why"; the user stories provide the "what, how, and how to verify."
 
-**Context budget:** PM reads idea brief in full, then reads only the executive summary + relevant sections of each research artifact.
+**Context budget:** PM reads discovery brief (`validation-brief.md` or `idea-brief.md`) in full, then reads only the executive summary + relevant sections of each research artifact.
 
 **Gate check:** Before proceeding to Step 2:
 - [ ] PRD contains measurable business goals
+- [ ] PRD has been validated by the user (if in semi-autonomous mode)
 - [ ] Every PRD feature has ≥1 user story
 - [ ] Every user story has acceptance criteria (AC-H, AC-U, AC-E)
+- [ ] All user stories strictly follow the requirements (PRD) and the Product Spec, with zero divergences or omission of spec details
 - [ ] Cross-validation checklist passes (Step 4 in PM agent)
 
 **Outputs:**
@@ -57,7 +78,7 @@ Invoke `@product-designer` to create detailed specs from the PRD and user storie
 - `artifacts/output/02-strategy/product-spec.md` — machine-readable, used by @architect, @developer, @tech-lead, @qa-engineer
 - `artifacts/output/02-strategy/product-spec.html` — human-readable, use `.opencode/templates/product-spec-template.html`
 
-Write the `.md` first (full content). Then produce the `.html` by filling the same content into the HTML template — replace all `{placeholders}` with real values.
+Write the `.md` first (full content). Then produce the `.html` by filling the same content into the HTML template. **CRITICAL: You must preserve the exact HTML structure, tags, and CSS classes (e.g., `<div class="card">`, `<div class="grid-2">`, `<ul class="checklist">`) from the template. Do not oversimplify the HTML.** Replace all `{placeholders}` with real values.
 
 #### Step 2b: Data Planning (optional) ⟨parallel⟩
 Invoke `@data-analyst` to define measurement:
@@ -90,7 +111,7 @@ Review the complete spec package:
 - Are open questions documented for dev?
 - If @ux-researcher was invoked, are all critical/serious findings resolved?
 
-**Gate check:** Before handing off to `develop`:
+**Gate check & Kanban Seeding:** Before handing off to `develop`:
 - [ ] `artifacts/output/02-strategy/requirements.md` exists
 - [ ] `artifacts/output/02-strategy/user-stories.md` exists
 - [ ] `artifacts/output/02-strategy/product-spec.md` exists
@@ -98,6 +119,11 @@ Review the complete spec package:
 - [ ] All acceptance criteria are testable
 - [ ] No blocking open questions remain
 - [ ] UX sign-off (if applicable)
+
+**Action:**
+- **In Semi-Autonomous/Manual Mode:** Pause for explicit human spec package approval. Once requirements, spec, and stories are approved, invoke `@product-manager` to **seed and initialize the Kanban board** (`artifacts/output/04-planning/kanban.md`), then invoke `@executor` to rebuild the **document graph** (`node .opencode/scripts/doc_graph.js`).
+- **In Autonomous Mode:** Skip all feature, PRD, and spec validation pauses entirely. Autonomously finalize the requirements, spec, and user stories, immediately run `@product-manager` to seed the Kanban board, and invoke `@executor` to rebuild the **document graph** (`node .opencode/scripts/doc_graph.js`).
+
 
 ## Output artifacts
 - `artifacts/output/02-strategy/requirements.md` (strategic PRD)
@@ -109,6 +135,13 @@ Review the complete spec package:
 
 ## Handoff to develop
 When design is complete and all gate checks pass:
+
+### Optional Architecture Phase Gate (Interactive Choice)
+Before proceeding to load the `develop` skill, you **MUST pause and ask the user** for their choice:
+1. **Option A (Architect first):** Invoke `@architect` to design components, models, schemas, and draft ADRs. Recommended for greenfield features, complex integrations, or structural modifications.
+2. **Option B (Direct to Developer):** Bypass Phase 3 completely and hand off the Strategy requirements (`requirements.md`, `user-stories.md`, `product-spec.md`) directly to `@tech-lead` for planning and `@developer` for coding. Recommended for straightforward features, routine iterations, or well-established code patterns.
+
+Ensure you explain the context of both options clearly so the user can make an informed choice. Based on their input, set the `ArchitectPhase` configuration in `project-context.md` (to `true` or `false` respectively) before loading the next skill.
 
 Write session summary before handing off:
 ```

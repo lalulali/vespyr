@@ -34,7 +34,7 @@ Delegate file creation to `@writer`. You do not write files directly.
 
 | Phase | Agents | Required Outputs |
 |-------|--------|-----------------|
-| **Validation** | @founder | `00-discovery/idea-brief.md` |
+| **Validation** | @founder | `00-discovery/validation-brief.md` OR `idea-brief.md` |
 | **Exploration** | @researcher, @user-researcher | `01-research/market-analysis.md`, `competitive-analysis.md`, `user-personas.md` |
 | **Design** | @product-manager, @product-designer | `02-strategy/requirements.md`, `user-stories.md`, `product-spec.md` |
 | **Development** | @tech-lead, @developer, @code-reviewer, @qa-engineer | `04-planning/execution-plan.md`, code, tests |
@@ -96,8 +96,13 @@ Based on the `next` command output:
 
 **advance-phase:**
 1. Validate current phase artifacts via `orchestrator_state.js validate --phase {phase}`
-2. If all present, advance to next phase
-3. Invoke first agent of new phase
+2. If all present, determine transition rules for the next phase.
+3. **Optional Architecture Gate Check:** If transitioning from Phase 2 (Strategy) to Phase 3 (Architecture):
+   - You **MUST pause** and ask the user if they want to run the Architecture phase (which invokes `@architect` first to design ADRs, schemas, contracts) or bypass it and proceed directly to Phase 4 (Planning) and Phase 5 (Execution).
+   - If the user chooses to run Architecture, mark `ArchitectPhase: true` in `project-context.md` and advance to Phase 3.
+   - If the user chooses to bypass, mark `ArchitectPhase: false` in `project-context.md`, skip Phase 3, and advance directly to Phase 4 (Planning) and Phase 5 (Execution).
+4. Invoke the appropriate starting agent of the new target phase.
+
 
 ### Step 4: Report
 
@@ -139,4 +144,4 @@ See [GUARDRAILS.md](../GUARDRAILS.md) for the full guardrails specification.
 | Artifact | Location |
 |----------|----------|
 | Pipeline state | `artifacts/output/pipeline-state.json` |
-| Orchestration log | `artifacts/output/05-project-management/orchestration-log.md` |
+| Orchestration log | `artifacts/output/04-planning/orchestration-log.md` |

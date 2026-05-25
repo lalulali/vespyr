@@ -21,7 +21,7 @@ Before starting, verify:
 
 ### Step 1: Release Readiness Review
 
-Invoke `@project-manager` to assess launch readiness across all dimensions:
+Invoke `@product-manager` to assess launch readiness across all dimensions:
 
 **Checklist — every item must pass:**
 - [ ] All acceptance criteria from user stories are met
@@ -41,14 +41,14 @@ Invoke `@project-manager` to assess launch readiness across all dimensions:
 
 ### Step 2: Go/No-Go Decision (gate)
 
-Invoke `@project-manager` and `@product-manager` to make the launch call:
+Invoke `@product-manager` and `@product-manager` to make the launch call:
 - Review release readiness checklist
 - Assess known risks and their mitigations
 - Confirm target release date and time
 - Define rollback criteria (what triggers a rollback, who decides)
 - Confirm stakeholder notification plan
 
-**Gate check:** Both @project-manager and @product-manager must agree on GO.
+**Gate check:** Both @product-manager and @product-manager must agree on GO.
 If either says NO-GO, document the blocking issue and resolve before retrying.
 
 **Output:** `artifacts/output/06-launch/go-nogo-decision.md`
@@ -76,7 +76,7 @@ Invoke `@technical-writer` to finalize:
 
 ### Step 4: Launch Execution
 
-Invoke `@devops-engineer` and `@project-manager` to execute the launch:
+Invoke `@devops-engineer` and `@product-manager` to execute the launch:
 - Deploy to production following the runbook
 - Monitor health checks and key metrics
 - Verify feature flags and gradual rollout
@@ -86,7 +86,7 @@ Invoke `@devops-engineer` and `@project-manager` to execute the launch:
 
 ### Step 5: Post-Launch Monitoring
 
-Invoke `@data-analyst` and `@project-manager` to monitor:
+Invoke `@data-analyst` and `@product-manager` to monitor:
 - Track core metrics against success criteria from the PRD
 - Monitor error rates, latency, and system health
 - Watch user adoption and feature usage
@@ -103,7 +103,7 @@ Invoke `@data-analyst` and `@project-manager` to monitor:
 
 ### Step 6: Launch Retrospective (quick)
 
-Invoke `@project-manager` to conduct a launch retro:
+Invoke `@product-manager` to conduct a launch retro:
 - What went well in the launch process?
 - What could be improved for next time?
 - Were there any near-misses?
@@ -112,7 +112,7 @@ Invoke `@project-manager` to conduct a launch retro:
 Write learnings to memory:
 ```
 @memory-controller write lessons-learned.md
-### [LESSON] {title} [date: YYYY-MM-DD] [agent: @project-manager]
+### [LESSON] {title} [date: YYYY-MM-DD] [agent: @product-manager]
 {launch lesson}
 **Status:** active
 ```

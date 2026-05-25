@@ -16,9 +16,8 @@ After any major phase, iteration cycle, or incident, this skill helps the team r
 Steps 1a and 1b can run **in parallel** to save time.
 
 #### Step 1a: Quantitative Data ⟨parallel⟩
-Invoke `@project-manager` to collect:
-- `artifacts/output/04-planning/execution-plan.md` — planned vs. actual effort
-- `artifacts/output/05-project-management/project-plan.md` — timeline adherence
+Invoke `@product-manager` to collect:
+- `artifacts/output/04-planning/kanban.md` — Kanban board state, completed stories, and cycle times
 - Active blockers and resolution times:
   ```
   @memory-controller load blockers
@@ -28,10 +27,10 @@ Invoke `@project-manager` to collect:
 - Launch metrics — deployment success rate, rollback frequency
 
 #### Step 1b: Qualitative Data ⟨parallel⟩
-Invoke `@project-manager` to collect:
+Invoke `@product-manager` to collect:
 - Lessons and agent notes from this cycle:
   ```
-  @memory-controller load project-manager [retrospective data gathering]
+  @memory-controller load product-manager [retrospective data gathering]
   ```
   Then load full files for deep review:
   ```
@@ -59,7 +58,7 @@ Invoke `@tech-lead` to review execution quality:
 **Output:** `artifacts/output/09-retro/execution-review.md`
 
 #### Step 2b: Process Review ⟨parallel⟩
-Invoke `@project-manager` to review team process:
+Invoke `@product-manager` to review team process:
 - Were handoffs smooth? Where did information get lost between agents?
 - Were blockers resolved quickly enough? Which ones caused delays?
 - Did any feedback loops hit the 2-cycle limit? What caused the impasse?
@@ -90,7 +89,7 @@ Invoke `@architect` to review:
 
 ### Step 4: Synthesize Action Items
 
-Invoke `@project-manager` to synthesize all reviews into actionable improvements:
+Invoke `@product-manager` to synthesize all reviews into actionable improvements:
 
 For each action item, specify:
 - **What** needs to change
@@ -110,13 +109,13 @@ Categorize action items:
 
 ### Step 5: Update Shared Memory + Compaction
 
-Invoke `@project-manager` to update the team's collective knowledge via `@memory-controller`:
+Invoke `@product-manager` to update the team's collective knowledge via `@memory-controller`:
 
 **Updates — use these exact commands:**
 
 ```
 @memory-controller write patterns-and-conventions.md
-### [PROCESS] {title} [date: YYYY-MM-DD] [agent: @project-manager]
+### [PROCESS] {title} [date: YYYY-MM-DD] [agent: @product-manager]
 {process improvement discovered this cycle}
 **Status:** active
 
@@ -131,12 +130,12 @@ Invoke `@project-manager` to update the team's collective knowledge via `@memory
 **Status:** active
 
 @memory-controller write active-decisions.md
-### [PROCESS] {title} [date: YYYY-MM-DD] [agent: @project-manager]
+### [PROCESS] {title} [date: YYYY-MM-DD] [agent: @product-manager]
 {new process decision}
 **Status:** active
 
 @memory-controller write lessons-learned.md
-### [LESSON] {title} [date: YYYY-MM-DD] [agent: @project-manager]
+### [LESSON] {title} [date: YYYY-MM-DD] [agent: @product-manager]
 {lesson learned this cycle}
 **Status:** active
 ```
@@ -144,7 +143,7 @@ Invoke `@project-manager` to update the team's collective knowledge via `@memory
 For each resolved blocker, mark it resolved:
 ```
 @memory-controller write blockers-and-risks.md
-### [RISK] {original title} [date: YYYY-MM-DD] [agent: @project-manager] [RESOLVED: YYYY-MM-DD]
+### [RISK] {original title} [date: YYYY-MM-DD] [agent: @product-manager] [RESOLVED: YYYY-MM-DD]
 {resolution summary}
 **Status:** resolved
 ```
@@ -165,6 +164,12 @@ New blockers: {any new blockers, or "none"}
 ```
 
 This compresses the entire retrospective into ~100 tokens for the next session's Tier 1 context.
+
+**Update Document Graph:**
+Invoke `@executor` to rebuild the document relationship graph so all recent decisions, blockers, and retro outcomes are fully indexed:
+```bash
+node .opencode/scripts/doc_graph.js
+```
 
 **Memory compaction (automatic — triggered by @memory-controller):**
 

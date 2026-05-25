@@ -48,7 +48,6 @@ Games follow the same phases but use **game-specific skills** that speak in play
 | @devops-engineer | allow | allow | allow | yes | Premium (default) | Writes CI/CD, infra, deployment configs |
 | @ux-researcher | **deny** | **deny** | allow | yes | Premium (default) | Evaluates usability — writes report via @writer |
 | @technical-writer | **deny** | allow | allow | yes | Premium (default) | Writes and updates documentation (no commands allowed) |
-| @project-manager | **deny** | **deny** | allow | yes | Premium (default) | Writes project plans, Kanban, status via @writer |
 | @memory-controller | **deny** | **deny** | allow | yes | Premium (default) | Memory I/O, preflight checks, compaction |
 | @orchestrator | allow | **deny** | allow | yes | Premium (default) | Pipeline state management, agent coordination |
 
@@ -69,7 +68,7 @@ Thinking Agent
 
 The model tier doesn't matter as much as the architecture: even if all agents used the same model, the separation is valuable because each sub-agent's context stays narrow and focused.
 
-**Enforced delegation (bash + edit denied):** @developer, @founder, @architect, @product-manager, @product-designer, @project-manager, @data-analyst, @researcher, @user-researcher, @ux-researcher.
+**Enforced delegation (bash + edit denied):** @developer, @founder, @architect, @product-manager, @product-designer, @data-analyst, @researcher, @user-researcher, @ux-researcher.
 **Partially enforced (bash denied, edit allowed):** @technical-writer (writes directly, but never runs commands).
 
 ## Flow
@@ -114,7 +113,7 @@ Validation is optional but recommended — you can skip to Exploration if the id
 | @security-engineer | Read + bash (no edit) | Sensitive data (payments, PII, health) |
 | @technical-writer | Full access | Public-facing API or user-facing feature changes |
 | @devops-engineer | Full access | Deploying, changing infrastructure, or setting up CI/CD |
-| @project-manager | Full access | Multi-phase projects needing timeline and coordination |
+
 
 ---
 
@@ -177,11 +176,11 @@ node .opencode/scripts/memory_filter.js --search "JWT authentication decision"
 
 - **First run:** Full scan of all source files
 - **Subsequent runs:** Only scans changed files (mtime-based)
-- **Output:** `artifacts/memory/structural/graph.json` with imports, exports, imported_by
+- **Output:** `artifacts/memory/structural/code-graph.json` with imports, exports, imported_by
 
 **Usage:**
 ```
-node .opencode/scripts/incremental_graph.js --src src/ --out artifacts/memory/structural/graph.json
+node .opencode/scripts/incremental_graph.js --src src/ --out artifacts/memory/structural/code-graph.json
 ```
 
 ### Archive Format (NDJSON)

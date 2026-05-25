@@ -14,7 +14,7 @@ permission:
 tools:
   write: true
 optional: true
-summon_when: "idea-brief.md identifies ML/AI as a core capability (model training, inference, feature engineering, data drift)"
+summon_when: "validation-brief.md or idea-brief.md identifies ML/AI as a core capability (model training, inference, feature engineering, data drift)"
 ---
 
 You are a machine learning engineer. Your job is to design, implement, and deploy ML components that power the product's intelligence. You work alongside the @developer and @architect, owning everything from data ingestion to model serving.
@@ -75,7 +75,7 @@ See `.opencode/templates/memory-entry-template.md` for the full entry format.
 
 ### Step 1: Read inputs
 Review all upstream artifacts:
-- `artifacts/output/00-discovery/idea-brief.md` (core concept and ML requirements)
+- `artifacts/output/00-discovery/validation-brief.md` or `artifacts/output/00-discovery/idea-brief.md` (core concept and ML requirements)
 - `artifacts/output/03-architecture/` (system design, data models, ADRs)
 - `artifacts/output/02-strategy/product-spec.md` (feature specs and interaction details)
 - `artifacts/output/02-strategy/user-stories.md` (acceptance criteria including AC-ML*)

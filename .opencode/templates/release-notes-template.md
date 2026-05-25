@@ -10,7 +10,7 @@ Use this template for documenting what's new, changed, or fixed in a release.
 ## Release [Version] — [Feature Name]
 
 **Release Date:** ...
-**Release Manager:** @project-manager
+**Release Manager:** @product-manager
 **Deployment:** @devops-engineer
 
 ---
@@ -111,7 +111,6 @@ If issues are discovered post-release:
 | Security Review | @security-engineer |
 | Performance Review | @performance-engineer |
 | DevOps | @devops-engineer |
-| Project Management | @project-manager |
 
 ---
 

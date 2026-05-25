@@ -1,6 +1,6 @@
 # Retrospective Template
 
-> **Used by:** @project-manager → **Feeds into:** process improvements, team knowledge base
+> **Used by:** @product-manager → **Feeds into:** process improvements, team knowledge base
 > **Save to:** `artifacts/output/09-retro/action-items.md` (summary) and supporting review docs
 
 Use this template after any major phase, iteration cycle, or incident to extract lessons and improve for next time.
@@ -10,7 +10,7 @@ Use this template after any major phase, iteration cycle, or incident to extract
 ## Retrospective: [Phase/Cycle Name]
 
 **Date:** ...
-**Facilitator:** @project-manager
+**Facilitator:** @product-manager
 **Period Under Review:** [Start date] through [End date]
 **Participants:** [List of agents who contributed during this period]
 
@@ -172,7 +172,7 @@ Use `@memory-controller` for all memory updates — do not write files directly.
 
 ```
 @memory-controller write patterns-and-conventions.md
-### [PROCESS] {title} [date: YYYY-MM-DD] [agent: @project-manager]
+### [PROCESS] {title} [date: YYYY-MM-DD] [agent: @product-manager]
 {process improvement}
 **Status:** active
 
@@ -187,12 +187,12 @@ Use `@memory-controller` for all memory updates — do not write files directly.
 **Status:** active
 
 @memory-controller write active-decisions.md
-### [PROCESS] {title} [date: YYYY-MM-DD] [agent: @project-manager]
+### [PROCESS] {title} [date: YYYY-MM-DD] [agent: @product-manager]
 {new process decision}
 **Status:** active
 
 @memory-controller write lessons-learned.md
-### [LESSON] {title} [date: YYYY-MM-DD] [agent: @project-manager]
+### [LESSON] {title} [date: YYYY-MM-DD] [agent: @product-manager]
 {lesson learned this cycle}
 **Status:** active
 ```
@@ -200,7 +200,7 @@ Use `@memory-controller` for all memory updates — do not write files directly.
 For resolved blockers, update their status:
 ```
 @memory-controller write blockers-and-risks.md
-### [RISK] {original title} [date: YYYY-MM-DD] [agent: @project-manager] [RESOLVED: YYYY-MM-DD]
+### [RISK] {original title} [date: YYYY-MM-DD] [agent: @product-manager] [RESOLVED: YYYY-MM-DD]
 {resolution summary}
 **Status:** resolved
 ```
@@ -245,6 +245,6 @@ Based on retrospective findings:
 
 **Document info:**
 - Version: 1.0
-- Author: @project-manager
+- Author: @product-manager
 - Date: ...
 - Depends on: `artifacts/output/09-retro/execution-review.md`, `artifacts/output/09-retro/product-review.md`, `artifacts/output/09-retro/architecture-review.md`, `artifacts/output/09-retro/process-review.md`

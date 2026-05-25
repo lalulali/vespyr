@@ -1,6 +1,6 @@
 # Go/No-Go Decision Template
 
-> **Used by:** @project-manager → **Feeds into:** @devops-engineer (deployment), stakeholders
+> **Used by:** @product-manager → **Feeds into:** @devops-engineer (deployment), stakeholders
 > **Save to:** `artifacts/output/06-launch/go-nogo-decision.md`
 
 Use this template to formally document the launch decision. This is the gate between "code is done" and "users have it."
@@ -10,7 +10,7 @@ Use this template to formally document the launch decision. This is the gate bet
 ## Release: [Version/Feature Name]
 
 **Decision Date:** ...
-**Decision Meeting Participants:** @project-manager, @product-manager, @tech-lead
+**Decision Meeting Participants:** @product-manager, @product-manager, @tech-lead
 **Target Release Date:** ...
 
 ---
@@ -94,7 +94,7 @@ Issues that are known but are acceptable to ship with.
 
 | Audience | Message | Channel | Timing | Owner |
 |----------|---------|---------|--------|-------|
-| Internal team | [Launch announcement] | ... | ... | @project-manager |
+| Internal team | [Launch announcement] | ... | ... | @product-manager |
 | Users | [Feature announcement] | ... | ... | @product-manager |
 | Support | [Known issues and FAQs] | ... | ... | @technical-writer |
 
@@ -105,7 +105,7 @@ Issues that are known but are acceptable to ship with.
 **Decision:** ✅ GO / ❌ NO-GO / 🟡 CONDITIONAL GO
 
 **Decision date:** ...
-**Decision made by:** @project-manager, @product-manager, @tech-lead
+**Decision made by:** @product-manager, @product-manager, @tech-lead
 
 ### Conditions (if CONDITIONAL GO)
 
@@ -124,6 +124,6 @@ Issues that are known but are acceptable to ship with.
 
 **Document info:**
 - Version: 1.0
-- Author: @project-manager
+- Author: @product-manager
 - Date: ...
 - Depends on: `artifacts/output/06-launch/release-readiness.md`

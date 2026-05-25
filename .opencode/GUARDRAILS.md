@@ -103,3 +103,18 @@ Thinking agents (@founder, @architect, @product-manager, @product-designer, @tec
 **Rationale:** The double-hop tax (agent → @writer → disk) costs ~200 tokens per invocation. For small files, this overhead exceeds the file content itself. Large documents benefit from @writer's transcription focus, keeping the thinking agent's context clean.
 
 **Exception:** If an agent's frontmatter explicitly denies `edit` permission, they must delegate regardless of file size.
+
+## Concise Chat Responses (Save Tokens & Noise)
+
+- **Do NOT duplicate or summarize written files in chat**: When you write, modify, or update a document/file (such as a PRD, spec, user stories, code, or report), you must reply with a very short and concise message in the chat pane.
+- **Never dump, quote, or repeat the content of the written document** back to the user or other agents in the chat thread. The written file is already the record of truth.
+- **Focus on the "Why" and Key Decisions**: If explanation is needed, reply only with the strategic or technical *why* (rationale) behind your choices and any outstanding questions/decisions. Do not repeat *what* is in the document itself.
+- **Format:** Use a single-sentence or extremely brief bulleted confirmation with a link to the modified file, followed by a maximum of 2-3 sentences explaining the core rationale ("why") if appropriate.
+
+## Architectural Boundaries (Architect vs. Developer)
+
+- **Focus on Contracts, NOT Implementation**: In all architectural design documents, ADRs, and system specs, `@architect` must focus strictly on defining structural boundaries, system components, database DDLs/schemas, type declarations, and API payloads/JSON shapes.
+- **Never Write Business Logic or Application Code**: The `@architect` must NEVER write raw controller/handler logic, application algorithms, helper methods, or UI components.
+- **Preserve Developer Creativity**: Leaving implementation details open ensures the `@developer` retains complete coding creativity, performance optimization control, and technical execution autonomy.
+
+

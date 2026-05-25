@@ -96,11 +96,11 @@ See `.opencode/templates/memory-entry-template.md` for the full entry format.
 
 ### Step 1: Read upstream artifacts
 Review all research and strategy:
-- `artifacts/output/02-strategy/requirements.md` — business context, goals, and scope
-- `artifacts/output/02-strategy/user-stories.md` — acceptance criteria, technical requirements, and edge cases
+- `artifacts/output/02-strategy/requirements.md` — business context, goals, and scope. **Trace strictly to user-approved and finalized capabilities from this PRD.** Do NOT design or invent out-of-scope or unapproved features.
+- `artifacts/output/02-strategy/user-stories.md` — acceptance criteria, technical requirements, and edge cases. Ensure all flows map strictly to stories finalized here.
 - `artifacts/output/01-research/user-personas.md` — who the users are, their behaviors, pain points
 - `artifacts/output/01-research/competitive-analysis.md` — what exists in the market, design patterns used
-- `artifacts/output/00-discovery/idea-brief.md` — the core concept
+- `artifacts/output/00-discovery/validation-brief.md` or `artifacts/output/00-discovery/idea-brief.md` — the core concept
 
 ### Step 2: Design UX (How it works)
 1. **Map end-to-end user flows** for each feature (primary path + alternatives + error paths)
@@ -134,17 +134,26 @@ If the concept involves ML/AI:
 ### Step 5: Write and save
 Follow the product spec template exactly. Produce:
 - User flows with Mermaid diagrams (happy path, alternatives, error flows)
-- Screen-by-screen specs with ALL states defined (default, loading, success, error, empty)
+- Screen-by-screen specs with ALL states defined (default, loading, success, error, empty) and their **Associated User Stories** explicitly declared
 - Interaction details with triggers, actions, feedback, and recovery
 - Visual direction with design tokens (typography, color, spacing)
-- Edge cases mapped to user story acceptance criteria
+- Edge cases mapped to user story acceptance criteria using a structured table with specific `Story Ref` IDs for system-level scenarios
 
-**Always produce both output files — they must stay structurally mirrored at all times:**
+### Step 6: Reciprocal Traceability Verification (NON-NEGOTIABLE)
+Before finalizing the spec, you MUST run a self-check to verify **bi-directional traceability** between your product spec and the user stories:
+*   **Spec → Stories:** Every screen, flow, and edge case table in the product spec must explicitly reference the user story ID(s) it satisfies (e.g., `Associated Stories: US-003, US-007`).
+*   **Stories → Spec:** Cross-check `artifacts/output/02-strategy/user-stories.md` and verify that every user story has at least one corresponding screen, flow, or state defined in your spec. If any story is unmapped, you MUST either add the missing spec coverage or flag the gap to `@product-manager` for resolution.
+*   **Zero Orphans Rule:** No screen/flow may exist without a story reference (spec-side orphan), and no user story may lack a corresponding spec design (story-side orphan).
+
+**CRITICAL RULE FOR HTML TEMPLATE:**
+When generating `product-spec.html`, you MUST NOT oversimplify the HTML structure. You MUST preserve all CSS classes, structural elements (`<div class="card">`, `<div class="grid-2">`, `<ul class="checklist">`, `<div class="state-card">`, `<div class="callout">`, etc.), and layout containers EXACTLY as they appear in `.opencode/templates/product-spec-template.html`. Do not strip out the styling hooks or fallback to plain `h1`/`p`/`ul` tags. 
+
+**Always produce both output files:**
 
 1. **`artifacts/output/02-strategy/product-spec.md`** — using `.opencode/templates/product-spec-template.md` as the structure reference
-2. **`artifacts/output/02-strategy/product-spec.html`** — using `.opencode/templates/product-spec-template.html` as the structure reference
+2. **`artifacts/output/02-strategy/product-spec.html`** — using `.opencode/templates/product-spec-template.html` as the structure reference. **Ensure all original HTML classes are maintained.**
 
-Every section, subsection, and structural element present in one file must exist in the other. If you add, remove, or rename a section in one file, apply the same change to the other file in the same task.
+Every section, subsection, and logical element present in one file must exist in the other. If you add, remove, or rename a section in one file, apply the same logical change to the other file in the same task, while strictly respecting their respective template formats.
 
 Delegate both files to `@writer` — send exact paths and full content for each.
 
@@ -165,7 +174,7 @@ See [GUARDRAILS.md](../GUARDRAILS.md) for the full guardrails specification that
 - Every interaction must define: trigger, action, success state, error state, loading state
 - Read both `artifacts/output/02-strategy/requirements.md` (for business context) and `artifacts/output/02-strategy/user-stories.md` (for exhaustive acceptance criteria)
 - Reference `artifacts/output/01-research/` for user context
-- Every screen and flow you design must map to acceptance criteria in the user stories document
+- **Bi-directional Traceability (NON-NEGOTIABLE):** Every screen and flow you design must map to acceptance criteria in the user stories document, and you must explicitly reference the story IDs in the screen specs and edge cases tables. Reciprocally, every user story must have at least one corresponding spec element. You own the spec→story direction; `@product-manager` owns the story→spec direction. Both must align with zero orphans.
 - If design conflicts with technical constraints, flag it and propose alternatives
 - If design conflicts with accessibility requirements, accessibility wins
 - Include responsive/mobile variants for every screen, not desktop-only afterthoughts

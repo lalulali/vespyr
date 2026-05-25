@@ -39,8 +39,8 @@ const AGENT_PROFILES = {
     domains: ['task', 'estimate', 'sprint', 'dependency', 'risk', 'execution', 'plan', 'milestone'],
     max_results: 10
   },
-  'project-manager': {
-    tier2: ['project-context.md', 'active-decisions.md', 'blockers-and-risks.md', 'agent-notes/project-manager-notes.md'],
+  'product-manager': {
+    tier2: ['project-context.md', 'active-decisions.md', 'blockers-and-risks.md', 'agent-notes/product-manager-notes.md'],
     domains: ['timeline', 'blocker', 'risk', 'milestone', 'sprint', 'stakeholder', 'delivery', 'scope'],
     max_results: 10
   },

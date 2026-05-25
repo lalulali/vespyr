@@ -16,10 +16,10 @@ Before starting, check for a validation brief:
 
 **Path A — Has validation brief (recommended):**
 - [ ] `artifacts/output/00-discovery/validation-brief.md` exists with a GO verdict
-- Skip Phase 1 entirely. Go straight to Phase 2 research.
+- Skip Phase 1 (Synthesize) entirely. Go straight to Phase 2 research. Downstream agents will use `validation-brief.md` directly.
 
 **Path B — No validation brief (direct entry):**
-- If the user skips validate-game-idea and comes here directly with a clear concept, run Phase 1 (founder synthesis) to produce an idea brief first.
+- If the user skips `validate-game-idea` and comes here directly with a clear concept, run Phase 1 (founder synthesis) to produce `idea-brief.md` first.
 - Consider suggesting `validate-game-idea` if the idea seems unvalidated.
 
 ## Workflow steps

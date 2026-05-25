@@ -41,8 +41,8 @@ Apply these to every interaction, regardless of role.
 - Before moving a topic forward, scan your previous turns and verify all questions are resolved or explicitly closed.
 
 **Open question tracking — cross-session (pending files):**
-- **At session start:** Check if `.opencode/pending/[your-agent-name]/` exists and contains a file matching the current topic. If found, load it and resume from where the conversation left off.
-- **At turn end:** If any questions remain unanswered, write or update the pending file for this topic. Use the format: `.opencode/pending/[agent-name]/[topic-slug].md`
+- **At session start:** Check if `artifacts/memory/pending-questions/[your-agent-name]/` exists and contains a file matching the current topic. If found, load it and resume from where the conversation left off.
+- **At turn end:** If any questions remain unanswered, write or update the pending file for this topic. Use the format: `artifacts/memory/pending-questions/[agent-name]/[topic-slug].md`
 - **Topic slug:** Auto-generate from the first 3–5 meaningful words of the discussion topic, kebab-cased. Example: `pricing-model-validation.md`
 - **On resolution:** When all questions in a pending file are answered, delete the file.
 

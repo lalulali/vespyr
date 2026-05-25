@@ -16,10 +16,10 @@ Before starting, check for a validation brief:
 
 **Path A — Has validation brief (recommended):**
 - [ ] `artifacts/output/00-discovery/validation-brief.md` exists with a GO verdict
-- Skip Phase 1 entirely. Go straight to Phase 2 research.
+- Skip Phase 1 (Synthesize) entirely. Go straight to Phase 2 research. Downstream agents will use `validation-brief.md` directly.
 
 **Path B — No validation brief (direct entry):**
-- If the user skips validate-idea and comes here directly with a clear concept, run Phase 1 (founder synthesis) to produce an idea brief first.
+- If the user skips `validate-idea` and comes here directly with a clear concept, run Phase 1 (founder synthesis) to produce `idea-brief.md` first.
 - Consider suggesting `validate-idea` if the idea seems unvalidated.
 
 ## Workflow steps
@@ -120,7 +120,12 @@ When exploration is complete:
 2. The concept is validated by evidence
 3. No unresolved GO/NO-GO blockers from research
 4. Premises from the validation brief still hold (or have been revised)
-5. Write session summary before handing off:
+5. Update project context with the finalized product identity:
+   ```
+   @memory-controller write project-context.md
+   Update the "Project Name", "Core Goal / Problem", and "Target Audience" fields based on the validated findings.
+   ```
+6. Write session summary before handing off:
    ```
    @memory-controller session-write
    Worked on: Product exploration — {concept name}
@@ -131,4 +136,4 @@ When exploration is complete:
    Next step: Load design to define requirements and create specs
    New blockers: {any research gaps or unresolved questions, or "none"}
    ```
-6. Load `design` to define requirements and create specs
+7. Load `design` to define requirements and create specs

@@ -11,6 +11,36 @@ Every user story generated must be exhaustive, precise, and highly testable:
 *   **Independence:** Every user story must be self-contained and independently testable.
 *   **Location:** All stories are appended to the cumulative backlog file: `artifacts/output/02-strategy/user-stories.md`.
 
+### 1.1 Granularity & Content Standards: Functional Capabilities vs. Persona Journeys
+
+To ensure user stories are developer-ready and sprint-actionable, they must represent **modular functional capabilities** rather than high-level **persona-based scenarios or journeys**.
+
+#### Key Contrast and Guidelines
+
+| Dimension | 🚫 Incorrect (Persona Journeys / Scenarios) |   Correct (Modular Functional Capabilities) |
+|:---|:---|:---|
+| **Concept** | Broad, end-to-end user paths containing multiple steps and functional domains in a single block. | Fine-grained, modular components focusing on a single system behavior or feature that fits in a single sprint. |
+| **Focus** | Subjective, situational user context (e.g. "completes form while walking", "ships purchase under WiFi"). | Objective, digital interaction patterns (user action + system response) that can be verified by automated tests. |
+| **Scope** | Too large to fit into a single developer task; hard to sequence, plan, and estimate accurately. | Small, independent, testable units that can be assigned directly to specific sprints (Sprint 1, Sprint 2, etc.). |
+
+#### Examples Baseline
+
+> [!WARNING]
+> **DO NOT use persona journeys as user stories.** Review this comparison to ensure you write correct, modular functional stories in the next iteration:
+
+##### 🚫 Incorrect Persona Journeys (Do NOT use)
+*   **Event attendee ships purchase:** "Rina scans QR at event booth, completes form in <60s, pays via QRIS, gets printed label" *(Too broad: spans QR entry, form entry, payment, and printing).*
+*   **Dropoff visitor skips queue:** "Budi scans QR at dropoff entrance, completes form while walking, gets immediate service" *(Mixes entry, form, and physical logic; uses subjective situational context).*
+*   **User in poor network ships:** "Form works with progressive enhancement even on unstable event WiFi." *(This is an offline/NFR behavior, not a functional journey)*
+
+#####   Correct Functional Capabilities (MUST use)
+*   `US-001 | QR Code Entry Point (Sprint 1)` — "User scans QR code to access shipping form without app download."
+*   `US-002 | Basic Shipping Form (Sprint 1)` — "User completes shipping form with sender, receiver, and package details."
+*   `US-003 | Location Auto-Detection (Sprint 2)` — "System auto-detects user location for sender address using GPS/network."
+*   `US-005 | QRIS Payment Integration (Sprint 1)` — "User pays for shipping using QRIS or ewallet (GoPay, OVO, Dana)."
+*   `US-006 | Label Generation & Printing (Sprint 1)` — "System generates and prints shipping label after payment confirmation."
+*   `US-009 | Offline Capability (Sprint 2)` — "Form works with degraded functionality during network issues."
+
 ---
 
 ## 2. Structural Requirements
@@ -27,6 +57,7 @@ Sprint:       [Target Sprint]
 Dependencies: [Story IDs or external blocking events]
 Author:       @product-manager
 Traces to PRD: [Section reference inside requirements.md]
+Traces to Product Spec: [Screen Name, Flow ID, or Section ID inside product-spec.md]
 ```
 
 ### 2.2 Narrative Format
@@ -87,6 +118,7 @@ Effort:       Medium
 Sprint:       Sprint 3
 Dependencies: US-000 (user auth system), Email service (external)
 Traces to PRD: Section 5.2: Password Reset Capability
+Traces to Product Spec: Section 3.1: Screen: Login, Flow: 2.1 Happy Path
 ```
 
 ### Narrative
@@ -134,9 +166,10 @@ Traces to PRD: Section 5.2: Password Reset Capability
 *   [ ] **AC-E5:** Given the user bookmarks the reset page and revisits it after the token is used, when the page loads, then an appropriate error is shown.
 
 ### UI / UX Notes
-*   **Screens:** Login → Forgot Password Form → Confirmation → Reset Form → Success.
-*   **States:** Empty form → Validating → Success / Error.
-*   **Navigation:** After success, redirect to dashboard.
+*   **Product Spec Screen Reference:** Screen: 3.1 Login Screen, Screen: 3.2 Forgot Password Screen
+*   **User Flow Reference:** Happy Path Flow 2.1
+*   **Key UI States:** Default, Loading, Validation Error, Success, Server Error
+*   **Accessibility requirements (WCAG 2.1 AA):** Custom keyboard tab order (Inputs → Buttons → Cancel), high contrast inputs, and prefers-reduced-motion animation disables.
 
 ### Data Model Notes
 *   **Entities:** `password_reset_tokens` (id, user_id, token_hash, expires_at, used_at, created_at).

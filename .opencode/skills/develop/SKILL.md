@@ -27,60 +27,51 @@ Review specs with `@product-manager` and `@product-designer`:
 - Designer reviews user flows, interaction specs, and visual direction
 - Clarify open questions, edge cases, and scope boundaries
 - Ensure specs are detailed enough for development
+- **Developer Mandate:** `@developer` MUST explicitly load, read, and fully digest the verified Product Spec (`artifacts/output/02-strategy/product-spec.md` or `product-spec.html`) and companion User Stories (`artifacts/output/02-strategy/user-stories.md`) in full. The developer cannot start writing code until they have read and aligned their implementation plan with these strategy documents.
 
 **Required inputs:**
 - `artifacts/output/02-strategy/product-spec.md`
 - `artifacts/output/02-strategy/requirements.md` (business context)
 - `artifacts/output/02-strategy/user-stories.md` (acceptance criteria and technical requirements)
 
-### Step 2: Architecture
-Invoke `@architect` to:
-- Design system architecture and component interactions
-- Select tech stack with trade-off rationale
-- Define data models, schemas, and API contracts
-- Document ADRs in `artifacts/output/03-architecture/`
-- Identify technical risks and mitigation strategies
+### Step 2: Architecture (Optional Phase)
 
-**Output:** `artifacts/output/03-architecture/adr-NNN-*.md`
+**Check Configuration:** Check `project-context.md` for the `ArchitectPhase` configuration.
+- **If `ArchitectPhase: false` (Bypassed):** **SKIP this step completely** and proceed directly to Step 3b (Execution Planning). Under Step 3a (Architecture/Spec Review), the `@tech-lead` will review strategy specifications directly instead of ADRs.
+- **If `ArchitectPhase: true` (Enabled) or unset (default):** Invoke `@architect` to:
+  - Design system architecture and component interactions
+  - Select tech stack with trade-off rationale
+  - Define data models, schemas, and API contracts
+  - Document ADRs in `artifacts/output/03-architecture/`
+  - Identify technical risks and mitigation strategies
 
-### Step 3: Architecture Review + Execution Planning (parallelizable)
+**Output:** `artifacts/output/03-architecture/adr-NNN-*.md` (Only generated and required if this phase was executed).
 
-Steps 3a and 3b can start together. The tech lead reviews architecture while also beginning to plan execution.
 
-#### Step 3a: Architecture Review
-Invoke `@tech-lead` to review the architecture:
-- Does the architecture support all spec requirements?
-- Are there missing components or interfaces?
-- Are there simpler alternatives worth considering?
-- Feed findings back to architect if gaps are found
+### Step 3: Architecture & Backlog Review
 
-**Loop limit:** If architect and tech-lead disagree, max 2 revision cycles, then escalate to @founder.
+The `@tech-lead` reviews the architectural decisions (if Phase 3 was executed) and the finalized user stories/Kanban backlog directly to prepare for development. (No separate execution-plan.md planning artifact is required).
 
-#### Step 3b: Execution Planning ⟨after 3a resolves⟩
+#### Step 3a: Architecture & Spec Review
+Invoke `@tech-lead` to review the architecture (or strategy specs if Phase 3 was bypassed):
+- Does the architecture/spec support all user stories and requirements?
+- Are there missing interfaces or structural risks?
+- Feed findings back to `@architect` or `@product-manager` if critical gaps are found.
+
+**Loop limit:** Max 2 revision cycles, then escalate to `@founder`.
+
+#### Step 3b: Backlog Preparation
 Invoke `@tech-lead` to:
-- Break work into small, independent tasks (1-4 hours each)
-- Define task dependencies and parallelization opportunities
-- Estimate effort for each task (small/medium/large)
-- Identify risky areas that need investigation (spikes)
-- **Mark which tasks can run in parallel** — this is critical for dev loop efficiency
+- Review the User Stories and the Kanban board (`artifacts/output/04-planning/kanban.md`) seeded by the `@product-manager`.
+- **Leadership Parallelism Evaluation:** `@tech-lead` takes direct leadership of the sprint setup and explicitly evaluates the task dependencies and file isolation in the backlog to determine the exact number of parallel developers to run (1 to N).
+- Plan implementation sequence, task dependencies, and parallel developer work assignments based on this evaluation.
+- Identify any technical unknowns or risky zones that require spikes.
 
-**Output:** `artifacts/output/04-planning/execution-plan.md`
+### Step 4: Kanban Backlog Activation (Gate)
 
-### Step 4: Plan Review + Project Setup (parallelizable)
+Before development starts, `@product-manager` reviews the prioritized backlog:
+- **Gate Check:** `@product-manager` confirms the prioritized backlog on the Kanban board is correct and aligned with sprint deadlines. Once confirmed, the `@tech-lead` activates the tasks by moving them to the **To Do** column on the Kanban board.
 
-#### Step 4a: Plan Review ⟨gate⟩
-Invoke `@product-manager` to review and approve the execution plan:
-- Does the plan deliver the highest priority items first?
-- Are scope trade-offs aligned with business goals?
-- Accept or adjust scope based on effort estimates
-
-**Gate check:** PM must approve before dev starts.
-
-#### Step 4b: Kanban Setup
-Invoke `@project-manager` to:
-- Create/update `artifacts/output/05-project-management/kanban.md`
-- Add all tasks from execution plan
-- Set WIP limits and priorities
 
 ### Step 5: Spike (if needed)
 If the tech lead identified unknowns or risks, investigate before committing:
@@ -107,7 +98,12 @@ If the tech lead identified unknowns or risks, investigate before committing:
 - Assign tasks with non-overlapping files (see §1.6 Task Assignment table)
 
 #### 6.2 Implement (`@developer-N` — each in own worktree, parallel)
-- Write code + tests in assigned worktree
+- **Spec Alignment & Read Check:** Ensure `@developer-N` has explicitly loaded and read `product-spec.md` and `user-stories.md` before coding.
+- **Role-Based Guardrails:** Follow the **Role tag** (`FE`/`BE`/`Full-Stack`) assigned by `@tech-lead` in the Task Assignment table:
+  - **FE:** Focus strongly on **visual accuracy, UI polish, and premium user experience**. If any frontend spec is unclear, pause and initiate a conversation with the **human user, `@product-designer`, or `@product-manager`** to clarify.
+  - **BE:** Focus on clean API contracts, model safety, and robust error flows. If any backend spec is unclear, pause and initiate a conversation with the **human user or `@product-manager`** to clarify.
+  - **Full-Stack:** Both FE and BE communication channels are available. Apply both visual and backend quality standards.
+- Write code + tests in assigned worktree conforming 100% to verified specs.
 - Run lints and unit tests locally
 - Commit to feature branch
 - Signal completion via memory:
@@ -166,8 +162,8 @@ git worktree remove ~/.local/share/opencode/worktree/worktree-dev-3
 git branch -d feat/${BRANCH}/task-1 feat/${BRANCH}/task-2 feat/${BRANCH}/task-3
 ```
 
-#### 6.7 Update kanban (`@project-manager`)
-- Move completed tasks to "Done" in `artifacts/output/05-project-management/kanban.md`
+#### 6.7 Update kanban (`@product-manager` / `@tech-lead`)
+- Move completed tasks to "Done" in `artifacts/output/04-planning/kanban.md`
 - Log cycle time per task
 
 ---

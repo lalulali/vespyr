@@ -81,14 +81,23 @@ List the high-level capabilities. Do NOT describe implementation — describe wh
 2. **Capability name** — one-sentence description
 3. **Capability name** — one-sentence description
 
-### 5.3 User Story Summary
-Provide a brief summary of the user stories. Full details are in the companion user-story document.
+### 5.3 Functional Requirements (Features)
+
+<!-- 
+CRITICAL RULE FOR PRODUCT MANAGERS:
+1. DO NOT write high-level persona journeys or multi-step scenarios spanning multiple functional domains (e.g. "Rina scans QR, completes form, pays, gets label"). These are user journeys/personas, not developer-ready functional stories.
+2. DO write granular, modular functional capabilities that focus on a single, testable, sprint-ready behavior.
+3. Every requirement must have a dedicated Sprint assignment (e.g., Sprint 1, Sprint 2).
+4. DO NOT use previous/legacy persona-based stories. Focus strictly on functional capabilities.
+-->
+
+Provide a brief summary of the functional requirements and features. These map directly to the user stories. Full details are in the companion user-story document.
 Reference: `artifacts/output/02-strategy/user-stories.md`
 
-| Story ID | Title | Priority | Summary |
-|----------|-------|----------|---------|
-| US-001 | ... | Must-have | ... |
-| US-002 | ... | Should-have | ... |
+| Feature / Story ID | Title | Priority | Sprint | Functional Summary |
+|--------------------|-------|----------|--------|--------------------|
+| US-001 | [Active-voice Title of Modular Capability (e.g., User Authentication)] | [Must-have / Should-have / Could-have] | [Sprint X (e.g., Sprint 1)] | [Description of digital interaction and system response (e.g., User logs in via secure credentials form)] |
+| US-002 | [Active-voice Title of next Capability (e.g., Password Recovery)] | [Must-have / Should-have / Could-have] | [Sprint X (e.g., Sprint 1)] | [Description of digital interaction and system response (e.g., User requests reset link via email)] |
 
 ## 6. Non-Functional Requirements
 

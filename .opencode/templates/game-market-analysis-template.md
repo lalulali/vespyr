@@ -150,6 +150,7 @@ Briefly note:
 | 2 | ... | ... | ... | ... |
 
 Rules:
+- Use inline citations (e.g., `[1]`) to connect claims directly to the sources listed in this section
 - Every claim in this document must trace to a source
 - Prefer primary sources (platform data, sales trackers, direct research) over secondary (blog posts, opinion pieces)
 - If exact data is unavailable, provide well-reasoned estimates with assumptions stated

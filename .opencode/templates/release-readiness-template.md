@@ -1,6 +1,6 @@
 # Release Readiness Checklist Template
 
-> **Used by:** @project-manager → **Feeds into:** @devops-engineer, @product-manager, @founder
+> **Used by:** @product-manager → **Feeds into:** @devops-engineer, @product-manager, @founder
 > **Save to:** `artifacts/output/06-launch/release-readiness.md`
 
 Use this template before any production release. Every item must be verified before go/no-go decision.
@@ -11,7 +11,7 @@ Use this template before any production release. Every item must be verified bef
 
 **Target Release Date:** ...
 **Release Scope:** [Brief description]
-**Release Manager:** @project-manager
+**Release Manager:** @product-manager
 
 ---
 
@@ -115,7 +115,7 @@ Use this template before any production release. Every item must be verified bef
 | QA | @qa-engineer | ⬜ | ... | |
 | Deployment | @devops-engineer | ⬜ | ... | |
 | Documentation | @technical-writer | ⬜ | ... | |
-| Launch Approval | @project-manager | ⬜ | ... | All above must be ✅ |
+| Launch Approval | @product-manager | ⬜ | ... | All above must be ✅ |
 
 ---
 
@@ -143,7 +143,7 @@ Use this template before any production release. Every item must be verified bef
 - Critical user-facing bug discovered
 
 **Decision makers:**
-- @project-manager (delivery readiness)
+- @product-manager (delivery readiness)
 - @product-manager (feature completeness)
 - @tech-lead (technical readiness)
 
@@ -151,7 +151,7 @@ Use this template before any production release. Every item must be verified bef
 
 **Document info:**
 - Version: 1.0
-- Author: @project-manager
+- Author: @product-manager
 - Date: ...
 - Last updated: ...
 - Depends on: `artifacts/output/04-planning/execution-plan.md`, `artifacts/output/02-strategy/requirements.md`

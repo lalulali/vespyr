@@ -1,0 +1,715 @@
+- generic [active] [ref=e1]:
+  - navigation [ref=e2]:
+    - generic [ref=e3]:
+      - generic [ref=e4]: Product Spec
+      - 'heading "{Feature Name}" [level=2] [ref=e5]'
+    - generic [ref=e6]:
+      - generic [ref=e7]: Sections
+      - link "1. Feature Overview" [ref=e8] [cursor=pointer]:
+        - /url: "#s1"
+        - text: 1. Feature Overview
+      - link "2. User Flows" [ref=e10] [cursor=pointer]:
+        - /url: "#s2"
+        - text: 2. User Flows
+      - link "3. Screen Specs" [ref=e12] [cursor=pointer]:
+        - /url: "#s3"
+        - text: 3. Screen Specs
+      - link "4. Interaction Details" [ref=e14] [cursor=pointer]:
+        - /url: "#s4"
+        - text: 4. Interaction Details
+      - link "5. Design System" [ref=e16] [cursor=pointer]:
+        - /url: "#s5"
+        - text: 5. Design System
+      - link "6. Edge Cases" [ref=e18] [cursor=pointer]:
+        - /url: "#s6"
+        - text: 6. Edge Cases
+      - link "7. Open Questions" [ref=e20] [cursor=pointer]:
+        - /url: "#s7"
+        - text: 7. Open Questions
+      - link "8. Cross-References" [ref=e22] [cursor=pointer]:
+        - /url: "#s8"
+        - text: 8. Cross-References
+    - generic [ref=e24]:
+      - generic [ref=e25]:
+        - strong [ref=e26]: Author
+        - text: "@product-designer"
+      - generic [ref=e27]:
+        - strong [ref=e28]: Version
+        - text: "{version}"
+      - generic [ref=e29]:
+        - strong [ref=e30]: Date
+        - text: "{date}"
+      - generic [ref=e31]:
+        - strong [ref=e32]: Status
+        - text: "{Draft | Ready}"
+  - main [ref=e33]:
+    - generic [ref=e34]:
+      - generic [ref=e35]: Product Specification
+      - 'heading "{Feature Name}" [level=1] [ref=e36]'
+      - paragraph [ref=e37]: "{One sentence — what this spec covers and who it's for.}"
+      - generic [ref=e38]:
+        - generic [ref=e39]: "v{version}"
+        - generic [ref=e40]: "{status}"
+        - generic [ref=e41]: "{date}"
+        - generic [ref=e42]: "@product-designer"
+    - generic [ref=e43]:
+      - generic [ref=e44]:
+        - generic [ref=e45]: "1"
+        - heading "Feature Overview" [level=2] [ref=e46]
+      - generic [ref=e47]:
+        - heading "Purpose" [level=3] [ref=e48]
+        - paragraph [ref=e49]: "{One sentence: what does this feature enable the user to do?}"
+      - generic [ref=e50]:
+        - heading "Goals" [level=3] [ref=e51]
+        - list [ref=e52]:
+          - listitem [ref=e53]:
+            - generic [ref=e55]: Goal 1 — e.g., "User can complete checkout in under 60 seconds"
+          - listitem [ref=e56]:
+            - generic [ref=e58]: Goal 2 — e.g., "Checkout abandonment rate drops below 15%"
+          - listitem [ref=e59]:
+            - generic [ref=e61]: Goal 3 — ...
+      - generic [ref=e62]:
+        - generic [ref=e63]:
+          - heading "In Scope" [level=3] [ref=e64]
+          - list [ref=e65]:
+            - listitem [ref=e66]:
+              - generic [ref=e67]: ✓
+              - generic [ref=e68]: Scope item 1
+            - listitem [ref=e69]:
+              - generic [ref=e70]: ✓
+              - generic [ref=e71]: Scope item 2
+            - listitem [ref=e72]:
+              - generic [ref=e73]: ✓
+              - generic [ref=e74]: Scope item 3
+        - generic [ref=e75]:
+          - heading "Out of Scope" [level=3] [ref=e76]
+          - list [ref=e77]:
+            - listitem [ref=e78]:
+              - generic [ref=e79]: ✕
+              - generic [ref=e80]: Out of scope item 1
+            - listitem [ref=e81]:
+              - generic [ref=e82]: ✕
+              - generic [ref=e83]: Out of scope item 2
+      - generic [ref=e84]:
+        - heading "Traceability" [level=3] [ref=e85]
+        - table [ref=e87]:
+          - rowgroup [ref=e88]:
+            - row "Spec Section PRD Feature User Stories" [ref=e89]:
+              - columnheader "Spec Section" [ref=e90]
+              - columnheader "PRD Feature" [ref=e91]
+              - columnheader "User Stories" [ref=e92]
+          - rowgroup [ref=e93]:
+            - row "2. User Flows Section X.Y US-001, US-002" [ref=e94]:
+              - cell "2. User Flows" [ref=e95]
+              - cell "Section X.Y" [ref=e96]
+              - cell "US-001, US-002" [ref=e97]:
+                - code [ref=e98]: US-001
+                - text: ","
+                - code [ref=e99]: US-002
+            - 'row "3. Screen: Dashboard Section X.Y US-003, US-004" [ref=e100]':
+              - 'cell "3. Screen: Dashboard" [ref=e101]'
+              - cell "Section X.Y" [ref=e102]
+              - cell "US-003, US-004" [ref=e103]:
+                - code [ref=e104]: US-003
+                - text: ","
+                - code [ref=e105]: US-004
+      - generic [ref=e106]:
+        - heading "ML Integration Points (if applicable)" [level=3] [ref=e107]:
+          - text: ML Integration Points
+          - generic [ref=e108]: (if applicable)
+        - generic [ref=e109]:
+          - generic [ref=e110]: 🤖
+          - paragraph [ref=e111]: "{Specify ML output appearance, confidence representation, and service failure fallback.}"
+    - generic [ref=e112]:
+      - generic [ref=e113]:
+        - generic [ref=e114]: "2"
+        - heading "User Flows" [level=2] [ref=e115]
+      - generic [ref=e116]:
+        - heading "Primary Flow — Happy Path" [level=3] [ref=e117]
+        - generic [ref=e118]:
+          - text: Paste Mermaid diagram here, or embed as <img> after rendering.
+          - code [ref=e119]: "flowchart TD: [Screen A] → [Screen B] → [Screen C]"
+      - generic [ref=e120]:
+        - heading "Alternative Flows" [level=3] [ref=e121]
+        - generic [ref=e122]:
+          - strong [ref=e123]: "Flow 2A — {Name}"
+          - paragraph [ref=e124]: "{Describe the flow briefly. Add Mermaid image below.}"
+          - generic [ref=e125]: Mermaid diagram placeholder
+      - generic [ref=e126]:
+        - heading "Error Flows" [level=3] [ref=e127]
+        - generic [ref=e128]:
+          - strong [ref=e129]: "Flow 3A — {Error Name}"
+          - paragraph [ref=e130]: "{What happens. How does the user recover? Every error flow must show a recovery path.}"
+          - generic [ref=e131]: Mermaid diagram placeholder
+      - generic [ref=e132]:
+        - heading "ML-Specific Flows (if applicable)" [level=3] [ref=e133]:
+          - text: ML-Specific Flows
+          - generic [ref=e134]: (if applicable)
+        - generic [ref=e135]:
+          - strong [ref=e136]: Flow 4A — ML Inference / Uncertainty
+          - paragraph [ref=e137]: "{Describe ML inference flow, confidence thresholds, and how uncertainty is surfaced to the user.}"
+          - generic [ref=e138]: ML inference / uncertainty flow diagram placeholder
+    - generic [ref=e139]:
+      - generic [ref=e140]:
+        - generic [ref=e141]: "3"
+        - heading "Screen-by-Screen Specifications" [level=2] [ref=e142]
+      - generic [ref=e143]:
+        - generic [ref=e144]:
+          - strong [ref=e145]: "3.1 Screen: {Screen Name}"
+          - generic [ref=e146]: Happy Path
+        - generic [ref=e147]:
+          - heading "Purpose" [level=4] [ref=e148]
+          - paragraph [ref=e149]: "{What is the user trying to accomplish on this screen?}"
+        - generic [ref=e150]:
+          - heading "Content" [level=4] [ref=e151]
+          - table [ref=e153]:
+            - rowgroup [ref=e154]:
+              - row "Element Type Content / Source Notes" [ref=e155]:
+                - columnheader "Element" [ref=e156]
+                - columnheader "Type" [ref=e157]
+                - columnheader "Content / Source" [ref=e158]
+                - columnheader "Notes" [ref=e159]
+            - rowgroup [ref=e160]:
+              - row "Header Text \"Create New Project\" H1, page title" [ref=e161]:
+                - cell "Header" [ref=e162]
+                - cell "Text" [ref=e163]
+                - cell "\"Create New Project\"" [ref=e164]
+                - cell "H1, page title" [ref=e165]
+              - row "Name Input Text field User input Required, max 100 chars" [ref=e166]:
+                - cell "Name Input" [ref=e167]
+                - cell "Text field" [ref=e168]
+                - cell "User input" [ref=e169]
+                - cell "Required, max 100 chars" [ref=e170]
+              - row "Submit Button Button \"Create Project\" Primary action" [ref=e171]:
+                - cell "Submit Button" [ref=e172]
+                - cell "Button" [ref=e173]
+                - cell "\"Create Project\"" [ref=e174]
+                - cell "Primary action" [ref=e175]
+              - row "Cancel Link Link \"Cancel\" Returns to dashboard" [ref=e176]:
+                - cell "Cancel Link" [ref=e177]
+                - cell "Link" [ref=e178]
+                - cell "\"Cancel\"" [ref=e179]
+                - cell "Returns to dashboard" [ref=e180]
+        - generic [ref=e181]:
+          - heading "Layout (Wireframe)" [level=4] [ref=e182]
+          - generic [ref=e183]: "+------------------------------------------+ | Header: \"Create New Project\" | +------------------------------------------+ | | | Project Name * [________________] | | (Error msg below field) | | | | Description [________________] | | [________________] | | | | [Create Project] Cancel | +------------------------------------------+"
+        - generic [ref=e184]:
+          - heading "States" [level=4] [ref=e185]
+          - generic [ref=e186]:
+            - generic [ref=e187]:
+              - generic [ref=e188]: Default
+              - list [ref=e189]:
+                - listitem [ref=e190]: · Form is empty; submit button enabled
+                - listitem [ref=e191]: · No validation messages visible
+            - generic [ref=e192]:
+              - generic [ref=e193]: Loading
+              - list [ref=e194]:
+                - listitem [ref=e195]: "· Trigger: user clicks submit"
+                - listitem [ref=e196]: · Submit button shows spinner; fields disabled
+                - listitem [ref=e197]: "· Timeout: 10s"
+            - generic [ref=e198]:
+              - generic [ref=e199]: Success
+              - list [ref=e200]:
+                - listitem [ref=e201]: "· Trigger: API returns 201 Created"
+                - listitem [ref=e202]: "· Green toast: \"Project created successfully\""
+                - listitem [ref=e203]: · Redirect to project detail after 2s
+            - generic [ref=e204]:
+              - generic [ref=e205]: Error — Validation
+              - list [ref=e206]:
+                - listitem [ref=e207]: "· Trigger: submit with empty required field"
+                - listitem [ref=e208]: · Red border on invalid field + inline message
+                - listitem [ref=e209]: · Focus moves to first error; form does not submit
+            - generic [ref=e210]:
+              - generic [ref=e211]: Error — Server
+              - list [ref=e212]:
+                - listitem [ref=e213]: "· Trigger: API returns 5xx / non-validation 4xx"
+                - listitem [ref=e214]: · Red banner at top of form; fields retain values
+                - listitem [ref=e215]: · "Retry" re-submits; "Cancel" returns to dashboard
+            - generic [ref=e216]:
+              - generic [ref=e217]: Empty State
+              - list [ref=e218]:
+                - listitem [ref=e219]: · N/A for creation forms — add note if applicable
+            - generic [ref=e220]:
+              - generic [ref=e221]: ML State (if applicable)
+              - list [ref=e222]:
+                - listitem [ref=e223]: "· Loading: skeleton while model processes"
+                - listitem [ref=e224]: "· Results: show with confidence indicator"
+                - listitem [ref=e225]: "· Error / fallback: \"AI unavailable\" note; show cached default"
+        - generic [ref=e226]:
+          - generic [ref=e227]:
+            - heading "Entry Points" [level=4] [ref=e228]
+            - table [ref=e230]:
+              - rowgroup [ref=e231]:
+                - row "From Trigger Precondition" [ref=e232]:
+                  - columnheader "From" [ref=e233]
+                  - columnheader "Trigger" [ref=e234]
+                  - columnheader "Precondition" [ref=e235]
+              - rowgroup [ref=e236]:
+                - row "Dashboard Click \"New Project\" Authenticated" [ref=e237]:
+                  - cell "Dashboard" [ref=e238]
+                  - cell "Click \"New Project\"" [ref=e239]
+                  - cell "Authenticated" [ref=e240]
+                - row "Direct URL /projects/new Authenticated" [ref=e241]:
+                  - cell "Direct URL" [ref=e242]
+                  - cell "/projects/new" [ref=e243]:
+                    - code [ref=e244]: /projects/new
+                  - cell "Authenticated" [ref=e245]
+          - generic [ref=e246]:
+            - heading "Exit Points" [level=4] [ref=e247]
+            - table [ref=e249]:
+              - rowgroup [ref=e250]:
+                - row "To Trigger Condition" [ref=e251]:
+                  - columnheader "To" [ref=e252]
+                  - columnheader "Trigger" [ref=e253]
+                  - columnheader "Condition" [ref=e254]
+              - rowgroup [ref=e255]:
+                - row "Project Detail Auto-redirect Success" [ref=e256]:
+                  - cell "Project Detail" [ref=e257]
+                  - cell "Auto-redirect" [ref=e258]
+                  - cell "Success" [ref=e259]
+                - row "Dashboard Click \"Cancel\" Any time" [ref=e260]:
+                  - cell "Dashboard" [ref=e261]
+                  - cell "Click \"Cancel\"" [ref=e262]
+                  - cell "Any time" [ref=e263]
+                - row "Same screen Validation fails Retain state" [ref=e264]:
+                  - cell "Same screen" [ref=e265]
+                  - cell "Validation fails" [ref=e266]
+                  - cell "Retain state" [ref=e267]
+        - generic [ref=e268]:
+          - heading "Accessibility" [level=4] [ref=e269]
+          - generic [ref=e270]:
+            - generic [ref=e271]: ♿
+            - paragraph [ref=e272]:
+              - text: "Tab order: Name → Description → Submit → Cancel · All inputs have"
+              - code [ref=e273]: <label>
+              - text: · Focus on first error · WCAG AA (4.5:1) · Respect
+              - code [ref=e274]: prefers-reduced-motion
+    - generic [ref=e275]:
+      - generic [ref=e276]:
+        - generic [ref=e277]: "4"
+        - heading "Interaction Details" [level=2] [ref=e278]
+      - generic [ref=e279]:
+        - heading "Global Interactions" [level=3] [ref=e280]
+        - table [ref=e282]:
+          - rowgroup [ref=e283]:
+            - row "Interaction Trigger Action Feedback Error Handling" [ref=e284]:
+              - columnheader "Interaction" [ref=e285]
+              - columnheader "Trigger" [ref=e286]
+              - columnheader "Action" [ref=e287]
+              - columnheader "Feedback" [ref=e288]
+              - columnheader "Error Handling" [ref=e289]
+          - rowgroup [ref=e290]:
+            - 'row "Pull to refresh Swipe down (mobile) Reload data Spinner + update Offline: cached + \"last updated\" timestamp" [ref=e291]':
+              - cell "Pull to refresh" [ref=e292]
+              - cell "Swipe down (mobile)" [ref=e293]
+              - cell "Reload data" [ref=e294]
+              - cell "Spinner + update" [ref=e295]
+              - 'cell "Offline: cached + \"last updated\" timestamp" [ref=e296]'
+            - row "Network offline Connection lost Show banner Persistent top banner Auto-hide on reconnect" [ref=e297]:
+              - cell "Network offline" [ref=e298]
+              - cell "Connection lost" [ref=e299]
+              - cell "Show banner" [ref=e300]
+              - cell "Persistent top banner" [ref=e301]
+              - cell "Auto-hide on reconnect" [ref=e302]
+            - 'row "Session expiry Token expires Redirect to login Modal: \"Session expired\" Save form state in localStorage" [ref=e303]':
+              - cell "Session expiry" [ref=e304]
+              - cell "Token expires" [ref=e305]
+              - cell "Redirect to login" [ref=e306]
+              - 'cell "Modal: \"Session expired\"" [ref=e307]'
+              - cell "Save form state in localStorage" [ref=e308]
+      - generic [ref=e309]:
+        - heading "Component Interactions" [level=3] [ref=e310]
+        - generic [ref=e311]:
+          - strong [ref=e312]: "4.2.1 {Component Name}"
+          - generic [ref=e313]:
+            - generic [ref=e314]:
+              - heading "Behavior" [level=4] [ref=e315]
+              - list [ref=e316]:
+                - listitem [ref=e317]:
+                  - generic [ref=e318]: ✓
+                  - generic [ref=e319]: "Trigger: {what starts it}"
+                - listitem [ref=e320]:
+                  - generic [ref=e321]: ✓
+                  - generic [ref=e322]: "Action: {what happens}"
+                - listitem [ref=e323]:
+                  - generic [ref=e324]: ✓
+                  - generic [ref=e325]: "Animation: {duration, easing}"
+            - generic [ref=e326]:
+              - heading "States" [level=4] [ref=e327]
+              - list [ref=e328]:
+                - listitem [ref=e329]:
+                  - generic [ref=e331]: Default
+                - listitem [ref=e332]:
+                  - generic [ref=e334]: Hover (desktop)
+                - listitem [ref=e335]:
+                  - generic [ref=e337]: Active / Pressed
+                - listitem [ref=e338]:
+                  - generic [ref=e340]: Disabled
+                - listitem [ref=e341]:
+                  - generic [ref=e343]: Loading
+      - generic [ref=e344]:
+        - heading "AI / ML Interaction Patterns (if applicable)" [level=3] [ref=e345]:
+          - text: AI / ML Interaction Patterns
+          - generic [ref=e346]: (if applicable)
+        - generic [ref=e347]:
+          - generic [ref=e348]:
+            - generic [ref=e349]: Streaming Responses
+            - list [ref=e350]:
+              - listitem [ref=e351]: · Show typing indicator or progressive reveal as results arrive
+              - listitem [ref=e352]: · Allow user to cancel long-running operations
+          - generic [ref=e353]:
+            - generic [ref=e354]: Confidence Display
+            - list [ref=e355]:
+              - listitem [ref=e356]: "· >80%: Display result directly"
+              - listitem [ref=e357]: "· 50–80%: Display with \"Suggested\" label"
+              - listitem [ref=e358]: "· <50%: Show as suggestion, request user confirmation"
+    - generic [ref=e359]:
+      - generic [ref=e360]:
+        - generic [ref=e361]: "5"
+        - heading "Visual Direction & Design System" [level=2] [ref=e362]
+      - generic [ref=e363]:
+        - heading "Typography" [level=3] [ref=e364]
+        - table [ref=e366]:
+          - rowgroup [ref=e367]:
+            - row "Level Font Size Weight Line Height Usage" [ref=e368]:
+              - columnheader "Level" [ref=e369]
+              - columnheader "Font" [ref=e370]
+              - columnheader "Size" [ref=e371]
+              - columnheader "Weight" [ref=e372]
+              - columnheader "Line Height" [ref=e373]
+              - columnheader "Usage" [ref=e374]
+          - rowgroup [ref=e375]:
+            - row "H1 Inter 24px 600 1.3 Page titles" [ref=e376]:
+              - cell "H1" [ref=e377]
+              - cell "Inter" [ref=e378]
+              - cell "24px" [ref=e379]
+              - cell "600" [ref=e380]
+              - cell "1.3" [ref=e381]
+              - cell "Page titles" [ref=e382]
+            - row "H2 Inter 18px 600 1.4 Section headers" [ref=e383]:
+              - cell "H2" [ref=e384]
+              - cell "Inter" [ref=e385]
+              - cell "18px" [ref=e386]
+              - cell "600" [ref=e387]
+              - cell "1.4" [ref=e388]
+              - cell "Section headers" [ref=e389]
+            - row "Body Inter 14px 400 1.5 General text" [ref=e390]:
+              - cell "Body" [ref=e391]
+              - cell "Inter" [ref=e392]
+              - cell "14px" [ref=e393]
+              - cell "400" [ref=e394]
+              - cell "1.5" [ref=e395]
+              - cell "General text" [ref=e396]
+            - row "Caption Inter 12px 400 1.4 Helper text, labels" [ref=e397]:
+              - cell "Caption" [ref=e398]
+              - cell "Inter" [ref=e399]
+              - cell "12px" [ref=e400]
+              - cell "400" [ref=e401]
+              - cell "1.4" [ref=e402]
+              - cell "Helper text, labels" [ref=e403]
+      - generic [ref=e404]:
+        - heading "Color Palette" [level=3] [ref=e405]
+        - generic [ref=e406]:
+          - generic [ref=e407]:
+            - code [ref=e410]: "--color-primary"
+            - generic [ref=e411]: "#3B82F6"
+            - generic [ref=e412]: Primary buttons, links, active states
+          - generic [ref=e413]:
+            - code [ref=e416]: "--color-success"
+            - generic [ref=e417]: "#10B981"
+            - generic [ref=e418]: Success messages, confirmations
+          - generic [ref=e419]:
+            - code [ref=e422]: "--color-error"
+            - generic [ref=e423]: "#EF4444"
+            - generic [ref=e424]: Error messages, validation
+          - generic [ref=e425]:
+            - code [ref=e428]: "--color-warning"
+            - generic [ref=e429]: "#F59E0B"
+            - generic [ref=e430]: Warnings, non-blocking issues
+          - generic [ref=e431]:
+            - code [ref=e434]: "--color-text-primary"
+            - generic [ref=e435]: "#1F2937"
+            - generic [ref=e436]: Headings, primary content
+          - generic [ref=e437]:
+            - code [ref=e440]: "--color-surface"
+            - generic [ref=e441]: "#F3F4F6"
+            - generic [ref=e442]: Cards, elevated surfaces
+      - generic [ref=e443]:
+        - heading "Spacing Scale" [level=3] [ref=e444]
+        - table [ref=e446]:
+          - rowgroup [ref=e447]:
+            - row "Token Value Usage" [ref=e448]:
+              - columnheader "Token" [ref=e449]
+              - columnheader "Value" [ref=e450]
+              - columnheader "Usage" [ref=e451]
+          - rowgroup [ref=e452]:
+            - row "--space-xs 4px Tight gaps, icon padding" [ref=e453]:
+              - cell "--space-xs" [ref=e454]:
+                - code [ref=e455]: "--space-xs"
+              - cell "4px" [ref=e456]
+              - cell "Tight gaps, icon padding" [ref=e457]
+            - row "--space-sm 8px Inline elements" [ref=e458]:
+              - cell "--space-sm" [ref=e459]:
+                - code [ref=e460]: "--space-sm"
+              - cell "8px" [ref=e461]
+              - cell "Inline elements" [ref=e462]
+            - row "--space-md 16px Standard gap" [ref=e463]:
+              - cell "--space-md" [ref=e464]:
+                - code [ref=e465]: "--space-md"
+              - cell "16px" [ref=e466]
+              - cell "Standard gap" [ref=e467]
+            - row "--space-lg 24px Section gaps" [ref=e468]:
+              - cell "--space-lg" [ref=e469]:
+                - code [ref=e470]: "--space-lg"
+              - cell "24px" [ref=e471]
+              - cell "Section gaps" [ref=e472]
+            - row "--space-xl 32px Page-level spacing" [ref=e473]:
+              - cell "--space-xl" [ref=e474]:
+                - code [ref=e475]: "--space-xl"
+              - cell "32px" [ref=e476]
+              - cell "Page-level spacing" [ref=e477]
+      - generic [ref=e478]:
+        - heading "Component States" [level=3] [ref=e479]
+        - table [ref=e481]:
+          - rowgroup [ref=e482]:
+            - row "State Visual Treatment Interaction" [ref=e483]:
+              - columnheader "State" [ref=e484]
+              - columnheader "Visual Treatment" [ref=e485]
+              - columnheader "Interaction" [ref=e486]
+          - rowgroup [ref=e487]:
+            - row "Default Token colors Pointer cursor" [ref=e488]:
+              - cell "Default" [ref=e489]
+              - cell "Token colors" [ref=e490]
+              - cell "Pointer cursor" [ref=e491]
+            - row "Hover 10% darker Pointer cursor" [ref=e492]:
+              - cell "Hover" [ref=e493]
+              - cell "10% darker" [ref=e494]
+              - cell "Pointer cursor" [ref=e495]
+            - row "Active / Pressed 20% darker, 1px inset shadow Pointer cursor" [ref=e496]:
+              - cell "Active / Pressed" [ref=e497]
+              - cell "20% darker, 1px inset shadow" [ref=e498]
+              - cell "Pointer cursor" [ref=e499]
+            - row "Focus 2px outline, --color-primary Keyboard navigable" [ref=e500]:
+              - cell "Focus" [ref=e501]
+              - cell "2px outline, --color-primary" [ref=e502]:
+                - text: 2px outline,
+                - code [ref=e503]: "--color-primary"
+              - cell "Keyboard navigable" [ref=e504]
+            - row "Disabled 50% opacity, not-allowed cursor No interaction" [ref=e505]:
+              - cell "Disabled" [ref=e506]
+              - cell "50% opacity, not-allowed cursor" [ref=e507]
+              - cell "No interaction" [ref=e508]
+            - row "Loading Skeleton / spinner, disabled No interaction" [ref=e509]:
+              - cell "Loading" [ref=e510]
+              - cell "Skeleton / spinner, disabled" [ref=e511]
+              - cell "No interaction" [ref=e512]
+      - generic [ref=e513]:
+        - heading "Responsive Behavior" [level=3] [ref=e514]
+        - table [ref=e516]:
+          - rowgroup [ref=e517]:
+            - row "Breakpoint Width Key Changes" [ref=e518]:
+              - columnheader "Breakpoint" [ref=e519]
+              - columnheader "Width" [ref=e520]
+              - columnheader "Key Changes" [ref=e521]
+          - rowgroup [ref=e522]:
+            - row "Mobile < 640px Single column, full-width buttons, bottom sheet modals" [ref=e523]:
+              - cell "Mobile" [ref=e524]
+              - cell "< 640px" [ref=e525]
+              - cell "Single column, full-width buttons, bottom sheet modals" [ref=e526]
+            - row "Tablet 640–1024px Two columns where applicable, side navigation" [ref=e527]:
+              - cell "Tablet" [ref=e528]
+              - cell "640–1024px" [ref=e529]
+              - cell "Two columns where applicable, side navigation" [ref=e530]
+            - row "Desktop > 1024px Full layout, hover states active, multi-column grids" [ref=e531]:
+              - cell "Desktop" [ref=e532]
+              - cell "> 1024px" [ref=e533]
+              - cell "Full layout, hover states active, multi-column grids" [ref=e534]
+      - generic [ref=e535]:
+        - heading "Accessibility Tokens" [level=3] [ref=e536]
+        - generic [ref=e537]:
+          - generic [ref=e538]: ♿
+          - paragraph [ref=e539]:
+            - code [ref=e540]: "--focus-ring-width: 2px"
+            - text: ·
+            - code [ref=e541]: "--focus-ring-color: #3B82F6"
+            - text: ·
+            - code [ref=e542]: "--min-touch-target: 44px"
+            - text: · Respect
+            - code [ref=e543]: prefers-reduced-motion
+            - text: to disable animations
+    - generic [ref=e544]:
+      - generic [ref=e545]:
+        - generic [ref=e546]: "6"
+        - heading "Edge Cases & Error Handling" [level=2] [ref=e547]
+      - generic [ref=e548]:
+        - heading "System-Level Edge Cases" [level=3] [ref=e549]
+        - table [ref=e551]:
+          - rowgroup [ref=e552]:
+            - row "Scenario Expected Behavior Story Ref" [ref=e553]:
+              - columnheader "Scenario" [ref=e554]
+              - columnheader "Expected Behavior" [ref=e555]
+              - columnheader "Story Ref" [ref=e556]
+          - rowgroup [ref=e557]:
+            - row "Connection lost mid-submission Save form to localStorage; \"Retry\" appears on reconnect US-XXX" [ref=e558]:
+              - cell "Connection lost mid-submission" [ref=e559]
+              - cell "Save form to localStorage; \"Retry\" appears on reconnect" [ref=e560]
+              - cell "US-XXX" [ref=e561]:
+                - code [ref=e562]: US-XXX
+            - 'row "Browser back during async op Confirmation modal: \"Leave without saving?\" US-XXX" [ref=e563]':
+              - cell "Browser back during async op" [ref=e564]
+              - 'cell "Confirmation modal: \"Leave without saving?\"" [ref=e565]'
+              - cell "US-XXX" [ref=e566]:
+                - code [ref=e567]: US-XXX
+            - row "10,000+ items in list Pagination (50/page) + search + filter; lazy-load images US-XXX" [ref=e568]:
+              - cell "10,000+ items in list" [ref=e569]
+              - cell "Pagination (50/page) + search + filter; lazy-load images" [ref=e570]
+              - cell "US-XXX" [ref=e571]:
+                - code [ref=e572]: US-XXX
+            - row "Formatted text pasted into plain field Strip formatting silently US-XXX" [ref=e573]:
+              - cell "Formatted text pasted into plain field" [ref=e574]
+              - cell "Strip formatting silently" [ref=e575]
+              - cell "US-XXX" [ref=e576]:
+                - code [ref=e577]: US-XXX
+            - 'row "File upload exceeds limit Reject with: \"Max file size is 50MB\" US-XXX" [ref=e578]':
+              - cell "File upload exceeds limit" [ref=e579]
+              - 'cell "Reject with: \"Max file size is 50MB\"" [ref=e580]'
+              - cell "US-XXX" [ref=e581]:
+                - code [ref=e582]: US-XXX
+            - row "Double-click submit Disable button after first click; ignore subsequent US-XXX" [ref=e583]:
+              - cell "Double-click submit" [ref=e584]
+              - cell "Disable button after first click; ignore subsequent" [ref=e585]
+              - cell "US-XXX" [ref=e586]:
+                - code [ref=e587]: US-XXX
+            - row "Same page open in two tabs Changes in Tab A reflect in Tab B (real-time sync or focus refresh) US-XXX" [ref=e588]:
+              - cell "Same page open in two tabs" [ref=e589]
+              - cell "Changes in Tab A reflect in Tab B (real-time sync or focus refresh)" [ref=e590]
+              - cell "US-XXX" [ref=e591]:
+                - code [ref=e592]: US-XXX
+      - generic [ref=e593]:
+        - heading "Content Edge Cases" [level=3] [ref=e594]
+        - table [ref=e596]:
+          - rowgroup [ref=e597]:
+            - row "Scenario Expected Behavior" [ref=e598]:
+              - columnheader "Scenario" [ref=e599]
+              - columnheader "Expected Behavior" [ref=e600]
+          - rowgroup [ref=e601]:
+            - row "Very long text (1000+ chars) in small container Truncate with ellipsis; full text on hover tooltip" [ref=e602]:
+              - cell "Very long text (1000+ chars) in small container" [ref=e603]
+              - cell "Truncate with ellipsis; full text on hover tooltip" [ref=e604]
+            - row "Empty state (0 items) Empty state illustration + \"Get started\" CTA" [ref=e605]:
+              - cell "Empty state (0 items)" [ref=e606]
+              - cell "Empty state illustration + \"Get started\" CTA" [ref=e607]
+            - row "Single item Show normally; avoid \"1 items\" grammar error" [ref=e608]:
+              - cell "Single item" [ref=e609]
+              - cell "Show normally; avoid \"1 items\" grammar error" [ref=e610]
+            - 'row "Special chars in input Accept and render correctly — test: <>\"''& and emojis" [ref=e611]':
+              - cell "Special chars in input" [ref=e612]
+              - 'cell "Accept and render correctly — test: <>\"''& and emojis" [ref=e613]':
+                - text: "Accept and render correctly — test:"
+                - code [ref=e614]: <>"'&
+                - text: and emojis
+            - row "Right-to-left language Mirror layout; dir=\"rtl\"" [ref=e615]:
+              - cell "Right-to-left language" [ref=e616]
+              - cell "Mirror layout; dir=\"rtl\"" [ref=e617]:
+                - text: Mirror layout;
+                - code [ref=e618]: dir="rtl"
+            - row "High contrast mode Respect OS setting; do not override" [ref=e619]:
+              - cell "High contrast mode" [ref=e620]
+              - cell "Respect OS setting; do not override" [ref=e621]
+      - generic [ref=e622]:
+        - heading "AI / ML Edge Cases (if applicable)" [level=3] [ref=e623]:
+          - text: AI / ML Edge Cases
+          - generic [ref=e624]: (if applicable)
+        - table [ref=e626]:
+          - rowgroup [ref=e627]:
+            - row "Scenario Expected Behavior" [ref=e628]:
+              - columnheader "Scenario" [ref=e629]
+              - columnheader "Expected Behavior" [ref=e630]
+          - rowgroup [ref=e631]:
+            - 'row "Model returns no results Empty state: \"No suggestions available\"" [ref=e632]':
+              - cell "Model returns no results" [ref=e633]
+              - 'cell "Empty state: \"No suggestions available\"" [ref=e634]'
+            - row "Low-confidence result Uncertainty indicator; don't auto-apply" [ref=e635]:
+              - cell "Low-confidence result" [ref=e636]
+              - cell "Uncertainty indicator; don't auto-apply" [ref=e637]
+            - row "Model timeout (>10s) Fallback results or \"Still thinking…\" + cancel option" [ref=e638]:
+              - cell "Model timeout (>10s)" [ref=e639]
+              - cell "Fallback results or \"Still thinking…\" + cancel option" [ref=e640]
+            - row "Offensive / inappropriate content Safety filter; show generic fallback" [ref=e641]:
+              - cell "Offensive / inappropriate content" [ref=e642]
+              - cell "Safety filter; show generic fallback" [ref=e643]
+            - row "Rapid successive queries Queue or debounce; don't spam the model" [ref=e644]:
+              - cell "Rapid successive queries" [ref=e645]
+              - cell "Queue or debounce; don't spam the model" [ref=e646]
+            - row "Model version rolled back Maintain user session state; don't lose context" [ref=e647]:
+              - cell "Model version rolled back" [ref=e648]
+              - cell "Maintain user session state; don't lose context" [ref=e649]
+    - generic [ref=e650]:
+      - generic [ref=e651]:
+        - generic [ref=e652]: "7"
+        - heading "Open Questions & Decisions" [level=2] [ref=e653]
+      - table [ref=e655]:
+        - rowgroup [ref=e656]:
+          - row "Question Impact Owner Deadline Status" [ref=e657]:
+            - columnheader "Question" [ref=e658]
+            - columnheader "Impact" [ref=e659]
+            - columnheader "Owner" [ref=e660]
+            - columnheader "Deadline" [ref=e661]
+            - columnheader "Status" [ref=e662]
+        - rowgroup [ref=e663]:
+          - 'row "{Question 1} Blocks implementation @{role} {date} Open" [ref=e664]':
+            - 'cell "{Question 1}" [ref=e665]'
+            - cell "Blocks implementation" [ref=e666]
+            - 'cell "@{role}" [ref=e667]'
+            - 'cell "{date}" [ref=e668]'
+            - cell "Open" [ref=e669]:
+              - generic [ref=e670]: Open
+          - 'row "{Question 2} Can defer @{role} {date} Resolved" [ref=e671]':
+            - 'cell "{Question 2}" [ref=e672]'
+            - cell "Can defer" [ref=e673]
+            - 'cell "@{role}" [ref=e674]'
+            - 'cell "{date}" [ref=e675]'
+            - cell "Resolved" [ref=e676]:
+              - generic [ref=e677]: Resolved
+      - generic [ref=e678]:
+        - generic [ref=e679]: ⚠️
+        - paragraph [ref=e680]:
+          - text: Any "Blocks implementation" question must be resolved before handing off to
+          - code [ref=e681]: product-development
+          - text: .
+    - generic [ref=e682]:
+      - generic [ref=e683]:
+        - generic [ref=e684]: "8"
+        - heading "Cross-References" [level=2] [ref=e685]
+      - table [ref=e687]:
+        - rowgroup [ref=e688]:
+          - row "Reference Document Section" [ref=e689]:
+            - columnheader "Reference" [ref=e690]
+            - columnheader "Document" [ref=e691]
+            - columnheader "Section" [ref=e692]
+        - rowgroup [ref=e693]:
+          - row "Business requirements artifacts/output/02-strategy/requirements.md §5 Feature Overview" [ref=e694]:
+            - cell "Business requirements" [ref=e695]
+            - cell "artifacts/output/02-strategy/requirements.md" [ref=e696]:
+              - code [ref=e697]: artifacts/output/02-strategy/requirements.md
+            - cell "§5 Feature Overview" [ref=e698]
+          - row "User stories artifacts/output/02-strategy/user-stories.md All" [ref=e699]:
+            - cell "User stories" [ref=e700]
+            - cell "artifacts/output/02-strategy/user-stories.md" [ref=e701]:
+              - code [ref=e702]: artifacts/output/02-strategy/user-stories.md
+            - cell "All" [ref=e703]
+          - row "Architecture decisions artifacts/output/03-architecture/ Relevant ADRs" [ref=e704]:
+            - cell "Architecture decisions" [ref=e705]
+            - cell "artifacts/output/03-architecture/" [ref=e706]:
+              - code [ref=e707]: artifacts/output/03-architecture/
+            - cell "Relevant ADRs" [ref=e708]
+          - row "Competitive positioning artifacts/output/01-research/competitive-analysis.md §3 Feature Matrix" [ref=e709]:
+            - cell "Competitive positioning" [ref=e710]
+            - cell "artifacts/output/01-research/competitive-analysis.md" [ref=e711]:
+              - code [ref=e712]: artifacts/output/01-research/competitive-analysis.md
+            - cell "§3 Feature Matrix" [ref=e713]
+          - row "User research artifacts/output/01-research/user-personas.md Personas" [ref=e714]:
+            - cell "User research" [ref=e715]
+            - cell "artifacts/output/01-research/user-personas.md" [ref=e716]:
+              - code [ref=e717]: artifacts/output/01-research/user-personas.md
+            - cell "Personas" [ref=e718]

@@ -1,6 +1,6 @@
 # Post-Incident Review Template
 
-> **Used by:** @project-manager → **Feeds into:** prevention mechanisms, process improvements
+> **Used by:** @product-manager → **Feeds into:** prevention mechanisms, process improvements
 > **Save to:** `artifacts/output/08-incidents/INC-NNN/post-incident-review.md`
 
 Use this template for the blameless post-incident review. Share with all stakeholders. Focus on systems and processes, not individuals.
@@ -11,7 +11,7 @@ Use this template for the blameless post-incident review. Share with all stakeho
 
 **Incident Date:** ...
 **Review Date:** ...
-**Review Lead:** @project-manager
+**Review Lead:** @product-manager
 **Attendees:** [List of agents/stakeholders involved]
 **Severity:** SEV1 / SEV2 / SEV3 / SEV4
 
@@ -94,7 +94,7 @@ Every action item must have an owner and a deadline. No exceptions.
 | AI-2 | ... | ... | ... | ⬜ |
 | AI-3 | ... | ... | ... | ⬜ |
 
-**Tracking:** @project-manager will follow up on all action items. Completed items should be marked ✅ with date.
+**Tracking:** @product-manager will follow up on all action items. Completed items should be marked ✅ with date.
 
 ---
 
@@ -117,17 +117,17 @@ Use `@memory-controller` to persist all incident learnings:
 
 ```
 @memory-controller write blockers-and-risks.md
-### [RISK] INC-NNN: {incident title} [date: YYYY-MM-DD] [agent: @project-manager] [RESOLVED: YYYY-MM-DD]
+### [RISK] INC-NNN: {incident title} [date: YYYY-MM-DD] [agent: @product-manager] [RESOLVED: YYYY-MM-DD]
 {new risks identified from this incident and their mitigations}
 **Status:** resolved
 
 @memory-controller write patterns-and-conventions.md
-### [PROCESS] {prevention mechanism title} [date: YYYY-MM-DD] [agent: @project-manager]
+### [PROCESS] {prevention mechanism title} [date: YYYY-MM-DD] [agent: @product-manager]
 {new guardrail or operational pattern established to prevent recurrence}
 **Status:** active
 
 @memory-controller write lessons-learned.md
-### [LESSON] INC-NNN: {title} [date: YYYY-MM-DD] [agent: @project-manager]
+### [LESSON] INC-NNN: {title} [date: YYYY-MM-DD] [agent: @product-manager]
 {what happened, root cause, what was done, what prevents recurrence}
 **Status:** active
 ```
@@ -142,7 +142,7 @@ Operational follow-up:
 
 **Document info:**
 - Version: 1.0
-- Author: @project-manager
+- Author: @product-manager
 - Date: ...
 - Incident: INC-NNN
 - Depends on: `artifacts/output/08-incidents/INC-NNN/rca.md`, `artifacts/output/08-incidents/INC-NNN/remediation.md`

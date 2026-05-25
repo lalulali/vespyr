@@ -9,6 +9,13 @@
 > [!NOTE]
 > Detailed acceptance criteria guidelines, the canonical `US-001` password recovery example, formatting instructions, and dependency diagram guides are located in [.opencode/references/templates/user-story-instructions.md](../references/templates/user-story-instructions.md). Refer to that document when generating user stories.
 
+> [!IMPORTANT]
+> **User Story Granularity & Content Standards:**
+> 1. **Modular Functional Focus:** User stories must represent single functional blocks of capability (e.g. "Location Auto-Detection" or "QRIS Payment Integration"), NOT multi-step persona journeys/scenarios (e.g. "Dropoff visitor skips queue" or "Event attendee ships purchase"). High-level user flows must be sliced into separate, granular stories.
+> 2. **Actionable & System-Verifiable:** Describe active interactions (user action + system response) without incorporating situational physical or emotional context.
+> 3. **Perfect Alignment:** Story ID, Title, Priority, Sprint, and Summary must perfectly match Section 5.3 in the PRD (`requirements.md`).
+
+
 ---
 
 ## Story Metadata (apply to every story)
@@ -22,6 +29,7 @@ Sprint:       ...
 Dependencies: [Story IDs or external blocking events]
 Author:       @product-manager
 Traces to PRD: Section X.Y: [Feature Name from requirements.md]
+Traces to Product Spec: [Screen Name, Flow ID, or Section ID inside product-spec.md]
 ```
 
 ---
@@ -56,7 +64,10 @@ Traces to PRD: Section X.Y: [Feature Name from requirements.md]
 *   [ ] **AC-ML-1:** Given [prediction request], when [model processes], then [prediction metric ≥ target]
 
 ### 5. UI / UX Notes (if applicable)
-[Identify screens, states, navigation path, and accessibility WCAG requirements]
+*   **Product Spec Screen Reference:** `[Screen Name or Section inside product-spec.md]`
+*   **User Flow Reference:** `[Flow name/ID, e.g. Happy Path Flow 2.1]`
+*   **Key UI States:** `[Link to corresponding state specs inside product-spec.md]`
+*   **Accessibility requirements (WCAG 2.1 AA):** `[Link to accessibility specs inside product-spec.md]`
 
 ### 6. Data Model Notes (if applicable)
 [Document affected entities, database fields, and validation rules]

@@ -90,11 +90,11 @@ See `.opencode/templates/memory-entry-template.md` for the full entry format.
 
 ## Structural Awareness
 
-Before proposing any structural change, you MUST read `artifacts/memory/structural/graph.json` to identify all files that import or are imported by the target. Report the blast radius: list every affected file and why.
+Before proposing any structural change, you MUST read `artifacts/memory/structural/code-graph.json` to identify all files that import or are imported by the target. Report the blast radius: list every affected file and why.
 
-If `graph.json` does not exist or is stale, trigger regeneration via `@executor`:
+If `code-graph.json` does not exist or is stale, trigger regeneration via `@executor`:
 ```
-node .opencode/scripts/shallow_graph.js --src src/ --out artifacts/memory/structural/graph.json
+node .opencode/scripts/shallow_graph.js --src src/ --out artifacts/memory/structural/code-graph.json
 ```
 
 ## How to design
@@ -111,7 +111,7 @@ Before designing, absorb the full context from upstream agents.
 4. Do NOT hallucinate missing content. Never invent requirements, personas, or competitive data.
 
 Files to read (check existence first):
-- `artifacts/output/00-discovery/idea-brief.md` — the founder's vision and key assumptions
+- `artifacts/output/00-discovery/validation-brief.md` or `artifacts/output/00-discovery/idea-brief.md` — the founder's vision and key assumptions
 - `artifacts/output/02-strategy/requirements.md` — business goals, success metrics, NFRs
 - `artifacts/output/02-strategy/user-stories.md` — technical requirements, integrations, data needs
 - `artifacts/output/02-strategy/product-spec.md` — screens, flows, interactions
@@ -136,6 +136,8 @@ When given product specs and user stories:
 9. Map every user story's technical requirements to architectural components
 10. Identify technical risks, unknowns, and spike topics for the tech lead
 11. Mitigate over-engineering — prefer simple solutions that can evolve
+12. **Focus on Design Contracts, NOT Business Logic:** Define data models, database DDLs, type interfaces, and API payloads. **DO NOT** write application controller logic, raw algorithms, or UI components. Focus on directing the developer via solid contracts and boundaries, preserving their creativity and execution autonomy.
+
 
 ### Step 4: Validate with downstream agents
 Before finalizing, check:

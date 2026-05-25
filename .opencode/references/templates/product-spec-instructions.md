@@ -15,8 +15,10 @@ When generating the product design specification:
 ## 2. Structural Requirements
 
 ### 2.1 Traceability Guidelines
-Every section of the product specification must explicitly trace back to a business-level PRD feature and a developer-level User Story:
-*   Use a traceability table mapping spec sections to PRD features and story IDs.
+Every section of the product specification must explicitly trace back to a business-level PRD feature and a developer-level User Story to ensure bi-directional alignment:
+*   Use a traceability table mapping spec sections to PRD features and story IDs in Section 1.5.
+*   In Section 3 (Screen-by-Screen Specifications), explicitly document the **Associated User Stories** (e.g., `Associated User Stories: [US-XXX], [US-YYY]`) directly under each screen title.
+*   In Section 6 (Edge Cases & Error Handling), ensure all system-level edge case scenarios trace to a specific developer `Story Ref`.
 *   If a spec section does not map to an existing story, halt and notify `@product-manager` to generate it first.
 
 ### 2.2 Machine Learning Integration

@@ -13,13 +13,13 @@ When something breaks in production, this skill provides the structured process 
 
 ### Step 1: Triage
 
-Invoke `@project-manager` to lead triage:
+Invoke `@product-manager` to lead triage:
 - **Severity classification:**
   - **SEV1 (Critical):** Service down, data loss, security breach → all hands, immediate response
   - **SEV2 (High):** Major feature broken, significant user impact → urgent response, 4-hour target
   - **SEV3 (Medium):** Feature degraded, workaround exists → next business day
   - **SEV4 (Low):** Minor issue, cosmetic, low impact → backlog
-- **Assign incident commander** (default: @project-manager)
+- **Assign incident commander** (default: @product-manager)
 - **Assemble responders** based on issue type:
   - Infrastructure issue → @devops-engineer + @architect
   - Application bug → @developer + @tech-lead
@@ -68,7 +68,7 @@ Then (sequential within this path):
 - `@qa-engineer` validates the fix and regression tests
 - `@devops-engineer` deploys the fix
 
-**Loop limit:** Max 2 review cycles on the incident fix. If the fix is still contested, the incident commander (@project-manager) makes the ship/rollback call.
+**Loop limit:** Max 2 review cycles on the incident fix. If the fix is still contested, the incident commander (@product-manager) makes the ship/rollback call.
 
 #### Step 4b: Monitoring Improvements ⟨parallel⟩
 Invoke `@devops-engineer` to:
@@ -79,7 +79,7 @@ Invoke `@devops-engineer` to:
 
 ### Step 5: Post-Incident Review
 
-Invoke `@project-manager` to conduct a blameless post-incident review:
+Invoke `@product-manager` to conduct a blameless post-incident review:
 - **What happened** — timeline of events
 - **What was the impact** — users affected, duration, data impact
 - **What was the root cause** — from RCA
@@ -93,21 +93,21 @@ Invoke `@project-manager` to conduct a blameless post-incident review:
 
 ### Step 6: Update Knowledge Base
 
-Invoke `@project-manager` to write incident learnings to memory via `@memory-controller`:
+Invoke `@product-manager` to write incident learnings to memory via `@memory-controller`:
 
 ```
 @memory-controller write blockers-and-risks.md
-### [RISK] {incident title} [date: YYYY-MM-DD] [agent: @project-manager] [RESOLVED: YYYY-MM-DD]
+### [RISK] {incident title} [date: YYYY-MM-DD] [agent: @product-manager] [RESOLVED: YYYY-MM-DD]
 {new risks identified from this incident}
 **Status:** resolved
 
 @memory-controller write lessons-learned.md
-### [LESSON] {title} [date: YYYY-MM-DD] [agent: @project-manager]
+### [LESSON] {title} [date: YYYY-MM-DD] [agent: @product-manager]
 {incident lessons — what happened, root cause, prevention}
 **Status:** active
 
 @memory-controller write patterns-and-conventions.md
-### [PROCESS] {title} [date: YYYY-MM-DD] [agent: @project-manager]
+### [PROCESS] {title} [date: YYYY-MM-DD] [agent: @product-manager]
 {new guardrail or operational pattern established}
 **Status:** active
 ```

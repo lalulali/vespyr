@@ -1,5 +1,7 @@
 # Vespyr: AI Agent Team for Product Development
 
+![Vespyr Version](https://img.shields.io/badge/version-1.6.0-blue)
+
 > A multi-agent system that runs a full product development team — from raw idea to production code.
 
 **Vespyr** (from *vespula* + *zephyr*) is a set of 23 AI agents, each with a defined role, that coordinate through a shared workflow to build software products. Think of it as a staffed team you configure once and invoke per project.
@@ -163,7 +165,7 @@ Core design rules:
 
 Takes a raw idea and produces one validated concept before any research cycles start. Applies structured stress-tests (Golden Circle, First Principles, Pre-mortem, unit economics) paired with Socratic questioning to expose hidden assumptions and kill weak directions early. Decides which optional agents to activate.
 
-Output: `idea-brief.md`
+Output: `validation-brief.md` (if validating) or `idea-brief.md` (if exploring)
 
 To customize: edit the stress-testing tools, add industry-specific validation criteria, or change what gets flagged as a red flag.
 
@@ -193,7 +195,7 @@ To customize: change persona templates or add domain-specific user attributes.
 
 #### @product-manager
 
-Synthesizes research into two documents: a PRD for business stakeholders and user stories for engineering. Every user story has acceptance criteria across three categories — happy path, unhappy path, and edge cases. Traces every story back to a PRD feature.
+Synthesizes research into two documents: a PRD for business stakeholders and user stories for engineering. Every user story has acceptance criteria across three categories — happy path, unhappy path, and edge cases. Enforces strict bi-directional traceability: every story traces back to a PRD feature (`Traces to PRD`) and forward to a product specification screen or flow (`Traces to Product Spec`). User stories must conform to both the approved requirements and the product spec visual designs with zero divergences.
 
 Outputs: `requirements.md`, `user-stories.md`
 
@@ -203,7 +205,7 @@ To customize: change PRD templates, adjust user story formats, or add domain-spe
 
 #### @product-designer
 
-Turns requirements into a product spec with no ambiguity left for developers. Maps every user flow (primary, alternative, error), defines all screen states (default, loading, success, error, empty), and specifies interaction details including accessibility.
+Turns requirements into a product spec with no ambiguity left for developers. Maps every user flow (primary, alternative, error), defines all screen states (default, loading, success, error, empty), and specifies interaction details including accessibility. Enforces bi-directional traceability via a mandatory **Reciprocal Traceability Verification** step: every screen and flow must reference the user story IDs it satisfies (spec→stories), and every user story must have at least one corresponding spec element (stories→spec). Zero orphans on either side.
 
 Output: `product-spec.md`
 
@@ -235,21 +237,11 @@ To customize: add technology-specific ADR templates or change the decision-makin
 
 #### @tech-lead
 
-Breaks architecture into 1–4 hour tasks. Each task has a definition of done, files to touch, and a risk level. Identifies the critical path and what can run in parallel.
+Assumes sprint planning leadership to evaluate task dependencies and backlog complexity, determining sprint-specific developer parallelism (1 to N). Breaks system architecture and user stories into modular tasks on the Kanban board. Assigns a **Role tag** (`FE`/`BE`/`Full-Stack`) to each task, which governs the assigned developer's focus area and communication permissions for the duration of that task.
 
-Output: `execution-plan.md`
+Output: `kanban.md` updates (To Do, sprint tasks)
 
 To customize: change task sizing guidelines or add team-specific planning patterns.
-
----
-
-#### @project-manager
-
-Owns delivery. Creates the project plan, maintains the Kanban board as the single source of truth, tracks blockers, and manages scope changes through formal intake. Does not define features — that's @product-manager's job.
-
-Outputs: `project-plan.md`, `kanban.md`, `sprint-plan.md`, `status-report.md`
-
-To customize: change WIP limits, sprint cadence, or reporting formats.
 
 ---
 
@@ -257,7 +249,10 @@ To customize: change WIP limits, sprint cadence, or reporting formats.
 
 #### @developer
 
-Implements features following existing patterns. Covers all three acceptance criteria categories. Writes tests alongside code, not after. Delegates file writes to @writer and command runs to @executor.
+Implements features following existing patterns. **Enforces Spec & Story Reading Mandate:** MUST load and read Product Spec and User Stories prior to coding. Covers happy/unhappy/edge acceptance criteria. Delegates file writes to @writer and command runs to @executor. Communication permissions are governed by the **Role tag** assigned by `@tech-lead`:
+- **FE:** Focuses strongly on implementation accuracy, visual polish, and user experience. Permitted to converse with the **human, `@product-designer`, or `@product-manager`** for clarifications.
+- **BE:** Focuses on API contracts, database, and system safety. Permitted to converse with the **human or `@product-manager`** for clarifications.
+- **Full-Stack:** Both FE and BE communication channels apply.
 
 Outputs: production code, tests
 
@@ -445,10 +440,10 @@ Vespyr organizes complex, multi-agent operations into highly structured **skills
 * **Outputs**: `market-analysis.md`, `competitive-analysis.md`, `user-personas.md`.
 
 #### 3. `product-design`
-* **Purpose**: Define comprehensive product requirements and create highly detailed, developer-ready interface and behavior specifications.
+* **Purpose**: Define comprehensive product requirements and create highly detailed, developer-ready interface and behavior specifications. Enforces a strict **tri-directional traceability standard**: PRD features → user stories → product spec screens, and back. Every story traces to a spec screen (`Traces to Product Spec`); every spec screen references its story IDs. Zero orphans on either side.
 * **When to use**: After exploration is completed and the opportunity is validated.
 * **Key Agents**: `@product-manager` and `@product-designer`.
-* **Outputs**: `requirements.md` (PRD), `user-stories.md` (with happy/unhappy/edge acceptance criteria), and `product-spec.md`.
+* **Outputs**: `requirements.md` (PRD), `user-stories.md` (with happy/unhappy/edge acceptance criteria and bi-directional spec tracing), and `product-spec.md` (with associated story references per screen and reciprocal traceability verification).
 
 #### 4. `product-development`
 * **Purpose**: Design code architecture, plan execution tasks, write tests and clean code, and execute multi-layer QA verification.
@@ -483,7 +478,7 @@ Vespyr organizes complex, multi-agent operations into highly structured **skills
 
 #### 8. `product-launch` (Post-Dev — Release)
 * **Purpose**: Orchestrate the transition from development to live production. Runs a rigorous multi-point Release Readiness checklist, facilitates formal Go/No-Go release decisions, prepares infrastructure, and monitors post-release metrics for 24–72 hours.
-* **Key Agents**: `@project-manager`, `@product-manager`, `@devops-engineer`, `@technical-writer`, `@data-analyst`.
+* **Key Agents**: `@product-manager`, `@devops-engineer`, `@technical-writer`, `@data-analyst`.
 * **Outputs**: `release-readiness.md`, `go-nogo-decision.md`, `launch-log.md`, and `post-launch-report.md`.
 
 #### 9. `product-iteration` (Post-Launch — Optimization)
@@ -493,12 +488,12 @@ Vespyr organizes complex, multi-agent operations into highly structured **skills
 
 #### 10. `incident-response` (Ops — Reactive)
 * **Purpose**: Manage production downtime, critical bugs, security vulnerabilities, or performance spikes under strict SLAs. Follows a robust process: triage severity, mitigate user-impact first (rollback/flag off), conduct a blameless 5 Whys Root-Cause Analysis (RCA), deploy QA'd fixes, and update team knowledge.
-* **Key Agents**: `@project-manager` (Incident Commander), `@architect`/`@tech-lead` (RCA), responders (`@devops-engineer`, `@developer`, `@security-engineer`, `@qa-engineer`).
+* **Key Agents**: `@product-manager` (Incident Commander), `@architect`/`@tech-lead` (RCA), responders (`@devops-engineer`, `@developer`, `@security-engineer`, `@qa-engineer`).
 * **Outputs**: `triage.md`, `mitigation.md`, `rca.md`, and `post-incident-review.md`.
 
 #### 11. `retrospective` (Ops — Continuous Improvement)
 * **Purpose**: Reflect on completed milestones, compare planned vs. actual effort, identify collaboration or handoff bottlenecks, log action items with clear ownership, and run the memory compaction protocol to keep system context lean.
-* **Key Agents**: `@project-manager`, `@tech-lead`, `@product-manager`, `@architect`.
+* **Key Agents**: `@tech-lead`, `@product-manager`, `@architect`.
 * **Outputs**: `execution-review.md`, `process-review.md`, `action-items.md`.
 
 ---

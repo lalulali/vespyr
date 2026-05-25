@@ -61,7 +61,7 @@ function createInitialState(name, type) {
 function getPhaseArtifacts(phase) {
   const artifactMap = {
     validation: [
-      { name: 'idea-brief.md', path: '00-discovery/idea-brief.md', required: true }
+      { name: 'idea-brief.md', path: '00-discovery/idea-brief.md', required: true, fallbackPath: '00-discovery/validation-brief.md', fallbackName: 'validation-brief.md' }
     ],
     exploration: [
       { name: 'market-analysis.md', path: '01-research/market-analysis.md', required: true },
@@ -87,8 +87,21 @@ function validatePhaseArtifacts(phase) {
   let allPresent = true;
 
   for (const art of artifacts) {
-    const fullPath = path.join(OUTPUT_DIR, art.path);
-    const exists = fs.existsSync(fullPath);
+    let fullPath = path.join(OUTPUT_DIR, art.path);
+    let exists = fs.existsSync(fullPath);
+    let name = art.name;
+    let actualPath = art.path;
+
+    if (!exists && art.fallbackPath) {
+      const fallbackFullPath = path.join(OUTPUT_DIR, art.fallbackPath);
+      if (fs.existsSync(fallbackFullPath)) {
+        fullPath = fallbackFullPath;
+        exists = true;
+        name = art.fallbackName;
+        actualPath = art.fallbackPath;
+      }
+    }
+
     if (!exists && art.required) allPresent = false;
 
     let version = null;
@@ -99,8 +112,8 @@ function validatePhaseArtifacts(phase) {
     }
 
     results.push({
-      name: art.name,
-      path: art.path,
+      name: name,
+      path: actualPath,
       required: art.required,
       exists,
       version

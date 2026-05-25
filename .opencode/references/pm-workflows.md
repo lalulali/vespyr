@@ -15,7 +15,7 @@ Absorb everything before writing a single word:
 *   `artifacts/output/01-research/competitive-analysis.md` — competitor features, pricing, gaps.
 *   `artifacts/output/01-research/user-personas.md` — target users, pain points, journeys.
 
-### Step 2: Write the PRD first
+### Step 2: Draft the PRD & Handle Human Validation (Interactive Gate)
 Follow the PRD template exactly (`.opencode/templates/prd-template.md`). Key rules:
 *   **Audience:** Business stakeholders, executives, sales, marketing — NOT engineers.
 *   **Tone:** Strategic, narrative, persuasive. No implementation details.
@@ -27,12 +27,26 @@ Follow the PRD template exactly (`.opencode/templates/prd-template.md`). Key rul
     *   Out-of-scope list (crucial for scope discipline).
     *   Risks and dependencies.
     *   Non-functional requirements (performance, security, accessibility).
-*   **Must reference:** The user stories document in a summary table.
+*   **Must reference:** A summary table of user stories mapping to precise **granular, modular functional capabilities** in Section 5.3.
+    *   *Granularity Check:* DO NOT list broad end-to-end user journeys (e.g. "Rina scans QR, completes form...") as stories in the PRD. Instead, list separate, sprint-assigned functional capabilities (e.g. `US-001 | QR Code Entry Point | Must-have | Sprint 1`, `US-002 | Basic Shipping Form | Must-have | Sprint 1`).
+*   **Validation Check:** If operating in `semi-autonomous` mode (and not bypassed), you MUST pause here and ask the user to validate the PRD. Do not proceed to user stories until the PRD is approved.
 
 ### Step 3: Write the User Stories
+Only AFTER the PRD is finalized and validated, generate the User Stories. 
+**Crucial Alignment:** The user stories MUST strictly align with and trace back to both the validated PRD (requirements) and the detailed Product Spec (`product-spec.md`). 
+*   **PRD & Spec Base:** What is written in the PRD is the absolute business base, and what is designed in the Product Spec is the absolute interaction base. 
+*   **Spec Alignment Rules:** The `@product-manager` must verify that every user story is structurally aligned with the screen designs, layouts, and interaction flows defined in `product-spec.md`.
+*   **AC Mapping:** All screen transitions, loading, success, empty, and error states documented in the product spec must be translated into explicit acceptance criteria (Happy, Unhappy, Edge) inside the user stories.
+*   **Sync:** The ID, Title, Priority, Sprint, and Summary of each story in `user-stories.md` must be perfectly synchronized with Section 5.3 of the PRD (`requirements.md`).
+
 Follow the user story template exactly (`.opencode/templates/user-story-template.md`). Key rules:
 *   **Audience:** Engineering — developers, QA, architects, tech lead.
 *   **Tone:** Precise, exhaustive, testable. Every sentence must be verifiable.
+*   **Story Content & Granularity Standards (NON-NEGOTIABLE):**
+    *   **Focus on Modular Capabilities:** Every user story must represent a single block of functionality. Slice multi-step user scenarios into separate, independent stories (e.g., separating input, payment, processing, and printing).
+    *   **NO Persona Journeys:** Never use persona narrative scenarios or physical/subjective user contexts (e.g., "Event attendee ships purchase", "Budi completes form while walking") as user stories. Focus purely on system-level interactions (user action + system response).
+    *   **Sprint Allocation:** Assign every story to a specific target Sprint (e.g., Sprint 1, Sprint 2).
+    *   **Perfect Sync:** The ID, Title, Priority, Sprint, and Summary of each story in `user-stories.md` must be perfectly synchronized with Section 5.3 of the PRD (`requirements.md`).
 *   **Must include for every story:**
     *   Narrative (As a / I want / so that).
     *   Business requirement (stakeholder impact, value, priority rationale).
@@ -41,31 +55,32 @@ Follow the user story template exactly (`.opencode/templates/user-story-template
         *   **Happy path** (AC-H*): Complete normal flow from trigger to completion.
         *   **Unhappy path** (AC-U*): Every error, failure, rejection, and invalid state.
         *   **Edge cases** (AC-E*): Boundaries, extremes, concurrency, race conditions, unusual inputs.
-    *   **Traceability:** Every story maps to a feature in the PRD. Include "Traces to PRD" field.
+    *   **Traceability:** Every story maps back to a feature in the PRD and forward to a screen/flow in the product specification (if applicable). Populate both the `Traces to PRD` and `Traces to Product Spec` metadata fields.
     *   **Independence:** Every story is independently implementable and testable.
-
+ 
 ### Step 4: Cross-validate (CRITICAL STEP)
 Before saving, run this checklist — every box must be checked:
 *   [ ] Every PRD feature has at least one user story.
 *   [ ] Every user story traces back to a PRD feature.
+*   [ ] All user stories strictly follow the requirements in the PRD and the visual/interaction flows in the Product Spec with zero divergences or omission of spec details.
 *   [ ] No implementation detail appears in the PRD.
 *   [ ] No business rationale is missing from user stories.
 *   [ ] Acceptance criteria cover happy, unhappy, and edge cases for every story.
 *   [ ] Story IDs are unique and sequential (US-001, US-002, ...).
 *   [ ] Technical requirements reference correct architectural constraints.
 *   [ ] Non-functional requirements (performance, security, accessibility) are covered in stories.
-*   [ ] Each story's effort estimate is reasonable (flag anything over "Large" for splitting).
+*   [ ] Each story's effort estimate is reasonable (flag anything over "Large" for splitting).or splitting).
 
 ### Step 5: Coordinate with @data-analyst
 Ensure success metrics in the PRD are SMART and measurable. Share user stories so `@data-analyst` can plan instrumentation for feature adoption tracking.
 
-### Step 6: Seed the Kanban board
-After PRD and user stories are finalized, add all features and user stories to the project Kanban (`artifacts/output/05-project-management/kanban.md`):
-*   Place items in the **Discovery** column initially.
-*   Set priority (Must-have / Should-have / Could-have) from PRD MoSCoW classification.
-*   Map each item to its user story ID for traceability.
-*   Coordinate with `@project-manager` on WIP limits and column placement.
-*   As research validates items, move them to **Design**.
+### Step 6: Seed and Initialize the Kanban board
+Once PRD, product specs, and user stories are validated and approved (or immediately in autonomous mode, completely skipping all intermediate validation pauses), `@product-manager` must initialize and seed the project Kanban board (`artifacts/output/04-planning/kanban.md`):
+*   Generate the Kanban board file directly.
+*   Populate the board with all user stories as separate cards in the **Backlog** column.
+*   For each card, set story ID, title, priority (Must-have/Should-have/Could-have) from MoSCoW classification, and sprint assignment.
+*   Ensure the Kanban matches the approved requirements and user stories perfectly.
+
 
 ---
 
@@ -90,14 +105,14 @@ Run prioritization exercises and document the rationale:
 *   **Always include:** The framework used and why, scoring/rationale for each item, explicit trade-offs, and what was de-prioritized.
 
 ### B3. Backlog Grooming
-Refine and maintain the backlog (`artifacts/output/05-project-management/kanban.md`):
+Refine and maintain the backlog (`artifacts/output/04-planning/kanban.md`):
 *   Review items in Discovery and Upcoming columns.
 *   Split oversized stories or features.
 *   Clarify acceptance criteria for vague items.
 *   Remove stale or invalidated items.
 *   Re-prioritize based on new data or feedback.
 *   Ensure every ready item has: clear description, acceptance criteria, priority, and estimated effort.
-*   Coordinate with `@tech-lead` on technical feasibility and `@project-manager` on sprint capacity.
+*   Coordinate with `@tech-lead` on technical feasibility and `@product-manager` on sprint capacity.
 
 ### B4. Feature Evaluation / Scope Review
 Evaluate a proposed feature or scope change on demand:

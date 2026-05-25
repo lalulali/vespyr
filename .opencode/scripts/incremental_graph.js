@@ -6,8 +6,8 @@
  * First run = full scan. Subsequent runs = delta only.
  *
  * Usage:
- *   node incremental_graph.js --src src/ --out artifacts/memory/structural/graph.json
- *   node incremental_graph.js --src src/,lib/ --out artifacts/memory/structural/graph.json
+ *   node incremental_graph.js --src src/ --out artifacts/memory/structural/code-graph.json
+ *   node incremental_graph.js --src src/,lib/ --out artifacts/memory/structural/code-graph.json
  */
 
 const fs = require('fs');
@@ -333,13 +333,13 @@ function main() {
   const args = process.argv.slice(2);
   if (args.length === 0) {
     console.log(`Usage:
-  node incremental_graph.js --src src/ --out artifacts/memory/structural/graph.json
-  node incremental_graph.js --src src/,lib/,app/ --out artifacts/memory/structural/graph.json`);
+  node incremental_graph.js --src src/ --out artifacts/memory/structural/code-graph.json
+  node incremental_graph.js --src src/,lib/,app/ --out artifacts/memory/structural/code-graph.json`);
     process.exit(0);
   }
 
   let src = 'src/';
-  let out = 'artifacts/memory/structural/graph.json';
+  let out = 'artifacts/memory/structural/code-graph.json';
 
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--src') src = args[i + 1];

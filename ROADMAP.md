@@ -10,7 +10,7 @@ Current status: **v1.0 — opencode native, shipped.**
 
 ### Squad-based team presets
 
-Right now Vespyr ships as one team of 22 agents. Most users don't need all of them for every project. The plan is to introduce **squads** — curated subsets of agents for specific use cases.
+Right now Vespyr ships as one team of 23 agents. Most users don't need all of them for every project. The plan is to introduce **squads** — curated subsets of agents for specific use cases.
 
 A squad is a named configuration that activates a subset of agents, sets their shared memory defaults, and optionally pre-configures the workflow phases relevant to that squad's purpose.
 
@@ -18,7 +18,7 @@ A squad is a named configuration that activates a subset of agents, sets their s
 
 | Squad | Agents included | Use case |
 |---|---|---|
-| `full-team` | All 22 agents | Default — full product development lifecycle |
+| `full-team` | All 23 agents | Default — full product development lifecycle |
 | `startup` | founder, market-researcher, competitor-analyzer, user-researcher, product-manager, product-designer, architect, tech-lead, developer, code-reviewer, qa-engineer, devops-engineer | Early-stage product from idea to MVP |
 | `build` | architect, tech-lead, developer, code-reviewer, qa-engineer, devops-engineer, technical-writer | You have a spec, you need to build it |
 | `research` | founder, market-researcher, competitor-analyzer, user-researcher, product-manager | Discovery and validation only, no code |
@@ -220,7 +220,7 @@ Hosted shared memory and artifact storage for teams. Multiple developers working
 
 | Version | Status | What shipped |
 |---|---|---|
-| v1.0 | ✅ Shipped | 22 agents, opencode native, delegation pattern, shared memory, game mode, humanizer skill |
+| v1.0 | ✅ Shipped | 23 agents, opencode native, delegation pattern, shared memory, game mode, humanizer skill |
 
 ---
 

@@ -153,6 +153,10 @@ Reference the founder's idea brief (`artifacts/output/00-discovery/idea-brief.md
 | 1 | ... | ... | ... | ... |
 | 2 | ... | ... | ... | ... |
 
+Rules:
+- Use inline citations (e.g., `[1]`) to connect claims directly to the sources listed in this section
+- Every claim in this document must trace to a source
+
 ---
 
 **Document info:**

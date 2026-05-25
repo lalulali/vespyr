@@ -66,9 +66,9 @@ Set the operation mode in `artifacts/memory/project-context.md`. Default is **se
 | **-1: Validation** | Auto-generate validation brief from context. Auto-decide GO/PIVOT/KILL based on available evidence. | Run diagnostic questions interactively. **Pause for GO/PIVOT/KILL verdict.** | Full Socratic session. Every question interactive. Human confirms each answer before next. |
 | **0: Discovery** | @founder auto-synthesizes, no review. | @founder synthesizes. **Pause for human review of idea brief before research.** | @founder drafts, human refines iteratively. |
 | **1: Research** | All research agents run in parallel, auto-complete. | Research runs autonomously. Human reviews at Phase 1→2 gate. | Human reviews each research output before the next agent starts. |
-| **2: Strategy** | Auto-generate PRD, specs, user stories. | Auto-generate. **Pause for human approval of PRD and product spec.** | Human co-writes requirements and specs with agents. |
-| **3: Architecture** | Auto-generate ADRs. | **Pause for human approval of architecture decisions.** | Human collaborates on every ADR. |
-| **4: Planning** | Auto-generate execution plan and project plan. | Auto-generate. Human reviews before execution. | Human co-writes plans with agents. |
+| **2: Strategy** | Auto-generate PRD, specs, user stories. | Draft features. **Pause for human selection & feedback.** Finalize PRD/user stories. **Pause for human spec approval.** | Human co-writes requirements and specs with agents. |
+| **3: Architecture (Optional)** | Auto-generate ADRs if enabled. | **Optional Phase.** Pause to ask user: run `@architect` first or bypass directly to `@tech-lead`/`@developer`? | Human collaborates on ADRs if executed. |
+| **4: Planning & Kanban** | `@product-manager` auto-seeds Kanban board from user stories. | **Kanban Seeding.** `@product-manager` seeds Kanban board once Strategy artifacts are approved. In autonomous mode, all approvals are skipped and Kanban is seeded instantly. | Human reviews Kanban board. |
 | **5: Execution** | Write code, auto-commit per task. | Write code autonomously. **Pause before destructive operations** (delete, migrate, refactor >100 lines). | Human reviews each task output before next task. |
 | **5.5: Design Validation** | Auto-run usability review. | Auto-run. **Pause if critical usability issues found.** | Human participates in usability review. |
 | **6: Quality Gates** | Auto-run all checks. Auto-fix low/medium issues. | Auto-run checks. **Pause on critical/high severity findings.** | Human reviews each quality report. |
@@ -107,6 +107,21 @@ Default: semi-autonomous
 
 **Resolution order:** Phase override → Default. If no override is set for a phase, the default applies.
 
+### Strategy Feature Design Selection Bypass
+
+To allow full automation of feature design and bypass the interactive selection pause during `semi-autonomous` mode in Phase 2, users can configure a dedicated bypass switch in `artifacts/memory/project-context.md`:
+
+```markdown
+## Operation Mode
+Default: semi-autonomous
+FeatureDesignInteraction: false
+```
+
+- **`FeatureDesignInteraction: true` (default in semi-autonomous):** Pause during feature selection to get user feedback.
+- **`FeatureDesignInteraction: false`:** Bypasses the feature selection pause entirely. `@product-manager` will auto-generate the complete PRD and user stories without stopping.
+- **Natural language support:** If a user says `"bypass feature review"`, `"automate feature design selection"`, or `"skip interactive feature design"`, the agent will set `FeatureDesignInteraction: false` in `artifacts/memory/project-context.md` and log the override.
+
+
 ### Changing mode
 
 Two ways to change the mode. Both work at any time, including mid-workflow.
@@ -120,6 +135,8 @@ Two ways to change the mode. Both work at any time, including mid-workflow.
 | "make development autonomous" / "dev phase should be autonomous" | Development override → autonomous |
 | "I want manual validation but autonomous development" | Sets both overrides |
 | "back to semi-auto" / "default mode" | Resets current phase to semi-autonomous |
+| "bypass feature review" / "automate feature design" | Sets `FeatureDesignInteraction` override to `false` |
+| "enable interactive feature design" / "review features" | Resets `FeatureDesignInteraction` to `true` |
 
 **Method 2: Edit file directly** — Edit `artifacts/memory/project-context.md` and change the mode/overrides. Agents read this file at the start of each phase.
 
@@ -149,10 +166,10 @@ When the execution plan has **2+ independent tasks**, multiple developer agents 
 | 2+ independent tasks, project uses git | **Multi-developer with worktrees** — parallel execution |
 | 2+ independent tasks, no git | **Multi-developer without worktrees** — parallel on separate files only, coordinate via shared memory |
 
-The `@tech-lead` decides the number of parallel developers during execution planning (Step 3b) based on:
+The `@tech-lead` assumes direct leadership during Phase 4 sprint setup and planning (Step 3b) to explicitly check and evaluate the task dependencies and file isolation in the backlog, deciding exactly how many parallel developers to run (1 to N) based on:
 - How many tasks are truly independent (no shared file edits)
 - Project complexity — more developers = more merge work
-- Recommended: **2-3 developers** max for most projects. More adds coordination overhead.
+- Recommended: **2-3 developers** max for most projects to keep coordination overhead low. Tech Lead can adjust this number up or down to optimize sprint delivery.
 
 ### Worktree setup protocol
 
@@ -182,12 +199,17 @@ git worktree list
 ```markdown
 ## Task Assignment
 
-| Developer | Worktree | Branch | Tasks | Files touched |
-|---|---|---|---|---|
-| @developer-1 | ~/.local/share/opencode/worktree/worktree-dev-1 | feat/main/task-1 | Auth flow, login page | src/auth/*, src/pages/login.* |
-| @developer-2 | ~/.local/share/opencode/worktree/worktree-dev-2 | feat/main/task-2 | Dashboard API, charts | src/api/dashboard.*, src/components/chart.* |
-| @developer-3 | ~/.local/share/opencode/worktree/worktree-dev-3 | feat/main/task-3 | Notification system | src/notifications/*, src/services/notify.* |
+| Developer | Worktree | Branch | Role | Tasks | Files touched |
+|---|---|---|---|---|---|
+| @developer-1 | ~/.local/share/opencode/worktree/worktree-dev-1 | feat/main/task-1 | FE | Auth flow, login page | src/auth/*, src/pages/login.* |
+| @developer-2 | ~/.local/share/opencode/worktree/worktree-dev-2 | feat/main/task-2 | BE | Dashboard API, charts | src/api/dashboard.*, src/components/chart.* |
+| @developer-3 | ~/.local/share/opencode/worktree/worktree-dev-3 | feat/main/task-3 | Full-Stack | Notification system | src/notifications/*, src/services/notify.* |
 ```
+
+**Role tags** determine the developer's communication permissions:
+- `FE` → Focus on visual accuracy and UX; may converse with human, `@product-designer`, or `@product-manager`
+- `BE` → Focus on API contracts, schemas, and robustness; may converse with human or `@product-manager`
+- `Full-Stack` → Both FE and BE communication channels are available
 
 **Critical rule:** Tasks assigned to different developers must NOT touch the same files. If two tasks need to edit the same file, they must be sequential (same developer) or the shared file must be edited by one developer first, then merged before the other starts.
 
@@ -196,10 +218,14 @@ git worktree list
 Each developer agent operates in its assigned worktree:
 
 1. **Navigate to worktree** — all file operations happen in the worktree directory
-2. **Read shared artifacts** — execution plan, ADRs, specs are in the main repo (read-only from worktree)
-3. **Implement task** — write code, tests, run lints in the worktree
-4. **Commit to feature branch** — commit to the worktree's branch
-5. **Signal completion** — update `artifacts/memory/agent-notes/developer-notes.md` in the main repo with status
+2. **Read shared artifacts (NON-NEGOTIABLE Spec & Story Reading Mandate):** `@developer` MUST read and fully understand the validated Product Spec (`artifacts/output/02-strategy/product-spec.md` or `product-spec.html`) and companion User Stories (`artifacts/output/02-strategy/user-stories.md`) in full prior to writing any code, ensuring 100% implementation alignment.
+3. **Clarify specifications (Ambiguities Guardrail):** If specifications or design layouts are unclear, follow the communication permissions defined by your assigned **Role tag** (FE/BE/Full-Stack) from the Task Assignment table:
+   - **FE:** Focus strongly on visual excellence and accuracy. Explicitly permitted to converse with the **human user, `@product-designer`, or `@product-manager`** to clarify.
+   - **BE:** Focus on robust logic and schema safety. Explicitly permitted to converse with the **human user or `@product-manager`** to clarify.
+   - **Full-Stack:** Both FE and BE communication channels are available.
+4. **Implement task** — write code satisfying happy/unhappy/edge acceptance criteria, write unit/integration tests, and run lints inside the worktree.
+5. **Commit to feature branch** — commit code to the worktree's designated branch.
+6. **Signal completion** — update `artifacts/memory/agent-notes/developer-notes.md` in the main repo with status.
 
 ### Merge protocol
 
@@ -294,32 +320,41 @@ Each handoff specifies what the upstream agent MUST produce before the downstrea
 
 | From | To | Required Artifacts | Contract |
 |------|-----|-------------------|----------|
-| @product-manager | @product-designer | `artifacts/output/02-strategy/requirements.md`, `artifacts/output/02-strategy/user-stories.md` | Must pass cross-validation checklist (every feature has ≥1 story, every story traces to a feature) |
+| @product-manager | @product-designer | `artifacts/output/02-strategy/requirements.md`, `artifacts/output/02-strategy/user-stories.md` | Must pass cross-validation checklist (every feature has ≥1 story, every story traces to a feature, and all stories are prepared for bi-directional spec tracing and strictly follow requirements and product spec visual designs with zero divergences) |
 | @product-manager | @architect | `artifacts/output/02-strategy/requirements.md`, `artifacts/output/02-strategy/user-stories.md` | Must contain business goals with measurable targets |
 | @product-designer | @architect | `artifacts/output/02-strategy/product-spec.md` | Must contain defined flows, screens, and technical constraints |
 | @product-designer | @ux-researcher | `artifacts/output/02-strategy/product-spec.md` | Must contain complete flows with all states defined; ready for usability validation |
 | @product-designer | @developer | `artifacts/output/02-strategy/product-spec.md` (validated by @ux-researcher if applicable) | UI is usability-tested or @product-designer has documented rationale for skipping |
 | @ux-researcher | @product-designer | `artifacts/output/01-research/ux-research-report.md` | Must contain severity-rated findings; critical issues resolved before dev handoff |
 
-### Architecture → Planning
+
+### Architecture → Planning (Only if Phase 3 is executed)
 
 | From | To | Required Artifacts | Contract |
 |------|-----|-------------------|----------|
 | @architect | @tech-lead | `artifacts/output/03-architecture/` (ADRs) | Must contain data model, API contracts, and tech stack decision |
-| @architect | @project-manager | `artifacts/output/03-architecture/` (ADRs) | Must contain risk register and architectural complexity assessment |
-| @tech-lead | @project-manager | `artifacts/output/04-planning/execution-plan.md` | Must contain task breakdown, effort estimates, and dependency map |
-| @project-manager | @project-manager | `artifacts/output/05-project-management/kanban.md` | Must be initialized with all user stories placed in correct columns |
-| @product-manager | @project-manager | `artifacts/output/02-strategy/requirements.md` | Must contain priorities and business deadlines |
+| @product-manager | @tech-lead | `artifacts/output/02-strategy/requirements.md` | Must contain priorities and business deadlines |
+
+
+### Strategy → Planning (Direct Handoff - Bypassing Optional Phase 3)
+
+If the user opts to bypass Phase 3 (Architecture), the Strategy artifacts feed directly into the Tech Lead and Developer for planning and implementation.
+
+| From | To | Required Artifacts | Contract |
+|------|-----|-------------------|----------|
+| @product-manager | @tech-lead | `artifacts/output/02-strategy/requirements.md`, `user-stories.md` | Tech Lead consumes strategic requirements directly for task breakdown |
+| @product-designer | @tech-lead | `artifacts/output/02-strategy/product-spec.md` | Tech Lead maps tasks directly to visual/interaction specifications |
+| @product-designer | @developer | `artifacts/output/02-strategy/product-spec.md` | Developer implements visual layouts and interaction specs directly |
+
 
 ### Planning → Execution
 
 | From | To | Required Artifacts | Contract |
 |------|-----|-------------------|----------|
-| @tech-lead | @developer | `artifacts/output/04-planning/execution-plan.md`, `artifacts/output/03-architecture/`, `artifacts/output/02-strategy/product-spec.md`, `artifacts/output/02-strategy/user-stories.md` | Must contain task breakdown with DoD, dependencies, and acceptance criteria mapping |
+| @tech-lead | @developer | `artifacts/output/02-strategy/product-spec.md`, `artifacts/output/02-strategy/user-stories.md` | Must contain task breakdown with DoD, dependencies, and acceptance criteria mapping from Kanban; developer MUST explicitly load and read both strategy documents prior to starting coding |
 | @tech-lead | @developer | `artifacts/output/01-research/ux-research-report.md` (if available) | @developer must be aware of validated interaction patterns |
-| @tech-lead | @data-analyst | `artifacts/output/04-planning/execution-plan.md`, `artifacts/output/02-strategy/requirements.md` | Must contain success metrics from business goals |
-| @tech-lead | @ml-engineer | `artifacts/output/04-planning/execution-plan.md`, `artifacts/output/03-architecture/` | Must contain ML-specific tasks and data requirements |
-| @project-manager | @devops-engineer | `artifacts/output/05-project-management/project-plan.md` | Must contain release milestones and deployment windows |
+| @tech-lead | @data-analyst | `artifacts/output/02-strategy/requirements.md` | Must contain success metrics from business goals |
+| @tech-lead | @ml-engineer | `artifacts/output/03-architecture/` | Must contain ML-specific tasks and data requirements |
 
 ### Execution → Quality Gates
 
@@ -334,35 +369,35 @@ Each handoff specifies what the upstream agent MUST produce before the downstrea
 
 | From | To | Required Artifacts | Contract |
 |------|-----|-------------------|----------|
-| @qa-engineer | @project-manager | QA sign-off report | All acceptance criteria met; known issues documented |
-| @code-reviewer | @project-manager | Code review summary | No blocking issues; non-blocking issues documented |
-| @security-engineer | @project-manager | Security audit report | No critical/high findings; medium/low findings documented |
-| @performance-engineer | @project-manager | Performance report | All SLAs met or exceptions documented |
-| @project-manager | @devops-engineer | `artifacts/output/06-launch/go-nogo-decision.md` | All release readiness criteria met; go/no-go decided |
+| @qa-engineer | @product-manager | QA sign-off report | All acceptance criteria met; known issues documented |
+| @code-reviewer | @product-manager | Code review summary | No blocking issues; non-blocking issues documented |
+| @security-engineer | @product-manager | Security audit report | No critical/high findings; medium/low findings documented |
+| @performance-engineer | @product-manager | Performance report | All SLAs met or exceptions documented |
+| @product-manager | @devops-engineer | `artifacts/output/06-launch/go-nogo-decision.md` | All release readiness criteria met; go/no-go decided |
 
 ### Launch → Iteration
 
 | From | To | Required Artifacts | Contract |
 |------|-----|-------------------|----------|
 | @devops-engineer | @data-analyst | Deployment confirmation + monitoring URLs | Production is live and healthy |
-| @project-manager | @product-manager | `artifacts/output/06-launch/post-launch-report.md` | Launch completed; initial metrics collected |
+| @devops-engineer | @product-manager | `artifacts/output/06-launch/post-launch-report.md` | Launch completed; initial metrics collected |
 
 ### Iteration → Retrospective
 
 | From | To | Required Artifacts | Contract |
 |------|-----|-------------------|----------|
-| @data-analyst | @project-manager | `artifacts/output/07-iteration/iteration-results.md` | Measured impact of iteration changes |
-| @tech-lead | @project-manager | Execution metrics (estimate vs actual) | Velocity and estimation data per task |
-| @project-manager | All | `artifacts/output/09-retro/action-items.md` | Actionable improvements with owners and deadlines |
+| @data-analyst | @product-manager | `artifacts/output/07-iteration/iteration-results.md` | Measured impact of iteration changes |
+| @tech-lead | @product-manager | Execution metrics (estimate vs actual) | Velocity and estimation data per task |
+| @product-manager | All | `artifacts/output/09-retro/action-items.md` | Actionable improvements with owners and deadlines |
 
 ### Incident → Remediation
 
 | From | To | Required Artifacts | Contract |
 |------|-----|-------------------|----------|
-| @project-manager | @devops-engineer | `artifacts/output/08-incidents/INC-NNN/triage.md` | Severity, timeline, assigned responders |
-| @devops-engineer | @project-manager | `artifacts/output/08-incidents/INC-NNN/mitigation.md` | Mitigation applied, current status |
+| @orchestrator | @devops-engineer | `artifacts/output/08-incidents/INC-NNN/triage.md` | Severity, timeline, assigned responders |
+| @devops-engineer | @orchestrator | `artifacts/output/08-incidents/INC-NNN/mitigation.md` | Mitigation applied, current status |
 | @architect | @developer | `artifacts/output/08-incidents/INC-NNN/rca.md` | Root cause identified, fix direction clear |
-| @developer | @project-manager | `artifacts/output/08-incidents/INC-NNN/remediation.md` | Fix implemented, tests added |
+| @developer | @orchestrator | `artifacts/output/08-incidents/INC-NNN/remediation.md` | Fix implemented, tests added |
 
 ---
 
@@ -381,16 +416,14 @@ When agents produce contradictory outputs, the following escalation path applies
 | **QA vs. Developer** (test failure disputes) | QA's test results against documented acceptance criteria are authoritative. Developer may challenge if acceptance criteria are ambiguous — resolved by @product-manager. |
 | **Performance vs. Developer** (performance requires redesign) | @performance-engineer documents finding with impact metrics. If fix requires >4h redesign, escalate to @tech-lead for scope/schedule trade-off decision. |
 | **Research contradicts Founder** (market/user/player research invalidates assumptions) | @researcher or @user-researcher presents evidence. @founder decides: pivot, refine, or proceed with documented risk acceptance. |
-| **Product Manager vs. Project Manager** (scope vs. timeline conflict) | @product-manager owns WHAT (scope and priority). @project-manager owns WHEN (timeline and coordination). If scope cannot fit timeline, @project-manager presents options with trade-offs; @product-manager decides which scope to cut. Escalate to @founder if unresolved. |
-| **Project Manager vs. Tech Lead** (delivery pressure vs. technical quality) | @project-manager raises timeline concern; @tech-lead provides rebuild/refactor trade-off. Escalate to @product-manager for business impact assessment if unresolved in 24h. |
+| **Product Manager vs. Tech Lead** (scope vs. engineering feasibility conflict) | @product-manager owns WHAT (scope and priority). @tech-lead owns HOW (technical quality and engineering coordination). If scope cannot fit engineering constraints, @tech-lead presents options with trade-offs; @product-manager decides which scope to adjust or cut. Escalate to @founder if unresolved. |
 
 ### 3.2 Escalation Ladder
 
 ```
 Level 1: Direct resolution between two agents (24h)
-Level 2: Project Manager mediation (48h)
-Level 3: Product Manager arbitration (72h)
-Level 4: Founder decision (final)
+Level 2: Tech Lead / Product Manager arbitration (48h)
+Level 3: Founder decision (final)
 ```
 
 ---
@@ -410,11 +443,11 @@ Agents are not siloed. Downstream findings MUST flow upstream.
 | @technical-writer → @developer | Docs discover undocumented behavior | Developer documents; if systemic, add to Definition of Done |
 | @ux-researcher → @product-designer | Users struggle with designed interaction | Redesign before dev handoff; critical findings are blocking |
 | @ux-researcher → @product-manager | Core tasks fail usability testing | Re-scope or re-design feature; escalate to @founder if concept-level issue |
-| @project-manager → @all | Kanban board updated | Item moved, blocked, or milestone changed | `artifacts/output/05-project-management/kanban.md` |
+| @product-manager → @all | Kanban board updated | Item moved, blocked, or milestone changed | `artifacts/output/04-planning/kanban.md` |
 | @founder → @all | Strategic pivot decision | All downstream artifacts must be re-validated against new direction |
-| @project-manager → @tech-lead | Tasks blocked or timeline at risk | Escalate blocker to owner with 24h deadline; adjust plan based on resolution |
+| @orchestrator → @tech-lead | Tasks blocked or timeline at risk | Escalate blocker to owner with 24h deadline; adjust plan based on resolution |
 | @data-analyst → @product-manager | Post-launch metrics differ from hypothesis | Flag for iteration backlog; adjust success criteria if needed |
-| @project-manager → @product-manager | Scope creep detected | Formal change request with timeline impact; @product-manager prioritizes |
+| @orchestrator → @product-manager | Scope creep detected | Formal change request with timeline impact; @product-manager prioritizes |
 
 ---
 
@@ -478,10 +511,11 @@ Optional agents add time to the schedule. Planning guidance:
 | `explore-game-idea` | 0-1 | @founder, @researcher, @user-researcher | Validated game brief, genre analysis, player personas |
 | `design` | 2 | @product-manager, @product-designer | PRD, user stories, product spec |
 | `develop` | 3-5 | @architect, @tech-lead, @developer, @qa-engineer | Working, tested feature |
-| `launch` | 7 | @project-manager, @devops-engineer | Shipped feature in production |
+| `launch` | 7 | @product-manager, @devops-engineer | Shipped feature in production |
 | `iterate` | 8 | @data-analyst, @product-manager, @developer | Measured improvement |
-| `incident` | Any | @project-manager, @devops-engineer, @developer | Mitigated incident, RCA, prevention |
-| `retro` | 9 | @project-manager, @tech-lead, @architect | Action items for improvement |
+| `incident` | Any | @orchestrator, @devops-engineer, @developer | Mitigated incident, RCA, prevention |
+| `retro` | 9 | @product-manager, @tech-lead, @architect | Action items for improvement |
+
 
 ---
 
@@ -503,8 +537,7 @@ artifacts/memory/
 │   ├── developer-notes.md
 │   ├── designer-notes.md
 │   ├── tech-lead-notes.md
-│   ├── qa-notes.md
-│   └── project-manager-notes.md
+│   └── qa-notes.md
 ├── session-summaries/           # Cross-session continuity
 │   ├── latest.md                # Most recent session (~100 tokens, Tier 1)
 │   └── history.md               # Full session log (append-only, never loaded directly)
@@ -513,7 +546,8 @@ artifacts/memory/
     └── YYYY-QN/                 # Quarterly archive folders
 ```
 
-**The Kanban board (`artifacts/output/05-project-management/kanban.md`) is a persistent project artifact, not just a template.** It is initialized during Phase 4 (Planning) by @project-manager and updated continuously throughout the project lifecycle. Every cross-agent handoff, blocker resolution, and scope change must be reflected in the Kanban.
+**The Kanban board (`artifacts/output/04-planning/kanban.md`) is a persistent project artifact, not just a template.** It is initialized and seeded directly by `@product-manager` once Strategy requirements, product specs, and user stories are approved (in semi-autonomous/manual mode) or immediately (skipping all approval pauses in autonomous mode). It is updated continuously throughout the project lifecycle. Every cross-agent handoff, blocker resolution, and scope change must be reflected in the Kanban.
+
 
 ### Memory Protocol
 
@@ -571,9 +605,8 @@ Use the format in `.opencode/templates/session-summary-template.md`. This writes
 | @qa-engineer finds flaky test | Test name, failure pattern, frequency | `qa-notes.md` |
 | @product-designer evolves design system | Component change, version, reason | `designer-notes.md` |
 | @tech-lead estimates task | Estimated vs actual, variance reason | `tech-lead-notes.md` |
-| @project-manager tracks delivery | Milestone status, blocker resolution, velocity | `project-manager-notes.md` |
-| @project-manager updates Kanban | Item column, status, activity log | `artifacts/output/05-project-management/kanban.md` |
-| @product-manager re-prioritizes | Priority changes, scope additions/removals | `artifacts/output/05-project-management/kanban.md` + `active-decisions.md` |
+| @product-manager updates Kanban | Item column, status, activity log | `artifacts/output/04-planning/kanban.md` |
+| @product-manager re-prioritizes | Priority changes, scope additions/removals | `artifacts/output/04-planning/kanban.md` + `active-decisions.md` |
 | @data-analyst observes metric shift | Metric, threshold, context | `active-decisions.md` |
 | Any agent hits blocker | Blocker description, owner, ETA | `blockers-and-risks.md` |
 | Any agent learns lesson | Phase, context, lesson, action item | `lessons-learned.md` |

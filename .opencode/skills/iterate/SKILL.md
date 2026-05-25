@@ -73,7 +73,7 @@ Invoke `@tech-lead` to:
 - Estimate effort based on existing velocity
 - Sequence for fastest delivery (quick wins first)
 
-Invoke `@project-manager` to:
+Invoke `@product-manager` to:
 - Fit iteration work into existing cadence
 - Manage scope and timeline trade-offs
 - Coordinate with any ongoing development work

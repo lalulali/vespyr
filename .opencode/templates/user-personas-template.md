@@ -182,6 +182,7 @@ This helps @product-designer understand the UX they're competing against and @pr
 | ... | ... | ... | ... | ... |
 
 Rules:
+- Use inline citations (e.g., `[1]`) to connect claims directly to the sources listed in this section
 - Protect participant anonymity
 - Store raw notes separately if they contain PII
 - Link to raw data if stored elsewhere

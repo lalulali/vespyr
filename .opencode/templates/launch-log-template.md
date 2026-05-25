@@ -1,6 +1,6 @@
 # Launch Log Template
 
-> **Used by:** @project-manager, @devops-engineer → **Feeds into:** post-launch report
+> **Used by:** @product-manager, @devops-engineer → **Feeds into:** post-launch report
 > **Save to:** `artifacts/output/06-launch/launch-log.md`
 
 Use this template to document the deployment process in real-time. Start logging before deployment begins and continue until monitoring confirms stability.
@@ -11,7 +11,7 @@ Use this template to document the deployment process in real-time. Start logging
 
 **Deployment Date:** ...
 **Deployment Lead:** @devops-engineer
-**Launch Commander:** @project-manager
+**Launch Commander:** @product-manager
 
 ---
 
@@ -107,6 +107,6 @@ Log every step with timestamp.
 
 **Document info:**
 - Version: 1.0
-- Author: @project-manager, @devops-engineer
+- Author: @product-manager, @devops-engineer
 - Date: ...
 - Depends on: `artifacts/output/06-launch/go-nogo-decision.md`, release runbook

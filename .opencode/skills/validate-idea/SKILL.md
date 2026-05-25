@@ -185,6 +185,21 @@ PREMISES:
 
 If the user disagrees, revise understanding. **Max 2 revision cycles** on premises — if you can't agree after 2 rounds, note the disagreement in the brief and move on.
 
+### Phase 3.5: Framework Application
+
+Before deciding the final verdict, `@founder` must apply 1–2 frameworks from their core toolkit to test the idea's structural integrity:
+
+**Available frameworks (pick 1-2 most relevant):**
+- **Golden Circle** — WHY / HOW / WHAT
+- **Pre-mortem** — It failed. What killed it?
+- **First Principles** — Strip the buzzwords. What's the core mechanism?
+- **Moat & Defensibility** — Why can't someone copy this in 3 months?
+- **Unit Economics** — Does the math work at 80% of expected price?
+- **Market Timing** — Why now and not 3 years ago?
+- **Dependency Stack** — What must already exist for this to work?
+
+**Ask the user the framework question** and push back on vague answers. Score the result (🟢 PASS, 🟡 WEAK, 🔴 FAIL). Do not proceed to Alternatives until the framework test is complete.
+
 ### Phase 4: Alternatives
 
 Generate 2-3 distinct approaches:

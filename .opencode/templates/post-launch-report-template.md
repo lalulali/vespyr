@@ -1,6 +1,6 @@
 # Post-Launch Report Template
 
-> **Used by:** @project-manager, @data-analyst → **Feeds into:** iteration decisions, retrospectives
+> **Used by:** @product-manager, @data-analyst → **Feeds into:** iteration decisions, retrospectives
 > **Save to:** `artifacts/output/06-launch/post-launch-report.md`
 
 Use this template 24-72 hours after launch to document metrics, issues, and initial learnings.
@@ -12,7 +12,8 @@ Use this template 24-72 hours after launch to document metrics, issues, and init
 **Launch Date:** ...
 **Report Date:** ...
 **Report Period:** [Launch date] through [Report date] ([X] hours/days)
-**Authors:** @project-manager, @data-analyst
+**Authors:** @product-manager, @data-analyst
+
 
 ---
 
@@ -145,6 +146,6 @@ Use this template 24-72 hours after launch to document metrics, issues, and init
 
 **Document info:**
 - Version: 1.0
-- Author: @project-manager, @data-analyst
+- Author: @product-manager, @data-analyst
 - Date: ...
 - Depends on: `artifacts/output/06-launch/launch-log.md`, `artifacts/output/02-strategy/requirements.md` (success criteria)

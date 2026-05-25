@@ -64,6 +64,7 @@ flowchart TD
 ## 3. Screen-by-Screen Specifications
 
 ### 3.1 Screen: [Screen Name]
+**Associated User Stories:** `[US-XXX]`, `[US-YYY]`
 
 #### 3.1.1 Purpose
 [Action user is trying to accomplish.]
@@ -127,7 +128,27 @@ flowchart TD
 ---
 
 ## 6. Edge Cases & Error Handling
-[Document system, content, and ML-specific edge cases as defined in references]
+
+### 6.1 System-Level Edge Cases
+| Scenario | Expected Behavior | Story Ref |
+|----------|-------------------|-----------|
+| Connection lost in submission | Save state to localStorage. Trigger retry alert on reconnection | `US-XXX` |
+| Browser back during async op | Show confirmation prompt overlay: "Leave without saving?" | `US-XXX` |
+| 10,000+ items in list | Pagination (50 items/page) + search filtering + media lazy loading | `US-XXX` |
+| Formatted text pasted into field | Strip formatting styling silently. Keep raw text characters | `US-XXX` |
+| File upload exceeds limit | Reject immediately with toast banner: "Max file size is 50MB" | `US-XXX` |
+| Double-click submit | Disable submit button on click. Ignore subsequent submit events | `US-XXX` |
+| Same page open in two tabs | Sync changes in real-time or request refresh on tab active focus | `US-XXX` |
+
+### 6.2 Content-Specific Edge Cases
+| Scenario | Expected Behavior |
+|----------|-------------------|
+| Very long content values | Truncate text safely with ellipsis; expose full value on hover tooltip |
+| Zero state / Empty lists | Show empty state illustration + clear "Get Started" primary action CTA |
+| Single item in list | Render normally, fix list count labels (avoid "1 items" grammar error) |
+| Special character inputs | Sanitize and render safely — cover tags: `<>"'&` and emojis |
+| RTL locale layouts | Mirror entire layout elements visually by applying standard `dir="rtl"` |
+| High contrast OS mode | Honor system configuration colors, don't override standard layout specs |
 
 ---
 

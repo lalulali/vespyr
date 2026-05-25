@@ -37,8 +37,7 @@ Read `artifacts/memory/project-context.md` for the current phase. If not set, in
 - `01-research/` has content → Phase 1
 - `02-strategy/` has content → Phase 2
 - `03-architecture/` has content → Phase 3
-- `04-planning/` has content → Phase 4
-- `05-project-management/` has content → Phase 4-5
+- `04-planning/` has content → Phase 4 (Planning & Kanban)
 - `06-launch/` has content → Phase 7
 - `07-iteration/` has content → Phase 8
 - `08-incidents/` has content → Incident

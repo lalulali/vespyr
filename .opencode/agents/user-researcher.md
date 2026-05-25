@@ -92,7 +92,7 @@ See `.opencode/templates/memory-entry-template.md` for the full entry format.
 ## How to research
 
 ### Step 1: Read upstream inputs
-- `artifacts/output/00-discovery/idea-brief.md` — the target user and key assumptions to validate
+- `artifacts/output/00-discovery/validation-brief.md` or `artifacts/output/00-discovery/idea-brief.md` — the target user and key assumptions to validate
 - `artifacts/output/01-research/competitive-analysis.md` — competitive context for user alternatives
 
 ### Step 2: Research

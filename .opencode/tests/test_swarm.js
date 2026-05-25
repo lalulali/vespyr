@@ -184,28 +184,57 @@ function testTelemetry() {
   assert(j2.by_type.memory_load > 0, `Expected memory_load events, got: ${JSON.stringify(j2.by_type)}`);
 }
 
-function testShallowGraph() {
-  console.log('\n\n--- Shallow Graph Tests ---');
+function testGraphs() {
+  console.log('\n\n--- Graph Mapper Tests ---');
 
-  // Test 1: Generate graph for scripts directory
-  const outFile = path.join(FIXTURES, 'test-graph.json');
-  const r1 = run(`node ${SCRIPTS}/shallow_graph.js --src .opencode/scripts --out ${outFile}`);
+  // Test 1: Generate codebase graph for scripts directory (shallow)
+  const codeFile = path.join(FIXTURES, 'test-code-graph.json');
+  const r1 = run(`node ${SCRIPTS}/shallow_graph.js --src .opencode/scripts --out ${codeFile}`);
   const j1 = JSON.parse(r1.stdout);
   assert(j1.success === true, `Expected success, got: ${r1.stdout}`);
   assert(j1.files_scanned > 0, `Expected files scanned, got: ${j1.files_scanned}`);
 
-  // Test 2: Graph structure
-  const graph = JSON.parse(fs.readFileSync(outFile, 'utf8'));
-  assert(graph.generated_at, `Expected generated_at in graph`);
-  assert(Array.isArray(graph.files), `Expected files array`);
-  assert(graph.files.length > 0, `Expected at least one file`);
+  // Check codebase graph structure
+  const codeGraph = JSON.parse(fs.readFileSync(codeFile, 'utf8'));
+  assert(codeGraph.generated_at, `Expected generated_at in graph`);
+  assert(Array.isArray(codeGraph.files), `Expected files array`);
+  assert(codeGraph.files.length > 0, `Expected at least one file`);
+  const firstCode = codeGraph.files[0];
+  assert(firstCode.path, `Expected path in file entry`);
+  assert(firstCode.language, `Expected language in file entry`);
+  assert(Array.isArray(firstCode.exports), `Expected exports array`);
+  assert(Array.isArray(firstCode.imports), `Expected imports array`);
+  assert(Array.isArray(firstCode.imported_by), `Expected imported_by array`);
 
-  const first = graph.files[0];
-  assert(first.path, `Expected path in file entry`);
-  assert(first.language, `Expected language in file entry`);
-  assert(Array.isArray(first.exports), `Expected exports array`);
-  assert(Array.isArray(first.imports), `Expected imports array`);
-  assert(Array.isArray(first.imported_by), `Expected imported_by array`);
+  // Test 2: Generate codebase graph incrementally (incremental)
+  const r2 = run(`node ${SCRIPTS}/incremental_graph.js --src .opencode/scripts --out ${codeFile}`);
+  const j2 = JSON.parse(r2.stdout);
+  assert(j2.success === true, `Expected success, got: ${r2.stdout}`);
+  assert(j2.scan_mode === 'incremental', `Expected incremental mode, got: ${j2.scan_mode}`);
+
+  // Test 3: Generate document graph (doc_graph)
+  const docFile = path.join(FIXTURES, 'test-doc-graph.json');
+  const r3 = run(`node ${SCRIPTS}/doc_graph.js --out ${docFile}`);
+  const j3 = JSON.parse(r3.stdout);
+  assert(j3.success === true, `Expected success, got: ${r3.stdout}`);
+  assert(j3.documents_scanned >= 0, `Expected documents scanned field`);
+
+  // Check document graph structure
+  const docGraph = JSON.parse(fs.readFileSync(docFile, 'utf8'));
+  assert(docGraph.generated_at, `Expected generated_at in graph`);
+  assert(Array.isArray(docGraph.nodes), `Expected nodes array`);
+  assert(Array.isArray(docGraph.edges), `Expected edges array`);
+
+  if (docGraph.nodes.length > 0) {
+    const firstNode = docGraph.nodes[0];
+    assert(firstNode.path, `Expected path in doc node`);
+    assert(firstNode.type, `Expected type in doc node`);
+    assert(firstNode.title, `Expected title in doc node`);
+    assert(Array.isArray(firstNode.sections), `Expected sections array`);
+    assert(Array.isArray(firstNode.links), `Expected links array`);
+    assert(Array.isArray(firstNode.requirements), `Expected requirements array`);
+    assert(Array.isArray(firstNode.user_stories), `Expected user_stories array`);
+  }
 }
 
 function testOrchestratorState() {
@@ -264,6 +293,17 @@ function testOrchestratorState() {
   const j7 = JSON.parse(r7.stdout);
   assert(j7.allPresent === true, `Expected validation phase complete`);
 
+  // Test 7b: Validate phase with fallback (validation-brief.md instead of idea-brief.md)
+  fs.unlinkSync(ideaBrief);
+  const valBrief = path.join(outputDir, '00-discovery', 'validation-brief.md');
+  fs.writeFileSync(valBrief, '---\n**Version:** 2\n---\nTest validation brief');
+
+  const r7b = run(`node ${testScript} validate --phase validation`);
+  const j7b = JSON.parse(r7b.stdout);
+  assert(j7b.allPresent === true, `Expected validation phase complete with fallback`);
+  assert(j7b.artifacts[0].name === 'validation-brief.md', `Expected artifact name to match validation-brief.md, got: ${j7b.artifacts[0].name}`);
+  assert(j7b.artifacts[0].version === 2, `Expected version 2, got: ${j7b.artifacts[0].version}`);
+
   // Cleanup
   fs.rmSync(path.join(FIXTURES, 'output'), { recursive: true });
   fs.unlinkSync(stateFile);
@@ -300,7 +340,7 @@ function main() {
     testArchiveManager(fixtures);
     testCompactionGuard(fixtures);
     testTelemetry();
-    testShallowGraph();
+    testGraphs();
     testOrchestratorState();
     testTelemetryReport();
   } finally {

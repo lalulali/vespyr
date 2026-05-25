@@ -43,8 +43,7 @@ Verify which phase directories under `artifacts/output/` have content:
 - `01-research/` — market analysis, personas
 - `02-strategy/` — PRD, specs, user stories
 - `03-architecture/` — ADRs
-- `04-planning/` — execution plans
-- `05-project-management/` — Kanban, project plans
+- `04-planning/` — Kanban board, planning decisions
 - `06-launch/` — release readiness, go/no-go
 - `07-iteration/` — analytics, iteration results
 - `08-incidents/` — active incidents

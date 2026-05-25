@@ -8,10 +8,10 @@ This reference document acts as the master developer playbook for the `@develope
 
 When working in multi-developer mode (assigned a Developer ID like `@developer-N` and a specific worktree):
 
-1.  **Identify Assignment:** Inspect the `Task Assignment` table in `artifacts/output/04-planning/execution-plan.md` to identify your assigned Developer ID, worktree path, feature branch, and files.
+1.  **Identify Assignment:** Inspect the `Backlog` / `To Do` lists in `artifacts/output/04-planning/kanban.md` to identify your assigned Developer ID, worktree path, feature branch, and files.
 2.  **Work in Assigned Worktree:** All file writes, modifications, and command executions MUST happen in your assigned worktree directory:
     *   *Path Example:* `~/.local/share/opencode/worktree/worktree-dev-N`
-3.  **Read Shared Repository Context:** You may read the master execution plan, architecture ADRs, product specs, and shared memory from the main repository directory (read-only access).
+3.  **Read Shared Repository Context:** You may read the Kanban board, architecture ADRs, product specs, user stories, and shared memory from the main repository directory (read-only access).
 4.  **Isolate Commit Boundaries:** Only perform commits and file modifications inside your worktree's designated feature branch (e.g., `feat/{base}/task-N`). Do NOT modify files assigned to other developers.
 5.  **Declare Dependencies:** If you require a modification in a file assigned to another developer, log the dependency in shared memory (`blockers-and-risks.md`) and coordinate before proceeding.
 6.  **Log Progress with Developer ID:** When writing to shared memory or logging status, always prefix entries with `[dev-N]` so other developers and downstream agents have clear status tracking.
@@ -33,8 +33,11 @@ Before reading any upstream planning or strategy artifact, verify its existence 
 *   **Continue:** Proceed using only currently available local context, explicitly marking any unresolved information gaps as `[MISSING]`.
 *   **Restart from beginning:** Direct the user on which upstream agents (e.g., `@founder`, `@product-manager`) need to be invoked to generate the missing assets first.
 
-### Step 1: Read the User Story
-Locate the corresponding story block in `artifacts/output/02-strategy/user-stories.md` and fully digest the requirements, business rationale, technical constraints, and acceptance criteria.
+### Step 1: Read the Product Spec and User Stories (NON-NEGOTIABLE Mandate)
+You MUST load, read, and fully digest the **Product Spec** (`artifacts/output/02-strategy/product-spec.md`) and the companion **User Stories** (`artifacts/output/02-strategy/user-stories.md`) in full prior to writing any code. Make sure to:
+*   Understand the complete end-to-end visual layouts, screen transitions, loading states, success states, and error states detailed in the product spec.
+*   Digest the business rationale, technical requirements, and acceptance criteria (Happy, Unhappy, and Edge cases) for your assigned stories.
+*   Conform 100% to these specs and stories. Do not commence implementation work until you have read both.
 
 ### Step 2: Study Existing Patterns
 Read existing source files in the same component area. Learn and match all naming conventions, folder structures, imports, and styling patterns exactly.
@@ -87,7 +90,7 @@ Before declaring a task complete and handing it over to downstream agents, verif
 
 *   **Explicit over Implicit:** Write clear, descriptive code. Avoid clever tricks or implicit language syntax that reduces readability.
 *   **Total Error Handling:** Never swallow exceptions or hide failures. Catch errors, log them with appropriate severity, and return clean user feedback or recovery alternatives.
-*   **Traceability:** Always reference execution plans (`execution-plan.md`) and architectural patterns (`03-architecture/`) in your task reasoning.
+*   **Traceability:** Always reference the Kanban backlog (`kanban.md`) and architectural patterns (`03-architecture/`) in your task reasoning.
 *   **Observability:** Treat structured logs as a first-class feature of the codebase.
 
 ---
@@ -96,7 +99,10 @@ Before declaring a task complete and handing it over to downstream agents, verif
 
 *   **Architectural Issues:** If you uncover an architectural limitation or flaw while writing code, do NOT work around it silently. File a formal change request (CR) against the relevant ADR.
 *   **Reviewer Disagreements:** If the `@code-reviewer` requests code changes that directly violate active ADRs or design parameters, file a change request and escalate to the `@tech-lead` for mediation.
-*   **Specification Ambiguities:** If the product spec or user stories contain vague, contradictory, or missing details, do NOT guess. Halt implementation on that path and request clarification from `@product-manager` or `@product-designer`.
+*   **Specification Ambiguities & Clarification Mandate:** If the product spec or user stories contain vague, contradictory, or missing details, do NOT guess. Halt implementation on that path and resolve it immediately through the communication channels determined by your assigned **Role tag** (`FE`/`BE`/`Full-Stack`) from `@tech-lead`:
+    *   **FE (Frontend):** Focus strongly on visual excellence, accuracy, and user experience. If a frontend requirement, layout, flow, or visual spec is unclear, you are explicitly permitted and encouraged to initiate discussions and converse with the **human user, `@product-designer`, or `@product-manager`** to clarify.
+    *   **BE (Backend):** Focus on clean design patterns, schemas, API contracts, and robustness. If a backend requirement, logic flow, schema, or integration contract is unclear, you are explicitly permitted and encouraged to initiate discussions and converse with the **human user or `@product-manager`** to clarify.
+    *   **Full-Stack:** Both FE and BE communication channels are available. Apply both visual and backend quality standards.
 
 ---
 

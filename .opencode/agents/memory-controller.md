@@ -20,7 +20,7 @@ downstream_consumers:
   - "@developer"
   - "@architect"
   - "@product-manager"
-  - "@project-manager"
+  - "@product-manager"
   - "@tech-lead"
   - "@founder"
   - "@researcher"
@@ -251,7 +251,7 @@ Validates that high-risk tasks have loaded required context before execution. Re
 | `database`, `schema`, `migration`, `model`, `table`, `column`, `index`, `sql`, `postgres`, `mongo`, `redis` | Must have loaded DB context in last load |
 | `auth`, `login`, `signin`, `permission`, `oauth`, `jwt`, `session`, `token`, `role`, `acl` | Must have loaded auth context in last load |
 | `dependency`, `npm install`, `package`, `import`, `require`, `yarn add`, `pip install`, `cargo add` | Must have loaded dependency context in last load |
-| `api`, `endpoint`, `route`, `contract`, `handler`, `controller`, `graphql`, `rest` | Must have checked `graph.json` OR loaded API context |
+| `api`, `endpoint`, `route`, `contract`, `handler`, `controller`, `graphql`, `rest` | Must have checked `code-graph.json` OR loaded API context |
 | `deploy`, `release`, `ship`, `ci/cd`, `pipeline`, `infrastructure`, `terraform`, `docker`, `kubernetes` | Must have loaded deploy context in last load |
 | `security`, `vulnerability`, `cve`, `owasp`, `encryption`, `hash`, `salt`, `xss`, `csrf`, `injection` | Must have loaded security context in last load |
 

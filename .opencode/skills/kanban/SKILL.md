@@ -18,7 +18,7 @@ Shows the current state of the Kanban board and allows quick updates. The Kanban
 
 ### Step 1: Check if Kanban exists
 
-Check for `artifacts/output/05-project-management/kanban.md`.
+Check for `artifacts/output/04-planning/kanban.md`.
 
 If it doesn't exist:
 - Recommend running the `develop` skill to initialize it during planning
@@ -58,4 +58,4 @@ Support these operations:
 - **Unblock** — remove blocker
 - **Complete** — mark as done
 
-Update `artifacts/output/05-project-management/kanban.md` and log the change to `artifacts/memory/project-manager-notes.md` via `@memory-controller write`.
+Update `artifacts/output/04-planning/kanban.md` and log the change to `artifacts/memory/product-manager-notes.md` via `@memory-controller write`.

@@ -1,6 +1,6 @@
 # Incident Triage Template
 
-> **Used by:** @project-manager (incident commander) → **Feeds into:** responders, stakeholders
+> **Used by:** @product-manager (incident commander) → **Feeds into:** responders, stakeholders
 > **Save to:** `artifacts/output/08-incidents/INC-NNN/triage.md`
 
 Use this template when a production incident is detected. Fill in as information becomes available — do not wait for completeness.
@@ -11,7 +11,7 @@ Use this template when a production incident is detected. Fill in as information
 
 **Detection Time:** ... (UTC)
 **Detection Source:** [Monitoring alert / User report / Support ticket / Other]
-**Incident Commander:** @project-manager
+**Incident Commander:** @product-manager
 **Severity:** SEV1 / SEV2 / SEV3 / SEV4
 
 ---
@@ -52,12 +52,12 @@ Use this template when a production incident is detected. Fill in as information
 
 | Role | Agent | Status |
 |------|-------|--------|
-| Incident Commander | @project-manager | Active |
+| Incident Commander | @product-manager | Active |
 | Infrastructure | @devops-engineer | Active / Standby |
 | Application | @developer / @tech-lead | Active / Standby |
 | Security | @security-engineer | Active / Standby / N/A |
 | Performance | @performance-engineer | Active / Standby / N/A |
-| Communication | @project-manager | Active |
+| Communication | @product-manager | Active |
 
 ---
 
@@ -66,7 +66,7 @@ Use this template when a production incident is detected. Fill in as information
 | Time (UTC) | Event | Source |
 |------------|-------|-------|
 | ... | First signal / alert | [Monitoring / User report] |
-| ... | Incident declared | @project-manager |
+| ... | Incident declared | @product-manager |
 | ... | Responder assigned | ... |
 | ... | Mitigation applied | ... |
 | ... | Root cause identified | ... |
@@ -99,6 +99,6 @@ Use this template when a production incident is detected. Fill in as information
 
 **Document info:**
 - Version: 1.0
-- Author: @project-manager
+- Author: @product-manager
 - Date: ...
 - Incident: INC-NNN

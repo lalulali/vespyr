@@ -88,7 +88,7 @@ If all web tools fail, proceed with best knowledge and label assumptions clearly
 **Triggered by:** `@researcher market [task description]`
 
 ### Step 1: Read upstream inputs
-- `artifacts/output/00-discovery/idea-brief.md` — target user and key assumptions
+- `artifacts/output/00-discovery/validation-brief.md` or `artifacts/output/00-discovery/idea-brief.md` — target user, core concept, and key assumptions
 
 ### Step 2: Research and write
 1. **Research market size** (TAM, SAM, SOM) — state methodology (top-down vs bottom-up), confidence levels
@@ -105,7 +105,7 @@ Write to `artifacts/output/01-research/market-analysis.md`
 **Triggered by:** `@researcher competitive [task description]`
 
 ### Step 1: Read upstream inputs
-- `artifacts/output/00-discovery/idea-brief.md` — founder's concept and assumptions
+- `artifacts/output/00-discovery/validation-brief.md` or `artifacts/output/00-discovery/idea-brief.md` — founder's concept and assumptions
 - `artifacts/output/01-research/market-analysis.md` — market context (if exists)
 
 ### Step 2: Research and write
