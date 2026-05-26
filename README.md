@@ -48,11 +48,15 @@ Invoke a skill via slash command or mention the founder agent directly:
 | Command | When to use |
 |---------|-------------|
 | `/squad` | Switch between curated agent squads (e.g. `startup`, `build`, `ship`) to optimize context size and skip redundant lifecycle phases |
-| `/idea-validation` | Product concepts — stress-test before investing research cycles |
-| `/game-idea-validation` | Game concepts — player experience, core loop, genre fit |
+| `/validate-idea` | Product concepts — stress-test before investing research cycles |
+| `/validate-game-idea` | Game concepts — player experience, core loop, genre fit |
+| `/help-me` | Conversational next-step navigator. Unsure what to do or where to start? Check phase readiness & get scannable guidance |
+| `/grill-me` | Socratic alignment loop. Pressure-test plans, specs, ideas, or architectural designs before committing |
 | `@founder` or `#founder`| Raw idea — shortcut to jump straight to the founder agent |
 
-Each skill runs its workflow — stress-test the concept, activate the right optional agents, produce an idea brief or validation brief, and hand off to the research phase.
+### 4. Navigate your next steps
+
+If you are ever unsure what to do next, what artifacts/files are missing, or what phase is currently active, just run `/help-me`. It will scan your workspace and give you a conversational navigation recommendation tailored to your exact project state.
 
 ### 5. Let the workflow run
 
@@ -476,27 +480,37 @@ Vespyr organizes complex, multi-agent operations into highly structured **skills
 
 ### Operations, Maintenance & Utility Skills
 
-#### 7. `humanizer` (Utility — On Demand)
+#### 7. `humanize` (Utility — On Demand)
 * **Purpose**: Remove AI-generated writing tells to ensure generated text, emails, code comments, and documentation sound natural, clear, and uniquely human. It detects and eliminates inflated symbolism, passive-voice overuses, copula avoidance, and overused AI vocabulary.
 * **When to use**: Any text artifact needs a pulse, personality, and natural phrasing.
-* **How to invoke**: Command any thinking agent or `@writer`: *"Use the humanizer skill on [text/file]"*.
+* **How to invoke**: Command any thinking agent or `@writer`: *"Use the humanize skill on [text/file]"*.
 
-#### 8. `product-launch` (Post-Dev — Release)
+#### 8. `help-me` (Utility — On Demand)
+* **Purpose**: Conversational next-step navigator that evaluates the current project state, checks active/missing files, scans the skill catalog, and gives a tailored, scannable recommendation on what to do next.
+* **When to use**: If you are unsure where to start on a fresh project or what phase/step is next in an active one.
+* **How to invoke**: Command `help me`, `/help-me`, or `/help-me [query]`.
+
+#### 9. `grill-me` (Utility — On Demand)
+* **Purpose**: Socratic stress-testing loop. Interviews you relentlessly—one question at a time—to pressure-test plans, specifications, ideas, or architectural designs, helping surface hidden assumptions and saving alignment decisions straight to `active-decisions.md`.
+* **When to use**: Before committing to a plan, spec, or design, to make sure it's fully aligned and bulletproof.
+* **How to invoke**: Command `grill me`, `/grill-me`, or `/grill-me [query]`.
+
+#### 10. `product-launch` (Post-Dev — Release)
 * **Purpose**: Orchestrate the transition from development to live production. Runs a rigorous multi-point Release Readiness checklist, facilitates formal Go/No-Go release decisions, prepares infrastructure, and monitors post-release metrics for 24–72 hours.
 * **Key Agents**: `@product-manager`, `@devops-engineer`, `@technical-writer`, `@data-analyst`.
 * **Outputs**: `release-readiness.md`, `go-nogo-decision.md`, `launch-log.md`, and `post-launch-report.md`.
 
-#### 9. `product-iteration` (Post-Launch — Optimization)
+#### 11. `product-iteration` (Post-Launch — Optimization)
 * **Purpose**: Rapidly improve live features by analyzing user behavior patterns, prioritizing enhancements using RICE frameworks, and running agile code loops (max 5 cycles before a retro).
 * **Key Agents**: `@data-analyst`, `@product-manager`, `@product-designer`, `@developer`.
 * **Outputs**: `analytics-insights.md`, `iteration-backlog.md`, `iteration-spec.md`, and `iteration-plan.md`.
 
-#### 10. `incident-response` (Ops — Reactive)
+#### 12. `incident-response` (Ops — Reactive)
 * **Purpose**: Manage production downtime, critical bugs, security vulnerabilities, or performance spikes under strict SLAs. Follows a robust process: triage severity, mitigate user-impact first (rollback/flag off), conduct a blameless 5 Whys Root-Cause Analysis (RCA), deploy QA'd fixes, and update team knowledge.
 * **Key Agents**: `@product-manager` (Incident Commander), `@architect`/`@tech-lead` (RCA), responders (`@devops-engineer`, `@developer`, `@security-engineer`, `@qa-engineer`).
 * **Outputs**: `triage.md`, `mitigation.md`, `rca.md`, and `post-incident-review.md`.
 
-#### 11. `retrospective` (Ops — Continuous Improvement)
+#### 13. `retrospective` (Ops — Continuous Improvement)
 * **Purpose**: Reflect on completed milestones, compare planned vs. actual effort, identify collaboration or handoff bottlenecks, log action items with clear ownership, and run the memory compaction protocol to keep system context lean.
 * **Key Agents**: `@tech-lead`, `@product-manager`, `@architect`.
 * **Outputs**: `execution-review.md`, `process-review.md`, `action-items.md`.
@@ -511,7 +525,7 @@ Vespyr includes a game development variant with game-specific templates and skil
 
 Game-specific templates: `game-idea-brief-template.md`, `game-validation-brief-template.md`, `game-competitive-analysis-template.md`, `game-market-analysis-template.md`
 
-Game-specific skills: `game-idea-validation`, `game-product-exploration`
+Game-specific skills: `validate-game-idea`, `explore-game-idea`
 
 To activate, set the project type in `artifacts/memory/project-context.md`:
 

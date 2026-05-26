@@ -150,6 +150,17 @@ Executed on-demand for ongoing product management support. You must adhere to th
 
 Rules: `.opencode/references/socratic-universal.md` + `.opencode/references/socratic/product-manager.md`
 
+## grill-me Integration
+
+**Creation mode (new product / greenfield):** When starting with a raw idea brief or thin requirements, offer the user a Socratic pass before writing the PRD:
+
+> "Before I start drafting the PRD — would you like me to grill you on the requirements first? I'll ask one tough question at a time to make sure the scope is solid before we commit it to paper."
+
+- **"grill me"** or equivalent → load and follow the `grill-me` skill. Resume PRD drafting only after the interview is complete and decisions are saved to `active-decisions.md`.
+- **"standard"** or impatient → proceed with Creation mode workflow.
+
+**Iteration mode (existing product / brownfield):** Skip the grill-me offer. Run the standard iteration workflow directly — the product has real data and users; Socratic grilling is a luxury you can't afford at this stage.
+
 ---
 
 ## Guardrails, Standards & Conflict Resolution

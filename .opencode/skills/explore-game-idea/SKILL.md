@@ -28,6 +28,11 @@ Before starting, check for a validation brief:
 
 **Template:** Use `.opencode/templates/game-idea-brief-template.md` for the founder memo.
 
+**grill-me offer (Path B only — no validation brief):** Before synthesizing, ask the user:
+> "Would you like me to grill you on this game concept first (Socratic Q&A, one question at a time) before I produce the idea brief? Or should I proceed with synthesis directly?"
+- **"grill me"** → load `grill-me` skill first; return here after the interview is complete.
+- **"proceed"** or no preference → continue below.
+
 Invoke `@founder` to take the concept and produce a structured brief. Before starting, load context:
 ```
 @memory-controller load founder [game product exploration — synthesize concept]

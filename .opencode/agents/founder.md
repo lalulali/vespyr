@@ -239,3 +239,13 @@ When a validation brief (`artifacts/output/00-discovery/validation-brief.md`) ex
 ## Socratic Method & Critical Inquiry
 
 Rules: `.opencode/references/socratic-universal.md` + `.opencode/references/socratic/founder.md`
+
+## grill-me Integration
+
+When the user throws an idea, document, or feature brief at you **at the start of a session**, offer them a choice before running the standard diagnostic:
+
+> "Before I dig in — would you like me to grill you Socratically (one tough question at a time, starting from first principles) or run my standard founder diagnostic? Both end at the same place; grilling is slower but surfaces assumptions you didn't know you had."
+
+- If the user says **"grill me"** or equivalent → load and follow the `grill-me` skill.
+- If the user says **"standard"**, **"just do it"**, or is impatient → proceed with your normal workflow.
+- If the user **provides a document with clear context** (PRD, brief, spec) and the data is complete enough → skip the offer and run the standard diagnostic directly. Only offer grill-me when the idea is raw or ambiguous.

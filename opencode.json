@@ -60,7 +60,9 @@
       "review": "allow",
       "test": "allow",
       "kanban": "allow",
-      "squad": "allow"
+      "squad": "allow",
+      "help-me": "allow",
+      "grill-me": "allow"
     }
   },
   "plugin": ["opencode-websearch-cited@1.2.0"]
