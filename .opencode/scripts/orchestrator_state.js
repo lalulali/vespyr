@@ -39,18 +39,47 @@ function writeState(state) {
   fs.writeFileSync(STATE_FILE, JSON.stringify(state, null, 2), 'utf8');
 }
 
-function createInitialState(name, type) {
+function createInitialState(name, type, squadName = 'full-team') {
+  let squad = null;
+  try {
+    const squadsUtil = require('./squads');
+    squad = squadsUtil.loadSquad(squadName);
+  } catch (e) {
+    squad = { name: 'full-team', agents: [] };
+  }
+
+  const defaultPhases = {
+    validation: { status: 'pending', started_at: null, completed_at: null, agents: ['founder'] },
+    exploration: { status: 'pending', started_at: null, completed_at: null, agents: ['researcher', 'user-researcher'] },
+    design: { status: 'pending', started_at: null, completed_at: null, agents: ['product-manager', 'product-designer'] },
+    development: { status: 'pending', started_at: null, completed_at: null, agents: ['tech-lead', 'developer', 'code-reviewer', 'qa-engineer'] }
+  };
+
+  if (squadName !== 'full-team') {
+    const activeAgents = new Set(squad.agents);
+    for (const phaseKey of Object.keys(defaultPhases)) {
+      defaultPhases[phaseKey].agents = defaultPhases[phaseKey].agents.filter(a => activeAgents.has(a));
+      if (defaultPhases[phaseKey].agents.length === 0) {
+        defaultPhases[phaseKey].status = 'complete';
+      }
+    }
+  }
+
+  let startPhase = 'validation';
+  const phaseOrder = ['validation', 'exploration', 'design', 'development'];
+  for (const phaseKey of phaseOrder) {
+    if (defaultPhases[phaseKey].status !== 'complete') {
+      startPhase = phaseKey;
+      break;
+    }
+  }
+
   return {
-    project: { name, type },
+    project: { name, type, squad: squadName },
     created_at: new Date().toISOString(),
     last_updated: new Date().toISOString(),
-    current_phase: 'validation',
-    phases: {
-      validation: { status: 'pending', started_at: null, completed_at: null, agents: ['founder'] },
-      exploration: { status: 'pending', started_at: null, completed_at: null, agents: ['researcher', 'user-researcher'] },
-      design: { status: 'pending', started_at: null, completed_at: null, agents: ['product-manager', 'product-designer'] },
-      development: { status: 'pending', started_at: null, completed_at: null, agents: ['tech-lead', 'developer', 'code-reviewer', 'qa-engineer'] }
-    },
+    current_phase: startPhase,
+    phases: defaultPhases,
     artifacts: {},
     change_requests: [],
     blockers: [],
@@ -159,15 +188,22 @@ function determineNextAction(state) {
     };
   }
 
-  // Current phase complete, advance to next
+  // Current phase complete, advance to next non-complete phase
   if (phaseIdx < phaseOrder.length - 1) {
-    const nextPhase = phaseOrder[phaseIdx + 1];
-    return {
-      action: 'advance-phase',
-      from: currentPhase,
-      to: nextPhase,
-      reason: `${currentPhase} phase complete, ready for ${nextPhase}`
-    };
+    let nextPhaseIdx = phaseIdx + 1;
+    while (nextPhaseIdx < phaseOrder.length) {
+      const nextPhase = phaseOrder[nextPhaseIdx];
+      const phaseObj = state.phases[nextPhase];
+      if (phaseObj && phaseObj.status !== 'complete') {
+        return {
+          action: 'advance-phase',
+          from: currentPhase,
+          to: nextPhase,
+          reason: `${currentPhase} phase complete, ready for ${nextPhase}`
+        };
+      }
+      nextPhaseIdx++;
+    }
   }
 
   return {
@@ -196,13 +232,24 @@ function main() {
     if (cmd === 'init') {
       let name = 'Untitled';
       let type = 'startup';
+      let squad = 'full-team';
       for (let i = 1; i < args.length; i += 2) {
         if (args[i] === '--name') name = args[i + 1];
         if (args[i] === '--type') type = args[i + 1];
+        if (args[i] === '--squad') squad = args[i + 1];
       }
-      const state = createInitialState(name, type);
+      const state = createInitialState(name, type, squad);
       writeState(state);
-      console.log(JSON.stringify({ success: true, project: name, type, state_file: STATE_FILE }));
+
+      // Pre-create and write project-context.md if artifacts/memory/ exists
+      const memoryDir = path.join(process.cwd(), 'artifacts', 'memory');
+      const projectContextFile = path.join(memoryDir, 'project-context.md');
+      if (fs.existsSync(memoryDir)) {
+        let content = `# Project Context\n\n## [CORE]\nProject: ${name} (${type})\nStack: None\nPhase: ${state.current_phase}\nSprint: none\nBlockers: 0\nSquad: ${squad}\n`;
+        fs.writeFileSync(projectContextFile, content, 'utf8');
+      }
+
+      console.log(JSON.stringify({ success: true, project: name, type, squad, state_file: STATE_FILE }));
     }
 
     if (cmd === 'status') {

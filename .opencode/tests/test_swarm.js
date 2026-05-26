@@ -249,13 +249,33 @@ function testOrchestratorState() {
   const orchestratorSrc = fs.readFileSync(path.join(SCRIPTS, 'orchestrator_state.js'), 'utf8');
   const patched = orchestratorSrc
     .replace(/const STATE_FILE = .*/, `const STATE_FILE = '${stateFile}';`)
-    .replace(/const OUTPUT_DIR = .*/, `const OUTPUT_DIR = '${outputDir}';`);
+    .replace(/const OUTPUT_DIR = .*/, `const OUTPUT_DIR = '${outputDir}';`)
+    .replace(/require\('\.\/squads'\)/g, `require('${path.join(SCRIPTS, 'squads.js').replace(/\\/g, '\\\\')}')`);
   fs.writeFileSync(testScript, patched);
 
   // Test 1: Init
   const r1 = run(`node ${testScript} init --name "Test" --type startup`);
   const j1 = JSON.parse(r1.stdout);
   assert(j1.success === true, `Expected init success, got: ${j1.error}`);
+
+  // Test 1b: Squad build verification
+  const rInitSquad = run(`node ${testScript} init --name "BuildProject" --type startup --squad build`);
+  const jInitSquad = JSON.parse(rInitSquad.stdout);
+  assert(jInitSquad.success === true, `Expected init with build squad success`);
+  assert(jInitSquad.squad === 'build', `Expected squad build, got: ${jInitSquad.squad}`);
+
+  const rStatusSquad = run(`node ${testScript} status`);
+  const jStatusSquad = JSON.parse(rStatusSquad.stdout);
+  assert(jStatusSquad.project.squad === 'build', `Expected squad in project status to be build`);
+  assert(jStatusSquad.phases.validation.status === 'complete', `Expected validation phase to be auto-completed/skipped`);
+  assert(jStatusSquad.phases.exploration.status === 'complete', `Expected exploration phase to be auto-completed/skipped`);
+  assert(jStatusSquad.phases.design.status === 'complete', `Expected design phase to be auto-completed/skipped`);
+  assert(jStatusSquad.current_phase === 'development', `Expected start phase for build squad to be development, got: ${jStatusSquad.current_phase}`);
+
+  // Re-initialize standard project for subsequent tests
+  const rReInit = run(`node ${testScript} init --name "Test" --type startup`);
+  const jReInit = JSON.parse(rReInit.stdout);
+  assert(jReInit.success === true, `Re-initialized standard project`);
 
   // Test 2: Status
   const r2 = run(`node ${testScript} status`);

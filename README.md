@@ -47,6 +47,7 @@ Invoke a skill via slash command or mention the founder agent directly:
 
 | Command | When to use |
 |---------|-------------|
+| `/squad` | Switch between curated agent squads (e.g. `startup`, `build`, `ship`) to optimize context size and skip redundant lifecycle phases |
 | `/idea-validation` | Product concepts — stress-test before investing research cycles |
 | `/game-idea-validation` | Game concepts — player experience, core loop, genre fit |
 | `@founder` or `#founder`| Raw idea — shortcut to jump straight to the founder agent |
@@ -67,6 +68,10 @@ Each agent loads context from shared memory via `@memory-controller`, produces i
 
 ```
 .opencode/
+├── squads/                    # Curated squad presets (7 presets, e.g. startup, build)
+│   ├── startup.md
+│   ├── build.md
+│   └── ...
 ├── agents/                    # Agent definitions (23 agents)
 │   ├── founder.md
 │   ├── product-manager.md
@@ -616,6 +621,24 @@ Templates in `.opencode/templates/` define output formats. Add required fields, 
 - `session-summaries/latest.md` — most recent session context (~100 tokens)
 
 Agents never read these files directly. They call `@memory-controller load [agent-type] [task]` which returns filtered, relevant context using hybrid keyword+semantic scoring (~1,000 tokens vs ~15,000 raw). See `.opencode/agents/memory-controller.md` for the full protocol.
+
+### Configuring and defining squads
+
+Squads are defined as Markdown files inside `.opencode/squads/` with a YAML frontmatter block listing the active agents:
+
+```markdown
+---
+name: startup
+description: Early-stage product from idea to MVP
+agents:
+  - founder
+  - developer
+  - ...
+---
+```
+
+You can create new squads by adding a `{squad-name}.md` file inside `.opencode/squads/` specifying your custom subset of agents. 
+Once created, you can switch to your custom squad using the command `/squad {squad-name}`.
 
 ### Configuring optional agents
 

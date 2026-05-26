@@ -2,15 +2,15 @@
 
 This document tracks what's planned, what's in progress, and what's done. It's a living document — priorities shift based on community feedback and adoption patterns.
 
-Current status: **v1.0 — opencode native, shipped.**
+Current status: **v1.1 — squad-based team presets, shipped.**
 
 ---
 
-## Now — v1.1 (Active)
+## Shipped — v1.1
 
 ### Squad-based team presets
 
-Right now Vespyr ships as one team of 23 agents. Most users don't need all of them for every project. The plan is to introduce **squads** — curated subsets of agents for specific use cases.
+Right now Vespyr ships as one team of 22 agents. Most users don't need all of them for every project. The plan is to introduce **squads** — curated subsets of agents for specific use cases.
 
 A squad is a named configuration that activates a subset of agents, sets their shared memory defaults, and optionally pre-configures the workflow phases relevant to that squad's purpose.
 
@@ -18,7 +18,7 @@ A squad is a named configuration that activates a subset of agents, sets their s
 
 | Squad | Agents included | Use case |
 |---|---|---|
-| `full-team` | All 23 agents | Default — full product development lifecycle |
+| `full-team` | All 22 agents | Default — full product development lifecycle |
 | `startup` | founder, market-researcher, competitor-analyzer, user-researcher, product-manager, product-designer, architect, tech-lead, developer, code-reviewer, qa-engineer, devops-engineer | Early-stage product from idea to MVP |
 | `build` | architect, tech-lead, developer, code-reviewer, qa-engineer, devops-engineer, technical-writer | You have a spec, you need to build it |
 | `research` | founder, market-researcher, competitor-analyzer, user-researcher, product-manager | Discovery and validation only, no code |
@@ -41,7 +41,7 @@ Squad definitions will live in `.opencode/squads/*.md` with a manifest listing w
 
 ---
 
-## Next — v1.2
+## Now — v1.2 (Active)
 
 ### `npx create-vespyr` installer
 
@@ -220,7 +220,8 @@ Hosted shared memory and artifact storage for teams. Multiple developers working
 
 | Version | Status | What shipped |
 |---|---|---|
-| v1.0 | ✅ Shipped | 23 agents, opencode native, delegation pattern, shared memory, game mode, humanizer skill |
+| v1.1 | ✅ Shipped | Squad-based team presets, active phase skipping, CLI and project-context integration |
+| v1.0 | ✅ Shipped | 22 agents, opencode native, delegation pattern, shared memory, game mode, humanizer skill |
 
 ---
 

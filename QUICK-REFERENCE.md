@@ -6,6 +6,19 @@ PHASES
 Product:   Validation (Red) → Exploration (Indigo) → Design (Amber) → Development (Green)
 Games:     Validation (Pink) → Exploration (Purple) → Design (Amber) → Development (Green)
 
+SQUADS (curated presets)
+────────────────────────
+full-team    All 22 agents (default)
+startup      founder, researcher, competitor, user-researcher, PM, designer, architect, tech-lead, developer, reviewer, QA, devops (Idea to MVP)
+build        architect, tech-lead, developer, reviewer, QA, devops, technical-writer (Build from spec)
+research     founder, researcher, competitor, user-researcher, PM (Validation only, no code)
+design       PM, designer, ux-researcher, data-analyst (Strategy & sprint)
+ship         developer, reviewer, QA, security, performance, devops (Quality & delivery)
+game-studio  founder (game), researcher, user-researcher, PM, designer, architect, tech-lead, developer, QA (Game variant)
+
+Switch squad:  /squad [squadName]
+Show squads:   /squad show
+
 PRIMARY AGENTS (by phase)
 ──────────────────────────────────────────────────
 Validation     @founder              Socratic stress-test (idea or game concept)

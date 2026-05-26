@@ -148,7 +148,7 @@ Create these directories under `artifacts/`:
 - `input/flows/` — user flows, journey maps, wireframes
 
 Create `artifacts/memory/` with:
-- `project-context.md` — pre-populate with discovered project info
+- `project-context.md` — pre-populate with discovered project info and chosen squad preset (e.g. `Squad: startup` or chosen `--squad` flag, defaulting to `full-team` if unspecified)
 - `active-decisions.md` — empty, ready for entries
 - `patterns-and-conventions.md` — pre-populate with discovered code patterns
 - `lessons-learned.md` — empty
@@ -206,6 +206,7 @@ Return a summary:
 - `/status` — Quick project state snapshot
 - `/memory` — Search archived project context
 - `/phase` — Show/switch phases
+- `/squad` — Show available agent squads and switch active squad
 - `/delegate` — Quick I/O offload
 - `/plan` — Standalone execution planning
 - `/review` — Standalone code review

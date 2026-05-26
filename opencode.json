@@ -59,7 +59,8 @@
       "plan": "allow",
       "review": "allow",
       "test": "allow",
-      "kanban": "allow"
+      "kanban": "allow",
+      "squad": "allow"
     }
   },
   "plugin": ["opencode-websearch-cited@1.2.0"]
