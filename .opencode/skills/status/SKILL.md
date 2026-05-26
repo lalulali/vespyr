@@ -16,64 +16,56 @@ Returns a concise status report of the project. No workflow, no phases — just 
 
 ## Workflow
 
-### Step 1: Load memory status
+### Step 1: Load orchestrator status state
+
+Read `artifacts/output/pipeline-state.json` (or run `node .opencode/scripts/orchestrator_state.js status` via `@executor`) to extract:
+- Project metadata (`name`, `type`, active `squad`)
+- Current active `"current_phase"`
+- Complete `"artifacts"` mapping (lists which deliverables exist and their exact versions)
+- Active `"blockers"` and open `"change_requests"` (status: `OPEN`)
+
+### Step 2: Load memory status
 
 ```
 @memory-controller status
 ```
 
-This returns health snapshot of all memory files — sizes, entry counts, archive status.
-
-### Step 2: Load active blockers
-
-```
-@memory-controller load blockers
-```
-
-Returns all active blockers with owners and ETAs.
+This returns a health snapshot of all memory files — sizes, entry counts, archive status.
 
 ### Step 3: Load last session summary
 
 Read `artifacts/memory/session-summaries/latest.md` directly (it's ~100 tokens, safe to load in full).
 
-### Step 4: Check artifact tree
+### Step 4: Check active blockers and CRs
 
-Verify which phase directories under `artifacts/output/` have content:
-- `00-discovery/` — validation/idea briefs
-- `01-research/` — market analysis, personas
-- `02-strategy/` — PRD, specs, user stories
-- `03-architecture/` — ADRs
-- `04-planning/` — Kanban board, planning decisions
-- `06-launch/` — release readiness, go/no-go
-- `07-iteration/` — analytics, iteration results
-- `08-incidents/` — active incidents
-- `09-retro/` — action items
+Cross-reference `project-context.md` blockers, `@memory-controller load blockers` output, and the registered blockers and open change requests in `pipeline-state.json`.
 
 ### Step 5: Report
 
-Return a concise status:
+Return a concise, premium status card:
 
 ```
-## Project Status
-**Phase:** {current phase based on latest artifacts}
+## Project Status: {project.name} ({project.type})
+**Active Phase:** {current_phase (validation / exploration / design / development)}
+**Squad Preset:** {project.squad}
 **Operation Mode:** {from project-context.md}
 
 ### Active Blockers
-{list or "none"}
+{list blockers from pipeline-state.json's blockers list, or "None"}
+
+### Open Change Requests (CRs)
+{list open CRs with IDs, sender, receiver, target, and issue, or "None"}
 
 ### Last Session
 {from session-summaries/latest.md}
 
 ### Artifact Progress
-- Discovery: {yes/no}
-- Research: {yes/no}
-- Strategy: {yes/no}
-- Architecture: {yes/no}
-- Planning: {yes/no}
-- Kanban: {initialized/not}
-- Launch: {yes/no}
-- Iteration: {yes/no}
+{For each phase (validation, exploration, design, development), list all required artifacts from pipeline-state.json's artifacts registry, indicating whether they exist and their active version number, e.g.:
+- 00-discovery/validation-brief.md: [Exists ✅ (Version: X)] or [Missing ❌]
+- 01-research/market-analysis.md: [Exists ✅ (Version: Y)] or [Missing ❌]
+}
 
 ### Memory Health
 {from @memory-controller status}
 ```
+

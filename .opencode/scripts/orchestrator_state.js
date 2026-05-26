@@ -222,6 +222,7 @@ function main() {
   node orchestrator_state.js next
   node orchestrator_state.js complete --agent founder --artifact idea-brief.md
   node orchestrator_state.js file-cr --from developer --to product-manager --target user-stories.md --issue "..."
+  node orchestrator_state.js set-phase --phase design
   node orchestrator_state.js validate --phase design`);
     process.exit(0);
   }
@@ -378,6 +379,61 @@ function main() {
       state.last_updated = new Date().toISOString();
       writeState(state);
       console.log(JSON.stringify({ success: true, cr_id: crId, cr }));
+    }
+
+    if (cmd === 'set-phase') {
+      let phase = null;
+      for (let i = 1; i < args.length; i += 2) {
+        if (args[i] === '--phase') phase = args[i + 1];
+      }
+      if (!phase) {
+        console.error('Missing --phase');
+        process.exit(1);
+      }
+      const state = readState();
+      if (!state) {
+        console.log(JSON.stringify({ error: 'No pipeline state found. Run init first.' }));
+        process.exit(1);
+      }
+
+      const phaseOrder = ['validation', 'exploration', 'design', 'development'];
+      if (!phaseOrder.includes(phase)) {
+        console.error(JSON.stringify({ error: `Invalid phase: ${phase}. Must be one of ${phaseOrder.join(', ')}` }));
+        process.exit(1);
+      }
+
+      const oldPhase = state.current_phase;
+      state.current_phase = phase;
+
+      if (state.phases[phase] && state.phases[phase].status === 'pending') {
+        state.phases[phase].status = 'in-progress';
+        state.phases[phase].started_at = new Date().toISOString();
+      }
+
+      state.history.push({
+        action: 'phase-switch',
+        from: oldPhase,
+        to: phase,
+        timestamp: new Date().toISOString()
+      });
+
+      state.last_updated = new Date().toISOString();
+      writeState(state);
+
+      // Sync back to project-context.md
+      const memoryDir = path.join(process.cwd(), 'artifacts', 'memory');
+      const projectContextFile = path.join(memoryDir, 'project-context.md');
+      if (fs.existsSync(memoryDir) && fs.existsSync(projectContextFile)) {
+        try {
+          let content = fs.readFileSync(projectContextFile, 'utf8');
+          content = content.replace(/Phase:\s*\S+/g, `Phase: ${phase}`);
+          fs.writeFileSync(projectContextFile, content, 'utf8');
+        } catch (err) {
+          // Sync failure shouldn't crash the script, but print a warning
+        }
+      }
+
+      console.log(JSON.stringify({ success: true, from: oldPhase, to: phase }));
     }
 
     if (cmd === 'validate') {

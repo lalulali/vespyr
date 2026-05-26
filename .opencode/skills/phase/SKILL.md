@@ -31,37 +31,44 @@ Displays the current phase in the product pipeline, allows switching between pha
 
 ### Step 1: Detect current phase
 
-Read `artifacts/memory/project-context.md` for the current phase. If not set, infer from the latest artifact in `artifacts/output/`:
+Read `artifacts/output/pipeline-state.json` (or execute `node .opencode/scripts/orchestrator_state.js status`) to read the canonical `"current_phase"`. 
 
-- `00-discovery/` has content → Phase -1 or 0
-- `01-research/` has content → Phase 1
-- `02-strategy/` has content → Phase 2
-- `03-architecture/` has content → Phase 3
-- `04-planning/` has content → Phase 4 (Planning & Kanban)
-- `06-launch/` has content → Phase 7
-- `07-iteration/` has content → Phase 8
-- `08-incidents/` has content → Incident
-- `09-retro/` has content → Phase 9
+If not initialized, fall back to reading `artifacts/memory/project-context.md` for the current phase, or infer from the latest artifact in `artifacts/output/`:
+- `00-discovery/` has content → validation
+- `01-research/` has content → exploration
+- `02-strategy/` has content → design
+- `03-architecture/` has content → design
+- `04-planning/` has content → development
+- `06-launch/` has content → development
+- `07-iteration/` has content → development
+- `08-incidents/` has content → development
+- `09-retro/` has content → development
 
 ### Step 2: Report
 
-Return:
+Return a concise report reflecting the active orchestrator state:
 
 ```
-## Current Phase: {phase name}
-**Skill:** {skill name}
+## Current Phase: {phase name (validation / exploration / design / development)}
+**Active Squad:** {squad from pipeline-state.json}
+**Phase Status:** {status from pipeline-state.json's phases[phase]}
 **Operation Mode:** {from project-context.md}
 
 ### Artifacts Produced
-{list of artifacts in the current phase's output directory}
+{list of artifacts and their versions in the current phase from pipeline-state.json's artifacts mapping}
 
-### Next Phase
-{next phase name} — load with `{skill name}`
+### Next Phase Action
+{Run `node .opencode/scripts/orchestrator_state.js next` to show the next logical action}
 ```
 
 ### Step 3: Switch phase (on request)
 
 If the user requests a phase switch:
-1. Update `artifacts/memory/project-context.md` with the new phase
+1. Run via `@executor`:
+   ```bash
+   node .opencode/scripts/orchestrator_state.js set-phase --phase {targetPhase}
+   ```
+   *(Note: This programmatically updates the current_phase, records it in the history, sets appropriate in-progress timestamps, and automatically syncs `artifacts/memory/project-context.md`'s `Phase:` field).*
 2. Log the change to `artifacts/memory/active-decisions.md`
-3. Load the corresponding skill
+3. Load the corresponding skill for the new phase
+
