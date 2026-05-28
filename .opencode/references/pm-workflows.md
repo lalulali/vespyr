@@ -27,8 +27,9 @@ Follow the PRD template exactly (`.opencode/templates/prd-template.md`). Key rul
     *   Out-of-scope list (crucial for scope discipline).
     *   Risks and dependencies.
     *   Non-functional requirements (performance, security, accessibility).
-*   **Must reference:** A summary table of user stories mapping to precise **granular, modular functional capabilities** in Section 5.3.
-    *   *Granularity Check:* DO NOT list broad end-to-end user journeys (e.g. "Rina scans QR, completes form...") as stories in the PRD. Instead, list separate, sprint-assigned functional capabilities (e.g. `US-001 | QR Code Entry Point | Must-have | Sprint 1`, `US-002 | Basic Shipping Form | Must-have | Sprint 1`).
+*   **Must reference:** A summary table of Functional Requirements (`FR-XXX`) mapping to strategic capabilities in Section 5.3.
+    *   *Format & Granularity Check:* DO NOT list broad end-to-end user journeys (e.g. "Rina scans QR, completes form...") as stories. Instead, list separate Functional Requirements in the exact format:
+        `FR: user can [activity]` followed by optional `- detail 1`, `- detail 2` using `<br>` tags in the table cell (e.g. `FR-001 | Must-have | FR: user can scan QR code to access form<br>- validate code uniqueness<br>- handle expired codes`).
 *   **Validation Check:** If operating in `semi-autonomous` mode (and not bypassed), you MUST pause here and ask the user to validate the PRD. Do not proceed to user stories until the PRD is approved.
 
 ### Step 3: Write the User Stories
@@ -37,7 +38,7 @@ Only AFTER the PRD is finalized and validated, generate the User Stories.
 *   **PRD & Spec Base:** What is written in the PRD is the absolute business base, and what is designed in the Product Spec is the absolute interaction base. 
 *   **Spec Alignment Rules:** The `@product-manager` must verify that every user story is structurally aligned with the screen designs, layouts, and interaction flows defined in `product-spec.md`.
 *   **AC Mapping:** All screen transitions, loading, success, empty, and error states documented in the product spec must be translated into explicit acceptance criteria (Happy, Unhappy, Edge) inside the user stories.
-*   **Sync:** The ID, Title, Priority, Sprint, and Summary of each story in `user-stories.md` must be perfectly synchronized with Section 5.3 of the PRD (`requirements.md`).
+*   **Traceability:** User Stories in `user-stories.md` must trace back explicitly to their corresponding Functional Requirement in the PRD (e.g., `Traces to PRD: Section 5.3: FR-001`). A single Functional Requirement (`FR-XXX`) can translate into one or more modular User Stories (`US-XXX`).
 
 Follow the user story template exactly (`.opencode/templates/user-story-template.md`). Key rules:
 *   **Audience:** Engineering — developers, QA, architects, tech lead.
@@ -46,7 +47,7 @@ Follow the user story template exactly (`.opencode/templates/user-story-template
     *   **Focus on Modular Capabilities:** Every user story must represent a single block of functionality. Slice multi-step user scenarios into separate, independent stories (e.g., separating input, payment, processing, and printing).
     *   **NO Persona Journeys:** Never use persona narrative scenarios or physical/subjective user contexts (e.g., "Event attendee ships purchase", "Budi completes form while walking") as user stories. Focus purely on system-level interactions (user action + system response).
     *   **Sprint Allocation:** Assign every story to a specific target Sprint (e.g., Sprint 1, Sprint 2).
-    *   **Perfect Sync:** The ID, Title, Priority, Sprint, and Summary of each story in `user-stories.md` must be perfectly synchronized with Section 5.3 of the PRD (`requirements.md`).
+    *   **Traceability Sync:** Every User Story (`US-XXX`) in `user-stories.md` must map back to a Functional Requirement (`FR-XXX`) from Section 5.3 of the PRD (`requirements.md`) via its `Traces to PRD` field.
 *   **Must include for every story:**
     *   Narrative (As a / I want / so that).
     *   Business requirement (stakeholder impact, value, priority rationale).
@@ -60,8 +61,8 @@ Follow the user story template exactly (`.opencode/templates/user-story-template
  
 ### Step 4: Cross-validate (CRITICAL STEP)
 Before saving, run this checklist — every box must be checked:
-*   [ ] Every PRD feature has at least one user story.
-*   [ ] Every user story traces back to a PRD feature.
+*   [ ] Every PRD Functional Requirement (`FR-XXX`) has at least one User Story (`US-XXX`).
+*   [ ] Every User Story traces back to a PRD Functional Requirement (`FR-XXX`) via `Traces to PRD`.
 *   [ ] All user stories strictly follow the requirements in the PRD and the visual/interaction flows in the Product Spec with zero divergences or omission of spec details.
 *   [ ] No implementation detail appears in the PRD.
 *   [ ] No business rationale is missing from user stories.

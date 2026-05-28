@@ -91,24 +91,25 @@ CRITICAL RULE FOR PRODUCT MANAGERS:
 4. DO NOT use previous/legacy persona-based stories. Focus strictly on functional capabilities.
 -->
 
-Provide a brief summary of the functional requirements and features. These map directly to the user stories. Full details are in the companion user-story document.
+Provide a brief summary of the functional requirements. These are strategic capabilities that will be translated into detailed user stories in the companion `user-stories.md` document.
 Reference: `artifacts/output/02-strategy/user-stories.md`
 
-| Feature / Story ID | Title | Priority | Sprint | Functional Summary |
-|--------------------|-------|----------|--------|--------------------|
-| US-001 | [Active-voice Title of Modular Capability (e.g., User Authentication)] | [Must-have / Should-have / Could-have] | [Sprint X (e.g., Sprint 1)] | [Description of digital interaction and system response (e.g., User logs in via secure credentials form)] |
-| US-002 | [Active-voice Title of next Capability (e.g., Password Recovery)] | [Must-have / Should-have / Could-have] | [Sprint X (e.g., Sprint 1)] | [Description of digital interaction and system response (e.g., User requests reset link via email)] |
+| Requirement ID | Category | Description | Priority |
+|----------------|----------|-------------|----------|
+| FR-001 | Authentication | FR: user can login with secure credentials<br>- validate email format<br>- encrypt passwords at rest | [Must-have / Should-have / Could-have] |
+| FR-002 | Authentication | FR: user can request password reset link via email<br>- generate single-use token valid for 1 hour<br>- send transactional email containing secure reset link | [Must-have / Should-have / Could-have] |
+
 
 ## 6. Non-Functional Requirements
 
-| Category | Requirement | Priority |
-|----------|-------------|----------|
-| Performance | e.g., Page load < 2s | Must-have |
-| Security | e.g., All PII encrypted at rest | Must-have |
-| Scalability | e.g., Support 10k concurrent users | Should-have |
-| Compliance | e.g., GDPR/CCPA compliant | Must-have |
-| Accessibility | e.g., WCAG 2.1 AA | Must-have |
-| ML/AI (if applicable) | e.g., Prediction accuracy > 90% | Must-have |
+| Requirement ID | Category | Description | Priority |
+|----------------|----------|-------------|----------|
+| NFR-001 | Performance | NFR: system must load pages in under 2 seconds<br>- measure home page loads<br>- measure dashboard responsiveness | Must-have |
+| NFR-002 | Security | NFR: system must encrypt all PII data at rest<br>- encrypt user email addresses<br>- encrypt phone numbers | Must-have |
+| NFR-003 | Scalability | NFR: system must support 10k concurrent users<br>- conduct load testing<br>- optimize query caching | Should-have |
+| NFR-004 | Compliance | NFR: system must be fully GDPR and CCPA compliant<br>- automate right-to-be-forgotten requests<br>- log compliance audit events | Must-have |
+| NFR-005 | Accessibility | NFR: system must conform to WCAG 2.1 AA guidelines<br>- enable full keyboard navigation<br>- provide high-contrast UI states | Must-have |
+| NFR-006 | ML/AI | NFR: prediction models must maintain accuracy > 90%<br>- validate baseline performance on test set<br>- monitor prediction drift | Must-have |
 
 ## 7. Timeline & Phases
 

@@ -122,10 +122,10 @@ Use this when building a new product or major feature from scratch. You must fol
    - Only AFTER the PRD is finalized and validated, generate the User Stories.
    - **Crucial PRD & Product Spec Alignment:** All user stories MUST strictly follow and satisfy both the approved requirements (PRD / `requirements.md`) and the detailed Product Spec (`product-spec.md`). You must cross-reference the product spec to guarantee that all screen visual layouts, user flows, loading states, success states, error states, and interaction behaviors documented in the spec are fully mapped into the acceptance criteria (AC-H, AC-U, AC-E) of the respective user stories. No story can conflict with or omit details from the approved specs.
    - **Granularity & Slicing Standards:** Formulate every story as a **modular functional capability** (e.g. "QR Code Entry Point", "Basic Shipping Form", "QRIS Payment Integration") mapped to a single, testable developer unit of work. **DO NOT** use broad persona scenarios/journeys (e.g. "Event attendee ships purchase: Rina scans QR, completes form, pays...") as user stories. Physical/subjective user contexts must be completely avoided.
-   - **Sprint Allocation & Sync:** Ensure every story has a target Sprint. Section 5.3 in the PRD (`requirements.md`) and the companion `user-stories.md` must be in perfect synchronization (ID, Title, Priority, Sprint, Summary).
+   - **Sprint Allocation & Traceability:** Ensure every story has a target Sprint. Derive granular, sprint-ready User Stories (`US-XXX`) in `user-stories.md` from the Functional Requirements (`FR-XXX`) defined in Section 5.3 of the PRD (`requirements.md`). A single Functional Requirement (`FR-XXX`) can map to one or more modular User Stories (`US-XXX`). Each user story must populate its `Traces to PRD` field with the corresponding `FR-XXX` ID.
    - **Traceability to Specifications:** Map each user story explicitly to its corresponding product spec section, screen, or user flow (e.g. `Section 3.1: Screen: Login, Flow: 2.1 Happy Path`) using the `Traces to Product Spec` metadata field. Structure Section 5 (`UI / UX Notes`) in each story to link directly to screen, flow, and state definitions.
    - Ensure they are precise, trace to PRD features, and cover Happy path AC-H*, Unhappy path AC-U*, Edge cases AC-E*.
-5. **Cross-validate** (check traceability, unique sequential story IDs, NFR coverage, and perfect PRD table sync).
+5. **Cross-validate** (check traceability, unique sequential story IDs, NFR coverage, and perfect FR-to-Story traceability).
 6. **Coordinate with @data-analyst** (SMART metrics, instrumentation).
 7. **Seed and Initialize the Kanban board** (`artifacts/output/04-planning/kanban.md`):
    - You are solely responsible for creating and seeding the Kanban board.
@@ -176,7 +176,7 @@ All operational guardrails, formatting standards, and conflict resolution protoc
 3. **Delegated Writes:** You do not write files directly; delegate all write and edit operations to `@writer`.
 4. **Conflict Resolution:** Facilitate decisions via structured frameworks. If research contradicts assumptions, present evidence to `@founder` for a final call.
 5. **Feature Design Interaction:** In semi-autonomous mode, you must pause and seek feature approval before writing final PRD and stories, unless bypassed.
-6. **Story Granularity & PRD Sync (NON-NEGOTIABLE):** You must slice user requirements into modular, sprint-assigned functional capabilities, never high-level persona journeys or scenarios. Section 5.3 of the PRD (`requirements.md`) and `user-stories.md` must sync perfectly on ID, Title, Priority, Sprint, and Summary. All legacy persona stories are deprecated.
+6. **Story Granularity & PRD Traceability (NON-NEGOTIABLE):** You must slice user requirements into modular, sprint-assigned functional capabilities, never high-level persona journeys or scenarios. Translate the Functional Requirements (`FR-XXX`) from Section 5.3 of the PRD (`requirements.md`) into one or more granular, sprint-ready User Stories (`US-XXX`) in `user-stories.md`, ensuring clear traceability (using `Traces to PRD: FR-XXX`). All legacy persona stories are deprecated.
 
 ## Outputs
 | Artifact | Location | Mode |
