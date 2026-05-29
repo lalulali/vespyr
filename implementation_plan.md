@@ -472,14 +472,14 @@ function transpileCursorMDC(agentsDir, outputDir) {
 
 ## 7. Adjustments to the `/init` Command (`init.md`)
 
-The `/init` command inside `.agents/commands/init.md` will be rewritten to be harness-agnostic. Below is the complete replacement content:
+The `/init` command inside `.agents/commands/init.md` will be rewritten to dynamically adapt its generated files based on the detected or active harness. Below is the complete specification:
 
 ```markdown
 # /init — Bootstrap a Vespyr-Powered Project
 
 ## What this command does
 
-Initializes a project for use with the Vespyr multi-agent engine. It analyzes the target directory, generates a `project-context.md`, creates root `AGENTS.md` and `agent.md` files, and configures harness integration points.
+Initializes a project for use with the Vespyr multi-agent engine. It analyzes the target directory, generates a `project-context.md`, and dynamically scaffolds the root reference files (`AGENTS.md`, `agent.md`, and `CLAUDE.md`) using a unified format but with paths tailored to the detected harnesses.
 
 ## When to use
 
@@ -525,9 +525,21 @@ Create or update `artifacts/memory/project-context.md`:
 - **Active Decisions**: None yet
 ```
 
-### Step 3: Bootstrap root files
+### Step 3: Scaffold Unified Root Reference Files (Harness-Specific Adjustments)
 
-If `AGENTS.md` or `agent.md` do not exist, create them from `.agents/templates/` (see Section 10 of the implementation plan for template content).
+The `/init` command dynamically adjusts the paths and prefixes of the generated files to align perfectly with the target harness environment. All three files share the exact same core formatting, list of 22 personas, 24 workflows, shared memory protocols, and the Karpathy-inspired core behavioral guidelines, differing only in harness directory adaptations:
+
+1. **`agent.md`** (Tailored for OpenCode):
+   - Scaffolded at target root.
+   - References the `.opencode/` directory prefix for all paths (e.g. `@.opencode/agents/founder.md` and `.opencode/skills/`).
+
+2. **`AGENTS.md`** (Generic Multi-Harness):
+   - Scaffolded at target root.
+   - References the generic `[.harness-folder]/` directory prefix so it remains highly portable across Cursor, Windsurf, Claude Code, and Kiro.
+
+3. **`CLAUDE.md`** (Tailored for Claude Code):
+   - Scaffolded at target root if the `.claude/` directory is detected or active.
+   - References the `.claude/` directory prefix for all paths (e.g. `@.claude/agents/founder.md` and `.claude/skills/`).
 
 ### Step 4: Verify harness integration
 
@@ -553,9 +565,9 @@ Print a summary of detected harnesses.
 
 ### Migration Notes
 When updating `init.md` in the source:
-1. **Replace** the entire content of `.agents/commands/init.md` with the above.
+1. **Replace** the entire content of `.agents/commands/init.md` with the dynamic harness-adjusting implementation.
 2. **Verify** that the old version (which referenced `.opencode/` exclusively) is fully replaced.
-3. **Test** by running `/init` in a blank test project and asserting that all generated paths reference `.agents/`, not `.opencode/`.
+3. **Test** by running `/init` in a blank test project and asserting that all generated paths reference their respective target harness prefixes correctly.
 
 ---
 
