@@ -122,8 +122,17 @@ Use this when building a new product or major feature from scratch. You must fol
    - Only AFTER the PRD is finalized and validated, generate the User Stories.
    - **Crucial PRD & Product Spec Alignment:** All user stories MUST strictly follow and satisfy both the approved requirements (PRD / `requirements.md`) and the detailed Product Spec (`product-spec.md`). You must cross-reference the product spec to guarantee that all screen visual layouts, user flows, loading states, success states, error states, and interaction behaviors documented in the spec are fully mapped into the acceptance criteria (AC-H, AC-U, AC-E) of the respective user stories. No story can conflict with or omit details from the approved specs.
    - **Granularity & Slicing Standards:** Formulate every story as a **modular functional capability** (e.g. "QR Code Entry Point", "Basic Shipping Form", "QRIS Payment Integration") mapped to a single, testable developer unit of work. **DO NOT** use broad persona scenarios/journeys (e.g. "Event attendee ships purchase: Rina scans QR, completes form, pays...") as user stories. Physical/subjective user contexts must be completely avoided.
+   - **Narrative Title Header Standard:** The H3 header of the User Story must be the active narrative itself, formatted precisely as `### User Story: As a [type of user], I want [goal], so that [benefit / reason]`. Do not use a separate descriptive title or a separate "Narrative" section.
    - **Sprint Allocation & Traceability:** Ensure every story has a target Sprint. Derive granular, sprint-ready User Stories (`US-XXX`) in `user-stories.md` from the Functional Requirements (`FR-XXX`) defined in Section 5.3 of the PRD (`requirements.md`). A single Functional Requirement (`FR-XXX`) can map to one or more modular User Stories (`US-XXX`). Each user story must populate its `Traces to PRD` field with the corresponding `FR-XXX` ID.
    - **Traceability to Specifications:** Map each user story explicitly to its corresponding product spec section, screen, or user flow (e.g. `Section 3.1: Screen: Login, Flow: 2.1 Happy Path`) using the `Traces to Product Spec` metadata field. Structure Section 5 (`UI / UX Notes`) in each story to link directly to screen, flow, and state definitions.
+   - **High-Level Backlog Tree Summary:** At the very top of `user-stories.md`, generate a high-level tree-structured summary mapping Epics, Features, and User Stories. By default, use this specific formatting structure:
+      ```
+      Epic: [Epic Name]
+          ├── Feature: [Feature Name]
+          │   ├── User Story: [US-XXX] - [Title]
+      ```
+      *Note: This specific tree hierarchy is the default format, but always adapt to and use any custom summary format specified or provided by the user if needed.*
+   - **Hierarchical Document Structure:** Structure the `user-stories.md` file using the Epic and Feature blocks defined in `.opencode/templates/user-story-template.md`. Group all modular user stories under their corresponding Feature blocks, and Features under Epic blocks. Every Epic and Feature must be fully explained with all metadata fields (e.g. tracker, parent, purpose, phase, functional specification, success criteria, FRs mapped) in their respective blocks.
    - Ensure they are precise, trace to PRD features, and cover Happy path AC-H*, Unhappy path AC-U*, Edge cases AC-E*.
 5. **Cross-validate** (check traceability, unique sequential story IDs, NFR coverage, and perfect FR-to-Story traceability).
 6. **Coordinate with @data-analyst** (SMART metrics, instrumentation).
@@ -171,7 +180,7 @@ All operational guardrails, formatting standards, and conflict resolution protoc
 *   **Global Guardrails:** [GUARDRAILS.md](../GUARDRAILS.md)
 
 ### Key Rules:
-1. **Exhaustive Acceptance Criteria:** Every user story must explicitly define Happy, Unhappy, and Edge cases.
+1. **Exhaustive Acceptance Criteria:** Every user story must explicitly define Happy, Unhappy, and Edge cases using highly legible, multi-line, indented Gherkin steps (Given, When, and Then on their own indented new lines).
 2. **PRD & Product Spec Traceability:** Traceability from User Stories back to PRD features and forward to Product Specification screens/flows is non-negotiable and mandatory. Every story must populate the `Traces to Product Spec` field and strictly satisfy all requirements and product spec designs without any divergences.
 3. **Delegated Writes:** You do not write files directly; delegate all write and edit operations to `@writer`.
 4. **Conflict Resolution:** Facilitate decisions via structured frameworks. If research contradicts assumptions, present evidence to `@founder` for a final call.

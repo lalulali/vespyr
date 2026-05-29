@@ -41,31 +41,79 @@ To ensure user stories are developer-ready and sprint-actionable, they must repr
 *   `US-006 | Label Generation & Printing (Sprint 1)` — "System generates and prints shipping label after payment confirmation."
 *   `US-009 | Offline Capability (Sprint 2)` — "Form works with degraded functionality during network issues."
 
+
+---
+
+### 1.2 Backlog Hierarchy Tree Summary
+
+At the top of the `user-stories.md` file, the product manager must include a high-level tree-structured summary representing how User Stories roll up into Features and Epics.
+
+#### Default Tree Format
+Use this specific text-based indentation tree layout by default:
+
+```text
+Epic: [Epic Name / e.g., Payment Method Display Module]
+    ├── Feature: [Feature Name]
+    │   ├── User Story: [US-XXX] - [Title]
+    │   └── User Story: [US-YYY] - [Title]
+```
+
+#### Custom Formats
+While the tree structure above is the default, the user may request or provide their own custom high-level summary format (e.g., table, flat list, spreadsheet link). The `@product-manager` must respect and adapt to the user's custom layout if provided.
+
 ---
 
 ## 2. Structural Requirements
 
-Every story block must contain the following standardized sections:
+Backlog files (`user-stories.md`) must be structured hierarchically. Every section must follow the standards below:
 
-### 2.1 Story Metadata Block
+### 2.1 Epic Block
+An Epic represents a high-level strategic capability or major module (e.g., Payment Method Display Module). It groups related features and establishes context. Format each Epic block exactly as follows:
+
+```markdown
+# Epic: [Epic Title]
+
+- **Tracker:** Epic
+- **Parent:** [Parent Epic if any / e.g. Core System]
+- **Purpose:** [Strategic business intent and problem solved]
+- **Phase:** [Validation / Exploration / Design / Development]
+- **FRs Covered:** [PRD Functional Requirement IDs / e.g. FR-001, FR-002]
 ```
-Story ID:     US-XXX
-Title:        [Active-voice title]
-Priority:     [Must-have / Should-have / Could-have / Won't-have]
-Effort:       [Small / Medium / Large]
-Sprint:       [Target Sprint]
-Dependencies: [Story IDs or external blocking events]
-Author:       @product-manager
-Traces to PRD: [Section reference inside requirements.md]
-Traces to Product Spec: [Screen Name, Flow ID, or Section ID inside product-spec.md]
+
+### 2.2 Feature Block
+A Feature is a discrete, tangible capability rolling up under an Epic (e.g., QRIS Payment Integration). It describes a major functional specification of the product. Format each Feature block exactly as follows:
+
+```markdown
+## Feature: [Feature Title]
+
+- **Tracker:** Feature
+- **Parent:** [Epic Name]
+- **Functional Specification:** [High-level functional behaviors and requirements overview]
+- **Success Criteria:** [Telemetry, user metrics, or business results indicating success]
+- **FRs:** [Functional requirements mapped from PRD / e.g., FR2, FR50, FR51]
 ```
 
-### 2.2 Narrative Format
-*   **As a** [specific type of user persona],
-*   **I want** [perform a clear action or use a feature],
-*   **so that** [achieve a measurable benefit or goal].
+### 2.3 User Story Block
+User Stories are modular functional capabilities nested under a Feature. Every story block contains the following standardized sections:
 
-### 2.3 Business Requirements
+#### 2.3.1 Story Metadata Block
+- **Tracker:** User Story
+- **Story ID:** US-XXX
+- **Parent:** [Feature Name]
+- **Priority:** [Must-have / Should-have / Could-have / Won't-have]
+- **Effort:** [Small / Medium / Large]
+- **Sprint:** [Target Sprint / e.g., Sprint 1]
+- **Dependencies:** [Story IDs or external blocking events]
+- **Author:** @product-manager
+- **Traces to PRD:** [Section reference inside requirements.md]
+- **Traces to Product Spec:** [Screen Name, Flow ID, or Section ID inside product-spec.md]
+
+#### 2.3.2 Narrative Title Header
+The title of the User Story (H3 header) must represent the narrative directly in standard agile format:
+`### User Story: As a [type of user], I want [goal], so that [benefit / reason]`
+No separate Narrative section is needed, making the document extremely concise.
+
+#### 2.3.3 Business Requirements
 Explain the commercial and customer justification for the feature:
 *   **Stakeholder Impact:** Who benefits and how?
 *   **Value Proposition:** What pain is relieved or gain created?
@@ -73,67 +121,51 @@ Explain the commercial and customer justification for the feature:
 *   **Success Signal:** The measurable telemetry metric (defined with `@data-analyst`) indicating success.
 *   **Priority Rationale:** Business justification for the chosen priority level.
 
-### 2.4 Technical Requirements
+#### 2.3.4 Technical Requirements
 Exhaustive integration constraints for engineering:
 *   **Integration Points:** Associated internal APIs, databases, or external microservices.
 *   **Data Requirements:** Exact schemas, formats, inputs, and persistence destinations.
 *   **Performance Constraints:** Maximum allowed latency, concurrency, and throughput.
 *   **Security Constraints:** Authentication, permissions, encryption, and data masking guidelines.
 *   **State Management:** Ephemeral states vs. long-term database storage.
-*   **Error Strategy:** Fallback actions when downstream systems fail.
 *   **ML Integration (if applicable):** Specific model versions, latency limits (`AC-ML*`), and baseline accuracies.
 
 ---
 
 ## 3. Acceptance Criteria Guidelines
 
-Acceptance criteria must be atomic, unambiguous, and formatted using **Given / When / Then** statements:
+Acceptance criteria must be atomic, unambiguous, and formatted using highly legible, multi-line, indented Gherkin steps:
 
-### 3.1 Happy Path (AC-H*)
-*   **Rules:** Cover the end-to-end user path from initial trigger to database save, including UI status shifts (default → loading → success) and automated system notifications.
-
-### 3.2 Unhappy Path (AC-U*)
-*   **Rules:** Document every validation fail, server down, network offline, and auth rejection. Never allow silent errors; every error path must preserve data integrity, display a user-facing recovery message, and write structured logs.
-
-### 3.3 Edge Cases (AC-E*)
-*   **Rules:** Think in extremes:
-    *   *Scale boundaries:* 0, 1, max, max+1, null values, long strings, emojis.
-    *   *Time and concurrency:* Double-clicks, back buttons during transitions, concurrent session updates.
-    *   *Security constraints:* SQL injections, unauthorized path traversal, expired tokens.
-
-### 3.4 ML Criteria (AC-ML*)
-*   **Rules:** Define numerical validation metrics: p95 latency targets, minimum accuracy rates, data drift limits, and bias metrics.
+*   **Structure:** Under each criteria number, indent and separate each Gherkin step (`Given`, `When`, `Then`, `And`, `But`) on its own separate line.
+*   **Format:**
+    *   `[ ]` **AC-XX-Y:** [Short summary description of criteria]
+        *   **Given** [precondition or initial state]
+        *   **When** [user action or system trigger]
+        *   **Then** [expected system outcome or state shift]
 
 ---
 
-## 4. Canonical Example: Password Recovery (US-001)
+### User Story: As a registered user who forgot my password, I want to receive a password reset email, so that I can regain access to my account without contacting support
 
-The following example shows a complete, fully populated user story complying with all standards:
+- **Tracker:** User Story
+- **Story ID:** US-001
+- **Parent:** [Security & Authentication]
+- **Priority:** Must-have
+- **Effort:** Medium
+- **Sprint:** Sprint 3
+- **Dependencies:** US-000 (user auth system), Email service (external)
+- **Author:** @product-manager
+- **Traces to PRD:** Section 5.2: Password Reset Capability
+- **Traces to Product Spec:** Section 3.1: Screen: Login, Flow: 2.1 Happy Path
 
-```
-Story ID:     US-001
-Title:        User can reset password via email
-Priority:     Must-have
-Effort:       Medium
-Sprint:       Sprint 3
-Dependencies: US-000 (user auth system), Email service (external)
-Traces to PRD: Section 5.2: Password Reset Capability
-Traces to Product Spec: Section 3.1: Screen: Login, Flow: 2.1 Happy Path
-```
-
-### Narrative
-**As a** registered user who forgot their password,
-**I want** to receive a password reset email,
-**so that** I can regain access to my account without contacting support.
-
-### Business Requirement
+#### Business Requirement
 *   **Stakeholder impact:** Reduces support ticket volume by ~15% (based on current ticket data).
 *   **Value proposition:** Self-service password recovery reduces friction and churn.
 *   **Revenue / cost implication:** Saves ~$5k/quarter in support costs.
 *   **Success signal:** >80% of reset emails are clicked within 24 hours.
 *   **Priority rationale:** Must-have — password recovery is a standard security requirement.
 
-### Technical Requirement
+#### Technical Requirement
 *   **Integration points:** Auth API (internal), SendGrid (external email service).
 *   **Data requirements:** User email, reset token (UUID, 1-hour expiry), token hash stored in DB.
 *   **Performance constraints:** Email sent within 5 seconds of request; reset page loads in < 1s.
@@ -141,53 +173,101 @@ Traces to Product Spec: Section 3.1: Screen: Login, Flow: 2.1 Happy Path
 *   **State management:** Token state: pending → used | expired.
 *   **Error handling strategy:** If SendGrid is down, queue email for retry with exponential backoff.
 
-### Acceptance Criteria
+#### Acceptance Criteria
 
-#### Happy Path
-*   [ ] **AC-H1:** Given the user is on the login page, when they click "Forgot password?" and enter a valid registered email, then a reset email is sent and a confirmation message is displayed.
-*   [ ] **AC-H2:** Given the user receives the reset email, when they click the reset link within 1 hour, then they are taken to a password reset form.
-*   [ ] **AC-H3:** Given the user enters a new password that meets complexity requirements and confirms it, when they submit, then the password is updated and they are logged in automatically.
-*   [ ] **AC-H4:** Given the password is reset, when the user tries to log in with the old password, then access is denied.
+##### Happy Path
+*   [ ] **AC-H1:** Send reset email
+    *   **Given** the user is on the login page
+    *   **When** they click "Forgot password?" and enter a valid registered email
+    *   **Then** a reset email is sent and a confirmation message is displayed
+*   [ ] **AC-H2:** Navigate to reset form
+    *   **Given** the user receives the reset email
+    *   **When** they click the reset link within 1 hour
+    *   **Then** they are taken to a password reset form
+*   [ ] **AC-H3:** Update password successfully
+    *   **Given** the user enters a new password that meets complexity requirements and confirms it
+    *   **When** they submit the form
+    *   **Then** the password is updated and they are logged in automatically
+*   [ ] **AC-H4:** Deny login with stale password
+    *   **Given** the password is reset
+    *   **When** the user tries to log in with the old password
+    *   **Then** access is denied
 
-#### Unhappy Path
-*   [ ] **AC-U1:** Given the user enters an unregistered email, when they submit the forgot-password form, then the system displays the same confirmation message as for a valid email (to prevent email enumeration attacks).
-*   [ ] **AC-U2:** Given the user clicks an expired reset link (after 1 hour), when the page loads, then an error message is shown and a new link can be requested.
-*   [ ] **AC-U3:** Given the user clicks an already-used reset link, when the page loads, then an error message is shown and a new link can be requested.
-*   [ ] **AC-U4:** Given the user enters a new password that does not meet complexity requirements, when they submit, then inline validation errors are shown and the password is not changed.
-*   [ ] **AC-U5:** Given the user enters mismatched password and confirmation, when they submit, then an error message is shown and the password is not changed.
-*   [ ] **AC-U6:** Given the user requests a 4th reset email within 1 hour, when they submit, then a rate-limit error is shown and no email is sent.
-*   [ ] **AC-U7:** Given SendGrid is down, when the user requests a reset, then the request is queued and the user sees a generic confirmation message.
+##### Unhappy Path
+*   [ ] **AC-U1:** Prevent email enumeration
+    *   **Given** the user enters an unregistered email
+    *   **When** they submit the forgot-password form
+    *   **Then** the system displays the same confirmation message as for a valid email
+*   [ ] **AC-U2:** Handle expired reset link
+    *   **Given** the user clicks an expired reset link (after 1 hour)
+    *   **When** the page loads
+    *   **Then** an expiration error message is shown and a new link can be requested
+*   [ ] **AC-U3:** Handle already used reset link
+    *   **Given** the user clicks an already-used reset link
+    *   **When** the page loads
+    *   **Then** a token-used error message is shown and a new link can be requested
+*   [ ] **AC-U4:** Reject weak passwords
+    *   **Given** the user enters a new password that does not meet complexity requirements
+    *   **When** they submit
+    *   **Then** inline validation errors are shown and the password is not changed
+*   [ ] **AC-U5:** Reject mismatched passwords
+    *   **Given** the user enters mismatched password and confirmation
+    *   **When** they submit
+    *   **Then** a mismatch error message is shown and the password is not changed
+*   [ ] **AC-U6:** Rate limit reset requests
+    *   **Given** the user requests a 4th reset email within 1 hour
+    *   **When** they submit
+    *   **Then** a rate-limit error is shown and no email is sent
+*   [ ] **AC-U7:** Handle email service downtime
+    *   **Given** SendGrid is down
+    *   **When** the user requests a reset
+    *   **Then** the request is successfully queued in the system and a generic confirmation is shown
 
-#### Edge Cases
-*   [ ] **AC-E1:** Given the user's email contains special characters or unicode, when the reset email is sent, then the email is delivered and the link works correctly.
-*   [ ] **AC-E2:** Given the user opens the reset link in a different browser than the one they requested from, when they submit the new password, then the reset succeeds.
-*   [ ] **AC-E3:** Given the user requests a reset, opens the link, but waits 61 minutes before submitting the new password, when they submit, then the form rejects with an expiration error.
-*   [ ] **AC-E4:** Given two users share an email address, when one requests a reset, then only that user's password is affected.
-*   [ ] **AC-E5:** Given the user bookmarks the reset page and revisits it after the token is used, when the page loads, then an appropriate error is shown.
+##### Edge Cases
+*   [ ] **AC-E1:** Unicode email support
+    *   **Given** the user's email contains special characters or unicode
+    *   **When** the reset email is sent
+    *   **Then** the email is delivered and the link works correctly
+*   [ ] **AC-E2:** Cross-browser recovery
+    *   **Given** the user opens the reset link in a different browser than the one they requested from
+    *   **When** they submit the new password
+    *   **Then** the reset succeeds
+*   [ ] **AC-E3:** Form submission timing boundary
+    *   **Given** the user requests a reset and opens the link, but waits 61 minutes before submitting the new password
+    *   **When** they click submit
+    *   **Then** the form rejects with an expiration error
+*   [ ] **AC-E4:** Shared email addresses
+    *   **Given** two users share an email address
+    *   **When** one requests a reset
+    *   **Then** only that user's password is affected
+*   [ ] **AC-E5:** Revisit used token page
+    *   **Given** the user bookmarks the reset page and revisits it after the token is used
+    *   **When** the page loads
+    *   **Then** a token-invalid error is shown gracefully.
 
-### UI / UX Notes
+#### UI / UX Notes
 *   **Product Spec Screen Reference:** Screen: 3.1 Login Screen, Screen: 3.2 Forgot Password Screen
 *   **User Flow Reference:** Happy Path Flow 2.1
 *   **Key UI States:** Default, Loading, Validation Error, Success, Server Error
 *   **Accessibility requirements (WCAG 2.1 AA):** Custom keyboard tab order (Inputs → Buttons → Cancel), high contrast inputs, and prefers-reduced-motion animation disables.
 
-### Data Model Notes
+#### Data Model Notes
 *   **Entities:** `password_reset_tokens` (id, user_id, token_hash, expires_at, used_at, created_at).
 *   **Validation:** Token must be 32-char hex, password must be 8+ chars with 1 uppercase, 1 lowercase, 1 number.
 
-### Out of Scope
+#### Out of Scope
 1.  Phone/SMS reset (future phase).
 2.  Password history enforcement.
 3.  Account lockout after failed resets.
 
-### Open Questions
+#### Open Questions
 | Question | Impact | Owner | Status |
 | :--- | :--- | :--- | :--- |
 | Should we invalidate all existing sessions on password change? | Security | Security lead | Open |
 
 ---
 
-## 5. Story Dependencies Diagram
+### Story Dependencies Diagram
 
 For complex features, the `@product-manager` must map the structural dependency tree in Mermaid format. This assists the `@tech-lead` and `@developer` during planning and sequencing:
 

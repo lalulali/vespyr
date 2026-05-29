@@ -18,64 +18,112 @@
 
 ---
 
-## Story Metadata (apply to every story)
+## Backlog Hierarchy Tree (Default)
 
-```
-Story ID:     US-XXX
-Title:        [Brief, active-voice title]
-Priority:     Must-have / Should-have / Could-have / Won't-have
-Effort:       Small / Medium / Large
-Sprint:       ...
-Dependencies: [Story IDs or external blocking events]
-Author:       @product-manager
-Traces to PRD: Section X.Y: [Feature Name from requirements.md]
-Traces to Product Spec: [Screen Name, Flow ID, or Section ID inside product-spec.md]
+> [!NOTE]
+> By default, provide a high-level tree structure of the backlog hierarchy at the top of `user-stories.md`. If a custom format is specified or requested by the user, that format may be used instead.
+
+```text
+Epic: [Epic Name]
+    ├── Feature: [Feature Name]
+    │   ├── User Story: [User Story Title / ID]
+    │   └── User Story: [User Story Title / ID]
+    └── Feature: [Feature Name]
+        └── User Story: [User Story Title / ID]
 ```
 
 ---
 
-## Story Structure
+## Hierarchy Structure
 
-### 1. Narrative
+### 1. Epic Section
+Use this format at the beginning of each Epic boundary inside `user-stories.md`:
 
-**As a** [type of user],
-**I want** [goal],
-**so that** [benefit / reason].
+# Epic: [Epic Title]
 
-### 2. Business Requirement
+- **Tracker:** Epic
+- **Parent:** [Parent Epic if any / e.g. Core System]
+- **Purpose:** [Strategic business intent and problem solved]
+- **Phase:** [Validation / Exploration / Design / Development]
+- **FRs Covered:** [PRD Functional Requirement IDs / e.g. FR-001, FR-002]
+
+---
+
+### 2. Feature Section
+Use this format for each Feature rolling up under an Epic:
+
+## Feature: [Feature Title]
+
+- **Tracker:** Feature
+- **Parent:** [Epic Name]
+- **Functional Specification:** [High-level functional behaviors and requirements overview]
+- **Success Criteria:** [Telemetry, user metrics, or business results indicating success]
+- **FRs:** FR2, FR50, FR51
+
+---
+
+### 3. User Story Section
+Use this format for each modular functional capability under a Feature:
+
+### User Story: As a [type of user], I want [goal], so that [benefit / reason]
+
+- **Tracker:** User Story
+- **Story ID:** US-XXX
+- **Parent:** [Feature Name]
+- **Priority:** Must-have / Should-have / Could-have / Won't-have
+- **Effort:** Small / Medium / Large
+- **Sprint:** Sprint [Number]
+- **Dependencies:** [Story IDs or external blocking events]
+- **Author:** @product-manager
+- **Traces to PRD:** Section X.Y: [Feature Name from requirements.md]
+- **Traces to Product Spec:** [Screen Name, Flow ID, or Section ID inside product-spec.md]
+
+#### Business Requirement
 [Document stakeholder impact, value proposition, financial implications, success signal, and priority rationale as detailed in user-story-instructions.md]
 
-### 3. Technical Requirement
+#### Technical Requirement
 [Document integration points, data requirements, performance/security constraints, state management, error handling, and ML strategy as detailed in user-story-instructions.md]
 
-### 4. Acceptance Criteria
-[Acceptance criteria must be testable, atomic, and formatted using Given/When/Then]
+#### Acceptance Criteria
+[Acceptance criteria must be testable, atomic, and formatted using multi-line Given/When/Then steps]
 
-#### 4.1 Happy Path
-*   [ ] **AC-H1:** Given [precondition], when [user action], then [expected outcome]
+##### Happy Path
+*   [ ] **AC-H1:** [Short Summary of Step]
+    *   **Given** [precondition]
+    *   **When** [user action]
+    *   **Then** [expected outcome]
 
-#### 4.2 Unhappy Path
-*   [ ] **AC-U1:** Given [failure condition], when [user action], then [graceful error recovery and data preservation]
+##### Unhappy Path
+*   [ ] **AC-U1:** [Short Summary of Failure Handling]
+    *   **Given** [failure or invalid condition]
+    *   **When** [user action]
+    *   **Then** [graceful recovery, error feedback, or safety state]
 
-#### 4.3 Edge Cases
-*   [ ] **AC-E1:** Given [boundary/concurrency/security extreme], when [user action], then [graceful handling]
+##### Edge Cases
+*   [ ] **AC-E1:** [Short Summary of Edge Case]
+    *   **Given** [boundary/concurrency/security extreme state]
+    *   **When** [user action]
+    *   **Then** [expected graceful handling or state]
 
-#### 4.4 ML Acceptance Criteria (AC-ML*) — if applicable
-*   [ ] **AC-ML-1:** Given [prediction request], when [model processes], then [prediction metric ≥ target]
+##### ML Acceptance Criteria (AC-ML*) — if applicable
+*   [ ] **AC-ML-1:** [Short Summary of ML Threshold]
+    *   **Given** [prediction input or model state]
+    *   **When** [model performs inference]
+    *   **Then** [inference latency, accuracy, or metric meets target]
 
-### 5. UI / UX Notes (if applicable)
+#### UI / UX Notes (if applicable)
 *   **Product Spec Screen Reference:** `[Screen Name or Section inside product-spec.md]`
 *   **User Flow Reference:** `[Flow name/ID, e.g. Happy Path Flow 2.1]`
 *   **Key UI States:** `[Link to corresponding state specs inside product-spec.md]`
 *   **Accessibility requirements (WCAG 2.1 AA):** `[Link to accessibility specs inside product-spec.md]`
 
-### 6. Data Model Notes (if applicable)
+#### Data Model Notes (if applicable)
 [Document affected entities, database fields, and validation rules]
 
-### 7. Out of Scope for This Story
+#### Out of Scope for This Story
 1.  ...
 
-### 8. Open Questions
+#### Open Questions
 | Question | Impact if unanswered | Owner | Status |
 |----------|----------------------|-------|--------|
 | ...      | ...                  | ...   | ...    |

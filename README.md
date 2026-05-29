@@ -1,6 +1,6 @@
 # Vespyr: AI Agent Team for Product Development
 
-![Vespyr Version](https://img.shields.io/badge/version-1.6.6-blue)
+![Vespyr Version](https://img.shields.io/badge/version-1.6.7-blue)
 
 > A multi-agent system that runs a full product development team — from raw idea to production code.
 

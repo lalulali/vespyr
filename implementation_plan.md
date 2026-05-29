@@ -278,6 +278,11 @@ To give the user an extremely premium interactive experience without heavy third
        - `❯ 1 - Current directory (.)`
         - `  2 - Custom path (Enter a custom folder path)`
 
+4. **Personalization Prompt (Becoming More Human)**:
+   - Prompt: `What should the agent squad call you? (e.g., Christian, Sarah) [Default: User]: `
+   - If user hits Enter without input, defaults to `"User"`.
+   - Stored as `userNickname` and dynamically injected into `artifacts/memory/project-context.md`.
+
 ### Extraction Mechanism
 The `.agents/` folder is bundled inside the npm package. At runtime, `cli.js` locates it relative to itself:
 ```js
@@ -502,6 +507,7 @@ Create or update `artifacts/memory/project-context.md`:
 ## Identity
 - **Project Name**: {detected-name}
 - **Repository**: {detected-repo-url}
+- **User Nickname**: {user-nickname}
 - **Created**: {iso-date}
 
 ## Technical
@@ -753,6 +759,7 @@ Created at `{target}/artifacts/memory/project-context.md`:
 ## Identity
 - **Project Name**: {project-name}
 - **Repository**: {repo-url-or-none}
+- **User Nickname**: {user-name}
 - **Created**: {iso-date}
 
 ## Technical
@@ -1558,3 +1565,33 @@ Assert the welcome art is printed byte-for-byte as specified in Section 5. Run:
 node ./bin/cli.js 2>&1 | head -n 10
 ```
 Confirm the output matches the exact spacing defined in lines 24-36 (no whitespace trimming by terminal or markdown renderer).
+
+---
+
+## 15. User Nickname & Personalization Integration
+
+To make the AI agent squad feel significantly more premium, natural, and human, the installation process includes an interactive personalization question.
+
+### 15.1 CLI Prompt Logic
+During a fresh installation (or reconfiguration), the CLI prompts the user with the following text:
+```
+? What should the agent squad call you? (e.g., Christian, Sarah) [Default: User]:
+```
+* **Defaults**: If the user presses `Enter` without typing anything, or runs the installer in non-interactive/silent mode (`--yes` / `-y`), it defaults to `"User"`.
+* **Sanitization**: The input is trimmed and sanitized to ensure it is alphanumeric (allowing spaces and standard punctuation).
+
+### 15.2 Storage in Project Context
+The collected name is stored in `artifacts/memory/project-context.md` under the identity block:
+```markdown
+## Identity
+- **Project Name**: {project-name}
+- **Repository**: {repo-url-or-none}
+- **User Nickname**: {user-name}
+```
+
+### 15.3 Harnessing the Nickname (How Agents Use It)
+Since all agents load `project-context.md` as Tier 1 core memory, they automatically parse the `User Nickname` field. We enforce the following rules in the core framework:
+1. **Direct Address**: When formulating interactive Socratic questions (e.g., during Socratic validation or when prompting the user for feature selection/PRD approvals), agents must greet and address the user directly by their nickname instead of generic placeholders like "human", "user", or "developer".
+   * *Example*: *"Hello Christian, before we dive into..."* instead of *"Hello user, before we..."*.
+2. **Commit Messages & Walkthroughs**: When attributing stakeholder decisions or drafting manual walkthrough outputs (like `walkthrough.md`), agents will refer to the user by their nickname when logging decisions.
+3. **Tone Guidelines**: Added explicitly to `socratic-universal.md` and default prompt structures, instructing all 22 agent personas to respect this personalization parameter for a more conversational and natural collaborative experience.
