@@ -4,7 +4,7 @@
 
 > A multi-agent system that runs a full product development team — from raw idea to production code.
 
-**Vespyr** (from *vespula* + *zephyr*) is a set of 23 AI agents, each with a defined role, that coordinate through a shared workflow to build software products. Think of it as a staffed team you configure once and invoke per project.
+**Vespyr** (from *vespula* + *zephyr*) is a set of 22 AI agents, each with a defined role, that coordinate through a shared workflow to build software products. Think of it as a staffed team you configure once and invoke per project.
 
 ---
 

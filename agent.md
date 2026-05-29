@@ -2,6 +2,8 @@
 
 A platform-agnostic, file-based multi-agent system configured to streamline product development and engineering operations. This system consists of 22 specialized agent personas, structured workflows, and a shared persistent memory layer.
 
+**Trade-Off Policy**: The guidelines below prioritize absolute execution quality, simplicity, and precision over sheer speed. Adhere to them strictly for all tasks.
+
 ---
 
 ## 🚀 Invocation & Multi-Harness Guidelines
@@ -71,6 +73,38 @@ For optimal efficiency, cognitive reasoning is separated from operational tasks.
 
 ---
 
+## 🛠️ Workflows (Skills)
+
+Vespyr organizes complex, multi-agent operations into highly structured **skills** (located in `.opencode/skills/`). Each skill is an end-to-end workflow designed for a specific product milestone, operational phase, or utility concern. They guide agents through sequence gates, coordinate parallel execution paths, and enforce quality control.
+
+### Curated Workflows
+*   `/validate-idea` — Stress-test product concepts before research
+*   `/validate-game-idea` — Stress-test game concepts before production
+*   `/explore-idea` — Market, competitor, and user research
+*   `/explore-game-idea` — Genre market and player research
+*   `/design` — PRD and screen specs creation
+*   `/develop` — MVP development cycle
+*   `/launch` — Release readiness and deployment
+*   `/iterate` — Post-launch behavior improvements
+*   `/incident` — Production incident response
+*   `/retro` — Post-cycle review and memory compaction
+*   `/help-me` — Conversational project navigator and co-pilot
+*   `/grill-me` — Relentless Socratic alignment and stress-testing interview
+*   `/humanize` — AI-writing tell detector and style normalizer
+*   `/status` — Quick project state snapshot
+*   `/memory` — Search archived project context
+*   `/phase` — Show/switch phases
+*   `/squad` — Show available agent squads and switch active squad
+*   `/delegate` — Quick I/O offload
+*   `/plan` — Standalone execution planning
+*   `/review` — Standalone code review
+*   `/test` — Run tests, summarize failures
+*   `/kanban` — Display and update Kanban board
+*   `/code-graph` — Generate/scan dependency graphs
+*   `/doc-graph` — Generate/scan documentation links and trace coverage
+
+---
+
 ## 🧠 Shared Memory & Context Persistence Protocol
 
 To ensure seamless collaboration across different agent steps and avoid context drift or high token costs, all agents leverage the localized text-based memory system located in `artifacts/memory/`.
@@ -87,6 +121,8 @@ To ensure seamless collaboration across different agent steps and avoid context 
    - Update decisions: `Run the memory-controller to write [decision] to active decisions`
 2. **For General Terminal/File-Writing Environments**:
    Directly view or modify the standard markdown memory files using your standard file read/edit tools.
+
+---
 
 ## 🌟 Core Behavioral Guidelines (Karpathy-Inspired)
 
