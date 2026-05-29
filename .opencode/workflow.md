@@ -61,21 +61,21 @@ Set the operation mode in `artifacts/memory/project-context.md`. Default is **se
 
 ### Per-phase behavior
 
-| Phase | Autonomous | Semi-autonomous | Manual |
-|-------|-----------|----------------|--------|
-| **-1: Validation** | Auto-generate validation brief from context. Auto-decide GO/PIVOT/KILL based on available evidence. | Run diagnostic questions interactively. **Pause for GO/PIVOT/KILL verdict.** | Full Socratic session. Every question interactive. Human confirms each answer before next. |
-| **0: Discovery** | @founder auto-synthesizes, no review. | @founder synthesizes. **Pause for human review of idea brief before research.** | @founder drafts, human refines iteratively. |
-| **1: Research** | All research agents run in parallel, auto-complete. | Research runs autonomously. Human reviews at Phase 1→2 gate. | Human reviews each research output before the next agent starts. |
-| **2: Strategy** | Auto-generate PRD, specs, user stories. | Draft features. **Pause for human selection & feedback.** Finalize PRD/user stories. **Pause for human spec approval.** | Human co-writes requirements and specs with agents. |
-| **3: Architecture (Optional)** | Auto-generate ADRs if enabled. | **Optional Phase.** Pause to ask user: run `@architect` first or bypass directly to `@tech-lead`/`@developer`? | Human collaborates on ADRs if executed. |
-| **4: Planning & Kanban** | `@product-manager` auto-seeds Kanban board from user stories. | **Kanban Seeding.** `@product-manager` seeds Kanban board once Strategy artifacts are approved. In autonomous mode, all approvals are skipped and Kanban is seeded instantly. | Human reviews Kanban board. |
-| **5: Execution** | Write code, auto-commit per task. | Write code autonomously. **Pause before destructive operations** (delete, migrate, refactor >100 lines). | Human reviews each task output before next task. |
-| **5.5: Design Validation** | Auto-run usability review. | Auto-run. **Pause if critical usability issues found.** | Human participates in usability review. |
-| **6: Quality Gates** | Auto-run all checks. Auto-fix low/medium issues. | Auto-run checks. **Pause on critical/high severity findings.** | Human reviews each quality report. |
-| **7: Launch** | **NEVER auto-deploy.** Always pauses for GO/NO-GO. | **Pause for human GO/NO-GO on deployment.** | Human drives launch sequence. |
-| **8: Iteration** | Auto-prioritize and implement improvements. | Auto-implement. **Pause for prioritization review.** | Human reviews each iteration proposal. |
-| **9: Retrospective** | Auto-generate retrospective report. | Auto-generate. **Pause for human review of action items.** | Human leads retrospective with agent support. |
-| **Incident Response** | Auto-mitigate (rollback, scale). **Pause before data-affecting fixes.** | **Pause for human triage decision.** Auto-mitigate after approval. | Human directs every remediation step. |
+| Phase | Primary Skill | Autonomous | Semi-autonomous | Manual |
+|-------|---------------|------------|----------------|--------|
+| **-1: Validation** | `validate-idea` / `validate-game-idea` | Auto-generate validation brief from context. Auto-decide GO/PIVOT/KILL based on available evidence. | Run diagnostic questions interactively. **Pause for GO/PIVOT/KILL verdict.** | Full Socratic session. Every question interactive. Human confirms each answer before next. |
+| **0: Discovery** | `validate-idea` / `validate-game-idea` | @founder auto-synthesizes, no review. | @founder synthesizes. **Pause for human review of idea brief before research.** | @founder drafts, human refines iteratively. |
+| **1: Research** | `explore-idea` / `explore-game-idea` | All research agents run in parallel, auto-complete. | Research runs autonomously. Human reviews at Phase 1→2 gate. | Human reviews each research output before the next agent starts. |
+| **2: Strategy** | `design` | Auto-generate PRD, specs, user stories. | Draft features. **Pause for human selection & feedback.** Finalize PRD/user stories. **Pause for human spec approval.** | Human co-writes requirements and specs with agents. |
+| **3: Architecture (Optional)** | `develop` / `design` | Auto-generate ADRs if enabled. | **Optional Phase.** Pause to ask user: run `@architect` first or bypass directly to `@tech-lead`/`@developer`? | Human collaborates on ADRs if executed. |
+| **4: Planning & Kanban** | `plan` / `kanban` | `@product-manager` auto-seeds Kanban board. `@tech-lead` auto-generates `execution-plan.md` task breakdown and estimates. | **Kanban & Planning.** `@product-manager` seeds the Kanban board. `@tech-lead` breaks down user stories into developer-centric tasks (1-4h, dependencies). **Pause for human approval of the execution plan.** | Human collaborates on task slicing, estimates, and reviews the Kanban board. |
+| **5: Execution** | `develop` | Write code, auto-commit per task. | Write code autonomously. **Pause before destructive operations** (delete, migrate, refactor >100 lines). | Human reviews each task output before next task. |
+| **5.5: Design Validation** | `design` | Auto-run usability review. | Auto-run. **Pause if critical usability issues found.** | Human participates in usability review. |
+| **6: Quality Gates** | `review` / `test` | Auto-run all checks. Auto-fix low/medium issues. | Auto-run checks. **Pause on critical/high severity findings.** | Human reviews each quality report. |
+| **7: Launch** | `launch` | **NEVER auto-deploy.** Always pauses for GO/NO-GO. | **Pause for human GO/NO-GO on deployment.** | Human drives launch sequence. |
+| **8: Iteration** | `iterate` | Auto-prioritize and implement improvements. | Auto-implement. **Pause for prioritization review.** | Human reviews each iteration proposal. |
+| **9: Retrospective** | `retro` | Auto-generate retrospective report. | Auto-generate. **Pause for human review of action items.** | Human leads retrospective with agent support. |
+| **Incident Response** | `incident` | Auto-mitigate (rollback, scale). **Pause before data-affecting fixes.** | **Pause for human triage decision.** Auto-mitigate after approval. | Human directs every remediation step. |
 
 ### Safety overrides (apply regardless of mode)
 

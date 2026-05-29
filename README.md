@@ -1,6 +1,6 @@
 # Vespyr: AI Agent Team for Product Development
 
-![Vespyr Version](https://img.shields.io/badge/version-1.6.0-blue)
+![Vespyr Version](https://img.shields.io/badge/version-1.6.6-blue)
 
 > A multi-agent system that runs a full product development team — from raw idea to production code.
 
@@ -436,25 +436,25 @@ Vespyr organizes complex, multi-agent operations into highly structured **skills
 
 ### Core Product Pipeline Skills
 
-#### 1. `idea-validation`
+#### 1. `validate-idea`
 * **Purpose**: Stress-test new product concepts before wasting research or development resources. Serves as a Socratic thinking partner rather than a cheerleader — applies critical inquiry to expose blind spots, test assumptions, and kill weak directions early.
 * **When to use**: Whenever you have a rough idea, a problem space, or a feature proposal without validated demand.
 * **Key Agents**: Led by `@founder` with I/O delegated to `@writer` and `@reader`.
 * **Output**: `artifacts/output/00-discovery/validation-brief.md` (using `validation-brief-template.md`).
 
-#### 2. `product-exploration`
+#### 2. `explore-idea`
 * **Purpose**: Conduct deep-dive market, competitor, and user research to build a comprehensive foundation for product strategy.
 * **When to use**: Once an idea is successfully validated.
 * **Key Agents**: Led by `@founder` and research agents (`@researcher` with `market` and `competitive` modes, `@user-researcher`).
 * **Outputs**: `market-analysis.md`, `competitive-analysis.md`, `user-personas.md`.
 
-#### 3. `product-design`
+#### 3. `design`
 * **Purpose**: Define comprehensive product requirements and create highly detailed, developer-ready interface and behavior specifications. Enforces a strict **tri-directional traceability standard**: PRD features → user stories → product spec screens, and back. Every story traces to a spec screen (`Traces to Product Spec`); every spec screen references its story IDs. Zero orphans on either side.
 * **When to use**: After exploration is completed and the opportunity is validated.
 * **Key Agents**: `@product-manager` and `@product-designer`.
 * **Outputs**: `requirements.md` (PRD), `user-stories.md` (with happy/unhappy/edge acceptance criteria and bi-directional spec tracing), and `product-spec.md` (with associated story references per screen and reciprocal traceability verification).
 
-#### 4. `product-development`
+#### 4. `develop`
 * **Purpose**: Design code architecture, plan execution tasks, write tests and clean code, and execute multi-layer QA verification.
 * **When to use**: When product specifications are signed off and the feature is ready to be built.
 * **Key Agents**: Led by `@tech-lead` and `@developer` with verification by `@code-reviewer` and `@qa-engineer`.
@@ -464,13 +464,13 @@ Vespyr organizes complex, multi-agent operations into highly structured **skills
 
 ### Game Studio Mode Skills
 
-#### 5. `game-idea-validation`
+#### 5. `validate-game-idea`
 * **Purpose**: A creative-first Socratic validation diagnostic that evaluates the concept's core loops, player emotions, platform suitability, and genre landscape rather than standard SaaS/startup metrics.
 * **When to use**: Game concept needs stress-testing before investing production time.
 * **Key Agents**: `@founder` acting as Creative Director.
 * **Output**: `artifacts/output/00-discovery/game-validation-brief.md`.
 
-#### 6. `game-product-exploration`
+#### 6. `explore-game-idea`
 * **Purpose**: Synthesizes genre landscape competitive intelligence, player demographic studies, and market/audience sizing for a validated game concept.
 * **When to use**: A game concept has passed validation and needs a complete, data-backed research foundation.
 * **Key Agents**: `@founder` and game research specialists.
