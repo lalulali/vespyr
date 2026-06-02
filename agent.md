@@ -71,6 +71,10 @@ For optimal efficiency, cognitive reasoning is separated from operational tasks.
 - **`@executor`**: Executes shell commands and returns clean, curated execution summaries (Bash execution).
 - **`@memory-controller`**: Memory gatekeeper. Loads progressive context tiers, validates writes, and compacts history.
 
+### 4. Domain Expert Delegation (Research)
+
+To maintain focus and avoid context bloat, the **`@product-manager`** and **`@product-designer`** can dynamically delegate research tasks to **`@researcher`** (for market/competitive research), **`@user-researcher`** (for user needs/personas), and **`@ux-researcher`** (for usability/interaction evaluation) at any time during product scoping or interaction design.
+
 ---
 
 ## 🛠️ Workflows (Skills)

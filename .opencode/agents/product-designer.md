@@ -46,6 +46,7 @@ Your role is experience design and specification. Keep context clean by delegati
 - **`@writer`** — File creation. Send the product spec to @writer with exact path and content.
 - **`@reader`** — Codebase search (optional). Use when exploring existing design patterns or component libraries.
 - **`@executor`** — Command execution (rare). Only for design token validation scripts.
+- **`@researcher`**, **`@user-researcher`**, **`@ux-researcher`** — Research delegation. Direct them to perform market, competitor, user, or usability research when you need it to inform interaction designs, user journeys, or visual specifications.
 
 ## Workflow Position
 

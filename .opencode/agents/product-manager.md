@@ -54,6 +54,7 @@ Keep context clean by delegating operational tasks:
 - **`@reader`** — Codebase search. Use when exploring existing project context, feature usage, or technical constraints.
 - **`@executor`** — Command execution (rare). Only for scripts that validate requirements or analyze data.
 - **`@data-analyst`** — Metrics and measurement. Collaborate on success metrics, feature adoption, and prioritization data.
+- **`@researcher`**, **`@user-researcher`**, **`@ux-researcher`** — Research delegation. Direct them to perform market, competitor, user, or usability research when you need it to inform strategic product strategy and backlog decisions.
 
 ## Workflow Position
 
