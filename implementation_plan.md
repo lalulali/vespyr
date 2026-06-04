@@ -55,7 +55,7 @@ This master folder is **mandatory** and always scaffolded first. Below is the ex
 
 ```
 .agents/
-├── agents/                       # 22 Core Agent Persona prompts
+├── agents/                       # 21 Core Agent Persona prompts
 │   ├── founder.md                # Validation and Discovery Lead
 │   ├── product-manager.md        # PRD & User Story Specifier
 │   ├── product-designer.md       # Screen & Flow Specifier
@@ -76,13 +76,15 @@ This master folder is **mandatory** and always scaffolded first. Below is the ex
 │   ├── memory-controller.md      # Memory Gatekeeper (Sub-Agent)
 │   ├── reader.md                 # Codebase Reader (Sub-Agent)
 │   ├── writer.md                 # Contiguous File Writer (Sub-Agent)
-│   ├── executor.md               # Bash Command Executor (Sub-Agent)
-│   └── orchestrator.md           # Swarm Coordinator & Pipeline Manager
+│   └── executor.md               # Bash Command Executor (Sub-Agent)
 ├── commands/                     # Slash Command Definitions
-│   └── init.md                   # Harness-agnostic bootstrap command instructions
-├── reference/                    # PM/Founder Frameworks & Guidelines
+│   ├── init.md                   # Harness-agnostic bootstrap command
+│   ├── scaffold-agents.md        # AGENTS.md template (single source of truth)
+│   ├── scaffold-agent.md         # agent.md template (single source of truth)
+│   └── scaffold-claude.md        # CLAUDE.md template (single source of truth)
+├── references/                   # PM/Founder Frameworks & Guidelines
 │   ├── founder-frameworks.md     # Golden Circle, Unit Economics sheets
-│   ├── pm-frameworks.md           # PRD templates & traceability framework
+│   ├── pm-frameworks.md          # PRD templates & traceability framework
 │   ├── developer-guidelines.md   # Clean Code, Testing & Git conventions
 │   ├── pm-workflows.md           # Acceptance criteria & Traceability rules
 │   ├── socratic-universal.md     # Universal Socratic rules for critical inquiry
@@ -97,6 +99,7 @@ This master folder is **mandatory** and always scaffolded first. Below is the ex
 │   ├── compile_skills.js         # Skills catalog compiler for help-me skill
 │   ├── dedupe_validator.js       # Duplicate memory entry prevention
 │   ├── doc_graph.js              # Document relationship & traceability mapper
+│   ├── ensure_graph.js           # Self-healing graph wrapper (mtime-aware)
 │   ├── hot_path_analyzer.js      # Optimization profiling calculator
 │   ├── incremental_graph.js      # mtime codebase import/export analyzer
 │   ├── memory_filter.js          # Tier 3 keyword + recency scoring
@@ -106,7 +109,7 @@ This master folder is **mandatory** and always scaffolded first. Below is the ex
 │   ├── squads.js                 # Squad preset loader and parser
 │   ├── swarm_telemetry.js        # Token and phase usage reporting
 │   └── token_profiler.js         # Static token sizing analysis
-├── skills/                       # Curated Phase Workflows (24 skills)
+├── skills/                       # Curated Phase Workflows (25 skills)
 │   ├── code-graph/               # Codebase structural dependency mapper
 │   ├── delegate/                 # One-shot I/O offload to sub-agents
 │   ├── design/                   # PRD & screen design specs from validated ideas
@@ -114,6 +117,7 @@ This master folder is **mandatory** and always scaffolded first. Below is the ex
 │   ├── doc-graph/                # Document relationship & traceability graph
 │   ├── explore-game-idea/        # Game concept market & competitor research
 │   ├── explore-idea/             # Concept validation via market & user research
+│   ├── find-skills/              # Discover and install agent skills
 │   ├── grill-me/                 # Socratic alignment interviewer
 │   ├── help-me/                  # Dynamic next-step project state navigator
 │   ├── humanize/                 # AI-writing tell elimination
@@ -139,37 +143,59 @@ This master folder is **mandatory** and always scaffolded first. Below is the ex
 │   ├── design.md
 │   ├── ship.md
 │   └── game-studio.md
-├── templates/                    # Markdown Output Outlines
+├── templates/                    # Markdown Output Templates (39 templates)
+│   ├── active-decisions-template.md
+│   ├── adr-template.md
+│   ├── analytics-insights-template.md
+│   ├── blockers-and-risks-template.md
+│   ├── competitive-analysis-template.md
+│   ├── execution-plan-template.md
+│   ├── game-competitive-analysis-template.md
+│   ├── game-idea-brief-template.md
+│   ├── game-market-analysis-template.md
+│   ├── game-user-personas-template.md
+│   ├── game-validation-brief-template.md
+│   ├── go-nogo-decision-template.md
 │   ├── idea-brief-template.md
+│   ├── incident-triage-template.md
+│   ├── iteration-backlog-template.md
+│   ├── iteration-results-template.md
+│   ├── kanban-template.md
+│   ├── launch-log-template.md
+│   ├── lessons-learned-template.md
+│   ├── market-analysis-template.md
+│   ├── measurement-plan-template.md
 │   ├── memory-entry-template.md
+│   ├── patterns-and-conventions-template.md
+│   ├── post-incident-review-template.md
+│   ├── post-launch-report-template.md
+│   ├── prd-template.md
+│   ├── product-spec-template.html
+│   ├── product-spec-template.md
+│   ├── project-context-template.md
+│   ├── rca-template.md
+│   ├── release-notes-template.md
+│   ├── release-readiness-template.md
+│   ├── retrospective-template.md
 │   ├── session-summary-template.md
-│   └── ...
+│   ├── user-personas-template.md
+│   ├── user-story-template.md
+│   ├── ux-research-report-template.md
+│   └── validation-brief-template.md
 ├── GUARDRAILS.md                 # Shared safety rules & Change Request protocol
-├── TROUBLESHOOTING.md            # Diagnoses for common workspace blocks
-├── .gitignore                    # Ignore rules for .agents/ directory
-├── delegation-pattern.md         # I/O separation model
 ├── skills.md                     # Skills catalog registry
-├── workflow.md                   # Full Execution graph and handoff contracts
-├── package.json                  # NPM dependencies for harness plugins (excluded from npm pack)
-└── package-lock.json             # NPM package lock for harness plugins (excluded from npm pack)
+└── workflow.md                   # Full Execution graph and handoff contracts
 ```
 
-> [!IMPORTANT]
-> **NPM Package Exclusion**: The `node_modules/`, `package.json`, and `package-lock.json` inside `.agents/` must be excluded from the published npm package. These are excluded via root `.npmignore`:
-> ```
-> .agents/node_modules/
-> .agents/package.json
-> .agents/package-lock.json
-> ```
+> [!NOTE]
 > `tests/` lives at the workspace root (extracted during Phase 1) and is excluded by not being in the `"files"` array.
-> These files are only used during local development when running the opencode harness natively from the workspace.
 
 ---
 
 ## 4. Custom Harness Linker Strategy
 
 By making the `.agents/` folder and root `AGENTS.md` / `agent.md` files mandatory core outputs:
-- **Antigravity**, **Codex CLI**, and other standard `.agents/`-compatible CLI assistants are **supported natively out-of-the-box** on every single install.
+- **Amp**, **Antigravity**, **Cline**, **Codex**, **Cursor**, **Deep Agents**, **Dexto**, **Firebender**, **Gemini CLI**, **GitHub Copilot**, **Kimi Code CLI**, **OpenCode**, **Warp**, and **Zed** (which use `.agents/` folders natively out-of-the-box) are **supported natively out-of-the-box** on every single install and always included during installation.
 - The installer CLI only prompts for **optional integrations** that require special symlinking or file compilation:
 
 | Optional Harness Integration | Target Path | Link Mode | Link Source | Description / Notes |
@@ -248,7 +274,7 @@ To give the user an extremely premium interactive experience without heavy third
    ```
 2. **Harness Checklist Selector (Interactive Checkboxes)**:
    - "Select harness integrations to configure (Space to toggle, Enter to confirm):"
-     - `✔ Core Agent Directory (natively supported by: Antigravity, Codex, etc.) [Mandatory]` (Locked/pre-selected; Space key is disabled)
+      - `✔ Core Agent Directory (natively supported by: Amp, Antigravity, Cline, Codex, Cursor, Deep Agents, Dexto, Firebender, Gemini CLI, GitHub Copilot, Kimi Code CLI, OpenCode, Warp, Zed, etc.) [Mandatory]` (Locked/pre-selected; Space key is disabled)
      - `◯ opencode` (scaffolds `.opencode` -> `.agents` symlink)
      - `◯ Claude Code` (scaffolds `.claude` -> `.agents` symlink)
      - `◯ Cursor Rules` (scaffolds `.cursor/rules/*.mdc` rules with metadata)
@@ -256,12 +282,18 @@ To give the user an extremely premium interactive experience without heavy third
      - `◯ Windsurf` (scaffolds `.windsurf/workflows` symlink & `.windsurfrules` symlink)
      - `◯ Kiro Steering` (scaffolds `.kiro/steering/` manual rule folder)
 
-3. **Path Selector (Local vs. Global)**:
-    - **Step 3.1**: "Where do you want to install Vespyr?"
-      - `❯ 1 - Local Installation (Current project folder)`
-      - `  2 - Global Installation (Global environment paths)`
+3. **Installation Scope & Method Selector**:
+    - **Step 3.1 (Installation Scope)**:
+      - "Select installation scope:"
+        - `❯ 1 - Project-level (Install in current workspace)`
+        - `  2 - Global (Install in user home/global environment paths)`
     
-    - **Step 3.2 (If Global chosen)**:
+    - **Step 3.2 (Installation Method)**:
+      - "Select installation method:"
+        - `❯ 1 - Symlink (Recommended - references the master folder, allowing prompt updates to automatically propagate)`
+        - `  2 - Copy (Static copy of all agent folders and files)`
+    
+    - **Step 3.3 (If Global chosen)**:
      - The installer searches standard environment paths for the user's OS and selected harnesses:
        - Antigravity / General CLI: `~/.agents/`
        - Claude Code: `~/.claude/`
@@ -271,9 +303,9 @@ To give the user an extremely premium interactive experience without heavy third
        - GitHub Copilot: `~/.config/github-copilot/`
        - Windsurf: `~/.windsurf/`
        - Kiro: `~/.kiro/`
-     - Automatically copies the master `.agents` folder and establishes symlinks globally.
+     - Establishes symlinks or copies files globally depending on the selected installation method.
    
-    - **Step 3.3 (If Local chosen)**:
+    - **Step 3.4 (If Project-level chosen)**:
      - "Select target directory:"
        - `❯ 1 - Current directory (.)`
         - `  2 - Custom path (Enter a custom folder path)`
@@ -309,16 +341,28 @@ File symlinks (for `.windsurfrules`, `.github/copilot-instructions.md`) use `fs.
 - Windows: File symlink (requires admin or Developer Mode enabled). If file symlinks fail, fall back to copying the file.
 
 ```js
-function createLink(target, linkPath, type = 'dir') {
-  try {
-    fs.symlinkSync(target, linkPath, type);
-  } catch (err) {
-    if (err.code === 'EPERM' && type === 'file' && process.platform === 'win32') {
-      // Fallback: copy file on Windows without symlink privileges
-      fs.copyFileSync(target, linkPath);
-      console.warn(`  ⚠ Symlink failed, copied file instead: ${linkPath}`);
-    } else {
+function createLinkOrCopy(target, linkPath, type = 'dir', method = 'symlink') {
+  if (method === 'copy') {
+    try {
+      if (type === 'dir') {
+        fs.cpSync(target, linkPath, { recursive: true });
+      } else {
+        fs.copyFileSync(target, linkPath);
+      }
+    } catch (err) {
       throw err;
+    }
+  } else {
+    try {
+      fs.symlinkSync(target, linkPath, type);
+    } catch (err) {
+      if (err.code === 'EPERM' && type === 'file' && process.platform === 'win32') {
+        // Fallback: copy file on Windows without symlink privileges
+        fs.copyFileSync(target, linkPath);
+        console.warn(`  ⚠ Symlink failed, copied file instead: ${linkPath}`);
+      } else {
+        throw err;
+      }
     }
   }
 }
@@ -436,7 +480,7 @@ Cursor `.mdc` files require specific frontmatter (`globs`, `alwaysApply`) to exe
 1. **Parse Markdown Frontmatter**: Reads `description`.
 2. **Translate to Cursor MDC Keys**:
    - `globs`: Configured to `*` by default so the agent context is pullable/summonable anywhere.
-   - `alwaysApply`: Set to `false` (we want the rules to be requested on-demand when the user mentions `@agent-name` in the Cursor chat pane, rather than polluting every single query with 22 agent prompts).
+   - `alwaysApply`: Set to `false` (we want the rules to be requested on-demand when the user mentions `@agent-name` in the Cursor chat pane, rather than polluting every single query with 21 agent prompts).
 3. **Embed Rules Body**: Emits the exact agent instructions.
 4. **Link/Write output**: Saves to `.cursor/rules/{agent-name}.mdc`.
 
@@ -518,281 +562,12 @@ Create or update `artifacts/memory/project-context.md`:
 ## Team
 - **Squad**: full-team
 - **Operation Mode**: semi-autonomous
-- **Active Agents**: 22 (full-team preset)
+- **Active Agents**: 21 (full-team preset)
 
 ## Memory
 - **Lessons Learned**: None yet
 - **Active Decisions**: None yet
 ```
-
-### Step 3: Scaffold Unified Root Reference Files (Harness-Specific Adjustments)
-
-The `/init` command dynamically adjusts the paths and prefixes of the generated files to align perfectly with the target harness environment. All three files share the exact same core formatting, list of 22 personas, 24 workflows, shared memory protocols, and the Karpathy-inspired core behavioral guidelines, differing only in harness directory adaptations:
-
-1. **`agent.md`** (Tailored for OpenCode):
-   - Scaffolded at target root.
-   - References the `.opencode/` directory prefix for all paths (e.g. `@.opencode/agents/founder.md` and `.opencode/skills/`).
-
-2. **`AGENTS.md`** (Generic Multi-Harness):
-   - Scaffolded at target root.
-   - References the generic `[.harness-folder]/` directory prefix so it remains highly portable across Cursor, Windsurf, Claude Code, and Kiro.
-
-3. **`CLAUDE.md`** (Tailored for Claude Code):
-   - Scaffolded at target root if the `.claude/` directory is detected or active.
-   - References the `.claude/` directory prefix for all paths (e.g. `@.claude/agents/founder.md` and `.claude/skills/`).
-
-### Step 4: Verify harness integration
-
-Check which harness symlinks/compiled directories exist:
-- `.opencode -> .agents` → opencode detected
-- `.claude -> .agents` → Claude Code detected
-- `.cursor/rules/*.mdc` → Cursor detected
-- `.github/agents/*.yml` → GitHub Copilot detected
-- `.windsurf/workflows -> .agents/skills` → Windsurf detected
-- `.kiro/steering -> .agents/agents` → Kiro detected
-
-Print a summary of detected harnesses.
-
-## Guardrails
-
-> [!CAUTION]
-> **Dotfolder Isolation**: You MUST NOT read, scan, or analyze any files inside system harness dotfolders — this includes `.agents/`, `.opencode/`, `.claude/`, `.cursor/`, `.github/`, `.windsurf/`, `.kiro/`, and any other `.`-prefixed harness directories. These contain the engine itself, not the project being initialized.
-
-> **Canonical Paths**: All generated references MUST use `.agents/` as the canonical master path for agents, commands, skills, templates, scripts, and squads. Do not reference `.opencode/` (which is just a symlink for the opencode harness).
-
-> **Preserve User Data**: Never overwrite existing `artifacts/`, `project-context.md`, `AGENTS.md`, or `agent.md` without user confirmation.
-```
-
-### Migration Notes
-When updating `init.md` in the source:
-1. **Replace** the entire content of `.agents/commands/init.md` with the dynamic harness-adjusting implementation.
-2. **Verify** that the old version (which referenced `.opencode/` exclusively) is fully replaced.
-3. **Test** by running `/init` in a blank test project and asserting that all generated paths reference their respective target harness prefixes correctly.
-
----
-
-## 8. Proposed Source Code Modifications
-
-We will perform the following changes in the source repository:
-
-### Phase 1: Directory Restructuring
-- **Rename** `.opencode/` to `.agents/` in the workspace root.
-- **Create Symlink** `.opencode -> .agents` in the workspace root so that any local opencode commands or developers using opencode continue to run flawlessly.
-- **Preserve** root `opencode.json` as-is. This file is the harness configuration for opencode (plugin declarations, agent permissions) and lives outside the `.agents/` directory. No changes needed.
-- **Extract** `tests/` from `.agents/` to workspace root. After the rename, `.agents/tests/` exists (it was `.opencode/tests/`). Move it: `fs.renameSync('.agents/tests', 'tests')`. Tests are for engine development only — they should not ship inside the installed `.agents/` folder and are excluded from npm pack because they're at the workspace root (not in `"files"`).
-
-### Phase 2: Global Path Adjustments
-We will update all instances of `.opencode/` to `.agents/` across the codebase using exact string replacements:
-- **Agents**: Update references in all 22 agent files (e.g. `memory-entry-template.md`, `references/socratic/...`).
-- **Guidelines**: Update references in `.agents/references/` (e.g. `pm-workflows.md`, `pm-frameworks.md`, `developer-guidelines.md`, `socratic-universal.md`).
-- **Core Files**: Update root `AGENTS.md`, `agent.md`, `README.md`, `QUICK-REFERENCE.md`, `PORTING.md`, and `.agents/GUARDRAILS.md`.
-- **Commands**: Update `.agents/commands/init.md` to generalize dotfolder isolation rules.
-- **Scripts**: 
-  - Update `token_profiler.js` (lines 18-20, 229), `incremental_graph.js` (line 206), `doc_graph.js` (line 115), `shallow_graph.js` (line 226), and `swarm_telemetry.js` (lines 249, 255) to check for `.agents/` first, falling back to `.opencode/`.
-  - Update exclusion lists in `incremental_graph.js`, `doc_graph.js`, and `shallow_graph.js` to also exclude `.agents/` (in addition to `.opencode/`) so scripts do not scan themselves after the rename.
-  - Update comment in `compile_skills.js` (line 3) to reference `.agents/skills/`.
-
-### Phase 3: Create Package Metadata
-- **Create** `package.json` at the root of the repository:
-  ```json
-  {
-    "name": "vespyr",
-    "version": "1.7.0",
-    "description": "Multi-agent engine for product development",
-    "main": "index.js",
-    "type": "module",
-    "bin": {
-      "vespyr": "./bin/cli.js"
-    },
-    "files": [
-      ".agents",
-      "bin",
-      "AGENTS.md",
-      "QUICK-REFERENCE.md",
-      "PORTING.md",
-      "README.md",
-      "agent.md"
-    ]
-  }
-  ```
-- **Create** `.npmignore` at the repository root to exclude development-only files from the published package:
-  ```
-  .agents/node_modules/
-  .agents/package.json
-  .agents/package-lock.json
-  ```
-  Note: `tests/` does not need an entry — it lives at the workspace root and is not listed in `"files"`, so it's excluded by default.
-- **Create** `bin/cli.js` implementing the installer CLI (see Section 5).
-
-### Phase 4: Build CLI Entry Point
-- **Create** `bin/cli.js` with the following structure:
-  ```js
-  #!/usr/bin/env node
-  'use strict';
-  
-  // --help / --version handling (early exit, no deps)
-  // args: parse process.argv for --dry-run, --yes, --target, --harness
-  // detect: check fs.existsSync('.agents') to branch install vs action menu
-  // render: ASCII art (always first)
-  // prompt: interactive checklist for harnesses (raw mode keypress)
-  // prompt: path selector (local vs global)
-  // scaffold: copy .agents/ from __dirname/../.agents to target
-  // scaffold: create artifacts/ with project-context.md
-  // scaffold: bootstrap AGENTS.md and agent.md in target root
-  // link: create symlinks per selected harnesses
-  // transpile: run MDC and YAML transpilers if Cursor/Copilot selected
-  // summary: print post-install summary (Section 14)
-  // version-tag: write .agents/.vespyr-version (Phase 5)
-  // cleanup: on error, rollback (delete .agents/ and symlinks in target)
-  ```
-
-#### Execution Flow (Function Dependency Graph)
-
-```
-main()
-├── printASCII()                          // Always first
-├── parseFlags()                          // --help, --version, --dry-run, --yes, --target, --harness
-├── detectState(targetDir)
-│   ├── hasRealO penc = lstat('.opencode').isDirectory() && !isSymlink()
-│   ├── hasAgents    = existsSync('.agents')
-│   └── return: 'fresh' | 'installed' | 'migrate'
-│
-├── [migrate] → migrateFlow()             // Section 11
-│   ├── backupOpencode()
-│   ├── renameToAgents()
-│   ├── createSymlink('.opencode', '.agents')
-│   └── updatePathsInAgents()             // regex .opencode → .agents
-│
-├── [fresh] → installFlow()               // Interactive prompts
-│   ├── printWelcome()
-│   ├── selectedHarnesses = promptHarnessChecklist()   // Keypress raw mode
-│   ├── installPath = promptPathSelector()
-│   ├── scaffoldAgents(src, target)                     // cpSync from bundle
-│   │   └── writeVersionFile(target + '/.agents')        // Phase 5
-│   ├── scaffoldArtifacts(target, projectName)            // Section 9
-│   ├── bootstrapRootDocs(target, projectName, selectedHarnesses)  // Section 10 (incl. CLAUDE.md)
-│   ├── linkHarnesses(target, selectedHarnesses)
-│   │   ├── createLink('.agents', '.opencode', 'dir')    // opencode
-│   │   ├── createLink('.agents', '.claude', 'dir')      // claude
-│   │   ├── transpileCursorMDC(…)                        // Cursor
-│   │   ├── transpileCopilotYAML(…)                      // GitHub Copilot
-│   │   ├── createLink('AGENTS.md', 'copilot-instructions.md', 'file')
-│   │   ├── createLink('.agents/GUARDRAILS.md', '.windsurfrules', 'file')
-│   │   ├── createLink('.agents/skills', '.windsurf/workflows', 'dir')
-│   │   └── createLink('.agents/agents', '.kiro/steering', 'dir')
-│   └── printSummary(target, selections)                  // Section 14
-│
-├── [installed] → actionMenuFlow()        // Already configured
-│   ├── printActionMenu()
-│   ├── [1: Update]    → updateAgents() + recompileHarnesses()
-│   ├── [2: Reconfigure] → promptHarnessChecklist() + linkHarnesses()
-│   └── [3: Uninstall] → uninstallFlow()
-│       ├── deleteAgents()
-│       ├── deleteSymlinks()
-│       ├── deleteRootDocs()
-│       └── preserveArtifacts()                           // Never delete
-│
-└── registerSignalHandlers()
-    └── SIGINT → rollbackPartialInstall()
-```
-
-### Phase 5: Version Tracking Marker
-The installer writes a version marker file to enable the update flow to detect version drift:
-
-**File**: `.agents/.vespyr-version`
-**Content**:
-```json
-{ "version": "1.7.0", "installed": "2026-05-26T12:00:00.000Z" }
-```
-
-**Purpose**:
-- `--version` flag reads this to report the installed engine version.
-- Action 1 (Update) compares this against the bundled version. If they match, the update is skipped with `Already up to date (v1.7.0).`.
-- Future: enables migration scripts that transform `.agents/` when upgrading across breaking versions.
-
-**Implementation**:
-```js
-function writeVersionFile(agentsDir) {
-  const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8'));
-  fs.writeFileSync(
-    path.join(agentsDir, '.vespyr-version'),
-    JSON.stringify({ version: pkg.version, installed: new Date().toISOString() }, null, 2)
-  );
-}
-
-function getInstalledVersion(targetDir) {
-  const versionFile = path.join(targetDir, '.agents', '.vespyr-version');
-  if (!fs.existsSync(versionFile)) return null;
-  return JSON.parse(fs.readFileSync(versionFile, 'utf8')).version;
-}
-```
-
----
-
-## 9. `artifacts/` Scaffolding Specification
-
-When the installer runs for the first time in a target directory, it scaffolds the `artifacts/` directory with the following structure:
-
-```
-{target}/artifacts/
-├── directions/
-├── input/
-│   ├── data/
-│   ├── designs/
-│   ├── documents/
-│   ├── example/
-│   └── flows/
-├── memory/
-│   ├── agent-notes/
-│   ├── archive/
-│   ├── patterns-and-conventions.md
-│   ├── pending-questions/
-│   │   └── .gitkeep
-│   └── structural/
-├── output/
-│   ├── 01-research/
-│   ├── 02-strategy/
-│   ├── 03-architecture/
-│   ├── 04-planning/
-│   ├── 05-execution/
-│   ├── 06-quality/
-│   ├── 07-infrastructure/
-│   └── 08-documentation/
-└── telemetry/
-```
-
-### `project-context.md` Template
-
-Created at `{target}/artifacts/memory/project-context.md`:
-
-```markdown
-# Project Context
-
-## Identity
-- **Project Name**: {project-name}
-- **Repository**: {repo-url-or-none}
-- **User Nickname**: {user-name}
-- **Created**: {iso-date}
-
-## Technical
-- **Stack**: None (Starting from scratch)
-- **Architecture**: Not yet defined
-- **Constraints**: None recorded
-
-## Team
-- **Squad**: full-team
-- **Operation Mode**: semi-autonomous
-- **Active Agents**: 22 (full-team preset)
-
-## Memory
-- **Lessons Learned**: None yet
-- **Active Decisions**: None yet
-```
-
-Variables filled at install time:
-- `{project-name}`: derived from target directory name (e.g., `path.basename(resolve(targetDir))`)
-- `{repo-url-or-none}`: attempted via `git remote get-url origin` if a git repo exists, otherwise `"None (not a git repository)"`
-- `{iso-date}`: `new Date().toISOString().split('T')[0]`
 
 ### Scaffolding Logic
 ```js
@@ -833,7 +608,7 @@ function scaffoldArtifacts(targetDir, projectName) {
 ## Team
 - **Squad**: full-team
 - **Operation Mode**: semi-autonomous
-- **Active Agents**: 22 (full-team preset)
+- **Active Agents**: 21 (full-team preset)
 
 ## Memory
 - **Lessons Learned**: None yet
@@ -846,281 +621,26 @@ function scaffoldArtifacts(targetDir, projectName) {
 
 ---
 
-## 10. `AGENTS.md` & `agent.md` Bootstrap Templates
+## 10. `AGENTS.md`, `agent.md` & `CLAUDE.md` Bootstrap Templates
 
-Both files are written to the target root and reference `.agents/` as the canonical path.
+The canonical template content lives in `.opencode/commands/` (installed as `.agents/commands/`):
 
-### `AGENTS.md` Template
-```markdown
-# {project-name}
-
-A platform-agnostic, file-based multi-agent system powered by [Vespyr](https://github.com/anomalyco/vespyr).
-
-> [!IMPORTANT]
-> **Harness Directory Adaptation**
-> Vespyr installs its core agent definitions in the `.agents/` directory. Depending on your active AI harness, you may need to configure a symlink or path mapping:
-> - **OpenCode**: `.opencode -> .agents` (symlink configured during install)
-> - **Claude Code**: `.claude -> .agents` (symlink configured during install)
-> - **Cursor**: Agent rules available under `.cursor/rules/*.mdc`
-> - **GitHub Copilot**: Agent definitions available under `.github/agents/*.yml`
-> - **Windsurf**: Workflows linked from `.windsurf/workflows -> .agents/skills`
-> - **Kiro**: Steering rules linked from `.kiro/steering -> .agents/agents`
-
-## Invocation & Multi-Harness Guidelines
-
-Since agents are defined as plain Markdown personas, they can be loaded and executed by any AI developer harness.
-
-### 1. Context-Aware & Mention-Capable IDEs (e.g., Cursor, Windsurf, GitHub Copilot)
-- Use the `@` symbol in your chat pane to mention the agent's markdown configuration file (e.g., `@.agents/agents/founder.md` or `@founder.md`).
-- Attach the specific agent's `.md` file to the chat window before starting your task.
-
-### 2. Single-Agent & Terminal Harnesses (e.g., Claude Code, opencode)
-- Instruct the active LLM session to read and adopt the persona explicitly:
-  ```
-  Adopt the role defined in: .agents/agents/[agent-name].md
-  Read that file to understand your persona, goals, workflow, and safety guardrails.
-  Strictly adhere to the 4 Core Behavioral Guidelines (Think Before Acting, Simplicity First, Surgical Actions, Goal-Driven Execution) defined in AGENTS.md.
-  Then, execute this task: [detailed instructions]
-  ```
-
-### 3. Standard Browser-Based LLMs (e.g., ChatGPT, Claude.ai)
-- Copy the entire contents of `.agents/agents/[agent-name].md` and paste it as the first system message in a new chat thread.
-
-## Core Agent Personas (22 specialized roles)
-
-The system features 22 highly tuned role profiles divided into three functional categories:
-
-### Core Swarm & Engineering Roles
-| Agent | Focus | Outputs |
+| Template File | Target | Purpose |
 |:---|:---|:---|
-| `@orchestrator` | Swarm coordinator, multi-agent pipeline execution | `artifacts/memory/swarm-state.json` |
-| `@founder` (Elena) | Strategic concept stress-testing | `artifacts/output/00-discovery/` |
-| `@product-manager` | PRD generation, user story maps, kanban | `requirements.md`, `kanban.md` |
-| `@product-designer` | UX/UI design specs, screen states, wireframes | `product-spec.md` |
-| `@architect` | System design, ADR records | `adr/*.md` |
-| `@tech-lead` | Execution plans, task estimation (1-4h) | `execution-plan.md` |
-| `@developer` | Feature implementation, test suites | Source Code & Unit Tests |
-| `@code-reviewer` | PR reviews, security validation | Review Checklists |
-| `@qa-engineer` | Integration testing, regression, release cert | `test-report.md` |
-
-### Specialized Domain Experts
-| Agent | Focus | Outputs |
-|:---|:---|:---|
-| `@researcher` | Market, competitor, genre research | `artifacts/output/01-research/` |
-| `@user-researcher` | User research, interviews, personas | `artifacts/output/01-research/user-research/` |
-| `@ux-researcher` | Usability, journey maps, interaction design | `artifacts/output/01-research/ux/` |
-| `@data-analyst` | Analytics, telemetry, dashboards | `artifacts/output/07-iteration/` |
-| `@security-engineer` | Threat modeling, vulnerability scanning | `artifacts/output/03-architecture/security/` |
-| `@performance-engineer` | Latency analysis, bottleneck profiling | `artifacts/output/07-iteration/performance/` |
-| `@ml-engineer` | AI logic, model integration, prompt templates | `artifacts/output/03-architecture/ml/` |
-| `@devops-engineer` | CI/CD, infrastructure, environments | `.github/workflows/`, Terraform |
-| `@technical-writer` | User manuals, API specs, release docs | `docs/`, `api-reference.md` |
-
-### Operational I/O Sub-Agents
-| Agent | Role |
-|:---|:---|
-| `@reader` | Fast codebase queries, regex searches, file reads (read-only) |
-| `@writer` | Contiguous file edits/writes, zero reasoning overhead (write-only) |
-| `@executor` | Shell command execution, curated summaries |
-| `@memory-controller` | Memory gatekeeper — load, validate, persist, compact |
-
-## Shared Memory & Context Persistence
-
-All agents leverage the localized text-based memory system in `artifacts/memory/`:
-- **`project-context.md`**: Source of truth for codebase stack, constraints, architecture
-- **`active-decisions.md`**: Critical design choices
-- **`lessons-learned.md`**: Engineering insights, bugs fixed
-
-## 🌟 Core Behavioral Guidelines (Karpathy-Inspired)
-
-To maximize reliability, reduce over-engineering, and enforce high-fidelity execution across all development phases (Discovery, Strategy, Planning, Design, Dev, QA, etc.), all Vespyr agents follow these four core principles:
-
-### 1. Think Before Acting
-*   **No Silent Assumptions**: State all assumptions explicitly before executing. If a task or specification is ambiguous, pause and ask for clarification rather than making a guess and running with it.
-*   **Surface Trade-Offs**: Present multiple potential paths (e.g., in design, architecture, research, or testing) with their pros and cons. Never select a path silently.
-*   **Push Back When Warranted**: If a simpler path, lighter design, or more direct method exists to solve the problem, suggest it. Push back on unnecessary overhead.
-*   **Pause on Ambiguity**: If any inputs (requirements, user feedback, APIs) are unclear, stop immediately, identify the confusion, and ask the user or squad lead.
-
-### 2. Simplicity First
-*   **Minimum Complexity**: Build/write/design the minimum necessary to fulfill the requirements. No speculative engineering or "just-in-case" abstractions.
-*   **No Speculative Features**: Do not add undocumented features, design options, or processes that were not requested.
-*   **Sleek Abstractions**: Avoid complex framework structures, heavy architectures, or bloated documentation templates for simple, single-use tasks. Keep files concise (e.g., if a spec can be 1 page instead of 5, keep it to 1; if a component can be 50 lines instead of 200, write 50).
-*   **The Senior Standard**: Constantly ask: *"Would a principal leader criticize this as over-complicated or bloated?"* If yes, refactor it down to its elegant core.
-
-### 3. Surgical Actions
-*   **Minimize Footprint**: Touch only what is strictly necessary to complete the task. Never refactor or touch adjacent files, code, formatting, or documentation that are out of scope.
-*   **Preserve Context**: Maintain existing styles, structures, and naming conventions, even if you would personally implement them differently.
-*   **No Side-Effect Cleanup**: Do not silently delete or "clean up" unrelated dead code, comments, or document sections. If you notice unrelated issues, document them in `lessons-learned.md` or mention them, but do not touch them.
-*   **Surgical Edits**: When editing files, use the most precise edit tools possible. Avoid rewriting whole files when changing a few lines.
-
-### 4. Goal-Driven Execution
-*   **Define Success Early**: Before starting any phase (Discovery, Design, Dev, QA, etc.), clearly define the deliverables and their exact verification criteria.
-*   **Test-First Discipline**: For developers, write tests before or alongside code. For other roles, establish checklist benchmarks (e.g., user story mapping for PMs, usability tests for Designers).
-*   **Rigorous Verification**: Never claim a task is complete until it has been explicitly verified using automated tests, manual walkthroughs, or system feedback.
-*   **Close the Loop**: Log outcomes and update persistent memory (`lessons-learned.md` or `active-decisions.md`) upon completion.
-
----
-
-## 🛡️ Guardrails
-
-All agents follow the safety and conflict resolution rules in `.agents/GUARDRAILS.md`.
-```
-
-### `agent.md` Template
-```markdown
-# Vespyr Agent Instructions
-
-You are operating within the Vespyr multi-agent engine. Your core agent definitions, workflows, and shared memory live in the `.agents/` directory.
-
-## Quick Reference
-- **Agent Personas**: `.agents/agents/` (22 specialized roles)
-- **Skills/Workflows**: `.agents/skills/` (24 curated phase workflows)
-- **Shared Memory**: `artifacts/memory/project-context.md`
-- **Squad Presets**: `.agents/squads/` (7 team configurations)
-- **Guardrails**: `.agents/GUARDRAILS.md`
-
-## Getting Started
-1. Run `/init` to bootstrap this project if it's newly installed.
-2. Use `@squad` to see or switch team presets.
-3. Use `@status` for a quick project state snapshot.
-4. Use `@help-me` for a tailored navigation report.
-
-## Harness Compatibility
-Vespyr is harness-agnostic. Your current harness integrations were configured during install. See `AGENTS.md` for invocation instructions per harness.
-
-## 🌟 Core Behavioral Guidelines (Karpathy-Inspired)
-
-To maximize reliability, reduce over-engineering, and enforce high-fidelity execution across all development phases (Discovery, Strategy, Planning, Design, Dev, QA, etc.), all Vespyr agents follow these four core principles:
-
-### 1. Think Before Acting
-*   **No Silent Assumptions**: State all assumptions explicitly before executing. If a task or specification is ambiguous, pause and ask for clarification rather than making a guess and running with it.
-*   **Surface Trade-Offs**: Present multiple potential paths (e.g., in design, architecture, research, or testing) with their pros and cons. Never select a path silently.
-*   **Push Back When Warranted**: If a simpler path, lighter design, or more direct method exists to solve the problem, suggest it. Push back on unnecessary overhead.
-*   **Pause on Ambiguity**: If any inputs (requirements, user feedback, APIs) are unclear, stop immediately, identify the confusion, and ask the user or squad lead.
-
-### 2. Simplicity First
-*   **Minimum Complexity**: Build/write/design the minimum necessary to fulfill the requirements. No speculative engineering or "just-in-case" abstractions.
-*   **No Speculative Features**: Do not add undocumented features, design options, or processes that were not requested.
-*   **Sleek Abstractions**: Avoid complex framework structures, heavy architectures, or bloated documentation templates for simple, single-use tasks. Keep files concise (e.g., if a spec can be 1 page instead of 5, keep it to 1; if a component can be 50 lines instead of 200, write 50).
-*   **The Senior Standard**: Constantly ask: *"Would a principal leader criticize this as over-complicated or bloated?"* If yes, refactor it down to its elegant core.
-
-### 3. Surgical Actions
-*   **Minimize Footprint**: Touch only what is strictly necessary to complete the task. Never refactor or touch adjacent files, code, formatting, or documentation that are out of scope.
-*   **Preserve Context**: Maintain existing styles, structures, and naming conventions, even if you would personally implement them differently.
-*   **No Side-Effect Cleanup**: Do not silently delete or "clean up" unrelated dead code, comments, or document sections. If you notice unrelated issues, document them in `lessons-learned.md` or mention them, but do not touch them.
-*   **Surgical Edits**: When editing files, use the most precise edit tools possible. Avoid rewriting whole files when changing a few lines.
-
-### 4. Goal-Driven Execution
-*   **Define Success Early**: Before starting any phase (Discovery, Design, Dev, QA, etc.), clearly define the deliverables and their exact verification criteria.
-*   **Test-First Discipline**: For developers, write tests before or alongside code. For other roles, establish checklist benchmarks (e.g., user story mapping for PMs, usability tests for Designers).
-*   **Rigorous Verification**: Never claim a task is complete until it has been explicitly verified using automated tests, manual walkthroughs, or system feedback.
-*   **Close the Loop**: Log outcomes and update persistent memory (`lessons-learned.md` or `active-decisions.md`) upon completion.
-```
-
-### `CLAUDE.md` Template (Claude Code Harness Only)
-Scaffolded at project root only when the user selects the Claude Code harness. This file serves as Claude Code's project memory, instructing it on how to discover and invoke Vespyr agents:
-
-```markdown
-# CLAUDE.md — Vespyr Multi-Agent Engine
-
-This project is powered by Vespyr, a platform-agnostic, file-based multi-agent system consisting of 22 specialized agent personas, structured workflows, and a shared persistent memory layer.
-
-**Trade-Off Policy**: The guidelines below prioritize absolute execution quality, simplicity, and precision over sheer speed. Adhere to them strictly for all tasks.
-
----
-
-## 🌟 Core Behavioral Guidelines (Karpathy-Inspired)
-
-To maximize reliability, reduce over-engineering, and enforce high-fidelity execution across all development phases, all agents must follow these four core principles:
-
-### 1. Think Before Acting
-*   **No Silent Assumptions**: State all assumptions explicitly before executing. If a task or specification is ambiguous, pause and ask for clarification rather than making a guess and running with it.
-*   **Surface Trade-Offs**: Present multiple potential paths (e.g., in design, architecture, research, or testing) with their pros and cons. Never select a path silently.
-*   **Push Back When Warranted**: If a simpler path, lighter design, or more direct method exists to solve the problem, suggest it. Push back on unnecessary overhead.
-*   **Pause on Ambiguity**: If any inputs (requirements, user feedback, APIs) are unclear, stop immediately, identify the confusion, and ask the user or squad lead.
-
-### 2. Simplicity First
-*   **Minimum Complexity**: Build/write/design the minimum necessary to fulfill the requirements. No speculative engineering or "just-in-case" abstractions.
-*   **No Speculative Features**: Do not add undocumented features, design options, or processes that were not requested.
-*   **Sleek Abstractions**: Avoid complex framework structures, heavy architectures, or bloated documentation templates for simple, single-use tasks. Keep files concise (e.g., if a spec can be 1 page instead of 5, keep it to 1; if a component can be 50 lines instead of 200, write 50).
-*   **The Senior Standard**: Constantly ask: *"Would a principal leader criticize this as over-complicated or bloated?"* If yes, refactor it down to its elegant core.
-
-### 3. Surgical Actions
-*   **Minimize Footprint**: Touch only what is strictly necessary to complete the task. Never refactor or touch adjacent files, code, formatting, or documentation that are out of scope.
-*   **Preserve Context**: Maintain existing styles, structures, and naming conventions, even if you would personally implement them differently.
-*   **No Side-Effect Cleanup**: Do not silently delete or "clean up" unrelated dead code, comments, or document sections. If you notice unrelated issues, document them in `lessons-learned.md` or mention them, but do not touch them.
-*   **Surgical Edits**: When editing files, use the most precise edit tools possible. Avoid rewriting whole files when changing a few lines.
-
-### 4. Goal-Driven Execution
-*   **Define Success Early**: Before starting any phase (Discovery, Design, Dev, QA, etc.), clearly define the deliverables and their exact verification criteria.
-*   **Test-First Discipline**: For developers, write tests before or alongside code. For other roles, establish checklist benchmarks (e.g., user story mapping for PMs, usability tests for Designers).
-*   **Rigorous Verification**: Never claim a task is complete until it has been explicitly verified using automated tests, manual walkthroughs, or system feedback.
-*   **Close the Loop**: Log outcomes and update persistent memory (`lessons-learned.md` or `active-decisions.md`) upon completion.
-
----
-
-## 👥 Agent Discovery & Invocation
-
-Vespyr agents are installed under `.claude/agents/` (symlinked to `.agents/agents/` or `.opencode/agents/`). To invoke an agent, instruct the LLM session to adopt its persona:
-
-```
-Adopt the role of the agent defined in .claude/agents/founder.md.
-Read that file to understand your persona, goals, workflow, and safety guardrails.
-Strictly adhere to the 4 Core Behavioral Guidelines defined in CLAUDE.md.
-Then, execute this task: [your detailed instructions]
-```
-
-### Core Agent Personas
-
-| Persona | Domain | Focus Area & Primary Responsibilities | Core Deliverables |
-| :--- | :--- | :--- | :--- |
-| **`@orchestrator`** | Swarm | Swarm coordinator, manages multi-agent pipeline execution | `swarm-state.json` |
-| **`@founder`** | Swarm | Strategic concept stress-testing (Elena) | `00-discovery/` |
-| **`@product-manager`** | Swarm | Scoping, PRD, user stories, Kanban | `requirements.md` |
-| **`@product-designer`** | Swarm | UX/UI designs, screen states, wireframes | `product-spec.md` |
-| **`@architect`** | Swarm | System design, ADR trade-offs | `adr/*.md` |
-| **`@tech-lead`** | Swarm | Execution plans, task estimation, backlog | `execution-plan.md` |
-| **`@developer`** | Swarm | Core feature implementation, code quality, unit tests | Source Code & Tests |
-| **`@code-reviewer`** | Swarm | PR reviews, security validation, compliance checks | Checklists & Feedbacks |
-| **`@qa-engineer`** | Swarm | Integration testing, regression verification | `test-report.md` |
-
-Full agent roster is available under `.claude/agents/` (22 specialized profiles). See `AGENTS.md` for a complete reference.
-
----
-
-## 🛠️ Workflows (Skills)
-
-Vespyr provides 24 curated workflows under `.claude/commands/` (symlinked to `.agents/skills/`):
-- `/help-me` — Project state navigator
-- `/grill-me` — Socratic alignment interview
-- `/design` — PRD and screen specs
-- `/develop` — Full MVP development cycle
-- `/review` — Standalone code review
-- `/test` — Run tests, summarize failures
-- `/retro` — Post-cycle review and memory compaction
-
----
-
-## 🧠 Shared Memory & Context Persistence
-
-Project context and decisions persist in `artifacts/memory/`:
-- `project-context.md` — Stack, constraints, architecture
-- `active-decisions.md` — Key design choices
-- `lessons-learned.md` — Engineering insights
-
-## 🛡️ Guardrails
-
-All agents follow safety rules in `.agents/GUARDRAILS.md`. Do not delete or modify files inside `.agents/`, `.claude/`, or `artifacts/memory/` without understanding the system.
-```
+| `scaffold-agents.md` | `AGENTS.md` | Harness-agnostic agent roster, invocation guidelines, memory protocol |
+| `scaffold-agent.md` | `agent.md` | Agent quick-reference (identical to AGENTS.md except prompt references `agent.md`) |
+| `scaffold-claude.md` | `CLAUDE.md` | Claude Code harness project memory (scaffolded only when Claude Code is selected) |
 
 ### Bootstrap Logic
 ```js
 function bootstrapRootDocs(targetDir, projectName, selectedHarnesses) {
-  const agentsMd = generateAgentsMd(projectName);     // AGENTS.md template
-  const agentMd = generateAgentMd();                   // agent.md template
-  const claudeMd = generateClaudeMd();                 // CLAUDE.md template
+  const commandsDir = path.join(targetDir, '.agents', 'commands');
 
   // AGENTS.md and agent.md — always scaffolded
+  const agentsMd = fs.readFileSync(path.join(commandsDir, 'scaffold-agents.md'), 'utf8')
+    .replace('{Project Name}', projectName);
+  const agentMd = fs.readFileSync(path.join(commandsDir, 'scaffold-agent.md'), 'utf8');
+
   const agentsPath = path.join(targetDir, 'AGENTS.md');
   const agentPath = path.join(targetDir, 'agent.md');
   if (!fs.existsSync(agentsPath)) fs.writeFileSync(agentsPath, agentsMd);
@@ -1128,13 +648,22 @@ function bootstrapRootDocs(targetDir, projectName, selectedHarnesses) {
 
   // CLAUDE.md — only when Claude Code harness is selected
   if (selectedHarnesses.includes('claude')) {
+    const claudeMd = fs.readFileSync(path.join(commandsDir, 'scaffold-claude.md'), 'utf8');
     const claudePath = path.join(targetDir, 'CLAUDE.md');
-    if (!fs.existsSync(claudePath)) {
-      fs.writeFileSync(claudePath, claudeMd);
-    }
+    if (!fs.existsSync(claudePath)) fs.writeFileSync(claudePath, claudeMd);
   }
 }
 ```
+
+### Key Differences Between Templates
+
+| Aspect | `AGENTS.md` | `agent.md` | `CLAUDE.md` |
+|:---|:---|:---|:---|
+| **Header** | `{Project Name} — Vespyr Multi-Agent Engine` | `Vespyr — Multi-Agent Engine` | `CLAUDE.md — Vespyr Multi-Agent Engine` |
+| **Prompt pattern** | References `this document` | References `agent.md` | References `CLAUDE.md` |
+| **Harness paths** | `.opencode/agents/` | `.opencode/agents/` | `.claude/agents/` |
+| **Skills paths** | `.opencode/skills/` | `.opencode/skills/` | `.claude/skills/` |
+| **When scaffolded** | Always | Always | Only if Claude Code selected |
 
 ---
 
@@ -1229,7 +758,7 @@ jobs:
 
 ### Pre-Publish Checklist (Manual)
 - [ ] All Phase 2 path updates verified (no `.opencode` references remain in `AGENTS.md`, `agent.md`, `README.md`, scripts)
-- [ ] `.npmignore` present and excludes `node_modules/`, `tests/`, `.agents/package.json`
+- [ ] `.npmignore` present and excludes `node_modules/`, `tests/`
 - [ ] `bin/cli.js` tested with `node ./bin/cli.js --dry-run`
 - [ ] Full verification (Section 16) passes in a clean `test-project/`
 - [ ] `npm pack --dry-run` shows only expected files
@@ -1304,14 +833,14 @@ After a successful install, the CLI prints a summary showing exactly what was do
 ============================================================
 
   Target:       /Users/you/my-project
-  Squad:        full-team (22 agents)
+  Squad:        full-team (21 agents)
   Harnesses:    opencode, claude-code, cursor
 
   Created:
     ✓ .agents/                        (core agent engine)
     ✓ .opencode -> .agents            (opencode harness)
     ✓ .claude -> .agents             (Claude Code harness)
-    ✓ .cursor/rules/*.mdc            (22 Cursor rules)
+    ✓ .cursor/rules/*.mdc            (21 Cursor rules)
     ✓ artifacts/                      (memory + output directories)
     ✓ AGENTS.md                       (harness-agnostic guide)
     ✓ agent.md                        (agent quick reference)
@@ -1336,7 +865,7 @@ function printSummary(targetDir, selections) {
     `============================================================`,
     ``,
     `  Target:       ${targetDir}`,
-    `  Squad:        full-team (22 agents)`,
+    `  Squad:        full-team (21 agents)`,
     `  Harnesses:    ${selections.harnesses.join(', ') || 'core only'}`,
     ``,
     `  Created:`,
@@ -1351,9 +880,9 @@ function printSummary(targetDir, selections) {
     lines.push(`    ✓ CLAUDE.md                      (Claude Code project memory)`);
   }
   if (selections.harnesses.includes('cursor'))
-    lines.push(`    ✓ .cursor/rules/*.mdc            (22 Cursor rules)`);
+    lines.push(`    ✓ .cursor/rules/*.mdc            (21 Cursor rules)`);
   if (selections.harnesses.includes('github'))
-    lines.push(`    ✓ .github/agents/*.yml           (22 Copilot agents)`);
+    lines.push(`    ✓ .github/agents/*.yml           (21 Copilot agents)`);
   if (selections.harnesses.includes('windsurf'))
     lines.push(`    ✓ .windsurf/workflows -> skills  (Windsurf workflows)`);
   if (selections.harnesses.includes('kiro'))
@@ -1403,7 +932,7 @@ node --test tests/
 | Case | Input | Expected |
 |:---|:---|:---|
 | Single agent | `founder.md` with `description: "Validates ideas"` | `.github/agents/founder.yml` with `name: founder`, `description: "Validates ideas"`, `instructions: \|` + body |
-| 22 agents | Full `.agents/agents/` directory | 22 `.yml` files, all parseable YAML |
+| 21 agents | Full `.agents/agents/` directory | 21 `.yml` files, all parseable YAML |
 | Agent with no description | `agent.md` with no `description` field | `.yml` with `description: ""` (empty string, no crash) |
 | Agent with quotes in description | `description: 'She said "hello"'` | `.yml` with `description: "She said \\"hello\\""` (escaped) |
 
@@ -1411,20 +940,22 @@ node --test tests/
 | Case | Input | Expected |
 |:---|:---|:---|
 | Single agent | `founder.md` with frontmatter | `.cursor/rules/founder.mdc` with `globs: "*"`, `alwaysApply: false`, frontmatter + body |
-| 22 agents | Full directory | 22 `.mdc` files, all with correct frontmatter keys |
+| 21 agents | Full directory | 21 `.mdc` files, all with correct frontmatter keys |
 | Agent missing from source | `404.md` doesn't exist | Skipped (no output file) |
 
-### Test 4: `createLink()`
-| Case | OS | Expected |
-|:---|:---|:---|
-| Directory symlink | macOS/Linux | POSIX symlink created, `readlink()` returns target |
-| Directory symlink | Windows (admin/DevMode) | Directory symlink created |
-| Directory symlink | Windows (no admin) | Junctions created, `lstat().isSymbolicLink()` returns true for the junction |
-| File symlink | macOS/Linux | POSIX symlink created |
-| File symlink | Windows (no admin) | Falls back to `copyFileSync`, original file unchanged |
-| Symlink already exists, points to same target | Any | Skipped, no error |
-| Symlink already exists, points elsewhere | Any | Throws `EEXIST` (handled by conflict resolution, not this function) |
-| Permission denied | Any | Throws `EACCES` with appropriate message |
+### Test 4: `createLinkOrCopy()`
+| Case | OS | Method | Expected |
+|:---|:---|:---|:---|
+| Directory symlink | macOS/Linux | symlink | POSIX symlink created, `readlink()` returns target |
+| Directory symlink | Windows (admin/DevMode) | symlink | Directory symlink created |
+| Directory symlink | Windows (no admin) | symlink | Junctions created, `lstat().isSymbolicLink()` returns true for the junction |
+| File symlink | macOS/Linux | symlink | POSIX symlink created |
+| File symlink | Windows (no admin) | symlink | Falls back to `copyFileSync`, original file unchanged |
+| Symlink already exists, points to same target | Any | symlink | Skipped, no error |
+| Symlink already exists, points elsewhere | Any | symlink | Throws `EEXIST` (handled by conflict resolution, not this function) |
+| Directory copy | Any | copy | Recursively copies directory using `fs.cpSync` |
+| File copy | Any | copy | Copies file using `fs.copyFileSync` |
+| Permission denied | Any | Any | Throws `EACCES` with appropriate message |
 
 ### Test 5: `detectState()`
 | Case | `.opencode/` | `.agents/` | Expected |
@@ -1519,10 +1050,10 @@ Verify that the files and folders are present:
 1. `test-project/.opencode/` must be a valid symlink pointing to `.agents/`.
 2. `test-project/.claude/` must be a valid symlink pointing to `.agents/`.
    - `test-project/CLAUDE.md` must exist and contain Vespyr agent invocation instructions and reference `.claude/agents/`.
-3. `test-project/.cursor/rules/` must contain 22 `.mdc` file rules translated and compiled from `.agents/agents/*.md` with proper metadata.
+3. `test-project/.cursor/rules/` must contain 21 `.mdc` file rules translated and compiled from `.agents/agents/*.md` with proper metadata.
 4. `test-project/.windsurf/workflows` must be a valid symlink pointing to `.agents/skills`.
 5. `test-project/.windsurfrules` must be a valid symlink pointing to `.agents/GUARDRAILS.md`.
-6. `test-project/.github/agents/` must contain 22 `.yml` configuration files compiled correctly from the agent prompts.
+6. `test-project/.github/agents/` must contain 21 `.yml` configuration files compiled correctly from the agent prompts.
 7. `test-project/.github/copilot-instructions.md` must point to `AGENTS.md`.
 
 #### Step 5: Test Backward Compatibility
@@ -1606,4 +1137,4 @@ Since all agents load `project-context.md` as Tier 1 core memory, they automatic
 1. **Direct Address**: When formulating interactive Socratic questions (e.g., during Socratic validation or when prompting the user for feature selection/PRD approvals), agents must greet and address the user directly by their nickname instead of generic placeholders like "human", "user", or "developer".
    * *Example*: *"Hello Christian, before we dive into..."* instead of *"Hello user, before we..."*.
 2. **Commit Messages & Walkthroughs**: When attributing stakeholder decisions or drafting manual walkthrough outputs (like `walkthrough.md`), agents will refer to the user by their nickname when logging decisions.
-3. **Tone Guidelines**: Added explicitly to `socratic-universal.md` and default prompt structures, instructing all 22 agent personas to respect this personalization parameter for a more conversational and natural collaborative experience.
+3. **Tone Guidelines**: Added explicitly to `socratic-universal.md` and default prompt structures, instructing all 21 agent personas to respect this personalization parameter for a more conversational and natural collaborative experience.

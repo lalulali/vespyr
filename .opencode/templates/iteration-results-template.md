@@ -1,6 +1,7 @@
 # Iteration Results Template
 
-> **Used by:** @data-analyst → **Feeds into:** iteration backlog (next cycle), retrospective
+> **Used by:** Nova (@data-analyst)
+> **Feeds into:** iteration backlog (next cycle), retrospective
 > **Save to:** `artifacts/output/07-iteration/iteration-results.md`
 
 Use this template to document the measured impact of iteration changes. Compare against success criteria from the iteration backlog.

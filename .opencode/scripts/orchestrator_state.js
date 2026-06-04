@@ -1,10 +1,12 @@
 #!/usr/bin/env node
 /**
- * Orchestrator State Manager — DAG Pipeline Execution for Vespyr
+ * Pipeline State Manager — DAG Pipeline Execution for Vespyr
  *
  * Manages pipeline state, validates outputs, tracks artifact versions,
- * and determines next actions. The LLM orchestrator agent uses this
- * script for deterministic state operations.
+ * and determines next actions. This script is the canonical source of
+ * truth for project state — every skill calls it directly via
+ * `@executor`. There is no @orchestrator subagent; the script itself
+ * is the state machine.
  *
  * Usage:
  *   node orchestrator_state.js init --name "My Project" --type startup
@@ -20,6 +22,8 @@ const path = require('path');
 
 const STATE_FILE = path.join(process.cwd(), 'artifacts', 'output', 'pipeline-state.json');
 const OUTPUT_DIR = path.join(process.cwd(), 'artifacts', 'output');
+const TELEMETRY_DIR = path.join(process.cwd(), 'artifacts', 'telemetry');
+const PROJECT_ROOT = process.cwd();
 
 function ensureDir() {
   if (!fs.existsSync(OUTPUT_DIR)) fs.mkdirSync(OUTPUT_DIR, { recursive: true });
@@ -37,6 +41,61 @@ function readState() {
 function writeState(state) {
   ensureDir();
   fs.writeFileSync(STATE_FILE, JSON.stringify(state, null, 2), 'utf8');
+}
+
+// Best-effort token estimate from file size: ~0.75 words per token on average.
+// Used only when the caller does not supply --tokens.
+function estimateTokensFromFile(absPath) {
+  try {
+    if (!fs.existsSync(absPath)) return 0;
+    const content = fs.readFileSync(absPath, 'utf8');
+    const words = content.split(/\s+/).filter(Boolean).length;
+    return Math.max(1, Math.round(words / 0.75));
+  } catch (e) {
+    return 0;
+  }
+}
+
+// Auto-record a telemetry event. Never throws — telemetry must not block orchestration.
+function recordTelemetry(eventType, fields) {
+  const telemetryScript = path.join(__dirname, 'swarm_telemetry.js');
+  if (!fs.existsSync(telemetryScript)) return;
+  try {
+    if (!fs.existsSync(TELEMETRY_DIR)) fs.mkdirSync(TELEMETRY_DIR, { recursive: true });
+    const parts = [`--type ${eventType}`];
+    if (fields.agent) parts.push(`--agent ${fields.agent}`);
+    if (fields.phase) parts.push(`--phase ${fields.phase}`);
+    if (fields.data) parts.push(`--data '${JSON.stringify(fields.data)}'`);
+    require('child_process').execSync(
+      `node "${telemetryScript}" record ${parts.join(' ')}`,
+      { stdio: 'ignore' }
+    );
+  } catch (e) {
+    // Silent fail
+  }
+}
+
+// Ensure a structural graph is fresh, recording the result as telemetry.
+// Never throws — graph failures must not block orchestration.
+function ensureGraph(type) {
+  const ensureScript = path.join(__dirname, 'ensure_graph.js');
+  if (!fs.existsSync(ensureScript)) return null;
+  try {
+    const stdout = require('child_process').execFileSync(
+      'node', [ensureScript, type],
+      { encoding: 'utf8', cwd: PROJECT_ROOT }
+    );
+    const result = JSON.parse(stdout);
+    recordTelemetry('graph_status', {
+      data: { graph: type, ...result }
+    });
+    return result;
+  } catch (e) {
+    recordTelemetry('graph_status', {
+      data: { graph: type, status: 'failed', error: e.message, stderr: e.stderr ? e.stderr.toString() : null }
+    });
+    return null;
+  }
 }
 
 function createInitialState(name, type, squadName = 'full-team') {
@@ -223,6 +282,7 @@ function main() {
   node orchestrator_state.js complete --agent founder --artifact idea-brief.md
   node orchestrator_state.js file-cr --from developer --to product-manager --target user-stories.md --issue "..."
   node orchestrator_state.js set-phase --phase design
+  node orchestrator_state.js ensure-graph <code|doc>
   node orchestrator_state.js validate --phase design`);
     process.exit(0);
   }
@@ -230,6 +290,18 @@ function main() {
   const cmd = args[0];
 
   try {
+    if (cmd === 'ensure-graph') {
+      const type = args[1];
+      if (!['code', 'doc'].includes(type)) {
+        console.error('Usage: orchestrator_state.js ensure-graph <code|doc>');
+        process.exit(2);
+      }
+      const result = ensureGraph(type);
+      if (!result) process.exit(1);
+      console.log(JSON.stringify(result, null, 2));
+      return;
+    }
+
     if (cmd === 'init') {
       let name = 'Untitled';
       let type = 'startup';
@@ -251,6 +323,15 @@ function main() {
       }
 
       console.log(JSON.stringify({ success: true, project: name, type, squad, state_file: STATE_FILE }));
+
+      recordTelemetry('phase_transition', {
+        phase: state.current_phase,
+        data: { action: 'init', project: name, type, squad }
+      });
+
+      // Seed the doc-graph on project init so traceability is available
+      // from the very first skill call.
+      ensureGraph('doc');
     }
 
     if (cmd === 'status') {
@@ -265,8 +346,11 @@ function main() {
     if (cmd === 'next') {
       const state = readState();
       if (!state) {
-        console.log(JSON.stringify({ error: 'No pipeline state found. Run init first.' }));
-        process.exit(1);
+        console.log(JSON.stringify({
+          action: 'init-required',
+          reason: 'No pipeline state found. Project is uninitialized.'
+        }));
+        return;
       }
       const action = determineNextAction(state);
       console.log(JSON.stringify(action, null, 2));
@@ -302,6 +386,12 @@ function main() {
         version = versionMatch ? parseInt(versionMatch[1], 10) : 1;
       }
 
+      // Auto-estimate tokens from artifact size when caller did not supply them.
+      // This guarantees telemetry is never empty during real workflow runs.
+      if (tokens === null) {
+        tokens = estimateTokensFromFile(artifactPath);
+      }
+
       state.artifacts[artifact] = {
         agent,
         completed_at: new Date().toISOString(),
@@ -322,23 +412,19 @@ function main() {
       state.last_updated = new Date().toISOString();
       writeState(state);
 
-      // Record telemetry if tokens or duration provided
-      if (tokens !== null || durationMs !== null) {
-        const telemetryScript = path.join(__dirname, 'swarm_telemetry.js');
-        if (fs.existsSync(telemetryScript)) {
-          try {
-            const dataParts = [];
-            if (tokens !== null) dataParts.push(`"tokens":${tokens}`);
-            if (durationMs !== null) dataParts.push(`"duration_ms":${durationMs}`);
-            const data = `{${dataParts.join(',')}}`;
-            require('child_process').execSync(
-              `node "${telemetryScript}" record --type agent_invoke --agent "${agent}" --phase "${state.current_phase}" --data '${data}'`,
-              { stdio: 'ignore' }
-            );
-          } catch (e) {
-            // Telemetry failure must not block orchestration
-          }
-        }
+      // Always record an agent_invoke telemetry event. Use provided duration_ms or 0.
+      recordTelemetry('agent_invoke', {
+        agent,
+        phase: state.current_phase,
+        data: { tokens, duration_ms: durationMs, artifact, version }
+      });
+
+      // Code-modifying agents should refresh the code-graph so the next
+      // consumer (architect, tech-lead, developer) reads a current graph
+      // instead of a stale one.
+      const codeModifyingAgents = new Set(['developer', 'architect', 'tech-lead']);
+      if (codeModifyingAgents.has(agent)) {
+        ensureGraph('code');
       }
 
       console.log(JSON.stringify({ success: true, agent, artifact, version, tokens, duration_ms: durationMs }));
@@ -434,6 +520,11 @@ function main() {
       }
 
       console.log(JSON.stringify({ success: true, from: oldPhase, to: phase }));
+
+      recordTelemetry('phase_transition', {
+        phase,
+        data: { action: 'set-phase', from: oldPhase, to: phase }
+      });
     }
 
     if (cmd === 'validate') {

@@ -4,7 +4,6 @@ description: Early-stage product from idea to MVP
 agents:
   - founder
   - researcher
-  - competitor-analyzer
   - user-researcher
   - product-manager
   - product-designer

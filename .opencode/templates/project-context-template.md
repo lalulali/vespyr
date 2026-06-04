@@ -1,6 +1,6 @@
 # Project Context Template
 
-> **Used by:** @founder (to initialize) → **Read by:** All agents via `@memory-controller`
+> **Used by:** Elena (@founder) → **Read by:** All agents via `Mnemos (@memory-controller)`
 > **Save to:** `artifacts/memory/project-context.md`
 
 This is the single source of truth for project-level context. Every agent reads this before starting work — but always through `@memory-controller`, never directly.

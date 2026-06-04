@@ -10,7 +10,7 @@ Current status: **v1.1 — squad-based team presets, shipped.**
 
 ### Squad-based team presets
 
-Right now Vespyr ships as one team of 22 agents. Most users don't need all of them for every project. The plan is to introduce **squads** — curated subsets of agents for specific use cases.
+Right now Vespyr ships as one team of 21 agents. Most users don't need all of them for every project. The plan is to introduce **squads** — curated subsets of agents for specific use cases.
 
 A squad is a named configuration that activates a subset of agents, sets their shared memory defaults, and optionally pre-configures the workflow phases relevant to that squad's purpose.
 
@@ -18,7 +18,7 @@ A squad is a named configuration that activates a subset of agents, sets their s
 
 | Squad | Agents included | Use case |
 |---|---|---|
-| `full-team` | All 22 agents | Default — full product development lifecycle |
+| `full-team` | All 21 agents | Default — full product development lifecycle |
 | `startup` | founder, market-researcher, competitor-analyzer, user-researcher, product-manager, product-designer, architect, tech-lead, developer, code-reviewer, qa-engineer, devops-engineer | Early-stage product from idea to MVP |
 | `build` | architect, tech-lead, developer, code-reviewer, qa-engineer, devops-engineer, technical-writer | You have a spec, you need to build it |
 | `research` | founder, market-researcher, competitor-analyzer, user-researcher, product-manager | Discovery and validation only, no code |
@@ -78,7 +78,7 @@ npx vespyr
     Enter a path
 
 Installing Vespyr for opencode with the startup squad...
-✓ Created .opencode/agents/ (22 agents)
+✓ Created .opencode/agents/ (21 agents)
 ✓ Created .opencode/skills/
 ✓ Created .opencode/templates/
 ✓ Created artifacts/memory/
@@ -103,6 +103,50 @@ Done. Run `opencode` to start.
 | 8 | Zed | Small but fast-growing, developer-focused |
 
 Each harness port generates the correct file structure for that tool — `.cursor/rules/` for Cursor, `.claude/agents/` for Claude Code, `.github/agents/` for Copilot, etc.
+
+### Future Additional Harnesses (Backlog)
+
+We plan to expand auto-detection and dedicated symlink/config output support for other emerging developer agents and CLI harnesses. These will be prioritized in future releases:
+
+| Harness | Target Dotfolder Prefix | Configuration & Rules Directory |
+|:---|:---|:---|
+| **AiderDesk** | `.aider-desk/` | `.aider-desk/skills/` |
+| **Augment** | `.augment/` | `.augment/skills/` |
+| **IBM Bob** | `.bob/` | `.bob/skills/` |
+| **OpenClaw** | N/A (Root) | `skills/` |
+| **CodeArts Agent** | `.codeartsdoer/` | `.codeartsdoer/skills/` |
+| **CodeBuddy** | `.codebuddy/` | `.codebuddy/skills/` |
+| **Codemaker** | `.codemaker/` | `.codemaker/skills/` |
+| **Code Studio** | `.codestudio/` | `.codestudio/skills/` |
+| **Command Code** | `.commandcode/` | `.commandcode/skills/` |
+| **Continue** | `.continue/` | `.continue/skills/` |
+| **Cortex Code** | `.cortex/` | `.cortex/skills/` |
+| **Crush** | `.crush/` | `.crush/skills/` |
+| **Devin for Terminal** | `.devin/` | `.devin/skills/` |
+| **Droid** | `.factory/` | `.factory/skills/` |
+| **ForgeCode** | `.forge/` | `.forge/skills/` |
+| **Goose** | `.goose/` | `.goose/skills/` |
+| **Hermes Agent** | `.hermes/` | `.hermes/skills/` |
+| **Junie** | `.junie/` | `.junie/skills/` |
+| **iFlow CLI** | `.iflow/` | `.iflow/skills/` |
+| **Kilo Code** | `.kilocode/` | `.kilocode/skills/` |
+| **Kiro CLI** | `.kiro/` | `.kiro/skills/` |
+| **Kode** | `.kode/` | `.kode/skills/` |
+| **MCPJam** | `.mcpjam/` | `.mcpjam/skills/` |
+| **Mistral Vibe** | `.vibe/` | `.vibe/skills/` |
+| **Mux** | `.mux/` | `.mux/skills/` |
+| **OpenHands** | `.openhands/` | `.openhands/skills/` |
+| **Pi** | `.pi/` | `.pi/skills/` |
+| **Qoder** | `.qoder/` | `.qoder/skills/` |
+| **Qwen Code** | `.qwen/` | `.qwen/skills/` |
+| **Rovo Dev** | `.rovodev/` | `.rovodev/skills/` |
+| **Roo Code** | `.roo/` | `.roo/skills/` |
+| **Tabnine CLI** | `.tabnine/` | `.tabnine/agent/skills/` |
+| **Trae / Trae CN** | `.trae/` | `.trae/skills/` |
+| **Zencoder** | `.zencoder/` | `.zencoder/skills/` |
+| **Neovate** | `.neovate/` | `.neovate/skills/` |
+| **Pochi** | `.pochi/` | `.pochi/skills/` |
+| **AdaL** | `.adal/` | `.adal/skills/` |
 
 ---
 
@@ -145,7 +189,7 @@ docs/
 │   ├── agent-boundaries.md           # Why one agent, one concern
 │   └── squad-design.md              # How squads are designed
 └── reference/
-    ├── agent-catalog.md              # All 22 agents, full spec
+    ├── agent-catalog.md              # All 21 agents, full spec
     ├── squad-catalog.md              # All squads
     ├── frontmatter-schema.md         # Agent file format
     ├── template-specs.md             # Output template formats
@@ -200,7 +244,7 @@ This is different from arbitrary prompt tweaking — every change needs a stated
 These are ideas that have been raised but not yet prioritized. They need more definition before they move up.
 
 **Multi-agent parallelism**
-Run multiple developer agents on separate git worktrees simultaneously. The developer agent already has a multi-developer mode section — this would make it a first-class feature with a proper orchestrator.
+Run multiple developer agents on separate git worktrees simultaneously. The developer agent already has a multi-developer mode section — this would make it a first-class feature with proper worktree-aware coordination.
 
 **MCP server integration**
 Expose Vespyr agents as MCP tools so they can be invoked from any MCP-compatible harness without manual porting.
@@ -221,7 +265,7 @@ Hosted shared memory and artifact storage for teams. Multiple developers working
 | Version | Status | What shipped |
 |---|---|---|
 | v1.1 | ✅ Shipped | Squad-based team presets, active phase skipping, CLI and project-context integration |
-| v1.0 | ✅ Shipped | 22 agents, opencode native, delegation pattern, shared memory, game mode, humanizer skill |
+| v1.0 | ✅ Shipped | 21 agents, opencode native, delegation pattern, shared memory, game mode, humanizer skill |
 
 ---
 

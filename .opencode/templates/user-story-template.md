@@ -1,6 +1,7 @@
 # User Story Template
 
-> **Used by:** @product-manager → **Feeds into:** @developer, @qa-engineer, @tech-lead, @data-analyst
+> **Used by:** Sarah (@product-manager)
+> **Feeds into:** Rex (@developer), Nina (@qa-engineer), Grant (@tech-lead), Nova (@data-analyst)
 > **Save to:** `artifacts/output/02-strategy/user-stories.md`
 
 **Version:** 2

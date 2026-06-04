@@ -1,6 +1,7 @@
 # Launch Log Template
 
-> **Used by:** @product-manager, @devops-engineer → **Feeds into:** post-launch report
+> **Used by:** Sarah (@product-manager), Axel (@devops-engineer)
+> **Feeds into:** post-launch report
 > **Save to:** `artifacts/output/06-launch/launch-log.md`
 
 Use this template to document the deployment process in real-time. Start logging before deployment begins and continue until monitoring confirms stability.

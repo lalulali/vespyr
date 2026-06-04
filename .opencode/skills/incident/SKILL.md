@@ -27,7 +27,7 @@ Invoke `@product-manager` to lead triage:
   - Performance degradation → @performance-engineer + @architect
 - **Open incident channel** — create `artifacts/output/08-incidents/INC-NNN/` directory
 
-**Output:** `artifacts/output/08-incidents/INC-NNN/triage.md`
+**Output:** `artifacts/output/08-incidents/INC-NNN/triage.md` (Use template: `.opencode/templates/incident-triage-template.md`)
 
 ### Step 2: Mitigate
 
@@ -52,7 +52,7 @@ Once users are unblocked, invoke `@architect` or `@tech-lead` to lead RCA:
 - **Detection gaps** — why wasn't this caught before reaching users
 - **Prevention mechanisms** — what would stop this class of issue in the future
 
-**Output:** `artifacts/output/08-incidents/INC-NNN/rca.md`
+**Output:** `artifacts/output/08-incidents/INC-NNN/rca.md` (Use template: `.opencode/templates/rca-template.md`)
 
 ### Step 4: Remediation (parallelizable)
 
@@ -89,7 +89,7 @@ Invoke `@product-manager` to conduct a blameless post-incident review:
 - **What could be improved** — detection, response, communication, prevention
 - **Action items with owners and deadlines**
 
-**Output:** `artifacts/output/08-incidents/INC-NNN/post-incident-review.md`
+**Output:** `artifacts/output/08-incidents/INC-NNN/post-incident-review.md` (Use template: `.opencode/templates/post-incident-review-template.md`)
 
 ### Step 6: Update Knowledge Base
 
@@ -160,3 +160,40 @@ Use this when:
 - After incident is resolved → load `iterate` to address follow-up improvements
 - If incident reveals architectural issues → load `develop` for broader redesign
 - If incident response process needs review → load `retro`
+
+---
+
+## State Machine Integration
+
+The pipeline state machine (`node .opencode/scripts/orchestrator_state.js`) is the canonical record of project state. This skill must wire its work into it so other skills, the dashboard, and the code-graph see what happened.
+
+### At Start
+
+Run via `@executor`:
+```bash
+node .opencode/scripts/orchestrator_state.js status
+```
+
+If pipeline is uninitialized (e.g., the project has no pipeline state yet but has a live incident), initialize with the current project name and type before recording. If the pipeline is mid-workflow, do NOT advance the phase — incident work happens in parallel.
+
+### At End — Record Completion
+
+For each incident directory `artifacts/output/08-incidents/INC-NNN/`, record the artifacts produced:
+
+```bash
+node .opencode/scripts/orchestrator_state.js complete --agent devops-engineer --artifact 08-incidents/INC-NNN/triage.md
+node .opencode/scripts/orchestrator_state.js complete --agent devops-engineer --artifact 08-incidents/INC-NNN/mitigation.md
+node .opencode/scripts/orchestrator_state.js complete --agent architect --artifact 08-incidents/INC-NNN/rca.md
+node .opencode/scripts/orchestrator_state.js complete --agent developer --artifact 08-incidents/INC-NNN/remediation.md
+node .opencode/scripts/orchestrator_state.js complete --agent devops-engineer --artifact 08-incidents/INC-NNN/post-incident-review.md
+```
+
+Replace `INC-NNN` with the actual incident ID. The `developer` `complete` call will trigger a code-graph refresh, ensuring the next agent (e.g., a follow-up `architect` reviewing the architectural impact) sees the new code state.
+
+**File a Change Request for cross-team fixes.** If remediation requires a change in another team's domain (e.g., a UX change requested by the architect but owned by the product manager), file a CR:
+
+```bash
+node .opencode/scripts/orchestrator_state.js file-cr --from developer --to product-manager --target <file> --issue "<issue>"
+```
+
+This creates an open CR in `pipeline-state.json` that blocks phase advancement until resolved.

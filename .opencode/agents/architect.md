@@ -92,10 +92,12 @@ See `.opencode/templates/memory-entry-template.md` for the full entry format.
 
 Before proposing any structural change, you MUST read `artifacts/memory/structural/code-graph.json` to identify all files that import or are imported by the target. Report the blast radius: list every affected file and why.
 
-If `code-graph.json` does not exist or is stale, trigger regeneration via `@executor`:
+**Always go through the self-healing wrapper**, never call the raw scan scripts:
 ```
-node .opencode/scripts/shallow_graph.js --src src/ --out artifacts/memory/structural/code-graph.json
+node .opencode/scripts/ensure_graph.js code
 ```
+
+The wrapper returns `{status: "fresh" | "regenerated", ...}`. If `"regenerated"`, report the new file count so the user sees the cost. Then read `code-graph.json` and use `imported_by` edges to map the blast radius. If no `src/` directory exists in the project, the wrapper returns an empty graph and you can skip this step.
 
 ## How to design
 

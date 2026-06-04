@@ -41,7 +41,7 @@ Invoke `@product-manager` to collect:
 - Any incident post-mortems from `artifacts/output/08-incidents/`
 - User feedback and support tickets (if applicable)
 
-**Output:** `artifacts/output/09-retro/data-collection.md`
+**Output:** `artifacts/output/09-retro/data-collection.md` (Use template: `.opencode/templates/retrospective-template.md`)
 
 ### Step 2: Review Cycle (parallelizable)
 
@@ -55,7 +55,7 @@ Invoke `@tech-lead` to review execution quality:
 - Was the critical path accurate? Where did the plan diverge?
 - What patterns caused rework (spec gaps, architecture unknowns, scope creep)?
 
-**Output:** `artifacts/output/09-retro/execution-review.md`
+**Output:** `artifacts/output/09-retro/execution-review.md` (Use template: `.opencode/templates/retrospective-template.md`)
 
 #### Step 2b: Process Review ⟨parallel⟩
 Invoke `@product-manager` to review team process:
@@ -65,7 +65,7 @@ Invoke `@product-manager` to review team process:
 - Were the right agents involved at the right times?
 - Were any agents idle when they could have been productive?
 
-**Output:** `artifacts/output/09-retro/process-review.md`
+**Output:** `artifacts/output/09-retro/process-review.md` (Use template: `.opencode/templates/retrospective-template.md`)
 
 #### Step 2c: Product Review ⟨parallel⟩
 Invoke `@product-manager` and `@product-designer` to review:
@@ -75,7 +75,7 @@ Invoke `@product-manager` and `@product-designer` to review:
 - Were there design-spec mismatches that caused rework?
 - What user feedback has come in since launch?
 
-**Output:** `artifacts/output/09-retro/product-review.md`
+**Output:** `artifacts/output/09-retro/product-review.md` (Use template: `.opencode/templates/retrospective-template.md`)
 
 ### Step 3: Architecture Review
 
@@ -85,7 +85,7 @@ Invoke `@architect` to review:
 - What technical debt was incurred, and is it acceptable?
 - Are there architectural changes needed before the next cycle?
 
-**Output:** `artifacts/output/09-retro/architecture-review.md`
+**Output:** `artifacts/output/09-retro/architecture-review.md` (Use template: `.opencode/templates/retrospective-template.md`)
 
 ### Step 4: Synthesize Action Items
 
@@ -105,7 +105,7 @@ Categorize action items:
 - **Tooling improvements** — automation, CI/CD, monitoring gaps
 - **Architecture decisions** — debt to pay down, refactoring priorities
 
-**Output:** `artifacts/output/09-retro/action-items.md`
+**Output:** `artifacts/output/09-retro/action-items.md` (Use template: `.opencode/templates/retrospective-template.md`)
 
 ### Step 5: Update Shared Memory + Compaction
 
@@ -166,9 +166,9 @@ New blockers: {any new blockers, or "none"}
 This compresses the entire retrospective into ~100 tokens for the next session's Tier 1 context.
 
 **Update Document Graph:**
-Invoke `@executor` to rebuild the document relationship graph so all recent decisions, blockers, and retro outcomes are fully indexed:
+Invoke `@executor` to refresh the document relationship graph so all recent decisions, blockers, and retro outcomes are fully indexed. Use the self-healing wrapper (mtime-aware, no-op if fresh):
 ```bash
-node .opencode/scripts/doc_graph.js
+node .opencode/scripts/ensure_graph.js doc
 ```
 
 **Memory compaction (automatic — triggered by @memory-controller):**
@@ -260,3 +260,44 @@ Use this when:
 - After retro, load `iterate` to apply learnings to the next cycle
 - After retro, load `develop` if new features emerged from the retrospective
 - After retro, load `explore-idea` (or `explore-game-idea` for game projects) if strategic pivot is needed based on findings
+
+---
+
+## State Machine Integration
+
+The pipeline state machine (`node .opencode/scripts/orchestrator_state.js`) is the canonical record of project state. This skill must wire its work into it so other skills, the dashboard, and the code-graph see what happened.
+
+### At Start
+
+Run via `@executor`:
+```bash
+node .opencode/scripts/orchestrator_state.js status
+```
+
+The project can be in any phase when retro runs. Retro does not require a specific phase.
+
+### At End — Record Completion
+
+Record the action items (the deliverable that actually matters):
+
+```bash
+node .opencode/scripts/orchestrator_state.js complete --agent product-manager --artifact 09-retro/action-items.md
+```
+
+Optionally record the other retro artifacts for traceability:
+
+```bash
+node .opencode/scripts/orchestrator_state.js complete --agent product-manager --artifact 09-retro/data-collection.md
+node .opencode/scripts/orchestrator_state.js complete --agent tech-lead --artifact 09-retro/execution-review.md
+node .opencode/scripts/orchestrator_state.js complete --agent product-manager --artifact 09-retro/process-review.md
+node .opencode/scripts/orchestrator_state.js complete --agent product-manager --artifact 09-retro/product-review.md
+node .opencode/scripts/orchestrator_state.js complete --agent architect --artifact 09-retro/architecture-review.md
+```
+
+After recording, the `retro` skill should also refresh the doc-graph so the new retrospective is queryable:
+
+```bash
+node .opencode/scripts/ensure_graph.js doc
+```
+
+This makes the new retro actionable-items discoverable from any subsequent skill that reads `artifacts/memory/structural/doc-graph.json`.

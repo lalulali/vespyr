@@ -37,7 +37,7 @@ Invoke `@product-manager` to assess launch readiness across all dimensions:
 
 **Any red item blocks launch.** Document yellow items as known risks with mitigation plans.
 
-**Output:** `artifacts/output/06-launch/release-readiness.md`
+**Output:** `artifacts/output/06-launch/release-readiness.md` (Use template: `.opencode/templates/release-readiness-template.md`)
 
 ### Step 2: Go/No-Go Decision (gate)
 
@@ -51,7 +51,7 @@ Invoke `@product-manager` and `@product-manager` to make the launch call:
 **Gate check:** Both @product-manager and @product-manager must agree on GO.
 If either says NO-GO, document the blocking issue and resolve before retrying.
 
-**Output:** `artifacts/output/06-launch/go-nogo-decision.md`
+**Output:** `artifacts/output/06-launch/go-nogo-decision.md` (Use template: `.opencode/templates/go-nogo-decision-template.md`)
 
 ### Step 3: Launch Preparation (parallelizable)
 
@@ -72,7 +72,7 @@ Invoke `@technical-writer` to finalize:
 - User-facing documentation updates
 - Known issues documentation
 
-**Output:** Deployment runbook, release notes, migration guides
+**Output:** Deployment runbook (in launch-log), release notes (Use template: `.opencode/templates/release-notes-template.md`), migration guides
 
 ### Step 4: Launch Execution
 
@@ -82,7 +82,7 @@ Invoke `@devops-engineer` and `@product-manager` to execute the launch:
 - Verify feature flags and gradual rollout
 - Track real-time error rates and user impact
 
-**Output:** `artifacts/output/06-launch/launch-log.md`
+**Output:** `artifacts/output/06-launch/launch-log.md` (Use template: `.opencode/templates/launch-log-template.md`)
 
 ### Step 5: Post-Launch Monitoring
 
@@ -99,7 +99,7 @@ Invoke `@data-analyst` and `@product-manager` to monitor:
 - **Medium:** Hotfix path via `@developer` → `@code-reviewer` → `@qa-engineer`
 - **Low:** Log for next iteration via `iterate` skill
 
-**Output:** `artifacts/output/06-launch/post-launch-report.md`
+**Output:** `artifacts/output/06-launch/post-launch-report.md` (Use template: `.opencode/templates/post-launch-report-template.md`)
 
 ### Step 6: Launch Retrospective (quick)
 
@@ -148,3 +148,32 @@ After launch:
 - For feature improvements based on user data → load `iterate`
 - For process review and team improvement → load `retro`
 - For production incidents → load `incident`
+
+---
+
+## State Machine Integration
+
+The pipeline state machine (`node .opencode/scripts/orchestrator_state.js`) is the canonical record of project state. This skill must wire its work into it so other skills, the dashboard, and the code-graph see what happened.
+
+### At Start
+
+Run via `@executor`:
+```bash
+node .opencode/scripts/orchestrator_state.js status
+```
+
+If pipeline is uninitialized, run `squad` first (or `init` directly). Then run `next` to confirm the project is in the development phase and that all required development artifacts are present.
+
+### At End — Record Completion
+
+Record each launch artifact:
+
+```bash
+node .opencode/scripts/orchestrator_state.js complete --agent product-manager --artifact 06-launch/release-readiness.md
+node .opencode/scripts/orchestrator_state.js complete --agent product-manager --artifact 06-launch/go-nogo-decision.md
+node .opencode/scripts/orchestrator_state.js complete --agent devops-engineer --artifact 06-launch/launch-log.md
+node .opencode/scripts/orchestrator_state.js complete --agent product-manager --artifact 06-launch/post-launch-report.md
+node .opencode/scripts/orchestrator_state.js complete --agent product-manager --artifact 06-launch/launch-retro.md
+```
+
+Record only the artifacts actually produced. The post-launch report is the critical one — once it's recorded, `iterate` becomes the natural next skill.

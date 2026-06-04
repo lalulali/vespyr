@@ -249,3 +249,37 @@ Use the template: `.opencode/templates/game-validation-brief-template.md`
 - **The genre landscape is the real competitor.** Not other games you're directly cloning — the 50 other games competing for your player's finite attention.
 - **Narrow beats wide.** The smallest fun loop someone enjoys in one sitting beats the 100-hour epic vision.
 - **Never start implementation.** This skill produces a validation brief, not code.
+
+---
+
+## State Machine Integration
+
+The pipeline state machine (`node .opencode/scripts/orchestrator_state.js`) is the canonical record of project state. This skill must wire its work into it so other skills, the dashboard, and the code-graph see what happened.
+
+### At Start
+
+Run via `@executor`:
+```bash
+node .opencode/scripts/orchestrator_state.js status
+```
+
+If pipeline is uninitialized, initialize first:
+```bash
+node .opencode/scripts/orchestrator_state.js init --name "<project>" --type <startup|company|personal>
+```
+
+Then run `next` to confirm the current phase expects validation work.
+
+### At End — Record Completion
+
+For the validation brief this skill produces, run via `@executor`:
+```bash
+node .opencode/scripts/orchestrator_state.js complete --agent founder --artifact 00-discovery/validation-brief.md
+```
+
+If the user chose to skip validation and go straight to exploration (producing an `idea-brief.md` instead), record that:
+```bash
+node .opencode/scripts/orchestrator_state.js complete --agent founder --artifact 00-discovery/idea-brief.md
+```
+
+This records the artifact, fires `agent_invoke` telemetry, and updates the pipeline history.

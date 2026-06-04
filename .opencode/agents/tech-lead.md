@@ -92,10 +92,12 @@ See `.opencode/templates/memory-entry-template.md` for the full entry format.
 
 Before breaking architecture into tasks, read `artifacts/memory/structural/code-graph.json` to understand the codebase topology. For each task that modifies multiple files, identify the blast radius: list all files that import or are imported by the target, and note dependency ordering.
 
-If `code-graph.json` does not exist or is stale, trigger regeneration via `@executor`:
+**Always go through the self-healing wrapper**, never call the raw scan scripts:
 ```
-node .opencode/scripts/shallow_graph.js --src src/ --out artifacts/memory/structural/code-graph.json
+node .opencode/scripts/ensure_graph.js code
 ```
+
+The wrapper returns `{status: "fresh" | "regenerated", ...}`. If `"regenerated"`, the wrapper already ran an incremental scan and you get a current graph. Use `imported_by` edges to plan task ordering: leaves (no one imports them) first, then mid-tier, then hubs. If no `src/` directory exists, the graph is empty — proceed with topological planning based on the task list alone.
 
 ## How to plan
 

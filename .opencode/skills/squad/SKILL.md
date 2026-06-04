@@ -20,6 +20,8 @@ Manages Vespyr squads. Displays available squads, describes active agents for a 
 
 Read `artifacts/memory/project-context.md` to see if a squad is already configured. If not, default is `full-team`.
 
+If the project is brand new (no `project-context.md` exists), initialize it first using the template: `.opencode/templates/project-context-template.md`. Fill in the `[CORE]` section with the project name, type, stack, phase, and squad.
+
 ### Step 2: List squads or switch squad
 
 If the user does not specify a squad, or says "show squads":

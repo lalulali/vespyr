@@ -76,7 +76,7 @@ Each agent loads context from shared memory via `@memory-controller`, produces i
 │   ├── startup.md
 │   ├── build.md
 │   └── ...
-├── agents/                    # Agent definitions (23 agents)
+├── agents/                    # Agent definitions (21 agents)
 │   ├── founder.md
 │   ├── product-manager.md
 │   ├── developer.md
@@ -785,7 +785,7 @@ Vespyr includes a suite of scripts for memory management, profiling, and telemet
 
 ### Telemetry
 
-Token and duration tracking is built into the orchestrator state machine. When agents complete artifacts, they pass `--tokens` and `--duration-ms` flags which are automatically recorded as telemetry events.
+Token and duration tracking is built into the pipeline state machine (`orchestrator_state.js`). Every state mutation auto-records a telemetry event, and `complete --tokens X --duration-ms Y` records an `agent_invoke` event attributed to the calling agent. When no token count is provided, the script estimates it from the artifact size.
 
 ```bash
 # View per-agent-per-phase breakdown

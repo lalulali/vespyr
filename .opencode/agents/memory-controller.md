@@ -129,6 +129,19 @@ Load full file: `@memory-controller load-full [filename]`
 
 **Triggered by:** `@memory-controller write [file] [content]`
 
+### Known Memory Files and Their Templates
+
+When writing to a memory file, use the corresponding template for the entry structure. The `[CORE]` section header in `project-context.md` is required to stay as-is — `@memory-controller` parses it directly for Tier 1 loading.
+
+| Memory file | Template | Purpose |
+|---|---|---|
+| `artifacts/memory/project-context.md` | `.opencode/templates/project-context-template.md` | Project basics, tech stack, phase — machine-readable header required |
+| `artifacts/memory/active-decisions.md` | `.opencode/templates/active-decisions-template.md` | Current decisions and rationale |
+| `artifacts/memory/blockers-and-risks.md` | `.opencode/templates/blockers-and-risks-template.md` | Active blockers and risks |
+| `artifacts/memory/lessons-learned.md` | `.opencode/templates/lessons-learned-template.md` | Insights from each phase |
+| `artifacts/memory/patterns-and-conventions.md` | `.opencode/templates/patterns-and-conventions-template.md` | Discovered patterns and conventions |
+| `artifacts/memory/agent-notes/<agent>.md` | `.opencode/templates/agent-notes-template.md` | Per-agent accumulated knowledge |
+
 ### Validation
 
 | Check | Rule | On failure |
@@ -251,7 +264,7 @@ Validates that high-risk tasks have loaded required context before execution. Re
 | `database`, `schema`, `migration`, `model`, `table`, `column`, `index`, `sql`, `postgres`, `mongo`, `redis` | Must have loaded DB context in last load |
 | `auth`, `login`, `signin`, `permission`, `oauth`, `jwt`, `session`, `token`, `role`, `acl` | Must have loaded auth context in last load |
 | `dependency`, `npm install`, `package`, `import`, `require`, `yarn add`, `pip install`, `cargo add` | Must have loaded dependency context in last load |
-| `api`, `endpoint`, `route`, `contract`, `handler`, `controller`, `graphql`, `rest` | Must have checked `code-graph.json` OR loaded API context |
+| `api`, `endpoint`, `route`, `contract`, `handler`, `controller`, `graphql`, `rest` | Must have checked `code-graph.json` (via `ensure_graph.js code`) OR loaded API context |
 | `deploy`, `release`, `ship`, `ci/cd`, `pipeline`, `infrastructure`, `terraform`, `docker`, `kubernetes` | Must have loaded deploy context in last load |
 | `security`, `vulnerability`, `cve`, `owasp`, `encryption`, `hash`, `salt`, `xss`, `csrf`, `injection` | Must have loaded security context in last load |
 

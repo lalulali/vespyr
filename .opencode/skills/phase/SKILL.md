@@ -46,7 +46,7 @@ If not initialized, fall back to reading `artifacts/memory/project-context.md` f
 
 ### Step 2: Report
 
-Return a concise report reflecting the active orchestrator state:
+Return a concise report reflecting the active pipeline state:
 
 ```
 ## Current Phase: {phase name (validation / exploration / design / development)}

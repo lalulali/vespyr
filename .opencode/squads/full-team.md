@@ -2,7 +2,6 @@
 name: full-team
 description: Default — full product development lifecycle
 agents:
-  - orchestrator
   - founder
   - product-manager
   - product-designer
@@ -28,4 +27,4 @@ agents:
 
 # Full Team Squad
 
-The default squad containing all 22 agents for the full product development lifecycle.
+The default squad containing all 21 agents for the full product development lifecycle.

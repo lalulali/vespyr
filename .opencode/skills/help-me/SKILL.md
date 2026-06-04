@@ -18,6 +18,36 @@ It answers: **"What should I do right now?"**
 
 ## Workflow
 
+### Step 0: Empty-Project Fast Path
+
+**Run this check first — before any agent or script call.**
+
+Check whether BOTH files exist:
+- `artifacts/output/pipeline-state.json`
+- `artifacts/memory/project-context.md`
+
+If either is missing, the project is uninitialized. **Do not call `@memory-controller`, do not run `orchestrator_state.js`, do not run any graph generator.** Two paths from here:
+
+**Path A — User asked a specific question** (e.g., "what skills are available?", "how does vespyr work?", "what's the difference between /design and /develop?"):
+
+- Read `.opencode/skills/help-me/skills-catalog.json` for the skill index
+- Read `.opencode/AGENTS.md` if you need framework context (phases, agents, guardrails)
+- Answer their question directly, citing the relevant skills/agents by name
+- If the question implies starting a project, close with `/validate-idea` or `/squad` as the natural next step
+- Keep the response tight — they asked one thing, not a tour
+
+**Path B — User typed bare `/help-me` with no question** (or a generic "what should I do?"):
+
+Respond with this exact short message:
+
+> This looks like a fresh project — no pipeline state yet.
+>
+> - **To start a project:** run `/validate-idea` (pressure-test a concept) or `/squad` (initialize the team preset)
+> - **To learn the framework:** ask *"what skills are available"*, *"how does vespyr work"*, or *"what's the difference between /design and /develop"* — I'll walk you through it
+> - **To load existing state:** run `/status` if you have specs or a codebase already
+
+Stop here. Do not enumerate skills, do not call any other agent.
+
 ### Step 1: Load Project State
 
 Load memory context:
@@ -39,13 +69,13 @@ Read `.opencode/skills/help-me/skills-catalog.json` — the compiled index of al
 
 ### Step 3: Check Artifact Readiness & Determine Next Action
 
-Query the orchestrator's state engine via the CLI to find the exact next task and status:
+Query the pipeline state engine via the CLI to find the exact next task and status:
 
 1. Run via `@executor`:
    ```bash
    node .opencode/scripts/orchestrator_state.js next
    ```
-2. Parse the orchestrator's returning JSON next action to direct the user:
+2. Parse the state engine's returning JSON next action to direct the user:
    - **`resolve-cr`**: Point out the specific open Change Request (CR) ID, sender, receiver, and target file. Suggest resolving this CR before moving forward.
    - **`resolve-blocker`**: List the active blockers and the assigned owners.
    - **`generate-artifacts`**: Identify precisely which required artifacts are missing for the current phase, cross-referencing against the skill catalog's prerequisites, and recommend the exact skill to run.
@@ -54,8 +84,8 @@ Query the orchestrator's state engine via the CLI to find the exact next task an
 ### Step 4: Optional — Structural Graph Check
 
 If the user query touches codebase or document traceability:
-- **Codebase graph:** Run `node .opencode/scripts/incremental_graph.js --src src/ --out artifacts/memory/structural/code-graph.json` via `@executor`
-- **Document graph:** Run `node .opencode/scripts/doc_graph.js --out artifacts/memory/structural/doc-graph.json` via `@executor`
+- **Codebase graph:** Run `node .opencode/scripts/ensure_graph.js code` via `@executor` (self-healing wrapper; no-op if fresh)
+- **Document graph:** Run `node .opencode/scripts/ensure_graph.js doc` via `@executor` (self-healing wrapper; no-op if fresh)
 - Report any stale or missing nodes
 
 ### Step 5: Respond

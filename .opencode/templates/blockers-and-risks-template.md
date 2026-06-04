@@ -1,6 +1,6 @@
 # Blockers and Risks Template
 
-> **Used by:** @tech-lead, any agent encountering a blocker → **Read by:** All agents
+> **Used by:** Grant (@tech-lead), any agent encountering a blocker → **Read by:** All agents
 > **Save to:** `artifacts/memory/blockers-and-risks.md`
 
 Active blockers, risks, and impediments that affect the project.

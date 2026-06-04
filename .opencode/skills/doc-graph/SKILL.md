@@ -5,38 +5,53 @@ description: Document relationship and traceability graph mapper — parse and u
 
 ## What this skill does
 
-Manages the document relationship and traceability graph (`doc-graph.json`). It crawls your project planning and memory files to map out semantic connections between strategy documents, user stories, active decisions, blockers, and their implementations.
+Manages the document relationship and traceability graph (`doc-graph.json`). Crawls your project planning and memory files to map out semantic connections between strategy documents, user stories, active decisions, blockers, and their implementations.
+
+**All doc-graph operations go through the self-healing wrapper** `node .opencode/scripts/ensure_graph.js doc`. The wrapper:
+- Returns `{status: "fresh"}` if the graph is current (mtime check vs all `.md` under `artifacts/memory/` and `artifacts/output/`)
+- Returns `{status: "regenerated", documents_scanned, code_references, edges_created, ...}` if it had to build
+- Records a `graph_status` telemetry event for every call
+
+Do not call `doc_graph.js` directly.
 
 ## When to use
 
 Use this skill when:
-- `"Update the document graph"` / `"Sync document relationships"` — Scan Markdown specifications and memory artifacts to synchronize relationship edges.
+- `"Update the document graph"` / `"Sync document relationships"` — Refresh the graph to reflect new/changed markdown files.
 - `"Check document graph status"` — View the current size, node counts, and edge connections of the document graph.
 
 ---
 
 ## Workflow
 
-### Step 1: Update Document Graph
-Invoke `@executor` to run the document graph crawler to parse all `.md` files in `artifacts/memory/` and `artifacts/output/` and construct the node-edge relational map:
+### Step 1: Run the wrapper
+
+Invoke `@executor` to call the self-healing wrapper:
 ```bash
-node .opencode/scripts/doc_graph.js --out artifacts/memory/structural/doc-graph.json
+node .opencode/scripts/ensure_graph.js doc [--out <path>] [--force]
 ```
 
-### Step 2: Report Status
-Read the JSON output from `@executor` and report a concise summary:
+The wrapper scans `artifacts/memory/` and `artifacts/output/` (skipping `archive/`, `telemetry/`, and `.opencode/`) and rebuilds the graph only if at least one `.md` file is newer than the existing graph.
+
+### Step 2: Report
+
+Read the JSON response from `@executor` and report a concise summary:
 ```
-### Document Graph Updated
-- **Documents Scanned**: [documents scanned count]
-- **Codebase File References**: [code references count]
-- **Relational Edges Created**: [edges created count]
+### Document Graph
+- **Status**: [fresh | regenerated]
+- **Scan Mode**: [full | none]
+- **Documents Scanned**: [count, or 0 if fresh]
+- **Codebase File References**: [code references count, or 0 if fresh]
+- **Relational Edges Created**: [edges created count, or 0 if fresh]
 - **Output Path**: artifacts/memory/structural/doc-graph.json
+- **Last Regenerated**: [graph_mtime from response]
 ```
+
+If status is `regenerated`, mention it explicitly — the user paid for a scan.
 
 ---
 
 ## Key Principles
-- **Agent Integration (Option 3)**: In addition to manual execution, this command is triggered explicitly by pipeline agents during critical phase changes:
-  - `@product-manager` triggers it inside `design/SKILL.md` once strategy/user stories are finalized.
-  - `@product-manager` triggers it inside `retro/SKILL.md` before memory compaction begins.
+- **Self-Healing After Phase Work**: The orchestrator's `init` command seeds the doc-graph when a project starts, and `complete` records the current graph status as telemetry. The `design` and `retro` skills also call the wrapper at the end of their work. You do not need to pre-warm it for them.
 - **Traceability Bridge**: Establishes edges that cross-reference User Story IDs (`US-XXX`), Requirement IDs (`REQ-XXX`), and relative codebase paths (e.g. `src/services/auth.js`) to form a complete Federated Graph.
+- **Query the Graph, Not the Files**: When you need to find which user story implements a requirement, or which ADR constrains a code module, read `artifacts/memory/structural/doc-graph.json` and traverse the edges — do not grep the markdown files. This is the whole point of the graph: it exists so agents don't burn tokens re-reading every doc to find the right one.

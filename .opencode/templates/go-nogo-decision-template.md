@@ -1,6 +1,7 @@
 # Go/No-Go Decision Template
 
-> **Used by:** @product-manager → **Feeds into:** @devops-engineer (deployment), stakeholders
+> **Used by:** Sarah (@product-manager)
+> **Feeds into:** Axel (@devops-engineer), stakeholders
 > **Save to:** `artifacts/output/06-launch/go-nogo-decision.md`
 
 Use this template to formally document the launch decision. This is the gate between "code is done" and "users have it."

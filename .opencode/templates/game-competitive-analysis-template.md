@@ -1,6 +1,7 @@
 # Game Competitive Analysis Template
 
-> **Used by:** @researcher (competitive mode) → **Feeds into:** @product-manager, @product-designer
+> **Used by:** Iris (@researcher)
+> **Feeds into:** Sarah (@product-manager), Ivy (@product-designer)
 > **Save to:** `artifacts/output/01-research/competitive-analysis.md`
 
 Use this template when writing the competitive landscape report.

@@ -90,14 +90,12 @@ The humanizer can be used as a pre-writing edit before `write`/`edit` operations
 
 ## Structural Graph Maintenance
 
-When you create, move, or delete files in `src/`, `lib/`, or `app/`:
+The code-graph is self-healing — you do not need to trigger regeneration manually.
 
-1. After completing the file operation, append this line to your confirmation:
-   ```
-   [GRAPH UPDATE NEEDED] Source files changed. Caller should regenerate structural graph.
-   ```
-2. Do NOT attempt to run `shallow_graph.js` yourself — you do not have bash permission.
-3. The calling agent (e.g., `@developer`, `@architect`) will trigger regeneration via `@executor`.
+When you create, move, or delete files in `src/`, `lib/`, or `app/`:
+- Do NOT output any "GRAPH UPDATE NEEDED" marker (the orchestrator handles this automatically on `complete`).
+- Do NOT attempt to run `shallow_graph.js` or `incremental_graph.js` yourself — you do not have bash permission.
+- Trust the self-healing contract: the next call to `node .opencode/scripts/ensure_graph.js code` (made by the calling agent or by `orchestrator_state.js complete`) will pick up your changes via mtime comparison.
 
 ## Guardrails
 

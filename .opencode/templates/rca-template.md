@@ -1,6 +1,7 @@
 # Root Cause Analysis Template
 
-> **Used by:** @architect or @tech-lead → **Feeds into:** remediation plan, prevention mechanisms
+> **Used by:** Vera (@architect) or Grant (@tech-lead)
+> **Feeds into:** remediation plan, prevention mechanisms
 > **Save to:** `artifacts/output/08-incidents/INC-NNN/rca.md`
 
 Use this template after an incident is mitigated. Focus on systems and processes, not people. Be thorough and honest.

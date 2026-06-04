@@ -1,6 +1,7 @@
 # Product Spec Template
 
-> **Used by:** @product-designer → **Feeds into:** @architect, @developer, @tech-lead, @qa-engineer, @technical-writer
+> **Used by:** Ivy (@product-designer)
+> **Feeds into:** Vera (@architect), Rex (@developer), Grant (@tech-lead), Nina (@qa-engineer), Clara (@technical-writer)
 
 **Version:** 2
 **Last changed:** 2026-05-20

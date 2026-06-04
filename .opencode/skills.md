@@ -1,23 +1,23 @@
-# Skills & Tabs
+# Workflows & Skills
 
-Four phases for product building. Switch between them with **Tab**. Each phase has a primary agent with scoped permissions.
+Four phases for product building. Each phase has a primary agent with scoped permissions.
 
-| Phase | Tab Color | Primary Agent | Permission | When to use |
-|-------|-----------|---------------|------------|-------------|
-| **Validation** | Red | `@founder` | Full access (writes validation brief) | Rough idea or problem space. Stress-test through Socratic diagnostic before investing research cycles. |
-| **Exploration** | Indigo | `@founder` + researchers | Full access (writes research artifacts) | Idea survived validation. Synthesize → validate through market, competitor, and user research. |
-| **Design** | Amber | `@product-manager` + `@product-designer` | Full access (writes PRD, specs) | Idea is validated. Define requirements (PRD) → create detailed specs with flows, interactions, visual design. |
-| **Development** | Green | `@tech-lead` + `@developer` | Full edit/bash access | Specs are ready, time to build. Implement features from specs with quality gates. |
+| Phase | Primary Agent | Permission | When to use |
+|-------|---------------|------------|-------------|
+| **Validation** | `@founder` | Full access (writes validation brief) | Rough idea or problem space. Stress-test through Socratic diagnostic before investing research cycles. |
+| **Exploration** | `@founder` + researchers | Full access (writes research artifacts) | Idea survived validation. Synthesize → validate through market, competitor, and user research. |
+| **Design** | `@product-manager` + `@product-designer` | Full access (writes PRD, specs) | Idea is validated. Define requirements (PRD) → create detailed specs with flows, interactions, visual design. |
+| **Development** | `@tech-lead` + `@developer` | Full edit/bash access | Specs are ready, time to build. Implement features from specs with quality gates. |
 
 ### Game Development Pipeline
 
 Games follow the same phases but use **game-specific skills** that speak in player experience, core loops, and genre landscapes instead of pain points and workflows:
 
-| Phase | Tab Color | Primary Skill | When to use |
-|-------|-----------|---------------|-------------|
-| **Validation** | Pink | `validate-game-idea` | Game concept needs stress-testing before production |
-| **Exploration** | Purple | `explore-game-idea` | Validated concept needs genre market, competitive landscape, and player research |
-| **Design → Development** | Amber → Green | `design` → `develop` | Same as product pipeline |
+| Phase | Primary Skill | When to use |
+|-------|---------------|-------------|
+| **Validation** | `validate-game-idea` | Game concept needs stress-testing before production |
+| **Exploration** | `explore-game-idea` | Validated concept needs genre market, competitive landscape, and player research |
+| **Design → Development** | `design` → `develop` | Same as product pipeline |
 
 > **Note:** After exploration, game and product pipelines converge. Design and development skills are domain-agnostic.
 
@@ -49,7 +49,6 @@ Games follow the same phases but use **game-specific skills** that speak in play
 | @ux-researcher | **deny** | **deny** | allow | yes | Premium (default) | Evaluates usability — writes report via @writer |
 | @technical-writer | **deny** | allow | allow | yes | Premium (default) | Writes and updates documentation (no commands allowed) |
 | @memory-controller | **deny** | **deny** | allow | yes | Premium (default) | Memory I/O, preflight checks, compaction |
-| @orchestrator | allow | **deny** | allow | yes | Premium (default) | Pipeline state management, agent coordination |
 
 ## Delegation Layer
 
@@ -76,7 +75,7 @@ The model tier doesn't matter as much as the architecture: even if all agents us
 ### Product Pipeline
 
 ```
-Validation (Red) → Exploration (Indigo) → Design (Amber) → Development (Green)
+Validation → Exploration → Design → Development
       ↓ GO              ↓                      ↓                    ↓
     validate-idea     explore-idea           design            develop
        ↓ KILL
@@ -86,7 +85,7 @@ Validation (Red) → Exploration (Indigo) → Design (Amber) → Development (Gr
 ### Game Development Pipeline
 
 ```
-Validation (Pink) → Exploration (Purple) → Design (Amber) → Development (Green)
+Validation → Exploration → Design → Development
       ↓ GO               ↓                       ↓                    ↓
   validate-game-idea  explore-game-idea         design            develop
        ↓ KILL
@@ -174,15 +173,21 @@ node .opencode/scripts/memory_filter.js --search "JWT authentication decision"
 
 ### Incremental Graph Scan
 
-`@architect`, `@tech-lead`, and `@memory-controller` (Operation 7) use `.opencode/scripts/incremental_graph.js` for structural analysis.
+`@architect`, `@tech-lead`, and `@memory-controller` (Operation 7) use `.opencode/scripts/ensure_graph.js code` for structural analysis. This is the **self-healing wrapper** — call it instead of the raw scan scripts.
 
 - **First run:** Full scan of all source files
-- **Subsequent runs:** Only scans changed files (mtime-based)
+- **Subsequent runs:** No-op if graph is fresh (mtime check); otherwise incremental scan of only changed files
 - **Output:** `artifacts/memory/structural/code-graph.json` with imports, exports, imported_by
+- **Telemetry:** Every call records a `graph_status` event so the dashboard shows scan cost
 
 **Usage:**
 ```
-node .opencode/scripts/incremental_graph.js --src src/ --out artifacts/memory/structural/code-graph.json
+node .opencode/scripts/ensure_graph.js code [--src src/] [--out <path>] [--force]
+```
+
+The same wrapper handles the document graph:
+```
+node .opencode/scripts/ensure_graph.js doc [--out <path>] [--force]
 ```
 
 ### Archive Format (NDJSON)

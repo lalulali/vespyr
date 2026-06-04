@@ -1,6 +1,7 @@
 # Measurement Plan Template
 
-> **Used by:** @data-analyst → **Feeds into:** @developer, @qa-engineer, @performance-engineer, @ml-engineer
+> **Used by:** Nova (@data-analyst)
+> **Feeds into:** Rex (@developer), Nina (@qa-engineer), Felix (@performance-engineer), Kai (@ml-engineer)
 > **Save to:** `artifacts/output/02-strategy/measurement-plan.md`
 
 Use this template when defining analytics instrumentation and success metrics.

@@ -1,6 +1,7 @@
 # Release Readiness Checklist Template
 
-> **Used by:** @product-manager → **Feeds into:** @devops-engineer, @product-manager, @founder
+> **Used by:** Sarah (@product-manager)
+> **Feeds into:** Axel (@devops-engineer), Sarah (@product-manager), Elena (@founder)
 > **Save to:** `artifacts/output/06-launch/release-readiness.md`
 
 Use this template before any production release. Every item must be verified before go/no-go decision.

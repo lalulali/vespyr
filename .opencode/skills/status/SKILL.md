@@ -16,7 +16,7 @@ Returns a concise status report of the project. No workflow, no phases — just 
 
 ## Workflow
 
-### Step 1: Load orchestrator status state
+### Step 1: Load pipeline state
 
 Read `artifacts/output/pipeline-state.json` (or run `node .opencode/scripts/orchestrator_state.js status` via `@executor`) to extract:
 - Project metadata (`name`, `type`, active `squad`)

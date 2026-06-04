@@ -1,6 +1,7 @@
 # Game Validation Brief: {one-sentence summary}
 
-> **Used by:** `game-idea-validation` skill → **Feeds into:** `game-product-exploration`
+> **Used by:** `game-idea-validation` skill
+> **Feeds into:** `game-product-exploration`
 > **Save to:** `artifacts/output/00-discovery/validation-brief.md`
 
 ---

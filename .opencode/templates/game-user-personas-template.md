@@ -1,6 +1,7 @@
 # Player Personas & Research Template
 
-> **Used by:** @user-researcher → **Feeds into:** @product-manager, @product-designer
+> **Used by:** Paige (@user-researcher)
+> **Feeds into:** Sarah (@product-manager), Ivy (@product-designer)
 > **Save to:** `artifacts/output/01-research/user-personas.md`
 
 Use this template when writing the player research report.

@@ -59,8 +59,8 @@ Both documents are required. The PRD provides the "what and why"; the user stori
 - [ ] Cross-validation checklist passes (Step 4 in PM agent)
 
 **Outputs:**
-- `artifacts/output/02-strategy/requirements.md`
-- `artifacts/output/02-strategy/user-stories.md`
+- `artifacts/output/02-strategy/requirements.md` — Use template: `.opencode/templates/prd-template.md`
+- `artifacts/output/02-strategy/user-stories.md` — Use template: `.opencode/templates/user-story-template.md`
 
 ### Step 2: Product Design + Data Planning (parallelizable)
 
@@ -86,7 +86,7 @@ Invoke `@data-analyst` to define measurement:
 - Events, properties, tracking design
 - Dashboard mockups for monitoring adoption
 
-**Output:** `artifacts/output/02-strategy/measurement-plan.md`
+**Output:** `artifacts/output/02-strategy/measurement-plan.md` (Use template: `.opencode/templates/measurement-plan-template.md`)
 
 ### Step 3: UX Validation (optional gate)
 
@@ -97,7 +97,7 @@ Invoke `@ux-researcher` to validate the product spec:
 - Cognitive walkthrough of key task flows
 - Accessibility review (WCAG 2.1 AA)
 
-**Output:** `artifacts/output/01-research/ux-research-report.md`
+**Output:** `artifacts/output/01-research/ux-research-report.md` (Use template: `.opencode/templates/ux-research-report-template.md`)
 
 **If critical findings exist:**
 - Loop back to Step 2a: @product-designer addresses critical findings
@@ -121,8 +121,8 @@ Review the complete spec package:
 - [ ] UX sign-off (if applicable)
 
 **Action:**
-- **In Semi-Autonomous/Manual Mode:** Pause for explicit human spec package approval. Once requirements, spec, and stories are approved, invoke `@product-manager` to **seed and initialize the Kanban board** (`artifacts/output/04-planning/kanban.md`), then invoke `@executor` to rebuild the **document graph** (`node .opencode/scripts/doc_graph.js`).
-- **In Autonomous Mode:** Skip all feature, PRD, and spec validation pauses entirely. Autonomously finalize the requirements, spec, and user stories, immediately run `@product-manager` to seed the Kanban board, and invoke `@executor` to rebuild the **document graph** (`node .opencode/scripts/doc_graph.js`).
+- **In Semi-Autonomous/Manual Mode:** Pause for explicit human spec package approval. Once requirements, spec, and stories are approved, invoke `@product-manager` to **seed and initialize the Kanban board** (`artifacts/output/04-planning/kanban.md`), then invoke `@executor` to refresh the **document graph** via the self-healing wrapper: `node .opencode/scripts/ensure_graph.js doc`.
+- **In Autonomous Mode:** Skip all feature, PRD, and spec validation pauses entirely. Autonomously finalize the requirements, spec, and user stories, immediately run `@product-manager` to seed the Kanban board, and invoke `@executor` to refresh the **document graph** via `node .opencode/scripts/ensure_graph.js doc`.
 
 
 ## Output artifacts
@@ -156,3 +156,35 @@ New blockers: {any open design questions or dependencies, or "none"}
 ```
 
 Load the `develop` skill to proceed.
+
+---
+
+## State Machine Integration
+
+The pipeline state machine (`node .opencode/scripts/orchestrator_state.js`) is the canonical record of project state. This skill must wire its work into it so other skills, the dashboard, and the code-graph see what happened.
+
+### At Start
+
+Run via `@executor`:
+```bash
+node .opencode/scripts/orchestrator_state.js status
+```
+
+If pipeline is uninitialized, run `squad` first (or `init` directly) before starting design work. Then run `next` to confirm the project is in the design phase.
+
+### At End — Record Completion
+
+Record each artifact produced:
+
+```bash
+node .opencode/scripts/orchestrator_state.js complete --agent product-manager --artifact 02-strategy/requirements.md
+node .opencode/scripts/orchestrator_state.js complete --agent product-manager --artifact 02-strategy/user-stories.md
+node .opencode/scripts/orchestrator_state.js complete --agent product-designer --artifact 02-strategy/product-spec.md
+```
+
+If a `measurement-plan.md` was produced, record that too:
+```bash
+node .opencode/scripts/orchestrator_state.js complete --agent data-analyst --artifact 02-strategy/measurement-plan.md
+```
+
+After the last `complete`, run `next` to confirm the pipeline auto-advanced to the development phase. If it didn't (because some artifacts are missing), the `next` output will tell you which ones.

@@ -5,7 +5,14 @@ description: Codebase structural dependency mapper — initialize, view status, 
 
 ## What this skill does
 
-Manages the codebase structural dependency graph (`code-graph.json`). It provides explicit, on-demand scanning of code directories to map imports, exports, and file-level relationships without automatic background overhead.
+Manages the codebase structural dependency graph (`code-graph.json`). Provides explicit, on-demand scanning of code directories to map imports, exports, and file-level relationships without automatic background overhead.
+
+**All code-graph operations go through the self-healing wrapper** `node .opencode/scripts/ensure_graph.js code`. The wrapper:
+- Returns `{status: "fresh"}` if the graph is current (mtime check)
+- Returns `{status: "regenerated", scan_mode: "full" | "incremental", ...}` if it had to build
+- Records a `graph_status` telemetry event for every call
+
+Do not call `shallow_graph.js` or `incremental_graph.js` directly.
 
 ## When to use
 
@@ -18,38 +25,35 @@ Use this skill when:
 
 ## Workflow
 
-### Step 1: Check Graph Existence
-Inspect the workspace to determine if `artifacts/memory/structural/code-graph.json` exists.
+### Step 1: Run the wrapper
 
-### Step 2: Initialize (Full Scan)
-If the file does **not** exist:
-Invoke `@executor` to run a complete language-agnostic structural scan across codebase source files (JS, TS, Python, Go, Rust, Java, Ruby, PHP, C++):
+Invoke `@executor` to call the self-healing wrapper:
 ```bash
-node .opencode/scripts/shallow_graph.js --src src/ --out artifacts/memory/structural/code-graph.json
-```
-*(Note: Replace `--src src/` with a comma-separated list of directories like `--src src/,lib/,app/` if the project uses alternative source paths).*
-
-### Step 3: Update (Incremental Scan)
-If the file **does** exist:
-Invoke `@executor` to run a high-speed incremental scan, comparing modified times (`mtime`) against the existing graph and parsing only changed/new/deleted files:
-```bash
-node .opencode/scripts/incremental_graph.js --src src/ --out artifacts/memory/structural/code-graph.json
+node .opencode/scripts/ensure_graph.js code [--src src/] [--out <path>] [--force]
 ```
 
-### Step 4: Report Status
-Read the returned JSON response from `@executor` and report a concise summary to the user:
+Replace `--src src/` with a comma-separated list of directories (e.g. `--src src/,lib/,app/`) if the project uses alternative source paths. Use `--force` to bypass the freshness check (rarely needed — useful for full rebuilds after manual edits).
+
+### Step 2: Report
+
+Read the JSON response from `@executor` and report a concise summary:
 ```
-### Codebase Graph Updated
-- **Scan Mode**: [full | incremental]
-- **Total Files Indexed**: [total file count]
-- **Files Scanned (Delta)**: [scanned files count]
-- **Changes Detected**: [changed files count] (new/modified)
-- **Files Deleted**: [deleted files count]
+### Codebase Graph
+- **Status**: [fresh | regenerated]
+- **Scan Mode**: [full | incremental | none]
+- **Files Indexed**: [total file count]
+- **Files Scanned (Delta)**: [scanned files count, or 0 if fresh]
+- **Changes Detected**: [changed files count, or 0 if fresh]
+- **Files Deleted**: [deleted files count, or 0 if fresh]
 - **Output Path**: artifacts/memory/structural/code-graph.json
+- **Last Regenerated**: [graph_mtime from response]
 ```
+
+If status is `regenerated`, mention it explicitly — the user paid for a scan.
 
 ---
 
 ## Key Principles
-- **No Background Autosaves**: Codebase indexing is never triggered automatically by development actions or file saves. It must be explicitly invoked to prevent unnecessary I/O or cpu overhead during coding loops.
+- **No Background Autosaves**: Codebase indexing is never triggered automatically by development actions or file saves. The orchestrator's `complete` command refreshes the code-graph after `developer` / `architect` / `tech-lead` finish work, but no other hook fires it.
 - **Source Folder Isolation**: Standard build folders (`dist/`, `build/`), dependencies (`node_modules/`), and engine system dotfolders (`.opencode/`, `artifacts/`) are always ignored during scans.
+- **Self-Healing Reads**: `@architect` and `@tech-lead` call this wrapper themselves before reading the graph. You don't need to pre-warm it for them.

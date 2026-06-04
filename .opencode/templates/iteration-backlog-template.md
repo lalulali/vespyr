@@ -1,6 +1,7 @@
 # Iteration Backlog Template
 
-> **Used by:** @product-manager → **Feeds into:** @product-designer, @tech-lead (iteration planning)
+> **Used by:** Sarah (@product-manager)
+> **Feeds into:** Ivy (@product-designer), Grant (@tech-lead)
 > **Save to:** `artifacts/output/07-iteration/iteration-backlog.md`
 
 Use this template to prioritize post-launch improvements based on analytics insights and user feedback.

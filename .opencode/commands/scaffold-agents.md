@@ -1,4 +1,4 @@
-# Vespyr — Multi-Agent Engine
+# {Project Name} — Vespyr Multi-Agent Engine
 
 A platform-agnostic, file-based multi-agent system configured to streamline product development and engineering operations. This system consists of 21 specialized agent personas, structured workflows, and a shared persistent memory layer.
 
@@ -20,7 +20,7 @@ Since agents are defined as plain Markdown personas, they can be loaded and exec
   ```
   Adopt the role of the agent defined in: .opencode/agents/[agent-name].md
   Read that file to understand your persona, goals, workflow, and safety guardrails.
-  Strictly adhere to the 4 Core Behavioral Guidelines (Think Before Acting, Simplicity First, Surgical Actions, Goal-Driven Execution) defined in agent.md.
+  Strictly adhere to the 4 Core Behavioral Guidelines (Think Before Acting, Simplicity First, Surgical Actions, Goal-Driven Execution) defined in this document.
   Then, execute this task: [detailed instructions]
   ```
 

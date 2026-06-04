@@ -1,6 +1,7 @@
 # Incident Triage Template
 
-> **Used by:** @product-manager (incident commander) → **Feeds into:** responders, stakeholders
+> **Used by:** Sarah (@product-manager)
+> **Feeds into:** responders, stakeholders
 > **Save to:** `artifacts/output/08-incidents/INC-NNN/triage.md`
 
 Use this template when a production incident is detected. Fill in as information becomes available — do not wait for completeness.

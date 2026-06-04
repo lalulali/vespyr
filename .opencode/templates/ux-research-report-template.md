@@ -1,6 +1,7 @@
 # UX Research Report Template
 
-> **Used by:** @ux-researcher → **Feeds into:** @product-designer, @developer, @product-manager, @qa-engineer
+> **Used by:** Zara (@ux-researcher)
+> **Feeds into:** Ivy (@product-designer), Rex (@developer), Sarah (@product-manager), Nina (@qa-engineer)
 > **Save to:** `artifacts/output/01-research/ux-research-report.md`
 
 Use this template when evaluating the usability, interaction design, information architecture, and accessibility of the product spec.

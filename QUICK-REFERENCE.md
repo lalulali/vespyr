@@ -3,12 +3,12 @@
 ```
 PHASES
 ──────
-Product:   Validation (Red) → Exploration (Indigo) → Design (Amber) → Development (Green)
-Games:     Validation (Pink) → Exploration (Purple) → Design (Amber) → Development (Green)
+Product:   Validation → Exploration → Design → Development
+Games:     Validation → Exploration → Design → Development
 
 SQUADS (curated presets)
 ────────────────────────
-full-team    All 22 agents (default)
+full-team    All 21 agents (default)
 startup      founder, researcher, competitor, user-researcher, PM, designer, architect, tech-lead, developer, reviewer, QA, devops (Idea to MVP)
 build        architect, tech-lead, developer, reviewer, QA, devops, technical-writer (Build from spec)
 research     founder, researcher, competitor, user-researcher, PM (Validation only, no code)
@@ -124,7 +124,7 @@ Deduplication: write validation rejects near-identical entries
 KEY FILES
 ──────────────────────────────────────────────────
 Workflow              .opencode/workflow.md
-Skills/tabs           .opencode/skills.md
+Workflows & Skills   .opencode/skills.md
 Troubleshooting       .opencode/TROUBLESHOOTING.md
 Agent library         .opencode/agents/
 Agent templates       .opencode/agents/templates/

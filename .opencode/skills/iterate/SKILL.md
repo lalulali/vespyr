@@ -28,7 +28,7 @@ Invoke `@data-analyst` to collect and analyze post-launch data:
 - A/B test results (if any experiments are running)
 - Qualitative feedback (reviews, support conversations, user interviews)
 
-**Output:** `artifacts/output/07-iteration/analytics-insights.md`
+**Output:** `artifacts/output/07-iteration/analytics-insights.md` (Use template: `.opencode/templates/analytics-insights-template.md`)
 
 ### Step 2: Identify Opportunities
 
@@ -40,7 +40,7 @@ Invoke `@product-manager` to synthesize insights into opportunities:
 - Determine what to iterate on vs. what to leave as-is
 
 **Input:** `artifacts/output/07-iteration/analytics-insights.md`
-**Output:** `artifacts/output/07-iteration/iteration-backlog.md`
+**Output:** `artifacts/output/07-iteration/iteration-backlog.md` (Use template: `.opencode/templates/iteration-backlog-template.md`)
 
 ### Step 3: Design + Architecture Assessment (parallelizable)
 
@@ -54,7 +54,7 @@ Invoke `@product-designer` to design improvements:
 - Document design rationale linking back to data signals
 
 **Input:** `artifacts/output/07-iteration/iteration-backlog.md`
-**Output:** `artifacts/output/07-iteration/iteration-spec.md`
+**Output:** `artifacts/output/07-iteration/iteration-spec.md` (Use template: `.opencode/templates/product-spec-template.md`)
 
 #### Step 3b: Architecture Impact Assessment ⟨parallel⟩
 Invoke `@architect` to assess:
@@ -64,7 +64,7 @@ Invoke `@architect` to assess:
 - Flag any technical debt that should be addressed alongside
 
 **Input:** `artifacts/output/07-iteration/iteration-backlog.md`
-**Output:** `artifacts/output/07-iteration/iteration-adr.md` (only if architectural changes needed)
+**Output:** `artifacts/output/07-iteration/iteration-adr.md` (only if architectural changes needed. Use template: `.opencode/templates/adr-template.md`)
 
 ### Step 4: Plan and Execute
 
@@ -84,7 +84,7 @@ Then execute the same dev loop from `develop`:
 - `@qa-engineer` validates (max 2 QA cycles)
 - `@product-manager` verifies
 
-**Output:** `artifacts/output/07-iteration/iteration-plan.md`
+**Output:** `artifacts/output/07-iteration/iteration-plan.md` (Use template: `.opencode/templates/execution-plan-template.md`)
 
 ### Step 5: Ship and Measure
 
@@ -113,7 +113,7 @@ Next step: {continue iterating / load retro / load develop}
 New blockers: {any issues, or "none"}
 ```
 
-**Output:** `artifacts/output/07-iteration/iteration-results.md`
+**Output:** `artifacts/output/07-iteration/iteration-results.md` (Use template: `.opencode/templates/iteration-results-template.md`)
 
 ### Step 6: Decide Next Action (gate)
 
@@ -150,3 +150,33 @@ Use this when:
 - Production incident? → load `incident`
 - Want to review how the team is working? → load `retro`
 - Hit 5 iteration cycles? → **mandatory** `retro` before continuing
+
+---
+
+## State Machine Integration
+
+The pipeline state machine (`node .opencode/scripts/orchestrator_state.js`) is the canonical record of project state. This skill must wire its work into it so other skills, the dashboard, and the code-graph see what happened.
+
+### At Start
+
+Run via `@executor`:
+```bash
+node .opencode/scripts/orchestrator_state.js status
+```
+
+The project should be in the development phase (or post-launch, depending on how your squad is configured). If pipeline is uninitialized, run `squad` first.
+
+### At End — Record Completion
+
+Record each iteration artifact:
+
+```bash
+node .opencode/scripts/orchestrator_state.js complete --agent data-analyst --artifact 07-iteration/analytics-insights.md
+node .opencode/scripts/orchestrator_state.js complete --agent product-manager --artifact 07-iteration/iteration-backlog.md
+node .opencode/scripts/orchestrator_state.js complete --agent product-designer --artifact 07-iteration/iteration-spec.md
+node .opencode/scripts/orchestrator_state.js complete --agent architect --artifact 07-iteration/iteration-adr.md
+node .opencode/scripts/orchestrator_state.js complete --agent tech-lead --artifact 07-iteration/iteration-plan.md
+node .opencode/scripts/orchestrator_state.js complete --agent developer --artifact 07-iteration/iteration-results.md
+```
+
+Record only the artifacts actually produced. The `iteration-results.md` triggers an automatic code-graph refresh (because the producing agent is `developer`), so the next iteration's planning has a current dependency view.

@@ -1,6 +1,7 @@
 # Project Kanban Board Template
 
-> **Used by:** @product-manager → **Feeds into:** status reports, stakeholder updates, retrospectives
+> **Used by:** Sarah (@product-manager)
+> **Feeds into:** status reports, stakeholder updates, retrospectives
 > **Save to:** `artifacts/output/04-planning/kanban.md`
 
 Use this template to track modular user stories and tasks through the delivery pipeline. Update it continuously at each handoff.

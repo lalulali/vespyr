@@ -4,7 +4,6 @@ description: Discovery and validation only, no code
 agents:
   - founder
   - researcher
-  - competitor-analyzer
   - user-researcher
   - product-manager
 ---

@@ -1,6 +1,6 @@
 # CLAUDE.md — Vespyr Multi-Agent Engine
 
-A platform-agnostic, file-based multi-agent system configured to streamline product development and engineering operations. This system consists of 22 specialized agent personas, structured workflows, and a shared persistent memory layer.
+A platform-agnostic, file-based multi-agent system configured to streamline product development and engineering operations. This system consists of 21 specialized agent personas, structured workflows, and a shared persistent memory layer.
 
 **Trade-Off Policy**: The guidelines below prioritize absolute execution quality, simplicity, and precision over sheer speed. Adhere to them strictly for all tasks.
 
@@ -30,46 +30,45 @@ Since agents are defined as plain Markdown personas, they can be loaded and exec
 
 ---
 
-## 👥 Core Agent Personas (22 specialized roles)
+## 👥 Core Agent Personas (21 specialized roles)
 
-The system features 22 highly tuned role profiles divided into three functional categories:
+The system features 21 highly tuned role profiles divided into three functional categories:
 
 ### 1. Core Swarm & Engineering Roles
 
 | Agent Persona | Focus Area & Primary Responsibilities | Core Outputs & Artifacts |
 | :--- | :--- | :--- |
-| **`@orchestrator`** | Swarm coordinator. Manages multi-agent execution pipelines and sequence handoffs. | `artifacts/memory/swarm-state.json` |
 | **`@founder` (Elena)** | Strategic concept stress-testing. Challenges assumptions with a GO/PIVOT/KILL verdict. | `artifacts/output/00-discovery/` |
-| **`@product-manager`** | Comprehensive requirements scoping, PRD generation, user story maps, and Kanban board maintenance. | `requirements.md`, `kanban.md` |
-| **`@product-designer`** | Low-to-high fidelity UX/UI design specifications, screen states, and wireframes. | `product-spec.md` & visual mockups |
-| **`@architect`** | Technical system designs, architecture trade-offs, and ADR records. | `adr/*.md` (ADRs) |
-| **`@tech-lead`** | Granular execution plans, technical breakdowns, task estimations (1-4 hours). | `execution-plan.md` |
-| **`@developer`** | Core feature implementation, code quality, and writing comprehensive test suites. | Source Code & Unit Tests |
-| **`@code-reviewer`** | High-fidelity, read-only code audits, pull request reviews, and security validation. | Review Checklists & Feedback |
-| **`@qa-engineer`** | End-to-end integration testing, regression validation, and release certification. | `test-report.md` |
+| **`@product-manager` (Sarah)** | Comprehensive requirements scoping, PRD generation, user story maps, and Kanban board maintenance. | `requirements.md`, `kanban.md` |
+| **`@product-designer` (Ivy)** | Low-to-high fidelity UX/UI design specifications, screen states, and wireframes. | `product-spec.md` & visual mockups |
+| **`@architect` (Vera)** | Technical system designs, architecture trade-offs, and ADR records. | `adr/*.md` (ADRs) |
+| **`@tech-lead` (Grant)** | Granular execution plans, technical breakdowns, task estimations (1-4 hours). | `execution-plan.md` |
+| **`@developer` (Rex)** | Core feature implementation, code quality, and writing comprehensive test suites. | Source Code & Unit Tests |
+| **`@code-reviewer` (Scout)** | High-fidelity, read-only code audits, pull request reviews, and security validation. | Review Checklists & Feedback |
+| **`@qa-engineer` (Nina)** | End-to-end integration testing, regression validation, and release certification. | `test-report.md` |
 
 ### 2. Specialized Domain Experts
 
 | Agent Persona | Focus Area & Primary Responsibilities | Core Outputs & Artifacts |
 | :--- | :--- | :--- |
-| **`@researcher`** | Conducts market, competitor, and genre research, synthesizing findings to back decisions. | `artifacts/output/01-research/` |
-| **`@user-researcher`** | Structures user research plans, executes interviews, and maps persona segments. | `artifacts/output/01-research/user-research/` |
-| **`@ux-researcher`** | Evaluates usability, designs user journey maps, and builds interaction paradigms. | `artifacts/output/01-research/ux/` |
-| **`@data-analyst`** | Sets up analytics instrumentation, synthesizes telemetry, and builds dashboards. | `artifacts/output/07-iteration/` |
-| **`@security-engineer`** | Conducts security reviews, threat modeling, vulnerability scanning, and secure defaults. | `artifacts/output/03-architecture/security/` |
-| **`@performance-engineer`** | Analyzes system latency, identifies performance bottlenecks, and runs optimization audits. | `artifacts/output/07-iteration/performance/` |
-| **`@ml-engineer`** | Standardizes AI logic, validates model integrations, and drafts prompt templates. | `artifacts/output/03-architecture/ml/` |
-| **`@devops-engineer`** | Designs CI/CD automation pipelines, provisions cloud infrastructure, and configures environments. | `.github/workflows/`, Terraform files |
-| **`@technical-writer`** | Formulates user manuals, maintains API specifications, and drafts release documentation. | `docs/`, `api-reference.md` |
+| **`@researcher` (Iris)** | Conducts market, competitor, and genre research, synthesizing findings to back decisions. | `artifacts/output/01-research/` |
+| **`@user-researcher` (Paige)** | Structures user research plans, executes interviews, and maps persona segments. | `artifacts/output/01-research/user-research/` |
+| **`@ux-researcher` (Zara)** | Evaluates usability, designs user journey maps, and builds interaction paradigms. | `artifacts/output/01-research/ux/` |
+| **`@data-analyst` (Nova)** | Sets up analytics instrumentation, synthesizes telemetry, and builds dashboards. | `artifacts/output/07-iteration/` |
+| **`@security-engineer` (Victor)** | Conducts security reviews, threat modeling, vulnerability scanning, and secure defaults. | `artifacts/output/03-architecture/security/` |
+| **`@performance-engineer` (Felix)** | Analyzes system latency, identifies performance bottlenecks, and runs optimization audits. | `artifacts/output/07-iteration/performance/` |
+| **`@ml-engineer` (Kai)** | Standardizes AI logic, validates model integrations, and drafts prompt templates. | `artifacts/output/03-architecture/ml/` |
+| **`@devops-engineer` (Axel)** | Designs CI/CD automation pipelines, provisions cloud infrastructure, and configures environments. | `.github/workflows/`, Terraform files |
+| **`@technical-writer` (Clara)** | Formulates user manuals, maintains API specifications, and drafts release documentation. | `docs/`, `api-reference.md` |
 
 ### 3. Operational I/O Sub-Agents
 
 For optimal efficiency, cognitive reasoning is separated from operational tasks. Thinking agents delegate I/O to these narrow, high-performance sub-agents:
 
-- **`@reader`**: Fast codebase queries, regex searches, and file views (Read-Only).
-- **`@writer`**: Ultra-focused, contiguous file edits and writes with zero reasoning overhead (Write-Only).
-- **`@executor`**: Executes shell commands and returns clean, curated execution summaries (Bash execution).
-- **`@memory-controller`**: Memory gatekeeper. Loads progressive context tiers, validates writes, and compacts history.
+- **`@reader` (Page)**: Fast codebase queries, regex searches, and file views (Read-Only).
+- **`@writer` (Quill)**: Ultra-focused, contiguous file edits and writes with zero reasoning overhead (Write-Only).
+- **`@executor` (Max)**: Executes shell commands and returns clean, curated execution summaries (Bash execution).
+- **`@memory-controller` (Mnemos)**: Memory gatekeeper. Loads progressive context tiers, validates writes, and compacts history.
 
 ### 4. Domain Expert Delegation (Research)
 

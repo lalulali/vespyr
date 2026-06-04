@@ -6,7 +6,10 @@
     "outputs": [
       "artifacts/memory/structural/code-graph.json"
     ],
-    "key_agents": []
+    "key_agents": [
+      "@architect",
+      "@tech-lead"
+    ]
   },
   {
     "name": "delegate",
@@ -92,9 +95,7 @@
     "outputs": [
       "artifacts/memory/structural/doc-graph.json"
     ],
-    "key_agents": [
-      "@product-manager"
-    ]
+    "key_agents": []
   },
   {
     "name": "explore-game-idea",
@@ -158,12 +159,12 @@
     "description": "Dynamic next-step navigator — evaluates project state, checks skill catalog, codebase/doc graphs, and provides a tailored navigation report with recommended slash commands.",
     "prerequisites": [],
     "outputs": [
-      "artifacts/memory/project-context.md",
-      "artifacts/memory/structural/code-graph.json",
-      "artifacts/memory/structural/doc-graph.json",
-      "artifacts/output/"
+      "artifacts/output/pipeline-state.json",
+      "artifacts/memory/project-context.md"
     ],
-    "key_agents": []
+    "key_agents": [
+      "@architect"
+    ]
   },
   {
     "name": "humanize",
@@ -278,6 +279,7 @@
     "description": "Show current phase, switch phases, list phase artifacts",
     "prerequisites": [],
     "outputs": [
+      "artifacts/output/pipeline-state.json",
       "artifacts/memory/project-context.md",
       "artifacts/memory/active-decisions.md"
     ],
@@ -312,7 +314,8 @@
       "artifacts/output/09-retro/action-items.md",
       "artifacts/memory/archive/YYYY-QN/",
       "artifacts/memory/archive/index.json",
-      "artifacts/output/09-retro/archive-review.md"
+      "artifacts/output/09-retro/archive-review.md",
+      "artifacts/memory/structural/doc-graph.json"
     ],
     "key_agents": [
       "@product-manager",
@@ -344,6 +347,7 @@
     "description": "Quick snapshot of current project state — phase, blockers, memory health, sprint progress",
     "prerequisites": [],
     "outputs": [
+      "artifacts/output/pipeline-state.json",
       "artifacts/memory/session-summaries/latest.md"
     ],
     "key_agents": []

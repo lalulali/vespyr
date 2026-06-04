@@ -1,6 +1,7 @@
 # Post-Incident Review Template
 
-> **Used by:** @product-manager → **Feeds into:** prevention mechanisms, process improvements
+> **Used by:** Sarah (@product-manager)
+> **Feeds into:** prevention mechanisms, process improvements
 > **Save to:** `artifacts/output/08-incidents/INC-NNN/post-incident-review.md`
 
 Use this template for the blameless post-incident review. Share with all stakeholders. Focus on systems and processes, not individuals.

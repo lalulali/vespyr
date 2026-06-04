@@ -1,6 +1,7 @@
 # Idea Brief Template (Founder Memo)
 
-> **Used by:** @founder → **Feeds into:** @researcher, @user-researcher
+> **Used by:** Elena (@founder)
+> **Feeds into:** Iris (@researcher), Paige (@user-researcher)
 > **Save to:** `artifacts/output/00-discovery/idea-brief.md`
 
 **Version:** 1

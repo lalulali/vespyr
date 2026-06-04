@@ -1,9 +1,9 @@
 # Session Summary Template
 
-> **Written by:** Any agent at end of session via `@memory-controller session-write [content]`
+> **Written by:** Any agent at end of session via `Mnemos (@memory-controller) session-write [content]`
 > **Save to:** `artifacts/memory/session-summaries/latest.md` (overwrite each session)
 > **Also appended to:** `artifacts/memory/session-summaries/history.md` (never overwrite)
-> **Read by:** `@memory-controller` as part of Tier 1 context loading
+> **Read by:** `Mnemos (@memory-controller)` as part of Tier 1 context loading
 
 The session summary is the fastest path to cross-session continuity. It costs ~100 tokens to load and tells the next agent exactly where things stand — without re-reading all memory files.
 

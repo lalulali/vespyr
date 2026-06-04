@@ -142,3 +142,38 @@ When exploration is complete:
    New blockers: {any research gaps or unresolved questions, or "none"}
    ```
 7. Load `design` to define requirements and create specs
+
+---
+
+## State Machine Integration
+
+The pipeline state machine (`node .opencode/scripts/orchestrator_state.js`) is the canonical record of project state. This skill must wire its work into it so other skills, the dashboard, and the code-graph see what happened.
+
+### At Start
+
+Run via `@executor`:
+```bash
+node .opencode/scripts/orchestrator_state.js status
+```
+
+If pipeline is uninitialized, initialize first via `squad` or directly:
+```bash
+node .opencode/scripts/orchestrator_state.js init --name "<project>" --type <startup|company|personal>
+```
+
+Then run `next` to confirm the current phase expects exploration work.
+
+### At End — Record Completion
+
+Record each artifact produced, in this order. The first one transitions the project out of validation; the rest record research outputs.
+
+```bash
+node .opencode/scripts/orchestrator_state.js complete --agent founder --artifact 00-discovery/idea-brief.md
+node .opencode/scripts/orchestrator_state.js complete --agent researcher --artifact 01-research/market-analysis.md
+node .opencode/scripts/orchestrator_state.js complete --agent researcher --artifact 01-research/competitive-analysis.md
+node .opencode/scripts/orchestrator_state.js complete --agent user-researcher --artifact 01-research/user-personas.md
+```
+
+Skip any artifact that was not produced (e.g., if the user came in with a validation brief, `idea-brief.md` may be skipped).
+
+Each `complete` call fires `agent_invoke` telemetry attributed to the producing agent.

@@ -1,6 +1,7 @@
 # Post-Launch Report Template
 
-> **Used by:** @product-manager, @data-analyst → **Feeds into:** iteration decisions, retrospectives
+> **Used by:** Sarah (@product-manager), Nova (@data-analyst)
+> **Feeds into:** iteration decisions, retrospectives
 > **Save to:** `artifacts/output/06-launch/post-launch-report.md`
 
 Use this template 24-72 hours after launch to document metrics, issues, and initial learnings.

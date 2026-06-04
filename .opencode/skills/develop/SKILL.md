@@ -45,12 +45,12 @@ Review specs with `@product-manager` and `@product-designer`:
   - Document ADRs in `artifacts/output/03-architecture/`
   - Identify technical risks and mitigation strategies
 
-**Output:** `artifacts/output/03-architecture/adr-NNN-*.md` (Only generated and required if this phase was executed).
+**Output:** `artifacts/output/03-architecture/adr-NNN-*.md` (Only generated and required if this phase was executed. Use template: `.opencode/templates/adr-template.md`).
 
 
 ### Step 3: Architecture & Backlog Review
 
-The `@tech-lead` reviews the architectural decisions (if Phase 3 was executed) and the finalized user stories/Kanban backlog directly to prepare for development. (No separate execution-plan.md planning artifact is required).
+The `@tech-lead` reviews the architectural decisions (if Phase 3 was executed) and the finalized user stories/Kanban backlog directly to prepare for development. Use template: `.opencode/templates/execution-plan-template.md` to produce the execution plan. Save to `artifacts/output/04-planning/execution-plan.md`. This document gates development — it lists tasks, estimates, dependencies, and the build order.
 
 #### Step 3a: Architecture & Spec Review
 Invoke `@tech-lead` to review the architecture (or strategy specs if Phase 3 was bypassed):
@@ -69,9 +69,10 @@ Invoke `@tech-lead` to:
 
 ### Step 4: Kanban Backlog Activation (Gate)
 
+Activate the Kanban board for the project. Use template: `.opencode/templates/kanban-template.md`. Save to `artifacts/output/04-planning/kanban.md`.
+
 Before development starts, `@product-manager` reviews the prioritized backlog:
 - **Gate Check:** `@product-manager` confirms the prioritized backlog on the Kanban board is correct and aligned with sprint deadlines. Once confirmed, the `@tech-lead` activates the tasks by moving them to the **To Do** column on the Kanban board.
-
 
 ### Step 5: Spike (if needed)
 If the tech lead identified unknowns or risks, investigate before committing:
@@ -200,7 +201,7 @@ Invoke `@security-engineer` when the feature touches:
 - Sensitive data (PII, payments, health records)
 - External APIs or third-party integrations
 
-**Output:** `artifacts/output/06-quality/findings-report.md`
+**Output:** `artifacts/output/06-quality/findings-report.md` (code review — use structure: `Severity, File:Line, Issue, Suggested Fix, Blocker?`)
 
 #### Step 7c: Performance Review (if applicable) ⟨parallel⟩
 Invoke `@performance-engineer` when the feature:
@@ -208,7 +209,7 @@ Invoke `@performance-engineer` when the feature:
 - Handles large data sets or high traffic
 - Has defined performance SLAs in the spec
 
-**Output:** `artifacts/output/06-quality/report.md`
+**Output:** `artifacts/output/06-quality/report.md` (QA report — use structure: `Test Run Summary, Pass/Fail by Suite, Open Defects, Release Recommendation`)
 
 ### Step 8: PM Verification (gate)
 Invoke `@product-manager` to verify the shipped feature:
@@ -241,3 +242,37 @@ A feature is done when:
 - Feature ready to ship → load `product-launch`
 - Need to build another feature → restart this skill
 - Production incident → load `incident-response`
+
+---
+
+## State Machine Integration
+
+The pipeline state machine (`node .opencode/scripts/orchestrator_state.js`) is the canonical record of project state. This skill must wire its work into it so other skills, the dashboard, and the code-graph see what happened.
+
+### At Start
+
+Run via `@executor`:
+```bash
+node .opencode/scripts/orchestrator_state.js status
+```
+
+If pipeline is uninitialized, run `squad` first (or `init` directly). Then run `next` to confirm the project is in the development phase and identify which artifacts are missing.
+
+### At End — Record Completion
+
+Record the execution plan first (it gates development):
+
+```bash
+node .opencode/scripts/orchestrator_state.js complete --agent tech-lead --artifact 04-planning/execution-plan.md
+```
+
+Then record each significant code change. For every module, feature, or test file produced, call `complete` with the producing agent (`developer`, `code-reviewer`, `qa-engineer`, etc.) and the relative artifact path. Example:
+
+```bash
+node .opencode/scripts/orchestrator_state.js complete --agent developer --artifact 04-planning/kanban.md
+node .opencode/scripts/orchestrator_state.js complete --agent qa-engineer --artifact 06-quality/report.md
+```
+
+**Important:** every `complete --agent developer|architect|tech-lead` call automatically refreshes the code-graph via `ensure_graph.js code`. This means the next agent that reads the code-graph (e.g., a follow-up `tech-lead` planning the next iteration) gets a current view without having to manually trigger a scan.
+
+If `next` returns `advance-phase` after your work, the pipeline is ready for `launch`. If it returns `generate-artifacts`, the response lists which required artifacts are still missing.

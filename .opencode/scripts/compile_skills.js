@@ -61,7 +61,7 @@ function extractOutputs(text) {
 
 function extractKeyAgents(text) {
   const agents = new Set();
-  const ignored = new Set(['writer', 'reader', 'executor', 'memory-controller', 'orchestrator']);
+  const ignored = new Set(['writer', 'reader', 'executor', 'memory-controller']);
   const pattern = /@([a-zA-Z0-9_-]+)/g;
   let m;
   while ((m = pattern.exec(text)) !== null) {

@@ -128,7 +128,7 @@ Consolidate your `AGENTS.md` and `artifacts/memory/project-context.md` into a si
 
 ## Agent team
 This project uses a multi-agent system. Agents are defined in .claude/agents/.
-Invoke them with @agent-name or let the orchestrator spawn them.
+Invoke them with @agent-name or @mention them in your IDE chat.
 
 ## Shared memory
 All memory access goes through @memory-controller. Never read artifacts/memory/

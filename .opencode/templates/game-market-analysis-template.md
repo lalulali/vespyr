@@ -1,6 +1,7 @@
 # Game Market Analysis Template
 
-> **Used by:** @researcher (market mode) → **Feeds into:** @product-manager
+> **Used by:** Iris (@researcher)
+> **Feeds into:** Sarah (@product-manager)
 > **Save to:** `artifacts/output/01-research/market-analysis.md`
 
 Use this template when writing the genre market analysis report.

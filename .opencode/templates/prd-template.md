@@ -1,6 +1,7 @@
 # PRD Template
 
-> **Used by:** @product-manager → **Feeds into:** @product-designer, @architect, @tech-lead, @developer, @data-analyst
+> **Used by:** Sarah (@product-manager)
+> **Feeds into:** Ivy (@product-designer), Vera (@architect), Grant (@tech-lead), Rex (@developer), Nova (@data-analyst)
 > **Save to:** `artifacts/output/02-strategy/requirements.md`
 
 **Version:** 1

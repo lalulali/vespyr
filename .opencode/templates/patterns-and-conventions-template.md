@@ -1,6 +1,6 @@
 # Patterns and Conventions Template
 
-> **Used by:** @developer, @architect, @product-designer, @qa-engineer → **Read by:** All agents
+> **Used by:** Rex (@developer), Vera (@architect), Ivy (@product-designer), Nina (@qa-engineer) → **Read by:** All agents
 > **Save to:** `artifacts/memory/patterns-and-conventions.md`
 
 Tracks discovered patterns, conventions, and anti-patterns as the project evolves.

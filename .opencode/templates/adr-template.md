@@ -1,6 +1,7 @@
 you# Architecture Decision Record (ADR) Template
 
-> **Used by:** @architect → **Feeds into:** @developer, @tech-lead, @security-engineer, @devops-engineer, @qa-engineer
+> **Used by:** Vera (@architect)
+> **Feeds into:** Rex (@developer), Grant (@tech-lead), Victor (@security-engineer), Axel (@devops-engineer), Nina (@qa-engineer)
 > **Save to:** `artifacts/output/03-architecture/adr-NNN-short-name.md`
 
 Use this template when documenting significant architectural decisions. Each ADR is a permanent record of a decision and its rationale.

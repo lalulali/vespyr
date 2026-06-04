@@ -1,6 +1,7 @@
 # Analytics Insights Template
 
-> **Used by:** @data-analyst → **Feeds into:** @product-manager (iteration backlog), @product-manager (status tracking)
+> **Used by:** Nova (@data-analyst)
+> **Feeds into:** Sarah (@product-manager), Sarah (@product-manager)
 > **Save to:** `artifacts/output/07-iteration/analytics-insights.md`
 
 Use this template to document post-launch analytics and user behavior data that informs iteration decisions.

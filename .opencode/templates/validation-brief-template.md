@@ -1,6 +1,7 @@
 # Validation Brief: {one-sentence summary}
 
-> **Used by:** `idea-validation` skill → **Feeds into:** `product-exploration`
+> **Used by:** `idea-validation` skill
+> **Feeds into:** `product-exploration`
 > **Save to:** `artifacts/output/00-discovery/validation-brief.md`
 
 ---

@@ -394,10 +394,10 @@ If the user opts to bypass Phase 3 (Architecture), the Strategy artifacts feed d
 
 | From | To | Required Artifacts | Contract |
 |------|-----|-------------------|----------|
-| @orchestrator | @devops-engineer | `artifacts/output/08-incidents/INC-NNN/triage.md` | Severity, timeline, assigned responders |
-| @devops-engineer | @orchestrator | `artifacts/output/08-incidents/INC-NNN/mitigation.md` | Mitigation applied, current status |
+| incident | @devops-engineer | `artifacts/output/08-incidents/INC-NNN/triage.md` | Severity, timeline, assigned responders |
+| @devops-engineer | incident | `artifacts/output/08-incidents/INC-NNN/mitigation.md` | Mitigation applied, current status |
 | @architect | @developer | `artifacts/output/08-incidents/INC-NNN/rca.md` | Root cause identified, fix direction clear |
-| @developer | @orchestrator | `artifacts/output/08-incidents/INC-NNN/remediation.md` | Fix implemented, tests added |
+| @developer | incident | `artifacts/output/08-incidents/INC-NNN/remediation.md` | Fix implemented, tests added |
 
 ---
 
@@ -445,9 +445,9 @@ Agents are not siloed. Downstream findings MUST flow upstream.
 | @ux-researcher → @product-manager | Core tasks fail usability testing | Re-scope or re-design feature; escalate to @founder if concept-level issue |
 | @product-manager → @all | Kanban board updated | Item moved, blocked, or milestone changed | `artifacts/output/04-planning/kanban.md` |
 | @founder → @all | Strategic pivot decision | All downstream artifacts must be re-validated against new direction |
-| @orchestrator → @tech-lead | Tasks blocked or timeline at risk | Escalate blocker to owner with 24h deadline; adjust plan based on resolution |
+| incident skill → @tech-lead | Tasks blocked or timeline at risk | Escalate blocker to owner with 24h deadline; adjust plan based on resolution |
 | @data-analyst → @product-manager | Post-launch metrics differ from hypothesis | Flag for iteration backlog; adjust success criteria if needed |
-| @orchestrator → @product-manager | Scope creep detected | Formal change request with timeline impact; @product-manager prioritizes |
+| incident skill → @product-manager | Scope creep detected | Formal change request with timeline impact; @product-manager prioritizes |
 
 ---
 
@@ -501,7 +501,7 @@ Optional agents add time to the schedule. Planning guidance:
 
 ---
 
-## 8. Skills (Phase Tabs)
+## 8. Workflows & Skills
 
 | Skill | Phase | Primary Agents | Key Output |
 |-------|-------|----------------|------------|
@@ -513,7 +513,7 @@ Optional agents add time to the schedule. Planning guidance:
 | `develop` | 3-5 | @architect, @tech-lead, @developer, @qa-engineer | Working, tested feature |
 | `launch` | 7 | @product-manager, @devops-engineer | Shipped feature in production |
 | `iterate` | 8 | @data-analyst, @product-manager, @developer | Measured improvement |
-| `incident` | Any | @orchestrator, @devops-engineer, @developer | Mitigated incident, RCA, prevention |
+| `incident` | Any | @devops-engineer, @developer | Mitigated incident, RCA, prevention |
 | `retro` | 9 | @product-manager, @tech-lead, @architect | Action items for improvement |
 
 
@@ -611,6 +611,55 @@ Use the format in `.opencode/templates/session-summary-template.md`. This writes
 | Any agent hits blocker | Blocker description, owner, ETA | `blockers-and-risks.md` |
 | Any agent learns lesson | Phase, context, lesson, action item | `lessons-learned.md` |
 | Any agent ends a session | What was done, decisions, next step, blockers | `session-summaries/latest.md` (via session-write) |
+
+---
+
+## 9b. Pipeline State Machine — the Source of Truth
+
+The **pipeline state machine** (`node .opencode/scripts/orchestrator_state.js`) is the canonical record of project state. Every workflow skill and every code-modifying agent must wire its work into it. Without this integration, the dashboard has no data, the code-graph never refreshes, and `next` has no signal to recommend actions.
+
+### What the state machine tracks
+
+- **Current phase** (validation → exploration → design → development)
+- **Artifact versions** (which deliverables exist, who produced them, what version)
+- **Change requests** (open CRs that block phase advancement)
+- **Blockers** (active blockers with owners and ETAs)
+- **History** (every `init`, `set-phase`, `complete`, `file-cr` event)
+- **Squad** (which agent preset is active)
+
+### When to call the state machine
+
+| Trigger | Command | Why |
+|---|---|---|
+| Skill starts (any phase) | `orchestrator_state.js status` | Know current phase before doing work |
+| Skill needs next action | `orchestrator_state.js next` | Get the system's recommendation |
+| Skill produces an artifact | `orchestrator_state.js complete --agent X --artifact Y` | Record work, fire telemetry, refresh code-graph |
+| User wants to switch phases | `orchestrator_state.js set-phase --phase X` | Advance with proper logging |
+| Cross-team change needed | `orchestrator_state.js file-cr --from X --to Y --target Z --issue "..."` | Block advancement until resolved |
+| Project initialization | `orchestrator_state.js init --name "X" --type Y` | First-run setup (also via `/squad`) |
+| Graph refresh (code) | `orchestrator_state.js ensure-graph code` | Force refresh code-graph |
+| Graph refresh (doc) | `orchestrator_state.js ensure-graph doc` | Force refresh doc-graph |
+
+### Auto-firing side effects
+
+The state machine is not just a state recorder. It auto-fires side effects that you would otherwise have to remember:
+
+- **`init`** → seeds `artifacts/memory/project-context.md` AND triggers `ensure_graph.js doc` so the doc-graph exists from the first call
+- **`set-phase`** → records `phase_transition` telemetry and syncs `Phase:` field in `project-context.md`
+- **`complete --agent developer|architect|tech-lead`** → records `agent_invoke` telemetry AND triggers `ensure_graph.js code` so the code-graph is current
+- **All `complete` calls** → record `agent_invoke` telemetry, even when no `--tokens` is supplied (token count is auto-estimated from artifact size)
+- **`file-cr`** → records the open CR in `pipeline-state.json`, which causes `next` to return `resolve-cr` until resolved
+
+### Why every skill must integrate
+
+If a skill produces an artifact without calling `complete`:
+- The artifact exists on disk but the state machine has no record
+- `next` cannot tell the user "validation is complete, move to exploration"
+- Telemetry stays empty
+- The code-graph is never refreshed after code-modifying work
+- Subsequent skills have no way to know what was already done
+
+Every workflow skill (`validate-idea`, `explore-idea`, `design`, `develop`, `launch`, `iterate`, `retro`, `incident`, and the `-game-idea` variants) has a "State Machine Integration" section that specifies exactly which `complete` calls to make. Follow it.
 
 ---
 

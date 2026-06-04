@@ -1,6 +1,7 @@
 # Release Notes Template
 
-> **Used by:** @technical-writer → **Feeds into:** stakeholders, users
+> **Used by:** Clara (@technical-writer)
+> **Feeds into:** stakeholders, users
 > **Save to:** `artifacts/output/06-launch/release-notes.md`
 
 Use this template for documenting what's new, changed, or fixed in a release.

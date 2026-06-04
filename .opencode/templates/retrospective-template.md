@@ -1,6 +1,7 @@
 # Retrospective Template
 
-> **Used by:** @product-manager → **Feeds into:** process improvements, team knowledge base
+> **Used by:** Sarah (@product-manager)
+> **Feeds into:** process improvements, team knowledge base
 > **Save to:** `artifacts/output/09-retro/action-items.md` (summary) and supporting review docs
 
 Use this template after any major phase, iteration cycle, or incident to extract lessons and improve for next time.

@@ -1,6 +1,7 @@
 # Execution Plan Template
 
-> **Used by:** @tech-lead → **Feeds into:** @developer, @data-analyst, @ml-engineer
+> **Used by:** Grant (@tech-lead)
+> **Feeds into:** Rex (@developer), Nova (@data-analyst), Kai (@ml-engineer)
 > **Save to:** `artifacts/output/04-planning/execution-plan.md`
 
 **Version:** 1
