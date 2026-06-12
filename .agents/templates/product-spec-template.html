@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Product Spec — {Feature Name}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] } } }
+    }
+  </script>
+  <style>
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(200, 200, 200, 0.8); border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(150, 150, 150, 0.8); }
+    body { background: radial-gradient(circle at 80% 0%, rgba(99, 102, 241, 0.04) 0%, transparent 40%), #fbfbfb; min-height: 100vh; }
+  </style>
+</head>
+<body class="text-zinc-700 antialiased font-sans flex min-h-screen selection:bg-indigo-500/10 selection:text-indigo-750">
+  <div id="overlay" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 hidden lg:hidden"></div>
+
+  <!-- SIDEBAR -->
+  <aside id="sidebar" class="fixed inset-y-0 left-0 w-64 bg-white/90 backdrop-blur-xl border-r border-zinc-200 z-50 flex flex-col p-5 overflow-y-auto transform -translate-x-full transition-transform duration-200 lg:translate-x-0 lg:z-30">
+    <div class="flex items-center justify-between pb-4 mb-4 border-b border-zinc-200">
+      <div>
+        <span class="text-[9px] font-bold text-indigo-700 bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-100 uppercase tracking-wide">Spec</span>
+        <h2 class="text-sm font-extrabold text-zinc-950 mt-1.5 tracking-tight">{Feature Name}</h2>
+      </div>
+      <button id="mobile-menu-close-btn" class="p-1 rounded text-zinc-400 hover:bg-zinc-100 lg:hidden"><i data-lucide="x" class="w-4 h-4"></i></button>
+    </div>
+    <nav class="flex-1 space-y-1 text-xs">
+      <span class="px-2 text-[10px] font-bold text-zinc-450 uppercase tracking-widest block mb-2">Sections</span>
+      <a class="nav-link flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-zinc-550 hover:bg-zinc-50 hover:text-zinc-955 transition-all border-l-2 border-transparent active" href="#s1"><i data-lucide="eye" class="w-3.5 h-3.5"></i>1. Feature Overview</a>
+      <a class="nav-link flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-zinc-550 hover:bg-zinc-50 hover:text-zinc-955 transition-all border-l-2 border-transparent" href="#s2"><i data-lucide="git-fork" class="w-3.5 h-3.5"></i>2. User Flows</a>
+      <a class="nav-link flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-zinc-550 hover:bg-zinc-50 hover:text-zinc-955 transition-all border-l-2 border-transparent" href="#s3"><i data-lucide="layout" class="w-3.5 h-3.5"></i>3. Screen Specs</a>
+      <a class="nav-link flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-zinc-550 hover:bg-zinc-50 hover:text-zinc-955 transition-all border-l-2 border-transparent" href="#s4"><i data-lucide="sparkles" class="w-3.5 h-3.5"></i>4. Interaction Details</a>
+      <a class="nav-link flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-zinc-550 hover:bg-zinc-50 hover:text-zinc-955 transition-all border-l-2 border-transparent" href="#s5"><i data-lucide="palette" class="w-3.5 h-3.5"></i>5. Design System</a>
+      <a class="nav-link flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-zinc-550 hover:bg-zinc-50 hover:text-zinc-955 transition-all border-l-2 border-transparent" href="#s6"><i data-lucide="shield-alert" class="w-3.5 h-3.5"></i>6. Edge Cases</a>
+      <a class="nav-link flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-zinc-550 hover:bg-zinc-50 hover:text-zinc-955 transition-all border-l-2 border-transparent" href="#s7"><i data-lucide="help-circle" class="w-3.5 h-3.5"></i>7. Open Questions</a>
+      <a class="nav-link flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-zinc-550 hover:bg-zinc-50 hover:text-zinc-955 transition-all border-l-2 border-transparent" href="#s8"><i data-lucide="link" class="w-3.5 h-3.5"></i>8. Cross-References</a>
+    </nav>
+    <div class="pt-4 mt-4 border-t border-zinc-200 text-[10px] text-zinc-500 space-y-1.5 bg-zinc-50 p-3 rounded-xl border border-zinc-200/60">
+      <div class="flex justify-between"><span>Author</span><span class="text-zinc-800 font-medium">@product-designer</span></div>
+      <div class="flex justify-between"><span>Version</span><span class="text-zinc-800 font-medium">{version}</span></div>
+      <div class="flex justify-between"><span>Date</span><span class="text-zinc-800 font-medium">{date}</span></div>
+      <div class="flex justify-between"><span>Status</span><span class="text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded font-bold">{Draft | Ready}</span></div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTAINER -->
+  <div class="flex-1 flex flex-col lg:pl-64 min-w-0">
+    <header class="sticky top-0 z-40 flex items-center justify-between lg:hidden px-5 py-3 bg-white/90 backdrop-blur-md border-b border-zinc-200">
+      <span class="text-xs font-bold text-zinc-955 uppercase tracking-wider">{Feature Name}</span>
+      <button id="mobile-menu-btn" class="p-1.5 rounded text-zinc-500 hover:bg-zinc-50"><i data-lucide="menu" class="w-5 h-5"></i></button>
+    </header>
+
+    <main class="flex-1 py-10 px-5 sm:px-8 lg:px-12 max-w-4xl space-y-12">
+      <!-- Page Header -->
+      <header class="pb-6 border-b border-zinc-200 space-y-3">
+        <span class="text-xs font-bold tracking-widest text-indigo-700 uppercase block">Product Specification</span>
+        <h1 class="text-3xl font-black tracking-tight text-zinc-950">{Feature Name}</h1>
+        <p class="text-zinc-500 text-sm leading-relaxed max-w-2xl font-light">{One sentence — what this spec covers and who it's for.}</p>
+        <div class="flex flex-wrap gap-2 text-xs pt-1">
+          <span class="inline-flex items-center gap-1 bg-zinc-100 text-zinc-650 px-2.5 py-0.5 rounded-full border border-zinc-200"><i data-lucide="git-branch" class="w-3 h-3 text-zinc-450"></i>v{version}</span>
+          <span class="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 px-2.5 py-0.5 rounded-full border border-emerald-200/50"><i data-lucide="tag" class="w-3 h-3"></i>{status}</span>
+          <span class="inline-flex items-center gap-1 bg-zinc-100 text-zinc-650 px-2.5 py-0.5 rounded-full border border-zinc-200"><i data-lucide="calendar" class="w-3 h-3 text-zinc-450"></i>{date}</span>
+          <span class="inline-flex items-center gap-1 bg-indigo-50 text-indigo-700 px-2.5 py-0.5 rounded-full border border-indigo-200/50"><i data-lucide="user" class="w-3 h-3"></i>@product-designer</span>
+        </div>
+      </header>
+
+      <!-- SECTION 1: Feature Overview -->
+      <section class="scroll-mt-20 space-y-6" id="s1">
+        <div class="flex items-center gap-2.5 pb-2 border-b border-zinc-200"><div class="flex items-center justify-center w-6 h-6 rounded bg-indigo-50 text-indigo-700 font-bold text-xs border border-indigo-100 shadow-sm">1</div><h2 class="text-lg font-bold text-zinc-950">Feature Overview</h2></div>
+        <div class="space-y-1"><h3 class="text-xs font-bold text-zinc-900 flex items-center gap-1.5"><span class="w-1 h-3 rounded bg-indigo-600"></span>Purpose</h3><p class="text-zinc-500 text-xs leading-relaxed max-w-2xl">{One sentence: what does this feature enable the user to do?}</p></div>
+        <div class="space-y-2">
+          <h3 class="text-xs font-bold text-zinc-900 flex items-center gap-1.5"><span class="w-1 h-3 rounded bg-indigo-600"></span>Goals</h3>
+          <ul class="grid gap-2 sm:grid-cols-3 text-xs text-zinc-550">
+            <li class="flex items-start gap-2 p-3 rounded-lg bg-white border border-zinc-200"><i data-lucide="check" class="w-4 h-4 text-zinc-400 flex-shrink-0 mt-0.5"></i><span>Goal 1 — e.g., "User can complete checkout in under 60 seconds"</span></li>
+            <li class="flex items-start gap-2 p-3 rounded-lg bg-white border border-zinc-200"><i data-lucide="check" class="w-4 h-4 text-zinc-400 flex-shrink-0 mt-0.5"></i><span>Goal 2 — e.g., "Checkout abandonment rate drops below 15%"</span></li>
+            <li class="flex items-start gap-2 p-3 rounded-lg bg-white border border-zinc-200"><i data-lucide="check" class="w-4 h-4 text-zinc-400 flex-shrink-0 mt-0.5"></i><span>Goal 3 — ...</span></li>
+          </ul>
+        </div>
+        <div class="grid gap-4 sm:grid-cols-2 text-xs">
+          <div class="p-4 rounded-xl bg-white border border-zinc-200 space-y-2 shadow-sm">
+            <h3 class="font-bold text-zinc-900 flex items-center gap-1.5"><i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-emerald-600"></i>In Scope</h3>
+            <ul class="space-y-1.5 text-zinc-650">
+              <li class="flex items-center gap-2"><div class="flex items-center justify-center w-4 h-4 rounded bg-emerald-50 text-emerald-700 border border-emerald-100 flex-shrink-0"><i data-lucide="check" class="w-3 h-3"></i></div>Scope item 1</li>
+              <li class="flex items-center gap-2"><div class="flex items-center justify-center w-4 h-4 rounded bg-emerald-50 text-emerald-700 border border-emerald-100 flex-shrink-0"><i data-lucide="check" class="w-3 h-3"></i></div>Scope item 2</li>
+              <li class="flex items-center gap-2"><div class="flex items-center justify-center w-4 h-4 rounded bg-emerald-50 text-emerald-700 border border-emerald-100 flex-shrink-0"><i data-lucide="check" class="w-3 h-3"></i></div>Scope item 3</li>
+            </ul>
+          </div>
+          <div class="p-4 rounded-xl bg-white border border-zinc-200 space-y-2 shadow-sm">
+            <h3 class="font-bold text-zinc-900 flex items-center gap-1.5"><i data-lucide="ban" class="w-3.5 h-3.5 text-rose-600"></i>Out of Scope</h3>
+            <ul class="space-y-1.5 text-zinc-500">
+              <li class="flex items-center gap-2"><div class="flex items-center justify-center w-4 h-4 rounded bg-rose-50 text-rose-600 border border-rose-100 flex-shrink-0"><i data-lucide="x" class="w-3 h-3"></i></div>Out of scope item 1</li>
+              <li class="flex items-center gap-2"><div class="flex items-center justify-center w-4 h-4 rounded bg-rose-50 text-rose-600 border border-rose-100 flex-shrink-0"><i data-lucide="x" class="w-3 h-3"></i></div>Out of scope item 2</li>
+            </ul>
+          </div>
+        </div>
+        <div class="space-y-2">
+          <h3 class="text-xs font-bold text-zinc-900 flex items-center gap-1.5"><span class="w-1 h-3 rounded bg-indigo-600"></span>Traceability</h3>
+          <div class="overflow-hidden border border-zinc-200 rounded-lg bg-white text-xs">
+            <table class="w-full border-collapse">
+              <thead><tr class="bg-zinc-50 border-b border-zinc-200 text-zinc-650 text-[10px] font-bold uppercase tracking-wider"><th class="px-4 py-2 text-left">Spec Section</th><th class="px-4 py-2 text-left">PRD Feature</th><th class="px-4 py-2 text-left">User Stories</th></tr></thead>
+              <tbody class="divide-y divide-zinc-200 text-zinc-650 font-light">
+                <tr class="hover:bg-zinc-50/50"><td class="px-4 py-2.5 font-semibold text-zinc-800">2. User Flows</td><td class="px-4 py-2.5">Section X.Y</td><td class="px-4 py-2.5"><code class="font-mono text-[10px] text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-100">US-001</code>, <code class="font-mono text-[10px] text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-100">US-002</code></td></tr>
+                <tr class="hover:bg-zinc-50/50"><td class="px-4 py-2.5 font-semibold text-zinc-800">3. Screen: Dashboard</td><td class="px-4 py-2.5">Section X.Y</td><td class="px-4 py-2.5"><code class="font-mono text-[10px] text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-100">US-003</code>, <code class="font-mono text-[10px] text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-100">US-004</code></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="flex gap-3 p-3.5 rounded-lg bg-violet-50 border border-violet-100 text-xs">
+          <div class="flex items-center justify-center w-7 h-7 rounded bg-violet-100 text-violet-700 border border-violet-200 flex-shrink-0"><i data-lucide="bot" class="w-4 h-4"></i></div>
+          <div class="space-y-0.5 flex-1">
+            <span class="text-[10px] font-bold text-violet-850 tracking-wide uppercase">ML Integration <span class="font-normal italic">(if applicable)</span></span>
+            <p class="text-zinc-500 leading-relaxed font-light">{Specify ML output appearance, confidence representation, and service failure fallback.}</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 2: User Flows -->
+      <section class="scroll-mt-20 space-y-6" id="s2">
+        <div class="flex items-center gap-2.5 pb-2 border-b border-zinc-200"><div class="flex items-center justify-center w-6 h-6 rounded bg-indigo-50 text-indigo-700 font-bold text-xs border border-indigo-100 shadow-sm">2</div><h2 class="text-lg font-bold text-zinc-955">User Flows</h2></div>
+        <div class="space-y-2">
+          <h3 class="text-xs font-bold text-zinc-900 flex items-center gap-1.5"><span class="w-1 h-3 rounded bg-indigo-600"></span>Primary Flow — Happy Path</h3>
+          <div class="flex flex-col items-center justify-center p-6 rounded-lg bg-white border border-dashed border-zinc-300 text-center gap-2">
+            <div class="w-8 h-8 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-700 border border-indigo-100"><i data-lucide="git-commit" class="w-4 h-4"></i></div>
+            <code class="font-mono text-[10px] text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded border border-indigo-100">flowchart TD: [Screen A] → [Screen B] → [Screen C]</code>
+            <p class="text-[10px] text-zinc-450 italic">Paste Mermaid diagram code here, or embed as rendered images.</p>
+          </div>
+        </div>
+        <div class="grid gap-4 sm:grid-cols-3 text-xs">
+          <div class="p-4 rounded-xl bg-white border border-zinc-200 space-y-2 flex flex-col justify-between shadow-sm">
+            <div class="space-y-1">
+              <span class="text-[9px] font-bold text-indigo-700 bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-100 uppercase tracking-wider block w-max">Alternative Flow</span>
+              <h4 class="font-bold text-zinc-900">{Flow 2A — Name}</h4>
+              <p class="text-zinc-500 leading-relaxed font-light">{Describe the flow briefly. Add Mermaid image below.}</p>
+            </div>
+            <div class="p-2 rounded bg-zinc-50 border border-zinc-200 text-center text-[10px] text-zinc-450 font-mono italic">Mermaid placeholder</div>
+          </div>
+          <div class="p-4 rounded-xl bg-white border border-zinc-200 space-y-2 flex flex-col justify-between shadow-sm">
+            <div class="space-y-1">
+              <span class="text-[9px] font-bold text-rose-700 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-100 uppercase tracking-wider block w-max">Error Flow</span>
+              <h4 class="font-bold text-zinc-900">{Flow 3A — Error Name}</h4>
+              <p class="text-zinc-500 leading-relaxed font-light">{What happens. How does the user recover? Every error flow must show a recovery path.}</p>
+            </div>
+            <div class="p-2 rounded bg-zinc-50 border border-zinc-200 text-center text-[10px] text-zinc-450 font-mono italic">Mermaid placeholder</div>
+          </div>
+          <div class="p-4 rounded-xl bg-white border border-zinc-200 space-y-2 flex flex-col justify-between shadow-sm">
+            <div class="space-y-1">
+              <span class="text-[9px] font-bold text-violet-700 bg-violet-50 px-1.5 py-0.5 rounded border border-violet-100 uppercase tracking-wider block w-max">ML-Specific Flow</span>
+              <h4 class="font-bold text-zinc-900">Flow 4A — Inference / Uncertainty</h4>
+              <p class="text-zinc-500 leading-relaxed font-light">{Describe ML inference flow, confidence thresholds, and how uncertainty is surfaced to the user.}</p>
+            </div>
+            <div class="p-2 rounded bg-zinc-50 border border-zinc-200 text-center text-[10px] text-zinc-450 font-mono italic">ML flow placeholder</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 3: Screen-by-Screen Specifications -->
+      <section class="scroll-mt-20 space-y-6" id="s3">
+        <div class="flex items-center gap-2.5 pb-2 border-b border-zinc-200"><div class="flex items-center justify-center w-6 h-6 rounded bg-indigo-50 text-indigo-700 font-bold text-xs border border-indigo-100 shadow-sm">3</div><h2 class="text-lg font-bold text-zinc-955">Screen Specs</h2></div>
+        <div class="p-5 rounded-xl bg-white border border-zinc-200 space-y-6 shadow-sm">
+          <div class="flex items-center justify-between pb-3 border-b border-zinc-200">
+            <div>
+              <span class="text-[9px] text-zinc-450 uppercase tracking-wider block">Specs</span>
+              <h3 class="text-sm font-bold text-zinc-900">3.1 Screen: {Screen Name}</h3>
+              <span class="text-[10px] text-zinc-550 block mt-1.5 font-light">Associated User Stories: <code class="font-mono text-[9px] text-indigo-650 bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-100/70">{US-XXX, US-YYY}</code></span>
+            </div>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-750 border border-emerald-200">Happy Path</span>
+          </div>
+          <div class="space-y-1"><h4 class="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Purpose</h4><p class="text-xs text-zinc-500 leading-relaxed font-light">{What is the user trying to accomplish on this screen?}</p></div>
+          <div class="space-y-2">
+            <h4 class="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Content</h4>
+            <div class="overflow-hidden border border-zinc-200 rounded-lg bg-white text-xs">
+              <table class="w-full border-collapse">
+                <thead><tr class="bg-zinc-50 border-b border-zinc-200 text-zinc-650 text-[10px] uppercase font-bold"><th class="px-4 py-1.5 text-left">Element</th><th class="px-4 py-1.5 text-left">Type</th><th class="px-4 py-1.5 text-left">Content / Source</th><th class="px-4 py-1.5 text-left">Notes</th></tr></thead>
+                <tbody class="divide-y divide-zinc-200 text-zinc-650 font-light">
+                  <tr><td class="px-4 py-2 font-semibold text-zinc-800">Header</td><td class="px-4 py-2">Text</td><td class="px-4 py-2">"Create New Project"</td><td class="px-4 py-2 text-[10px] text-zinc-500">H1, page title</td></tr>
+                  <tr><td class="px-4 py-2 font-semibold text-zinc-800">Name Input</td><td class="px-4 py-2">Text field</td><td class="px-4 py-2">User input</td><td class="px-4 py-2 text-[10px] text-zinc-500">Required, max 100 chars</td></tr>
+                  <tr><td class="px-4 py-2 font-semibold text-zinc-800">Submit Button</td><td class="px-4 py-2">Button</td><td class="px-4 py-2">"Create Project"</td><td class="px-4 py-2 text-[10px] text-zinc-500">Primary action</td></tr>
+                  <tr><td class="px-4 py-2 font-semibold text-zinc-800">Cancel Link</td><td class="px-4 py-2">Link</td><td class="px-4 py-2">"Cancel"</td><td class="px-4 py-2 text-[10px] text-zinc-500">Returns to dashboard</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="space-y-2">
+            <h4 class="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Layout Blueprint (Wireframe)</h4>
+            <pre class="bg-zinc-50 border border-zinc-200 p-4 rounded-lg font-mono text-[10px] leading-relaxed text-zinc-600 overflow-x-auto select-all">+------------------------------------------+
+|  Header: "Create New Project"            |
++------------------------------------------+
+|                                          |
+|  Project Name *  [________________]      |
+|  (Error msg below field)                 |
+|                                          |
+|  Description     [________________]      |
+|                  [________________]      |
+|                                          |
+|  [Create Project]      Cancel            |
++------------------------------------------+</pre>
+          </div>
+          <div class="space-y-2">
+            <h4 class="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">States</h4>
+            <div class="grid gap-2 sm:grid-cols-2 md:grid-cols-4 text-xs font-light text-zinc-500">
+              <div class="p-3 rounded-lg bg-zinc-50 border border-zinc-200 border-l-2 border-l-zinc-500"><b class="text-[9px] font-bold text-zinc-600 uppercase tracking-wider block mb-1">Default</b>Form is empty; submit active. No validations.</div>
+              <div class="p-3 rounded-lg bg-zinc-50 border border-zinc-200 border-l-2 border-l-indigo-500"><b class="text-[9px] font-bold text-indigo-700 uppercase tracking-wider block mb-1">Loading</b>Trigger: submit. Button shows spinner, fields locked. (10s max)</div>
+              <div class="p-3 rounded-lg bg-zinc-50 border border-zinc-200 border-l-2 border-l-emerald-500"><b class="text-[9px] font-bold text-emerald-700 uppercase tracking-wider block mb-1">Success</b>API 201. Toast: "Project created". Auto-redirect in 2s.</div>
+              <div class="p-3 rounded-lg bg-zinc-50 border border-zinc-200 border-l-2 border-l-rose-500"><b class="text-[9px] font-bold text-rose-600 uppercase tracking-wider block mb-1">Validation Error</b>Empty required field. Red border, inline text. Focus shift.</div>
+              <div class="p-3 rounded-lg bg-zinc-50 border border-zinc-200 border-l-2 border-l-rose-600"><b class="text-[9px] font-bold text-rose-700 uppercase tracking-wider block mb-1">Server Error</b>API 5xx. Red banner at top, forms keep values. "Retry" option.</div>
+              <div class="p-3 rounded-lg bg-zinc-50 border border-zinc-200 border-l-2 border-l-amber-500"><b class="text-[9px] font-bold text-amber-700 uppercase tracking-wider block mb-1">Empty State</b>N/A for creation forms — add note if applicable.</div>
+              <div class="p-3 rounded-lg bg-zinc-50 border border-zinc-200 border-l-2 border-l-violet-500 col-span-1 sm:col-span-2"><b class="text-[9px] font-bold text-violet-700 uppercase tracking-wider block mb-1">ML Inference State</b>Loading: skeleton while processing. Show results + confidence. Fail: fallbacks.</div>
+            </div>
+          </div>
+          <div class="grid gap-4 sm:grid-cols-2 text-xs">
+            <div class="space-y-1.5">
+              <h4 class="text-[10px] font-bold text-zinc-550 uppercase tracking-wider">Entry Points</h4>
+              <div class="overflow-hidden border border-zinc-200 rounded-lg bg-white"><table class="w-full text-left border-collapse"><thead><tr class="bg-zinc-50 border-b border-zinc-200 text-zinc-650 text-[9px] uppercase font-bold"><th class="px-3 py-1.5">From</th><th class="px-3 py-1.5">Trigger</th><th class="px-3 py-1.5">Precondition</th></tr></thead><tbody class="divide-y divide-zinc-200 text-zinc-500"><tr><td class="px-3 py-1.5 font-semibold text-zinc-800">Dashboard</td><td class="px-3 py-1.5">Click "New Project"</td><td class="px-3 py-1.5">Auth</td></tr><tr><td class="px-3 py-1.5 font-semibold text-zinc-800">Direct URL</td><td class="px-3 py-1.5"><code class="text-indigo-600 text-[10px]">/projects/new</code></td><td class="px-3 py-1.5">Auth</td></tr></tbody></table></div>
+            </div>
+            <div class="space-y-1.5">
+              <h4 class="text-[10px] font-bold text-zinc-555 uppercase tracking-wider">Exit Points</h4>
+              <div class="overflow-hidden border border-zinc-200 rounded-lg bg-white"><table class="w-full text-left border-collapse"><thead><tr class="bg-zinc-50 border-b border-zinc-200 text-zinc-650 text-[9px] uppercase font-bold"><th class="px-3 py-1.5">To</th><th class="px-3 py-1.5">Trigger</th><th class="px-3 py-1.5">Condition</th></tr></thead><tbody class="divide-y divide-zinc-200 text-zinc-500"><tr><td class="px-3 py-1.5 font-semibold text-zinc-800">Project Detail</td><td class="px-3 py-1.5">Auto-redirect</td><td class="px-3 py-1.5 text-emerald-700 font-bold">Success</td></tr><tr><td class="px-3 py-1.5 font-semibold text-zinc-800">Dashboard</td><td class="px-3 py-1.5">Click "Cancel"</td><td class="px-3 py-1.5">Any time</td></tr><tr><td class="px-3 py-1.5 font-semibold text-zinc-800">Same screen</td><td class="px-3 py-1.5">Fail Validation</td><td class="px-3 py-1.5">Keep state</td></tr></tbody></table></div>
+            </div>
+          </div>
+          <div class="flex gap-3 p-3.5 rounded-lg bg-indigo-50 border border-indigo-100 text-[11px] leading-relaxed">
+            <div class="flex items-center justify-center w-7 h-7 rounded bg-indigo-100 text-indigo-700 border border-indigo-200 flex-shrink-0"><i data-lucide="accessibility" class="w-4 h-4"></i></div>
+            <div class="space-y-0.5">
+              <span class="text-[10px] font-bold text-indigo-700 uppercase">Accessibility Spec</span>
+              <p class="text-zinc-500 font-light">Tab order: Name → Description → Submit → Cancel &nbsp;·&nbsp; Standard input labels &nbsp;·&nbsp; Shifting focus to errors &nbsp;·&nbsp; WCAG AA contrast compliance &nbsp;·&nbsp; Animation responsive to <code>prefers-reduced-motion</code></p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 4: Interaction Details -->
+      <section class="scroll-mt-20 space-y-6" id="s4">
+        <div class="flex items-center gap-2.5 pb-2 border-b border-zinc-200"><div class="flex items-center justify-center w-6 h-6 rounded bg-indigo-50 text-indigo-700 font-bold text-xs border border-indigo-100 shadow-sm">4</div><h2 class="text-lg font-bold text-zinc-955">Interaction Details</h2></div>
+        <div class="space-y-2">
+          <h3 class="text-xs font-bold text-zinc-900 flex items-center gap-1.5"><span class="w-1 h-3 rounded bg-indigo-600"></span>Global Interactions</h3>
+          <div class="overflow-hidden border border-zinc-200 rounded-lg bg-white text-xs">
+            <table class="w-full border-collapse">
+              <thead><tr class="bg-zinc-50 border-b border-zinc-200 text-zinc-650 text-[9px] uppercase font-bold"><th class="px-4 py-2 text-left">Interaction</th><th class="px-4 py-2 text-left">Trigger</th><th class="px-4 py-2 text-left">Action</th><th class="px-4 py-2 text-left">Feedback</th><th class="px-4 py-2 text-left">Error Handling</th></tr></thead>
+              <tbody class="divide-y divide-zinc-200 text-zinc-600 font-light">
+                <tr><td class="px-4 py-2 font-semibold text-zinc-800">Pull to refresh</td><td class="px-4 py-2 text-zinc-500">Swipe down (mobile)</td><td class="px-4 py-2">Reload data</td><td class="px-4 py-2">Spinner + update</td><td class="px-4 py-2 text-zinc-450 text-[10px]">Offline: cache + timestamp</td></tr>
+                <tr><td class="px-4 py-2 font-semibold text-zinc-800">Network offline</td><td class="px-4 py-2 text-zinc-500">Connection lost</td><td class="px-4 py-2">Show banner</td><td class="px-4 py-2">Persistent top banner</td><td class="px-4 py-2 text-zinc-450 text-[10px]">Auto-hide on reconnect</td></tr>
+                <tr><td class="px-4 py-2 font-semibold text-zinc-800">Session expiry</td><td class="px-4 py-2 text-zinc-500">Token expires</td><td class="px-4 py-2">Redirect to login</td><td class="px-4 py-2">Modal alert box</td><td class="px-4 py-2 text-zinc-450 text-[10px]">Store state in localStorage</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="p-4 rounded-xl bg-white border border-zinc-200 space-y-3 text-xs shadow-sm">
+          <h3 class="font-bold text-zinc-900 flex items-center gap-1.5"><span class="w-1 h-3 rounded bg-indigo-600"></span>Component Spec: {Component Name}</h3>
+          <div class="grid gap-4 sm:grid-cols-2">
+            <div class="p-3.5 rounded-lg bg-zinc-50 border border-zinc-200 space-y-2">
+              <span class="text-[9px] font-bold text-indigo-700 uppercase tracking-widest block border-b border-zinc-200 pb-1">Behavior</span>
+              <ul class="space-y-1 text-zinc-655">
+                <li class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-600"></i>Trigger: {what starts it}</li>
+                <li class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-600"></i>Action: {what happens}</li>
+                <li class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-600"></i>Animation: {duration, easing}</li>
+              </ul>
+            </div>
+            <div class="p-3.5 rounded-lg bg-zinc-50 border border-zinc-200 space-y-2">
+              <span class="text-[9px] font-bold text-indigo-700 uppercase tracking-widest block border-b border-zinc-200 pb-1">States</span>
+              <ul class="grid grid-cols-2 gap-1.5 text-zinc-500">
+                <li class="flex items-center gap-1.5"><i data-lucide="square" class="w-3 h-3 text-zinc-400"></i>Default</li>
+                <li class="flex items-center gap-1.5"><i data-lucide="square" class="w-3 h-3 text-zinc-400"></i>Hover (desktop)</li>
+                <li class="flex items-center gap-1.5"><i data-lucide="square" class="w-3 h-3 text-zinc-400"></i>Active/Pressed</li>
+                <li class="flex items-center gap-1.5"><i data-lucide="square" class="w-3 h-3 text-zinc-400"></i>Disabled</li>
+                <li class="flex items-center gap-1.5"><i data-lucide="square" class="w-3 h-3 text-zinc-400"></i>Loading</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="space-y-3">
+          <h3 class="text-xs font-bold text-zinc-900 flex items-center gap-1.5"><span class="w-1 h-3 rounded bg-indigo-600"></span>AI / ML Interaction Patterns <span class="text-xs font-normal text-zinc-550 italic">(if applicable)</span></h3>
+          <div class="grid gap-4 sm:grid-cols-2 text-xs">
+            <div class="p-3.5 rounded-xl bg-white border border-zinc-200 border-l-2 border-l-violet-500 space-y-1 shadow-sm"><span class="font-bold text-violet-750 block mb-1">Streaming Responses</span>Show loading indicators / typing animations or progressive reveal. Enable user abort.</div>
+            <div class="p-3.5 rounded-xl bg-white border border-zinc-200 border-l-2 border-l-violet-500 space-y-1 shadow-sm"><span class="font-bold text-violet-755 block mb-1">Confidence Display</span>&gt;80%: display natively · 50-80%: add "suggested" tag · &lt;50%: ask explicit confirmation.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 5: Visual Direction & Design System -->
+      <section class="scroll-mt-20 space-y-6" id="s5">
+        <div class="flex items-center gap-2.5 pb-2 border-b border-zinc-200"><div class="flex items-center justify-center w-6 h-6 rounded bg-indigo-50 text-indigo-700 font-bold text-xs border border-indigo-100 shadow-sm">5</div><h2 class="text-lg font-bold text-zinc-955">Design System</h2></div>
+        <div class="space-y-2">
+          <h3 class="text-xs font-bold text-zinc-900 flex items-center gap-1.5"><span class="w-1 h-3 rounded bg-indigo-600"></span>Typography</h3>
+          <div class="overflow-hidden border border-zinc-200 rounded-lg bg-white text-xs"><table class="w-full border-collapse"><thead><tr class="bg-zinc-50 border-b border-zinc-200 text-zinc-650 text-[9px] uppercase font-bold"><th class="px-4 py-1.5 text-left">Level</th><th class="px-4 py-1.5 text-left">Font</th><th class="px-4 py-1.5 text-left">Size</th><th class="px-4 py-1.5 text-left">Weight</th><th class="px-4 py-1.5 text-left">Line Height</th><th class="px-4 py-1.5 text-left">Usage</th></tr></thead><tbody class="divide-y divide-zinc-200 text-zinc-650 font-light"><tr><td class="px-4 py-1.5 font-bold text-zinc-900">H1</td><td class="px-4 py-1.5">Inter</td><td class="px-4 py-1.5">24px</td><td class="px-4 py-1.5">600</td><td class="px-4 py-1.5 text-zinc-500">1.3</td><td class="px-4 py-1.5 text-zinc-500 font-light">Page titles</td></tr><tr><td class="px-4 py-1.5 font-bold text-zinc-900">H2</td><td class="px-4 py-1.5">Inter</td><td class="px-4 py-1.5">18px</td><td class="px-4 py-1.5">600</td><td class="px-4 py-1.5 text-zinc-500">1.4</td><td class="px-4 py-1.5 text-zinc-500 font-light">Section headers</td></tr><tr><td class="px-4 py-1.5 font-bold text-zinc-900">Body</td><td class="px-4 py-1.5">Inter</td><td class="px-4 py-1.5">14px</td><td class="px-4 py-1.5">400</td><td class="px-4 py-1.5 text-zinc-500">1.5</td><td class="px-4 py-1.5 text-zinc-500 font-light">General specs</td></tr><tr><td class="px-4 py-1.5 font-bold text-zinc-900">Caption</td><td class="px-4 py-1.5">Inter</td><td class="px-4 py-1.5">12px</td><td class="px-4 py-1.5">400</td><td class="px-4 py-1.5 text-zinc-500">1.4</td><td class="px-4 py-1.5 text-zinc-500 font-light">Helpers, tags</td></tr></tbody></table></div>
+        </div>
+        <div class="space-y-2">
+          <h3 class="text-xs font-bold text-zinc-900 flex items-center gap-1.5"><span class="w-1 h-3 rounded bg-indigo-600"></span>Color Palette</h3>
+          <div class="grid gap-2 sm:grid-cols-3 text-xs">
+            <div class="flex items-center gap-3 p-2.5 rounded-lg bg-white border border-zinc-200 shadow-sm"><div class="w-8 h-8 rounded border border-black/5 bg-[#4F46E5] flex-shrink-0"></div><div><code class="text-indigo-755 font-mono text-[10px]">--color-primary</code><p class="text-zinc-400 block text-[9px] mb-0.5">#4F46E5</p><p class="text-zinc-500 text-[10px] truncate">Primary indigo actions</p></div></div>
+            <div class="flex items-center gap-3 p-2.5 rounded-lg bg-white border border-zinc-200 shadow-sm"><div class="w-8 h-8 rounded border border-black/5 bg-[#10B981] flex-shrink-0"></div><div><code class="text-indigo-755 font-mono text-[10px]">--color-success</code><p class="text-zinc-400 block text-[9px] mb-0.5">#10B981</p><p class="text-zinc-500 text-[10px] truncate">Success checks & badges</p></div></div>
+            <div class="flex items-center gap-3 p-2.5 rounded-lg bg-white border border-zinc-200 shadow-sm"><div class="w-8 h-8 rounded border border-black/5 bg-[#EF4444] flex-shrink-0"></div><div><code class="text-indigo-755 font-mono text-[10px]">--color-error</code><p class="text-zinc-400 block text-[9px] mb-0.5">#EF4444</p><p class="text-zinc-500 text-[10px] truncate">Validation error alerts</p></div></div>
+            <div class="flex items-center gap-3 p-2.5 rounded-lg bg-white border border-zinc-200 shadow-sm"><div class="w-8 h-8 rounded border border-black/5 bg-[#F59E0B] flex-shrink-0"></div><div><code class="text-indigo-755 font-mono text-[10px]">--color-warning</code><p class="text-zinc-400 block text-[9px] mb-0.5">#F59E0B</p><p class="text-zinc-500 text-[10px] truncate">Warning status details</p></div></div>
+            <div class="flex items-center gap-3 p-2.5 rounded-lg bg-white border border-zinc-200 shadow-sm"><div class="w-8 h-8 rounded border border-zinc-200 bg-[#09090B] flex-shrink-0"></div><div><code class="text-indigo-755 font-mono text-[10px]">--color-text-primary</code><p class="text-zinc-450 block text-[9px] mb-0.5">#09090B</p><p class="text-zinc-500 text-[10px] truncate">Primary dark heading text</p></div></div>
+            <div class="flex items-center gap-3 p-2.5 rounded-lg bg-white border border-zinc-200 shadow-sm"><div class="w-8 h-8 rounded border border-zinc-200 bg-[#FFFFFF] flex-shrink-0"></div><div><code class="text-indigo-755 font-mono text-[10px]">--color-surface</code><p class="text-zinc-450 block text-[9px] mb-0.5">#FFFFFF</p><p class="text-zinc-500 text-[10px] truncate">Elevated card panels</p></div></div>
+          </div>
+        </div>
+        <div class="grid gap-4 sm:grid-cols-2 text-xs">
+          <div class="space-y-1.5">
+            <h4 class="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">Spacing Scale</h4>
+            <div class="overflow-hidden border border-zinc-200 rounded-lg bg-white"><table class="w-full text-left border-collapse"><thead><tr class="bg-zinc-50 border-b border-zinc-200 text-zinc-650 text-[9px] uppercase font-bold"><th class="px-3 py-1">Token</th><th class="px-3 py-1">Value</th><th class="px-3 py-1">Usage</th></tr></thead><tbody class="divide-y divide-zinc-200 text-zinc-500"><tr><td class="px-3 py-1 font-mono text-indigo-600">--space-xs</td><td class="px-3 py-1 text-zinc-800">4px</td><td class="px-3 py-1">Tight layout margins</td></tr><tr><td class="px-3 py-1 font-mono text-indigo-600">--space-sm</td><td class="px-3 py-1 text-zinc-800">8px</td><td class="px-3 py-1">Standard gaps</td></tr><tr><td class="px-3 py-1 font-mono text-indigo-600">--space-md</td><td class="px-3 py-1 text-zinc-800">16px</td><td class="px-3 py-1">General elements margins</td></tr><tr><td class="px-3 py-1 font-mono text-indigo-600">--space-lg</td><td class="px-3 py-1 text-zinc-800">24px</td><td class="px-3 py-1">Standard section margins</td></tr><tr><td class="px-3 py-1 font-mono text-indigo-600">--space-xl</td><td class="px-3 py-1 text-zinc-800">32px</td><td class="px-3 py-1">Page block divisions</td></tr></tbody></table></div>
+          </div>
+          <div class="space-y-1.5">
+            <h4 class="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">Component States</h4>
+            <div class="overflow-hidden border border-zinc-200 rounded-lg bg-white"><table class="w-full text-left border-collapse"><thead><tr class="bg-zinc-50 border-b border-zinc-200 text-zinc-650 text-[9px] uppercase font-bold"><th class="px-3 py-1">State</th><th class="px-3 py-1">Treatment</th><th class="px-3 py-1">Interaction</th></tr></thead><tbody class="divide-y divide-zinc-200 text-zinc-550 font-light"><tr><td class="px-3 py-1 font-semibold text-zinc-800">Default</td><td class="px-3 py-1">Token values</td><td class="px-3 py-1">Pointer cursor</td></tr><tr><td class="px-3 py-1 font-semibold text-zinc-800">Hover</td><td class="px-3 py-1">10% Darker</td><td class="px-3 py-1">Pointer cursor</td></tr><tr><td class="px-3 py-1 font-semibold text-zinc-800">Active</td><td class="px-3 py-1">20% Darker + inset shadow</td><td class="px-3 py-1">Pointer cursor</td></tr><tr><td class="px-3 py-1 font-semibold text-zinc-800">Focus</td><td class="px-3 py-1">2px outline ring</td><td class="px-3 py-1">Keyboard support</td></tr><tr><td class="px-3 py-1 font-semibold text-zinc-800">Disabled</td><td class="px-3 py-1">50% opacity block</td><td class="px-3 py-1">Not-allowed</td></tr><tr><td class="px-3 py-1 font-semibold text-zinc-800">Loading</td><td class="px-3 py-1">Skeleton animation list</td><td class="px-3 py-1">Locked</td></tr></tbody></table></div>
+          </div>
+        </div>
+        <div class="grid gap-4 sm:grid-cols-2 items-start text-xs">
+          <div class="space-y-1.5">
+            <h4 class="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">Responsive Specs</h4>
+            <div class="overflow-hidden border border-zinc-200 rounded-lg bg-white"><table class="w-full text-left border-collapse"><thead><tr class="bg-zinc-50 border-b border-zinc-200 text-zinc-650 text-[9px] uppercase font-bold"><th class="px-3 py-1">Breakpoint</th><th class="px-3 py-1">Width</th><th class="px-3 py-1">Key Changes</th></tr></thead><tbody class="divide-y divide-zinc-200 text-zinc-555 font-light"><tr><td class="px-3 py-1 font-medium text-zinc-800">Mobile</td><td class="px-3 py-1">&lt; 640px</td><td class="px-3 py-1">Single col layout, full CTA buttons, sheets</td></tr><tr><td class="px-3 py-1 font-medium text-zinc-800">Tablet</td><td class="px-3 py-1">640–1024px</td><td class="px-3 py-1">Compact rows, sidebar nav hidden</td></tr><tr><td class="px-3 py-1 font-medium text-zinc-800">Desktop</td><td class="px-3 py-1">&gt; 1024px</td><td class="px-3 py-1">Full 3 columns layout, hover triggers enabled</td></tr></tbody></table></div>
+          </div>
+          <div class="space-y-1.5">
+            <h4 class="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">A11y Tokens</h4>
+            <div class="flex gap-3 p-3.5 rounded-lg bg-white border border-zinc-200 text-[11px] leading-relaxed shadow-sm">
+              <div class="flex items-center justify-center w-7 h-7 rounded bg-indigo-50 text-indigo-705 border border-indigo-100 flex-shrink-0"><i data-lucide="shield" class="w-4 h-4"></i></div>
+              <div class="space-y-0.5">
+                <span class="font-semibold text-indigo-755 uppercase">Accessibility Tokens</span>
+                <p class="text-zinc-500 font-light"><code>--focus-ring-width: 2px</code> &nbsp;·&nbsp; <code>--focus-ring-color: #3B82F6</code> &nbsp;·&nbsp; <code>--min-touch-target: 44px</code> &nbsp;·&nbsp; Ignore animations on <code>prefers-reduced-motion</code></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 6: Edge Cases & Error Handling -->
+      <section class="scroll-mt-20 space-y-6" id="s6">
+        <div class="flex items-center gap-2.5 pb-2 border-b border-zinc-200"><div class="flex items-center justify-center w-6 h-6 rounded bg-indigo-50 text-indigo-700 font-bold text-xs border border-indigo-100 shadow-sm">6</div><h2 class="text-lg font-bold text-zinc-955">Edge Cases</h2></div>
+        <div class="space-y-2">
+          <h3 class="text-xs font-bold text-zinc-900 flex items-center gap-1.5"><span class="w-1 h-3 rounded bg-indigo-600"></span>System-Level Edge Cases</h3>
+          <div class="overflow-hidden border border-zinc-200 rounded-lg bg-white text-xs">
+            <table class="w-full border-collapse">
+              <thead><tr class="bg-zinc-50 border-b border-zinc-200 text-zinc-650 text-[9px] uppercase font-bold"><th class="px-4 py-2 text-left">Scenario</th><th class="px-4 py-2 text-left">Expected Behavior</th><th class="px-4 py-2 text-left w-24">Story Ref</th></tr></thead>
+              <tbody class="divide-y divide-zinc-200 text-zinc-655 font-light">
+                <tr class="hover:bg-zinc-50/50"><td class="px-4 py-2 font-semibold text-zinc-800">Connection lost in submission</td><td class="px-4 py-2 text-zinc-550">Save state to localStorage. Trigger retry alert on reconnection</td><td class="px-4 py-2"><code class="text-indigo-650 font-mono">US-XXX</code></td></tr>
+                <tr class="hover:bg-zinc-50/50"><td class="px-4 py-2 font-semibold text-zinc-800">Browser back during async op</td><td class="px-4 py-2 text-zinc-550">Show confirmation prompt overlay: "Leave without saving?"</td><td class="px-4 py-2"><code class="text-indigo-655 font-mono">US-XXX</code></td></tr>
+                <tr class="hover:bg-zinc-50/50"><td class="px-4 py-2 font-semibold text-zinc-800">10,000+ items in list</td><td class="px-4 py-2 text-zinc-550">Pagination (50 items/page) + search filtering + media lazy loading</td><td class="px-4 py-2"><code class="text-indigo-655 font-mono">US-XXX</code></td></tr>
+                <tr class="hover:bg-zinc-50/50"><td class="px-4 py-2 font-semibold text-zinc-800">Formatted text pasted into field</td><td class="px-4 py-2 text-zinc-550">Strip formatting styling silently. Keep raw text characters</td><td class="px-4 py-2"><code class="text-indigo-655 font-mono">US-XXX</code></td></tr>
+                <tr class="hover:bg-zinc-50/50"><td class="px-4 py-2 font-semibold text-zinc-800">File upload exceeds limit</td><td class="px-4 py-2 text-zinc-550">Reject immediately with toast banner: "Max file size is 50MB"</td><td class="px-4 py-2"><code class="text-indigo-655 font-mono">US-XXX</code></td></tr>
+                <tr class="hover:bg-zinc-50/50"><td class="px-4 py-2 font-semibold text-zinc-800">Double-click submit</td><td class="px-4 py-2 text-zinc-550">Disable submit button on click. Ignore subsequent submit events</td><td class="px-4 py-2"><code class="text-indigo-655 font-mono">US-XXX</code></td></tr>
+                <tr class="hover:bg-zinc-50/50"><td class="px-4 py-2 font-semibold text-zinc-800">Same page open in two tabs</td><td class="px-4 py-2 text-zinc-550">Sync changes in real-time or request refresh on tab active focus</td><td class="px-4 py-2"><code class="text-indigo-655 font-mono">US-XXX</code></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="space-y-2">
+          <h3 class="text-xs font-bold text-zinc-900 flex items-center gap-1.5"><span class="w-1 h-3 rounded bg-indigo-600"></span>Content-Specific Edge Cases</h3>
+          <div class="overflow-hidden border border-zinc-200 rounded-lg bg-white text-xs">
+            <table class="w-full border-collapse">
+              <thead><tr class="bg-zinc-50 border-b border-zinc-200 text-zinc-650 text-[9px] uppercase font-bold"><th class="px-4 py-2 text-left w-1/3">Scenario</th><th class="px-4 py-2 text-left">Expected Behavior</th></tr></thead>
+              <tbody class="divide-y divide-zinc-200 text-zinc-655 font-light">
+                <tr class="hover:bg-zinc-50/50"><td class="px-4 py-2 font-semibold text-zinc-800">Very long content values</td><td class="px-4 py-2 text-zinc-550">Truncate text safely with ellipsis; expose full value on hover tooltip</td></tr>
+                <tr class="hover:bg-zinc-50/50"><td class="px-4 py-2 font-semibold text-zinc-800">Zero state / Empty lists</td><td class="px-4 py-2 text-zinc-550">Show empty state illustration + clear "Get Started" primary action CTA</td></tr>
+                <tr class="hover:bg-zinc-50/50"><td class="px-4 py-2 font-semibold text-zinc-800">Single item in list</td><td class="px-4 py-2 text-zinc-550">Render normally, fix list count labels (avoid "1 items" grammar error)</td></tr>
+                <tr class="hover:bg-zinc-50/50"><td class="px-4 py-2 font-semibold text-zinc-800">Special character inputs</td><td class="px-4 py-2 text-zinc-550">Sanitize and render safely — cover tags: <code>&lt;&gt;"'&amp;</code> and emojis</td></tr>
+                <tr class="hover:bg-zinc-50/50"><td class="px-4 py-2 font-semibold text-zinc-800">RTL locale layouts</td><td class="px-4 py-2 text-zinc-550">Mirror entire layout elements visually by applying standard <code>dir="rtl"</code></td></tr>
+                <tr class="hover:bg-zinc-50/50"><td class="px-4 py-2 font-semibold text-zinc-800">High contrast OS mode</td><td class="px-4 py-2 text-zinc-550">Honor system configuration colors, don't override standard layout specs</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="space-y-2">
+          <h3 class="text-xs font-bold text-zinc-900 flex items-center gap-1.5"><span class="w-1 h-3 rounded bg-indigo-600"></span>AI / ML Edge Cases <span class="text-xs font-normal text-zinc-550 italic">(if applicable)</span></h3>
+          <div class="overflow-hidden border border-zinc-200 rounded-lg bg-white text-xs">
+            <table class="w-full border-collapse">
+              <thead><tr class="bg-zinc-50 border-b border-zinc-200 text-zinc-650 text-[9px] uppercase font-bold"><th class="px-4 py-2 text-left w-1/3">Scenario</th><th class="px-4 py-2 text-left">Expected Behavior</th></tr></thead>
+              <tbody class="divide-y divide-zinc-200 text-zinc-655 font-light">
+                <tr class="hover:bg-zinc-50/50"><td class="px-4 py-2 font-semibold text-zinc-800">No results returned</td><td class="px-4 py-2 text-zinc-550">Show empty state alert block: "No suggestions available"</td></tr>
+                <tr class="hover:bg-zinc-50/50"><td class="px-4 py-2 font-semibold text-zinc-800">Low confidence result</td><td class="px-4 py-2 text-zinc-550">Add warning overlay flags. Do not automatically insert suggestion values</td></tr>
+                <tr class="hover:bg-zinc-50/50"><td class="px-4 py-2 font-semibold text-zinc-800">Model query timeout (>10s)</td><td class="px-4 py-2 text-zinc-550">Expose fallback default recommendation or "Still thinking..." state with cancel</td></tr>
+                <tr class="hover:bg-zinc-50/50"><td class="px-4 py-2 font-semibold text-zinc-800">Offensive prompt outcome</td><td class="px-4 py-2 text-zinc-550">Trigger standard safety filters. Expose generic static layout fallbacks</td></tr>
+                <tr class="hover:bg-zinc-50/50"><td class="px-4 py-2 font-semibold text-zinc-800">Rapid consecutive queries</td><td class="px-4 py-2 text-zinc-550">Debounce active input actions. Queue background threads requests</td></tr>
+                <tr class="hover:bg-zinc-50/50"><td class="px-4 py-2 font-semibold text-zinc-800">Model version rolled back</td><td class="px-4 py-2 text-zinc-550">Retain user active session content. Prevent active document context loss</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 7: Open Questions & Decisions -->
+      <section class="scroll-mt-20 space-y-6" id="s7">
+        <div class="flex items-center gap-2.5 pb-2 border-b border-zinc-200"><div class="flex items-center justify-center w-6 h-6 rounded bg-indigo-50 text-indigo-700 font-bold text-xs border border-indigo-100 shadow-sm">7</div><h2 class="text-lg font-bold text-zinc-955">Open Questions</h2></div>
+        <div class="overflow-hidden border border-zinc-200 rounded-lg bg-white text-xs">
+          <table class="w-full border-collapse">
+            <thead><tr class="bg-zinc-50 border-b border-zinc-200 text-zinc-650 text-[9px] uppercase font-bold"><th class="px-4 py-2 text-left">Question</th><th class="px-4 py-2 text-left">Impact</th><th class="px-4 py-2 text-left">Owner</th><th class="px-4 py-2 text-left">Deadline</th><th class="px-4 py-2 text-left w-20">Status</th></tr></thead>
+            <tbody class="divide-y divide-zinc-200 text-zinc-650">
+              <tr class="hover:bg-zinc-50/50"><td class="px-4 py-2.5 font-semibold text-zinc-800">{Question 1}</td><td class="px-4 py-2.5 text-zinc-550">Blocks implementation</td><td class="px-4 py-2.5 text-zinc-800">@{role}</td><td class="px-4 py-2.5 text-zinc-500">{date}</td><td class="px-4 py-2.5"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">Open</span></td></tr>
+              <tr class="hover:bg-zinc-50/50"><td class="px-4 py-2.5 font-semibold text-zinc-800">{Question 2}</td><td class="px-4 py-2.5 text-zinc-550">Can defer</td><td class="px-4 py-2.5 text-zinc-800">@{role}</td><td class="px-4 py-2.5 text-zinc-500">{date}</td><td class="px-4 py-2.5"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-750 border border-emerald-200">Resolved</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="flex gap-3 p-3.5 rounded-lg bg-amber-50 border border-amber-100 text-xs">
+          <div class="flex items-center justify-center w-7 h-7 rounded bg-amber-100 text-amber-600 border border-amber-200 flex-shrink-0"><i data-lucide="alert-triangle" class="w-4 h-4"></i></div>
+          <div class="space-y-0.5">
+            <span class="text-[10px] font-bold text-amber-700 uppercase">Handoff Blockers</span>
+            <p class="text-zinc-500 leading-relaxed font-light">Any "Blocks implementation" open questions must be resolved before formal spec handoff is completed for <code>product-development</code> execution.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 8: Cross-References -->
+      <section class="scroll-mt-20 space-y-6" id="s8">
+        <div class="flex items-center gap-2.5 pb-2 border-b border-zinc-200"><div class="flex items-center justify-center w-6 h-6 rounded bg-indigo-50 text-indigo-700 font-bold text-xs border border-indigo-100 shadow-sm">8</div><h2 class="text-lg font-bold text-zinc-955">Cross-References</h2></div>
+        <div class="overflow-hidden border border-zinc-200 rounded-lg bg-white text-xs shadow-sm">
+          <table class="w-full border-collapse">
+            <thead><tr class="bg-zinc-50 border-b border-zinc-200 text-zinc-650 text-[9px] uppercase font-bold"><th class="px-4 py-2 text-left">Reference Link</th><th class="px-4 py-2 text-left">Document Name</th><th class="px-4 py-2 text-left">Target Section</th></tr></thead>
+            <tbody class="divide-y divide-zinc-200 text-zinc-655">
+              <tr class="hover:bg-zinc-50/50"><td class="px-4 py-2 font-bold text-zinc-800">Business requirements</td><td class="px-4 py-2 text-zinc-550"><code class="font-mono text-[10px] text-indigo-650 bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-100">artifacts/output/02-strategy/requirements.md</code></td><td class="px-4 py-2 text-zinc-550 font-light">§5 Feature Overview</td></tr>
+              <tr class="hover:bg-zinc-50/50"><td class="px-4 py-2 font-bold text-zinc-800">User stories</td><td class="px-4 py-2 text-zinc-550"><code class="font-mono text-[10px] text-indigo-650 bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-100">artifacts/output/02-strategy/user-stories.md</code></td><td class="px-4 py-2 text-zinc-550 font-light">All sections</td></tr>
+              <tr class="hover:bg-zinc-50/50"><td class="px-4 py-2 font-bold text-zinc-800">Architecture decisions</td><td class="px-4 py-2 text-zinc-550"><code class="font-mono text-[10px] text-indigo-650 bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-100">artifacts/output/03-architecture/</code></td><td class="px-4 py-2 text-zinc-550 font-light">Relevant ADRs</td></tr>
+              <tr class="hover:bg-zinc-50/50"><td class="px-4 py-2 font-bold text-zinc-800">Competitive positioning</td><td class="px-4 py-2 text-zinc-555"><code class="font-mono text-[10px] text-indigo-650 bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-100">artifacts/output/01-research/competitive-analysis.md</code></td><td class="px-4 py-2 text-zinc-550 font-light">§3 Feature Matrix</td></tr>
+              <tr class="hover:bg-zinc-50/50"><td class="px-4 py-2 font-bold text-zinc-800">User research</td><td class="px-4 py-2 text-zinc-555"><code class="font-mono text-[10px] text-indigo-650 bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-100">artifacts/output/01-research/user-personas.md</code></td><td class="px-4 py-2 text-zinc-550 font-light">User Personas</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    lucide.createIcons();
+    const sidebar = document.getElementById('sidebar'), mobileMenuBtn = document.getElementById('mobile-menu-btn');
+    const mobileMenuCloseBtn = document.getElementById('mobile-menu-close-btn'), overlay = document.getElementById('overlay');
+    function toggleSidebar() { sidebar.classList.toggle('-translate-x-full'); overlay.classList.toggle('hidden'); }
+    mobileMenuBtn?.addEventListener('click', toggleSidebar);
+    mobileMenuCloseBtn?.addEventListener('click', toggleSidebar);
+    overlay?.addEventListener('click', toggleSidebar);
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('click', () => { if (window.innerWidth < 1024) toggleSidebar(); });
+    });
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const activeId = entry.target.getAttribute('id');
+          document.querySelectorAll('.nav-link').forEach(link => {
+            if (link.getAttribute('href') === `#${activeId}`) {
+              link.classList.add('bg-zinc-100', 'text-indigo-600', 'border-l-indigo-600');
+              link.classList.remove('text-zinc-500', 'border-transparent');
+            } else {
+              link.classList.remove('bg-zinc-100', 'text-indigo-600', 'border-l-indigo-600');
+              link.classList.add('text-zinc-500', 'border-transparent');
+            }
+          });
+        }
+      });
+    }, { root: null, rootMargin: '-20% 0px -60% 0px', threshold: 0 });
+    document.querySelectorAll('section[id]').forEach(section => observer.observe(section));
+  </script>
+</body>
+</html>

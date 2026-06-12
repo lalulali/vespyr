@@ -83,7 +83,7 @@ Last session: {first 5 lines or "none"}
 
 ### Step 2 — Tier 2: Agent-specific context (~300 tokens)
 
-Load the agent's Tier 2 files from the profile table in `.opencode/scripts/memory_filter.js`. For each file:
+Load the agent's Tier 2 files from the profile table in `.agents/scripts/memory_filter.js`. For each file:
 1. Read the file (auto-create via `@writer` if missing)
 2. Extract sections NOT marked `[RESOLVED]`, `[ARCHIVED]`, or `[SUPERSEDED]`
 3. Truncate sections > 5 sentences to first 3 sentences
@@ -95,7 +95,7 @@ Load the agent's Tier 2 files from the profile table in `.opencode/scripts/memor
 
 Run via `@executor`:
 ```
-node .opencode/scripts/memory_filter.js --agent {agent-type} --task "{task-description}"
+node .agents/scripts/memory_filter.js --agent {agent-type} --task "{task-description}"
 ```
 
 Default max results varies by agent profile (review agents: 5, others: 10). Override with `--max N`.
@@ -138,12 +138,12 @@ When writing to a memory file, use the corresponding template for the entry stru
 
 | Memory file | Template | Purpose |
 |---|---|---|
-| `artifacts/memory/project-context.md` | `.opencode/templates/project-context-template.md` | Project basics, tech stack, phase — machine-readable header required |
-| `artifacts/memory/active-decisions.md` | `.opencode/templates/active-decisions-template.md` | Current decisions and rationale |
-| `artifacts/memory/blockers-and-risks.md` | `.opencode/templates/blockers-and-risks-template.md` | Active blockers and risks |
-| `artifacts/memory/lessons-learned.md` | `.opencode/templates/lessons-learned-template.md` | Insights from each phase |
-| `artifacts/memory/patterns-and-conventions.md` | `.opencode/templates/patterns-and-conventions-template.md` | Discovered patterns and conventions |
-| `artifacts/memory/agent-notes/<agent>.md` | `.opencode/templates/agent-notes-template.md` | Per-agent accumulated knowledge |
+| `artifacts/memory/project-context.md` | `.agents/templates/project-context-template.md` | Project basics, tech stack, phase — machine-readable header required |
+| `artifacts/memory/active-decisions.md` | `.agents/templates/active-decisions-template.md` | Current decisions and rationale |
+| `artifacts/memory/blockers-and-risks.md` | `.agents/templates/blockers-and-risks-template.md` | Active blockers and risks |
+| `artifacts/memory/lessons-learned.md` | `.agents/templates/lessons-learned-template.md` | Insights from each phase |
+| `artifacts/memory/patterns-and-conventions.md` | `.agents/templates/patterns-and-conventions-template.md` | Discovered patterns and conventions |
+| `artifacts/memory/agent-notes/<agent>.md` | `.agents/templates/agent-notes-template.md` | Per-agent accumulated knowledge |
 
 ### Validation
 
@@ -159,7 +159,7 @@ When writing to a memory file, use the corresponding template for the entry stru
 
 Run via `@executor`:
 ```
-node .opencode/scripts/dedupe_validator.js --title "{entry title}" --target artifacts/memory/{target-file}
+node .agents/scripts/dedupe_validator.js --title "{entry title}" --target artifacts/memory/{target-file}
 ```
 
 - `"status": "duplicate"` → Reject with pointer to existing entry
@@ -191,7 +191,7 @@ After writing, check word count. If over threshold, trigger compaction.
 
 **Delegate to script.** Run via `@executor`:
 ```
-node .opencode/scripts/memory_filter.js --search "{query}" --max 5
+node .agents/scripts/memory_filter.js --search "{query}" --max 5
 ```
 
 Format results:
@@ -227,7 +227,7 @@ Format results:
 3. Archive resolved/stale entries to `artifacts/memory/archive/YYYY-QN/{filename}` via `@writer`
 4. Update archive index via `@executor`:
    ```
-   node .opencode/scripts/archive_manager.js append-ndjson --file artifacts/memory/archive/index.ndjson --entry '{...}'
+   node .agents/scripts/archive_manager.js append-ndjson --file artifacts/memory/archive/index.ndjson --entry '{...}'
    ```
 5. Rewrite source file with only kept entries via `@writer`
 6. Report: "Compacted {filename}: {N} kept, {N} archived."

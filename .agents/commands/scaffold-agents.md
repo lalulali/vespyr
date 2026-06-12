@@ -1,4 +1,4 @@
-# CLAUDE.md — Vespyr Multi-Agent Engine
+# {Project Name} — Vespyr Multi-Agent Engine
 
 A platform-agnostic, file-based multi-agent system configured to streamline product development and engineering operations. This system consists of 21 specialized agent personas, structured workflows, and a shared persistent memory layer.
 
@@ -11,21 +11,21 @@ A platform-agnostic, file-based multi-agent system configured to streamline prod
 Since agents are defined as plain Markdown personas, they can be loaded and executed by any AI developer harness. Choose the method corresponding to your current environment:
 
 ### 1. Context-Aware & Mention-Capable IDEs (e.g., Cursor, Windsurf, GitHub Copilot)
-- **Direct Invocation**: Use the `@` symbol in your chat pane to mention the agent's markdown configuration file (e.g., `@.claude/agents/founder.md` or `@founder.md`).
+- **Direct Invocation**: Use the `@` symbol in your chat pane to mention the agent's markdown configuration file (e.g., `@.agents/agents/founder.md` or `@founder.md`).
 - **Context Injection**: Attach the specific agent's `.md` file to the chat window before starting your task to ensure the assistant adopts the exact profile and guardrails.
 
 ### 2. Single-Agent & Terminal Harnesses (e.g., Claude Code, Aider, CLI Assistants, Google Antigravity)
 - Instruct the active LLM session to read and adopt the persona explicitly. 
 - **System Directive Prompt Pattern**:
   ```
-  Adopt the role of the agent defined in: .claude/agents/[agent-name].md
+  Adopt the role of the agent defined in: .agents/agents/[agent-name].md
   Read that file to understand your persona, goals, workflow, and safety guardrails.
-  Strictly adhere to the 4 Core Behavioral Guidelines (Think Before Acting, Simplicity First, Surgical Actions, Goal-Driven Execution) defined in CLAUDE.md.
+  Strictly adhere to the 4 Core Behavioral Guidelines (Think Before Acting, Simplicity First, Surgical Actions, Goal-Driven Execution) defined in this document.
   Then, execute this task: [detailed instructions]
   ```
 
 ### 3. Standard Browser-Based LLMs (e.g., ChatGPT Web, Claude.ai, Gemini Web)
-- Copy the entire contents of the desired agent file from `.claude/agents/[agent-name].md` and paste it as the very first system message or instruction in a new chat thread.
+- Copy the entire contents of the desired agent file from `.agents/agents/[agent-name].md` and paste it as the very first system message or instruction in a new chat thread.
 - Append your query at the end of the prompt to initialize the agent's behavior.
 
 ---
@@ -78,7 +78,7 @@ To maintain focus and avoid context bloat, the **`@product-manager`** and **`@pr
 
 ## 🛠️ Workflows (Skills)
 
-Vespyr organizes complex, multi-agent operations into highly structured **skills** (located in `.claude/skills/`). Each skill is an end-to-end workflow designed for a specific product milestone, operational phase, or utility concern. They guide agents through sequence gates, coordinate parallel execution paths, and enforce quality control.
+Vespyr organizes complex, multi-agent operations into highly structured **skills** (located in `.agents/skills/`). Each skill is an end-to-end workflow designed for a specific product milestone, operational phase, or utility concern. They guide agents through sequence gates, coordinate parallel execution paths, and enforce quality control.
 
 ### Curated Workflows
 *   `/validate-idea` — Stress-test product concepts before research

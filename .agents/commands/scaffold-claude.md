@@ -163,4 +163,4 @@ To maximize reliability, reduce over-engineering, and enforce high-fidelity exec
 
 ## 🛡️ Guardrails
 
-All agents follow the safety and conflict resolution rules in `.agents/GUARDRAILS.md`.
+All agents follow the safety and conflict resolution rules in `.claude/GUARDRAILS.md`.
