@@ -581,24 +581,25 @@ describe('Test 8: bootstrapRootDocs()', () => {
 describe('Test 9: asciiArtSpacing()', () => {
   it('should have correct leading spaces on line 1', () => {
     const lines = ASCII_ART.split('\n');
-    assert.ok(lines[0].startsWith('  __  __'));
-    assert.strictEqual(lines[0].indexOf('__'), 2);
+    assert.strictEqual(lines[0], '');
+    assert.ok(lines[1].startsWith(' __  __'));
+    assert.strictEqual(lines[1].indexOf('__'), 1);
   });
 
   it('should have correct leading spaces on line 8', () => {
     const lines = ASCII_ART.split('\n');
-    const line8 = lines[7];
+    const line8 = lines[8];
     const match = line8.match(/^( *)\\ \\_\\/);
     assert.ok(match, `Line 8 should start with spaces before \\ \\_\\, got: "${line8}"`);
-    assert.strictEqual(match[1].length, 29);
+    assert.strictEqual(match[1].length, 28);
   });
 
   it('should have correct leading spaces on line 9', () => {
     const lines = ASCII_ART.split('\n');
-    const line9 = lines[8];
+    const line9 = lines[9];
     const match = line9.match(/^( *)\\\/_\//);
     assert.ok(match, `Line 9 should start with spaces before \\/_\\/, got: "${line9}"`);
-    assert.strictEqual(match[1].length, 30);
+    assert.strictEqual(match[1].length, 29);
   });
 
   it('should contain no tab characters', () => {
