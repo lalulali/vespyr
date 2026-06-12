@@ -1,0 +1,30 @@
+{
+  "name": "vespyr",
+  "version": "1.7.0",
+  "description": "AI agent team installer — 21 specialized personas for product development",
+  "bin": {
+    "vespyr": "./bin/cli.js"
+  },
+  "files": [
+    "bin/",
+    ".agents/"
+  ],
+  "scripts": {
+    "test": "node --test tests/test_cli.js"
+  },
+  "keywords": [
+    "ai",
+    "agents",
+    "multi-agent",
+    "product-development",
+    "cli"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/anomalyco/vespyr"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

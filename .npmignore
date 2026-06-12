@@ -1,0 +1,8 @@
+node_modules/
+tests/
+.opencode/
+artifacts/
+test-project/
+.DS_Store
+*.log
+.github/

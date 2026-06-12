@@ -17,9 +17,6 @@ artifacts/memory/
 *.tmp
 *.log
 
-# Local dev artifacts (installer testing)
-.agents/
-
 # IDE
 .vscode/
 .idea/
@@ -39,3 +36,6 @@ coverage/
 
 # Temporary files within tracked directories should use *.tmp naming
 # and those ARE ignored by the rule above.
+
+temp/
+tmp/

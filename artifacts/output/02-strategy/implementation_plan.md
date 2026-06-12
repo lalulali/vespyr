@@ -109,7 +109,7 @@ This master folder is **mandatory** and always scaffolded first. Below is the ex
 │   ├── squads.js                 # Squad preset loader and parser
 │   ├── swarm_telemetry.js        # Token and phase usage reporting
 │   └── token_profiler.js         # Static token sizing analysis
-├── skills/                       # Curated Phase Workflows (25 skills)
+├── skills/                       # Curated Phase Workflows (24 skills)
 │   ├── code-graph/               # Codebase structural dependency mapper
 │   ├── delegate/                 # One-shot I/O offload to sub-agents
 │   ├── design/                   # PRD & screen design specs from validated ideas
@@ -117,7 +117,6 @@ This master folder is **mandatory** and always scaffolded first. Below is the ex
 │   ├── doc-graph/                # Document relationship & traceability graph
 │   ├── explore-game-idea/        # Game concept market & competitor research
 │   ├── explore-idea/             # Concept validation via market & user research
-│   ├── find-skills/              # Discover and install agent skills
 │   ├── grill-me/                 # Socratic alignment interviewer
 │   ├── help-me/                  # Dynamic next-step project state navigator
 │   ├── humanize/                 # AI-writing tell elimination
@@ -146,6 +145,7 @@ This master folder is **mandatory** and always scaffolded first. Below is the ex
 ├── templates/                    # Markdown Output Templates (39 templates)
 │   ├── active-decisions-template.md
 │   ├── adr-template.md
+│   ├── agent-notes-template.md
 │   ├── analytics-insights-template.md
 │   ├── blockers-and-risks-template.md
 │   ├── competitive-analysis-template.md
@@ -575,29 +575,43 @@ function scaffoldArtifacts(targetDir, projectName) {
   const artifactsDir = path.join(targetDir, 'artifacts');
   if (fs.existsSync(artifactsDir)) return; // Never overwrite existing artifacts
 
-  const dirs = [
-    'directions',
-    'input/data', 'input/designs', 'input/documents', 'input/example', 'input/flows',
-    'memory/agent-notes', 'memory/archive', 'memory/pending-questions', 'memory/structural',
+  const outputDirs = [
+    'output/00-discovery',
     'output/01-research', 'output/02-strategy', 'output/03-architecture',
-    'output/04-planning', 'output/05-execution', 'output/06-quality',
-    'output/07-infrastructure', 'output/08-documentation',
-    'telemetry'
+    'output/04-planning',
+    'output/06-launch', 'output/07-iteration',
+    'output/08-incidents', 'output/09-retro',
   ];
+  const memoryDirs = [
+    'memory/agent-notes', 'memory/archive', 'memory/session-summaries',
+  ];
+  const inputDirs = [
+    'input/data', 'input/designs', 'input/documents', 'input/example', 'input/flows',
+  ];
+  const allDirs = ['directions', 'telemetry', ...inputDirs, ...outputDirs, ...memoryDirs];
 
-  for (const dir of dirs) {
+  for (const dir of allDirs) {
     fs.mkdirSync(path.join(artifactsDir, dir), { recursive: true });
   }
 
-  // .gitkeep for empty directories that should be tracked
-  fs.writeFileSync(path.join(artifactsDir, 'memory/pending-questions/.gitkeep'), '');
+  // Per-agent pending-questions subdirectories
+  const agentFiles = fs.readdirSync(path.join(targetDir, '.agents', 'agents'))
+    .filter(f => f.endsWith('.md'));
+  const pendingDir = path.join(artifactsDir, 'memory', 'pending-questions');
+  fs.mkdirSync(pendingDir, { recursive: true });
+  for (const agentFile of agentFiles) {
+    const agentName = path.basename(agentFile, '.md');
+    fs.mkdirSync(path.join(pendingDir, agentName), { recursive: true });
+  }
 
-  // project-context.md
-  const context = `# Project Context
+  // Memory files
+  const memoryPath = path.join(artifactsDir, 'memory');
+  fs.writeFileSync(path.join(memoryPath, 'project-context.md'), `# Project Context
 
 ## Identity
 - **Project Name**: ${projectName}
 - **Repository**: None (not a git repository)
+- **User Nickname**: User
 - **Created**: ${new Date().toISOString().split('T')[0]}
 
 ## Technical
@@ -613,15 +627,18 @@ function scaffoldArtifacts(targetDir, projectName) {
 ## Memory
 - **Lessons Learned**: None yet
 - **Active Decisions**: None yet
-`;
+`);
 
-  fs.writeFileSync(path.join(artifactsDir, 'memory', 'project-context.md'), context);
+  fs.writeFileSync(path.join(memoryPath, 'active-decisions.md'), '# Active Decisions\n\nNo decisions recorded yet.\n');
+  fs.writeFileSync(path.join(memoryPath, 'patterns-and-conventions.md'), '# Patterns & Conventions\n\nNo patterns recorded yet.\n');
+  fs.writeFileSync(path.join(memoryPath, 'lessons-learned.md'), '# Lessons Learned\n\nNo lessons recorded yet.\n');
+  fs.writeFileSync(path.join(memoryPath, 'blockers-and-risks.md'), '# Blockers & Risks\n\nNo blockers or risks recorded yet.\n');
 }
 ```
 
 ---
 
-## 10. `AGENTS.md`, `agent.md` & `CLAUDE.md` Bootstrap Templates
+## 8. `AGENTS.md`, `agent.md` & `CLAUDE.md` Bootstrap Templates
 
 The canonical template content lives in `.opencode/commands/` (installed as `.agents/commands/`):
 
@@ -667,7 +684,7 @@ function bootstrapRootDocs(targetDir, projectName, selectedHarnesses) {
 
 ---
 
-## 11. Migration Path for Existing Users
+## 9. Migration Path for Existing Users
 
 Users who previously ran Vespyr from a cloned repository (with `.opencode/` at the project root) need a migration path. The installer detects this scenario and offers guided migration.
 
@@ -700,7 +717,7 @@ Select an action:
 2. **Rename**: `fs.renameSync('.opencode', '.agents')` — atomic on same filesystem.
 3. **Extract tests**: `fs.renameSync('.agents/tests', 'tests')` — moves test files to workspace root. Tests are for engine development only and should not live inside the installed `.agents/` folder.
 4. **Symlink**: `fs.symlinkSync('.agents', '.opencode', 'dir')` — preserves backward compatibility for opencode harness.
-5. **Path updates**: Run the Phase 2 path adjustments (Section 8) against `.agents/` contents in-place. Since the user's files may have custom modifications, use regex replacement rather than wholesale overwrite:
+5. **Path updates**: Run regex replacement against `.agents/` contents in-place to update `.opencode/` → `.agents/` references. Since the user's files may have custom modifications, use surgical regex rather than wholesale overwrite:
    ```js
    function updatePathsInDir(dir) {
      for (const entry of walkSync(dir)) {
@@ -721,7 +738,7 @@ Select an action:
 
 ---
 
-## 12. Publishing & CI/CD Workflow
+## 10. Publishing & CI/CD Workflow
 
 ### GitHub Actions Release Workflow (`.github/workflows/publish.yml`)
 ```yaml
@@ -760,7 +777,7 @@ jobs:
 - [ ] All Phase 2 path updates verified (no `.opencode` references remain in `AGENTS.md`, `agent.md`, `README.md`, scripts)
 - [ ] `.npmignore` present and excludes `node_modules/`, `tests/`
 - [ ] `bin/cli.js` tested with `node ./bin/cli.js --dry-run`
-- [ ] Full verification (Section 16) passes in a clean `test-project/`
+- [ ] Full verification (Section 14) passes in a clean `test-project/`
 - [ ] `npm pack --dry-run` shows only expected files
 - [ ] Version in root `package.json` matches the git tag
 
@@ -773,7 +790,7 @@ jobs:
 
 ---
 
-## 13. Error Handling, Edge Cases & Conflict Resolution
+## 11. Error Handling, Edge Cases & Conflict Resolution
 
 ### Comprehensive Error Table
 
@@ -823,7 +840,7 @@ process.on('SIGINT', () => {
 
 ---
 
-## 14. Post-Install Summary Output
+## 12. Post-Install Summary Output
 
 After a successful install, the CLI prints a summary showing exactly what was done and next steps:
 
@@ -910,7 +927,7 @@ function printSummary(targetDir, selections) {
 
 ---
 
-## 15. Unit Test Specification
+## 13. Unit Test Specification
 
 `cli.js` is a single-file zero-dependency module. All tests are written using Node's built-in `node:test` runner (no Jest/Mocha dependency). Test files live in `tests/` at the workspace root. Run with:
 
@@ -976,10 +993,10 @@ node --test tests/
 ### Test 7: `scaffoldArtifacts()`
 | Case | Expected |
 |:---|:---|
-| First run | All 19 directories created, `project-context.md` written with project name from `path.basename(targetDir)` |
+| First run | All output (00-discovery through 09-retro), memory, input, telemetry, and directions directories created. `project-context.md` written with project name. 5 memory markdown files seeded. Per-agent `pending-questions/` subdirectories created. |
 | Second run (already exists) | No changes (returns early), existing `project-context.md` untouched |
 | Project name from dir | Target `/foo/my-app` → `Project Name: my-app` |
-| `.gitkeep` | `memory/pending-questions/.gitkeep` created |
+| Pending questions | `memory/pending-questions/` contains one subdirectory per agent persona (21 dirs) |
 
 ### Test 8: `bootstrapRootDocs()`
 | Case | Expected |
@@ -1014,7 +1031,7 @@ node --test tests/
 
 ---
 
-## 16. Verification Plan
+## 14. Verification Plan
 
 We will perform comprehensive verification of our changes inside a dedicated test folder to fulfill the rule: `"during testing, create a new folder and test inside that test folder"` and `"no automatic push to git"`.
 
@@ -1138,3 +1155,166 @@ Since all agents load `project-context.md` as Tier 1 core memory, they automatic
    * *Example*: *"Hello Christian, before we dive into..."* instead of *"Hello user, before we..."*.
 2. **Commit Messages & Walkthroughs**: When attributing stakeholder decisions or drafting manual walkthrough outputs (like `walkthrough.md`), agents will refer to the user by their nickname when logging decisions.
 3. **Tone Guidelines**: Added explicitly to `socratic-universal.md` and default prompt structures, instructing all 21 agent personas to respect this personalization parameter for a more conversational and natural collaborative experience.
+
+---
+
+## 16. Implementation Checklist — Per Harness
+
+This checklist breaks the v1.7.0 `npx vespyr` installer into actionable, verifiable tasks organized by harness integration. Tasks are ordered by dependency: the core `.agents/` engine must be operational first, then each harness can be integrated independently.
+
+> Use `[x]` to mark complete. Each task includes the section of this plan that provides its full specification.
+
+---
+
+### 16.1 Core Engine — `.agents/` (All Harnesses, Always On)
+
+The `.agents/` folder is the mandatory core. It is extracted from the npm package bundle into the target project root on every install. Harnesses that read Markdown agents natively (Amp, Antigravity, Cline, Codex, Deep Agents, Dexto, Firebender, Gemini CLI, Kimi Code CLI, Warp, Zed) work out-of-the-box with no additional configuration.
+
+| # | Task | Status | Spec |
+|:---|:---|:---|:---|
+| 1 | **Create `bin/cli.js` entry point** — zero-dependency Node.js script ; reads `process.argv` for flags, prints ASCII art, orchestrates full install lifecycle | [x] | §5 |
+| 2 | **Implement `parseFlags()`** — support `--dry-run`, `--yes`/`-y`, `--target <path>`, `--harness <names>`, `--version`/`-v`, `--help`/`-h` | [x] | §5 Flags Reference |
+| 3 | **Implement `detectState()`** — check for `.opencode/` (real dir → migrate), `.agents/` (exists → action menu), neither → fresh install | [x] | §5 Auto-Detection, §11 Detection |
+| 4 | **Implement interactive checklist renderer** — raw-mode keypress UI (`Up`/`Down` to move `❯`, `Space` to toggle `◯`/`✔`, `Enter` to submit) | [x] | §5 Checklist Selector |
+| 5 | **Implement `scaffoldArtifacts()`** — create full `artifacts/` tree (output/, memory/, input/, telemetry/, directions/) ; seed 5 memory markdown files ; create per-agent `pending-questions/` subdirectories | [x] | §7 `scaffoldArtifacts()` |
+| 6 | **Implement `bootstrapRootDocs()`** — write `AGENTS.md` and `agent.md` from `scaffold-agents.md`/`scaffold-agent.md` templates ; conditionally write `CLAUDE.md` from `scaffold-claude.md` | [x] | §8 Bootstrap Logic |
+| 7 | **Implement `createLinkOrCopy(target, linkPath, type, method)`** — cross-platform symlink with Windows junction/fallback support ; `type='dir'` or `'file'` ; `method='symlink'` or `'copy'` | [x] | §5 `createLinkOrCopy()` |
+| 8 | **Implement extraction mechanism** — locate bundled `.agents/` via `path.join(__dirname, '..', '.agents')` ; `fs.cpSync` into target ; atomic via temp + rename | [x] | §5 Extraction |
+| 9 | **Implement action menu** — Update (overwrite `.agents/`, preserve artifacts, recompile harnesses), Reconfigure (re-run prompts), Uninstall (delete `.agents/` + harness links, **preserve `artifacts/`**) | [x] | §5 Action Menu |
+| 10 | **Implement conflict detection & resolution** — real dir at `.opencode/`/`.claude/` → backup + replace ; existing `.cursor/rules/`/`.github/agents/` → merge ; existing symlink → skip or prompt | [x] | §5 Conflict Detection |
+| 11 | **Implement dry-run mode** — every action logged as `[DRY RUN] Would ...` ; no filesystem mutations | [x] | §5 Dry-Run |
+| 12 | **Implement error handling & rollback** — catch `EACCES`/`ENOSPC`/`ENOENT` with user messages ; SIGINT handler cleans up partial `.agents/` and symlinks | [x] | §11 Error Table, §11 Signal Handling |
+| 13 | **Implement personalization prompt** — `"What should the agent squad call you?"` ; default `"User"` ; sanitize ; inject into `project-context.md` Identity block | [x] | §15 |
+| 14 | **Implement `printSummary()`** — post-install output showing target path, squad, harnesses, created files, next steps | [x] | §12 |
+| 15 | **Write `tests/` unit test suite** — all 10 tests from Section 13 using `node:test` ; run with `node --test tests/` | [x] | §13 |
+
+---
+
+### 16.2 OpenCode Harness
+
+OpenCode reads agents from `.opencode/agents/` and skills from `.opencode/skills/`. This harness is always available as an optional checkbox.
+
+| # | Task | Status | Spec |
+|:---|:---|:---|:---|
+| 1 | **Create `.opencode/` → `.agents/` folder symlink** via `createLinkOrCopy('.agents', '.opencode', 'dir', 'symlink')` | [x] | §4 Table |
+| 2 | **Detect existing `.opencode/`** — if real dir, offer backup + replace ; if symlink to elsewhere, prompt overwrite | [x] | §5 Conflict Detection |
+| 3 | **On uninstall** — remove `.opencode/` symlink | [x] | §5 Action 3 |
+
+---
+
+### 16.3 Claude Code Harness
+
+Claude Code reads agents from `.claude/agents/`, commands from `.claude/commands/`, and loads `CLAUDE.md` as project memory.
+
+| # | Task | Status | Spec |
+|:---|:---|:---|:---|
+| 1 | **Create `.claude/` → `.agents/` folder symlink** via `createLinkOrCopy('.agents', '.claude', 'dir', 'symlink')` | [x] | §4 Table |
+| 2 | **Write `CLAUDE.md`** — bootstrap from `scaffold-claude.md` template ; only if Claude Code harness selected ; references `.claude/agents/` and Vespyr workflows | [x] | §8 Bootstrap Logic |
+| 3 | **Detect existing `.claude/`** — same backup+replace strategy as opencode | [x] | §5 Conflict Detection |
+| 4 | **On uninstall** — remove `.claude/` symlink ; delete `CLAUDE.md` | [x] | §5 Action 3 |
+
+---
+
+### 16.4 Cursor Rules Harness
+
+Cursor does not consume raw `.md` agent files. It requires `.mdc` files under `.cursor/rules/` with specific frontmatter (`globs`, `alwaysApply`).
+
+| # | Task | Status | Spec |
+|:---|:---|:---|:---|
+| 1 | **Implement `transpileCursorMDC()`** — read each `.agents/agents/*.md`, parse frontmatter, emit `.cursor/rules/{name}.mdc` with `globs: "*"` + `alwaysApply: false` + body | [x] | §6.2 |
+| 2 | **Implement `parseFrontmatter(content)`** — shared parser for Copilot YAML and Cursor MDC ; regex `^---\r?\n([\s\S]*?)\r?\n---` + key:value extraction | [x] | §6.1 Frontmatter Parser |
+| 3 | **Handle missing/broken frontmatter** — warn `⚠ Skipping {file}: no frontmatter found` ; skip agent ; never abort entire install | [x] | §6.2 Transpilation Errors |
+| 4 | **Detect existing `.cursor/rules/`** — merge strategy: add Vespyr `.mdc` files alongside existing rules ; never delete user rules | [x] | §5 Conflict Detection |
+| 5 | **On update/reconfigure** — re-run `transpileCursorMDC()` to regenerate `.mdc` files from latest agent prompts | [x] | §5 Action 1 |
+| 6 | **On uninstall** — delete only Vespyr-generated `.mdc` files from `.cursor/rules/` ; leave user rules intact | [x] | §5 Action 3 |
+
+---
+
+### 16.5 Windsurf Harness
+
+Windsurf reads workflows from `.windsurf/workflows/` and global rules from `.windsurfrules`.
+
+| # | Task | Status | Spec |
+|:---|:---|:---|:---|
+| 1 | **Create `.windsurf/workflows/` → `.agents/skills` folder symlink** via `createLinkOrCopy('.agents/skills', '.windsurf/workflows', 'dir', 'symlink')` | [x] | §4 Table |
+| 2 | **Create `.windsurfrules` → `.agents/GUARDRAILS.md` file symlink** via `createLinkOrCopy('.agents/GUARDRAILS.md', '.windsurfrules', 'file', 'symlink')` | [x] | §4 Table |
+| 3 | **Detect existing `.windsurfrules`** — if real file (not symlink), backup to `.windsurfrules.backup`, then replace with symlink | [x] | §5 Conflict Detection |
+| 4 | **On uninstall** — remove `.windsurf/workflows/` symlink ; remove `.windsurfrules` symlink | [x] | §5 Action 3 |
+
+---
+
+### 16.6 Kiro Steering Harness
+
+Kiro consumes steering rules from `.kiro/steering/` directly.
+
+| # | Task | Status | Spec |
+|:---|:---|:---|:---|
+| 1 | **Create `.kiro/steering/` → `.agents/agents` folder symlink** via `createLinkOrCopy('.agents/agents', '.kiro/steering', 'dir', 'symlink')` | [x] | §4 Table |
+| 2 | **On uninstall** — remove `.kiro/steering/` symlink | [x] | §5 Action 3 |
+
+---
+
+### 16.7 GitHub Copilot Harness
+
+GitHub Copilot expects YAML agent definitions under `.github/agents/` and repository-level instructions in `.github/copilot-instructions.md`.
+
+| # | Task | Status | Spec |
+|:---|:---|:---|:---|
+| 1 | **Implement `transpileCopilotYAML()`** — read each `.agents/agents/*.md`, parse frontmatter, emit `.github/agents/{name}.yml` with `name:`, `description:`, `instructions: |` + indented body | [x] | §6.1 |
+| 2 | **Handle missing/broken frontmatter** — warn and skip ; never abort install | [x] | §6.2 |
+| 3 | **Create `.github/copilot-instructions.md` → `AGENTS.md` file symlink** via `createLinkOrCopy('AGENTS.md', '.github/copilot-instructions.md', 'file', 'symlink')` | [x] | §4 Table |
+| 4 | **Detect existing `.github/agents/`** — merge: add Vespyr `.yml` files alongside existing agent configs | [x] | §5 Conflict Detection |
+| 5 | **On update/reconfigure** — re-run `transpileCopilotYAML()` | [x] | §5 Action 1 |
+| 6 | **On uninstall** — delete Vespyr-generated `.yml` files from `.github/agents/` ; remove `.github/copilot-instructions.md` symlink | [x] | §5 Action 3 |
+
+---
+
+### 16.8 Global Install Support (All Harnesses)
+
+When user selects "Global" scope, the installer places `.agents/` in user home and configures harness-specific global paths.
+
+| # | Task | Status | Spec |
+|:---|:---|:---|:---|
+| 1 | **Resolve global paths per harness** → map each selected harness to its OS-specific global location (e.g., Cursor macOS: `~/Library/Application Support/Cursor/User/globalRules/`, Linux: `~/.config/Cursor/User/globalRules/`) | [x] | §5 Step 3.3 |
+| 2 | **Create global symlinks/copies** — same `createLinkOrCopy` mechanics ; respect the user's chosen install method (symlink vs copy) | [x] | §5 Step 3.3 |
+
+---
+
+### 16.9 Migration Flow
+
+For users upgrading from a pre-v1.7.0 `.opencode/` cloned repo to the new `.agents/` architecture.
+
+| # | Task | Status | Spec |
+|:---|:---|:---|:---|
+| 1 | **Detect migration scenario** — `.opencode/` is a real directory (not symlink) AND `.agents/` does not exist | [x] | §9 Detection |
+| 2 | **Display migration prompt** — 3 options: Migrate, Fresh Install, Cancel | [x] | §9 Migration Flow |
+| 3 | **Implement migration Action 1** — backup `.opencode/`, rename to `.agents/`, extract tests to workspace root, create `.opencode/` symlink, regex-replace `.opencode/`→`.agents/` in all `.md`/`.js` files, preserve `artifacts/` | [x] | §9 Migration Steps |
+| 4 | **Implement migration Action 2** — backup to `.opencode.backup.{timestamp}/`, proceed as fresh install | [x] | §9 |
+
+---
+
+### 16.10 Publishing & CI/CD
+
+| # | Task | Status | Spec |
+|:---|:---|:---|:---|
+| 1 | **Create `.github/workflows/publish.yml`** — triggers on `v*` tag ; `npm publish --provenance --access public` | [x] | §10 |
+| 2 | **Create `.npmignore`** — exclude `node_modules/`, `tests/` | [x] | §10 Checklist |
+| 3 | **Verify `files` array in `package.json`** — includes `bin/`, `.agents/`, excludes tests | [x] | §10 |
+| 4 | **Cut first release** — bump root `package.json` to `1.7.0`, tag, push | [ ] | §10 Release Process |
+
+---
+
+### 16.11 Verification (Cross-Cutting)
+
+| # | Task | Status | Spec |
+|:---|:---|:---|:---|
+| 1 | **Step 1–2: Create `test-project/` and run installer** — select all harnesses ; target `./test-project` | [x] | §14 Step 1–2 |
+| 2 | **Step 3: Assert folder structure** — `.agents/` complete ; `artifacts/` tree complete ; `project-context.md` correct ; `AGENTS.md`/`agent.md`/`CLAUDE.md` present | [x] | §14 Step 3 |
+| 3 | **Step 4: Assert links & transpilations** — opencode/claude symlinks valid ; 21 `.mdc` files in `cursor/rules/` ; 21 `.yml` files in `github/agents/` ; windsurf links correct | [x] | §14 Step 4 |
+| 4 | **Step 5: Script backward compatibility** — run `token_profiler.js`, `compile_skills.js`, `squads.js` from inside `.agents/scripts/` ; all complete without path errors | [x] | §14 Step 5 |
+| 5 | **Step 6: Update flow** — re-run installer ; Action 1 preserves `artifacts/` ; harnesses recompiled | [x] | §14 Step 6 |
+| 6 | **Step 7: Reconfigure flow** — toggle additional harness ; new links created | [x] | §14 Step 7 |
+| 7 | **Step 8: Uninstall flow** — `.agents/` and all links removed ; `artifacts/` fully preserved | [x] | §14 Step 8 |
+| 8 | **Step 9: Reinstall after uninstall** — clean reinstall ; preserves existing `artifacts/` | [x] | §14 Step 9 |
+| 9 | **Step 10: ASCII art byte verification** — `head -n 10` shows exact spacing | [x] | §14 Step 10 |
+| 10 | **48 unit tests pass** — all `node:test` cases from Section 13 green (10 suites, 48 tests) | [x] | §13 |
