@@ -23,6 +23,7 @@ const {
   updateUserNickname,
   uninstallHarnesses,
   performReconfigure,
+  performUpdate,
   ASCII_ART,
   VERSION,
 } = require('../bin/cli.js');
@@ -903,6 +904,82 @@ describe('Test 16: Reconfiguration harness removal', () => {
     
     // claude (selected) should still exist
     assert.strictEqual(fs.existsSync(claudePath), true);
+  });
+});
+
+describe('Test 17: End-to-End Installation, Update, Reconfiguration, and Uninstallation Scenarios', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = makeTempDir();
+  });
+
+  afterEach(() => {
+    cleanTempDir(tmpDir);
+  });
+
+  it('should run the complete cycle of fresh install, update, reconfigure, and uninstall smoothly', async () => {
+    // 1. Setup a fresh project directory structure simulating the source folder
+    const agentsTarget = path.join(tmpDir, '.agents');
+    fs.mkdirSync(agentsTarget);
+    fs.mkdirSync(path.join(agentsTarget, 'agents'));
+    fs.mkdirSync(path.join(agentsTarget, 'skills'));
+    fs.writeFileSync(path.join(agentsTarget, 'agents', 'founder.md'), '---\ndescription: "core agent"\n---\nfounder prompt');
+    fs.writeFileSync(path.join(agentsTarget, 'skills', 'skills.md'), 'core skills');
+    fs.writeFileSync(path.join(agentsTarget, '.vespyr-version'), JSON.stringify({ version: '1.6.0' }));
+
+    // Setup project context
+    const memoryDir = path.join(tmpDir, 'artifacts', 'memory');
+    fs.mkdirSync(memoryDir, { recursive: true });
+    const contextFile = path.join(memoryDir, 'project-context.md');
+    fs.writeFileSync(contextFile, `# Project Context\n\n## Identity\n- **Project Name**: temp\n- **User Nickname**: Christian\n`);
+
+    // 2. Run performUpdate to update from v1.6.0 (simulated) to latest version
+    const { performUpdate } = require('../bin/cli.js');
+    await performUpdate(tmpDir, { yes: true });
+
+    // Verify it updated the version file and kept the files
+    const newVersion = JSON.parse(fs.readFileSync(path.join(agentsTarget, '.vespyr-version'), 'utf8'));
+    assert.strictEqual(newVersion.version, VERSION);
+
+    // 3. Run performReconfigure to select opencode and claude
+    const opencodePath = path.join(tmpDir, '.opencode');
+    const claudePath = path.join(tmpDir, '.claude');
+    
+    // Configure harnesses: ['opencode', 'claude']
+    await performReconfigure(tmpDir, { harnesses: ['opencode', 'claude'], yes: true });
+
+    // Verify both are configured
+    assert.strictEqual(fs.existsSync(opencodePath), true);
+    assert.strictEqual(fs.existsSync(claudePath), true);
+
+    // Add custom files that should never be deleted during uninstallation/reconfigurations
+    const rulesDir = path.join(tmpDir, '.cursor', 'rules');
+    fs.mkdirSync(rulesDir, { recursive: true });
+    fs.writeFileSync(path.join(rulesDir, 'founder.mdc'), 'core rule');
+    fs.writeFileSync(path.join(rulesDir, 'my-custom-rule.mdc'), 'user rule');
+    fs.writeFileSync(path.join(agentsTarget, 'skills', 'my-custom-skill.md'), 'user skill');
+
+    // 4. Reconfigure to deselect opencode (leaving only claude)
+    await performReconfigure(tmpDir, { harnesses: ['claude'], yes: true });
+
+    // Verify opencode is surgically removed
+    assert.strictEqual(fs.existsSync(opencodePath), false);
+    // Verify claude and custom rules/skills remain
+    assert.strictEqual(fs.existsSync(claudePath), true);
+    assert.strictEqual(fs.existsSync(path.join(rulesDir, 'my-custom-rule.mdc')), true);
+    assert.strictEqual(fs.existsSync(path.join(agentsTarget, 'skills', 'my-custom-skill.md')), true);
+
+    // 5. Perform final uninstallation
+    await performUninstall(tmpDir);
+
+    // Verify harness files and CLAUDE.md got surgically uninstalled
+    assert.strictEqual(fs.existsSync(claudePath), false);
+    assert.strictEqual(fs.existsSync(path.join(rulesDir, 'founder.mdc')), false);
+
+    // Verify custom files are preserved
+    assert.strictEqual(fs.existsSync(path.join(rulesDir, 'my-custom-rule.mdc')), true);
+    assert.strictEqual(fs.existsSync(path.join(agentsTarget, 'skills', 'my-custom-skill.md')), true);
   });
 });
 

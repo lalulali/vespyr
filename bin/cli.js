@@ -1864,6 +1864,7 @@ module.exports = {
   updateUserNickname,
   uninstallHarnesses,
   performReconfigure,
+  performUpdate,
   ASCII_ART,
   VERSION,
   HARNESS_OPTIONS,
