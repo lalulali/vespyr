@@ -15,6 +15,14 @@ const {
   bootstrapRootDocs,
   writeVersionFile,
   getInstalledVersion,
+  handleConflict,
+  performUninstall,
+  surgicallyCleanupAgentsDir,
+  removeDirIfEmpty,
+  getExistingUserNickname,
+  updateUserNickname,
+  uninstallHarnesses,
+  performReconfigure,
   ASCII_ART,
   VERSION,
 } = require('../bin/cli.js');
@@ -266,6 +274,107 @@ describe('Test 4: createLinkOrCopy()', () => {
     assert.ok(fs.existsSync(dest));
     assert.strictEqual(fs.readFileSync(dest, 'utf8'), 'content');
   });
+
+  it('should resolve relative target paths relative to destination parent directory when copying', () => {
+    const source = path.join(tmpDir, 'source');
+    fs.mkdirSync(source);
+    fs.writeFileSync(path.join(source, 'file.txt'), 'relative copy test');
+
+    const destParent = path.join(tmpDir, 'parent');
+    fs.mkdirSync(destParent);
+
+    const relativeTarget = path.relative(destParent, source);
+    const dest = path.join(destParent, 'dest');
+
+    createLinkOrCopy(relativeTarget, dest, 'dir', 'copy');
+
+    assert.ok(fs.existsSync(path.join(dest, 'file.txt')));
+    assert.strictEqual(fs.readFileSync(path.join(dest, 'file.txt'), 'utf8'), 'relative copy test');
+  });
+});
+
+describe('Test 11: handleConflict()', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = makeTempDir();
+  });
+
+  afterEach(() => {
+    cleanTempDir(tmpDir);
+  });
+
+  it('should delete symbolic link if method is copy', () => {
+    const linkPath = path.join(tmpDir, 'test-link');
+    const targetPath = path.join(tmpDir, 'target');
+    fs.mkdirSync(targetPath);
+    fs.symlinkSync(targetPath, linkPath, 'dir');
+
+    // Make sure link exists as symlink
+    assert.ok(fs.lstatSync(linkPath).isSymbolicLink());
+
+    handleConflict(linkPath, 'test-link', tmpDir, 'copy');
+
+    // Should no longer exist (since it was deleted)
+    assert.throws(() => {
+      fs.lstatSync(linkPath);
+    }, /ENOENT/);
+  });
+
+  it('should keep symbolic link if method is symlink and points to .agents', () => {
+    const linkPath = path.join(tmpDir, 'test-link');
+    fs.symlinkSync('.agents', linkPath, 'dir');
+
+    handleConflict(linkPath, 'test-link', tmpDir, 'symlink');
+
+    // Should still exist and point to .agents
+    const stat = fs.lstatSync(linkPath);
+    assert.ok(stat.isSymbolicLink());
+    assert.strictEqual(fs.readlinkSync(linkPath), '.agents');
+  });
+
+  it('should delete symbolic link if method is symlink but points to wrong target', () => {
+    const linkPath = path.join(tmpDir, 'test-link');
+    fs.symlinkSync('wrong-target', linkPath, 'dir');
+
+    handleConflict(linkPath, 'test-link', tmpDir, 'symlink');
+
+    // Should be deleted
+    assert.throws(() => {
+      fs.lstatSync(linkPath);
+    }, /ENOENT/);
+  });
+
+  it('should backup real directory or file if method is symlink', () => {
+    const dirPath = path.join(tmpDir, 'real-dir');
+    fs.mkdirSync(dirPath);
+    fs.writeFileSync(path.join(dirPath, 'file.txt'), 'data');
+
+    handleConflict(dirPath, 'real-dir', tmpDir, 'symlink');
+
+    // Original directory should no longer exist at original path
+    assert.throws(() => {
+      fs.lstatSync(dirPath);
+    }, /ENOENT/);
+
+    // Backup directory should exist
+    const files = fs.readdirSync(tmpDir);
+    const backupDir = files.find(f => f.startsWith('real-dir.backup.'));
+    assert.ok(backupDir);
+    assert.ok(fs.existsSync(path.join(tmpDir, backupDir, 'file.txt')));
+  });
+
+  it('should NOT backup real directory if method is copy (enrich instead)', () => {
+    const dirPath = path.join(tmpDir, 'real-dir');
+    fs.mkdirSync(dirPath);
+    fs.writeFileSync(path.join(dirPath, 'file.txt'), 'data');
+
+    handleConflict(dirPath, 'real-dir', tmpDir, 'copy');
+
+    // Original directory should still exist
+    assert.ok(fs.existsSync(dirPath));
+    assert.ok(fs.existsSync(path.join(dirPath, 'file.txt')));
+  });
 });
 
 describe('Test 5: detectState()', () => {
@@ -285,6 +394,7 @@ describe('Test 5: detectState()', () => {
 
   it('should detect already installed', () => {
     fs.mkdirSync(path.join(tmpDir, '.agents'));
+    fs.writeFileSync(path.join(tmpDir, '.agents', '.vespyr-version'), JSON.stringify({ version: '1.7.0' }));
     assert.strictEqual(detectState(tmpDir), 'installed');
   });
 
@@ -296,7 +406,13 @@ describe('Test 5: detectState()', () => {
   it('should prioritize installed over migrate', () => {
     fs.mkdirSync(path.join(tmpDir, '.opencode'));
     fs.mkdirSync(path.join(tmpDir, '.agents'));
+    fs.writeFileSync(path.join(tmpDir, '.agents', '.vespyr-version'), JSON.stringify({ version: '1.7.0' }));
     assert.strictEqual(detectState(tmpDir), 'installed');
+  });
+
+  it('should detect fresh if .agents folder exists but has no .vespyr-version file', () => {
+    fs.mkdirSync(path.join(tmpDir, '.agents'));
+    assert.strictEqual(detectState(tmpDir), 'fresh');
   });
 });
 
@@ -534,3 +650,259 @@ describe('Test 10: parseFlags()', () => {
     assert.strictEqual(result.target, './here');
   });
 });
+
+describe('Test 12: removeDirIfEmpty()', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = makeTempDir();
+  });
+
+  afterEach(() => {
+    cleanTempDir(tmpDir);
+  });
+
+  it('should remove a directory if completely empty', () => {
+    const emptySub = path.join(tmpDir, 'empty-sub');
+    fs.mkdirSync(emptySub);
+    removeDirIfEmpty(emptySub);
+    assert.strictEqual(fs.existsSync(emptySub), false);
+  });
+
+  it('should remove a directory if it only contains .DS_Store', () => {
+    const dsStoreSub = path.join(tmpDir, 'ds-store-sub');
+    fs.mkdirSync(dsStoreSub);
+    fs.writeFileSync(path.join(dsStoreSub, '.DS_Store'), 'some binary data');
+    removeDirIfEmpty(dsStoreSub);
+    assert.strictEqual(fs.existsSync(dsStoreSub), false);
+  });
+
+  it('should NOT remove a directory if it contains other files', () => {
+    const nonOptionSub = path.join(tmpDir, 'non-empty-sub');
+    fs.mkdirSync(nonOptionSub);
+    fs.writeFileSync(path.join(nonOptionSub, 'custom-file.txt'), 'keep me');
+    removeDirIfEmpty(nonOptionSub);
+    assert.strictEqual(fs.existsSync(nonOptionSub), true);
+    assert.strictEqual(fs.readFileSync(path.join(nonOptionSub, 'custom-file.txt'), 'utf8'), 'keep me');
+  });
+});
+
+describe('Test 13: surgicallyCleanupAgentsDir()', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = makeTempDir();
+  });
+
+  afterEach(() => {
+    cleanTempDir(tmpDir);
+  });
+
+  it('should remove core files but preserve custom files and skills', () => {
+    const targetAgents = path.join(tmpDir, '.agents');
+    fs.mkdirSync(targetAgents);
+    fs.mkdirSync(path.join(targetAgents, 'agents'));
+    fs.mkdirSync(path.join(targetAgents, 'skills'));
+    fs.mkdirSync(path.join(targetAgents, 'commands'));
+
+    // Create a core agent, a core skill, a core folder, and some core files
+    fs.writeFileSync(path.join(targetAgents, 'agents', 'founder.md'), 'core agent');
+    fs.mkdirSync(path.join(targetAgents, 'skills', 'validate-idea'));
+    fs.writeFileSync(path.join(targetAgents, 'skills', 'validate-idea', 'SKILL.md'), 'core skill');
+    fs.writeFileSync(path.join(targetAgents, 'GUARDRAILS.md'), 'core guardrails');
+    fs.writeFileSync(path.join(targetAgents, '.vespyr-version'), 'version info');
+
+    // Create custom files/skills
+    fs.writeFileSync(path.join(targetAgents, 'agents', 'custom-agent.md'), 'my custom agent');
+    fs.mkdirSync(path.join(targetAgents, 'skills', 'my-custom-skill'));
+    fs.writeFileSync(path.join(targetAgents, 'skills', 'my-custom-skill', 'SKILL.md'), 'custom skill');
+    fs.writeFileSync(path.join(targetAgents, 'custom-file.txt'), 'custom text');
+
+    surgicallyCleanupAgentsDir(targetAgents);
+
+    // Core files should be deleted
+    assert.strictEqual(fs.existsSync(path.join(targetAgents, 'agents', 'founder.md')), false);
+    assert.strictEqual(fs.existsSync(path.join(targetAgents, 'skills', 'validate-idea')), false);
+    assert.strictEqual(fs.existsSync(path.join(targetAgents, 'GUARDRAILS.md')), false);
+    assert.strictEqual(fs.existsSync(path.join(targetAgents, '.vespyr-version')), false);
+    assert.strictEqual(fs.existsSync(path.join(targetAgents, 'commands')), false);
+
+    // Custom files/skills should be preserved
+    assert.strictEqual(fs.existsSync(targetAgents), true);
+    assert.strictEqual(fs.existsSync(path.join(targetAgents, 'agents', 'custom-agent.md')), true);
+    assert.strictEqual(fs.existsSync(path.join(targetAgents, 'skills', 'my-custom-skill')), true);
+    assert.strictEqual(fs.existsSync(path.join(targetAgents, 'custom-file.txt')), true);
+  });
+});
+
+describe('Test 14: performUninstall() surgical project cleanup', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = makeTempDir();
+  });
+
+  afterEach(() => {
+    cleanTempDir(tmpDir);
+  });
+
+  it('should surgically uninstall from harnesses and delete empty folders recursively', async () => {
+    const agentsTarget = path.join(tmpDir, '.agents');
+    fs.mkdirSync(agentsTarget);
+    fs.mkdirSync(path.join(agentsTarget, 'agents'));
+    fs.writeFileSync(path.join(agentsTarget, 'agents', 'founder.md'), 'core');
+    fs.writeFileSync(path.join(agentsTarget, '.vespyr-version'), JSON.stringify({ version: '1.7.0' }));
+
+    // Setup Cursor rules directory with core rule and a custom rule
+    const rulesDir = path.join(tmpDir, '.cursor', 'rules');
+    fs.mkdirSync(rulesDir, { recursive: true });
+    fs.writeFileSync(path.join(rulesDir, 'founder.mdc'), 'transpiled founder rule');
+    fs.writeFileSync(path.join(rulesDir, 'my-own-rule.mdc'), 'user rule');
+
+    // Setup GitHub agents directory with core agent and a custom agent
+    const githubAgentsDir = path.join(tmpDir, '.github', 'agents');
+    fs.mkdirSync(githubAgentsDir, { recursive: true });
+    fs.writeFileSync(path.join(githubAgentsDir, 'founder.yml'), 'transpiled founder agent');
+    fs.writeFileSync(path.join(githubAgentsDir, 'my-own-agent.yml'), 'user agent');
+    fs.writeFileSync(path.join(tmpDir, '.github', 'copilot-instructions.md'), 'copilot instructions');
+
+    // Setup Windsurf workflows directory (copy method) with core skill and custom skill
+    const windsurfWorkflowsDir = path.join(tmpDir, '.windsurf', 'workflows');
+    fs.mkdirSync(windsurfWorkflowsDir, { recursive: true });
+    fs.mkdirSync(path.join(windsurfWorkflowsDir, 'validate-idea'));
+    fs.writeFileSync(path.join(windsurfWorkflowsDir, 'validate-idea', 'SKILL.md'), 'core skill');
+    fs.mkdirSync(path.join(windsurfWorkflowsDir, 'my-custom-skill'));
+    fs.writeFileSync(path.join(windsurfWorkflowsDir, 'my-custom-skill', 'SKILL.md'), 'user skill');
+    fs.writeFileSync(path.join(tmpDir, '.windsurfrules'), 'windsurf rules');
+
+    // Run uninstall
+    await performUninstall(tmpDir);
+
+    // Core files deleted
+    assert.strictEqual(fs.existsSync(path.join(rulesDir, 'founder.mdc')), false);
+    assert.strictEqual(fs.existsSync(path.join(githubAgentsDir, 'founder.yml')), false);
+    assert.strictEqual(fs.existsSync(path.join(tmpDir, '.github', 'copilot-instructions.md')), false);
+    assert.strictEqual(fs.existsSync(path.join(windsurfWorkflowsDir, 'validate-idea')), false);
+    assert.strictEqual(fs.existsSync(path.join(tmpDir, '.windsurfrules')), false);
+
+    // Custom files preserved
+    assert.strictEqual(fs.existsSync(path.join(rulesDir, 'my-own-rule.mdc')), true);
+    assert.strictEqual(fs.existsSync(path.join(githubAgentsDir, 'my-own-agent.yml')), true);
+    assert.strictEqual(fs.existsSync(path.join(windsurfWorkflowsDir, 'my-custom-skill')), true);
+
+    // Verify .agents got completely cleaned up since it had no custom files
+    assert.strictEqual(fs.existsSync(agentsTarget), false);
+  });
+
+  it('should resolve and clean up global paths when version file has global: true', async () => {
+    const originalHomedir = os.homedir;
+    const mockHome = path.join(tmpDir, 'mock-home');
+    fs.mkdirSync(mockHome);
+    
+    // Override os.homedir
+    os.homedir = () => mockHome;
+
+    // Set up a mock global target directory inside the mock home
+    const agentsTarget = path.join(mockHome, '.agents');
+    fs.mkdirSync(agentsTarget);
+    fs.mkdirSync(path.join(agentsTarget, 'agents'));
+    fs.writeFileSync(path.join(agentsTarget, 'agents', 'founder.md'), 'core');
+    fs.writeFileSync(path.join(agentsTarget, '.vespyr-version'), JSON.stringify({ version: '1.7.0', global: true }));
+
+    // Set up mock global harnesses
+    const globalOpencode = path.join(mockHome, '.opencode');
+    fs.mkdirSync(globalOpencode);
+    fs.writeFileSync(path.join(globalOpencode, '.vespyr-version'), JSON.stringify({ version: '1.7.0', global: true }));
+
+    // Run uninstall passing the mock target folder
+    await performUninstall(mockHome);
+
+    // Restore homedir
+    os.homedir = originalHomedir;
+
+    // Verify global harness got cleaned up surgically
+    assert.strictEqual(fs.existsSync(globalOpencode), false);
+    assert.strictEqual(fs.existsSync(agentsTarget), false);
+  });
+});
+
+describe('Test 15: Reconfigure Nickname Helpers', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = makeTempDir();
+  });
+
+  afterEach(() => {
+    cleanTempDir(tmpDir);
+  });
+
+  it('should default to User if project-context.md does not exist', () => {
+    const nickname = getExistingUserNickname(tmpDir);
+    assert.strictEqual(nickname, 'User');
+  });
+
+  it('should parse existing nickname from project-context.md', () => {
+    const memoryDir = path.join(tmpDir, 'artifacts', 'memory');
+    fs.mkdirSync(memoryDir, { recursive: true });
+    fs.writeFileSync(path.join(memoryDir, 'project-context.md'), `# Project Context\n\n## Identity\n- **Project Name**: temp\n- **User Nickname**: Christian\n`);
+    
+    const nickname = getExistingUserNickname(tmpDir);
+    assert.strictEqual(nickname, 'Christian');
+  });
+
+  it('should update user nickname in project-context.md', () => {
+    const memoryDir = path.join(tmpDir, 'artifacts', 'memory');
+    fs.mkdirSync(memoryDir, { recursive: true });
+    const contextFile = path.join(memoryDir, 'project-context.md');
+    fs.writeFileSync(contextFile, `# Project Context\n\n## Identity\n- **Project Name**: temp\n- **User Nickname**: Christian\n`);
+
+    updateUserNickname(tmpDir, 'Sarah');
+
+    const content = fs.readFileSync(contextFile, 'utf8');
+    assert.ok(content.includes('- **User Nickname**: Sarah'));
+    assert.ok(!content.includes('- **User Nickname**: Christian'));
+  });
+});
+
+describe('Test 16: Reconfiguration harness removal', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = makeTempDir();
+  });
+
+  afterEach(() => {
+    cleanTempDir(tmpDir);
+  });
+
+  it('should remove deselected harness files when reconfiguring', async () => {
+    // Write fake versions and harnesses
+    const agentsTarget = path.join(tmpDir, '.agents');
+    fs.mkdirSync(agentsTarget);
+    fs.mkdirSync(path.join(agentsTarget, 'agents'));
+    fs.writeFileSync(path.join(agentsTarget, 'agents', 'founder.md'), 'core agent');
+    fs.writeFileSync(path.join(agentsTarget, '.vespyr-version'), JSON.stringify({ version: '1.7.0' }));
+
+    // Setup opencode (symlink/directory)
+    const opencodePath = path.join(tmpDir, '.opencode');
+    fs.mkdirSync(opencodePath);
+    fs.writeFileSync(path.join(opencodePath, '.vespyr-version'), JSON.stringify({ version: '1.7.0' }));
+
+    // Setup Claude Code (symlink/directory)
+    const claudePath = path.join(tmpDir, '.claude');
+    fs.mkdirSync(claudePath);
+    fs.writeFileSync(path.join(claudePath, '.vespyr-version'), JSON.stringify({ version: '1.7.0' }));
+
+    // Run reconfigure with only claude (deselecting opencode)
+    const { performReconfigure } = require('../bin/cli.js');
+    await performReconfigure(tmpDir, { harnesses: ['claude'], yes: true });
+
+    // opencode (deselected) should be surgically removed
+    assert.strictEqual(fs.existsSync(opencodePath), false);
+    
+    // claude (selected) should still exist
+    assert.strictEqual(fs.existsSync(claudePath), true);
+  });
+});
+

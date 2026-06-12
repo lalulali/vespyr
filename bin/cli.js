@@ -115,9 +115,10 @@ function parseFlags(argv) {
 function detectState(targetDir) {
   const opencodePath = path.join(targetDir, ".opencode");
   const agentsPath = path.join(targetDir, ".agents");
+  const versionPath = path.join(agentsPath, ".vespyr-version");
 
   const opencodeExists = fs.existsSync(opencodePath);
-  const agentsExists = fs.existsSync(agentsPath);
+  const agentsExists = fs.existsSync(agentsPath) && fs.existsSync(versionPath);
 
   if (agentsExists) {
     return "installed";
@@ -172,10 +173,11 @@ function createLinkOrCopy(target, linkPath, type = "dir", method = "symlink") {
   }
 
   if (method === "copy") {
+    const sourcePath = path.isAbsolute(target) ? target : path.resolve(path.dirname(linkPath), target);
     if (type === "dir") {
-      fs.cpSync(target, linkPath, { recursive: true });
+      fs.cpSync(sourcePath, linkPath, { recursive: true });
     } else {
-      fs.copyFileSync(target, linkPath);
+      fs.copyFileSync(sourcePath, linkPath);
     }
   } else {
     if (fs.existsSync(linkPath)) {
@@ -585,9 +587,9 @@ function printWizardSummary() {
   }
 }
 
-function askChecklist(question, options, showBack = false) {
+function askChecklist(question, options, showBack = false, initialSelections = []) {
   return new Promise((resolve) => {
-    const selected = new Array(options.length).fill(false);
+    const selected = options.map((o) => initialSelections.includes(o.id));
     let cursor = 0;
     const totalOptions = options.length + (showBack ? 1 : 0);
 
@@ -751,7 +753,7 @@ async function installHarnesses(targetDir, selections, method) {
 
   if (selections.includes("opencode")) {
     const linkPath = path.join(targetDir, ".opencode");
-    handleConflict(linkPath, ".opencode", targetDir);
+    handleConflict(linkPath, ".opencode", targetDir, method);
     if (!fs.existsSync(linkPath)) {
       createLinkOrCopy(
         path.relative(targetDir, agentsTarget),
@@ -764,7 +766,7 @@ async function installHarnesses(targetDir, selections, method) {
 
   if (selections.includes("claude")) {
     const linkPath = path.join(targetDir, ".claude");
-    handleConflict(linkPath, ".claude", targetDir);
+    handleConflict(linkPath, ".claude", targetDir, method);
     if (!fs.existsSync(linkPath)) {
       createLinkOrCopy(
         path.relative(targetDir, agentsTarget),
@@ -811,6 +813,7 @@ async function installHarnesses(targetDir, selections, method) {
     if (!dryRun) {
       fs.mkdirSync(path.join(targetDir, ".windsurf"), { recursive: true });
     }
+    handleConflict(workflowsDir, "windsurf workflows", targetDir, method);
     if (!fs.existsSync(workflowsDir)) {
       createLinkOrCopy(
         path.relative(
@@ -824,7 +827,7 @@ async function installHarnesses(targetDir, selections, method) {
     }
 
     const windsurfRules = path.join(targetDir, ".windsurfrules");
-    handleConflict(windsurfRules, ".windsurfrules", targetDir);
+    handleConflict(windsurfRules, ".windsurfrules", targetDir, method);
     if (!fs.existsSync(windsurfRules)) {
       createLinkOrCopy(
         path.relative(targetDir, path.join(agentsTarget, "GUARDRAILS.md")),
@@ -840,6 +843,7 @@ async function installHarnesses(targetDir, selections, method) {
     if (!dryRun) {
       fs.mkdirSync(path.join(targetDir, ".kiro"), { recursive: true });
     }
+    handleConflict(steeringDir, "kiro steering", targetDir, method);
     if (!fs.existsSync(steeringDir)) {
       createLinkOrCopy(
         path.relative(
@@ -854,23 +858,30 @@ async function installHarnesses(targetDir, selections, method) {
   }
 }
 
-function handleConflict(linkPath, name, targetDir) {
-  if (!fs.existsSync(linkPath)) return;
-
+function handleConflict(linkPath, name, targetDir, method = "symlink") {
   try {
     const stat = fs.lstatSync(linkPath);
     if (stat.isSymbolicLink()) {
       const target = fs.readlinkSync(linkPath);
       if (
-        target === ".agents" ||
-        target.endsWith("/.agents") ||
-        target.includes(".agents/")
+        method === "symlink" &&
+        (target === ".agents" ||
+          target.endsWith("/.agents") ||
+          target.includes(".agents/") ||
+          target === path.join(os.homedir(), ".agents") ||
+          target === path.join(os.homedir(), ".agents", "skills") ||
+          target === path.join(os.homedir(), ".agents", "agents") ||
+          target === path.join(os.homedir(), ".agents", "GUARDRAILS.md"))
       ) {
         return;
       }
-      logWarn(`Symlink ${name} points to ${target}. Will overwrite.`);
+      logWarn(`Removing existing symlink ${name} to configure with ${method}.`);
       if (!dryRun) fs.unlinkSync(linkPath);
     } else {
+      if (method === "copy" && stat.isDirectory()) {
+        // If we want to copy to an existing directory, we enrich it directly
+        return;
+      }
       const backupPath = `${linkPath}.backup.${Date.now()}`;
       logWarn(
         `Existing ${name} found. Backing up to ${path.basename(backupPath)}`,
@@ -880,7 +891,9 @@ function handleConflict(linkPath, name, targetDir) {
       }
     }
   } catch (e) {
-    // ignore
+    if (e.code !== "ENOENT") {
+      // ignore
+    }
   }
 }
 
@@ -933,10 +946,9 @@ async function performGlobalInstall(selections, method, userNickname) {
 
   // Copy .agents/ to ~/.agents/
   if (!fs.existsSync(globalAgentsDir)) {
-    const tempDir = path.join(home, `.agents.tmp.${Date.now()}`);
-    fs.cpSync(AGENTS_SRC, tempDir, { recursive: true });
-    fs.renameSync(tempDir, globalAgentsDir);
+    fs.mkdirSync(globalAgentsDir, { recursive: true });
   }
+  fs.cpSync(AGENTS_SRC, globalAgentsDir, { recursive: true });
 
   // Write version file
   const versionPath = path.join(globalAgentsDir, ".vespyr-version");
@@ -976,11 +988,13 @@ async function performGlobalInstall(selections, method, userNickname) {
         transpileCopilotYAML(config.source, agentsDir);
       } else if (h === "windsurf") {
         const workflowsDir = path.join(globalTarget, "workflows");
+        handleConflict(workflowsDir, `${h} workflows`, home, method);
         if (!fs.existsSync(workflowsDir)) {
           createLinkOrCopy(config.source, workflowsDir, "dir", method);
         }
         // Also create .windsurfrules
         const windsurfRules = path.join(home, ".windsurfrules");
+        handleConflict(windsurfRules, ".windsurfrules", home, method);
         if (!fs.existsSync(windsurfRules)) {
           createLinkOrCopy(
             path.join(globalAgentsDir, "GUARDRAILS.md"),
@@ -991,12 +1005,14 @@ async function performGlobalInstall(selections, method, userNickname) {
         }
       } else if (h === "kiro") {
         const steeringDir = path.join(globalTarget, "steering");
+        handleConflict(steeringDir, `${h} steering`, home, method);
         if (!fs.existsSync(steeringDir)) {
           createLinkOrCopy(config.source, steeringDir, "dir", method);
         }
       }
     } else {
       // Simple dir symlinks (opencode, claude)
+      handleConflict(globalTarget, h, home, method);
       if (!fs.existsSync(globalTarget)) {
         createLinkOrCopy(config.source, globalTarget, "dir", method);
       }
@@ -1145,9 +1161,10 @@ async function performFreshInstall(targetDir, flags) {
   if (dryRun) {
     logDry(`Would copy .agents/ to ${agentsTarget}`);
   } else {
-    const tempDir = path.join(targetDir, `.agents.tmp.${Date.now()}`);
-    fs.cpSync(AGENTS_SRC, tempDir, { recursive: true });
-    fs.renameSync(tempDir, agentsTarget);
+    if (!fs.existsSync(agentsTarget)) {
+      fs.mkdirSync(agentsTarget, { recursive: true });
+    }
+    fs.cpSync(AGENTS_SRC, agentsTarget, { recursive: true });
     installed = true;
   }
 
@@ -1176,13 +1193,10 @@ async function performUpdate(targetDir, flags) {
     return;
   }
 
-  const tempDir = path.join(targetDir, `.agents.tmp.${Date.now()}`);
-  fs.cpSync(AGENTS_SRC, tempDir, { recursive: true });
-
-  if (fs.existsSync(agentsTarget)) {
-    fs.rmSync(agentsTarget, { recursive: true, force: true });
+  if (!fs.existsSync(agentsTarget)) {
+    fs.mkdirSync(agentsTarget, { recursive: true });
   }
-  fs.renameSync(tempDir, agentsTarget);
+  fs.cpSync(AGENTS_SRC, agentsTarget, { recursive: true });
 
   writeVersionFile(targetDir);
 
@@ -1201,29 +1215,386 @@ async function performUpdate(targetDir, flags) {
   if (fs.existsSync(path.join(targetDir, ".kiro", "steering")))
     installedHarnesses.push("kiro");
 
-  await installHarnesses(targetDir, installedHarnesses, "symlink");
+  // Detect method from existing installation
+  let method = "symlink";
+  const opencodePath = path.join(targetDir, ".opencode");
+  const claudePath = path.join(targetDir, ".claude");
+  try {
+    if (fs.existsSync(opencodePath)) {
+      const stat = fs.lstatSync(opencodePath);
+      if (!stat.isSymbolicLink()) method = "copy";
+    } else if (fs.existsSync(claudePath)) {
+      const stat = fs.lstatSync(claudePath);
+      if (!stat.isSymbolicLink()) method = "copy";
+    }
+  } catch (e) {}
+
+  await installHarnesses(targetDir, installedHarnesses, method);
 
   log(`  Updated from v${prevVersion || "unknown"} to v${VERSION}`);
   log(`  Harnesses recompiled: ${installedHarnesses.join(", ") || "none"}`);
   log(`  artifacts/ preserved.\n`);
 }
 
+function getExistingUserNickname(targetDir) {
+  const contextPath = path.join(targetDir, "artifacts", "memory", "project-context.md");
+  if (!fs.existsSync(contextPath)) {
+    return "User";
+  }
+  try {
+    const content = fs.readFileSync(contextPath, "utf8");
+    const match = content.match(/-\s+\*\*User Nickname\*\*:\s*(.*)/i);
+    if (match) {
+      return match[1].trim();
+    }
+  } catch (e) {}
+  return "User";
+}
+
+function updateUserNickname(targetDir, newNickname) {
+  const contextPath = path.join(targetDir, "artifacts", "memory", "project-context.md");
+  if (!fs.existsSync(contextPath)) return;
+  try {
+    let content = fs.readFileSync(contextPath, "utf8");
+    const updated = content.replace(/(-\s+\*\*User Nickname\*\*:\s*)(.*)/i, `$1${newNickname}`);
+    if (updated !== content) {
+      fs.writeFileSync(contextPath, updated, "utf8");
+    }
+  } catch (e) {}
+}
+
 async function performReconfigure(targetDir, flags) {
   log(`\n  Reconfiguring Vespyr in ${targetDir}...\n`);
 
+  // 1. Detect if it's a global installation
+  const agentsTarget = path.join(targetDir, ".agents");
+  let isGlobal = false;
+  const versionPath = path.join(agentsTarget, ".vespyr-version");
+  if (fs.existsSync(versionPath)) {
+    try {
+      const data = JSON.parse(fs.readFileSync(versionPath, "utf8"));
+      isGlobal = !!data.global;
+    } catch (e) {}
+  }
+  if (!isGlobal && targetDir === os.homedir()) {
+    isGlobal = true;
+  }
+
+  const getPath = (harness, localRel) => {
+    if (isGlobal) {
+      return getGlobalPath(harness);
+    }
+    return path.join(targetDir, localRel);
+  };
+
+  // Detect previously installed harnesses
+  let prevHarnesses = [];
+  if (fs.existsSync(getPath("opencode", ".opencode"))) prevHarnesses.push("opencode");
+  if (fs.existsSync(getPath("claude", ".claude"))) prevHarnesses.push("claude");
+  if (fs.existsSync(path.join(getPath("cursor", ".cursor"), "rules"))) prevHarnesses.push("cursor");
+  if (fs.existsSync(path.join(getPath("github", ".github"), "agents"))) prevHarnesses.push("github");
+  if (fs.existsSync(path.join(getPath("windsurf", ".windsurf"), "workflows"))) prevHarnesses.push("windsurf");
+  if (fs.existsSync(path.join(getPath("kiro", ".kiro"), "steering"))) prevHarnesses.push("kiro");
+
   let selections = flags.harnesses.length > 0 ? flags.harnesses : [];
+  let userNickname = getExistingUserNickname(targetDir);
+
   if (!flags.yes) {
     selections = await askChecklist(
       "Select harness integrations to configure:",
       HARNESS_OPTIONS,
+      false,
+      prevHarnesses
     );
+
+    const contextPath = path.join(targetDir, "artifacts", "memory", "project-context.md");
+    if (fs.existsSync(contextPath)) {
+      userNickname = await askQuestion(
+        "What should the agent squad call you? (e.g., Christian, Sarah)",
+        userNickname,
+      );
+      userNickname = userNickname.replace(/[^a-zA-Z0-9\s\-_.]/g, "") || "User";
+      updateUserNickname(targetDir, userNickname);
+    }
   }
 
-  await installHarnesses(targetDir, selections, "symlink");
+  // Detect method from existing installation
+  let method = "symlink";
+  const opencodePath = getPath("opencode", ".opencode");
+  const claudePath = getPath("claude", ".claude");
+  try {
+    if (fs.existsSync(opencodePath)) {
+      const stat = fs.lstatSync(opencodePath);
+      if (!stat.isSymbolicLink()) method = "copy";
+    } else if (fs.existsSync(claudePath)) {
+      const stat = fs.lstatSync(claudePath);
+      if (!stat.isSymbolicLink()) method = "copy";
+    }
+  } catch (e) {}
+
+  // Uninstall deselected harnesses
+  const removedHarnesses = prevHarnesses.filter(h => !selections.includes(h));
+  if (removedHarnesses.length > 0) {
+    uninstallHarnesses(targetDir, removedHarnesses, isGlobal);
+  }
+
+  await installHarnesses(targetDir, selections, method);
 
   log(
     `  Reconfiguration complete. Harnesses: ${selections.join(", ") || "core only"}\n`,
   );
+}
+
+function removeDirIfEmpty(dirPath) {
+  try {
+    if (fs.existsSync(dirPath)) {
+      const stat = fs.lstatSync(dirPath);
+      if (stat.isDirectory()) {
+        const files = fs.readdirSync(dirPath).filter(f => f !== ".DS_Store");
+        if (files.length === 0) {
+          fs.rmSync(dirPath, { recursive: true, force: true });
+        }
+      }
+    }
+  } catch (e) {
+    // ignore
+  }
+}
+
+function surgicallyCleanupAgentsDir(agentsTarget) {
+  if (!fs.existsSync(agentsTarget)) return;
+
+  try {
+    const stat = fs.lstatSync(agentsTarget);
+    if (stat.isSymbolicLink()) {
+      fs.unlinkSync(agentsTarget);
+      return;
+    }
+  } catch (e) {
+    return;
+  }
+
+  // Delete core agents
+  const agentsSrcDir = path.join(AGENTS_SRC, "agents");
+  const targetAgentsDir = path.join(agentsTarget, "agents");
+  if (fs.existsSync(agentsSrcDir) && fs.existsSync(targetAgentsDir)) {
+    try {
+      const coreAgents = fs.readdirSync(agentsSrcDir);
+      for (const agent of coreAgents) {
+        const targetAgentPath = path.join(targetAgentsDir, agent);
+        if (fs.existsSync(targetAgentPath)) {
+          fs.rmSync(targetAgentPath, { recursive: true, force: true });
+        }
+      }
+      removeDirIfEmpty(targetAgentsDir);
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  // Delete core skills
+  const skillsSrcDir = path.join(AGENTS_SRC, "skills");
+  const targetSkillsDir = path.join(agentsTarget, "skills");
+  if (fs.existsSync(skillsSrcDir) && fs.existsSync(targetSkillsDir)) {
+    try {
+      const coreSkills = fs.readdirSync(skillsSrcDir);
+      for (const skill of coreSkills) {
+        const targetSkillPath = path.join(targetSkillsDir, skill);
+        if (fs.existsSync(targetSkillPath)) {
+          fs.rmSync(targetSkillPath, { recursive: true, force: true });
+        }
+      }
+      removeDirIfEmpty(targetSkillsDir);
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  // Delete other core folders
+  const coreFolders = ["commands", "references", "scripts", "squads", "templates"];
+  for (const folder of coreFolders) {
+    const folderPath = path.join(agentsTarget, folder);
+    if (fs.existsSync(folderPath)) {
+      fs.rmSync(folderPath, { recursive: true, force: true });
+    }
+  }
+
+  // Delete core files
+  const coreFiles = [
+    "GUARDRAILS.md",
+    "TROUBLESHOOTING.md",
+    "delegation-pattern.md",
+    "skills.md",
+    "workflow.md",
+    ".vespyr-version",
+    ".gitignore",
+    ".DS_Store"
+  ];
+  for (const file of coreFiles) {
+    const filePath = path.join(agentsTarget, file);
+    if (fs.existsSync(filePath)) {
+      try {
+        fs.unlinkSync(filePath);
+      } catch (e) {}
+    }
+  }
+
+  // Delete the directory if it is empty
+  removeDirIfEmpty(agentsTarget);
+}
+
+function uninstallHarnesses(targetDir, harnesses, isGlobal) {
+  const home = os.homedir();
+  const getPath = (harness, localRel) => {
+    if (isGlobal) {
+      return getGlobalPath(harness);
+    }
+    return path.join(targetDir, localRel);
+  };
+
+  for (const h of harnesses) {
+    if (h === "opencode") {
+      const opencodePath = getPath("opencode", ".opencode");
+      if (fs.existsSync(opencodePath)) {
+        surgicallyCleanupAgentsDir(opencodePath);
+      }
+    }
+
+    if (h === "claude") {
+      const claudePath = getPath("claude", ".claude");
+      if (fs.existsSync(claudePath)) {
+        surgicallyCleanupAgentsDir(claudePath);
+      }
+    }
+
+    if (h === "cursor") {
+      const cursorTargetDir = getPath("cursor", ".cursor");
+      if (fs.existsSync(cursorTargetDir)) {
+        const rulesDir = path.join(cursorTargetDir, "rules");
+        if (fs.existsSync(rulesDir)) {
+          try {
+            const stat = fs.lstatSync(rulesDir);
+            if (stat.isSymbolicLink()) {
+              fs.unlinkSync(rulesDir);
+            } else {
+              const agentsSrcDir = path.join(AGENTS_SRC, "agents");
+              if (fs.existsSync(agentsSrcDir)) {
+                const coreAgents = fs.readdirSync(agentsSrcDir).filter(f => f.endsWith(".md"));
+                for (const agent of coreAgents) {
+                  const name = path.basename(agent, ".md");
+                  const mdcFile = path.join(rulesDir, `${name}.mdc`);
+                  if (fs.existsSync(mdcFile)) {
+                    fs.unlinkSync(mdcFile);
+                  }
+                }
+              }
+              removeDirIfEmpty(rulesDir);
+            }
+          } catch (e) {}
+        }
+        removeDirIfEmpty(cursorTargetDir);
+      }
+    }
+
+    if (h === "github") {
+      const githubTargetDir = getPath("github", ".github");
+      if (fs.existsSync(githubTargetDir)) {
+        const agentsDir = path.join(githubTargetDir, "agents");
+        if (fs.existsSync(agentsDir)) {
+          try {
+            const stat = fs.lstatSync(agentsDir);
+            if (stat.isSymbolicLink()) {
+              fs.unlinkSync(agentsDir);
+            } else {
+              const agentsSrcDir = path.join(AGENTS_SRC, "agents");
+              if (fs.existsSync(agentsSrcDir)) {
+                const coreAgents = fs.readdirSync(agentsSrcDir).filter(f => f.endsWith(".md"));
+                for (const agent of coreAgents) {
+                  const name = path.basename(agent, ".md");
+                  const ymlFile = path.join(agentsDir, `${name}.yml`);
+                  if (fs.existsSync(ymlFile)) {
+                    fs.unlinkSync(ymlFile);
+                  }
+                }
+              }
+              removeDirIfEmpty(agentsDir);
+            }
+          } catch (e) {}
+        }
+
+        const copilotInstructions = path.join(githubTargetDir, "copilot-instructions.md");
+        if (fs.existsSync(copilotInstructions)) {
+          try {
+            fs.unlinkSync(copilotInstructions);
+          } catch (e) {}
+        }
+
+        removeDirIfEmpty(githubTargetDir);
+      }
+    }
+
+    if (h === "windsurf") {
+      const windsurfTargetDir = getPath("windsurf", ".windsurf");
+      if (fs.existsSync(windsurfTargetDir)) {
+        const workflowsDir = path.join(windsurfTargetDir, "workflows");
+        if (fs.existsSync(workflowsDir)) {
+          try {
+            const stat = fs.lstatSync(workflowsDir);
+            if (stat.isSymbolicLink()) {
+              fs.unlinkSync(workflowsDir);
+            } else {
+              const skillsSrcDir = path.join(AGENTS_SRC, "skills");
+              if (fs.existsSync(skillsSrcDir)) {
+                const coreSkills = fs.readdirSync(skillsSrcDir);
+                for (const skill of coreSkills) {
+                  const skillPath = path.join(workflowsDir, skill);
+                  if (fs.existsSync(skillPath)) {
+                    fs.rmSync(skillPath, { recursive: true, force: true });
+                  }
+                }
+              }
+              removeDirIfEmpty(workflowsDir);
+            }
+          } catch (e) {}
+        }
+        removeDirIfEmpty(windsurfTargetDir);
+      }
+      const windsurfRulesPath = isGlobal ? path.join(home, ".windsurfrules") : path.join(targetDir, ".windsurfrules");
+      if (fs.existsSync(windsurfRulesPath)) {
+        try {
+          fs.unlinkSync(windsurfRulesPath);
+        } catch (e) {}
+      }
+    }
+
+    if (h === "kiro") {
+      const kiroTargetDir = getPath("kiro", ".kiro");
+      if (fs.existsSync(kiroTargetDir)) {
+        const steeringDir = path.join(kiroTargetDir, "steering");
+        if (fs.existsSync(steeringDir)) {
+          try {
+            const stat = fs.lstatSync(steeringDir);
+            if (stat.isSymbolicLink()) {
+              fs.unlinkSync(steeringDir);
+            } else {
+              const agentsSrcDir = path.join(AGENTS_SRC, "agents");
+              if (fs.existsSync(agentsSrcDir)) {
+                const coreAgents = fs.readdirSync(agentsSrcDir).filter(f => f.endsWith(".md"));
+                for (const agent of coreAgents) {
+                  const targetAgentPath = path.join(steeringDir, agent);
+                  if (fs.existsSync(targetAgentPath)) {
+                    fs.rmSync(targetAgentPath, { recursive: true, force: true });
+                  }
+                }
+              }
+              removeDirIfEmpty(steeringDir);
+            }
+          } catch (e) {}
+        }
+        removeDirIfEmpty(kiroTargetDir);
+      }
+    }
+  }
 }
 
 async function performUninstall(targetDir) {
@@ -1237,69 +1608,35 @@ async function performUninstall(targetDir) {
     return;
   }
 
+  // 1. Detect if it's a global installation
   const agentsTarget = path.join(targetDir, ".agents");
-  if (fs.existsSync(agentsTarget)) {
-    fs.rmSync(agentsTarget, { recursive: true, force: true });
-  }
-
-  const symlinksToRemove = [".opencode", ".claude", ".windsurfrules"];
-  for (const link of symlinksToRemove) {
-    const linkPath = path.join(targetDir, link);
-    if (fs.existsSync(linkPath)) {
-      try {
-        const stat = fs.lstatSync(linkPath);
-        if (stat.isSymbolicLink()) {
-          fs.unlinkSync(linkPath);
-        }
-      } catch (e) {
-        /* ignore */
-      }
-    }
-  }
-
-  const dirsToRemove = [
-    ".cursor/rules",
-    ".github/agents",
-    ".windsurf/workflows",
-    ".kiro/steering",
-  ];
-  for (const dir of dirsToRemove) {
-    const dirPath = path.join(targetDir, dir);
-    if (fs.existsSync(dirPath)) {
-      try {
-        const stat = fs.lstatSync(dirPath);
-        if (stat.isSymbolicLink()) {
-          fs.unlinkSync(dirPath);
-        } else {
-          fs.rmSync(dirPath, { recursive: true, force: true });
-        }
-      } catch (e) {
-        /* ignore */
-      }
-    }
-  }
-
-  const copilotInstructions = path.join(
-    targetDir,
-    ".github",
-    "copilot-instructions.md",
-  );
-  if (fs.existsSync(copilotInstructions)) {
+  let isGlobal = false;
+  const versionPath = path.join(agentsTarget, ".vespyr-version");
+  if (fs.existsSync(versionPath)) {
     try {
-      const stat = fs.lstatSync(copilotInstructions);
-      if (stat.isSymbolicLink()) {
-        fs.unlinkSync(copilotInstructions);
-      }
-    } catch (e) {
-      /* ignore */
-    }
+      const data = JSON.parse(fs.readFileSync(versionPath, "utf8"));
+      isGlobal = !!data.global;
+    } catch (e) {}
+  }
+  if (!isGlobal && targetDir === os.homedir()) {
+    isGlobal = true;
   }
 
+  // 2. Surgically cleanup .agents directory
+  surgicallyCleanupAgentsDir(agentsTarget);
+
+  // 3. Clean up all harness files/folders surgically
+  const allHarnesses = ["opencode", "claude", "cursor", "github", "windsurf", "kiro"];
+  uninstallHarnesses(targetDir, allHarnesses, isGlobal);
+
+  // 4. Delete core root documents
   const filesToRemove = ["AGENTS.md", "agent.md", "CLAUDE.md"];
   for (const file of filesToRemove) {
     const filePath = path.join(targetDir, file);
     if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
+      try {
+        fs.unlinkSync(filePath);
+      } catch (e) {}
     }
   }
 
@@ -1449,11 +1786,6 @@ Examples:
 
   let targetDir = flags.target ? path.resolve(flags.target) : process.cwd();
 
-  if (flags.target && !fs.existsSync(targetDir)) {
-    logError(`The specified path does not exist: ${targetDir}`);
-    process.exit(1);
-  }
-
   const state = detectState(targetDir);
 
   try {
@@ -1524,6 +1856,14 @@ module.exports = {
   getInstalledVersion,
   updatePathsInDir,
   printSummary,
+  handleConflict,
+  performUninstall,
+  surgicallyCleanupAgentsDir,
+  removeDirIfEmpty,
+  getExistingUserNickname,
+  updateUserNickname,
+  uninstallHarnesses,
+  performReconfigure,
   ASCII_ART,
   VERSION,
   HARNESS_OPTIONS,
