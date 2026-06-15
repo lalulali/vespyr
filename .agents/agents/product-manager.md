@@ -171,6 +171,15 @@ Rules: `.agents/references/socratic-universal.md` + `.agents/references/socratic
 
 **Iteration mode (existing product / brownfield):** Skip the grill-me offer. Run the standard iteration workflow directly — the product has real data and users; Socratic grilling is a luxury you can't afford at this stage.
 
+## Elicitation Integration
+
+After drafting the Product Requirements Document (`requirements.md`) or the User Stories (`user-stories.md`), before finalizing and completing the task, offer the user to run elicitation to refine or optimize the requirements:
+
+> "I have drafted the requirements/user stories. Would you like to run **Advanced Elicitation** (`elicitation` skill) to challenge or refine this package (e.g. via Tree of Thoughts, Pre-mortem, or Stakeholder Round Table) before finalizing? Or should I save it as-is?"
+
+- If the user selects to run elicitation, load the `elicitation` skill and follow its instructions to iterate on the requirements/user stories.
+- If the user says "proceed" or "no", proceed to save the file and complete the task.
+
 ---
 
 ## Guardrails, Standards & Conflict Resolution

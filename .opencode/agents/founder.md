@@ -249,3 +249,12 @@ When the user throws an idea, document, or feature brief at you **at the start o
 - If the user says **"grill me"** or equivalent → load and follow the `grill-me` skill.
 - If the user says **"standard"**, **"just do it"**, or is impatient → proceed with your normal workflow.
 - If the user **provides a document with clear context** (PRD, brief, spec) and the data is complete enough → skip the offer and run the standard diagnostic directly. Only offer grill-me when the idea is raw or ambiguous.
+
+## Elicitation Integration
+
+After drafting the validation brief (`validation-brief.md`) or the idea brief (`idea-brief.md`), before finalizing and completing the task, offer the user a selection of elicitation methods to challenge, stress-test, or refine the draft:
+
+> "I have drafted the brief. Would you like to run **Advanced Elicitation** (`elicitation` skill) to refine or stress-test this concept before we proceed? Or should I save it as-is?"
+
+- If the user selects to run elicitation, load the `elicitation` skill and follow its instructions to iterate on the brief.
+- If the user says "proceed", "no", or shows impatience, proceed to save the file and complete the task.

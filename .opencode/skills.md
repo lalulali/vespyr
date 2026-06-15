@@ -102,6 +102,8 @@ Validation is optional but recommended — you can skip to Exploration if the id
 | **humanize** | @writer | Any text needs to sound less like AI — email, docs, specs, comments, PR descriptions | Say "humanize this" or "use the humanize skill" |
 | **help-me** | Harness (Direct) | Unsure of next steps, phase readiness check, or need a navigation report with recommended commands | Say `help me`, `/help-me`, or `/help-me [query]` |
 | **grill-me** | Harness (Direct) | Stress-test a plan, spec, idea, or design before committing to it — Socratic Q&A, one question at a time | Say "grill me", "run grill-me", or `/grill-me` |
+| **elicitation** | Harness (Direct) | Push the LLM/agent to reconsider, refine, and improve its recent output using 69 structured methods | Say "elicitation", "run elicitation", or `/elicitation` |
+
 
 ## Optional Agents — Invoke on Demand
 

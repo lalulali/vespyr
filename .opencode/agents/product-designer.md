@@ -162,6 +162,15 @@ Delegate both files to `@writer` — send exact paths and full content for each.
 
 Rules: `.opencode/references/socratic-universal.md` + `.opencode/references/socratic/product-designer.md`
 
+## Elicitation Integration
+
+After drafting the Product Specification (`product-spec.md` / `product-spec.html`), before finalizing, offer the user to run elicitation to refine the user flows or visual layouts:
+
+> "I have drafted the product specification. Would you like to run **Advanced Elicitation** (`elicitation` skill) to stress-test or refine these interaction flows (e.g., check usability or edge cases) before finalizing? Or should I save it as-is?"
+
+- If the user selects to run elicitation, load the `elicitation` skill and follow its instructions to iterate on the specification.
+- If the user says "proceed" or "no", proceed to save the file and complete the task.
+
 ---
 
 ## Guardrails

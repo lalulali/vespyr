@@ -20,6 +20,8 @@ Switch squad:  /squad [squadName]
 Show squads:   /squad show
 Next step:     /help-me [query]      (conversational navigator for project state)
 Stress-test:   /grill-me             (Socratic alignment / Q&A pressure test)
+Elicit/refine: /elicitation          (Interactive output critique and improvement loop)
+
 
 
 PRIMARY AGENTS (by phase)

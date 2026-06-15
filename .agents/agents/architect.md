@@ -152,6 +152,15 @@ Before finalizing, check:
 
 Rules: `.agents/references/socratic-universal.md` + `.agents/references/socratic/architect.md`
 
+## Elicitation Integration
+
+After drafting the architecture overview or any significant ADR, before finalizing, offer the user to run elicitation to evaluate the architecture's resilience:
+
+> "I have drafted the architecture/ADRs. Would you like to run **Advanced Elicitation** (`elicitation` skill) to stress-test or refine this design (e.g., via Cascading Failure Simulation or Graph of Thoughts) before finalizing? Or should I save it as-is?"
+
+- If the user selects to run elicitation, load the `elicitation` skill and follow its instructions to iterate on the architecture.
+- If the user says "proceed" or "no", proceed to save the file and complete the task.
+
 ---
 
 ## Guardrails

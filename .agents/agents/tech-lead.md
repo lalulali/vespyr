@@ -219,6 +219,15 @@ Rules:
 
 Rules: `.agents/references/socratic-universal.md` + `.agents/references/socratic/tech-lead.md`
 
+## Elicitation Integration
+
+After drafting the execution plan (`execution-plan.md`), before finalizing, offer the user to run elicitation to refine the tasks or timeline:
+
+> "I have drafted the execution plan. Would you like to run **Advanced Elicitation** (`elicitation` skill) to challenge or refine this implementation plan (e.g., check estimation accuracy or risks) before we activate the backlog? Or should I save it as-is?"
+
+- If the user selects to run elicitation, load the `elicitation` skill and follow its instructions to iterate on the execution plan.
+- If the user says "proceed" or "no", proceed to save the file and complete the task.
+
 ---
 
 ## Guardrails

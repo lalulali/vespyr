@@ -171,6 +171,55 @@ Rules: `.opencode/references/socratic-universal.md` + `.opencode/references/socr
 
 **Iteration mode (existing product / brownfield):** Skip the grill-me offer. Run the standard iteration workflow directly — the product has real data and users; Socratic grilling is a luxury you can't afford at this stage.
 
+## Elicitation Integration
+
+After drafting the Product Requirements Document (`requirements.md`) or the User Stories (`user-stories.md`), before finalizing and completing the task, offer the user to run elicitation to refine or optimize the requirements:
+
+> "I have drafted the requirements/user stories. Would you like to run **Advanced Elicitation** (`elicitation` skill) to challenge or refine this package (e.g. via Tree of Thoughts, Pre-mortem, or Stakeholder Round Table) before finalizing? Or should I save it as-is?"
+
+- If the user selects to run elicitation, load the `elicitation` skill and follow its instructions to iterate on the requirements/user stories.
+- If the user says "proceed" or "no", proceed to save the file and complete the task.
+
+---
+
+## Success Metrics Builder
+
+When defining success criteria for the product or features (such as in step 6 of Creation Mode or when coordinating with `@data-analyst`), use the WDS Metrics Builder framework:
+ 
+1. **Classify Success Criteria into four distinct dimensions**:
+   - **Business Metrics**: e.g., revenue, conversion rates, customer retention, unit economics.
+   - **User Metrics**: e.g., feature adoption, engagement, activation rate, NPS / user satisfaction.
+   - **Technical/Experience Metrics**: e.g., page load/latency, system uptime, API response times, error rates.
+   - **Timeline Milestones**: e.g., target release dates, phase progression.
+
+2. **Differentiate between Goals and Metrics**:
+   - **Visionary/Business Goal**: Aspirational and motivating (e.g., "Work smarter").
+   - **SMART Objective/Metric**: Measurable targets supporting the visionary goal (e.g., "Reduce admin support calls by 40%").
+   - Always map visionary goals (e.g. primary outcomes and prerequisites) to at least 3 measurable objectives each (3x3 Goals-to-Objectives mapping structure).
+
+3. **Conversational Refinement to SMART Format**:
+   - Avoid asking the user generic questions like "What are your success criteria?".
+   - Facilitate a dialogue to naturally transform vague goals (e.g., "Get influential users") into SMART format:
+     - **Specific**: What exactly is being targeted?
+     - **Measurable**: What is the target number or metric?
+     - **Achievable**: Is it realistic?
+     - **Relevant**: Does it align with the vision/business model?
+     - **Time-bound**: By when? (e.g., "Onboard 10 verified influencers with 1000+ followers by Q4 2026").
+
+4. **Structured Metric Classification & Typology**:
+   - **Primary, Secondary, and Guardrail Metrics**:
+     - *Primary Metric*: The North Star metric directly reflecting the core value of the feature or product (e.g., checkout completion rate).
+     - *Secondary Metrics*: Supporting indicators showing how the primary metric is achieved (e.g., average order value, add-to-cart rate).
+     - *Guardrail Metrics*: Metrics to protect business safety, technical health, or UX from negative side-effects of optimizing the primary metric (e.g., page load latency, transaction failure rates, refund rates).
+   - **Leading vs. Lagging Metrics**:
+     - *Leading Metrics*: Predictive indicators that signal future outcomes (e.g., daily active users, checkout funnel drop-offs).
+     - *Lagging Metrics*: Historical indicators confirming final outcomes (e.g., monthly transaction volume, customer churn).
+   - **L1 (Level 1) vs. L2 (Level 2) Metrics**:
+     - *L1*: High-level executive KPIs directly tied to business value (e.g., monthly revenue).
+     - *L2*: Operational, input-level metrics that drive the L1 metrics (e.g., average payment processing success rate).
+   - **Proxy Metrics**: Practical, near-term measurements used as stand-ins for critical long-term outcomes that are slow or hard to measure (e.g., measuring "saving a payment method" as a proxy for long-term customer repeat transaction rate).
+   - **Vanity Metrics (Avoid)**: Metrics that look impressive on paper but do not correlate with business value or drive actionable decisions (e.g., total app downloads, page views). Focus instead on actionable metrics.
+
 ---
 
 ## Guardrails, Standards & Conflict Resolution
