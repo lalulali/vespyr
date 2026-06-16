@@ -864,6 +864,17 @@ async function installHarnesses(targetDir, selections, method) {
 			);
 		}
 	}
+
+	if (!selections.includes("opencode")) {
+		const targetCommands = path.join(agentsTarget, "commands");
+		if (fs.existsSync(targetCommands)) {
+			if (!dryRun) {
+				fs.rmSync(targetCommands, { recursive: true, force: true });
+			} else {
+				logDry(`Would remove commands folder from ${agentsTarget} because opencode is not selected`);
+			}
+		}
+	}
 }
 
 function handleConflict(linkPath, name, targetDir, method = "symlink") {
@@ -966,6 +977,13 @@ async function performGlobalInstall(selections, method, userNickname) {
 		global: true,
 	};
 	fs.writeFileSync(versionPath, JSON.stringify(data, null, 2));
+
+	if (!selections.includes("opencode")) {
+		const globalCommands = path.join(globalAgentsDir, "commands");
+		if (fs.existsSync(globalCommands)) {
+			fs.rmSync(globalCommands, { recursive: true, force: true });
+		}
+	}
 
 	// Create harness links at global paths
 	const harnessLinkMap = {

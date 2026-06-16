@@ -25,6 +25,7 @@ function getDocType(relPath) {
   if (relPath.includes('08-incidents')) return 'incident';
   if (relPath.includes('09-retro')) return 'retrospective';
   if (relPath.includes('artifacts/memory')) return 'memory';
+  if (relPath.includes('artifacts/input')) return 'input';
   return 'document';
 }
 
@@ -140,7 +141,8 @@ function scanDirectory(dir, projectRoot, nodes = []) {
 function buildGraph(projectRoot) {
   const rawNodes = [];
   
-  // Scan output and memory directories
+  // Scan input, output and memory directories
+  scanDirectory(path.resolve(projectRoot, 'artifacts/input'), projectRoot, rawNodes);
   scanDirectory(path.resolve(projectRoot, 'artifacts/output'), projectRoot, rawNodes);
   scanDirectory(path.resolve(projectRoot, 'artifacts/memory'), projectRoot, rawNodes);
 
@@ -165,6 +167,8 @@ function buildGraph(projectRoot) {
           edgeType = 'traces_to';
         } else if (node.path.includes('adr') && target.includes('requirements')) {
           edgeType = 'aligns_with';
+        } else if (!node.path.includes('artifacts/input') && target.includes('artifacts/input')) {
+          edgeType = 'derived_from';
         }
 
         edges.push({

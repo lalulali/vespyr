@@ -906,6 +906,28 @@ describe('Test 16: Reconfiguration harness removal', () => {
     // claude (selected) should still exist
     assert.strictEqual(fs.existsSync(claudePath), true);
   });
+
+  it('should remove commands folder from .agents if opencode is not selected', async () => {
+    const agentsTarget = path.join(tmpDir, '.agents');
+    fs.mkdirSync(agentsTarget);
+    fs.mkdirSync(path.join(agentsTarget, 'agents'));
+    fs.mkdirSync(path.join(agentsTarget, 'commands'));
+    fs.writeFileSync(path.join(agentsTarget, 'agents', 'founder.md'), 'core agent');
+    fs.writeFileSync(path.join(agentsTarget, 'commands', 'init.md'), 'init command');
+    fs.writeFileSync(path.join(agentsTarget, '.vespyr-version'), JSON.stringify({ version: '1.7.0' }));
+
+    // Setup Claude Code (symlink/directory)
+    const claudePath = path.join(tmpDir, '.claude');
+    fs.mkdirSync(claudePath);
+    fs.writeFileSync(path.join(claudePath, '.vespyr-version'), JSON.stringify({ version: '1.7.0' }));
+
+    // Run reconfigure with only claude (excluding opencode)
+    const { performReconfigure } = require('../bin/cli.js');
+    await performReconfigure(tmpDir, { harnesses: ['claude'], yes: true });
+
+    // commands folder should be removed from .agents
+    assert.strictEqual(fs.existsSync(path.join(agentsTarget, 'commands')), false);
+  });
 });
 
 describe('Test 17: End-to-End Installation, Update, Reconfiguration, and Uninstallation Scenarios', () => {

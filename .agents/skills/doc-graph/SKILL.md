@@ -53,5 +53,5 @@ If status is `regenerated`, mention it explicitly — the user paid for a scan.
 
 ## Key Principles
 - **Self-Healing After Phase Work**: The orchestrator's `init` command seeds the doc-graph when a project starts, and `complete` records the current graph status as telemetry. The `design` and `retro` skills also call the wrapper at the end of their work. You do not need to pre-warm it for them.
-- **Traceability Bridge**: Establishes edges that cross-reference User Story IDs (`US-XXX`), Requirement IDs (`REQ-XXX`), and relative codebase paths (e.g. `src/services/auth.js`) to form a complete Federated Graph.
+- **Traceability Bridge**: Establishes edges that cross-reference User Story IDs (`US-XXX`), Requirement IDs (`REQ-XXX`), and relative codebase paths (e.g. `src/services/auth.js`) to form a complete Federated Graph. It also distinguishes raw user sources (`type: "input"`) from AI-generated files, linking the latter back to their human origins using `derived_from` edges.
 - **Query the Graph, Not the Files**: When you need to find which user story implements a requirement, or which ADR constrains a code module, read `artifacts/memory/structural/doc-graph.json` and traverse the edges — do not grep the markdown files. This is the whole point of the graph: it exists so agents don't burn tokens re-reading every doc to find the right one.

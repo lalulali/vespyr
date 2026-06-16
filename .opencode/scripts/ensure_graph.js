@@ -88,6 +88,7 @@ function maxMtimeOfSources(srcDirs) {
 function maxMtimeOfDocs() {
   const ignore = new Set(['node_modules', '.git', 'archive', 'telemetry', '.opencode']);
   const roots = [
+    path.join(PROJECT_ROOT, 'artifacts', 'input'),
     path.join(PROJECT_ROOT, 'artifacts', 'memory'),
     path.join(PROJECT_ROOT, 'artifacts', 'output')
   ];
