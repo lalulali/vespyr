@@ -333,6 +333,20 @@
     "key_agents": []
   },
   {
+    "name": "round-table",
+    "description": "Orchestrates multi-agent roundtable discussions based on their perspective and stage of development",
+    "prerequisites": [],
+    "outputs": [],
+    "key_agents": [
+      "@founder",
+      "@product-manager",
+      "@product-designer",
+      "@architect",
+      "@tech-lead",
+      "@developer"
+    ]
+  },
+  {
     "name": "squad",
     "description": "Show available agent squads, switch active squad, and initialize the team preset",
     "prerequisites": [],

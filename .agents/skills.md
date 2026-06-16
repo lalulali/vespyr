@@ -103,6 +103,7 @@ Validation is optional but recommended — you can skip to Exploration if the id
 | **help-me** | Harness (Direct) | Unsure of next steps, phase readiness check, or need a navigation report with recommended commands | Say `help me`, `/help-me`, or `/help-me [query]` |
 | **grill-me** | Harness (Direct) | Stress-test a plan, spec, idea, or design before committing to it — Socratic Q&A, one question at a time | Say "grill me", "run grill-me", or `/grill-me` |
 | **elicitation** | Harness (Direct) | Push the LLM/agent to reconsider, refine, and improve its recent output using 69 structured methods | Say "elicitation", "run elicitation", or `/elicitation` |
+| **round-table** | Harness (Direct) | Multi-agent roundtable discussions based on their perspective and stage of development | Say "round-table", "run roundtable", or `/round-table` |
 
 
 ## Optional Agents — Invoke on Demand
