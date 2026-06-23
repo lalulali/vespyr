@@ -1,6 +1,6 @@
 # Vespyr: The AI Agent Team for Product Development
 
-![Vespyr Version](https://img.shields.io/badge/version-1.7.0-blue)
+![Vespyr Version](https://img.shields.io/badge/version-1.8.0-blue)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Most AI coding assistants struggle because they are asked to do everything at once. They build before they design, skip writing tests, and lose context as files grow.
@@ -21,19 +21,18 @@ Vespyr divides the software development lifecycle into clean, sequential gates:
 
 ---
 
-## 🚀 Easy Installation with `bin/cli.js`
+## 🚀 Easy Installation
 
-Vespyr comes with an interactive CLI setup wizard that configures the agent engine for your preferred environment.
+Vespyr comes with an interactive CLI setup wizard that configures the agent engine for your preferred developer environment.
 
-To install Vespyr into your target project:
+To install Vespyr into your project:
 
 ```bash
-# Clone the repository
-git clone https://github.com/lalulali/vespyr.git
-cd vespyr
+# Add to your project dependencies
+npm install vespyr
 
-# Run the installer
-node bin/cli.js
+# Run the setup wizard
+npx vespyr
 ```
 
 ### What the installer does:
@@ -45,6 +44,8 @@ node bin/cli.js
    * **Windsurf**: Maps workflows to `.windsurf/workflows` and rules to `.windsurfrules`
    * **GitHub Copilot**: Transpiles instructions into `.github/agents/*.yml`
    * **Kiro**: Scaffolds `.kiro/steering/` manual agent folders
+   * **Hermes Agent**: Links skills to `.hermes/skills`
+   * **OpenClaw**: Scaffolds `.openclaw/workspace/`
    * **OpenCode**: Links `.opencode` to your local agent directory
 
 ### CLI Flags
@@ -53,13 +54,13 @@ You can bypass the wizard and automate the setup using command-line flags:
 
 ```bash
 # Install with defaults for Cursor and Claude Code in a specific directory
-node bin/cli.js --yes --target /path/to/my-project --harness cursor,claude
+npx vespyr --yes --target /path/to/my-project --harness cursor,claude
 
 # Sync agent documentation definitions
-node bin/cli.js --sync-docs
+npx vespyr --sync-docs
 
 # Dry run to see what would change
-node bin/cli.js --dry-run
+npx vespyr --dry-run
 ```
 
 ---
