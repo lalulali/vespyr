@@ -65,6 +65,68 @@ const HARNESS_OPTIONS = [
 	},
 ];
 
+// Each spec describes a target folder/file that should be a symlink
+// pointing into the canonical .agents/ directory. Used by the
+// copy→symlink migration flow.
+const HARNESS_SYMLINK_SPECS = [
+	{
+		id: "opencode",
+		label: ".opencode (opencode harness)",
+		target: ".opencode",
+		source: ".agents",
+		type: "dir",
+	},
+	{
+		id: "claude",
+		label: ".claude (Claude Code harness)",
+		target: ".claude",
+		source: ".agents",
+		type: "dir",
+	},
+	{
+		id: "kiro",
+		label: ".kiro/steering (Kiro steering)",
+		target: ".kiro/steering",
+		source: ".agents/agents",
+		type: "dir",
+	},
+	{
+		id: "windsurf-workflows",
+		label: ".windsurf/workflows (Windsurf)",
+		target: ".windsurf/workflows",
+		source: ".agents/skills",
+		type: "dir",
+	},
+	{
+		id: "windsurf-rules",
+		label: ".windsurfrules (Windsurf rules)",
+		target: ".windsurfrules",
+		source: ".agents/GUARDRAILS.md",
+		type: "file",
+	},
+	{
+		id: "hermes",
+		label: ".hermes/skills (Hermes Agent)",
+		target: ".hermes/skills",
+		source: ".agents/skills",
+		type: "dir",
+	},
+	{
+		id: "openclaw-skills",
+		label: ".openclaw/workspace/skills (OpenClaw)",
+		target: ".openclaw/workspace/skills",
+		source: ".agents/skills",
+		type: "dir",
+	},
+	{
+		id: "openclaw-agents",
+		label: ".openclaw/workspace/AGENTS.md (OpenClaw)",
+		target: ".openclaw/workspace/AGENTS.md",
+		source: "AGENTS.md",
+		type: "file",
+	},
+];
+
 let createdLinks = [];
 let installed = false;
 let dryRun = false;
@@ -132,29 +194,24 @@ function parseFlags(argv) {
 }
 
 function detectState(targetDir) {
-	const opencodePath = path.join(targetDir, ".opencode");
 	const agentsPath = path.join(targetDir, ".agents");
 	const versionPath = path.join(agentsPath, ".vespyr-version");
-
-	const opencodeExists = fs.existsSync(opencodePath);
-	const agentsExists = fs.existsSync(agentsPath) && fs.existsSync(versionPath);
-
-	if (agentsExists) {
+	if (fs.existsSync(agentsPath) && fs.existsSync(versionPath)) {
 		return "installed";
 	}
-
-	if (opencodeExists) {
-		try {
-			const stat = fs.lstatSync(opencodePath);
-			if (!stat.isSymbolicLink()) {
-				return "migrate";
-			}
-		} catch (e) {
-			// ignore
-		}
-	}
-
 	return "fresh";
+}
+
+function detectUnlinkedHarnesses(targetDir) {
+	return HARNESS_SYMLINK_SPECS.filter((spec) => {
+		const target = path.join(targetDir, spec.target);
+		try {
+			const stat = fs.lstatSync(target);
+			return !stat.isSymbolicLink();
+		} catch (e) {
+			return false;
+		}
+	});
 }
 
 function parseFrontmatter(content) {
@@ -2202,84 +2259,110 @@ async function performUninstall(targetDir) {
 	log(`  Uninstall complete. artifacts/ preserved.\n`);
 }
 
-async function performMigration(targetDir, flags) {
+async function performCopyToSymlinkMigration(targetDir, flags) {
+	const unlinked = detectUnlinkedHarnesses(targetDir);
+
+	if (unlinked.length === 0) {
+		log(`\n  No copy-style harness folders detected. Nothing to migrate.\n`);
+		return;
+	}
+
 	log(`\n============================================================`);
-	log(`   VESPYR v${VERSION} — Migration Detected`);
+	log(`   VESPYR v${VERSION} — Copy → Symlink Migration`);
 	log(`============================================================`);
-	log(`An existing .opencode/ directory was found. This appears to be`);
-	log(`a pre-v1.7.0 Vespyr installation (cloned repo style).`);
-	log(``);
-	log(`Vespyr v1.7.0 uses .agents/ as the canonical folder with`);
-	log(`optional harness symlinks. We can migrate your setup.\n`);
+	log(`Detected ${unlinked.length} harness folder(s) that are currently`);
+	log(`copies but should be symlinks into .agents/.\n`);
 
 	if (flags.yes) {
-		await executeMigration(targetDir);
+		await executeCopyToSymlinkMigration(targetDir, unlinked.map((s) => s.id));
 		return;
 	}
 
-	const choice = await askSingleChoice("Select an action:", [
-		"Migrate (Rename .opencode/ to .agents/, create .opencode symlink)",
-		"Fresh install (Back up .opencode/ to .opencode.backup/, start fresh)",
-		"Cancel (Keep everything as-is)",
-	]);
+	const options = unlinked.map((spec) => ({ id: spec.id, label: spec.label }));
+	const initialSelections = unlinked.map((s) => s.id);
 
-	if (choice === 0) {
-		await executeMigration(targetDir);
-	} else if (choice === 1) {
-		const backupPath = path.join(targetDir, `.opencode.backup.${Date.now()}`);
-		if (!dryRun) {
-			fs.renameSync(path.join(targetDir, ".opencode"), backupPath);
-		}
-		log(`  Backed up .opencode/ to ${path.basename(backupPath)}`);
-		await performFreshInstall(targetDir, flags);
-	} else {
-		log(`  Migration cancelled.\n`);
-		process.exit(0);
+	const result = await askChecklist(
+		"Select harness folders to convert to symlinks:",
+		options,
+		true,
+		initialSelections,
+	);
+
+	if (result.back) {
+		log(`\n  Migration cancelled.\n`);
+		return;
 	}
+
+	if (result.length === 0) {
+		log(`\n  No folders selected. Nothing to migrate.\n`);
+		return;
+	}
+
+	await executeCopyToSymlinkMigration(targetDir, result);
 }
 
-async function executeMigration(targetDir) {
-	log(`\n  Migrating .opencode/ to .agents/...\n`);
+async function executeCopyToSymlinkMigration(targetDir, selectedIds) {
+	log(`\n  Converting copies to symlinks in ${targetDir}...\n`);
 
 	if (dryRun) {
-		logDry(`Would backup .opencode/ to .opencode.backup/`);
-		logDry(`Would rename .opencode/ to .agents/`);
-		logDry(`Would move tests/ to workspace root`);
-		logDry(`Would create .opencode -> .agents symlink`);
-		logDry(`Would update .opencode/ references to .agents/ in all files`);
+		for (const id of selectedIds) {
+			const spec = HARNESS_SYMLINK_SPECS.find((s) => s.id === id);
+			if (!spec) continue;
+			logDry(`Would convert ${spec.target} → ${spec.source} (${spec.type})`);
+		}
+		logDry(
+			`Would create timestamped .backup of each converted folder before symlinking`,
+		);
 		return;
 	}
 
-	const opencodePath = path.join(targetDir, ".opencode");
-	const agentsPath = path.join(targetDir, ".agents");
-	const backupPath = path.join(targetDir, `.opencode.backup.${Date.now()}`);
+	let converted = 0;
+	let skipped = 0;
+	let failed = 0;
 
-	fs.cpSync(opencodePath, backupPath, { recursive: true });
-	log(`  Backed up to ${path.basename(backupPath)}`);
+	for (const id of selectedIds) {
+		const spec = HARNESS_SYMLINK_SPECS.find((s) => s.id === id);
+		if (!spec) continue;
 
-	fs.renameSync(opencodePath, agentsPath);
-	log(`  Renamed .opencode/ to .agents/`);
+		const target = path.join(targetDir, spec.target);
+		const source = path.join(targetDir, spec.source);
 
-	const testsInAgents = path.join(agentsPath, "tests");
-	const testsAtRoot = path.join(targetDir, "tests");
-	if (fs.existsSync(testsInAgents) && !fs.existsSync(testsAtRoot)) {
-		fs.renameSync(testsInAgents, testsAtRoot);
-		log(`  Moved tests/ to workspace root`);
+		try {
+			const stat = fs.lstatSync(target);
+			if (stat.isSymbolicLink()) {
+				log(`  ${spec.target} is already a symlink, skipping.`);
+				skipped++;
+				continue;
+			}
+
+			if (!fs.existsSync(source)) {
+				logWarn(
+					`Source ${spec.source} not found — cannot create symlink for ${spec.target}.`,
+				);
+				skipped++;
+				continue;
+			}
+
+			const backupPath = `${target}.backup.${Date.now()}`;
+			fs.renameSync(target, backupPath);
+			log(`  Backed up ${spec.target} → ${path.basename(backupPath)}`);
+
+			const parentDir = path.dirname(target);
+			fs.mkdirSync(parentDir, { recursive: true });
+
+			const relSource = path.relative(parentDir, source);
+			fs.symlinkSync(relSource, target, spec.type);
+			log(`  Created symlink: ${spec.target} → ${relSource}`);
+			converted++;
+		} catch (e) {
+			logError(`  Failed to migrate ${spec.target}: ${e.message}`);
+			failed++;
+		}
 	}
 
-	try {
-		fs.symlinkSync(".agents", opencodePath, "dir");
-		createdLinks.push(opencodePath);
-		log(`  Created .opencode -> .agents symlink`);
-	} catch (e) {
-		logWarn(`Could not create .opencode symlink: ${e.message}`);
-	}
-
-	updatePathsInDir(agentsPath);
-	log(`  Updated .opencode/ -> .agents/ references in all files`);
-
-	writeVersionFile(targetDir);
-	log(`\n  Migration complete.\n`);
+	log(
+		`\n  Migration complete. Converted: ${converted}, Skipped: ${skipped}, Failed: ${failed}\n`,
+	);
 }
 
 async function showActionMenu(targetDir, flags) {
@@ -2293,17 +2376,34 @@ async function showActionMenu(targetDir, flags) {
 		return;
 	}
 
-	const choice = await askSingleChoice("Select an action:", [
+	const unlinked = detectUnlinkedHarnesses(targetDir);
+	const hasUnlinked = unlinked.length > 0;
+
+	const choices = [
 		"Update Vespyr (Sync latest agent prompts, scripts, and skills)",
+	];
+	if (hasUnlinked) {
+		choices.push(
+			`Migrate (Convert ${unlinked.length} copied harness folder${unlinked.length === 1 ? "" : "s"} to symlinks)`,
+		);
+	}
+	choices.push(
 		"Reconfigure (Re-run interactive setup / add or remove harnesses)",
 		"Uninstall Vespyr (Cleanly remove all Vespyr folders and files)",
-	]);
+	);
+
+	const choice = await askSingleChoice("Select an action:", choices);
 
 	if (choice === 0) {
 		await performUpdate(targetDir, flags);
-	} else if (choice === 1) {
+	} else if (hasUnlinked && choice === 1) {
+		await performCopyToSymlinkMigration(targetDir, flags);
+	} else if (
+		(hasUnlinked && choice === 2) ||
+		(!hasUnlinked && choice === 1)
+	) {
 		await performReconfigure(targetDir, flags);
-	} else if (choice === 2) {
+	} else {
 		await performUninstall(targetDir);
 	}
 }
@@ -2380,8 +2480,6 @@ Examples:
 	try {
 		if (state === "installed") {
 			await showActionMenu(targetDir, flags);
-		} else if (state === "migrate") {
-			await performMigration(targetDir, flags);
 		} else {
 			log(`\n============================================================`);
 			log(`   VESPYR v${VERSION} — AI Agent Team Installer`);
@@ -2456,7 +2554,10 @@ module.exports = {
 	uninstallHarnesses,
 	performReconfigure,
 	performUpdate,
+	performCopyToSymlinkMigration,
+	detectUnlinkedHarnesses,
 	ASCII_ART,
 	VERSION,
 	HARNESS_OPTIONS,
+	HARNESS_SYMLINK_SPECS,
 };

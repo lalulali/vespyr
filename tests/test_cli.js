@@ -8,6 +8,7 @@ const {
   parseFlags,
   parseFrontmatter,
   detectState,
+  detectUnlinkedHarnesses,
   createLinkOrCopy,
   transpileCopilotYAML,
   transpileCursorMDC,
@@ -378,7 +379,7 @@ describe('Test 11: handleConflict()', () => {
   });
 });
 
-describe('Test 5: detectState()', () => {
+describe('Test 5: detectState() / detectUnlinkedHarnesses()', () => {
   let tmpDir;
 
   beforeEach(() => {
@@ -399,13 +400,14 @@ describe('Test 5: detectState()', () => {
     assert.strictEqual(detectState(tmpDir), 'installed');
   });
 
-  it('should detect migration needed', () => {
+  it('should treat legacy .opencode dir as fresh (no more migrate state)', () => {
     fs.mkdirSync(path.join(tmpDir, '.opencode'));
-    assert.strictEqual(detectState(tmpDir), 'migrate');
+    assert.strictEqual(detectState(tmpDir), 'fresh');
   });
 
-  it('should prioritize installed over migrate', () => {
+  it('should prioritize installed over any harness folders', () => {
     fs.mkdirSync(path.join(tmpDir, '.opencode'));
+    fs.mkdirSync(path.join(tmpDir, '.kiro', 'steering'), { recursive: true });
     fs.mkdirSync(path.join(tmpDir, '.agents'));
     fs.writeFileSync(path.join(tmpDir, '.agents', '.vespyr-version'), JSON.stringify({ version: '1.7.0' }));
     assert.strictEqual(detectState(tmpDir), 'installed');
@@ -414,6 +416,29 @@ describe('Test 5: detectState()', () => {
   it('should detect fresh if .agents folder exists but has no .vespyr-version file', () => {
     fs.mkdirSync(path.join(tmpDir, '.agents'));
     assert.strictEqual(detectState(tmpDir), 'fresh');
+  });
+
+  it('detectUnlinkedHarnesses returns empty when nothing exists', () => {
+    assert.deepStrictEqual(detectUnlinkedHarnesses(tmpDir), []);
+  });
+
+  it('detectUnlinkedHarnesses returns empty when all targets are symlinks', () => {
+    const agentsDir = path.join(tmpDir, '.agents');
+    fs.mkdirSync(agentsDir, { recursive: true });
+    fs.symlinkSync(agentsDir, path.join(tmpDir, '.opencode'), 'dir');
+    fs.symlinkSync(agentsDir, path.join(tmpDir, '.claude'), 'dir');
+    assert.deepStrictEqual(detectUnlinkedHarnesses(tmpDir), []);
+  });
+
+  it('detectUnlinkedHarnesses flags real directories as unlinked', () => {
+    const agentsDir = path.join(tmpDir, '.agents');
+    fs.mkdirSync(agentsDir, { recursive: true });
+    fs.mkdirSync(path.join(tmpDir, '.opencode'));
+    fs.mkdirSync(path.join(tmpDir, '.kiro', 'steering'), { recursive: true });
+    fs.writeFileSync(path.join(tmpDir, '.windsurfrules'), 'GUARDRAILS');
+    const unlinked = detectUnlinkedHarnesses(tmpDir);
+    const ids = unlinked.map((s) => s.id).sort();
+    assert.deepStrictEqual(ids, ['kiro', 'opencode', 'windsurf-rules']);
   });
 });
 
