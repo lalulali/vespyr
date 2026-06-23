@@ -5,7 +5,7 @@ const path = require("path");
 const os = require("os");
 const readline = require("readline");
 
-const VERSION = "1.7.0";
+const VERSION = "1.8.0";
 const AGENTS_SRC = path.join(__dirname, "..", ".agents");
 const DEFAULT_SUBAGENT_MODEL = "anthropic/claude-sonnet-4-5";
 
@@ -51,6 +51,17 @@ const HARNESS_OPTIONS = [
 		id: "kiro",
 		label: "Kiro Steering",
 		description: "scaffolds .kiro/steering/ manual rule folder",
+	},
+	{
+		id: "hermes",
+		label: "Hermes Agent",
+		description: "scaffolds .hermes/skills/ -> .agents/skills (agentskills.io)",
+	},
+	{
+		id: "openclaw",
+		label: "OpenClaw",
+		description:
+			"scaffolds .openclaw/workspace/{AGENTS.md,skills/} (agentskills.io)",
 	},
 ];
 
@@ -573,6 +584,18 @@ function printSummary(targetDir, selections) {
 	}
 	if (selections.harnesses.includes("kiro"))
 		lines.push(`    ✓ .kiro/steering -> agents        (Kiro steering)`);
+	if (selections.harnesses.includes("hermes"))
+		lines.push(
+			`    ✓ .hermes/skills -> .agents/skills (Hermes Agent, agentskills.io)`,
+		);
+	if (selections.harnesses.includes("openclaw"))
+		lines.push(
+			`    ✓ .openclaw/workspace/AGENTS.md   (OpenClaw project memory)`,
+		);
+	if (selections.harnesses.includes("openclaw"))
+		lines.push(
+			`    ✓ .openclaw/workspace/skills      (OpenClaw skills, agentskills.io)`,
+		);
 
 	lines.push(
 		``,
@@ -922,6 +945,51 @@ async function installHarnesses(targetDir, selections, method, model) {
 		}
 	}
 
+	if (selections.includes("hermes")) {
+		const hermesDir = path.join(targetDir, ".hermes");
+		const hermesSkills = path.join(hermesDir, "skills");
+		if (!dryRun) {
+			fs.mkdirSync(hermesDir, { recursive: true });
+		}
+		handleConflict(hermesSkills, "hermes skills", targetDir, method);
+		if (!fs.existsSync(hermesSkills)) {
+			createLinkOrCopy(
+				path.relative(hermesDir, path.join(agentsTarget, "skills")),
+				hermesSkills,
+				"dir",
+				method,
+			);
+		}
+	}
+
+	if (selections.includes("openclaw")) {
+		const openclawDir = path.join(targetDir, ".openclaw");
+		const workspaceDir = path.join(openclawDir, "workspace");
+		const workspaceAgents = path.join(workspaceDir, "AGENTS.md");
+		const workspaceSkills = path.join(workspaceDir, "skills");
+		if (!dryRun) {
+			fs.mkdirSync(workspaceDir, { recursive: true });
+		}
+		handleConflict(workspaceAgents, "openclaw workspace AGENTS.md", targetDir, method);
+		if (!fs.existsSync(workspaceAgents)) {
+			createLinkOrCopy(
+				path.relative(workspaceDir, path.join(targetDir, "AGENTS.md")),
+				workspaceAgents,
+				"file",
+				method,
+			);
+		}
+		handleConflict(workspaceSkills, "openclaw workspace skills", targetDir, method);
+		if (!fs.existsSync(workspaceSkills)) {
+			createLinkOrCopy(
+				path.relative(workspaceDir, path.join(agentsTarget, "skills")),
+				workspaceSkills,
+				"dir",
+				method,
+			);
+		}
+	}
+
 	if (!selections.includes("opencode")) {
 		const targetCommands = path.join(agentsTarget, "commands");
 		if (fs.existsSync(targetCommands)) {
@@ -1035,6 +1103,8 @@ function getGlobalPath(harness) {
 				: platform === "linux"
 					? path.join(home, ".config", "Cursor", "User", "globalRules")
 					: path.join(home, ".config", "Cursor", "User", "globalRules"),
+		hermes: path.join(home, ".hermes"),
+		openclaw: path.join(home, ".openclaw", "workspace"),
 	};
 
 	return paths[harness] || null;
@@ -1101,6 +1171,16 @@ async function performGlobalInstall(selections, method, userNickname) {
 			source: path.join(globalAgentsDir, "agents"),
 			output: "steering",
 		},
+		hermes: {
+			type: "dir",
+			source: path.join(globalAgentsDir, "skills"),
+			output: "skills",
+		},
+		openclaw: {
+			type: "dir",
+			source: path.join(globalAgentsDir, "skills"),
+			output: "skills",
+		},
 	};
 
 	for (const h of selections) {
@@ -1110,7 +1190,7 @@ async function performGlobalInstall(selections, method, userNickname) {
 		const globalTarget = getGlobalPath(h);
 		if (!globalTarget) continue;
 
-		if (h === "cursor" || h === "github" || h === "windsurf" || h === "kiro") {
+		if (h === "cursor" || h === "github" || h === "windsurf" || h === "kiro" || h === "hermes" || h === "openclaw") {
 			// These need subdirectory handling
 			const parentDir = path.dirname(globalTarget);
 			if (!fs.existsSync(parentDir))
@@ -1150,6 +1230,18 @@ async function performGlobalInstall(selections, method, userNickname) {
 				handleConflict(steeringDir, `${h} steering`, home, method);
 				if (!fs.existsSync(steeringDir)) {
 					createLinkOrCopy(config.source, steeringDir, "dir", method);
+				}
+			} else if (h === "hermes") {
+				const hermesSkills = path.join(globalTarget, "skills");
+				handleConflict(hermesSkills, `${h} skills`, home, method);
+				if (!fs.existsSync(hermesSkills)) {
+					createLinkOrCopy(config.source, hermesSkills, "dir", method);
+				}
+			} else if (h === "openclaw") {
+				const openclawSkills = path.join(globalTarget, "skills");
+				handleConflict(openclawSkills, `${h} skills`, home, method);
+				if (!fs.existsSync(openclawSkills)) {
+					createLinkOrCopy(config.source, openclawSkills, "dir", method);
 				}
 			}
 		} else {
@@ -1356,6 +1448,10 @@ async function performUpdate(targetDir, flags) {
 		installedHarnesses.push("windsurf");
 	if (fs.existsSync(path.join(targetDir, ".kiro", "steering")))
 		installedHarnesses.push("kiro");
+	if (fs.existsSync(path.join(targetDir, ".hermes", "skills")))
+		installedHarnesses.push("hermes");
+	if (fs.existsSync(path.join(targetDir, ".openclaw", "workspace", "skills")))
+		installedHarnesses.push("openclaw");
 
 	// Detect method from existing installation
 	let method = "symlink";
@@ -1455,6 +1551,14 @@ async function performReconfigure(targetDir, flags) {
 		prevHarnesses.push("windsurf");
 	if (fs.existsSync(path.join(getPath("kiro", ".kiro"), "steering")))
 		prevHarnesses.push("kiro");
+	if (fs.existsSync(path.join(getPath("hermes", ".hermes"), "skills")))
+		prevHarnesses.push("hermes");
+	if (
+		fs.existsSync(
+			path.join(getPath("openclaw", ".openclaw"), "workspace", "skills"),
+		)
+	)
+		prevHarnesses.push("openclaw");
 
 	let selections = flags.harnesses.length > 0 ? flags.harnesses : [];
 	let userNickname = getExistingUserNickname(targetDir);
@@ -1779,6 +1883,72 @@ function uninstallHarnesses(targetDir, harnesses, isGlobal) {
 				removeDirIfEmpty(kiroTargetDir);
 			}
 		}
+
+		if (h === "hermes") {
+			const hermesTargetDir = getPath("hermes", ".hermes");
+			if (fs.existsSync(hermesTargetDir)) {
+				const hermesSkills = path.join(hermesTargetDir, "skills");
+				try {
+					const stat = fs.lstatSync(hermesSkills);
+					if (stat.isSymbolicLink()) {
+						fs.unlinkSync(hermesSkills);
+					} else if (stat.isDirectory()) {
+						const skillsSrcDir = path.join(AGENTS_SRC, "skills");
+						if (fs.existsSync(skillsSrcDir)) {
+							const coreSkills = fs.readdirSync(skillsSrcDir);
+							for (const skill of coreSkills) {
+								const skillPath = path.join(hermesSkills, skill);
+								if (fs.existsSync(skillPath)) {
+									fs.rmSync(skillPath, { recursive: true, force: true });
+								}
+							}
+						}
+						removeDirIfEmpty(hermesSkills);
+					}
+				} catch (e) {}
+				removeDirIfEmpty(hermesTargetDir);
+			}
+		}
+
+		if (h === "openclaw") {
+			const openclawTargetDir = getPath("openclaw", ".openclaw");
+			if (fs.existsSync(openclawTargetDir)) {
+				const workspaceDir = path.join(openclawTargetDir, "workspace");
+				if (fs.existsSync(workspaceDir)) {
+					const workspaceAgents = path.join(workspaceDir, "AGENTS.md");
+					if (fs.existsSync(workspaceAgents)) {
+						try {
+							fs.unlinkSync(workspaceAgents);
+						} catch (e) {}
+					}
+
+					const workspaceSkills = path.join(workspaceDir, "skills");
+					try {
+						const stat = fs.lstatSync(workspaceSkills);
+						if (stat.isSymbolicLink()) {
+							fs.unlinkSync(workspaceSkills);
+						} else if (stat.isDirectory()) {
+							const skillsSrcDir = path.join(AGENTS_SRC, "skills");
+							if (fs.existsSync(skillsSrcDir)) {
+								const coreSkills = fs.readdirSync(skillsSrcDir);
+								for (const skill of coreSkills) {
+									const skillPath = path.join(workspaceSkills, skill);
+									if (fs.existsSync(skillPath)) {
+										fs.rmSync(skillPath, {
+											recursive: true,
+											force: true,
+										});
+									}
+								}
+							}
+							removeDirIfEmpty(workspaceSkills);
+						}
+					} catch (e) {}
+					removeDirIfEmpty(workspaceDir);
+				}
+				removeDirIfEmpty(openclawTargetDir);
+			}
+		}
 	}
 }
 
@@ -1818,6 +1988,8 @@ async function performUninstall(targetDir) {
 		"github",
 		"windsurf",
 		"kiro",
+		"hermes",
+		"openclaw",
 	];
 	uninstallHarnesses(targetDir, allHarnesses, isGlobal);
 
