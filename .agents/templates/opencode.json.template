@@ -1,0 +1,66 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "_comment": "Vespyr-managed opencode config. The model token in each subagent is filled in by the installer (default: anthropic/claude-sonnet-4-5, override with --model). Edit freely after install — re-running `npx vespyr update` will NOT overwrite this file.",
+  "agent": {
+    "reader": {
+      "description": "Specialized sub-agent for reading files and searching code — returns summarized results to conserve context",
+      "model": "{DEFAULT_MODEL}",
+      "mode": "subagent",
+      "permission": {
+        "bash": "deny",
+        "edit": "deny"
+      }
+    },
+    "writer": {
+      "description": "Specialized sub-agent for writing and editing files — executes precisely without reasoning, keeping the caller focused on design",
+      "model": "{DEFAULT_MODEL}",
+      "mode": "subagent",
+      "permission": {
+        "bash": "deny"
+      }
+    },
+    "executor": {
+      "description": "Specialized sub-agent for running bash commands — returns summarized output instead of raw logs",
+      "model": "{DEFAULT_MODEL}",
+      "mode": "subagent",
+      "permission": {
+        "edit": "deny"
+      }
+    },
+    "memory-controller": {
+      "description": "Memory gatekeeper — loads filtered context for agents (progressive tiers), validates and persists memory writes, compacts files that exceed thresholds, and archives resolved entries with a searchable index",
+      "model": "{DEFAULT_MODEL}",
+      "mode": "subagent",
+      "permission": {
+        "bash": "deny",
+        "edit": "deny"
+      }
+    }
+  },
+  "permission": {
+    "skill": {
+      "validate-idea": "allow",
+      "explore-idea": "allow",
+      "design": "allow",
+      "develop": "allow",
+      "launch": "allow",
+      "iterate": "allow",
+      "incident": "allow",
+      "retro": "allow",
+      "humanize": "allow",
+      "validate-game-idea": "allow",
+      "explore-game-idea": "allow",
+      "status": "allow",
+      "memory": "allow",
+      "phase": "allow",
+      "delegate": "allow",
+      "plan": "allow",
+      "review": "allow",
+      "test": "allow",
+      "kanban": "allow",
+      "squad": "allow",
+      "help-me": "allow",
+      "grill-me": "allow"
+    }
+  }
+}

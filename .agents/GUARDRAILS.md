@@ -16,6 +16,7 @@ All agents in this system MUST follow these guardrails. This file is the single 
 ## User Questioning
 - **By default, ask the user before making significant changes** that could affect the project state, user data, or external systems.
 - **Exception:** In `mode: autonomous`, you may proceed but must notify the user of what was changed after the fact.
+- **Discussion & Phase Gates (Semi-Autonomous):** In `semi-autonomous` mode, if the user wants to discuss requirements, features, or design, or has outstanding questions, the agent swarm must exhaustively finish the discussion first. The agents **MUST NOT** proceed to the next phase or step without receiving explicit user confirmation/approval.
 - When in doubt, always ask — never assume.
 
 ## Scope Restriction
@@ -116,5 +117,12 @@ Thinking agents (@founder, @architect, @product-manager, @product-designer, @tec
 - **Focus on Contracts, NOT Implementation**: In all architectural design documents, ADRs, and system specs, `@architect` must focus strictly on defining structural boundaries, system components, database DDLs/schemas, type declarations, and API payloads/JSON shapes.
 - **Never Write Business Logic or Application Code**: The `@architect` must NEVER write raw controller/handler logic, application algorithms, helper methods, or UI components.
 - **Preserve Developer Creativity**: Leaving implementation details open ensures the `@developer` retains complete coding creativity, performance optimization control, and technical execution autonomy.
+
+## Antigravity Harness I/O Handling (IsArtifact)
+
+- **Always set `IsArtifact: false`** when invoking file creation or writing tools (`write_to_file`, `replace_file_content`, etc.) for standard files that should reside in the workspace directories (e.g. `artifacts/`, `src/`, `.agents/`).
+- **Exception:** Only use `IsArtifact: true` for system-defined planning mode artifacts (`task.md`, `implementation_plan.md`, `walkthrough.md`) that are designed to be intercepted and managed by the IDE's internal planning engine.
+- This prevents the Antigravity harness from redirecting standard project documents into the IDE's internal private app data folders.
+
 
 

@@ -27,7 +27,7 @@ Review specs with `@product-manager` and `@product-designer`:
 - Designer reviews user flows, interaction specs, and visual direction
 - Clarify open questions, edge cases, and scope boundaries
 - Ensure specs are detailed enough for development
-- **Developer Mandate:** `@developer` MUST explicitly load, read, and fully digest the verified Product Spec (`artifacts/output/02-strategy/product-spec.md` or `product-spec.html`) and companion User Stories (`artifacts/output/02-strategy/user-stories.md`) in full. The developer cannot start writing code until they have read and aligned their implementation plan with these strategy documents.
+- **Developer Mandate:** `@developer` MUST explicitly load, read, and fully digest the verified Product Spec (`artifacts/output/02-strategy/product-spec.md`) and companion User Stories (`artifacts/output/02-strategy/user-stories.md`) in full. The developer cannot start writing code until they have read and aligned their implementation plan with these strategy documents.
 
 **Required inputs:**
 - `artifacts/output/02-strategy/product-spec.md`

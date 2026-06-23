@@ -218,7 +218,7 @@ git worktree list
 Each developer agent operates in its assigned worktree:
 
 1. **Navigate to worktree** — all file operations happen in the worktree directory
-2. **Read shared artifacts (NON-NEGOTIABLE Spec & Story Reading Mandate):** `@developer` MUST read and fully understand the validated Product Spec (`artifacts/output/02-strategy/product-spec.md` or `product-spec.html`) and companion User Stories (`artifacts/output/02-strategy/user-stories.md`) in full prior to writing any code, ensuring 100% implementation alignment.
+2. **Read shared artifacts (NON-NEGOTIABLE Spec & Story Reading Mandate):** `@developer` MUST read and fully understand the validated Product Spec (`artifacts/output/02-strategy/product-spec.md`) and companion User Stories (`artifacts/output/02-strategy/user-stories.md`) in full prior to writing any code, ensuring 100% implementation alignment.
 3. **Clarify specifications (Ambiguities Guardrail):** If specifications or design layouts are unclear, follow the communication permissions defined by your assigned **Role tag** (FE/BE/Full-Stack) from the Task Assignment table:
    - **FE:** Focus strongly on visual excellence and accuracy. Explicitly permitted to converse with the **human user, `@product-designer`, or `@product-manager`** to clarify.
    - **BE:** Focus on robust logic and schema safety. Explicitly permitted to converse with the **human user or `@product-manager`** to clarify.
@@ -679,9 +679,10 @@ These guardrails apply to **all agents** regardless of role or phase.
 ### User Questioning
 - **By default, ask the user before making significant changes** that could affect the project state, user data, or external systems.
 - **Exception:** In `mode: autonomous`, you may proceed but must notify the user of what was changed after the fact.
+- **Discussion & Phase Gates (Semi-Autonomous):** In `semi-autonomous` mode, if the user wants to discuss requirements, features, or design, or has outstanding questions, the agent swarm must exhaustively finish the discussion first. The agents **MUST NOT** proceed to the next phase or step without receiving explicit user confirmation/approval.
 - When in doubt, always ask — never assume.
 
 ### Scope Restriction
-- All agents may only access files within the project directory: `/Users/christianhadianto/Documents/TechSmith/nephila/` and its subdirectories.
+- All agents may only access files within the current project workspace directory and its subdirectories.
 - **Never** access, read, or modify files outside the project folder (system directories, user home outside project, external drives, `~/.bashrc`, `/etc`, `/usr`, `C:\`, etc.).
 - All artifacts must be saved within the project's `artifacts/` directory or `.agents/` subdirectory.

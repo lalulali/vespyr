@@ -4,7 +4,7 @@ A platform-agnostic, file-based multi-agent system configured to streamline prod
 
 > [!IMPORTANT]
 > **Harness Directory Adaptation**
-> Depending on your active AI assistant harness, the base configuration directory (originally `.opencode/`) should be renamed or adapted to your harness's expected dotfolder. Throughout this document, we refer to this base folder as `[.harness-folder]`. Common names include:
+> Depending on your active AI assistant harness, the base configuration directory (originally `.opencode/`) should be renamed or adapted to your harness's expected dotfolder. Throughout this document, we refer to this base folder as `.agents`. Common names include:
 > - **Kiro**: `.kiro/`
 > - **OpenCode**: `.opencode/`
 > - **Antigravity**: `.agents/`
@@ -20,21 +20,21 @@ A platform-agnostic, file-based multi-agent system configured to streamline prod
 Since agents are defined as plain Markdown personas, they can be loaded and executed by any AI developer harness. Choose the method corresponding to your current environment:
 
 ### 1. Context-Aware & Mention-Capable IDEs (e.g., Cursor, Windsurf, GitHub Copilot)
-- **Direct Invocation**: Use the `@` symbol in your chat pane to mention the agent's markdown configuration file (e.g., `@[.harness-folder]/agents/founder.md` or `@founder.md`).
+- **Direct Invocation**: Use the `@` symbol in your chat pane to mention the agent's markdown configuration file (e.g., `@.agents/agents/founder.md` or `@founder.md`).
 - **Context Injection**: Attach the specific agent's `.md` file to the chat window before starting your task to ensure the assistant adopts the exact profile and guardrails.
 
 ### 2. Single-Agent & Terminal Harnesses (e.g., Claude Code, Aider, CLI Assistants, Google Antigravity)
 - Instruct the active LLM session to read and adopt the persona explicitly. 
 - **System Directive Prompt Pattern**:
   ```
-  Adopt the role of the agent defined in: [.harness-folder]/agents/[agent-name].md
+  Adopt the role of the agent defined in: .agents/agents/[agent-name].md
   Read that file to understand your persona, goals, workflow, and safety guardrails.
-  Strictly adhere to the 4 Core Behavioral Guidelines (Think Before Acting, Simplicity First, Surgical Actions, Goal-Driven Execution) defined in AGENTS.md.
+  Strictly adhere to the 4 Core Behavioral Guidelines (Think Before Acting, Simplicity First, Surgical Actions, Goal-Driven Execution) defined in this document.
   Then, execute this task: [detailed instructions]
   ```
 
 ### 3. Standard Browser-Based LLMs (e.g., ChatGPT Web, Claude.ai, Gemini Web)
-- Copy the entire contents of the desired agent file from `[.harness-folder]/agents/[agent-name].md` and paste it as the very first system message or instruction in a new chat thread.
+- Copy the entire contents of the desired agent file from `.agents/agents/[agent-name].md` and paste it as the very first system message or instruction in a new chat thread.
 - Append your query at the end of the prompt to initialize the agent's behavior.
 
 ---
@@ -87,7 +87,7 @@ To maintain focus and avoid context bloat, the **`@product-manager`** and **`@pr
 
 ## 🛠️ Workflows (Skills)
 
-Vespyr organizes complex, multi-agent operations into highly structured **skills** (located in `[.harness-folder]/skills/`). Each skill is an end-to-end workflow designed for a specific product milestone, operational phase, or utility concern. They guide agents through sequence gates, coordinate parallel execution paths, and enforce quality control.
+Vespyr organizes complex, multi-agent operations into highly structured **skills** (located in `.agents/skills/`). Each skill is an end-to-end workflow designed for a specific product milestone, operational phase, or utility concern. They guide agents through sequence gates, coordinate parallel execution paths, and enforce quality control.
 
 ### Curated Workflows
 *   `/validate-idea` — Stress-test product concepts before research
@@ -148,7 +148,7 @@ To maximize reliability, reduce over-engineering, and enforce high-fidelity exec
 *   **No Silent Assumptions**: State all assumptions explicitly before executing. If a task or specification is ambiguous, pause and ask for clarification rather than making a guess and running with it.
 *   **Surface Trade-Offs**: Present multiple potential paths (e.g., in design, architecture, research, or testing) with their pros and cons. Never select a path silently.
 *   **Push Back When Warranted**: If a simpler path, lighter design, or more direct method exists to solve the problem, suggest it. Push back on unnecessary overhead.
-*   **Pause on Ambiguity**: If any inputs (requirements, user feedback, APIs) are unclear, stop immediately, identify the confusion, and ask the user or squad lead.
+*   **Pause on Ambiguity & Active Discussion**: If any inputs (requirements, user feedback, APIs) are unclear, stop immediately, identify the confusion, and ask the user or squad lead. In `semi-autonomous` mode, if the user raises questions or wants to discuss requirements, features, or design, the agent swarm must finish the discussion and **MUST NOT** proceed to the next phase or step without receiving explicit user confirmation/approval.
 
 ### 2. Simplicity First
 *   **Minimum Complexity**: Build/write/design the minimum necessary to fulfill the requirements. No speculative engineering or "just-in-case" abstractions.
@@ -161,6 +161,7 @@ To maximize reliability, reduce over-engineering, and enforce high-fidelity exec
 *   **Preserve Context**: Maintain existing styles, structures, and naming conventions, even if you would personally implement them differently.
 *   **No Side-Effect Cleanup**: Do not silently delete or "clean up" unrelated dead code, comments, or document sections. If you notice unrelated issues, document them in `lessons-learned.md` or mention them, but do not touch them.
 *   **Surgical Edits**: When editing files, use the most precise edit tools possible. Avoid rewriting whole files when changing a few lines.
+*   **Antigravity I/O Redirection Safeguard**: When using file creation or edit tools, always set `IsArtifact: false` for all standard workspace files (e.g. within `artifacts/`, `src/`, or `.agents/`). Set `IsArtifact: true` *only* for the IDE planning artifacts (`task.md`, `implementation_plan.md`, `walkthrough.md`). This ensures files write directly to the workspace instead of the IDE's internal app data folders.
 
 ### 4. Goal-Driven Execution
 *   **Define Success Early**: Before starting any phase (Discovery, Design, Dev, QA, etc.), clearly define the deliverables and their exact verification criteria.
@@ -172,4 +173,4 @@ To maximize reliability, reduce over-engineering, and enforce high-fidelity exec
 
 ## 🛡️ Guardrails
 
-All agents follow the safety and conflict resolution rules in `[.harness-folder]/GUARDRAILS.md`.
+All agents follow the safety and conflict resolution rules in `.agents/GUARDRAILS.md`.

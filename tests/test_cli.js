@@ -525,14 +525,15 @@ describe('Test 8: bootstrapRootDocs()', () => {
 
   beforeEach(() => {
     tmpDir = makeTempDir();
-    fs.mkdirSync(path.join(tmpDir, '.agents', 'commands'), { recursive: true });
+    fs.mkdirSync(path.join(tmpDir, '.agents', 'templates'), { recursive: true });
 
-    fs.writeFileSync(path.join(tmpDir, '.agents', 'commands', 'scaffold-agents.md'),
-      '# {Project Name} — Vespyr\n\nPath: .agents/agents/\n');
-    fs.writeFileSync(path.join(tmpDir, '.agents', 'commands', 'scaffold-agent.md'),
-      '# Vespyr\n\nPath: .agents/agents/\n');
-    fs.writeFileSync(path.join(tmpDir, '.agents', 'commands', 'scaffold-claude.md'),
-      '# CLAUDE.md — Vespyr\n\nPath: .claude/agents/\n');
+    fs.writeFileSync(
+      path.join(tmpDir, '.agents', 'templates', 'AGENTS.md.canonical'),
+      '# {DOC_LABEL}Vespyr — Test\n\n' +
+      '<!-- BEGIN: ROOT_ONLY -->ROOT-ONLY-CONTENT<!-- END: ROOT_ONLY -->\n\n' +
+      'Path: [.harness-folder]/agents/\n' +
+      'Self: {SELF_REF}\n'
+    );
   });
 
   afterEach(() => {
@@ -562,19 +563,29 @@ describe('Test 8: bootstrapRootDocs()', () => {
     assert.strictEqual(fs.readFileSync(path.join(tmpDir, 'AGENTS.md'), 'utf8'), 'existing');
   });
 
-  it('should contain .agents/ references in AGENTS.md', () => {
+  it('should substitute harness directory in AGENTS.md', () => {
     bootstrapRootDocs(tmpDir, 'test-project', []);
 
     const agents = fs.readFileSync(path.join(tmpDir, 'AGENTS.md'), 'utf8');
     assert.ok(agents.includes('.agents/'));
-    assert.ok(!agents.includes('.opencode/'));
+    assert.ok(!agents.includes('[.harness-folder]'));
   });
 
-  it('should replace {Project Name} in AGENTS.md', () => {
-    bootstrapRootDocs(tmpDir, 'my-app', []);
+  it('should include ROOT_ONLY block only in AGENTS.md', () => {
+    bootstrapRootDocs(tmpDir, 'test-project', []);
 
     const agents = fs.readFileSync(path.join(tmpDir, 'AGENTS.md'), 'utf8');
-    assert.ok(agents.includes('my-app'));
+    const agent = fs.readFileSync(path.join(tmpDir, 'agent.md'), 'utf8');
+
+    assert.ok(agents.includes('ROOT-ONLY-CONTENT'));
+    assert.ok(!agent.includes('ROOT-ONLY-CONTENT'));
+  });
+
+  it('should render CLAUDE.md title with DOC_LABEL prefix', () => {
+    bootstrapRootDocs(tmpDir, 'test-project', ['claude']);
+
+    const claude = fs.readFileSync(path.join(tmpDir, 'CLAUDE.md'), 'utf8');
+    assert.ok(claude.startsWith('# CLAUDE.md Vespyr — Test'));
   });
 });
 
@@ -611,7 +622,7 @@ describe('Test 10: parseFlags()', () => {
   it('should handle no flags', () => {
     const result = parseFlags(['node', 'cli.js']);
     assert.deepStrictEqual(result, {
-      dryRun: false, yes: false, target: null, harnesses: [], version: false, help: false,
+      dryRun: false, yes: false, target: null, harnesses: [], model: null, syncDocs: false, version: false, help: false,
     });
   });
 

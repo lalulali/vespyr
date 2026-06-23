@@ -40,3 +40,4 @@ coverage/
 temp/
 tmp/
 artifacts/
+.opencode/

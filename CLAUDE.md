@@ -1,6 +1,7 @@
-# CLAUDE.md — Vespyr Multi-Agent Engine
+# CLAUDE.md Vespyr — Multi-Agent Engine
 
 A platform-agnostic, file-based multi-agent system configured to streamline product development and engineering operations. This system consists of 21 specialized agent personas, structured workflows, and a shared persistent memory layer.
+
 
 **Trade-Off Policy**: The guidelines below prioritize absolute execution quality, simplicity, and precision over sheer speed. Adhere to them strictly for all tasks.
 
@@ -91,7 +92,7 @@ Vespyr organizes complex, multi-agent operations into highly structured **skills
 *   `/iterate` — Post-launch behavior improvements
 *   `/incident` — Production incident response
 *   `/retro` — Post-cycle review and memory compaction
-*   `/help-me` — Conversational next-step navigator and co-pilot
+*   `/help-me` — Conversational project navigator and co-pilot
 *   `/grill-me` — Relentless Socratic alignment and stress-testing interview
 *   `/humanize` — AI-writing tell detector and style normalizer
 *   `/status` — Quick project state snapshot
@@ -125,6 +126,10 @@ To ensure seamless collaboration across different agent steps and avoid context 
 2. **For General Terminal/File-Writing Environments**:
    Directly view or modify the standard markdown memory files using your standard file read/edit tools.
 
+### 👤 User Identity
+
+Before responding to the user for the first time in any session, **always read `artifacts/memory/project-context.md`** and extract the `User Nickname` field from the `## Identity` section. Address the user by their preferred name throughout the conversation. If the file or field is missing, default to `"User"`.
+
 ---
 
 ## 🌟 Core Behavioral Guidelines (Karpathy-Inspired)
@@ -135,7 +140,7 @@ To maximize reliability, reduce over-engineering, and enforce high-fidelity exec
 *   **No Silent Assumptions**: State all assumptions explicitly before executing. If a task or specification is ambiguous, pause and ask for clarification rather than making a guess and running with it.
 *   **Surface Trade-Offs**: Present multiple potential paths (e.g., in design, architecture, research, or testing) with their pros and cons. Never select a path silently.
 *   **Push Back When Warranted**: If a simpler path, lighter design, or more direct method exists to solve the problem, suggest it. Push back on unnecessary overhead.
-*   **Pause on Ambiguity**: If any inputs (requirements, user feedback, APIs) are unclear, stop immediately, identify the confusion, and ask the user or squad lead.
+*   **Pause on Ambiguity & Active Discussion**: If any inputs (requirements, user feedback, APIs) are unclear, stop immediately, identify the confusion, and ask the user or squad lead. In `semi-autonomous` mode, if the user raises questions or wants to discuss requirements, features, or design, the agent swarm must finish the discussion and **MUST NOT** proceed to the next phase or step without receiving explicit user confirmation/approval.
 
 ### 2. Simplicity First
 *   **Minimum Complexity**: Build/write/design the minimum necessary to fulfill the requirements. No speculative engineering or "just-in-case" abstractions.
@@ -148,6 +153,7 @@ To maximize reliability, reduce over-engineering, and enforce high-fidelity exec
 *   **Preserve Context**: Maintain existing styles, structures, and naming conventions, even if you would personally implement them differently.
 *   **No Side-Effect Cleanup**: Do not silently delete or "clean up" unrelated dead code, comments, or document sections. If you notice unrelated issues, document them in `lessons-learned.md` or mention them, but do not touch them.
 *   **Surgical Edits**: When editing files, use the most precise edit tools possible. Avoid rewriting whole files when changing a few lines.
+*   **Antigravity I/O Redirection Safeguard**: When using file creation or edit tools, always set `IsArtifact: false` for all standard workspace files (e.g. within `artifacts/`, `src/`, or `.claude/`). Set `IsArtifact: true` *only* for the IDE planning artifacts (`task.md`, `implementation_plan.md`, `walkthrough.md`). This ensures files write directly to the workspace instead of the IDE's internal app data folders.
 
 ### 4. Goal-Driven Execution
 *   **Define Success Early**: Before starting any phase (Discovery, Design, Dev, QA, etc.), clearly define the deliverables and their exact verification criteria.
@@ -159,4 +165,4 @@ To maximize reliability, reduce over-engineering, and enforce high-fidelity exec
 
 ## 🛡️ Guardrails
 
-All agents follow the safety and conflict resolution rules in `.agents/GUARDRAILS.md`.
+All agents follow the safety and conflict resolution rules in `.claude/GUARDRAILS.md`.

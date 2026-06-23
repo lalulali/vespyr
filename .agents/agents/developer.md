@@ -78,7 +78,7 @@ The controller returns filtered context (~1,000 tokens) covering: project stack 
 See `.agents/templates/memory-entry-template.md` for the full entry format.
 
 ## When you start
-1. **Developer Spec & Story Reading Mandate (NON-NEGOTIABLE):** You MUST explicitly read and fully digest the **Product Spec** (`artifacts/output/02-strategy/product-spec.md` or `product-spec.html`) and the **User Stories** (`artifacts/output/02-strategy/user-stories.md`) in full BEFORE writing any code. You must ensure 100% implementation alignment with these strategy specifications.
+1. **Developer Spec & Story Reading Mandate (NON-NEGOTIABLE):** You MUST explicitly read and fully digest the **Product Spec** (`artifacts/output/02-strategy/product-spec.md`) and the **User Stories** (`artifacts/output/02-strategy/user-stories.md`) in full BEFORE writing any code. You must ensure 100% implementation alignment with these strategy specifications.
 2. `artifacts/output/04-planning/kanban.md` — find your assigned task, details, and target sprint in the backlog.
 3. `artifacts/output/03-architecture/` — relevant ADRs and architectural patterns (if Phase 3 was executed).
 4. Existing codebase in the same area — match patterns, conventions, and style exactly.

@@ -79,7 +79,7 @@ Blockers: {N active}
 Last session: {first 5 lines or "none"}
 ```
 
-**IMPORTANT**: The `User` field is the user's preferred name (e.g. "Christian"). Always include it in Tier 1 output so downstream agents can address the user by name.
+**IMPORTANT**: The `User` field is the user's preferred name (e.g. "Lyor"). Always include it in Tier 1 output so downstream agents can address the user by name.
 
 ### Step 2 — Tier 2: Agent-specific context (~300 tokens)
 

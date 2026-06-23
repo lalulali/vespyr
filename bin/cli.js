@@ -7,6 +7,7 @@ const readline = require("readline");
 
 const VERSION = "1.7.0";
 const AGENTS_SRC = path.join(__dirname, "..", ".agents");
+const DEFAULT_SUBAGENT_MODEL = "anthropic/claude-sonnet-4-5";
 
 const ASCII_ART = `
  __  __                                         
@@ -82,6 +83,8 @@ function parseFlags(argv) {
 		yes: false,
 		target: null,
 		harnesses: [],
+		model: null,
+		syncDocs: false,
 		version: false,
 		help: false,
 	};
@@ -100,6 +103,10 @@ function parseFlags(argv) {
 				.split(",")
 				.map((s) => s.trim())
 				.filter(Boolean);
+		} else if (arg === "--model") {
+			flags.model = args[++i] || null;
+		} else if (arg === "--sync-docs") {
+			flags.syncDocs = true;
 		} else if (arg === "--version" || arg === "-v") {
 			flags.version = true;
 		} else if (arg === "--help" || arg === "-h") {
@@ -395,39 +402,84 @@ function scaffoldArtifacts(targetDir, projectName, userNickname = "User") {
 	);
 }
 
-function bootstrapRootDocs(targetDir, projectName, selectedHarnesses) {
-	const commandsDir = fs.existsSync(path.join(targetDir, ".agents", "commands"))
-		? path.join(targetDir, ".agents", "commands")
-		: path.join(AGENTS_SRC, "commands");
+const ROOT_DOC_CONFIGS = [
+	{
+		filename: "AGENTS.md",
+		harnessDir: ".agents",
+		selfRef: "this document",
+		docLabel: "",
+		includeRootOnly: true,
+	},
+	{
+		filename: "agent.md",
+		harnessDir: ".agents",
+		selfRef: "agent.md",
+		docLabel: "",
+		includeRootOnly: false,
+	},
+	{
+		filename: "CLAUDE.md",
+		harnessDir: ".claude",
+		selfRef: "CLAUDE.md",
+		docLabel: "CLAUDE.md ",
+		includeRootOnly: false,
+		requiresHarness: "claude",
+	},
+];
 
-	const agentsMd = fs
-		.readFileSync(path.join(commandsDir, "scaffold-agents.md"), "utf8")
-		.replace(/\{Project Name\}/g, projectName);
-	const agentMd = fs.readFileSync(
-		path.join(commandsDir, "scaffold-agent.md"),
-		"utf8",
+function renderScaffold(canonical, config) {
+	let result = canonical;
+
+	if (config.includeRootOnly) {
+		result = result
+			.replace(/<!-- BEGIN: ROOT_ONLY -->\n?/g, "")
+			.replace(/\n?<!-- END: ROOT_ONLY -->/g, "");
+	} else {
+		result = result.replace(
+			/<!-- BEGIN: ROOT_ONLY -->[\s\S]*?<!-- END: ROOT_ONLY -->\n?/g,
+			"",
+		);
+	}
+
+	result = result.replace(/\[.harness-folder\]/g, config.harnessDir);
+	result = result.replace(/\{SELF_REF\}/g, config.selfRef);
+	result = result.replace(/\{DOC_LABEL\}/g, config.docLabel);
+
+	return result;
+}
+
+function bootstrapRootDocs(targetDir, projectName, selectedHarnesses) {
+	const templatesDir = fs.existsSync(
+		path.join(targetDir, ".agents", "templates"),
+	)
+		? path.join(targetDir, ".agents", "templates")
+		: path.join(AGENTS_SRC, "templates");
+	const canonicalPath = path.join(templatesDir, "AGENTS.md.canonical");
+	if (!fs.existsSync(canonicalPath)) {
+		logWarn(
+			`Canonical template missing at ${canonicalPath} — skipping root docs`,
+		);
+		return;
+	}
+	const canonical = fs.readFileSync(canonicalPath, "utf8");
+
+	const docsToWrite = ROOT_DOC_CONFIGS.filter(
+		(cfg) =>
+			!cfg.requiresHarness || selectedHarnesses.includes(cfg.requiresHarness),
 	);
 
-	const agentsPath = path.join(targetDir, "AGENTS.md");
-	const agentPath = path.join(targetDir, "agent.md");
-
 	if (dryRun) {
-		if (!fs.existsSync(agentsPath)) logDry(`Would create AGENTS.md`);
-		if (!fs.existsSync(agentPath)) logDry(`Would create agent.md`);
-		if (selectedHarnesses.includes("claude")) logDry(`Would create CLAUDE.md`);
+		for (const cfg of docsToWrite) {
+			const target = path.join(targetDir, cfg.filename);
+			if (!fs.existsSync(target)) logDry(`Would create ${cfg.filename}`);
+		}
 		return;
 	}
 
-	if (!fs.existsSync(agentsPath)) fs.writeFileSync(agentsPath, agentsMd);
-	if (!fs.existsSync(agentPath)) fs.writeFileSync(agentPath, agentMd);
-
-	if (selectedHarnesses.includes("claude")) {
-		const claudeMd = fs.readFileSync(
-			path.join(commandsDir, "scaffold-claude.md"),
-			"utf8",
-		);
-		const claudePath = path.join(targetDir, "CLAUDE.md");
-		if (!fs.existsSync(claudePath)) fs.writeFileSync(claudePath, claudeMd);
+	for (const cfg of docsToWrite) {
+		const target = path.join(targetDir, cfg.filename);
+		if (fs.existsSync(target)) continue;
+		fs.writeFileSync(target, renderScaffold(canonical, cfg), "utf8");
 	}
 }
 
@@ -499,8 +551,12 @@ function printSummary(targetDir, selections) {
 		`    ✓ artifacts/                      (memory + output directories)`,
 	];
 
-	if (selections.harnesses.includes("opencode"))
+	if (selections.harnesses.includes("opencode")) {
 		lines.push(`    ✓ .opencode -> .agents            (opencode harness)`);
+		lines.push(
+			`    ✓ opencode.json                   (subagent + skill config)`,
+		);
+	}
 	if (selections.harnesses.includes("claude")) {
 		lines.push(`    ✓ .claude -> .agents              (Claude Code harness)`);
 		lines.push(
@@ -526,8 +582,8 @@ function printSummary(targetDir, selections) {
 		`    3. Use @help-me for a tailored navigation report`,
 		`    4. Use /squad to view or switch team presets`,
 		``,
-		`  Docs: https://github.com/anomalyco/vespyr`,
-		`  Report issues: https://github.com/anomalyco/vespyr/issues`,
+		`  Docs: https://github.com/lalulali/vespyr`,
+		`  Report issues: https://github.com/lalulali/vespyr/issues`,
 		`============================================================`,
 	);
 
@@ -756,7 +812,7 @@ function askQuestion(question, defaultVal = "") {
 	});
 }
 
-async function installHarnesses(targetDir, selections, method) {
+async function installHarnesses(targetDir, selections, method, model) {
 	const agentsTarget = path.join(targetDir, ".agents");
 
 	if (selections.includes("opencode")) {
@@ -770,6 +826,7 @@ async function installHarnesses(targetDir, selections, method) {
 				method,
 			);
 		}
+		installOpencodeConfig(targetDir, model);
 	}
 
 	if (selections.includes("claude")) {
@@ -871,10 +928,45 @@ async function installHarnesses(targetDir, selections, method) {
 			if (!dryRun) {
 				fs.rmSync(targetCommands, { recursive: true, force: true });
 			} else {
-				logDry(`Would remove commands folder from ${agentsTarget} because opencode is not selected`);
+				logDry(
+					`Would remove commands folder from ${agentsTarget} because opencode is not selected`,
+				);
 			}
 		}
 	}
+}
+
+function installOpencodeConfig(targetDir, model) {
+	const target = path.join(targetDir, "opencode.json");
+	if (fs.existsSync(target)) {
+		if (dryRun) {
+			logDry(`Would skip opencode.json (already exists)`);
+		}
+		return;
+	}
+
+	const templatePath = path.join(
+		AGENTS_SRC,
+		"templates",
+		"opencode.json.template",
+	);
+	if (!fs.existsSync(templatePath)) {
+		logWarn(`opencode.json template missing at ${templatePath} — skipping`);
+		return;
+	}
+
+	const resolvedModel = model !== null ? model : DEFAULT_SUBAGENT_MODEL;
+	const rendered = fs
+		.readFileSync(templatePath, "utf8")
+		.replace(/\{DEFAULT_MODEL\}/g, resolvedModel);
+
+	if (dryRun) {
+		logDry(`Would write opencode.json (model: ${resolvedModel})`);
+		return;
+	}
+
+	fs.writeFileSync(target, rendered, "utf8");
+	log(`  ✓ opencode.json                       (model: ${resolvedModel})`);
 }
 
 function handleConflict(linkPath, name, targetDir, method = "symlink") {
@@ -1156,7 +1248,7 @@ async function performFreshInstall(targetDir, flags) {
 				}
 			} else if (step === "name") {
 				userNickname = await askQuestion(
-					"What should the agent squad call you? (e.g., Christian, Sarah)",
+					"What should the agent squad call you? (e.g., Lyor)",
 					userNickname || "User",
 				);
 				userNickname =
@@ -1223,7 +1315,7 @@ async function performFreshInstall(targetDir, flags) {
 	const projectName = path.basename(targetDir);
 	scaffoldArtifacts(targetDir, projectName, userNickname);
 	bootstrapRootDocs(targetDir, projectName, selections);
-	await installHarnesses(targetDir, selections, method);
+	await installHarnesses(targetDir, selections, method, flags.model);
 
 	if (!dryRun) {
 		printSummary(targetDir, { harnesses: selections });
@@ -1383,7 +1475,7 @@ async function performReconfigure(targetDir, flags) {
 		);
 		if (fs.existsSync(contextPath)) {
 			userNickname = await askQuestion(
-				"What should the agent squad call you? (e.g., Christian, Sarah)",
+				"What should the agent squad call you? (e.g., Lyor)",
 				userNickname,
 			);
 			userNickname = userNickname.replace(/[^a-zA-Z0-9\s\-_.]/g, "") || "User";
@@ -1849,6 +1941,28 @@ async function showActionMenu(targetDir, flags) {
 	}
 }
 
+function performSyncDocs(targetDir) {
+	const canonicalPath = path.join(
+		AGENTS_SRC,
+		"templates",
+		"AGENTS.md.canonical",
+	);
+	if (!fs.existsSync(canonicalPath)) {
+		logError(`Canonical template not found at ${canonicalPath}`);
+		process.exit(1);
+	}
+	const canonical = fs.readFileSync(canonicalPath, "utf8");
+
+	const written = [];
+	for (const cfg of ROOT_DOC_CONFIGS) {
+		const target = path.join(targetDir, cfg.filename);
+		fs.writeFileSync(target, renderScaffold(canonical, cfg), "utf8");
+		written.push(target);
+	}
+	log(`\n  Synced ${written.length} root doc(s) from canonical:`);
+	for (const p of written) log(`    ✓ ${path.relative(targetDir, p)}`);
+}
+
 async function main() {
 	const flags = parseFlags(process.argv);
 	dryRun = flags.dryRun;
@@ -1869,6 +1983,8 @@ Options:
   --yes, -y            Skip all interactive prompts, use defaults
   --target <path>      Specify installation directory
   --harness <names>    Pre-select harness(es), comma-separated
+  --model <id>         Default subagent model for opencode.json (default: anthropic/claude-sonnet-4-5)
+  --sync-docs          Regenerate root AGENTS.md, agent.md, CLAUDE.md from the canonical template
   --version, -v        Print version and exit
   --help, -h           Print usage and exit
 
@@ -1876,6 +1992,7 @@ Examples:
   npx vespyr                          Interactive install
   npx vespyr --yes                    Install with defaults
   npx vespyr --harness opencode,claude  Pre-select harnesses
+  npx vespyr --model google/gemini-2.5-pro  Override default subagent model
   npx vespyr --target ./my-project    Install to specific directory
   npx vespyr --dry-run                Preview actions
 `);
@@ -1885,6 +2002,11 @@ Examples:
 	log(ASCII_ART);
 
 	let targetDir = flags.target ? path.resolve(flags.target) : process.cwd();
+
+	if (flags.syncDocs) {
+		await performSyncDocs(targetDir);
+		return;
+	}
 
 	const state = detectState(targetDir);
 

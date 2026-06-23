@@ -10,7 +10,8 @@
     ".agents/"
   ],
   "scripts": {
-    "test": "node --test tests/test_cli.js"
+    "test": "node --test tests/test_cli.js",
+    "sync-docs": "node bin/cli.js --sync-docs"
   },
   "keywords": [
     "ai",

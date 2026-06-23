@@ -271,6 +271,6 @@ Hosted shared memory and artifact storage for teams. Multiple developers working
 
 ## How to influence the roadmap
 
-Open an issue on [GitHub Issues](https://github.com/christianhadianto/vespyr/issues) with the label `roadmap`. Describe the problem you're trying to solve, not the solution — that helps prioritize correctly.
+Open an issue on [GitHub Issues](https://github.com/lalulali/vespyr/issues) with the label `roadmap`. Describe the problem you're trying to solve, not the solution — that helps prioritize correctly.
 
 Items with the most real-world problem evidence move up. Items that are technically interesting but solve hypothetical problems stay in the backlog.
