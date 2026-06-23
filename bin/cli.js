@@ -545,7 +545,7 @@ function updatePathsInDir(dir) {
 	}
 }
 
-function printSummary(targetDir, selections) {
+function printSummary(targetDir, selections, installResults = {}) {
 	const lines = [
 		`\n============================================================`,
 		`   VESPYR v${VERSION} — Installation Complete`,
@@ -561,6 +561,12 @@ function printSummary(targetDir, selections) {
 		`    ✓ agent.md                        (agent quick reference)`,
 		`    ✓ artifacts/                      (memory + output directories)`,
 	];
+
+	const actionMarker = (action, fallback = "✓") => {
+		if (action === "skipped") return "⚠";
+		if (action === "merged") return "✓";
+		return fallback;
+	};
 
 	if (selections.harnesses.includes("opencode")) {
 		lines.push(`    ✓ .opencode -> .agents            (opencode harness)`);
@@ -584,18 +590,39 @@ function printSummary(targetDir, selections) {
 	}
 	if (selections.harnesses.includes("kiro"))
 		lines.push(`    ✓ .kiro/steering -> agents        (Kiro steering)`);
-	if (selections.harnesses.includes("hermes"))
+	if (selections.harnesses.includes("hermes")) {
+		const action = installResults.hermes;
+		const marker = actionMarker(action);
+		const note =
+			action === "merged"
+				? "merged with user skills"
+				: action === "skipped"
+					? "skipped (existing user content preserved)"
+					: ".agents/skills (Hermes Agent, agentskills.io)";
+		lines.push(`    ${marker} .hermes/skills              (${note})`);
+	}
+	if (selections.harnesses.includes("openclaw")) {
+		const skillsAction = installResults.openclaw_skills;
+		const skillsMarker = actionMarker(skillsAction);
+		const skillsNote =
+			skillsAction === "merged"
+				? "merged with user skills"
+				: skillsAction === "skipped"
+					? "skipped (existing user content preserved)"
+					: "OpenClaw skills, agentskills.io";
 		lines.push(
-			`    ✓ .hermes/skills -> .agents/skills (Hermes Agent, agentskills.io)`,
+			`    ${skillsMarker} .openclaw/workspace/skills (${skillsNote})`,
 		);
-	if (selections.harnesses.includes("openclaw"))
+		const agentsAction = installResults.openclaw_agents;
+		const agentsMarker = actionMarker(agentsAction);
+		const agentsNote =
+			agentsAction === "skipped"
+				? "skipped (existing file preserved)"
+				: "OpenClaw project memory";
 		lines.push(
-			`    ✓ .openclaw/workspace/AGENTS.md   (OpenClaw project memory)`,
+			`    ${agentsMarker} .openclaw/workspace/AGENTS.md (${agentsNote})`,
 		);
-	if (selections.harnesses.includes("openclaw"))
-		lines.push(
-			`    ✓ .openclaw/workspace/skills      (OpenClaw skills, agentskills.io)`,
-		);
+	}
 
 	lines.push(
 		``,
@@ -837,6 +864,7 @@ function askQuestion(question, defaultVal = "") {
 
 async function installHarnesses(targetDir, selections, method, model) {
 	const agentsTarget = path.join(targetDir, ".agents");
+	const results = {};
 
 	if (selections.includes("opencode")) {
 		const linkPath = path.join(targetDir, ".opencode");
@@ -948,18 +976,12 @@ async function installHarnesses(targetDir, selections, method, model) {
 	if (selections.includes("hermes")) {
 		const hermesDir = path.join(targetDir, ".hermes");
 		const hermesSkills = path.join(hermesDir, "skills");
-		if (!dryRun) {
-			fs.mkdirSync(hermesDir, { recursive: true });
-		}
-		handleConflict(hermesSkills, "hermes skills", targetDir, method);
-		if (!fs.existsSync(hermesSkills)) {
-			createLinkOrCopy(
-				path.relative(hermesDir, path.join(agentsTarget, "skills")),
-				hermesSkills,
-				"dir",
-				method,
-			);
-		}
+		results.hermes = enrichHarnessTarget(
+			hermesSkills,
+			path.join(agentsTarget, "skills"),
+			method,
+			"hermes skills",
+		);
 	}
 
 	if (selections.includes("openclaw")) {
@@ -967,27 +989,18 @@ async function installHarnesses(targetDir, selections, method, model) {
 		const workspaceDir = path.join(openclawDir, "workspace");
 		const workspaceAgents = path.join(workspaceDir, "AGENTS.md");
 		const workspaceSkills = path.join(workspaceDir, "skills");
-		if (!dryRun) {
-			fs.mkdirSync(workspaceDir, { recursive: true });
-		}
-		handleConflict(workspaceAgents, "openclaw workspace AGENTS.md", targetDir, method);
-		if (!fs.existsSync(workspaceAgents)) {
-			createLinkOrCopy(
-				path.relative(workspaceDir, path.join(targetDir, "AGENTS.md")),
-				workspaceAgents,
-				"file",
-				method,
-			);
-		}
-		handleConflict(workspaceSkills, "openclaw workspace skills", targetDir, method);
-		if (!fs.existsSync(workspaceSkills)) {
-			createLinkOrCopy(
-				path.relative(workspaceDir, path.join(agentsTarget, "skills")),
-				workspaceSkills,
-				"dir",
-				method,
-			);
-		}
+		results.openclaw_agents = enrichHarnessTarget(
+			workspaceAgents,
+			path.join(targetDir, "AGENTS.md"),
+			method,
+			"openclaw workspace AGENTS.md",
+		);
+		results.openclaw_skills = enrichHarnessTarget(
+			workspaceSkills,
+			path.join(agentsTarget, "skills"),
+			method,
+			"openclaw workspace skills",
+		);
 	}
 
 	if (!selections.includes("opencode")) {
@@ -1002,6 +1015,8 @@ async function installHarnesses(targetDir, selections, method, model) {
 			}
 		}
 	}
+
+	return results;
 }
 
 function installOpencodeConfig(targetDir, model) {
@@ -1074,6 +1089,94 @@ function handleConflict(linkPath, name, targetDir, method = "symlink") {
 			// ignore
 		}
 	}
+}
+
+function enrichHarnessTarget(targetPath, sourcePath, method, label) {
+	let existingStat = null;
+	try {
+		existingStat = fs.lstatSync(targetPath);
+	} catch (e) {
+		/* does not exist */
+	}
+
+	if (!existingStat) {
+		const parentDir = path.dirname(targetPath);
+		if (!dryRun) {
+			fs.mkdirSync(parentDir, { recursive: true });
+		}
+		if (method === "symlink") {
+			const sourceStat = fs.statSync(sourcePath);
+			createLinkOrCopy(
+				path.relative(parentDir, sourcePath),
+				targetPath,
+				sourceStat.isDirectory() ? "dir" : "file",
+				"symlink",
+			);
+		} else if (!dryRun) {
+			if (fs.statSync(sourcePath).isDirectory()) {
+				fs.cpSync(sourcePath, targetPath, { recursive: true });
+			} else {
+				fs.copyFileSync(sourcePath, targetPath);
+			}
+		} else {
+			logDry(`Would copy ${sourcePath} to ${targetPath}`);
+		}
+		return "created";
+	}
+
+	if (existingStat.isSymbolicLink()) {
+		const linkTarget = fs.readlinkSync(targetPath);
+		const resolved = path.resolve(path.dirname(targetPath), linkTarget);
+		if (resolved === path.resolve(sourcePath)) {
+			return "unchanged";
+		}
+		logWarn(
+			`${label} is a symlink to "${linkTarget}" — leaving it alone to preserve user content.`,
+		);
+		return "skipped";
+	}
+
+	if (existingStat.isDirectory()) {
+		if (method === "symlink") {
+			logWarn(
+				`${label} already exists as a directory. Vespyr content NOT symlinked. To include vespyr ${existingStat.isDirectory() ? "skills" : "items"} alongside, configure "${sourcePath}" as an external directory in your ${label.split(" ")[0]} config, or rename/remove the existing folder first.`,
+			);
+			return "skipped";
+		}
+		const existingItems = fs.readdirSync(targetPath);
+		const userOnlyCount = existingItems.filter(
+			(name) => !fs.existsSync(path.join(sourcePath, name)),
+		).length;
+		let copied = 0;
+		let skipped = 0;
+		const items = fs.readdirSync(sourcePath);
+		for (const item of items) {
+			const dest = path.join(targetPath, item);
+			if (fs.existsSync(dest)) {
+				skipped++;
+				continue;
+			}
+			if (!dryRun) {
+				fs.cpSync(path.join(sourcePath, item), dest, { recursive: true });
+			}
+			copied++;
+		}
+		if (!dryRun) {
+			log(
+				`  ${label}: merged ${copied} vespyr item(s), kept ${skipped} user-named item(s), preserved ${userOnlyCount} user-only item(s)`,
+			);
+		} else {
+			logDry(
+				`Would merge ${copied} vespyr item(s) into ${targetPath}, keep ${skipped} user-named item(s), preserve ${userOnlyCount} user-only item(s)`,
+			);
+		}
+		return "merged";
+	}
+
+	logWarn(
+		`${label} already exists as a file. Not overwriting. To use vespyr's version, remove or rename the existing file first.`,
+	);
+	return "skipped";
 }
 
 function getGlobalPath(harness) {
@@ -1407,10 +1510,10 @@ async function performFreshInstall(targetDir, flags) {
 	const projectName = path.basename(targetDir);
 	scaffoldArtifacts(targetDir, projectName, userNickname);
 	bootstrapRootDocs(targetDir, projectName, selections);
-	await installHarnesses(targetDir, selections, method, flags.model);
+	const installResults = await installHarnesses(targetDir, selections, method, flags.model);
 
 	if (!dryRun) {
-		printSummary(targetDir, { harnesses: selections });
+		printSummary(targetDir, { harnesses: selections }, installResults);
 	}
 }
 
@@ -2251,6 +2354,7 @@ module.exports = {
 	updatePathsInDir,
 	printSummary,
 	handleConflict,
+	enrichHarnessTarget,
 	performUninstall,
 	surgicallyCleanupAgentsDir,
 	removeDirIfEmpty,
