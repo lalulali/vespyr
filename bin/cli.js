@@ -2034,7 +2034,7 @@ Examples:
 			);
 		} else {
 			logError(
-				`Installation failed: ${err.message}. Run with --dry-run to debug, or report at github.com/anomalyco/vespyr/issues.`,
+				`Installation failed: ${err.message}. Run with --dry-run to debug, or report at github.com/lalulali/vespyr/issues.`,
 			);
 		}
 

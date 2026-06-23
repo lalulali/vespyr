@@ -3,7 +3,7 @@
   "version": "1.7.0",
   "description": "AI agent team installer — 21 specialized personas for product development",
   "bin": {
-    "vespyr": "./bin/cli.js"
+    "vespyr": "bin/cli.js"
   },
   "files": [
     "bin/",
@@ -23,7 +23,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/anomalyco/vespyr"
+    "url": "git+https://github.com/lalulali/vespyr.git"
   },
   "engines": {
     "node": ">=18"
