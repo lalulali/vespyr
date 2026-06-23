@@ -236,17 +236,21 @@ function createLinkOrCopy(target, linkPath, type = "dir", method = "symlink") {
 	}
 }
 
-function transpileCopilotYAML(agentsDir, outputDir) {
+function transpileCopilotYAML(agentsDir, outputDir, options = {}) {
+	const merge = options.merge === true;
+	const ext = "yml";
 	const agentFiles = fs.readdirSync(agentsDir).filter((f) => f.endsWith(".md"));
 	if (dryRun) {
 		logDry(
-			`Would create ${agentFiles.length} Copilot YAML files in ${outputDir}`,
+			`${merge ? "Would merge" : "Would create"} ${agentFiles.length} Copilot YAML files in ${outputDir}`,
 		);
-		return;
+		return { written: agentFiles.length, preserved: 0 };
 	}
 
 	fs.mkdirSync(outputDir, { recursive: true });
 
+	let written = 0;
+	let preserved = 0;
 	for (const file of agentFiles) {
 		const content = fs.readFileSync(path.join(agentsDir, file), "utf8");
 		const { data, body } = parseFrontmatter(content);
@@ -257,6 +261,12 @@ function transpileCopilotYAML(agentsDir, outputDir) {
 
 		const name = path.basename(file, ".md");
 		const desc = (data.description || "").replace(/"/g, '\\"');
+		const targetFile = path.join(outputDir, `${name}.${ext}`);
+
+		if (merge && fs.existsSync(targetFile)) {
+			preserved++;
+			continue;
+		}
 
 		const yml = [
 			`name: ${name}`,
@@ -266,21 +276,27 @@ function transpileCopilotYAML(agentsDir, outputDir) {
 			"",
 		].join("\n");
 
-		fs.writeFileSync(path.join(outputDir, `${name}.yml`), yml);
+		fs.writeFileSync(targetFile, yml);
+		written++;
 	}
+	return { written, preserved };
 }
 
-function transpileCursorMDC(agentsDir, outputDir) {
+function transpileCursorMDC(agentsDir, outputDir, options = {}) {
+	const merge = options.merge === true;
+	const ext = "mdc";
 	const agentFiles = fs.readdirSync(agentsDir).filter((f) => f.endsWith(".md"));
 	if (dryRun) {
 		logDry(
-			`Would create ${agentFiles.length} Cursor MDC files in ${outputDir}`,
+			`${merge ? "Would merge" : "Would create"} ${agentFiles.length} Cursor MDC files in ${outputDir}`,
 		);
-		return;
+		return { written: agentFiles.length, preserved: 0 };
 	}
 
 	fs.mkdirSync(outputDir, { recursive: true });
 
+	let written = 0;
+	let preserved = 0;
 	for (const file of agentFiles) {
 		const content = fs.readFileSync(path.join(agentsDir, file), "utf8");
 		const { data, body } = parseFrontmatter(content);
@@ -291,6 +307,12 @@ function transpileCursorMDC(agentsDir, outputDir) {
 
 		const name = path.basename(file, ".md");
 		const desc = (data.description || "").replace(/"/g, '\\"');
+		const targetFile = path.join(outputDir, `${name}.${ext}`);
+
+		if (merge && fs.existsSync(targetFile)) {
+			preserved++;
+			continue;
+		}
 
 		const mdc = [
 			"---",
@@ -302,8 +324,10 @@ function transpileCursorMDC(agentsDir, outputDir) {
 			body,
 		].join("\n");
 
-		fs.writeFileSync(path.join(outputDir, `${name}.mdc`), mdc);
+		fs.writeFileSync(targetFile, mdc);
+		written++;
 	}
+	return { written, preserved };
 }
 
 function scaffoldArtifacts(targetDir, projectName, userNickname = "User") {
@@ -568,28 +592,64 @@ function printSummary(targetDir, selections, installResults = {}) {
 		return fallback;
 	};
 
+	const noteFor = (action, fallbackNote) => {
+		if (action === "merged") return "merged with user content";
+		if (action === "skipped") return "skipped (user content preserved)";
+		if (action === "unchanged") return "unchanged";
+		return fallbackNote;
+	};
+
 	if (selections.harnesses.includes("opencode")) {
-		lines.push(`    ✓ .opencode -> .agents            (opencode harness)`);
+		const dirAction = installResults.opencode;
 		lines.push(
-			`    ✓ opencode.json                   (subagent + skill config)`,
+			`    ${actionMarker(dirAction)} .opencode -> .agents        (opencode harness — ${noteFor(dirAction, "linked")})`,
+		);
+		const cfgAction = installResults.opencode_config;
+		lines.push(
+			`    ${actionMarker(cfgAction)} opencode.json               (subagent + skill config — ${noteFor(cfgAction, "written")})`,
 		);
 	}
 	if (selections.harnesses.includes("claude")) {
-		lines.push(`    ✓ .claude -> .agents              (Claude Code harness)`);
+		const action = installResults.claude;
+		lines.push(
+			`    ${actionMarker(action)} .claude -> .agents          (Claude Code harness — ${noteFor(action, "linked")})`,
+		);
 		lines.push(
 			`    ✓ CLAUDE.md                       (Claude Code project memory)`,
 		);
 	}
-	if (selections.harnesses.includes("cursor"))
-		lines.push(`    ✓ .cursor/rules/*.mdc             (21 Cursor rules)`);
-	if (selections.harnesses.includes("github"))
-		lines.push(`    ✓ .github/agents/*.yml            (21 Copilot agents)`);
-	if (selections.harnesses.includes("windsurf")) {
-		lines.push(`    ✓ .windsurf/workflows -> skills   (Windsurf workflows)`);
-		lines.push(`    ✓ .windsurfrules -> GUARDRAILS    (Windsurf rules)`);
+	if (selections.harnesses.includes("cursor")) {
+		const action = installResults.cursor;
+		lines.push(
+			`    ${actionMarker(action)} .cursor/rules/*.mdc         (21 Cursor rules — ${noteFor(action, "transpiled")})`,
+		);
 	}
-	if (selections.harnesses.includes("kiro"))
-		lines.push(`    ✓ .kiro/steering -> agents        (Kiro steering)`);
+	if (selections.harnesses.includes("github")) {
+		const action = installResults.github;
+		lines.push(
+			`    ${actionMarker(action)} .github/agents/*.yml        (21 Copilot agents — ${noteFor(action, "transpiled")})`,
+		);
+		const copilotAction = installResults.github_copilot;
+		lines.push(
+			`    ${actionMarker(copilotAction)} .github/copilot-instructions.md (${noteFor(copilotAction, "linked")})`,
+		);
+	}
+	if (selections.harnesses.includes("windsurf")) {
+		const wfAction = installResults.windsurf_workflows;
+		lines.push(
+			`    ${actionMarker(wfAction)} .windsurf/workflows -> skills (Windsurf workflows — ${noteFor(wfAction, "linked")})`,
+		);
+		const rulesAction = installResults.windsurf_rules;
+		lines.push(
+			`    ${actionMarker(rulesAction)} .windsurfrules -> GUARDRAILS (Windsurf rules — ${noteFor(rulesAction, "linked")})`,
+		);
+	}
+	if (selections.harnesses.includes("kiro")) {
+		const action = installResults.kiro;
+		lines.push(
+			`    ${actionMarker(action)} .kiro/steering -> agents    (Kiro steering — ${noteFor(action, "linked")})`,
+		);
+	}
 	if (selections.harnesses.includes("hermes")) {
 		const action = installResults.hermes;
 		const marker = actionMarker(action);
@@ -867,46 +927,42 @@ async function installHarnesses(targetDir, selections, method, model) {
 	const results = {};
 
 	if (selections.includes("opencode")) {
-		const linkPath = path.join(targetDir, ".opencode");
-		handleConflict(linkPath, ".opencode", targetDir, method);
-		if (!fs.existsSync(linkPath)) {
-			createLinkOrCopy(
-				path.relative(targetDir, agentsTarget),
-				linkPath,
-				"dir",
-				method,
-			);
-		}
-		installOpencodeConfig(targetDir, model);
+		results.opencode = enrichHarnessTarget(
+			path.join(targetDir, ".opencode"),
+			agentsTarget,
+			method,
+			".opencode",
+		);
+		results.opencode_config = installOpencodeConfig(targetDir, model);
 	}
 
 	if (selections.includes("claude")) {
-		const linkPath = path.join(targetDir, ".claude");
-		handleConflict(linkPath, ".claude", targetDir, method);
-		if (!fs.existsSync(linkPath)) {
-			createLinkOrCopy(
-				path.relative(targetDir, agentsTarget),
-				linkPath,
-				"dir",
-				method,
-			);
-		}
+		results.claude = enrichHarnessTarget(
+			path.join(targetDir, ".claude"),
+			agentsTarget,
+			method,
+			".claude",
+		);
 	}
 
 	if (selections.includes("cursor")) {
 		const rulesDir = path.join(targetDir, ".cursor", "rules");
-		if (!dryRun && !fs.existsSync(rulesDir)) {
-			fs.mkdirSync(rulesDir, { recursive: true });
-		}
-		transpileCursorMDC(path.join(agentsTarget, "agents"), rulesDir);
+		results.cursor = enrichHarnessTranspileTarget(
+			rulesDir,
+			path.join(agentsTarget, "agents"),
+			"cursor rules",
+			transpileCursorMDC,
+		);
 	}
 
 	if (selections.includes("github")) {
 		const agentsOutDir = path.join(targetDir, ".github", "agents");
-		if (!dryRun && !fs.existsSync(agentsOutDir)) {
-			fs.mkdirSync(agentsOutDir, { recursive: true });
-		}
-		transpileCopilotYAML(path.join(agentsTarget, "agents"), agentsOutDir);
+		results.github = enrichHarnessTranspileTarget(
+			agentsOutDir,
+			path.join(agentsTarget, "agents"),
+			"github agents",
+			transpileCopilotYAML,
+		);
 
 		const copilotInstructions = path.join(
 			targetDir,
@@ -914,63 +970,48 @@ async function installHarnesses(targetDir, selections, method, model) {
 			"copilot-instructions.md",
 		);
 		const agentsMdPath = path.join(targetDir, "AGENTS.md");
-		if (!fs.existsSync(copilotInstructions)) {
-			createLinkOrCopy(
-				path.relative(path.join(targetDir, ".github"), agentsMdPath),
-				copilotInstructions,
-				"file",
-				method,
-			);
-		}
+		results.github_copilot = enrichHarnessTarget(
+			copilotInstructions,
+			agentsMdPath,
+			method,
+			".github/copilot-instructions.md",
+		);
 	}
 
 	if (selections.includes("windsurf")) {
 		const workflowsDir = path.join(targetDir, ".windsurf", "workflows");
+		const windsurfRoot = path.join(targetDir, ".windsurf");
 		if (!dryRun) {
-			fs.mkdirSync(path.join(targetDir, ".windsurf"), { recursive: true });
+			fs.mkdirSync(windsurfRoot, { recursive: true });
 		}
-		handleConflict(workflowsDir, "windsurf workflows", targetDir, method);
-		if (!fs.existsSync(workflowsDir)) {
-			createLinkOrCopy(
-				path.relative(
-					path.join(targetDir, ".windsurf"),
-					path.join(agentsTarget, "skills"),
-				),
-				workflowsDir,
-				"dir",
-				method,
-			);
-		}
+		results.windsurf_workflows = enrichHarnessTarget(
+			workflowsDir,
+			path.join(agentsTarget, "skills"),
+			method,
+			"windsurf workflows",
+		);
 
 		const windsurfRules = path.join(targetDir, ".windsurfrules");
-		handleConflict(windsurfRules, ".windsurfrules", targetDir, method);
-		if (!fs.existsSync(windsurfRules)) {
-			createLinkOrCopy(
-				path.relative(targetDir, path.join(agentsTarget, "GUARDRAILS.md")),
-				windsurfRules,
-				"file",
-				method,
-			);
-		}
+		results.windsurf_rules = enrichHarnessTarget(
+			windsurfRules,
+			path.join(agentsTarget, "GUARDRAILS.md"),
+			method,
+			".windsurfrules",
+		);
 	}
 
 	if (selections.includes("kiro")) {
 		const steeringDir = path.join(targetDir, ".kiro", "steering");
+		const kiroRoot = path.join(targetDir, ".kiro");
 		if (!dryRun) {
-			fs.mkdirSync(path.join(targetDir, ".kiro"), { recursive: true });
+			fs.mkdirSync(kiroRoot, { recursive: true });
 		}
-		handleConflict(steeringDir, "kiro steering", targetDir, method);
-		if (!fs.existsSync(steeringDir)) {
-			createLinkOrCopy(
-				path.relative(
-					path.join(targetDir, ".kiro"),
-					path.join(agentsTarget, "agents"),
-				),
-				steeringDir,
-				"dir",
-				method,
-			);
-		}
+		results.kiro = enrichHarnessTarget(
+			steeringDir,
+			path.join(agentsTarget, "agents"),
+			method,
+			"kiro steering",
+		);
 	}
 
 	if (selections.includes("hermes")) {
@@ -1025,7 +1066,7 @@ function installOpencodeConfig(targetDir, model) {
 		if (dryRun) {
 			logDry(`Would skip opencode.json (already exists)`);
 		}
-		return;
+		return "unchanged";
 	}
 
 	const templatePath = path.join(
@@ -1035,7 +1076,7 @@ function installOpencodeConfig(targetDir, model) {
 	);
 	if (!fs.existsSync(templatePath)) {
 		logWarn(`opencode.json template missing at ${templatePath} — skipping`);
-		return;
+		return "skipped";
 	}
 
 	const resolvedModel = model !== null ? model : DEFAULT_SUBAGENT_MODEL;
@@ -1045,11 +1086,12 @@ function installOpencodeConfig(targetDir, model) {
 
 	if (dryRun) {
 		logDry(`Would write opencode.json (model: ${resolvedModel})`);
-		return;
+		return "created";
 	}
 
 	fs.writeFileSync(target, rendered, "utf8");
 	log(`  ✓ opencode.json                       (model: ${resolvedModel})`);
+	return "created";
 }
 
 function handleConflict(linkPath, name, targetDir, method = "symlink") {
@@ -1179,6 +1221,57 @@ function enrichHarnessTarget(targetPath, sourcePath, method, label) {
 	return "skipped";
 }
 
+function enrichHarnessTranspileTarget(
+	outputDir,
+	agentsDir,
+	label,
+	transpileFn,
+) {
+	let existingStat = null;
+	try {
+		existingStat = fs.lstatSync(outputDir);
+	} catch (e) {
+		/* does not exist */
+	}
+
+	if (!existingStat) {
+		const parentDir = path.dirname(outputDir);
+		if (!dryRun) {
+			fs.mkdirSync(parentDir, { recursive: true });
+		}
+		const result = transpileFn(agentsDir, outputDir);
+		if (!dryRun) {
+			log(
+				`  ${label}: wrote ${result.written} file(s) into ${outputDir}`,
+			);
+		}
+		return "created";
+	}
+
+	if (existingStat.isSymbolicLink()) {
+		const linkTarget = fs.readlinkSync(outputDir);
+		logWarn(
+			`${label} is a symlink to "${linkTarget}" — leaving it alone to preserve user content.`,
+		);
+		return "skipped";
+	}
+
+	if (existingStat.isDirectory()) {
+		const result = transpileFn(agentsDir, outputDir, { merge: true });
+		if (!dryRun) {
+			log(
+				`  ${label}: merged ${result.written} vespyr file(s), preserved ${result.preserved} user file(s) in ${outputDir}`,
+			);
+		}
+		return "merged";
+	}
+
+	logWarn(
+		`${label} already exists as a file. Not overwriting. To use vespyr's output, remove or rename the existing file first.`,
+	);
+	return "skipped";
+}
+
 function getGlobalPath(harness) {
 	const home = os.homedir();
 	const platform = process.platform;
@@ -1294,65 +1387,64 @@ async function performGlobalInstall(selections, method, userNickname) {
 		if (!globalTarget) continue;
 
 		if (h === "cursor" || h === "github" || h === "windsurf" || h === "kiro" || h === "hermes" || h === "openclaw") {
-			// These need subdirectory handling
-			const parentDir = path.dirname(globalTarget);
-			if (!fs.existsSync(parentDir))
-				fs.mkdirSync(parentDir, { recursive: true });
-			if (!fs.existsSync(globalTarget))
-				fs.mkdirSync(globalTarget, { recursive: true });
-
 			if (h === "cursor") {
 				const rulesDir = path.join(globalTarget, "rules");
-				if (!fs.existsSync(rulesDir))
-					fs.mkdirSync(rulesDir, { recursive: true });
-				transpileCursorMDC(config.source, rulesDir);
+				enrichHarnessTranspileTarget(
+					rulesDir,
+					config.source,
+					"cursor rules",
+					transpileCursorMDC,
+				);
 			} else if (h === "github") {
 				const agentsDir = path.join(globalTarget, "agents");
-				if (!fs.existsSync(agentsDir))
-					fs.mkdirSync(agentsDir, { recursive: true });
-				transpileCopilotYAML(config.source, agentsDir);
+				enrichHarnessTranspileTarget(
+					agentsDir,
+					config.source,
+					"github agents",
+					transpileCopilotYAML,
+				);
 			} else if (h === "windsurf") {
 				const workflowsDir = path.join(globalTarget, "workflows");
-				handleConflict(workflowsDir, `${h} workflows`, home, method);
-				if (!fs.existsSync(workflowsDir)) {
-					createLinkOrCopy(config.source, workflowsDir, "dir", method);
-				}
-				// Also create .windsurfrules
+				enrichHarnessTarget(
+					workflowsDir,
+					config.source,
+					method,
+					"windsurf workflows",
+				);
 				const windsurfRules = path.join(home, ".windsurfrules");
-				handleConflict(windsurfRules, ".windsurfrules", home, method);
-				if (!fs.existsSync(windsurfRules)) {
-					createLinkOrCopy(
-						path.join(globalAgentsDir, "GUARDRAILS.md"),
-						windsurfRules,
-						"file",
-						method,
-					);
-				}
+				enrichHarnessTarget(
+					windsurfRules,
+					path.join(globalAgentsDir, "GUARDRAILS.md"),
+					method,
+					".windsurfrules",
+				);
 			} else if (h === "kiro") {
 				const steeringDir = path.join(globalTarget, "steering");
-				handleConflict(steeringDir, `${h} steering`, home, method);
-				if (!fs.existsSync(steeringDir)) {
-					createLinkOrCopy(config.source, steeringDir, "dir", method);
-				}
+				enrichHarnessTarget(
+					steeringDir,
+					config.source,
+					method,
+					"kiro steering",
+				);
 			} else if (h === "hermes") {
 				const hermesSkills = path.join(globalTarget, "skills");
-				handleConflict(hermesSkills, `${h} skills`, home, method);
-				if (!fs.existsSync(hermesSkills)) {
-					createLinkOrCopy(config.source, hermesSkills, "dir", method);
-				}
+				enrichHarnessTarget(
+					hermesSkills,
+					config.source,
+					method,
+					"hermes skills",
+				);
 			} else if (h === "openclaw") {
 				const openclawSkills = path.join(globalTarget, "skills");
-				handleConflict(openclawSkills, `${h} skills`, home, method);
-				if (!fs.existsSync(openclawSkills)) {
-					createLinkOrCopy(config.source, openclawSkills, "dir", method);
-				}
+				enrichHarnessTarget(
+					openclawSkills,
+					config.source,
+					method,
+					"openclaw skills",
+				);
 			}
 		} else {
-			// Simple dir symlinks (opencode, claude)
-			handleConflict(globalTarget, h, home, method);
-			if (!fs.existsSync(globalTarget)) {
-				createLinkOrCopy(config.source, globalTarget, "dir", method);
-			}
+			enrichHarnessTarget(globalTarget, config.source, method, h);
 		}
 	}
 
@@ -2355,6 +2447,7 @@ module.exports = {
 	printSummary,
 	handleConflict,
 	enrichHarnessTarget,
+	enrichHarnessTranspileTarget,
 	performUninstall,
 	surgicallyCleanupAgentsDir,
 	removeDirIfEmpty,
