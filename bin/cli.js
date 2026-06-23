@@ -5,7 +5,7 @@ const path = require("path");
 const os = require("os");
 const readline = require("readline");
 
-const VERSION = "1.7.0";
+const VERSION = "1.7.1";
 const AGENTS_SRC = path.join(__dirname, "..", ".agents");
 const DEFAULT_SUBAGENT_MODEL = "anthropic/claude-sonnet-4-5";
 
