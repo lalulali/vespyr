@@ -45,6 +45,8 @@ Squad definitions will live in `.opencode/squads/*.md` with a manifest listing w
 
 ### `npx create-vespyr` installer
 
+> See `docs/adoption-plan-agents-and-skills.md` for the proposed **v1.5** upgrades to the agent library, skill library, and the agent-skills integration layer (synthesized from a comparative review of BMAD, Ruflo, and ECC).
+
 Installing Vespyr today means cloning the repo and copying files manually. The goal is a single command that scaffolds the system into any project, for any harness.
 
 ```bash

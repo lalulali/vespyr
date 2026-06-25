@@ -5,7 +5,7 @@ const path = require("path");
 const os = require("os");
 const readline = require("readline");
 
-const VERSION = "1.7.1";
+const VERSION = "1.7.2";
 const AGENTS_SRC = path.join(__dirname, "..", ".agents");
 const DEFAULT_SUBAGENT_MODEL = "anthropic/claude-sonnet-4-5";
 
@@ -20,112 +20,196 @@ const ASCII_ART = `
                             \\ \\_\\     /\\___/    
                              \\/_/     \\/__/`;
 
-const HARNESS_OPTIONS = [
-	{
-		id: "opencode",
+// Single source of truth for all harness capabilities. Each harness
+// declares an "engine" (primary install slot) and optional "channels"
+// (additional files/links). The installer, uninstaller, summary printer,
+// and migration detector all derive their behavior from this table —
+// no per-harness branching.
+//
+// Engine / channel fields:
+//   type:        "link" | "transpile" | "opencode-config"
+//   target:      project-relative path (joined to targetDir at install time)
+//   source:      project-relative source path (joined to targetDir)
+//   transpiler:  key in TRANSPILERS (only for type:"transpile")
+//   ext:         output file extension for uninstall mapping (transpile only)
+//   isFile:      hint for link engine — target is a single file, not a dir
+//   skipGlobal:  skip this channel during global install
+//   globalTarget: explicit global path override (rare; e.g. .windsurfrules
+//                 lives outside its harness's normal root folder)
+const HARNESS_CONFIG = {
+	opencode: {
 		label: "opencode",
 		description: "scaffolds .opencode -> .agents symlink",
+		engine: {
+			type: "link",
+			target: ".opencode",
+			source: ".agents",
+			summary: ".opencode -> .agents",
+			summaryTag: "opencode harness",
+		},
+		channels: [
+			{
+				type: "opencode-config",
+				target: "opencode.json",
+				summary: "opencode.json",
+				summaryTag: "subagent + skill config",
+				skipGlobal: true,
+			},
+		],
 	},
-	{
-		id: "claude",
+	claude: {
 		label: "Claude Code",
 		description: "scaffolds .claude -> .agents symlink + CLAUDE.md",
+		engine: {
+			type: "link",
+			target: ".claude",
+			source: ".agents",
+			summary: ".claude -> .agents",
+			summaryTag: "Claude Code harness",
+		},
+		rootDoc: { filename: "CLAUDE.md" },
 	},
-	{
-		id: "cursor",
+	cursor: {
 		label: "Cursor Rules",
 		description: "scaffolds .cursor/rules/*.mdc rules with metadata",
+		engine: {
+			type: "transpile",
+			target: ".cursor/rules",
+			source: ".agents/agents",
+			transpiler: "cursor",
+			ext: "mdc",
+			summary: ".cursor/rules/*.mdc",
+			summaryTag: "Cursor rules",
+		},
 	},
-	{
-		id: "github",
+	github: {
 		label: "GitHub Copilot & CLI",
 		description: "scaffolds .github/agents/*.yml compiled rules",
+		engine: {
+			type: "transpile",
+			target: ".github/agents",
+			source: ".agents/agents",
+			transpiler: "copilot",
+			ext: "yml",
+			summary: ".github/agents/*.yml",
+			summaryTag: "Copilot agents",
+		},
+		channels: [
+			{
+				type: "link",
+				target: ".github/copilot-instructions.md",
+				source: "AGENTS.md",
+				isFile: true,
+				summary: ".github/copilot-instructions.md",
+				summaryTag: "Copilot instructions",
+			},
+		],
 	},
-	{
-		id: "windsurf",
+	kiro: {
+		label: "Kiro Steering",
+		description: "scaffolds .kiro/steering/ manual rule folder",
+		engine: {
+			type: "link",
+			target: ".kiro/steering",
+			source: ".agents/agents",
+			summary: ".kiro/steering -> agents",
+			summaryTag: "Kiro steering",
+		},
+	},
+	windsurf: {
 		label: "Windsurf",
 		description:
 			"scaffolds .windsurf/workflows symlink & .windsurfrules symlink",
+		engine: {
+			type: "link",
+			target: ".windsurf/workflows",
+			source: ".agents/skills",
+			summary: ".windsurf/workflows -> skills",
+			summaryTag: "Windsurf workflows",
+		},
+		channels: [
+			{
+				id: "windsurf-rules",
+				type: "link",
+				target: ".windsurfrules",
+				source: ".agents/GUARDRAILS.md",
+				isFile: true,
+				globalTarget: ".windsurfrules",
+				summary: ".windsurfrules -> GUARDRAILS",
+				summaryTag: "Windsurf rules",
+			},
+		],
 	},
-	{
-		id: "kiro",
-		label: "Kiro Steering",
-		description: "scaffolds .kiro/steering/ manual rule folder",
-	},
-	{
-		id: "hermes",
+	hermes: {
 		label: "Hermes Agent",
 		description: "scaffolds .hermes/skills/ -> .agents/skills (agentskills.io)",
+		engine: {
+			type: "link",
+			target: ".hermes/skills",
+			source: ".agents/skills",
+			summary: ".hermes/skills",
+			summaryTag: "Hermes Agent, agentskills.io",
+		},
 	},
-	{
-		id: "openclaw",
+	openclaw: {
 		label: "OpenClaw",
 		description:
 			"scaffolds .openclaw/workspace/{AGENTS.md,skills/} (agentskills.io)",
+		engine: {
+			type: "link",
+			target: ".openclaw/workspace/skills",
+			source: ".agents/skills",
+			summary: ".openclaw/workspace/skills",
+			summaryTag: "OpenClaw skills, agentskills.io",
+		},
+		channels: [
+			{
+				type: "link",
+				target: ".openclaw/workspace/AGENTS.md",
+				source: "AGENTS.md",
+				isFile: true,
+				summary: ".openclaw/workspace/AGENTS.md",
+				summaryTag: "OpenClaw project memory",
+				skipGlobal: true,
+			},
+		],
 	},
-];
+};
 
-// Each spec describes a target folder/file that should be a symlink
-// pointing into the canonical .agents/ directory. Used by the
-// copy→symlink migration flow.
-const HARNESS_SYMLINK_SPECS = [
-	{
-		id: "opencode",
-		label: ".opencode (opencode harness)",
-		target: ".opencode",
-		source: ".agents",
-		type: "dir",
+// Derived: harness options for the wizard
+const HARNESS_OPTIONS = Object.entries(HARNESS_CONFIG).map(([id, c]) => ({
+	id,
+	label: c.label,
+	description: c.description,
+}));
+
+// Derived: symlink migration specs (one per link-type channel)
+const HARNESS_SYMLINK_SPECS = Object.entries(HARNESS_CONFIG).flatMap(
+	([id, c]) => {
+		const specs = [];
+		if (c.engine.type === "link") {
+			specs.push({
+				id,
+				label: c.engine.summary,
+				target: c.engine.target,
+				source: c.engine.source,
+				type: c.engine.isFile ? "file" : "dir",
+			});
+		}
+		for (const ch of c.channels || []) {
+			if (ch.type === "link") {
+				specs.push({
+					id: ch.id || `${id}-${path.basename(ch.target)}`,
+					label: ch.summary,
+					target: ch.target,
+					source: ch.source,
+					type: ch.isFile ? "file" : "dir",
+				});
+			}
+		}
+		return specs;
 	},
-	{
-		id: "claude",
-		label: ".claude (Claude Code harness)",
-		target: ".claude",
-		source: ".agents",
-		type: "dir",
-	},
-	{
-		id: "kiro",
-		label: ".kiro/steering (Kiro steering)",
-		target: ".kiro/steering",
-		source: ".agents/agents",
-		type: "dir",
-	},
-	{
-		id: "windsurf-workflows",
-		label: ".windsurf/workflows (Windsurf)",
-		target: ".windsurf/workflows",
-		source: ".agents/skills",
-		type: "dir",
-	},
-	{
-		id: "windsurf-rules",
-		label: ".windsurfrules (Windsurf rules)",
-		target: ".windsurfrules",
-		source: ".agents/GUARDRAILS.md",
-		type: "file",
-	},
-	{
-		id: "hermes",
-		label: ".hermes/skills (Hermes Agent)",
-		target: ".hermes/skills",
-		source: ".agents/skills",
-		type: "dir",
-	},
-	{
-		id: "openclaw-skills",
-		label: ".openclaw/workspace/skills (OpenClaw)",
-		target: ".openclaw/workspace/skills",
-		source: ".agents/skills",
-		type: "dir",
-	},
-	{
-		id: "openclaw-agents",
-		label: ".openclaw/workspace/AGENTS.md (OpenClaw)",
-		target: ".openclaw/workspace/AGENTS.md",
-		source: "AGENTS.md",
-		type: "file",
-	},
-];
+);
 
 let createdLinks = [];
 let installed = false;
@@ -296,13 +380,17 @@ function createLinkOrCopy(target, linkPath, type = "dir", method = "symlink") {
 function transpileCopilotYAML(agentsDir, outputDir, options = {}) {
 	const merge = options.merge === true;
 	const ext = "yml";
-	const agentFiles = fs.readdirSync(agentsDir).filter((f) => f.endsWith(".md"));
 	if (dryRun) {
+		const fileCount = fs.existsSync(agentsDir)
+			? fs.readdirSync(agentsDir).filter((f) => f.endsWith(".md")).length
+			: "vespyr";
 		logDry(
-			`${merge ? "Would merge" : "Would create"} ${agentFiles.length} Copilot YAML files in ${outputDir}`,
+			`${merge ? "Would merge" : "Would create"} ${fileCount} Copilot YAML files in ${outputDir}`,
 		);
-		return { written: agentFiles.length, preserved: 0 };
+		return { written: 0, preserved: 0 };
 	}
+
+	const agentFiles = fs.readdirSync(agentsDir).filter((f) => f.endsWith(".md"));
 
 	fs.mkdirSync(outputDir, { recursive: true });
 
@@ -342,13 +430,17 @@ function transpileCopilotYAML(agentsDir, outputDir, options = {}) {
 function transpileCursorMDC(agentsDir, outputDir, options = {}) {
 	const merge = options.merge === true;
 	const ext = "mdc";
-	const agentFiles = fs.readdirSync(agentsDir).filter((f) => f.endsWith(".md"));
 	if (dryRun) {
+		const fileCount = fs.existsSync(agentsDir)
+			? fs.readdirSync(agentsDir).filter((f) => f.endsWith(".md")).length
+			: "vespyr";
 		logDry(
-			`${merge ? "Would merge" : "Would create"} ${agentFiles.length} Cursor MDC files in ${outputDir}`,
+			`${merge ? "Would merge" : "Would create"} ${fileCount} Cursor MDC files in ${outputDir}`,
 		);
-		return { written: agentFiles.length, preserved: 0 };
+		return { written: 0, preserved: 0 };
 	}
+
+	const agentFiles = fs.readdirSync(agentsDir).filter((f) => f.endsWith(".md"));
 
 	fs.mkdirSync(outputDir, { recursive: true });
 
@@ -386,6 +478,12 @@ function transpileCursorMDC(agentsDir, outputDir, options = {}) {
 	}
 	return { written, preserved };
 }
+
+// Transpiler registry — populated after the transpile functions are defined.
+const TRANSPILERS = {
+	cursor: transpileCursorMDC,
+	copilot: transpileCopilotYAML,
+};
 
 function scaffoldArtifacts(targetDir, projectName, userNickname = "User") {
 	const artifactsDir = path.join(targetDir, "artifacts");
@@ -626,6 +724,37 @@ function updatePathsInDir(dir) {
 	}
 }
 
+function summaryActionMarker(action) {
+	if (action === "skipped") return "⚠";
+	return "✓";
+}
+
+function summaryActionNote(action, fallback) {
+	if (action === "merged") return "merged with user content";
+	if (action === "skipped") return "skipped (user content preserved)";
+	if (action === "unchanged") return "unchanged";
+	return fallback || "done";
+}
+
+function summaryDefaultNote(channel) {
+	if (channel.type === "transpile") return "transpiled";
+	if (channel.type === "opencode-config") return "written";
+	if (channel.type === "link") {
+		// Hermes / OpenClaw skills historically surfaced a "agentskills.io" note
+		// when freshly linked; the summaryTag already carries that information.
+		return "linked";
+	}
+	return "done";
+}
+
+function pushSummaryLine(lines, channel, action) {
+	const marker = summaryActionMarker(action);
+	const note = summaryActionNote(action, summaryDefaultNote(channel));
+	const summary = (channel.summary || channel.target || "").padEnd(32);
+	const tag = channel.summaryTag || "harness";
+	lines.push(`    ${marker} ${summary} (${tag} — ${note})`);
+}
+
 function printSummary(targetDir, selections, installResults = {}) {
 	const lines = [
 		`\n============================================================`,
@@ -643,102 +772,23 @@ function printSummary(targetDir, selections, installResults = {}) {
 		`    ✓ artifacts/                      (memory + output directories)`,
 	];
 
-	const actionMarker = (action, fallback = "✓") => {
-		if (action === "skipped") return "⚠";
-		if (action === "merged") return "✓";
-		return fallback;
-	};
+	for (const id of selections.harnesses) {
+		const config = HARNESS_CONFIG[id];
+		const result = installResults[id];
+		if (!config || !result) continue;
 
-	const noteFor = (action, fallbackNote) => {
-		if (action === "merged") return "merged with user content";
-		if (action === "skipped") return "skipped (user content preserved)";
-		if (action === "unchanged") return "unchanged";
-		return fallbackNote;
-	};
+		pushSummaryLine(lines, config.engine, result.engine);
 
-	if (selections.harnesses.includes("opencode")) {
-		const dirAction = installResults.opencode;
-		lines.push(
-			`    ${actionMarker(dirAction)} .opencode -> .agents        (opencode harness — ${noteFor(dirAction, "linked")})`,
-		);
-		const cfgAction = installResults.opencode_config;
-		lines.push(
-			`    ${actionMarker(cfgAction)} opencode.json               (subagent + skill config — ${noteFor(cfgAction, "written")})`,
-		);
-	}
-	if (selections.harnesses.includes("claude")) {
-		const action = installResults.claude;
-		lines.push(
-			`    ${actionMarker(action)} .claude -> .agents          (Claude Code harness — ${noteFor(action, "linked")})`,
-		);
-		lines.push(
-			`    ✓ CLAUDE.md                       (Claude Code project memory)`,
-		);
-	}
-	if (selections.harnesses.includes("cursor")) {
-		const action = installResults.cursor;
-		lines.push(
-			`    ${actionMarker(action)} .cursor/rules/*.mdc         (21 Cursor rules — ${noteFor(action, "transpiled")})`,
-		);
-	}
-	if (selections.harnesses.includes("github")) {
-		const action = installResults.github;
-		lines.push(
-			`    ${actionMarker(action)} .github/agents/*.yml        (21 Copilot agents — ${noteFor(action, "transpiled")})`,
-		);
-		const copilotAction = installResults.github_copilot;
-		lines.push(
-			`    ${actionMarker(copilotAction)} .github/copilot-instructions.md (${noteFor(copilotAction, "linked")})`,
-		);
-	}
-	if (selections.harnesses.includes("windsurf")) {
-		const wfAction = installResults.windsurf_workflows;
-		lines.push(
-			`    ${actionMarker(wfAction)} .windsurf/workflows -> skills (Windsurf workflows — ${noteFor(wfAction, "linked")})`,
-		);
-		const rulesAction = installResults.windsurf_rules;
-		lines.push(
-			`    ${actionMarker(rulesAction)} .windsurfrules -> GUARDRAILS (Windsurf rules — ${noteFor(rulesAction, "linked")})`,
-		);
-	}
-	if (selections.harnesses.includes("kiro")) {
-		const action = installResults.kiro;
-		lines.push(
-			`    ${actionMarker(action)} .kiro/steering -> agents    (Kiro steering — ${noteFor(action, "linked")})`,
-		);
-	}
-	if (selections.harnesses.includes("hermes")) {
-		const action = installResults.hermes;
-		const marker = actionMarker(action);
-		const note =
-			action === "merged"
-				? "merged with user skills"
-				: action === "skipped"
-					? "skipped (existing user content preserved)"
-					: ".agents/skills (Hermes Agent, agentskills.io)";
-		lines.push(`    ${marker} .hermes/skills              (${note})`);
-	}
-	if (selections.harnesses.includes("openclaw")) {
-		const skillsAction = installResults.openclaw_skills;
-		const skillsMarker = actionMarker(skillsAction);
-		const skillsNote =
-			skillsAction === "merged"
-				? "merged with user skills"
-				: skillsAction === "skipped"
-					? "skipped (existing user content preserved)"
-					: "OpenClaw skills, agentskills.io";
-		lines.push(
-			`    ${skillsMarker} .openclaw/workspace/skills (${skillsNote})`,
-		);
-		const agentsAction = installResults.openclaw_agents;
-		const agentsMarker = actionMarker(agentsAction);
-		const agentsNote =
-			agentsAction === "skipped"
-				? "skipped (existing file preserved)"
-				: "OpenClaw project memory";
-		lines.push(
-			`    ${agentsMarker} .openclaw/workspace/AGENTS.md (${agentsNote})`,
-		);
+		const channels = config.channels || [];
+		for (let i = 0; i < channels.length; i++) {
+			pushSummaryLine(lines, channels[i], result.channels?.[i]);
+		}
+
+		if (config.rootDoc) {
+			lines.push(
+				`    ✓ ${config.rootDoc.filename.padEnd(32)} (${config.label} project memory)`,
+			);
+		}
 	}
 
 	lines.push(
@@ -980,135 +1030,21 @@ function askQuestion(question, defaultVal = "") {
 }
 
 async function installHarnesses(targetDir, selections, method, model) {
-	const agentsTarget = path.join(targetDir, ".agents");
+	const ctx = { targetDir, method, model, isGlobal: false };
 	const results = {};
-
-	if (selections.includes("opencode")) {
-		results.opencode = enrichHarnessTarget(
-			path.join(targetDir, ".opencode"),
-			agentsTarget,
-			method,
-			".opencode",
-		);
-		results.opencode_config = installOpencodeConfig(targetDir, model);
+	for (const id of selections) {
+		results[id] = installHarness(id, ctx);
 	}
 
-	if (selections.includes("claude")) {
-		results.claude = enrichHarnessTarget(
-			path.join(targetDir, ".claude"),
-			agentsTarget,
-			method,
-			".claude",
-		);
-	}
-
-	if (selections.includes("cursor")) {
-		const rulesDir = path.join(targetDir, ".cursor", "rules");
-		results.cursor = enrichHarnessTranspileTarget(
-			rulesDir,
-			path.join(agentsTarget, "agents"),
-			"cursor rules",
-			transpileCursorMDC,
-		);
-	}
-
-	if (selections.includes("github")) {
-		const agentsOutDir = path.join(targetDir, ".github", "agents");
-		results.github = enrichHarnessTranspileTarget(
-			agentsOutDir,
-			path.join(agentsTarget, "agents"),
-			"github agents",
-			transpileCopilotYAML,
-		);
-
-		const copilotInstructions = path.join(
-			targetDir,
-			".github",
-			"copilot-instructions.md",
-		);
-		const agentsMdPath = path.join(targetDir, "AGENTS.md");
-		results.github_copilot = enrichHarnessTarget(
-			copilotInstructions,
-			agentsMdPath,
-			method,
-			".github/copilot-instructions.md",
-		);
-	}
-
-	if (selections.includes("windsurf")) {
-		const workflowsDir = path.join(targetDir, ".windsurf", "workflows");
-		const windsurfRoot = path.join(targetDir, ".windsurf");
-		if (!dryRun) {
-			fs.mkdirSync(windsurfRoot, { recursive: true });
-		}
-		results.windsurf_workflows = enrichHarnessTarget(
-			workflowsDir,
-			path.join(agentsTarget, "skills"),
-			method,
-			"windsurf workflows",
-		);
-
-		const windsurfRules = path.join(targetDir, ".windsurfrules");
-		results.windsurf_rules = enrichHarnessTarget(
-			windsurfRules,
-			path.join(agentsTarget, "GUARDRAILS.md"),
-			method,
-			".windsurfrules",
-		);
-	}
-
-	if (selections.includes("kiro")) {
-		const steeringDir = path.join(targetDir, ".kiro", "steering");
-		const kiroRoot = path.join(targetDir, ".kiro");
-		if (!dryRun) {
-			fs.mkdirSync(kiroRoot, { recursive: true });
-		}
-		results.kiro = enrichHarnessTarget(
-			steeringDir,
-			path.join(agentsTarget, "agents"),
-			method,
-			"kiro steering",
-		);
-	}
-
-	if (selections.includes("hermes")) {
-		const hermesDir = path.join(targetDir, ".hermes");
-		const hermesSkills = path.join(hermesDir, "skills");
-		results.hermes = enrichHarnessTarget(
-			hermesSkills,
-			path.join(agentsTarget, "skills"),
-			method,
-			"hermes skills",
-		);
-	}
-
-	if (selections.includes("openclaw")) {
-		const openclawDir = path.join(targetDir, ".openclaw");
-		const workspaceDir = path.join(openclawDir, "workspace");
-		const workspaceAgents = path.join(workspaceDir, "AGENTS.md");
-		const workspaceSkills = path.join(workspaceDir, "skills");
-		results.openclaw_agents = enrichHarnessTarget(
-			workspaceAgents,
-			path.join(targetDir, "AGENTS.md"),
-			method,
-			"openclaw workspace AGENTS.md",
-		);
-		results.openclaw_skills = enrichHarnessTarget(
-			workspaceSkills,
-			path.join(agentsTarget, "skills"),
-			method,
-			"openclaw workspace skills",
-		);
-	}
-
+	// Drop the .agents/commands folder when opencode is not selected
 	if (!selections.includes("opencode")) {
-		const targetCommands = path.join(agentsTarget, "commands");
+		const targetCommands = path.join(targetDir, ".agents", "commands");
 		if (fs.existsSync(targetCommands)) {
 			if (!dryRun) {
 				fs.rmSync(targetCommands, { recursive: true, force: true });
 			} else {
 				logDry(
-					`Would remove commands folder from ${agentsTarget} because opencode is not selected`,
+					`Would remove commands folder from ${targetDir}/.agents because opencode is not selected`,
 				);
 			}
 		}
@@ -1204,13 +1140,19 @@ function enrichHarnessTarget(targetPath, sourcePath, method, label) {
 			fs.mkdirSync(parentDir, { recursive: true });
 		}
 		if (method === "symlink") {
-			const sourceStat = fs.statSync(sourcePath);
-			createLinkOrCopy(
-				path.relative(parentDir, sourcePath),
-				targetPath,
-				sourceStat.isDirectory() ? "dir" : "file",
-				"symlink",
-			);
+			if (dryRun) {
+				logDry(
+					`Would symlink ${targetPath} -> ${path.relative(parentDir, sourcePath)}`,
+				);
+			} else {
+				const sourceStat = fs.statSync(sourcePath);
+				createLinkOrCopy(
+					path.relative(parentDir, sourcePath),
+					targetPath,
+					sourceStat.isDirectory() ? "dir" : "file",
+					"symlink",
+				);
+			}
 		} else if (!dryRun) {
 			if (fs.statSync(sourcePath).isDirectory()) {
 				fs.cpSync(sourcePath, targetPath, { recursive: true });
@@ -1363,6 +1305,104 @@ function getGlobalPath(harness) {
 	return paths[harness] || null;
 }
 
+// ---------------------------------------------------------------------------
+// Unified harness install engine
+//
+// All harnesses go through the same code path. Each harness's HARNESS_CONFIG
+// entry describes its engine (primary slot) and optional channels (extras).
+// These helpers translate those declarations into concrete file operations.
+// ---------------------------------------------------------------------------
+
+// Resolve the global install path for a channel under the global install ctx.
+// For most harnesses the path is getGlobalPath(harnessId) + the last segment
+// of channel.target. For opencode/claude the harness root IS the target.
+// For channels with an explicit globalTarget (e.g. .windsurfrules) the
+// override is used verbatim relative to home.
+function resolveGlobalTarget(channel, harnessId) {
+	if (channel.globalTarget) {
+		return path.join(os.homedir(), channel.globalTarget);
+	}
+	const root = getGlobalPath(harnessId);
+	if (harnessId === "opencode" || harnessId === "claude") return root;
+	return path.join(root, path.basename(channel.target));
+}
+
+// Resolve (target, source) absolute paths for a channel under a given ctx.
+// ctx: { harnessId, targetDir, isGlobal, globalAgentsDir }
+function resolveChannelPaths(channel, ctx) {
+	if (!ctx.isGlobal) {
+		return {
+			target: path.join(ctx.targetDir, channel.target),
+			source: path.join(ctx.targetDir, channel.source),
+		};
+	}
+	const source = path.join(
+		ctx.globalAgentsDir,
+		channel.source.replace(/^\.agents\/?/, ""),
+	);
+	return { target: resolveGlobalTarget(channel, ctx.harnessId), source };
+}
+
+// Apply a single channel (link / transpile / opencode-config) to the install
+// context. Returns the action string ("created" | "merged" | "skipped" | ...).
+function applyChannel(channel, ctx) {
+	switch (channel.type) {
+		case "link": {
+			const { target, source } = resolveChannelPaths(channel, ctx);
+			return enrichHarnessTarget(
+				target,
+				source,
+				ctx.method,
+				channel.summaryTag || ctx.harnessId,
+			);
+		}
+		case "transpile": {
+			const { target, source } = resolveChannelPaths(channel, ctx);
+			return enrichHarnessTranspileTarget(
+				target,
+				source,
+				channel.summaryTag || ctx.harnessId,
+				TRANSPILERS[channel.transpiler],
+			);
+		}
+		case "opencode-config":
+			return installOpencodeConfig(ctx.targetDir, ctx.model);
+		default:
+			logWarn(`Unknown channel type for ${ctx.harnessId}: ${channel.type}`);
+			return "skipped";
+	}
+}
+
+// Install a single harness: its engine plus any non-skipped channels.
+function installHarness(harnessId, ctx) {
+	const config = HARNESS_CONFIG[harnessId];
+	if (!config) {
+		logWarn(`Unknown harness: ${harnessId}`);
+		return null;
+	}
+	const channelCtx = { ...ctx, harnessId };
+	const channels = config.channels || [];
+	const visible = ctx.isGlobal
+		? channels.filter((ch) => !ch.skipGlobal)
+		: channels;
+	return {
+		engine: applyChannel(config.engine, channelCtx),
+		channels: visible.map((ch) => applyChannel(ch, channelCtx)),
+	};
+}
+
+// Detect which harnesses are currently installed (used by update / reconfigure).
+// isGlobal: false → check project-relative targets, true → check global paths.
+function detectInstalledHarnesses(targetDir, isGlobal) {
+	return Object.keys(HARNESS_CONFIG).filter((id) => {
+		const config = HARNESS_CONFIG[id];
+		const target = isGlobal
+			? resolveGlobalTarget(config.engine, id)
+			: path.join(targetDir, config.engine.target);
+		return fs.existsSync(target);
+	});
+}
+
 async function performGlobalInstall(selections, method, userNickname) {
 	const globalAgentsDir = getGlobalPath("agents");
 	const home = os.homedir();
@@ -1400,109 +1440,17 @@ async function performGlobalInstall(selections, method, userNickname) {
 		}
 	}
 
-	// Create harness links at global paths
-	const harnessLinkMap = {
-		opencode: { type: "dir", source: path.join(globalAgentsDir) },
-		claude: { type: "dir", source: path.join(globalAgentsDir) },
-		cursor: {
-			type: "dir",
-			source: path.join(globalAgentsDir, "agents"),
-			output: "rules",
-		},
-		github: {
-			type: "dir",
-			source: path.join(globalAgentsDir, "agents"),
-			output: "agents",
-		},
-		windsurf: {
-			type: "dir",
-			source: path.join(globalAgentsDir, "skills"),
-			output: "workflows",
-		},
-		kiro: {
-			type: "dir",
-			source: path.join(globalAgentsDir, "agents"),
-			output: "steering",
-		},
-		hermes: {
-			type: "dir",
-			source: path.join(globalAgentsDir, "skills"),
-			output: "skills",
-		},
-		openclaw: {
-			type: "dir",
-			source: path.join(globalAgentsDir, "skills"),
-			output: "skills",
-		},
+	// Install every selected harness through the same engine used for
+	// project installs — only the targetDir and isGlobal flag differ.
+	const ctx = {
+		targetDir: home,
+		method,
+		model: null,
+		isGlobal: true,
+		globalAgentsDir,
 	};
-
-	for (const h of selections) {
-		const config = harnessLinkMap[h];
-		if (!config) continue;
-
-		const globalTarget = getGlobalPath(h);
-		if (!globalTarget) continue;
-
-		if (h === "cursor" || h === "github" || h === "windsurf" || h === "kiro" || h === "hermes" || h === "openclaw") {
-			if (h === "cursor") {
-				const rulesDir = path.join(globalTarget, "rules");
-				enrichHarnessTranspileTarget(
-					rulesDir,
-					config.source,
-					"cursor rules",
-					transpileCursorMDC,
-				);
-			} else if (h === "github") {
-				const agentsDir = path.join(globalTarget, "agents");
-				enrichHarnessTranspileTarget(
-					agentsDir,
-					config.source,
-					"github agents",
-					transpileCopilotYAML,
-				);
-			} else if (h === "windsurf") {
-				const workflowsDir = path.join(globalTarget, "workflows");
-				enrichHarnessTarget(
-					workflowsDir,
-					config.source,
-					method,
-					"windsurf workflows",
-				);
-				const windsurfRules = path.join(home, ".windsurfrules");
-				enrichHarnessTarget(
-					windsurfRules,
-					path.join(globalAgentsDir, "GUARDRAILS.md"),
-					method,
-					".windsurfrules",
-				);
-			} else if (h === "kiro") {
-				const steeringDir = path.join(globalTarget, "steering");
-				enrichHarnessTarget(
-					steeringDir,
-					config.source,
-					method,
-					"kiro steering",
-				);
-			} else if (h === "hermes") {
-				const hermesSkills = path.join(globalTarget, "skills");
-				enrichHarnessTarget(
-					hermesSkills,
-					config.source,
-					method,
-					"hermes skills",
-				);
-			} else if (h === "openclaw") {
-				const openclawSkills = path.join(globalTarget, "skills");
-				enrichHarnessTarget(
-					openclawSkills,
-					config.source,
-					method,
-					"openclaw skills",
-				);
-			}
-		} else {
-			enrichHarnessTarget(globalTarget, config.source, method, h);
-		}
+	for (const id of selections) {
+		installHarness(id, ctx);
 	}
 
 	log(`  Global install complete.`);
@@ -1687,23 +1635,7 @@ async function performUpdate(targetDir, flags) {
 	writeVersionFile(targetDir);
 
 	const versionFile = path.join(targetDir, ".agents", ".vespyr-version");
-	let installedHarnesses = [];
-	if (fs.existsSync(path.join(targetDir, ".opencode")))
-		installedHarnesses.push("opencode");
-	if (fs.existsSync(path.join(targetDir, ".claude")))
-		installedHarnesses.push("claude");
-	if (fs.existsSync(path.join(targetDir, ".cursor", "rules")))
-		installedHarnesses.push("cursor");
-	if (fs.existsSync(path.join(targetDir, ".github", "agents")))
-		installedHarnesses.push("github");
-	if (fs.existsSync(path.join(targetDir, ".windsurf", "workflows")))
-		installedHarnesses.push("windsurf");
-	if (fs.existsSync(path.join(targetDir, ".kiro", "steering")))
-		installedHarnesses.push("kiro");
-	if (fs.existsSync(path.join(targetDir, ".hermes", "skills")))
-		installedHarnesses.push("hermes");
-	if (fs.existsSync(path.join(targetDir, ".openclaw", "workspace", "skills")))
-		installedHarnesses.push("openclaw");
+	const installedHarnesses = detectInstalledHarnesses(targetDir, false);
 
 	// Detect method from existing installation
 	let method = "symlink";
@@ -1783,34 +1715,8 @@ async function performReconfigure(targetDir, flags) {
 		isGlobal = true;
 	}
 
-	const getPath = (harness, localRel) => {
-		if (isGlobal) {
-			return getGlobalPath(harness);
-		}
-		return path.join(targetDir, localRel);
-	};
-
 	// Detect previously installed harnesses
-	let prevHarnesses = [];
-	if (fs.existsSync(getPath("opencode", ".opencode")))
-		prevHarnesses.push("opencode");
-	if (fs.existsSync(getPath("claude", ".claude"))) prevHarnesses.push("claude");
-	if (fs.existsSync(path.join(getPath("cursor", ".cursor"), "rules")))
-		prevHarnesses.push("cursor");
-	if (fs.existsSync(path.join(getPath("github", ".github"), "agents")))
-		prevHarnesses.push("github");
-	if (fs.existsSync(path.join(getPath("windsurf", ".windsurf"), "workflows")))
-		prevHarnesses.push("windsurf");
-	if (fs.existsSync(path.join(getPath("kiro", ".kiro"), "steering")))
-		prevHarnesses.push("kiro");
-	if (fs.existsSync(path.join(getPath("hermes", ".hermes"), "skills")))
-		prevHarnesses.push("hermes");
-	if (
-		fs.existsSync(
-			path.join(getPath("openclaw", ".openclaw"), "workspace", "skills"),
-		)
-	)
-		prevHarnesses.push("openclaw");
+	const prevHarnesses = detectInstalledHarnesses(targetDir, isGlobal);
 
 	let selections = flags.harnesses.length > 0 ? flags.harnesses : [];
 	let userNickname = getExistingUserNickname(targetDir);
@@ -1841,6 +1747,11 @@ async function performReconfigure(targetDir, flags) {
 
 	// Detect method from existing installation
 	let method = "symlink";
+	const getPath = (id, defaultSub) => {
+		return isGlobal
+			? getGlobalPath(id)
+			: path.join(targetDir, HARNESS_CONFIG[id]?.engine?.target || defaultSub);
+	};
 	const opencodePath = getPath("opencode", ".opencode");
 	const claudePath = getPath("claude", ".claude");
 	try {
@@ -1970,237 +1881,109 @@ function surgicallyCleanupAgentsDir(agentsTarget) {
 	removeDirIfEmpty(agentsTarget);
 }
 
+function uninstallChannel(channel, ctx) {
+	const { harnessId, isGlobal, targetDir } = ctx;
+	const target = isGlobal
+		? resolveGlobalTarget(channel, harnessId)
+		: path.join(targetDir, channel.target);
+
+	// lstatSync (not existsSync) — existsSync follows symlinks and would
+	// return false for dangling symlinks, e.g. .kiro/steering -> ../.agents/agents
+	// after surgicallyCleanupAgentsDir has already removed the target.
+	let stat;
+	try {
+		stat = fs.lstatSync(target);
+	} catch (e) {
+		return; // target doesn't exist
+	}
+
+	// Special case: the opencode/claude engine is the entire .opencode/.claude
+	// directory, which mirrors the .agents tree. Use the surgical cleanup so
+	// we only remove canonical vespyr items, not anything the user added.
+	if (
+		channel.type === "link" &&
+		channel.source === ".agents" &&
+		(harnessId === "opencode" || harnessId === "claude")
+	) {
+		surgicallyCleanupAgentsDir(target);
+		return;
+	}
+
+	// Symlink (including dangling) → just unlink
+	if (stat.isSymbolicLink()) {
+		try {
+			fs.unlinkSync(target);
+		} catch (e) {}
+		removeDirIfEmpty(path.dirname(target));
+		return;
+	}
+
+	// File (e.g. .windsurfrules, AGENTS.md, copilot-instructions.md) → unlink
+	if (stat.isFile()) {
+		try {
+			fs.unlinkSync(target);
+		} catch (e) {}
+		removeDirIfEmpty(path.dirname(target));
+		return;
+	}
+
+	// Directory → surgically remove only the items that came from vespyr
+	const sourceRoot = isGlobal ? getGlobalPath("agents") : AGENTS_SRC;
+	const sourceSubpath = channel.source.replace(/^\.agents\/?/, "");
+	const sourceDir = sourceSubpath
+		? path.join(sourceRoot, sourceSubpath)
+		: sourceRoot;
+
+	if (fs.existsSync(sourceDir)) {
+		const sourceStat = fs.statSync(sourceDir);
+		if (sourceStat.isDirectory()) {
+			const items = fs.readdirSync(sourceDir);
+			for (const item of items) {
+				// Transpile channels map source file extensions (e.g. .md → .mdc, .yml)
+				const baseName = path.basename(item, path.extname(item));
+				const targetName = channel.ext ? `${baseName}.${channel.ext}` : item;
+				const itemPath = path.join(target, targetName);
+				if (fs.existsSync(itemPath)) {
+					try {
+						fs.rmSync(itemPath, { recursive: true, force: true });
+					} catch (e) {}
+				}
+			}
+		} else {
+			try {
+				fs.unlinkSync(target);
+			} catch (e) {}
+		}
+	}
+
+	removeDirIfEmpty(target);
+	removeDirIfEmpty(path.dirname(target));
+}
+
 function uninstallHarnesses(targetDir, harnesses, isGlobal) {
 	const home = os.homedir();
-	const getPath = (harness, localRel) => {
-		if (isGlobal) {
-			return getGlobalPath(harness);
-		}
-		return path.join(targetDir, localRel);
-	};
+	const effectiveTargetDir = isGlobal ? home : targetDir;
+	const ctx = { isGlobal, targetDir: effectiveTargetDir };
 
-	for (const h of harnesses) {
-		if (h === "opencode") {
-			const opencodePath = getPath("opencode", ".opencode");
-			if (fs.existsSync(opencodePath)) {
-				surgicallyCleanupAgentsDir(opencodePath);
-			}
-		}
+	for (const id of harnesses) {
+		const config = HARNESS_CONFIG[id];
+		if (!config) continue;
+		const harnessCtx = { ...ctx, harnessId: id };
 
-		if (h === "claude") {
-			const claudePath = getPath("claude", ".claude");
-			if (fs.existsSync(claudePath)) {
-				surgicallyCleanupAgentsDir(claudePath);
-			}
+		uninstallChannel(config.engine, harnessCtx);
+
+		for (const ch of config.channels || []) {
+			if (isGlobal && ch.skipGlobal) continue;
+			uninstallChannel(ch, harnessCtx);
 		}
 
-		if (h === "cursor") {
-			const cursorTargetDir = getPath("cursor", ".cursor");
-			if (fs.existsSync(cursorTargetDir)) {
-				const rulesDir = path.join(cursorTargetDir, "rules");
-				if (fs.existsSync(rulesDir)) {
-					try {
-						const stat = fs.lstatSync(rulesDir);
-						if (stat.isSymbolicLink()) {
-							fs.unlinkSync(rulesDir);
-						} else {
-							const agentsSrcDir = path.join(AGENTS_SRC, "agents");
-							if (fs.existsSync(agentsSrcDir)) {
-								const coreAgents = fs
-									.readdirSync(agentsSrcDir)
-									.filter((f) => f.endsWith(".md"));
-								for (const agent of coreAgents) {
-									const name = path.basename(agent, ".md");
-									const mdcFile = path.join(rulesDir, `${name}.mdc`);
-									if (fs.existsSync(mdcFile)) {
-										fs.unlinkSync(mdcFile);
-									}
-								}
-							}
-							removeDirIfEmpty(rulesDir);
-						}
-					} catch (e) {}
-				}
-				removeDirIfEmpty(cursorTargetDir);
-			}
-		}
-
-		if (h === "github") {
-			const githubTargetDir = getPath("github", ".github");
-			if (fs.existsSync(githubTargetDir)) {
-				const agentsDir = path.join(githubTargetDir, "agents");
-				if (fs.existsSync(agentsDir)) {
-					try {
-						const stat = fs.lstatSync(agentsDir);
-						if (stat.isSymbolicLink()) {
-							fs.unlinkSync(agentsDir);
-						} else {
-							const agentsSrcDir = path.join(AGENTS_SRC, "agents");
-							if (fs.existsSync(agentsSrcDir)) {
-								const coreAgents = fs
-									.readdirSync(agentsSrcDir)
-									.filter((f) => f.endsWith(".md"));
-								for (const agent of coreAgents) {
-									const name = path.basename(agent, ".md");
-									const ymlFile = path.join(agentsDir, `${name}.yml`);
-									if (fs.existsSync(ymlFile)) {
-										fs.unlinkSync(ymlFile);
-									}
-								}
-							}
-							removeDirIfEmpty(agentsDir);
-						}
-					} catch (e) {}
-				}
-
-				const copilotInstructions = path.join(
-					githubTargetDir,
-					"copilot-instructions.md",
-				);
-				if (fs.existsSync(copilotInstructions)) {
-					try {
-						fs.unlinkSync(copilotInstructions);
-					} catch (e) {}
-				}
-
-				removeDirIfEmpty(githubTargetDir);
-			}
-		}
-
-		if (h === "windsurf") {
-			const windsurfTargetDir = getPath("windsurf", ".windsurf");
-			if (fs.existsSync(windsurfTargetDir)) {
-				const workflowsDir = path.join(windsurfTargetDir, "workflows");
-				if (fs.existsSync(workflowsDir)) {
-					try {
-						const stat = fs.lstatSync(workflowsDir);
-						if (stat.isSymbolicLink()) {
-							fs.unlinkSync(workflowsDir);
-						} else {
-							const skillsSrcDir = path.join(AGENTS_SRC, "skills");
-							if (fs.existsSync(skillsSrcDir)) {
-								const coreSkills = fs.readdirSync(skillsSrcDir);
-								for (const skill of coreSkills) {
-									const skillPath = path.join(workflowsDir, skill);
-									if (fs.existsSync(skillPath)) {
-										fs.rmSync(skillPath, { recursive: true, force: true });
-									}
-								}
-							}
-							removeDirIfEmpty(workflowsDir);
-						}
-					} catch (e) {}
-				}
-				removeDirIfEmpty(windsurfTargetDir);
-			}
-			const windsurfRulesPath = isGlobal
-				? path.join(home, ".windsurfrules")
-				: path.join(targetDir, ".windsurfrules");
-			if (fs.existsSync(windsurfRulesPath)) {
-				try {
-					fs.unlinkSync(windsurfRulesPath);
-				} catch (e) {}
-			}
-		}
-
-		if (h === "kiro") {
-			const kiroTargetDir = getPath("kiro", ".kiro");
-			if (fs.existsSync(kiroTargetDir)) {
-				const steeringDir = path.join(kiroTargetDir, "steering");
-				if (fs.existsSync(steeringDir)) {
-					try {
-						const stat = fs.lstatSync(steeringDir);
-						if (stat.isSymbolicLink()) {
-							fs.unlinkSync(steeringDir);
-						} else {
-							const agentsSrcDir = path.join(AGENTS_SRC, "agents");
-							if (fs.existsSync(agentsSrcDir)) {
-								const coreAgents = fs
-									.readdirSync(agentsSrcDir)
-									.filter((f) => f.endsWith(".md"));
-								for (const agent of coreAgents) {
-									const targetAgentPath = path.join(steeringDir, agent);
-									if (fs.existsSync(targetAgentPath)) {
-										fs.rmSync(targetAgentPath, {
-											recursive: true,
-											force: true,
-										});
-									}
-								}
-							}
-							removeDirIfEmpty(steeringDir);
-						}
-					} catch (e) {}
-				}
-				removeDirIfEmpty(kiroTargetDir);
-			}
-		}
-
-		if (h === "hermes") {
-			const hermesTargetDir = getPath("hermes", ".hermes");
-			if (fs.existsSync(hermesTargetDir)) {
-				const hermesSkills = path.join(hermesTargetDir, "skills");
-				try {
-					const stat = fs.lstatSync(hermesSkills);
-					if (stat.isSymbolicLink()) {
-						fs.unlinkSync(hermesSkills);
-					} else if (stat.isDirectory()) {
-						const skillsSrcDir = path.join(AGENTS_SRC, "skills");
-						if (fs.existsSync(skillsSrcDir)) {
-							const coreSkills = fs.readdirSync(skillsSrcDir);
-							for (const skill of coreSkills) {
-								const skillPath = path.join(hermesSkills, skill);
-								if (fs.existsSync(skillPath)) {
-									fs.rmSync(skillPath, { recursive: true, force: true });
-								}
-							}
-						}
-						removeDirIfEmpty(hermesSkills);
-					}
-				} catch (e) {}
-				removeDirIfEmpty(hermesTargetDir);
-			}
-		}
-
-		if (h === "openclaw") {
-			const openclawTargetDir = getPath("openclaw", ".openclaw");
-			if (fs.existsSync(openclawTargetDir)) {
-				const workspaceDir = path.join(openclawTargetDir, "workspace");
-				if (fs.existsSync(workspaceDir)) {
-					const workspaceAgents = path.join(workspaceDir, "AGENTS.md");
-					if (fs.existsSync(workspaceAgents)) {
-						try {
-							fs.unlinkSync(workspaceAgents);
-						} catch (e) {}
-					}
-
-					const workspaceSkills = path.join(workspaceDir, "skills");
-					try {
-						const stat = fs.lstatSync(workspaceSkills);
-						if (stat.isSymbolicLink()) {
-							fs.unlinkSync(workspaceSkills);
-						} else if (stat.isDirectory()) {
-							const skillsSrcDir = path.join(AGENTS_SRC, "skills");
-							if (fs.existsSync(skillsSrcDir)) {
-								const coreSkills = fs.readdirSync(skillsSrcDir);
-								for (const skill of coreSkills) {
-									const skillPath = path.join(workspaceSkills, skill);
-									if (fs.existsSync(skillPath)) {
-										fs.rmSync(skillPath, {
-											recursive: true,
-											force: true,
-										});
-									}
-								}
-							}
-							removeDirIfEmpty(workspaceSkills);
-						}
-					} catch (e) {}
-					removeDirIfEmpty(workspaceDir);
-				}
-				removeDirIfEmpty(openclawTargetDir);
-			}
-		}
+		// Final cleanup: try to remove the harness's root directory if empty.
+		// For opencode/claude the surgical cleanup already removed the engine
+		// dir itself, so this is a no-op for them.
+		const harnessRoot = isGlobal
+			? getGlobalPath(id)
+			: path.join(effectiveTargetDir, config.engine.target.split("/")[0]);
+		removeDirIfEmpty(harnessRoot);
 	}
 }
 
@@ -2552,12 +2335,20 @@ module.exports = {
 	getExistingUserNickname,
 	updateUserNickname,
 	uninstallHarnesses,
+	uninstallChannel,
+	installHarness,
+	applyChannel,
+	resolveChannelPaths,
+	resolveGlobalTarget,
+	detectInstalledHarnesses,
 	performReconfigure,
 	performUpdate,
 	performCopyToSymlinkMigration,
 	detectUnlinkedHarnesses,
 	ASCII_ART,
 	VERSION,
+	HARNESS_CONFIG,
 	HARNESS_OPTIONS,
 	HARNESS_SYMLINK_SPECS,
+	TRANSPILERS,
 };

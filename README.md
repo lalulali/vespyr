@@ -1,7 +1,8 @@
 # Vespyr: The AI Agent Team for Product Development
 
-![Vespyr Version](https://img.shields.io/badge/version-1.7.1-blue)
+![Vespyr Version](https://img.shields.io/badge/version-1.7.2-blue)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![skills.sh](https://skills.sh/b/lalulali/vespyr)](https://skills.sh/lalulali/vespyr)
 
 Most AI coding assistants struggle because they are asked to do everything at once. They build before they design, skip writing tests, and lose context as files grow.
 
