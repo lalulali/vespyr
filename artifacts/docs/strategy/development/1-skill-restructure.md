@@ -14,7 +14,9 @@
 | F1.9–F1.12 | Phase 1 / T2 | Evolution 2.3, Adoption 3.1 (design, tri-modal) |
 | F1.13–F1.14 | Phase 1 / T2 | Adoption 3.1 (launch) |
 | F1.15–F1.17 | Phase 1 / T3 | Adoption 3.2 (spec kernel) |
+| F1.17.a | Phase 1 / T1, T3 | Adoption 3.2.1 (Ivy enrichment & `design.md`) |
 | F1.18–F1.20 | Phase 1 / T3 | Adoption 3.7 (sprint-status.yaml) |
+| F1.19.a | Phase 1 / T3, T4 | Adoption 3.7.1 (Orchestrator ASCII CLI Dashboard) |
 | F1.21–F1.24 | Phase 1 / T2 | Evolution 2.4 (CSV method libraries) |
 | F1.25–F1.26 | Phase 1 / T1 | Evolution 1.2 (domain expert depth + false-positive guard) |
 
@@ -156,6 +158,12 @@
   - [ ] Create `.agents/templates/prd/companions/decision-log.md` (template, ~20 lines)
   - [ ] Update `develop/SKILL.md` step-01 to require the spec-kernel form
   - [ ] Remove the old monolithic `prd-template.md`
+- [ ] F1.17.a — `@product-designer` (Ivy) Enrichment & Visual spec handoff (`design.md`):
+  - [ ] Enrich `@product-designer` (Ivy) persona to analyze UX grids, layout hierarchy, and user psychology.
+  - [ ] Implement adaptive styling rubric: Rigid/Structured (for dashboards/utility software) vs. Out-of-the-Box/Creative (for consumer apps/promotional sites), supporting theme combinations (e.g. *Sleek Utility*, *Modern Glassmorphism*, *Minimalist Tech*, *Vibrant Brand-First*).
+  - [ ] Create `artifacts/output/02-strategy/design.md` template mapping custom variables, colors, typography, component states, micro-animations, and responsive breakpoints. Core engineering agents (`@developer`, `@architect`, `@qa-engineer`, `@tech-lead`) and future marketing/growth agents are instructed to read this visual source of truth.
+  - [ ] Transition `product-spec.html` output to be dynamically generated on the fly (Tailwind CSS CDN + custom styled variables), deleting the 56KB static HTML template. Ensure generated HTML matches standard spec section structure.
+
 
 ## F1.18–F1.20 — Status YAML state machine
 
@@ -168,6 +176,10 @@
   - [ ] `next` command reads from YAML
   - [ ] `complete` command writes to YAML
   - [ ] `pipeline-state.json` becomes a derived cache (still written, but YAML is the source of truth)
+- [ ] F1.19.a — Human-Readable ASCII CLI Dashboard & Swarm State Enforcement:
+  - [ ] Upgrade `status` and `next` commands to print structured terminal ASCII boards (with phase status, artifact completeness checklist, blockers, and next action recommendations) unless `--json` is passed.
+  - [ ] Add agent-level enforcement: core personas query phase status at startup (verifying `pipeline-state.json`/`sprint-status.yaml`) to prevent running out-of-order, and execute (or request `@executor`/the user to execute) `complete` command at shutdown.
+
 - [ ] F1.20 — Create `.agents/skills/sprint-status/SKILL.md`:
   - [ ] Renders the YAML as a Kanban table
   - [ ] `## When to invoke`
@@ -237,6 +249,8 @@ For each, the structure should be:
 - [ ] `match_methods.js --context "PRD section" --source elicitation` returns 5 methods
 - [ ] The 9 domain-expert agents are all ≥ 200 lines
 - [ ] `code-reviewer.md` has the 15-item false-positive guard
+- [ ] `@product-designer` (Ivy) generates `design.md` visual spec companion and dynamic `product-spec.html` presentation on the fly (deleting the 56KB static template) adaptively based on Rigid vs. Creative style combinations
+- [ ] `orchestrator_state.js status` and `next` commands print human-readable ASCII dashboards by default when run in terminal, and agents enforce pipeline state checks at startup and shutdown
 
 ## Risks specific to this phase
 

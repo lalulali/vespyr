@@ -10,7 +10,7 @@
 strategy/development/
 ├── README.md                 ← this file (overview, alignment, sequencing)
 ├── 0-foundation.md           ← Phase 0: contracts that everything else builds on (Week 1, ~18h)
-├── 1-skill-restructure.md    ← Phase 1: skills → folder + step files; artifacts → kernel + companions (Weeks 2–3, ~36h)
+├── 1-skill-restructure.md    ← Phase 1: skills → folder + step files; artifacts → kernel + companions (Weeks 2–3, ~54h)
 ├── 2-enablement.md           ← Phase 2: hooks, MCP, self-learning, witness, delegation, QA gate (Week 4, ~22h)
 ├── 3-quality-observability.md ← Phase 3: graph auto-build, query API, telemetry, catalog parity (Weeks 5–6, ~22h)
 ├── 4-modularity.md           ← Phase 4: install-modules, rules/, builders, example project (Weeks 7–8, ~22h)
@@ -41,7 +41,7 @@ This folder is a *view*, not a *plan*. Every micro-task traces back to one of th
 ```
 Phase 0 (Foundation)        18h,  Week 1      T1, T3
   ↓ contracts established
-Phase 1 (Skill Restructure) 36h,  Weeks 2–3    T2, T3
+Phase 1 (Skill Restructure) 54h,  Weeks 2–3    T2, T3
   ↓ skills atomic, artifacts rigorous
 Phase 2 (Enablement)        22h,  Week 4      T4, T5
   ↓ hooks, MCP, self-learning, witness live
@@ -61,13 +61,13 @@ v2.1 (or v3.0) SHIP
 | Phase | Hours | Status |
 |---|---|---|
 | 0 | 18h | not started |
-| 1 | 36h | not started |
+| 1 | 54h | not started |
 | 2 | 22h | not started |
 | 3 | 22h | not started |
 | 4 | 22h | not started |
 | 5 (post-v2.0) | ~60h | not started |
-| **Total v2.0** | **~120h / 8 weeks** | |
-| **Total incl. Phase 5** | **~180h / 12 weeks** | |
+| **Total v2.0** | **~138h / 8 weeks** | |
+| **Total incl. Phase 5** | **~198h / 12 weeks** | |
 
 ## Theme coverage
 
@@ -97,7 +97,7 @@ See master roadmap Part 5 for the full 14-row risk register.
 
 ## Definition of Done (rolled up from master Part 6)
 
-The v2.0 release ships when **all 12 criteria** are met. The phase-level "Done when" blocks roll up to these:
+The v2.0 release ships when **all 14 criteria** are met. The phase-level "Done when" blocks roll up to these:
 
 1. All 21 agents have v2 frontmatter → Phase 0
 2. The 5 skills are folder + step files → Phase 1
@@ -111,8 +111,10 @@ The v2.0 release ships when **all 12 criteria** are met. The phase-level "Done w
 10. Graph is auto-built at 5 lifecycle moments → Phase 3
 11. Catalog parity test passes → Phase 3
 12. `npx vespyr init --example` works → Phase 4
+13. `@product-designer` (Ivy) generates `design.md` visual spec companion and dynamic HTML presentation on the fly (deleting the 56KB static template) adaptively based on Rigid vs. Creative style combinations → Phase 1
+14. `orchestrator_state.js status` and `next` commands print human-readable ASCII dashboards by default when run in terminal, and agents enforce pipeline state checks at startup and shutdown → Phase 1
 
-If only #1, #2, #3, #4, #7 pass, you can ship a **v2.0-rc1** (skills + agents only).
+If only #1, #2, #3, #4, #7, #13, #14 pass, you can ship a **v2.0-rc1** (skills + agents only).
 If #1–#7 pass, you can ship a **v2.0-rc2** (plus hooks, MCP, self-learning).
 If #1–#11 pass, you can ship a **v2.0-rc3** (full release minus example).
 When all 12 pass, ship **v2.0**.
