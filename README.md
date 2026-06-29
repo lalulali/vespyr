@@ -1,6 +1,6 @@
 # Vespyr: The AI Agent Team for Product Development
 
-![Vespyr Version](https://img.shields.io/badge/version-1.7.2-blue)
+![Vespyr Version](https://img.shields.io/badge/version-1.7.3-blue)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![skills.sh](https://skills.sh/b/lalulali/vespyr)](https://skills.sh/lalulali/vespyr)
 
