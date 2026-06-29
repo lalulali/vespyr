@@ -19,6 +19,7 @@
 | F1.19.a | Phase 1 / T3, T4 | Adoption 3.7.1 (Orchestrator ASCII CLI Dashboard) |
 | F1.21–F1.24 | Phase 1 / T2 | Evolution 2.4 (CSV method libraries) |
 | F1.25–F1.26 | Phase 1 / T1 | Evolution 1.2 (domain expert depth + false-positive guard) |
+| F1.27–F1.28 | Phase 1 / T3 | Custom Requirement (Wiki Builder Skill) |
 
 ---
 
@@ -236,6 +237,21 @@ For each, the structure should be:
   - [ ] "Use lodash/ramda" for 1-2 line vanilla JS
   - [ ] "Add unit tests" for integration-covered code
 
+## F1.27–F1.28 — Wiki Builder Skill (Karpathy LLM Style)
+
+**Source:** Custom Requirement (on top of doc-graph)
+
+- [ ] F1.27 — Create `.agents/skills/build-wiki/SKILL.md`:
+  - [ ] Frontmatter v2
+  - [ ] `## When to invoke` (when user/agents want to compile project artifacts into a navigable wiki)
+  - [ ] `## Done when` (compilation complete and index/backlinks updated)
+- [ ] F1.28 — Create `.agents/scripts/build_wiki.js` (~180 lines):
+  - [ ] Scans `artifacts/` recursively as the raw source folder.
+  - [ ] Compiles raw Markdown artifacts into clean, styled static HTML pages inside the `wiki/` directory at the project root.
+  - [ ] Integrates with `doc-graph` (from Phase 3) to extract incoming/outgoing links (backlinks) and traceback metadata for each document.
+  - [ ] Embeds dynamic backlink navigation, forward links, and relationship visualizations (e.g. Mermaid diagrams) for each document page.
+  - [ ] Generates an interactive sidebar navigation, a searchable index page, and a clean typography system.
+
 ---
 
 ## Done when
@@ -251,6 +267,7 @@ For each, the structure should be:
 - [ ] `code-reviewer.md` has the 15-item false-positive guard
 - [ ] `@product-designer` (Ivy) generates `design.md` visual spec companion and dynamic `product-spec.html` presentation on the fly (deleting the 56KB static template) adaptively based on Rigid vs. Creative style combinations
 - [ ] `orchestrator_state.js status` and `next` commands print human-readable ASCII dashboards by default when run in terminal, and agents enforce pipeline state checks at startup and shutdown
+- [ ] `build-wiki` is a folder with `SKILL.md` (≤ 60 lines) and compiles `artifacts/` into a styled wiki inside `wiki/` with automated backlink navigation and doc-graph alignment
 
 ## Risks specific to this phase
 

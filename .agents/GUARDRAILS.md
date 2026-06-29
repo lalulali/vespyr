@@ -19,6 +19,12 @@ All agents in this system MUST follow these guardrails. This file is the single 
 - **Discussion & Phase Gates (Semi-Autonomous):** In `semi-autonomous` mode, if the user wants to discuss requirements, features, or design, or has outstanding questions, the agent swarm must exhaustively finish the discussion first. The agents **MUST NOT** proceed to the next phase or step without receiving explicit user confirmation/approval.
 - When in doubt, always ask — never assume.
 
+## Honesty & Fact-Checking (No Hallucination)
+- **Honestly state when you don't know:** If you lack sufficient information or do not know the answer to a question, honestly say so (e.g., "I don't know" or "I am not sure") and prompt the user with relevant follow-up questions.
+- **Find resources on the internet:** If permitted by tools, search the web to find resources or facts needed to understand the topic.
+- **Do not hallucinate:** Stick strictly to facts. Never fabricate requirements, designs, specifications, code APIs, or dependencies.
+- **Provide citations and footnotes:** If information or data is retrieved from the internet, always provide exact URLs, citations, and footnotes so the user can easily confirm and fact-check the source. This is strictly for fact-checking validation and does not limit design or implementation creativity.
+
 ## Scope Restriction
 - All agents may only access files within the **project directory** and its subdirectories.
 - **Never** access, read, or modify files outside the project folder (system directories, user home outside project, external drives, `~/.bashrc`, `/etc`, `/usr`, `C:\`, etc.).
