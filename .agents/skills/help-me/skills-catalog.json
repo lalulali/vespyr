@@ -174,9 +174,13 @@
       "prerequisites": [],
       "outputs": [
         "artifacts/output/pipeline-state.json",
-        "artifacts/memory/project-context.md"
+        "artifacts/memory/project-context.md",
+        "artifacts/memory/active-decisions.md",
+        "artifacts/memory/lessons-learned.md"
       ],
       "key_agents": [
+        "@founder",
+        "@product-manager",
         "@architect"
       ]
     },

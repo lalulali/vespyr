@@ -1,8 +1,8 @@
 # Phase 0 — Foundation
 
-> **Week 1, ~18 hours**
-> **Themes:** T1 (Agent depth), T3 (Artifact rigor)
-> **Goal:** Establish the contracts that everything else builds on. After this phase, vespyr is "rigorous" — agents are locked, customization works, entry points consolidated, terminology fixed.
+> **Week 1–2, ~30 hours** (extended from 18h to absorb F0.23–F0.28 multi-agent infrastructure)
+> **Themes:** T1 (Agent depth), T2 (Multi-agent collaboration) **NEW**, T3 (Artifact rigor)
+> **Goal:** Establish the contracts that everything else builds on. After this phase, vespyr is "rigorous" and "collaborative" — agents are locked, customization works, entry points consolidated, terminology fixed, multi-agent patterns declared, critic infrastructure ready.
 
 ## Source mapping
 
@@ -286,16 +286,132 @@ You are a {role} with {depth}.
 
 ---
 
+## F0.23 — Multi-agent interaction patterns (`.agents/references/multi-agent-patterns.md`)
+
+**Source:** New for v2.1+ — required by the critic-reviewer pattern and the checkpointed invocation model. Synthesis of Self-Refine (Madaan et al. 2023) and Multi-Agent Debate (Du et al. 2023).
+
+- [ ] Create the reference doc defining 5 patterns with a decision tree, worked examples, and the adversarial collaboration protocol:
+  - [ ] **Sequential** — task chain: A → B → C. Each agent's output is the next agent's input. Use when outputs have a strict dependency.
+  - [ ] **Parallel** — task fan-out: spawn N agents, wait for all, synthesize results. Use when sub-tasks are independent and synthesis is well-defined.
+  - [ ] **Debate** — adversarial collaboration: 2+ agents argue positions, converge or escalate. Use for contentious decisions where the strongest answer requires steelmanning.
+  - [ ] **Hierarchical** — manager agent delegates to workers, synthesizes results. Use when delegation is dynamic based on tool/plugin access.
+  - [ ] **Critic-Reviewer** — checkpointed adversarial collaboration: critic joins at declared checkpoints, creator defends or revises. Use for high-stakes artifacts (research, code, docs).
+- [ ] Add a decision tree: "For task X, use pattern Y because Z" (e.g., "research artifact → critic-review at 3 checkpoints")
+- [ ] Add worked examples for each pattern (concrete skills that use it)
+- [ ] Document the **adversarial collaboration protocol** (response modes: Accept / Defend / Negotiate / Escalate)
+- [ ] Document the **escalation rules**: 3 debate rounds max, P0 issues, declared human gates
+- [ ] Document **context isolation**: critic only sees `[DRAFT]`, `[RUBRIC]`, `[EVALUATION_CRITERIA]` — never the creator's reasoning chain
+- [ ] Document the **"what would change my mind"** field — critics must articulate falsifiability
+- [ ] Cross-link from `AGENTS.md` and from each SKILL.md that uses a pattern
+
+## F0.24 — `patterns: [list]` and `critics: [list]` fields in SKILL.md frontmatter
+
+**Source:** F0.23 — required for tooling/queryability of multi-agent patterns. `critics:` field added after the 4-critic model (research-critic, code-critic, ux-critic, doc-critic) to support discriminated loading.
+
+- [ ] Add `patterns: [list]` field to all SKILL.md frontmatter
+  - [ ] Known pattern set: `sequential`, `parallel`, `debate`, `hierarchical`, `critic-review`
+  - [ ] Escape hatch: `unknown` (declared but not yet classified — append-only evolution)
+  - [ ] Empty list rejected — must declare at least one pattern, even if `unknown`
+- [ ] Add `critics: [list]` field to all SKILL.md frontmatter (declarative critic loading)
+  - [ ] Each entry has `persona: <name>` + `triggers: [checkpoint_names]` + `required: bool`
+  - [ ] Empty list = no critic (default for low-stakes skills)
+  - [ ] Discriminated loading: orchestrator loads only declared critics at declared checkpoints, not all 4
+  - [ ] Peak concurrent cost: 1 critic persona + skill = ~3.5k tokens (vs. ~10k if all 4 always loaded)
+- [ ] Document 3 critic loading modes in `multi-agent-patterns.md`:
+  - [ ] **Skill-only** (default for automated workflows): no persona loaded, just `/critic-review` + rubric (~1k tokens)
+  - [ ] **Checkpointed** (declared `critics:` field): orchestrator loads specific critic at specific checkpoint (~3.5k at peak)
+  - [ ] **Lazy** (manual user invocation): `@<critic>` loads that persona for the turn (~2.5k)
+- [ ] Migration script at `.agents/scripts/migrate_patterns.js`:
+  - [ ] Reads each SKILL.md
+  - [ ] Adds `patterns: [unknown]` and `critics: []` if fields are missing
+  - [ ] Logs skills that need manual pattern assignment
+- [ ] Update existing skills (grill-me, squad, delegate, plan, code-graph, memory, explore-idea, develop, etc.) with their actual patterns and critics
+
+## F0.25 — Pattern + critic validator (`.agents/scripts/validate_patterns.js`)
+
+**Source:** F0.24 — enforces the frontmatter contract.
+
+- [ ] Create the validator (~80 lines):
+  - [ ] Parse YAML frontmatter of every SKILL.md
+  - [ ] Required field: `patterns: [list]` — each value must be in the known set OR be `unknown`; empty list rejected
+  - [ ] Optional field: `critics: [list]` — each entry must have valid `persona` (matches a known critic persona) + `triggers` (list of checkpoint names) + `required` (bool)
+  - [ ] If `critics:` references a persona that doesn't exist as an agent file, warn (don't fail) — allows forward-compat
+  - [ ] Exit 0 if all pass; exit 1 with file list if any fail
+- [ ] Add `npm run validate:patterns` to `package.json`
+- [ ] Wire into `bin/cli.js init`
+- [ ] Wire into CI (fail build on validation error)
+- [ ] Document the `critics:` schema in `multi-agent-patterns.md` so skill authors know how to declare
+
+## F0.26 — Critic-reviewer infrastructure (`.agents/skills/critic-review/SKILL.md`)
+
+**Source:** F0.23 — defines the critic procedure used by all critic invocations (both persona and skill-only).
+
+- [ ] Create the skill as a procedure (not a persona):
+  - [ ] **Inputs:** `[DRAFT]`, `[RUBRIC_PATH]`, `[CHECKPOINT_NAME]`, `[EVALUATION_CRITERIA]`
+  - [ ] **Step 1: Context isolation** — load only inputs, never the creator's reasoning chain
+  - [ ] **Step 2: Score against rubric** — for each issue, emit: (a) what's wrong, (b) what would change my mind, (c) severity (P0/P1/P2)
+  - [ ] **Step 3: Return structured challenges** — JSON-shape output for parsing
+- [ ] Document the **adversarial collaboration protocol**:
+  - [ ] Creator's 4 response modes: Accept / Defend / Negotiate / Escalate
+  - [ ] 3-round debate cap
+  - [ ] Escalation triggers: debate exhaustion, P0 issue, scope dispute, declared human gate
+- [ ] Document the **temperature / model override**:
+  - [ ] Critic invocation can specify `temperature: <float>` (defaults to 0.0 for rigor)
+  - [ ] Critic invocation can specify `model: <id>` (defaults to creator's model)
+  - [ ] Different model = strongest critic signal
+- [ ] Document **checkpointed invocation** — the skill declares which checkpoints trigger critic review
+- [ ] Add `## When to invoke` and `## When NOT to invoke` sections
+- [ ] Add `## Why this is a skill, not a persona` section — clarifies the procedure/voice separation
+- [ ] Verify file is ≥ 150 lines
+
+## F0.27 — Domain rubric files (`.agents/rubrics/*.md`)
+
+**Source:** F0.26 — each domain has its own rubric for the critic to score against.
+
+- [ ] Create `rubrics/research.md` — citations, methodology, claim-evidence ratio, sample bias, reproducibility
+- [ ] Create `rubrics/user-research.md` — JTBD rigor, persona specificity, pain-point sourcing, segment coverage
+- [ ] Create `rubrics/ux.md` — usability heuristics, a11y check, interaction patterns, journey completeness
+- [ ] Create `rubrics/code.md` — correctness, security, performance, readability, test coverage
+- [ ] Create `rubrics/docs.md` — clarity, completeness, accuracy, structure, examples
+- [ ] Each rubric is 30–50 lines: criteria list + scoring guide + severity definitions
+- [ ] Cross-link from `/critic-review` SKILL.md
+- [ ] Document the rubric authoring convention in `rubrics/README.md` (how to add a new domain rubric)
+
+## F0.28 — Technical-writer handoff in `/develop` SKILL.md
+
+**Source:** Persona-skill-enrichment-plan §6 — technical-writer is currently under-invoked in the dev loop.
+
+- [ ] Add explicit trigger to `/develop` SKILL.md:
+  ```
+  ## Technical-writer handoff
+  After PR approval, before merge → invoke @technical-writer for:
+    - Changelog entry (1–3 bullets, user-facing)
+    - Release notes draft (if shipping a release)
+    - Doc updates (if API or behavior changed)
+    - Migration notes (if breaking change)
+  ```
+- [ ] Add to develop skill's `patterns` frontmatter: `patterns: [sequential, critic-review]`
+- [ ] Wire into the existing handoff section (don't add a new section — replace the missing piece)
+- [ ] Add a `human_gates: [post_PR_approval]` declaration to the skill
+
+---
+
 ## Done when
 
 - [ ] `npx vespyr init` produces a working install with the new frontmatter schema
 - [ ] `node .agents/scripts/validate_frontmatter.js` exits 0 on all 21 agents
+- [ ] `node .agents/scripts/validate_patterns.js` exits 0 on all skills
 - [ ] `node bin/cli.js phase` reads from `phase-table.md` (not hardcoded)
 - [ ] The 6 thin skills (grill-me, squad, delegate, plan, code-graph, memory) are all ≥ 80 lines
 - [ ] `AGENTS.md`, `agent.md`, `CLAUDE.md` are symlinks (or generated), not hand-maintained duplicates
 - [ ] Customization test: editing `.agents/custom/developer.toml` to override `temperature` actually overrides it on next agent load
 - [ ] `glossary.md` and `agent-contracts.md` exist and are linked from `AGENTS.md`
 - [ ] All 21 agents have: v2 frontmatter, channeled mentor, IDENTITY block, icon-prefix instruction
+- [ ] `multi-agent-patterns.md` exists and defines Sequential, Parallel, Debate, Hierarchical, Critic-Reviewer with decision tree and adversarial collaboration protocol
+- [ ] All skills declare `patterns: [list]` in frontmatter (no empty lists)
+- [ ] `/critic-review` skill exists with adversarial collaboration protocol (response modes, escalation rules, context isolation, model/temp override)
+- [ ] 5 domain rubrics exist (research, user-research, ux, code, docs) plus a `rubrics/README.md` authoring convention
+- [ ] `/develop` skill has explicit `@technical-writer` handoff trigger at post-PR-approval, pre-merge gate
 
 ## Risks specific to this phase
 
@@ -303,6 +419,11 @@ You are a {role} with {depth}.
 - **IDENTITY block boundaries** can drift if not enforced at install time. Validator must reject agents without it.
 - **Channeled mentor overload**: hard rule = 1–2 references per agent. Reject 3+.
 - **Glossary becomes a bikeshed magnet**: lock it at end of phase; future changes require explicit review.
+- **Pattern frontmatter drift**: skills add patterns without updating the reference doc. Mitigation: pattern validator checks against known set; `unknown` escape hatch allows honest declaration without forcing premature classification.
+- **Critic paralysis**: critic interrupts creator's flow at every checkpoint, breaking creative momentum. Mitigation: max 3 invocations per skill; severity-prioritized feedback (P0 fix now, P1 fix later, P2 optional); creator can dismiss P2+ and continue.
+- **Critic itself wrong**: adversarial collaboration assumes critic is reasonable. Mitigation: 3-round debate cap, escalation to human tie-breaker, mandatory "what would change my mind" field forces critic to articulate falsifiability.
+- **Context isolation leaks**: LLM harness may bleed creator's reasoning into critic's context, breaking the "fresh perspective" value. Mitigation: explicit `[DRAFT]`-only prompt, "you have not seen the author's reasoning" instruction, optional different model (F0.26 §"temperature / model override").
+- **Pattern validator + frontmatter validator drift**: two validators, two contracts. Mitigation: both are invoked by `bin/cli.js init`; CI runs both on every PR; if either fails, the build fails.
 
 ## Handoff to Phase 1
 
@@ -313,3 +434,8 @@ Once Phase 0 is done, every new file in Phase 1+ can assume:
 - Entry points are symlinks (one source).
 - Phase table is canonical.
 - Glossary and contracts are the single source of terminology.
+- Multi-agent interaction patterns are defined (Sequential, Parallel, Debate, Hierarchical, Critic-Reviewer).
+- Skills declare their patterns in frontmatter (`patterns: [list]`).
+- Critic-reviewer infrastructure exists (skill + rubrics + adversarial protocol + context isolation).
+- Domain rubrics exist for research, user-research, ux, code, docs.
+- Technical-writer handoff is wired into `/develop` at the post-PR-approval gate.

@@ -50,7 +50,7 @@ For each persona, the work is:
 - [ ] 5.17 — `@customer-success` (Iris-CS) — CSM; channels Lincoln Murphy + Nick Mehta
 - [ ] 5.18 — `@support-engineer` (Aegis) — support lead; channels Robert Rose + Intercom playbook
 
-### New Skills (T1, 13 total)
+### New Skills (T1, 14 total)
 
 For each skill, the work is:
 1. Create the folder + `SKILL.md` (boilerplate 50 lines)
@@ -72,6 +72,7 @@ For each skill, the work is:
 - [ ] 5.34 — `/database-migration` — schema/data migrations; primary `@database-engineer` + `@migration-engineer`
 - [ ] 5.35 — `/migrate-stack` — framework/language/cloud; primary `@migration-engineer` + `@architect`
 - [ ] 5.36 — `/correct-course` — mid-flight pivot; primary `@founder` leads
+- [ ] 5.37 — `/llm-wiki` — LLM-Wiki knowledge base generation (adopt & improve with citation validation + link integrity checks); primary `@technical-writer`
 
 ### Squad Updates (T1)
 
@@ -83,7 +84,7 @@ For each skill, the work is:
 ### Tier 1 Done when
 
 - [ ] All 14 T1 personas have v2 frontmatter, IDENTITY block, channeled mentor, icon
-- [ ] All 13 T1 skills are folder + `SKILL.md` + `steps/` (or tri-modal subfolders)
+- [ ] All 14 T1 skills are folder + `SKILL.md` + `steps/` (or tri-modal subfolders)
 - [ ] The `brainstormer ↔ founder` pairing is documented in `AGENTS.md`
 - [ ] The `humanize` skill is invoked by default by every external-facing persona
 - [ ] No persona duplicates an existing persona's charter (per file 4 AC #6)

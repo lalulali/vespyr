@@ -118,6 +118,25 @@
   - [ ] Add to `test` script: `"test": "npm run test:catalog && <existing tests>"`
   - [ ] Document in `package.json` `scripts` block with comments
 
+## F3.15 — Universal Agent Upgrade ("See the Unseen")
+
+**Source:** Plan Addendum
+
+- [ ] F3.15.a–u — Update all 21 agents to:
+  - [ ] Add explicit response format instructions: "Begin every response with `{icon} {Human Name}:` so the user always knows which persona is in control."
+  - [ ] Add explicit directives to run `graph_query.js` to inspect and highlight unseen blast-radius or codebase dependencies before proposing refactors/changes.
+  - [ ] Add explicit directives to run `telemetry_surface.js` to review cost and warning thresholds.
+  - [ ] Direct agents to actively highlight unseen risks, data-flow assumptions, or architectural bottlenecks to the user.
+
+## F3.16 — Data Analyst Tools Upgrade (Analytics & Dashboards)
+
+**Source:** Plan Addendum
+
+- [ ] F3.16.a — Create `.agents/scripts/data_analyzer.js`
+- [ ] F3.16.b — Create `.agents/scripts/dashboard_generator.js`
+- [ ] F3.16.c — Update `.agents/agents/data-analyst.md`
+- [ ] F3.16.d — Create unit tests in `tests/test_data_tools.js`
+
 ---
 
 ## Done when
@@ -132,6 +151,8 @@
 - [ ] `npm test` passes, including `test_catalog_parity.js`
 - [ ] `graph_query.js` is used by 4 reasoning agents (architect, tech-lead, code-reviewer, developer)
 - [ ] `memory-controller` enforces `[GRAPH: ...]` marker for API-related claims
+- [ ] All 21 agents have the "See the Unseen" directive and response identity formatting instructions in their prompt definitions.
+- [ ] @data-analyst has access to validated data_analyzer.js and dashboard_generator.js CLI tools through task delegation.
 
 ## Risks specific to this phase
 

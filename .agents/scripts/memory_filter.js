@@ -159,28 +159,31 @@ function parseSections(content, filename) {
   let currentSection = null;
   let currentLines = [];
 
+  function finalizeSection(section, linesList) {
+    section.body = linesList.join('\n');
+    section.isResolved = section.body.includes('**Status:** resolved') ||
+                         section.body.includes('**Status:** superseded') ||
+                         section.body.includes('**Status:** archived');
+  }
+
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     if (line.startsWith('### ')) {
       if (currentSection) {
-        currentSection.body = currentLines.join('\n');
+        finalizeSection(currentSection, currentLines);
         sections.push(currentSection);
       }
       const header = line.replace(/^###\s+/, '').trim();
       const statusMatch = header.match(/\[date:\s*(\d{4}-\d{2}-\d{2})\]/);
       const date = statusMatch ? statusMatch[1] : null;
       const isCritical = header.includes('[CRITICAL]');
-      const isResolved = content.substring(content.indexOf(line)).includes('**Status:** resolved') ||
-                         content.substring(content.indexOf(line)).includes('**Status:** superseded') ||
-                         content.substring(content.indexOf(line)).includes('**Status:** archived');
 
       currentSection = {
         header,
         file: filename,
         date,
         isCritical,
-        isResolved,
-        lines: [],
+        isResolved: false,
         body: ''
       };
       currentLines = [line];
@@ -190,7 +193,7 @@ function parseSections(content, filename) {
   }
 
   if (currentSection) {
-    currentSection.body = currentLines.join('\n');
+    finalizeSection(currentSection, currentLines);
     sections.push(currentSection);
   }
 

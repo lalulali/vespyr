@@ -1,20 +1,29 @@
-# Vespyr v2.0 — Development Phases (Micro View)
+# Vespyr v2.0+ — Development Phases (Micro View)
 
 > **Status:** Working view. Breaks the canonical v2.0 plan (`0. vespyr-master-roadmap.md`) into per-phase micro-tasks so the maintainer can focus on one phase at a time without re-reading the 535-line master doc.
 > **Authoritative plan:** `0. vespyr-master-roadmap.md` is the source of truth. The 5 phase files here mirror its F-numbering. If they conflict, **master wins**; file an issue.
 > **Audience:** Christian, sole maintainer. Each phase is independently shippable.
 
+## Release structure (as of this update)
+
+The v2.0 plan is split across two releases to right-size the surface for a solo maintainer:
+
+- **v2.0** = pre-Phase 0 (Hermes & OpenClaw integration plan) + master plan **Phases 0 + 1** (foundation + skill restructure + artifact rigor). The structural rigor that protects Vespyr's differentiators.
+- **v2.1** = master plan **Phases 2 + 3 + 4** (enablement + observability + modularity) + **Deeper Bench T1** (14 personas + 13 skills + 3 squads).
+- **v2.2** = **Deeper Bench T2 + T3** (7 personas + 4 skills).
+
 ## Folder structure
 
 ```
 strategy/development/
-├── README.md                 ← this file (overview, alignment, sequencing)
-├── 0-foundation.md           ← Phase 0: contracts that everything else builds on (Week 1, ~18h)
-├── 1-skill-restructure.md    ← Phase 1: skills → folder + step files; artifacts → kernel + companions (Weeks 2–3, ~54h)
-├── 2-enablement.md           ← Phase 2: hooks, MCP, self-learning, witness, delegation, QA gate (Week 4, ~22h)
-├── 3-quality-observability.md ← Phase 3: graph auto-build, query API, telemetry, catalog parity (Weeks 5–6, ~22h)
-├── 4-modularity.md           ← Phase 4: install-modules, rules/, builders, example project (Weeks 7–8, ~22h)
-└── 5-deeper-bench.md         ← Post-v2.0 enrichment (T1–T3 from file 4: 18 personas + 16 skills) — NOT in master F-numbering yet
+├── README.md                   ← this file (overview, alignment, sequencing)
+├── 0a-hermes-openclaw.md       ← Pre-Phase 0: Hermes & OpenClaw integration plan (~6-10h)  [v2.0]
+├── 0-foundation.md             ← Phase 0: contracts that everything else builds on (Week 1, ~18h)  [v2.0]
+├── 1-skill-restructure.md      ← Phase 1: skills → folder + step files; artifacts → kernel + companions (Weeks 2–3, ~54h)  [v2.0]
+├── 2-enablement.md             ← Phase 2: hooks, MCP, self-learning, witness, delegation, QA gate (Week 4, ~22h)  [v2.1]
+├── 3-quality-observability.md  ← Phase 3: graph auto-build, query API, telemetry, catalog parity (Weeks 5–6, ~22h)  [v2.1]
+├── 4-modularity.md             ← Phase 4: install-modules, rules/, builders, example project (Weeks 7–8, ~22h)  [v2.1]
+└── 5-deeper-bench.md           ← Deeper Bench: T1 (14 personas + 13 skills, ~6 weeks) [v2.1]; T2 (6 personas + 4 skills, ~3 weeks) + T3 (1 persona, ~1 week) [v2.2]
 ```
 
 ## How to use this folder
@@ -39,48 +48,57 @@ This folder is a *view*, not a *plan*. Every micro-task traces back to one of th
 ## Sequencing at a glance
 
 ```
-Phase 0 (Foundation)        18h,  Week 1      T1, T3
-  ↓ contracts established
-Phase 1 (Skill Restructure) 54h,  Weeks 2–3    T2, T3
-  ↓ skills atomic, artifacts rigorous
-Phase 2 (Enablement)        22h,  Week 4      T4, T5
-  ↓ hooks, MCP, self-learning, witness live
-Phase 3 (Quality+Obs)       22h,  Weeks 5–6   T3, T4
-  ↓ graph queryable, telemetry surfaced
-Phase 4 (Modularity)        22h,  Weeks 7–8   T6
-  ↓ selective install, builders, example
+v2.0 (pre-Phase 0 + Phases 0 + 1)
+                            78-82h,  Weeks 1–4   T1, T2, T3
+  ↓ Hermes/OpenClaw plan, then structural rigor
 v2.0 SHIP
   ↓
-Phase 5 (Deeper Bench)     ~60h,  post-v2.0   persona + skill enrichment
-  ↓ 18 personas, 16 skills, 3 new squads (growth, data-platform, migration)
-v2.1 (or v3.0) SHIP
+v2.1 (Phases 2 + 3 + 4 + Deeper Bench T1)
+                            126h, Weeks 5–12+  T3, T4, T5, T6
+  ↓ hooks, MCP, self-learning, graph, telemetry, modularity
+  ↓ +14 T1 personas, +13 T1 skills, +3 squads
+v2.1 SHIP
+  ↓
+v2.2 (Deeper Bench T2 + T3)
+                            ~24h, post-v2.1
+  ↓ +7 personas (T2+T3), +4 skills (T2)
+v2.2 SHIP
 ```
 
 ## Total effort budget
 
-| Phase | Hours | Status |
+| Release | Hours | Status |
 |---|---|---|
-| 0 | 18h | not started |
-| 1 | 54h | not started |
-| 2 | 22h | not started |
-| 3 | 22h | not started |
-| 4 | 22h | not started |
-| 5 (post-v2.0) | ~60h | not started |
-| **Total v2.0** | **~138h / 8 weeks** | |
-| **Total incl. Phase 5** | **~198h / 12 weeks** | |
+| v2.0 (pre-Phase 0 + Phases 0 + 1) | ~78-82h / 5-6 weeks | not started |
+| v2.1 (Phases 2 + 3 + 4 + T1) | ~126h / 8-9 weeks | not started |
+| v2.2 (T2 + T3) | ~24h / 2 weeks | not started |
+| **Total** | **~228-232h / 15-17 weeks** | |
+
+Per-phase breakdown (unchanged from master plan, just re-labeled):
+
+| Phase | Hours | Ships in |
+|---|---|---|
+| pre-Phase 0 (Hermes/OpenClaw plan) | 6-10h | v2.0 |
+| 0 | 18h | v2.0 |
+| 1 | 54h | v2.0 |
+| 2 | 22h | v2.1 |
+| 3 | 22h | v2.1 |
+| 4 | 22h | v2.1 |
+| 5 (Deeper Bench T1) | ~60h | v2.1 |
+| 5 (Deeper Bench T2+T3) | ~24h | v2.2 |
 
 ## Theme coverage
 
 The 6 themes from master roadmap (T1–T6) are spread across phases. A theme may have work in multiple phases:
 
-| Theme | Phase 0 | Phase 1 | Phase 2 | Phase 3 | Phase 4 | Phase 5 |
-|---|---|---|---|---|---|---|
-| T1 — Agent depth | ★★★ | ★ | ★ | ★ | ★★ | (enrichment) |
-| T2 — Skill atomicity | – | ★★★ | – | – | – | ★★★ |
-| T3 — Artifact rigor | ★ | ★★ | – | ★★ | – | – |
-| T4 — Harness contracts | – | – | ★★★ | ★ | – | – |
-| T5 — Self-improvement | – | – | ★★★ | – | – | – |
-| T6 — Modularity | – | – | – | – | ★★★ | ★ |
+| Theme | Phase 0 (v2.0) | Phase 1 (v2.0) | Phase 2 (v2.1) | Phase 3 (v2.1) | Phase 4 (v2.1) | Phase 5 T1 (v2.1) | Phase 5 T2+T3 (v2.2) |
+|---|---|---|---|---|---|---|---|
+| T1 — Agent depth | ★★★ | ★ | ★ | ★ | ★★ | ★★★ | ★★ |
+| T2 — Skill atomicity | – | ★★★ | – | – | – | ★★★ | ★★ |
+| T3 — Artifact rigor | ★ | ★★ | – | ★★ | – | – | – |
+| T4 — Harness contracts | – | – | ★★★ | ★ | – | – | – |
+| T5 — Self-improvement | – | – | ★★★ | – | – | – | – |
+| T6 — Modularity | – | – | – | – | ★★★ | ★ | – |
 
 ★★★ = primary work this phase; ★★ = secondary; ★ = light touch.
 
@@ -97,7 +115,7 @@ See master roadmap Part 5 for the full 14-row risk register.
 
 ## Definition of Done (rolled up from master Part 6)
 
-The v2.0 release ships when **all 14 criteria** are met. The phase-level "Done when" blocks roll up to these:
+The v2.0 release ships when **all 16 criteria** are met. The phase-level "Done when" blocks roll up to these:
 
 1. All 21 agents have v2 frontmatter → Phase 0
 2. The 5 skills are folder + step files → Phase 1
@@ -113,8 +131,10 @@ The v2.0 release ships when **all 14 criteria** are met. The phase-level "Done w
 12. `npx vespyr init --example` works → Phase 4
 13. `@product-designer` (Ivy) generates `design.md` visual spec companion and dynamic HTML presentation on the fly (deleting the 56KB static template) adaptively based on Rigid vs. Creative style combinations → Phase 1
 14. `orchestrator_state.js status` and `next` commands print human-readable ASCII dashboards by default when run in terminal, and agents enforce pipeline state checks at startup and shutdown → Phase 1
+15. All 21 agents are upgraded with "See the Unseen" directive and response prefixes → Phase 3
+16. `@data-analyst` has access to data_analyzer.js and dashboard_generator.js CLI tools → Phase 3
 
 If only #1, #2, #3, #4, #7, #13, #14 pass, you can ship a **v2.0-rc1** (skills + agents only).
 If #1–#7 pass, you can ship a **v2.0-rc2** (plus hooks, MCP, self-learning).
-If #1–#11 pass, you can ship a **v2.0-rc3** (full release minus example).
-When all 12 pass, ship **v2.0**.
+If #1–#11, #15, #16 pass, you can ship a **v2.0-rc3** (full release minus example).
+When all 16 pass, ship **v2.0**.
