@@ -1,7 +1,7 @@
 # Risk Register — Consolidated
 
 > **Source:** Consolidated from master roadmap Part 5 (13 rows), enrichment plan §8 (15 rows), each phase file's risks, and 3 new risks identified during review.
-> **Total:** 31 risks — 10 high-impact, 15 medium-impact, 6 low-impact.
+> **Total:** 36 risks — 12 high-impact, 17 medium-impact, 7 low-impact.
 
 ---
 
@@ -82,3 +82,22 @@
 | R29 | Persona overlap discovered post-release | High | Medium | Pre-release `@architect` review against existing 21. "No overlap" rule is a hard gate. |
 | R30 | Game-studio squad can't find a real project to validate against | High | Medium | T2 ship-block: a working game project exercises every game persona. If none found, defer to separate minor release. |
 | R31 | New personas all want `read + bash`, breaking the reasoning/I/O split | Medium | High | Hard rule: any persona with `bash` is "thinking + execution" (developer-tier). Every bash command goes through `@executor`. The split is preserved. |
+
+---
+
+## Phase 0 risk — worktree tooling (T7.1b)
+
+| # | Risk | Likelihood | Impact | Mitigation |
+|---|---|---|---|---|
+| R32 | Orphaned worktrees accumulate (agent crashes mid-task, worktree never cleaned) | Medium | Medium | `worktree.js clean-all` for bulk cleanup. `stop:session-end` hook (Phase 2) can auto-clean stale worktrees. `loop-state.json` tracks active worktrees for manual audit. |
+
+---
+
+## Phase 6 risks (Loop Engineering)
+
+| # | Risk | Likelihood | Impact | Mitigation |
+|---|---|---|---|---|
+| R33 | Token cost runaway — `/goal` with 10 iterations × full context is expensive | High | High | Hard iteration limit (10, configurable via `VESPYR_GOAL_MAX_ITERATIONS`). `goal_check.js` runs only the verification command. @goal-verifier is a narrow read-only sub-agent (~80 lines, minimal context). Automations start with ONE task; each new automation must clear persona gating (Gate A or B). |
+| R34 | @goal-verifier rubber-stamps (returns DONE when it shouldn't) | Medium | High | @goal-verifier reads ONLY the verification command output, not the maker's code or reasoning. If the command exits non-zero, verifier MUST return `NOT-DONE`. The verifier cannot be talked into "done" by the maker — it has no access to the maker's context. |
+| R35 | Comprehension debt accelerates — loop ships code the user didn't write or review | High | High | `/goal` writes a report at the end (what changed, what passed, what to review). Automations write to a triage inbox for human review — they do not auto-merge. The loop surfaces work; the human reviews it. No auto-merge, no auto-advance past the QA hard gate (Phase 2 F2.23). |
+| R36 | Cognitive surrender — user stops having opinions and just takes what the loop produces | Medium | High | `/goal` requires a verifiable condition (forces the user to define "done" upfront). Automations require a human review gate before any code modification. The loop is a tool, not an autopilot. This is the article's own warning, not a new one — and it maps to Vespyr's existing "Think Before Acting" guardrail. |

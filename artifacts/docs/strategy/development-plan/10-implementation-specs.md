@@ -733,3 +733,346 @@ if (!allOk) {
 }
 console.log('\n✅ QA gate passed.');
 ```
+
+---
+
+## §12 — worktree.js (Phase 0, T7.1b, ~100 lines)
+
+**Path:** `.agents/scripts/worktree.js`
+**Purpose:** Creates, lists, and cleans git worktrees for parallel agent isolation. Each worktree is a separate checkout on its own branch sharing repo history. Tracks active worktrees in `loop-state.json`.
+
+```javascript
+#!/usr/bin/env node
+// worktree.js — git worktree management for parallel agent isolation
+// Usage: node .agents/scripts/worktree.js create <branch>
+//        node .agents/scripts/worktree.js list
+//        node .agents/scripts/worktree.js clean <branch>
+//        node .agents/scripts/worktree.js clean-all
+
+const { execSync } = require('child_process');
+const fs = require('fs');
+const path = require('path');
+
+const ROOT = path.join(__dirname, '..', '..');
+const WT_DIR = path.join(ROOT, '.agents', 'worktrees');
+const STATE = path.join(ROOT, '.agents', 'state', 'loop-state.json');
+
+function loadState() {
+  if (!fs.existsSync(STATE)) return { worktrees: [] };
+  return JSON.parse(fs.readFileSync(STATE, 'utf8'));
+}
+
+function saveState(state) {
+  const dir = path.dirname(STATE);
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(STATE, JSON.stringify(state, null, 2));
+}
+
+function git(args) {
+  return execSync(`git ${args}`, { cwd: ROOT, encoding: 'utf8' }).trim();
+}
+
+const cmd = process.argv[2];
+const branch = process.argv[3];
+
+if (cmd === 'create') {
+  if (!branch) { console.error('Usage: worktree.js create <branch>'); process.exit(1); }
+  if (!fs.existsSync(WT_DIR)) fs.mkdirSync(WT_DIR, { recursive: true });
+  const wtPath = path.join(WT_DIR, branch);
+  if (fs.existsSync(wtPath)) { console.error(`[ERROR] worktree already exists: ${wtPath}`); process.exit(1); }
+  git(`worktree add -b "${branch}" "${wtPath}"`);
+  const state = loadState();
+  state.worktrees = state.worktrees || [];
+  state.worktrees.push({ branch, path: wtPath, created_at: new Date().toISOString() });
+  saveState(state);
+  console.log(`[OK] worktree created: ${wtPath} (branch: ${branch})`);
+
+} else if (cmd === 'list') {
+  const state = loadState();
+  const wts = state.worktrees || [];
+  if (wts.length === 0) { console.log('No active worktrees.'); process.exit(0); }
+  console.log('Branch                 | Path');
+  console.log('-----------------------|----');
+  for (const wt of wts) {
+    console.log(`${wt.branch.padEnd(22)} | ${wt.path}`);
+  }
+
+} else if (cmd === 'clean') {
+  if (!branch) { console.error('Usage: worktree.js clean <branch>'); process.exit(1); }
+  const state = loadState();
+  const wt = (state.worktrees || []).find(w => w.branch === branch);
+  if (!wt) { console.error(`[ERROR] no worktree for branch: ${branch}`); process.exit(1); }
+  git(`worktree remove "${wt.path}" --force`);
+  git(`branch -D "${branch}"`);
+  state.worktrees = state.worktrees.filter(w => w.branch !== branch);
+  saveState(state);
+  console.log(`[OK] worktree cleaned: ${branch}`);
+
+} else if (cmd === 'clean-all') {
+  const state = loadState();
+  for (const wt of (state.worktrees || [])) {
+    try { git(`worktree remove "${wt.path}" --force`); git(`branch -D "${wt.branch}"`); }
+    catch (e) { console.log(`[WARN] could not clean ${wt.branch}: ${e.message}`); }
+  }
+  state.worktrees = [];
+  saveState(state);
+  console.log('[OK] all worktrees cleaned');
+
+} else {
+  console.error('Usage: worktree.js <create|list|clean|clean-all> [branch]');
+  process.exit(1);
+}
+```
+
+---
+
+## §13 — goal_check.js (Phase 6, F6.2, ~120 lines)
+
+**Path:** `.agents/scripts/goal_check.js`
+**Purpose:** Runs the verification command for a `/goal` loop, captures exit code + output, writes result to `loop-state.json`. Does NOT grade "done" — that's @goal-verifier's job. This script only runs the check and records the result.
+
+```javascript
+#!/usr/bin/env node
+// goal_check.js — run /goal verification and record result
+// Usage: node .agents/scripts/goal_check.js run "<condition>"
+//        node .agents/scripts/goal_check.js status
+//        node .agents/scripts/goal_check.js resume
+//        node .agents/scripts/goal_check.js clear
+
+const { execSync } = require('child_process');
+const fs = require('fs');
+const path = require('path');
+
+const ROOT = process.cwd();
+const STATE = path.join(ROOT, '.agents', 'state', 'loop-state.json');
+const MAX_ITER = parseInt(process.env.VESPYR_GOAL_MAX_ITERATIONS || '10', 10);
+
+function loadState() {
+  if (!fs.existsSync(STATE)) return { active_goal: null };
+  return JSON.parse(fs.readFileSync(STATE, 'utf8'));
+}
+
+function saveState(state) {
+  const dir = path.dirname(STATE);
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(STATE, JSON.stringify(state, null, 2));
+}
+
+const cmd = process.argv[2];
+
+if (cmd === 'run') {
+  const condition = process.argv[3];
+  if (!condition) { console.error('Usage: goal_check.js run "<condition>"'); process.exit(1); }
+
+  const state = loadState();
+  if (state.active_goal && state.active_goal.status === 'running') {
+    console.error('[ERROR] goal already running. Use "status" or "clear".'); process.exit(1);
+  }
+
+  state.active_goal = {
+    condition,
+    iteration: 0,
+    last_failure: null,
+    started_at: new Date().toISOString(),
+    status: 'running'
+  };
+  saveState(state);
+  console.log(`[OK] goal started: "${condition}" (max ${MAX_ITER} iterations)`);
+
+  while (state.active_goal.iteration < MAX_ITER) {
+    state.active_goal.iteration++;
+    saveState(state);
+    console.log(`\n--- Iteration ${state.active_goal.iteration}/${MAX_ITER} ---`);
+    let exitCode = 0;
+    let output = '';
+    try {
+      output = execSync(condition, { cwd: ROOT, encoding: 'utf8', timeout: 120000 });
+      console.log(output);
+    } catch (e) {
+      exitCode = e.status || 1;
+      output = (e.stdout || '') + (e.stderr || '');
+      console.log(output);
+      state.active_goal.last_failure = `iteration ${state.active_goal.iteration}: exit ${exitCode}`;
+      saveState(state);
+      console.log(`[NOT-DONE] exit code ${exitCode}. Invoke @goal-verifier to confirm, then continue.`);
+      process.exit(0);
+    }
+    if (exitCode === 0) {
+      state.active_goal.status = 'done';
+      saveState(state);
+      console.log('[DONE] condition passed. Invoke @goal-verifier to confirm before declaring success.');
+      process.exit(0);
+    }
+  }
+  state.active_goal.status = 'paused';
+  saveState(state);
+  console.error(`[LIMIT] reached ${MAX_ITER} iterations without passing. Paused.`);
+  process.exit(1);
+
+} else if (cmd === 'status') {
+  const state = loadState();
+  if (!state.active_goal) { console.log('No active goal.'); process.exit(0); }
+  const g = state.active_goal;
+  console.log(`Condition:  ${g.condition}`);
+  console.log(`Status:     ${g.status}`);
+  console.log(`Iteration:  ${g.iteration}/${MAX_ITER}`);
+  if (g.last_failure) console.log(`Last fail:  ${g.last_failure}`);
+
+} else if (cmd === 'resume') {
+  const state = loadState();
+  if (!state.active_goal) { console.error('No paused goal to resume.'); process.exit(1); }
+  if (state.active_goal.status !== 'paused') { console.error(`Goal is ${state.active_goal.status}, not paused.`); process.exit(1); }
+  state.active_goal.status = 'running';
+  saveState(state);
+  console.log('[OK] goal resumed. Re-invoke the /goal skill to continue.');
+
+} else if (cmd === 'clear') {
+  const state = loadState();
+  state.active_goal = null;
+  saveState(state);
+  console.log('[OK] goal cleared.');
+
+} else {
+  console.error('Usage: goal_check.js <run|status|resume|clear> [condition]');
+  process.exit(1);
+}
+```
+
+---
+
+## §14 — automation.js (Phase 6, F6.6, ~180 lines)
+
+**Path:** `.agents/scripts/automation.js`
+**Purpose:** Creates, lists, runs, and archives scheduled automations. Each automation = prompt + cadence + skill + environment. Findings land in a triage inbox. Runs that find nothing archive themselves.
+
+```javascript
+#!/usr/bin/env node
+// automation.js — scheduled automation management
+// Usage: node .agents/scripts/automation.js create --name="..." --prompt="..." --cadence="..." [--skill="..."] [--worktree]
+//        node .agents/scripts/automation.js list
+//        node .agents/scripts/automation.js run <id>
+//        node .agents/scripts/automation.js run-all [--due]
+//        node .agents/scripts/automation.js archive <id>
+
+const fs = require('fs');
+const path = require('path');
+const { execSync } = require('child_process');
+
+const ROOT = process.cwd();
+const AUTOS = path.join(ROOT, '.agents', 'state', 'automations.json');
+const TRIAGE = path.join(ROOT, 'artifacts', 'output', '00-discovery', 'triage');
+
+function loadAutos() {
+  if (!fs.existsSync(AUTOS)) return { automations: [] };
+  return JSON.parse(fs.readFileSync(AUTOS, 'utf8'));
+}
+
+function saveAutos(data) {
+  const dir = path.dirname(AUTOS);
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(AUTOS, JSON.stringify(data, null, 2));
+}
+
+function parseArgs(argv) {
+  const args = {};
+  for (const arg of argv) {
+    const m = arg.match(/^--(\w+)=(.+)$/);
+    if (m) args[m[1]] = m[2];
+  }
+  return args;
+}
+
+const cmd = process.argv[2];
+
+if (cmd === 'create') {
+  const args = parseArgs(process.argv.slice(3));
+  if (!args.name || !args.prompt || !args.cadence) {
+    console.error('Usage: automation.js create --name="..." --prompt="..." --cadence="..." [--skill="..."] [--worktree]');
+    process.exit(1);
+  }
+  const data = loadAutos();
+  const id = args.name.toLowerCase().replace(/\s+/g, '-');
+  if (data.automations.find(a => a.id === id)) {
+    console.error(`[ERROR] automation "${id}" already exists`); process.exit(1);
+  }
+  data.automations.push({
+    id, name: args.name, prompt: args.prompt, cadence: args.cadence,
+    skill: args.skill || null, worktree: !!args.worktree,
+    last_run: null, findings: 0, archived: 0, created_at: new Date().toISOString()
+  });
+  saveAutos(data);
+  console.log(`[OK] automation created: ${id}`);
+
+} else if (cmd === 'list') {
+  const data = loadAutos();
+  if (data.automations.length === 0) { console.log('No automations.'); process.exit(0); }
+  console.log('ID                     | Cadence      | Last run    | Findings');
+  console.log('-----------------------|--------------|-------------|---------');
+  for (const a of data.automations) {
+    console.log(`${a.id.padEnd(22)} | ${a.cadence.padEnd(12)} | ${(a.last_run || 'never').padEnd(11)} | ${a.findings}`);
+  }
+
+} else if (cmd === 'run') {
+  const id = process.argv[3];
+  if (!id) { console.error('Usage: automation.js run <id>'); process.exit(1); }
+  const data = loadAutos();
+  const auto = data.automations.find(a => a.id === id);
+  if (!auto) { console.error(`[ERROR] automation "${id}" not found`); process.exit(1); }
+
+  const outDir = path.join(TRIAGE, auto.id);
+  if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
+  const outFile = path.join(outDir, `${new Date().toISOString().split('T')[0]}.md`);
+
+  let worktreePath = null;
+  if (auto.worktree) {
+    const wtBranch = `automation-${auto.id}-${Date.now()}`;
+    execSync(`node .agents/scripts/worktree.js create ${wtBranch}`, { cwd: ROOT, stdio: 'inherit' });
+    worktreePath = path.join(ROOT, '.agents', 'worktrees', wtBranch);
+  }
+
+  const prompt = auto.skill ? `$${auto.skill} ${auto.prompt}` : auto.prompt;
+  console.log(`[RUN] automation: ${auto.id}`);
+  console.log(`  Prompt: ${prompt}`);
+  console.log(`  Output: ${outFile}`);
+  console.log(`  Worktree: ${worktreePath || 'none (local checkout)'}`);
+  console.log('  → Hand off to the agent. Findings will be written to the triage inbox.');
+
+  auto.last_run = new Date().toISOString();
+  saveAutos(data);
+
+} else if (cmd === 'run-all') {
+  const dueOnly = process.argv.includes('--due');
+  const data = loadAutos();
+  let run = 0;
+  for (const auto of data.automations) {
+    if (dueOnly) {
+      console.log(`[CHECK] ${auto.id}: cadence=${auto.cadence} last=${auto.last_run || 'never'}`);
+      // Due-check is harness-specific (cron, GitHub Actions, hooks). This is a stub.
+      continue;
+    }
+    console.log(`[RUN] ${auto.id}`);
+    run++;
+  }
+  if (run === 0) console.log('No automations to run.');
+
+} else if (cmd === 'archive') {
+  const id = process.argv[3];
+  if (!id) { console.error('Usage: automation.js archive <id>'); process.exit(1); }
+  const data = loadAutos();
+  const auto = data.automations.find(a => a.id === id);
+  if (!auto) { console.error(`[ERROR] automation "${id}" not found`); process.exit(1); }
+  const triageDir = path.join(TRIAGE, auto.id);
+  const archiveDir = path.join(triageDir, 'archive');
+  if (fs.existsSync(archiveDir)) {
+    const files = fs.readdirSync(triageDir).filter(f => f.endsWith('.md'));
+    for (const f of files) fs.renameSync(path.join(triageDir, f), path.join(archiveDir, f));
+  }
+  auto.archived++;
+  saveAutos(data);
+  console.log(`[OK] archived findings for: ${id}`);
+
+} else {
+  console.error('Usage: automation.js <create|list|run|run-all|archive> [...]');
+  process.exit(1);
+}
+```

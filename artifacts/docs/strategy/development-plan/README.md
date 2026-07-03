@@ -30,8 +30,8 @@ Three releases. Each is independently shippable. If a release slips, the previou
 
 | Release | Scope | Effort | Calendar | Themes |
 |---|---|---|---|---|
-| **v2.0** | Phase 0 + Phase 1 — foundation, identity, skill restructure, artifact rigor | ~78h | ~5 weeks | T1, T2, T3, T7 |
-| **v2.1** | Phase 2 + 3 + 4 — hooks, MCP, self-learning, graph, telemetry, modularity | ~66h | ~5 weeks | T3, T4, T5, T6 |
+| **v2.0** | Phase 0 + Phase 1 — foundation, identity, skill restructure, artifact rigor, worktree tooling | ~82h | ~5 weeks | T1, T2, T3, T7 |
+| **v2.1** | Phase 2 + 3 + 4 + 6 — hooks, MCP, self-learning, graph, telemetry, modularity, loop engineering | ~80h | ~6 weeks | T3, T4, T5, T6, T7 |
 | **v2.2** | Phase 5 — Deeper Bench (T1 + T2 + T3 personas) | ~84h | ~6 weeks | T1, T2 |
 
 **v2.0 ships the differentiators.** The original plan buried Vespyr's 3 unique moats (permission-denial I/O split, Socratic depth, 3-tier memory) in a "T7 Backlog" while spending 138h importing BMAD/Ruflo/ECC patterns. This plan promotes T7 to Phase 0. The differentiators ship first, not last.
@@ -60,14 +60,15 @@ Every file in the plan maps to exactly one theme. Themes are capability-shaped, 
 
 | Phase | Release | Hours | Weeks | Themes | What ships | File |
 |---|---|---|---|---|---|---|
-| **0** | v2.0 | ~24h | 1-2 | T1, T3, T7 | Frontmatter v2, IDENTITY block, customization TOML, thin skills ≥80 lines, entry-point consolidation, phase table, glossary, agent contracts, **+ T7: worktree delegation enforcement, memory auto-loading, Socratic minimum bar, identity docs** | `01-phase-0-foundation.md` |
+| **0** | v2.0 | ~28h | 1-2 | T1, T3, T7 | Frontmatter v2, IDENTITY block, customization TOML, thin skills ≥80 lines, entry-point consolidation, phase table, glossary, agent contracts, **+ T7: worktree delegation enforcement + tooling (T7.1b), memory auto-loading, Socratic minimum bar, identity docs** | `01-phase-0-foundation.md` |
 | **1** | v2.0 | ~54h | 3-4 | T2, T3 | 5 long skills → folder + steps (develop, validate-idea, retro, design, launch); tri-modal flows; spec-kernel PRD; sprint-status.yaml; ASCII CLI dashboards; 9 domain experts ≥200 lines; code-reviewer 15-item false-positive guard; Ivy design.md + dynamic HTML | `02-phase-1-skills.md` |
 | **2** | v2.1 | ~22h | 5 | T4, T5 | 10 lifecycle hooks; MCP server (10 tools); self-learning (episode→pattern→instinct); SHA-256 witness; delegation enforcement; QA as hard gate | `03-phase-2-enablement.md` |
 | **3** | v2.1 | ~22h | 6 | T3, T4 | Graph auto-build at 5 lifecycle moments; graph query API; telemetry surface; catalog parity test; "See the Unseen" on all 21 agents; data analyst CLI tools | `04-phase-3-observability.md` |
 | **4** | v2.1 | ~22h | 7-8 | T6 | install-modules (7 modules); rules/common + per-language; agent-builder/skill-builder/workflow-builder; worked example project; README/AGENTS/QUICK-REFERENCE/CHANGELOG rewrite | `05-phase-4-modularity.md` |
 | **5** | v2.2 | ~84h | 9-14 | T1, T2 | Deeper Bench: T1 (14 personas + 14 skills + 3 squads), T2 (7 personas + 4 skills), T3 (1 persona) | `06-phase-5-deeper-bench.md` |
+| **6** | v2.1 | ~14h | 6 | T4, T7 | Loop Engineering: `/goal` primitive (run-until-verifiable-condition with separate verifier), automations/heartbeat (scheduled task execution, starts with 1 CI-failure triage), loop state on disk | `11-phase-6-loop-engineering.md` |
 
-**Total: ~228h across 14 weeks (3 releases).**
+**Total: ~246h across 15 weeks (3 releases).**
 
 ---
 
@@ -84,7 +85,7 @@ This is the single DoD list. The original docs had 3 conflicting counts (10, 14,
 5. `code-reviewer.md` has the 15-item false-positive guard.
 6. `@product-designer` (Ivy) generates `design.md` + dynamic HTML. 56KB static template deleted.
 7. Orchestrator CLI prints ASCII dashboards by default. Agents enforce pipeline state checks at startup/shutdown.
-8. **T7 — Vespyr Identity:** 3 differentiators explicitly advanced — (a) worktree delegation enforcement (~60 lines), (b) cross-session memory pattern auto-loading (~80 lines), (c) Socratic universal minimum bar (~40 lines). Identity section added to AGENTS.md + README.
+8. **T7 — Vespyr Identity:** 3 differentiators explicitly advanced — (a) worktree delegation enforcement + tooling (T7.1b, ~160 lines), (b) cross-session memory pattern auto-loading (~80 lines), (c) Socratic universal minimum bar (~40 lines). Identity section added to AGENTS.md + README.
 
 ### v2.1 DoD (criteria 9-14)
 
@@ -94,6 +95,12 @@ This is the single DoD list. The original docs had 3 conflicting counts (10, 14,
 12. Self-learning works end-to-end (episode → pattern → instinct). `instincts.md` loaded FIRST by `@memory-controller`.
 13. Graph auto-built at 5 lifecycle moments. `auto_graph.js check` < 500ms. `graph_query.js` returns structured responses.
 14. Catalog parity test passes (`npm test` includes `test_catalog_parity.js`). All 21 agents have "See the Unseen" directive + response prefixes. `@data-analyst` has `data_analyzer.js` + `dashboard_generator.js`.
+
+### v2.1 DoD — Loop Engineering (criteria 15-17)
+
+15. `vespyr goal "<condition>"` runs iterations, invokes @goal-verifier, stops when the condition passes. @goal-verifier reads only the verification output (not the maker's code) and returns `DONE` or `NOT-DONE`.
+16. `automation.js create/list/run/archive` works. The starter automation (CI-failure triage) runs and produces a triage file in `artifacts/output/00-discovery/triage/`.
+17. `loop-state.json` persists goal + automation state across sessions. `memory-controller` surfaces paused goals and overdue automations on session start.
 
 ### Release candidates
 
@@ -258,6 +265,7 @@ The "1-day ECC repackage" pattern is insufficient. Personas that don't clear eit
 | `08-framework-analysis.md` | Condensed 4-framework comparison (insights only) | ~200 |
 | `09-risk-register.md` | Consolidated risk register (single source) | ~100 |
 | `10-implementation-specs.md` | JS code specs: graph_query.js, witness.js, self_learn.js, etc. | ~500 |
+| `11-phase-6-loop-engineering.md` | Loop Engineering: `/goal` + automations + loop state (v2.1) | ~150 |
 
 ---
 

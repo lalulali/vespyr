@@ -1,7 +1,7 @@
 # Phase 0 — Foundation + Vespyr Identity
 
 > **Release:** v2.0
-> **Effort:** ~24h (18h foundation + 6h T7 identity)
+> **Effort:** ~28h (18h foundation + 6h T7 identity + 4h T7.1b worktree tooling)
 > **Calendar:** Week 1-2
 > **Themes:** T1 (Agent depth), T3 (Artifact rigor), T7 (Vespyr identity)
 > **Goal:** Establish the contracts that everything else builds on AND advance Vespyr's 3 differentiators. After this phase, Vespyr is "rigorous" and "identity-locked" — agents are locked, customization works, entry points consolidated, terminology fixed, and the 3 moats (permission-denial, Socratic depth, 3-tier memory) are explicitly strengthened.
@@ -231,6 +231,17 @@ The original plan spent 138h importing BMAD/Ruflo/ECC patterns and 0h advancing 
   - Each block: "You delegate I/O to sub-agents by default. Direct I/O requires a `[DIRECT-IO-JUSTIFIED: ...]` line."
 - [ ] Note: The `delegation_audit.js` script and `delegation-log.json` infrastructure stay in Phase 2 (they need hooks). Phase 0 ships the policy + the contract blocks.
 
+### T7.1b — Worktree isolation tooling (~100 lines)
+
+**Differentiator:** Permission-denial reasoning/I/O split — parallel agents must not collide.
+
+T7.1 ships the *policy* (delegation rules for worktrees). This ships the *tooling*. Without it, parallel agents share one checkout and collide. This is the foundation for Phase 6 (Loop Engineering) — a loop that spawns parallel agents needs isolation.
+
+- [ ] Create `.agents/scripts/worktree.js` (~100 lines): `create <branch>`, `list`, `clean <branch>`, `clean-all`. Uses `git worktree add` into `.agents/worktrees/<branch>/`. Each worktree is a separate checkout on its own branch sharing repo history. `clean` removes the worktree and deletes the branch. Tracks active worktrees in `.agents/state/loop-state.json` (the loop-state schema is defined in Phase 6 F6.9; Phase 0 writes a minimal version with just the `worktrees` array). **Implementation code:** See `10-implementation-specs.md` §12
+- [ ] Update `@developer`: when spawning parallel tasks, each task gets its own worktree via `worktree.js create`
+- [ ] Add `.agents/worktrees/` to `.gitignore` (worktrees are local; `loop-state.json` is committed but worktree directories are not)
+- [ ] Add `npm run worktree:create <branch>` and `npm run worktree:clean <branch>` to `package.json`
+
 ### T7.2 — Cross-session memory pattern auto-loading (~80 lines)
 
 **Differentiator:** 3-tier progressive memory.
@@ -273,6 +284,7 @@ The original plan spent 138h importing BMAD/Ruflo/ECC patterns and 0h advancing 
 - [ ] `glossary.md` and `agent-contracts.md` exist and are linked from `AGENTS.md`
 - [ ] All 21 agents have: v2 frontmatter, channeled mentor, IDENTITY block, icon-prefix instruction, Socratic Stance section
 - [ ] **T7:** `delegation-pattern.md` has the worktree rules + `[DIRECT-IO-JUSTIFIED]` protocol; 13 reasoning agents have Delegation Contract blocks
+- [ ] **T7.1b:** `worktree.js create/list/clean` works; two parallel @developer tasks in separate worktrees don't collide
 - [ ] **T7:** `memory-controller.md` has the pattern pre-fetch step; `memory_filter.js` supports `--prefetch-patterns`
 - [ ] **T7:** `validate_frontmatter.js` checks for `## Socratic Stance` section on reasoning agents
 - [ ] **T7:** `AGENTS.md` and `README.md` have the "Vespyr Identity" section stating the 3 differentiators
