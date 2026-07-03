@@ -1,0 +1,291 @@
+# Vespyr Development Plan
+
+> **Status:** v2.0 — not started. This file is the single source of truth. If anything here conflicts with other docs in `strategy/`, this file wins.
+> **Maintainer:** Chris (solo, AI-assisted)
+> **Created:** 2026-07-02 — consolidates and corrects the original strategy folder (7,330 lines → this folder)
+
+---
+
+## What this folder replaces
+
+This folder supersedes the following files in `strategy/`:
+
+| Original file | Status | What happened to its content |
+|---|---|---|
+| `0. vespyr-master-roadmap.md` (546 lines) | Superseded | Consolidated into this README + phase files |
+| `1. framework_comparison_*.md` (412 lines) | Condensed | → `08-framework-analysis.md` |
+| `2. vespyr_evolution_plan.md` (2,375 lines) | Superseded | Code specs → `10-implementation-specs.md`; micro-tasks merged into phase files |
+| `3. adoption-plan-*.md` (687 lines) | Superseded | Adoption matrix → this README §3; details merged into phase files |
+| `4. persona-skill-enrichment-plan.md` (1,190 lines) | Condensed | → `06-phase-5-deeper-bench.md` |
+| `ROADMAP.md` (442 lines) | Keep as public-facing | This README is the internal source; ROADMAP.md is the public mirror |
+| `development/` (1,678 lines) | Superseded | Corrected and merged into `01-06` phase files |
+
+**Original total: 7,330 lines across 13 files. This folder: ~3,500 lines across 11 files.** The reduction comes from de-duplication (themes were defined 4x, DoD 3x, risks 4x, adoption matrix 2x).
+
+---
+
+## 1. Release Structure
+
+Three releases. Each is independently shippable. If a release slips, the previous release is valid.
+
+| Release | Scope | Effort | Calendar | Themes |
+|---|---|---|---|---|
+| **v2.0** | Phase 0 + Phase 1 — foundation, identity, skill restructure, artifact rigor | ~78h | ~5 weeks | T1, T2, T3, T7 |
+| **v2.1** | Phase 2 + 3 + 4 — hooks, MCP, self-learning, graph, telemetry, modularity | ~66h | ~5 weeks | T3, T4, T5, T6 |
+| **v2.2** | Phase 5 — Deeper Bench (T1 + T2 + T3 personas) | ~84h | ~6 weeks | T1, T2 |
+
+**v2.0 ships the differentiators.** The original plan buried Vespyr's 3 unique moats (permission-denial I/O split, Socratic depth, 3-tier memory) in a "T7 Backlog" while spending 138h importing BMAD/Ruflo/ECC patterns. This plan promotes T7 to Phase 0. The differentiators ship first, not last.
+
+---
+
+## 2. The 7 Themes
+
+Every file in the plan maps to exactly one theme. Themes are capability-shaped, not implementation-shaped.
+
+| # | Theme | One-line statement | Ships in |
+|---|---|---|---|
+| **T1** | Agent depth | Role-locked personas with structured customization that survives updates | v2.0, v2.2 |
+| **T2** | Skill atomicity | A skill is a folder of self-contained step files, not a single Markdown blob | v2.0, v2.2 |
+| **T3** | Artifact rigor | Every artifact has a kernel + companions, a status, a hash witness, a traceability graph | v2.0, v2.1 |
+| **T4** | Harness contracts | Policy enforced at the harness layer (hooks), primitives exposed via MCP | v2.1 |
+| **T5** | Self-improvement | Sessions leave patterns → patterns promote to conventions → conventions promote to instincts → instincts auto-load | v2.1 |
+| **T6** | Modularity | Core stays lean. Domain extras ship as installable modules | v2.1 |
+| **T7** | Vespyr identity | The 3 differentiators (permission-denial, Socratic depth, 3-tier memory) are explicitly advanced, not just preserved | v2.0 (NEW — promoted from backlog) |
+
+**T7 is new.** The original plan had it buried in "Backlog (no timeline)." This plan promotes it to Phase 0 because the differentiators are the moat. Without T7, v2.0 is "BMAD v6.8 with different file names" — the exact failure mode the original plan warned against.
+
+---
+
+## 3. Phase Table (Canonical)
+
+| Phase | Release | Hours | Weeks | Themes | What ships | File |
+|---|---|---|---|---|---|---|
+| **0** | v2.0 | ~24h | 1-2 | T1, T3, T7 | Frontmatter v2, IDENTITY block, customization TOML, thin skills ≥80 lines, entry-point consolidation, phase table, glossary, agent contracts, **+ T7: worktree delegation enforcement, memory auto-loading, Socratic minimum bar, identity docs** | `01-phase-0-foundation.md` |
+| **1** | v2.0 | ~54h | 3-4 | T2, T3 | 5 long skills → folder + steps (develop, validate-idea, retro, design, launch); tri-modal flows; spec-kernel PRD; sprint-status.yaml; ASCII CLI dashboards; 9 domain experts ≥200 lines; code-reviewer 15-item false-positive guard; Ivy design.md + dynamic HTML | `02-phase-1-skills.md` |
+| **2** | v2.1 | ~22h | 5 | T4, T5 | 10 lifecycle hooks; MCP server (10 tools); self-learning (episode→pattern→instinct); SHA-256 witness; delegation enforcement; QA as hard gate | `03-phase-2-enablement.md` |
+| **3** | v2.1 | ~22h | 6 | T3, T4 | Graph auto-build at 5 lifecycle moments; graph query API; telemetry surface; catalog parity test; "See the Unseen" on all 21 agents; data analyst CLI tools | `04-phase-3-observability.md` |
+| **4** | v2.1 | ~22h | 7-8 | T6 | install-modules (7 modules); rules/common + per-language; agent-builder/skill-builder/workflow-builder; worked example project; README/AGENTS/QUICK-REFERENCE/CHANGELOG rewrite | `05-phase-4-modularity.md` |
+| **5** | v2.2 | ~84h | 9-14 | T1, T2 | Deeper Bench: T1 (14 personas + 14 skills + 3 squads), T2 (7 personas + 4 skills), T3 (1 persona) | `06-phase-5-deeper-bench.md` |
+
+**Total: ~228h across 14 weeks (3 releases).**
+
+---
+
+## 4. Definition of Done (Canonical — 14 Criteria)
+
+This is the single DoD list. The original docs had 3 conflicting counts (10, 14, 16). This is the canonical 14.
+
+### v2.0 DoD (criteria 1-8)
+
+1. All 21 agents have v2 frontmatter (`name`, `icon`, `capabilities`, `default_squad`, `origin`, `channeled_mentor`) + `<!-- IDENTITY: do not edit -->` block. `validate_frontmatter.js` exits 0.
+2. The 5 long skills are folder + step files with resume semantics: `develop` (9 steps), `validate-idea` (tri-modal 7+5+5), `retro` (5), `design` (tri-modal 6+4+4), `launch` (5).
+3. Spec-kernel is the canonical PRD shape (`templates/prd/SPEC.md` + companions). Old `prd-template.md` removed.
+4. `sprint-status.yaml` is the human-readable state of truth. `orchestrator_state.js status`/`next` read from it.
+5. `code-reviewer.md` has the 15-item false-positive guard.
+6. `@product-designer` (Ivy) generates `design.md` + dynamic HTML. 56KB static template deleted.
+7. Orchestrator CLI prints ASCII dashboards by default. Agents enforce pipeline state checks at startup/shutdown.
+8. **T7 — Vespyr Identity:** 3 differentiators explicitly advanced — (a) worktree delegation enforcement (~60 lines), (b) cross-session memory pattern auto-loading (~80 lines), (c) Socratic universal minimum bar (~40 lines). Identity section added to AGENTS.md + README.
+
+### v2.1 DoD (criteria 9-14)
+
+9. 10 lifecycle hooks registered, env-var-disablable, documented.
+10. MCP tool surface exposes 10 tools, callable from Claude Code or OpenCode.
+11. `orchestrator_state.js next` refuses to advance out of `development` without `qa-signoff.md`.
+12. Self-learning works end-to-end (episode → pattern → instinct). `instincts.md` loaded FIRST by `@memory-controller`.
+13. Graph auto-built at 5 lifecycle moments. `auto_graph.js check` < 500ms. `graph_query.js` returns structured responses.
+14. Catalog parity test passes (`npm test` includes `test_catalog_parity.js`). All 21 agents have "See the Unseen" directive + response prefixes. `@data-analyst` has `data_analyzer.js` + `dashboard_generator.js`.
+
+### Release candidates
+
+- **v2.0-rc1:** DoD 1, 2, 8 (frontmatter, skill folders, T7 identity) — minimum structural rigor
+- **v2.0-rc2:** + DoD 3, 4 (spec-kernel, sprint-status)
+- **v2.0-rc3:** + DoD 5, 6, 7 (false-positive guard, Ivy, ASCII dashboards) — release-ready
+
+---
+
+## 5. What Was Cut or Deferred (Reprioritization)
+
+The original plan had scope creep and wrong priorities. Here's what changed:
+
+| Item | Original status | New status | Why |
+|---|---|---|---|
+| **T7 Vespyr Identity** (3 differentiators) | Backlog (no timeline) | **Phase 0** (v2.0) | The moat ships first, not last. Without T7, v2.0 is all imports. |
+| **F0.23-F0.28** (critic infrastructure: multi-agent patterns, critic-review skill, 5 rubrics, patterns/critics frontmatter) | Phase 0 (v2.0) | **Deferred to v2.3+** | Speculative engineering. No critic personas exist until v2.2. The infrastructure has no consumers. Violates "Simplicity First." |
+| **F1.27-F1.28** (build-wiki skill + script) | Phase 1 (v2.0) | **Moved to Phase 3** (v2.1) | Depends on doc-graph (Phase 3 work). Forward dependency. |
+| **Pre-Phase 0** (Hermes/OpenClaw integration) | v2.0 (6-10h) | **Deferred to v2.1+** | Scope creep for 2 non-top-8 harnesses. OpenClaw prioritized above Hermes (can enforce permissions). See `07-harness-integration.md`. |
+| **35-harness future table** | ROADMAP.md (35 rows) | **Deleted** | Performative. A solo maintainer cannot port to 35 harnesses. Replaced with: "additional harnesses added as community demand warrants." |
+| **Critic consortium** (4 critic personas + consortium pattern + 3 loading modes + discriminated loading) | v2.1 (Phase 5 T1) | **Deferred to v2.3+** | 600 lines of spec for 4 personas with no consumers. Ship 1 critic + the skill first; add the other 3 if the first one gets used. |
+| **Hermes integration** (623-line plan) | Pre-Phase 0 (v2.0) | **v2.1+, degraded mode** | Hermes cannot enforce permission-denial (Vespyr's #1 moat) or route I/O to cheap models. Degraded experience. See `07-harness-integration.md`. |
+| **OpenClaw integration** (365-line plan) | Pre-Phase 0 (v2.0) | **v2.1+, prioritized above Hermes** | OpenClaw CAN enforce permissions via sandbox. Better fit. Security review required first. See `07-harness-integration.md`. |
+
+---
+
+## 6. Adoption Matrix (Source → Vespyr)
+
+Principle: **adopt the idea, not the inventory.** We do not want Vespyr to look like BMAD v6.8 with different file names.
+
+| Source pattern | Adopted in | Phase | Notes |
+|---|---|---|---|
+| BMAD — step-file / micro-file architecture | T2 | 1 | Folder + `steps/`, plain Markdown (no XML DSL) |
+| BMAD — tri-modal workflows (create/edit/validate) | T2 | 1 | `steps-c/`, `steps-e/`, `steps-v/` |
+| BMAD — CSV technique libraries | T2 | 1 | Extend `elicitation/methods.csv`, add 2 new CSVs |
+| BMAD — 5-field spec kernel | T3 | 1 | 2-file split (kernel + companions) |
+| BMAD — 2-file customization TOML | T1 | 0 | Simplified from BMAD's 3-file/4-layer |
+| BMAD — hardcoded identity + customizable behavior | T1 | 0 | `<!-- IDENTITY: do not edit -->` block |
+| BMAD — icon-prefixed persona | T1 | 0 | First line of every response |
+| BMAD — frontmatter schema | T1 | 0 | `name`, `icon`, `capabilities`, `default_squad`, `origin` |
+| BMAD — channeled mentor | T1 | 0 | 1-2 references per agent |
+| BMAD — sprint-status.yaml | T3 | 1 | Layered on pipeline-state.json |
+| BMAD — glossary + agent-contracts | T1, T3 | 0 | One definition per term, owns/doesn't-own table |
+| Ruflo — lifecycle hooks | T4 | 2 | 10 hooks with stable IDs + env-var disable |
+| Ruflo — MCP tool surface | T4 | 2 | 10 tools wrapping existing scripts |
+| Ruflo — witness/verification | T3 | 2 | SHA-256 (no Ed25519 — overkill for local-first) |
+| Ruflo — self-learning / instincts | T5 | 2 | 3-tier episode → pattern → instinct |
+| Ruflo — delegation enforcement | T1 | 2 | `delegation-policy.md` + `[DIRECT-IO-JUSTIFIED]` + audit |
+| Ruflo — graph auto-build + query API | T3 | 3 | `auto_graph.js` + `graph_query.js` |
+| Ruflo — telemetry surface | T3 | 3 | LLM-consumable digests |
+| Ruflo — QA as hard gate | T1 | 2 | `qa-signoff.md` blocks phase advance |
+| ECC — code-reviewer false-positive guard | T1 | 1 | 15-item skip-list |
+| ECC — language-specific rules | T6 | 4 | `rules/common/` + `rules/<lang>/` |
+| ECC — env-var hook profile | T4 | 2 | `VESPYR_HOOK_PROFILE=minimal\|standard\|strict` |
+| ECC — install profiles | T6 | 4 | `install-modules.json` |
+| ECC — example project | T6 | 4 | CLI todo list, all 10 phase folders |
+
+### Patterns explicitly NOT adopted
+
+| Pattern | Source | Why not |
+|---|---|---|
+| Vector DB / HNSW / embeddings | Ruflo | Vespyr is file-based. `memory_filter.js` keyword scoring is the right primitive. |
+| Plugin marketplace (30+ plugins) | Ruflo | v3.0 backlog. |
+| Federation / multi-node trust | Ruflo | Single-repo, single-machine. |
+| WASM neural runtime | Ruflo | No model fine-tuning in Vespyr. |
+| 10+ harness dotfolder mirrors | BMAD | We use symlinks + thin shims. |
+| `<workflow>` XML pseudo-DSL | BMAD | Plain Markdown is just as expressive for short step files. |
+| 3-file TOML with 4-layer merge | BMAD | 2-file is enough. |
+| WDS persona handoff | BMAD | Round-table skill already does multi-agent spawning. |
+| AIDefence 3-gate PII pipeline | Ruflo | Dev framework, not a production PII handler. |
+| 12-locale README translations | ECC | High effort, low value. Backlog for v3.0+. |
+| 20+ language-specific reviewer agents | ECC | Captured as language subagents of `@developer`/`@code-reviewer`, not 20 top-level personas. |
+
+---
+
+## 7. Persona & Skill Counts (Canonical)
+
+The original docs had 5 different counts for T1 personas (14, 18, 18, 19, 25). This is the canonical count.
+
+### Current (v1.7.x)
+
+| Entity | Count |
+|---|---|
+| Agents | 21 (4 I/O sub-agents + 17 reasoning personas) |
+| Skills | 24 |
+| Squads | 7 |
+
+### After v2.2 (full Deeper Bench)
+
+| Tier | New personas | New skills | New squads | Ships in |
+|---|---|---|---|---|
+| T1 | 14 | 14 (incl. llm-wiki) | 3 (growth, data-platform, migration) | v2.1 |
+| T2 | 7 | 4 | 0 | v2.2 |
+| T3 | 1 | 0 | 0 | v2.2 |
+| **Total new** | **22** | **18** | **3** | |
+| **Grand total** | **43** | **42** | **10** | |
+
+### Deferred to v2.3+ (critic consortium)
+
+| Item | Count | Why deferred |
+|---|---|---|
+| Critic personas (@research-critic, @code-critic, @ux-critic, @doc-critic) | 4 | Depends on critic infrastructure (F0.23-F0.28) which is deferred. Ship 1 critic first; add others if used. |
+| /critic-review skill | 1 | Same. |
+| Multi-agent patterns reference | 1 | Same. |
+| Domain rubrics (research, user-research, ux, code, docs) | 5 | Same. |
+
+### T1 personas (14) — ship in v2.1
+
+brainstormer, innovation-strategist, problem-solver, storyteller, presentation-master, growth-marketer, seo-specialist, database-engineer, api-designer, ml-ops, accessibility-architect, migration-engineer, customer-success, support-engineer
+
+### T1 skills (14) — ship in v2.1
+
+brainstorming, pr-faq, epics-and-stories, market-research, storytelling, presentation, design-thinking, accessibility-audit, cost-analysis, api-design, database-migration, migrate-stack, correct-course, llm-wiki
+
+### T2 personas (7) — ship in v2.2
+
+narrative-engineer, game-designer, game-developer, level-designer, brand-voice-curator, content-engineer, finance-analyst
+
+### T2 skills (4) — ship in v2.2
+
+game-design-doc, narrative-design, playtest-plan, domain-research
+
+### T3 personas (1) — ship in v2.2
+
+legal-counsel (read-only, privacy-focused)
+
+### Persona gating (applies to all new personas)
+
+Each new persona must clear **one of two gates** before shipping:
+- **Gate A — Demand:** 3+ community requests with named use cases
+- **Gate B — Depth:** ≥ 200 lines with persona depth, decision tree, failure modes, escalation patterns, memory write-back contracts
+
+The "1-day ECC repackage" pattern is insufficient. Personas that don't clear either gate move to the backlog.
+
+---
+
+## 8. File Inventory
+
+| Action | Count |
+|---|---|
+| New files (v2.0) | ~48 |
+| Modified files (v2.0) | ~30 |
+| New files (v2.1) | ~28 |
+| Modified files (v2.1) | ~35 |
+| New files (v2.2) | ~11 |
+| **Total net new code** | **~3,500 lines (v2.0) + ~2,000 (v2.1) + ~800 (v2.2)** |
+
+---
+
+## 9. This Folder's Files
+
+| File | What it contains | Lines (est.) |
+|---|---|---|
+| `README.md` (this file) | Single source of truth: releases, phases, DoD, themes, counts, adoption matrix | ~250 |
+| `01-phase-0-foundation.md` | Phase 0 micro-tasks (F0.1-F0.22 + T7 identity, v2.0) | ~350 |
+| `02-phase-1-skills.md` | Phase 1 micro-tasks (F1.1-F1.26, v2.0) | ~300 |
+| `03-phase-2-enablement.md` | Phase 2 micro-tasks (F2.1-F2.27, v2.1) | ~250 |
+| `04-phase-3-observability.md` | Phase 3 micro-tasks (F3.1-F3.16, v2.1) | ~200 |
+| `05-phase-4-modularity.md` | Phase 4 micro-tasks (F4.1-F4.15, v2.1) | ~200 |
+| `06-phase-5-deeper-bench.md` | Phase 5: T1/T2/T3 personas + skills + squads (v2.2) | ~300 |
+| `07-harness-integration.md` | Hermes + OpenClaw (honest, condensed, OpenClaw prioritized) | ~200 |
+| `08-framework-analysis.md` | Condensed 4-framework comparison (insights only) | ~200 |
+| `09-risk-register.md` | Consolidated risk register (single source) | ~100 |
+| `10-implementation-specs.md` | JS code specs: graph_query.js, witness.js, self_learn.js, etc. | ~500 |
+
+---
+
+## 10. How to Use This Folder
+
+1. **Pick a phase.** Open the matching `01-phase-0-foundation.md` … `06-phase-5-deeper-bench.md`.
+2. **Read the "Source mapping" table.** Each micro-task cites the original F-number and source.
+3. **Work in order.** Phases are linearly dependent (0 → 1 → 2 → 3 → 4 → 5). Within a phase, F-items can be parallelized unless noted.
+4. **Tick the checkbox.** Each micro-task ends with `- [ ]`. The "Done when" block at the end of each phase is the gate to the next.
+5. **If a phase slips**, ship the previous phase's release as a valid intermediate. Phases 0, 1, 2 are independently shippable.
+6. **For implementation code**, see `10-implementation-specs.md` — it has the full JS specs for every new script.
+7. **For harness work**, see `07-harness-integration.md` — it has the honest assessments for Hermes and OpenClaw.
+
+---
+
+## 11. Decision Authority
+
+When a phase is mid-execution and a new constraint emerges (e.g., a phase overruns by 1 week), **Chris has sole decision authority**. The default: **defer to the next release, do not slip the current release date**. The phased rc cutoffs make this easier — anything that doesn't hit the current rc is the next release's work, by definition.
+
+---
+
+## 12. Version History
+
+| Version | Status | What shipped |
+|---|---|---|
+| v2.2 | Planned | Deeper Bench T2 + T3 (+7 personas, +4 skills) |
+| v2.1 | Planned | Phases 2+3+4 (hooks, MCP, self-learning, graph, telemetry, modularity) + Deeper Bench T1 (+14 personas, +14 skills, +3 squads) |
+| **v2.0** | **Not started** | Phases 0+1 (foundation, identity, skill restructure, artifact rigor) — 8 DoD criteria |
+| v1.7.x | Stable | `npx create-vespyr` installer, 8 active harnesses |
+| v1.1-v1.6 | Shipped | Per CHANGELOG |
+| v1.0 | Shipped | 21 agents, opencode native, delegation pattern, shared memory, game mode, humanizer |
