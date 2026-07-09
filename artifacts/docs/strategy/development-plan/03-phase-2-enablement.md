@@ -1,7 +1,6 @@
 # Phase 2 — Enablement
 
 > **Release:** v2.1
-> **Effort:** ~22h
 > **Calendar:** Week 5
 > **Themes:** T4 (Harness contracts), T5 (Self-improvement)
 > **Goal:** Vespyr enforces policy at the harness layer (hooks), exposes primitives externally (MCP), tracks its own work (self-learning), has delegation audited (not just documented), and makes QA a hard gate.
@@ -144,6 +143,22 @@ mcp__vespyr__agent_resolve({ query: "who reviews PRs" }) → { agent: "code-revi
 - [ ] F2.14 — Update `memory-controller.md`: add Step 0.25 "Load instincts.md FIRST (before any other context)". Loading order: (1) instincts.md, (2) project-context.md, (3) active-decisions.md, (4) patterns-and-conventions.md, (5) lessons-learned.md, (6) agent-notes/<this-agent>.md
 - [ ] F2.15 — Update `memory_filter.js`: add `instincts.md` to loadable files with highest priority, cap at ~200 tokens
 
+### Self-learning outcome metrics
+
+**Problem:** Episodes → patterns → instincts is well-specified as a pipeline, but there's no mechanism to answer: "did promoting this instinct actually improve agent outcomes?" Without measuring whether instincts help, the system could accumulate noise that costs tokens without adding value.
+
+**Target:** Add 3 metrics to the self-learning system:
+
+1. **Instinct hit rate:** How often does an auto-loaded instinct get referenced by an agent during a session? Tracked by `memory_filter.js` — when an instinct is loaded, log it; when an agent's output cites the instinct pattern, count a "hit." Target: > 50% of loaded instincts get at least 1 hit per week.
+
+2. **Pattern freshness:** How many patterns are > 90 days old with < 3 occurrences? These are stale patterns that should be archived. `self_learn.js scan-patterns` reports stale patterns alongside instinct candidates.
+
+3. **Token cost of instincts:** How many tokens does `instincts.md` consume per session? Capped at ~200 tokens (F2.15), but if the instinct count grows beyond 10, the cap forces truncation. Track: instinct count × average tokens per instinct. If total exceeds 200, flag for demotion review.
+
+- [ ] F2.15.a — Add instinct hit tracking to `memory_filter.js`: log loaded instincts to `state/instinct-hits.json`; increment counter when agent output matches an instinct pattern
+- [ ] F2.15.b — Add stale pattern reporting to `self_learn.js scan-patterns`: flag patterns > 90 days old with < 3 occurrences
+- [ ] F2.15.c — Add token cost tracking to `memory_filter.js`: report total tokens consumed by `instincts.md` on each load
+
 ## F2.16-F2.18 — Witness (artifact integrity)
 
 **Source:** Evolution §2.5 | **Theme:** T3
@@ -267,6 +282,7 @@ The orchestrator reads this file's existence as the gate token to advance from d
 - [ ] `orchestrator_state.js next` refuses to advance out of `development` without `qa-signoff.md`
 - [ ] `VESPYR_DISABLED_HOOKS=pre:bash:tmux` actually disables that hook
 - [ ] `VESPYR_HOOK_PROFILE=minimal` strips the format/quality hooks
+- [ ] **Self-learning metrics:** instinct hit tracking, stale pattern reporting, and token cost tracking all functional
 
 ## Risks
 
@@ -275,6 +291,14 @@ The orchestrator reads this file's existence as the gate token to advance from d
 - **`witness.js` false positives.** Re-sign on every `@memory-controller write`. Witness is a history, not a lock. First warning is informational.
 - **Self-learning promotes false patterns.** 3+ occurrences, 2+ agents, 7+ day span — all required. Every promotion is human-in-the-loop.
 - **Delegation audit reveals low rate.** This is the audit's job; don't game the metric.
+
+### Rollback plan
+
+If Phase 2 breaks:
+- **Hooks:** `VESPYR_DISABLED_HOOKS=*` disables all hooks. Or delete `.agents/hooks/hooks.json` — hooks are opt-in per harness.
+- **MCP server:** remove the MCP registration from `opencode.json`. The underlying scripts still work via CLI.
+- **Self-learning:** delete `instincts.md` — the system falls back to the 2-tier memory (project-context + patterns). No data is lost; episodes and patterns remain.
+- **QA hard gate:** if `qa-signoff.md` blocks a legitimate release, create a manual signoff with `Release recommendation: CONDITIONAL` and a note explaining the bypass.
 
 ## Handoff to Phase 3
 

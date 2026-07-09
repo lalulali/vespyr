@@ -1,7 +1,6 @@
 # Phase 5 — Deeper Bench (Post-v2.1 Enrichment)
 
 > **Release:** v2.2 (T1 ships with v2.1 alongside Phase 2-4; T2+T3 ship in v2.2)
-> **Effort:** ~84h
 > **Calendar:** Weeks 9-14
 > **Themes:** T1 (Agent depth), T2 (Skill atomicity)
 > **Goal:** Enrich the 21-persona bench to 43 personas and the 24-skill library to 42 skills. Add 3 new opt-in squads. Fill the gaps between v1.7's engineering core and broader product-team needs.
@@ -57,7 +56,7 @@ For each: create agent file (v2 frontmatter, IDENTITY block, channeled mentor, i
 
 - [ ] **T1.1** `@brainstormer` (Carson) — Divergent Ideation Coach
 
-**Channeled mentor:** Alex Osborn (CPB / brainstorming) + Keith Johnstone (improv / yes-and). Speaks like an enthusiastic improv coach — high energy, "YES AND" everything, celebrates the wildest thinking in the room. Psychological safety unlocks the wildest ideas. Today's absurdity is tomorrow's obvious innovation.
+**Channeled mentor:** Alex Osborn (BBDO / brainstorming) + Keith Johnstone (improv / yes-and). Speaks like an enthusiastic improv coach — high energy, "YES AND" everything, celebrates the wildest thinking in the room. Psychological safety unlocks the wildest ideas. Today's absurdity is tomorrow's obvious innovation.
 
 **Charter:**
 - Runs divergent ideation when the user is stuck, when the brief feels stale, or when `@founder` rejects 3+ concept framings in a row.
@@ -236,7 +235,7 @@ For each: create agent file (v2 frontmatter, IDENTITY block, channeled mentor, i
 
 ---
 
-- [ ] **T1.12** `@migration-engineer` (Hermes) — Migration & Porting Specialist
+- [ ] **T1.12** `@migration-engineer` (Agni) — Migration & Porting Specialist
 
 **Channeled mentor:** Brandur Leach (atomic data migrations) + Charity Majors (observability-first migrations). Speaks like a database migration specialist — paranoid about backward compatibility, obsessive about rollback.
 
@@ -393,7 +392,7 @@ For each skill: create folder + SKILL.md (bootloader) + steps/ (when multi-step)
 
 **Source:** Brandur Leach's expand-migrate-contract pattern.
 **When to invoke:** Before any schema change; before any data backfill; before any DB version upgrade.
-**Primary agents:** `@database-engineer` (Cassandra) + `@migration-engineer` (Hermes).
+**Primary agents:** `@database-engineer` (Cassandra) + `@migration-engineer` (Agni).
 **Output:** `artifacts/output/migration/<migration-id>.md` with: inventory, expand-migrate-contract plan, dual-write strategy, backfill script (pseudocode), read-switch runbook, cleanup task, rollback procedure.
 **Effort:** ~2 days.
 
@@ -403,7 +402,7 @@ For each skill: create folder + SKILL.md (bootloader) + steps/ (when multi-step)
 
 **Source:** Vespyr gap.
 **When to invoke:** When a project needs to port to a new framework, language, or cloud provider.
-**Primary agent:** `@migration-engineer` (Hermes) + `@architect` (Vera) for the target architecture.
+**Primary agent:** `@migration-engineer` (Agni) + `@architect` (Vera) for the target architecture.
 **Output:** `artifacts/output/migration/stack/<from>→<to>.md` with: dependency inventory, parity assessment (what's easy, what's hard, what's impossible), the strangler-fig plan, the rollback plan, the "what do we keep?" decision.
 **Effort:** ~2 days.
 
@@ -680,3 +679,10 @@ For each skill: create folder + SKILL.md (bootloader) + steps/ (when multi-step)
 - **Game-studio squad can't find a real project.** T2 ship-block: a working game project exercises every game persona. If none found, defer to separate minor release.
 - **New personas all want `read + bash`, breaking the reasoning/I/O split.** Hard rule: any persona with `bash` is "thinking + execution" (developer-tier). Every bash command goes through `@executor`. The split is preserved.
 - **humanize skill too long (565 lines) to be default for many personas.** Cache patterns as `humanize-checklist.md`, invoked by all external-facing personas.
+
+### Rollback plan
+
+If Phase 5 breaks:
+- **New personas:** each persona is a standalone `.md` file. Delete any persona that causes issues without affecting the 21 core agents.
+- **New squads:** squads are opt-in via `install-modules`. If a squad causes routing issues, remove it from the default install.
+- **New skills:** each skill is a standalone folder. Delete any skill that causes issues without affecting the 24 core skills.

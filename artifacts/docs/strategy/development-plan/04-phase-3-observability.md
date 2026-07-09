@@ -1,7 +1,6 @@
 # Phase 3 — Quality + Observability
 
 > **Release:** v2.1
-> **Effort:** ~22h
 > **Calendar:** Week 6
 > **Themes:** T3 (Artifact rigor), T4 (Harness contracts)
 > **Goal:** Make the graph a first-class tool (auto-build, query API), make telemetry a first-class surface (LLM-consumable digests), prove catalog consistency, and give all agents "See the Unseen" observability directives.
@@ -230,6 +229,14 @@ Moved from Phase 1 because it depends on doc-graph (Phase 3 work).
 - **Catalog parity test fails on first run.** Expected — counts are already off. The test outputs the diff; v2.0 release is the fix.
 - **Graph query returns too much data.** Each query is sized for LLM consumption; `summary` returns top 5, `blast-radius` returns just names.
 - **Telemetry surface overwhelms context.** Cap at 20 lines for `session`, 15 for `hot-paths`. Never raw event data.
+
+### Rollback plan
+
+If Phase 3 breaks:
+- **Graph auto-build:** remove the Step 0 graph freshness check from `memory-controller.md`. Agents can still invoke `/code-graph` and `/doc-graph` manually.
+- **Graph query API:** if `graph_query.js` returns incorrect results, agents fall back to reading `code-graph.json` directly (the raw JSON still exists).
+- **Telemetry:** remove Step 0.5 from `memory-controller.md`. Telemetry data is still written by `swarm_telemetry.js`; only the surface layer is removed.
+- **Catalog parity test:** if the test is too noisy, move it from `npm test` to a manual `npm run test:catalog` until counts stabilize.
 
 ## Handoff to Phase 4
 

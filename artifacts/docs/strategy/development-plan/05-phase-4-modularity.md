@@ -1,7 +1,6 @@
 # Phase 4 — Modularity + Handoff
 
 > **Release:** v2.1
-> **Effort:** ~22h
 > **Calendar:** Weeks 7-8
 > **Theme:** T6 (Modularity)
 > **Goal:** Core stays lean. Domain extras ship as install-modules. Language-specific rules layer. Builder skills let users create new agents/skills/workflows. Example project ships. Docs are rewritten. After this phase, Vespyr is "modular."
@@ -34,7 +33,7 @@
     },
     "research": {
       "description": "Research agents: market, user, UX researchers",
-      "agents": ["researcher", "user-researcher", "ux-researcher"],
+      "agents": ["researcher", "user-researcher"],
       "skills": ["explore-idea"]
     },
     "design": {
@@ -216,9 +215,64 @@ The example is a deliberately trivial project ("a CLI todo list") — the point 
 ## F4.15 — Add CHANGELOG.md v2.0 entry
 
 - [ ] Summarize the 8 v2.0 DoD criteria
-- [ ] List the ~48 new files, ~30 modified files
-- [ ] Note the effort (82h over 5 weeks)
+- [ ] List new and modified files per release
 - [ ] Reference this development-plan/ folder
+
+## F4.16 — Dogfood validation project
+
+**Problem:** The plan builds infrastructure for building things but never validates it by building something real. The example project (F4.9-F4.10) is a CLI todo list — it doesn't stress-test 43 personas, 42 skills, hooks, MCP, self-learning, graph, and loop engineering together. Integration bugs are discovered by real users, not by the maintainer.
+
+**Target:** A non-trivial dogfood project that exercises the full v2.0+v2.1 pipeline from `/validate-idea` through `/iterate`. The project must:
+
+1. Start with `/validate-idea` → produce a GO/PIVOT/KILL brief
+2. Run `/explore-idea` → market + user research
+3. Run `/design` → spec-kernel PRD + user stories + design.md
+4. Run `/plan` → execution plan with task breakdown
+5. Run `/develop` → full 10-step cycle with QA hard gate, graph queries, delegation audit
+6. Run `/launch` → readiness check + deploy
+7. Run `/iterate` → analytics + iteration backlog
+8. Exercise at least 3 different squads (startup, build, ship)
+9. Trigger self-learning (produce episodes, promote at least 1 pattern)
+10. Run at least 1 `/goal` loop and 1 automation
+
+**Suggested project:** A small web app (e.g., a personal knowledge base or a team standup bot) — complex enough to need architecture, simple enough to finish in 1-2 weeks. The output artifacts live in `artifacts/output/dogfood/` and serve as both validation evidence and a second worked example.
+
+- [ ] Define the dogfood project scope (1-page brief)
+- [ ] Run the full pipeline end-to-end, documenting blockers and integration bugs
+- [ ] File bugs found during dogfood as issues on GitHub
+- [ ] Publish the dogfood artifacts as a second worked example alongside the CLI todo list
+
+## F4.17-F4.19 — New-user onboarding
+
+**Problem:** After all 3 releases ship, a new user's first 10 minutes are undefined. `npx vespyr` → then what? The README rewrite (F4.11) lists sections but doesn't specify the onboarding flow. The `init --example` command exists but there's no guided path from "just installed" to "first skill completed."
+
+**Target:** A maintained onboarding system with 3 surfaces:
+
+### F4.17 — Web guide (maintained documentation site)
+
+- [ ] Create a web-based guide (GitHub Pages or similar) covering:
+  - **Getting started:** install → first session → first skill → first artifact
+  - **Concepts:** themes, phases, squads, agents, skills, memory, customization
+  - **Tutorials:** step-by-step walkthroughs for `/validate-idea`, `/design`, `/develop`
+  - **Reference:** command reference, frontmatter schema, hook IDs, MCP tools
+  - **FAQ:** common questions, troubleshooting, harness-specific notes
+- [ ] The guide is versioned alongside the codebase (each release updates the guide)
+- [ ] Link from README.md, `npx vespyr` output, and `QUICK-REFERENCE.md`
+
+### F4.18 — README maintenance contract
+
+- [ ] README.md is treated as a living document, not a one-time write:
+  - Every new feature (hook, MCP tool, skill, agent) updates README in the same PR
+  - `test_catalog_parity.js` (Phase 3) already checks counts; extend to check README section headers match the current feature set
+  - README version badge matches `package.json` version
+- [ ] Add a "Last verified" date to each major README section
+
+### F4.19 — npx installer versioning
+
+- [ ] `npx vespyr` output includes the installed version number
+- [ ] `npx vespyr --version` prints the current version
+- [ ] `npx vespyr doctor` runs a health check: validates frontmatter, checks hook registration, verifies MCP server, confirms memory files exist
+- [ ] Installer pins to the tagged release (not `main` branch) — supply chain safety
 
 ---
 
@@ -234,6 +288,8 @@ The example is a deliberately trivial project ("a CLI todo list") — the point 
 - [ ] `README.md` reflects v2.0 architecture (7 themes, identity section, hooks, MCP, modules)
 - [ ] `AGENTS.md` (canonical) surfaces all new contracts
 - [ ] `ROADMAP.md` no longer has the 35-harness table
+- [ ] **Dogfood:** full pipeline exercised end-to-end on a real project; integration bugs filed as GitHub issues
+- [ ] **Onboarding:** web guide published; `npx vespyr doctor` runs health check; README has "Last verified" dates
 
 ## Risks
 
@@ -241,6 +297,13 @@ The example is a deliberately trivial project ("a CLI todo list") — the point 
 - **Rules merge order is non-obvious.** Document specificity rule in `rules/README.md`; add `validate_rules.js` test.
 - **Example project becomes maintenance burden.** It's an example, not a real product. Update only when schema changes.
 - **Builders produce inconsistent output.** Each builder uses `@writer` with a hardcoded template; output is byte-identical to hand-written.
+
+### Rollback plan
+
+If Phase 4 breaks:
+- **Module split:** `install-modules` defaults to installing all modules (matching v1.7.x behavior). If a module is removed incorrectly, `npx vespyr install-modules --all` restores it.
+- **Rules:** if language-specific rules cause conflicts, delete `.agents/rules/<lang>/` — agents fall back to `rules/common/` only.
+- **Builders:** if builders produce broken output, the generated files can be deleted and hand-written instead. Builders are convenience, not infrastructure.
 
 ## Handoff to v2.1 Ship
 

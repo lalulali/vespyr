@@ -1,6 +1,6 @@
 # Framework Analysis — Condensed
 
-> **Source:** Condensed from `1. framework_comparison_vespyr_ecc_bmad_ruflo.md` (412 lines → ~200). Keeps insights only. Full analysis is in the original file (kept for reference).
+> **Source:** Condensed from `1. framework_comparison_*.md` (412 lines → ~170). Keeps insights only. Full analysis is in the original file (kept for reference).
 
 ---
 

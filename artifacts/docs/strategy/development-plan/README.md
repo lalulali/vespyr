@@ -28,11 +28,11 @@ This folder supersedes the following files in `strategy/`:
 
 Three releases. Each is independently shippable. If a release slips, the previous release is valid.
 
-| Release | Scope | Effort | Calendar | Themes |
-|---|---|---|---|---|
-| **v2.0** | Phase 0 + Phase 1 — foundation, identity, skill restructure, artifact rigor, worktree tooling | ~82h | ~5 weeks | T1, T2, T3, T7 |
-| **v2.1** | Phase 2 + 3 + 4 + 6 — hooks, MCP, self-learning, graph, telemetry, modularity, loop engineering | ~80h | ~6 weeks | T3, T4, T5, T6, T7 |
-| **v2.2** | Phase 5 — Deeper Bench (T1 + T2 + T3 personas) | ~84h | ~6 weeks | T1, T2 |
+| Release | Scope | Calendar | Themes |
+|---|---|---|---|
+| **v2.0** | Phase 0 + Phase 1 — foundation, identity, skill restructure, artifact rigor, worktree tooling | ~5 weeks | T1, T2, T3, T7 |
+| **v2.1** | Phase 2 + 3 + 4 + 6 — hooks, MCP, self-learning, graph, telemetry, modularity, loop engineering | ~6 weeks | T3, T4, T5, T6, T7 |
+| **v2.2** | Phase 5 — Deeper Bench (T1 + T2 + T3 personas) | ~6 weeks | T1, T2 |
 
 **v2.0 ships the differentiators.** The original plan buried Vespyr's 3 unique moats (permission-denial I/O split, Socratic depth, 3-tier memory) in a "T7 Backlog" while spending 138h importing BMAD/Ruflo/ECC patterns. This plan promotes T7 to Phase 0. The differentiators ship first, not last.
 
@@ -58,28 +58,28 @@ Every file in the plan maps to exactly one theme. Themes are capability-shaped, 
 
 ## 3. Phase Table (Canonical)
 
-| Phase | Release | Hours | Weeks | Themes | What ships | File |
-|---|---|---|---|---|---|---|
-| **0** | v2.0 | ~28h | 1-2 | T1, T3, T7 | Frontmatter v2, IDENTITY block, customization TOML, thin skills ≥80 lines, entry-point consolidation, phase table, glossary, agent contracts, **+ T7: worktree delegation enforcement + tooling (T7.1b), memory auto-loading, Socratic minimum bar, identity docs** | `01-phase-0-foundation.md` |
-| **1** | v2.0 | ~54h | 3-4 | T2, T3 | 5 long skills → folder + steps (develop, validate-idea, retro, design, launch); tri-modal flows; spec-kernel PRD; sprint-status.yaml; ASCII CLI dashboards; 9 domain experts ≥200 lines; code-reviewer 15-item false-positive guard; Ivy design.md + dynamic HTML | `02-phase-1-skills.md` |
-| **2** | v2.1 | ~22h | 5 | T4, T5 | 10 lifecycle hooks; MCP server (10 tools); self-learning (episode→pattern→instinct); SHA-256 witness; delegation enforcement; QA as hard gate | `03-phase-2-enablement.md` |
-| **3** | v2.1 | ~22h | 6 | T3, T4 | Graph auto-build at 5 lifecycle moments; graph query API; telemetry surface; catalog parity test; "See the Unseen" on all 21 agents; data analyst CLI tools | `04-phase-3-observability.md` |
-| **4** | v2.1 | ~22h | 7-8 | T6 | install-modules (7 modules); rules/common + per-language; agent-builder/skill-builder/workflow-builder; worked example project; README/AGENTS/QUICK-REFERENCE/CHANGELOG rewrite | `05-phase-4-modularity.md` |
-| **5** | v2.2 | ~84h | 9-14 | T1, T2 | Deeper Bench: T1 (14 personas + 14 skills + 3 squads), T2 (7 personas + 4 skills), T3 (1 persona) | `06-phase-5-deeper-bench.md` |
-| **6** | v2.1 | ~14h | 6 | T4, T7 | Loop Engineering: `/goal` primitive (run-until-verifiable-condition with separate verifier), automations/heartbeat (scheduled task execution, starts with 1 CI-failure triage), loop state on disk | `11-phase-6-loop-engineering.md` |
+| Phase | Release | Themes | What ships | File |
+|---|---|---|---|---|
+| **0** | v2.0 | T1, T3, T7 | Frontmatter v2, IDENTITY block, customization TOML, thin skills ≥80 lines, entry-point consolidation, phase table, glossary, agent contracts, **+ T7: worktree delegation enforcement + tooling (T7.1b), memory auto-loading, Socratic minimum bar, identity docs** | `01-phase-0-foundation.md` |
+| **1** | v2.0 | T2, T3 | 5 long skills → folder + steps (develop, validate-idea, retro, design, launch); tri-modal flows; spec-kernel PRD; sprint-status.yaml; ASCII CLI dashboards; 9 domain experts ≥200 lines; code-reviewer 15-item false-positive guard; Ivy design.md + dynamic HTML | `02-phase-1-skills.md` |
+| **2** | v2.1 | T4, T5 | 10 lifecycle hooks; MCP server (10 tools); self-learning (episode→pattern→instinct); SHA-256 witness; delegation enforcement; QA as hard gate | `03-phase-2-enablement.md` |
+| **3** | v2.1 | T3, T4 | Graph auto-build at 5 lifecycle moments; graph query API; telemetry surface; catalog parity test; "See the Unseen" on all 21 agents; data analyst CLI tools | `04-phase-3-observability.md` |
+| **4** | v2.1 | T6 | install-modules (7 modules); rules/common + per-language; agent-builder/skill-builder/workflow-builder; worked example project; README/AGENTS/QUICK-REFERENCE/CHANGELOG rewrite | `05-phase-4-modularity.md` |
+| **5** | v2.2 | T1, T2 | Deeper Bench: T1 (14 personas + 14 skills + 3 squads), T2 (7 personas + 4 skills), T3 (1 persona) | `06-phase-5-deeper-bench.md` |
+| **6** | v2.1 | T4, T7 | Loop Engineering: `/goal` primitive (run-until-verifiable-condition with separate verifier), automations/heartbeat (scheduled task execution, starts with 1 CI-failure triage), loop state on disk | `11-phase-6-loop-engineering.md` |
 
-**Total: ~246h across 15 weeks (3 releases).**
+**Total: 3 releases.**
 
 ---
 
-## 4. Definition of Done (Canonical — 14 Criteria)
+## 4. Definition of Done (Canonical — 21 Criteria)
 
-This is the single DoD list. The original docs had 3 conflicting counts (10, 14, 16). This is the canonical 14.
+This is the single DoD list.
 
 ### v2.0 DoD (criteria 1-8)
 
 1. All 21 agents have v2 frontmatter (`name`, `icon`, `capabilities`, `default_squad`, `origin`, `channeled_mentor`) + `<!-- IDENTITY: do not edit -->` block. `validate_frontmatter.js` exits 0.
-2. The 5 long skills are folder + step files with resume semantics: `develop` (9 steps), `validate-idea` (tri-modal 7+5+5), `retro` (5), `design` (tri-modal 6+4+4), `launch` (5).
+2. The 5 long skills are folder + step files with resume semantics: `develop` (10 steps), `validate-idea` (tri-modal 7+5+5), `retro` (5), `design` (tri-modal 6+4+4), `launch` (5).
 3. Spec-kernel is the canonical PRD shape (`templates/prd/SPEC.md` + companions). Old `prd-template.md` removed.
 4. `sprint-status.yaml` is the human-readable state of truth. `orchestrator_state.js status`/`next` read from it.
 5. `code-reviewer.md` has the 15-item false-positive guard.
@@ -102,11 +102,18 @@ This is the single DoD list. The original docs had 3 conflicting counts (10, 14,
 16. `automation.js create/list/run/archive` works. The starter automation (CI-failure triage) runs and produces a triage file in `artifacts/output/00-discovery/triage/`.
 17. `loop-state.json` persists goal + automation state across sessions. `memory-controller` surfaces paused goals and overdue automations on session start.
 
+### v2.1 DoD — Validation & Onboarding (criteria 18-21)
+
+18. **Dogfood project:** full pipeline exercised end-to-end (`/validate-idea` → `/iterate`) on a real project. Integration bugs filed as GitHub issues. Artifacts published as a second worked example.
+19. **Migration path:** `npx vespyr migrate` converts v1.7.x hand-edits into `.agents/custom/*.toml` overrides with backup. Migration report lists every action taken.
+20. **Onboarding:** web guide published covering getting started, concepts, tutorials, and reference. `npx vespyr doctor` runs a health check. README has "Last verified" dates per section.
+21. **See the Unseen DNA:** all 21 agents have "See the Unseen" in their IDENTITY block (non-negotiable, not customizable). `validate_frontmatter.js` checks for the section.
+
 ### Release candidates
 
 - **v2.0-rc1:** DoD 1, 2, 8 (frontmatter, skill folders, T7 identity) — minimum structural rigor
-- **v2.0-rc2:** + DoD 3, 4 (spec-kernel, sprint-status)
-- **v2.0-rc3:** + DoD 5, 6, 7 (false-positive guard, Ivy, ASCII dashboards) — release-ready
+- **v2.0-rc2:** + DoD 3, 4, 19 (spec-kernel, sprint-status, migration path) — upgrade-safe
+- **v2.0-rc3:** + DoD 5, 6, 7, 21 (false-positive guard, Ivy, ASCII dashboards, See the Unseen DNA) — release-ready
 
 ---
 
@@ -237,20 +244,7 @@ The "1-day ECC repackage" pattern is insufficient. Personas that don't clear eit
 
 ---
 
-## 8. File Inventory
-
-| Action | Count |
-|---|---|
-| New files (v2.0) | ~48 |
-| Modified files (v2.0) | ~30 |
-| New files (v2.1) | ~28 |
-| Modified files (v2.1) | ~35 |
-| New files (v2.2) | ~11 |
-| **Total net new code** | **~3,500 lines (v2.0) + ~2,000 (v2.1) + ~800 (v2.2)** |
-
----
-
-## 9. This Folder's Files
+## 8. This Folder's Files
 
 | File | What it contains | Lines |
 |---|---|---|
@@ -263,13 +257,13 @@ The "1-day ECC repackage" pattern is insufficient. Personas that don't clear eit
 | `06-phase-5-deeper-bench.md` | Phase 5: FULL persona charters (channeled mentor, charter, permissions, squad, complements) for all 22 new personas + 18 new skills | 682 |
 | `07-harness-integration.md` | Hermes + OpenClaw: full directory structures, SKILL.md templates, sandbox configs, invocation patterns, memory protocols | 445 |
 | `08-framework-analysis.md` | Condensed 4-framework comparison (insights only) | 101 |
-| `09-risk-register.md` | Consolidated risk register (31 risks, single source) | 103 |
+| `09-risk-register.md` | Consolidated risk register (40 risks, single source) | 103 |
 | `10-implementation-specs.md` | Full JS code for 14 scripts: sync-entry-points, validate_frontmatter, merge_customization, memory prefetch, auto_graph, graph_query, telemetry_surface, witness, self_learn, delegation_audit, qa_check, worktree, goal_check, automation | 1078 |
 | `11-phase-6-loop-engineering.md` | Loop Engineering: `/goal` primitive + automations + loop state (v2.1) | 130 |
 
 ---
 
-## 10. How to Use This Folder
+## 9. How to Use This Folder
 
 1. **Pick a phase.** Open the matching `01-phase-0-foundation.md` … `06-phase-5-deeper-bench.md`.
 2. **Read the "Source mapping" table.** Each micro-task cites the original F-number and source.
@@ -281,13 +275,13 @@ The "1-day ECC repackage" pattern is insufficient. Personas that don't clear eit
 
 ---
 
-## 11. Decision Authority
+## 10. Decision Authority
 
 When a phase is mid-execution and a new constraint emerges (e.g., a phase overruns by 1 week), **Chris has sole decision authority**. The default: **defer to the next release, do not slip the current release date**. The phased rc cutoffs make this easier — anything that doesn't hit the current rc is the next release's work, by definition.
 
 ---
 
-## 12. Version History
+## 11. Version History
 
 | Version | Status | What shipped |
 |---|---|---|
@@ -297,3 +291,52 @@ When a phase is mid-execution and a new constraint emerges (e.g., a phase overru
 | v1.7.x | Stable | `npx create-vespyr` installer, 8 active harnesses |
 | v1.1-v1.6 | Shipped | Per CHANGELOG |
 | v1.0 | Shipped | 21 agents, opencode native, delegation pattern, shared memory, game mode, humanizer |
+
+---
+
+## 12. Community Feedback & Persona Gating
+
+**Channel:** All feature requests, persona requests, and bug reports go through [GitHub Issues](https://github.com/lalulali/vespyr/issues).
+
+**Persona gating feedback loop:**
+
+- Gate A (demand) requires 3+ community requests with named use cases — tracked via the `persona-request` label on GitHub Issues
+- Before shipping any new persona, the maintainer checks the issue tracker for matching requests
+- If a persona has < 3 requests, it must clear Gate B (depth) or defer to backlog
+- Quarterly review: triage open `persona-request` issues, consolidate duplicates, update the canonical persona list
+
+**Feature requests:**
+
+- Use the `feature-request` label
+- Each request must include: what problem it solves, which agent/skill it touches, and a concrete use case
+- Requests that map to an existing theme (T1-T7) get prioritized; requests outside all themes go to v3.0 backlog
+
+**Bug reports:**
+
+- Use the `bug` label
+- Include: harness name + version, Vespyr version, reproduction steps, expected vs actual behavior
+
+---
+
+## 13. Session-Start Latency Budget
+
+**Problem:** Multiple phases add session-start hooks: memory pre-fetch (Phase 0), instinct loading (Phase 2), graph freshness check (Phase 3), telemetry snapshot (Phase 3), loop state loading (Phase 6). Each is individually fast (<500ms), but stacked together, session start could take 5-10 seconds. There's no total latency budget or ordering spec.
+
+**Target:** A defined ordering and total budget for session-start operations:
+
+| Order | Operation | Phase | Budget | Source |
+|---|---|---|---|---|
+| 1 | Load `instincts.md` | 2 | < 50ms | `memory_filter.js` |
+| 2 | Load `project-context.md` + `active-decisions.md` | 0 | < 100ms | `memory_filter.js` |
+| 3 | Pattern pre-fetch (current agent + phase) | 0 | < 100ms | `memory_filter.js --prefetch-patterns` |
+| 4 | Graph freshness check | 3 | < 500ms | `auto_graph.js check` |
+| 5 | Telemetry snapshot (last 7 days) | 3 | < 200ms | `telemetry_surface.js session` |
+| 6 | Loop state check (paused goals, overdue automations) | 6 | < 50ms | `loop-state.json` read |
+| **Total** | | | **< 1000ms** | |
+
+**Rules:**
+
+- Total session-start overhead must not exceed 1 second
+- Operations 4-6 are non-blocking: if they exceed their budget, they're skipped with a `[SKIPPED: timeout]` marker
+- Graph rebuild (if `[STALE]`) runs in the background, not at session start — it's triggered by the first agent that needs the graph
+- The latency budget is tested in CI: `npm test` includes a `test_session_latency.js` that measures the full session-start sequence

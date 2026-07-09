@@ -1,7 +1,6 @@
 # Phase 6 — Loop Engineering
 
 > **Release:** v2.1
-> **Effort:** ~14h
 > **Calendar:** Week 6 (after Phase 2, parallel with Phase 3)
 > **Themes:** T4 (Harness contracts), T7 (Vespyr identity)
 > **Goal:** Vespyr runs itself on a loop. The user designs the loop, not the prompts. After this phase, Vespyr has a `/goal` primitive (run-until-verifiable-condition with a separate verifier model), a heartbeat (scheduled automations that discover and triage work), and on-disk loop state (so tomorrow's run picks up where today stopped). The maker/checker split — already a Vespyr differentiator — is applied to the stop condition itself.
@@ -29,6 +28,18 @@
 | — | Skills | Already exists (26 skills) | v2.0 |
 | — | Sub-agents (maker/checker) | Already exists (21 personas, code-reviewer/qa-engineer) | v2.0 |
 | — | Plugins/connectors (MCP) | Phase 2 F2.6-F2.10 | v2.1 |
+
+---
+
+## Prerequisites — Proof of concept required
+
+**This phase is the most innovative but the least validated.** `/goal` with a separate verifier is genuinely novel, but it's specified in ~130 lines with one starter automation and no prototype. Before committing to the full spec:
+
+- [ ] **PoC-1:** Manually run a `/goal`-like loop 3 times on a real task (e.g., "make all tests in `tests/auth/` pass"). Document: how many iterations it took, whether the verifier rubber-stamped, token cost per iteration, and whether the output was useful.
+- [ ] **PoC-2:** Manually run the CI-failure triage automation once. Document: what it found, token cost, whether the triage file was actionable.
+- [ ] **Go/no-go:** If PoC-1 shows the verifier rubber-stamps > 50% of the time, redesign the verifier separation before implementing. If PoC-2 shows token cost exceeds the value of findings, reconsider the automation scope.
+
+PoC results are filed as a short report in `artifacts/output/00-discovery/loop-engineering-poc.md` and inform any spec revisions before implementation begins.
 
 ---
 
@@ -94,6 +105,7 @@ The model forgets between runs. The repo doesn't. Loop state lives on disk so to
 
 ## Done when
 
+- [ ] **PoC complete:** `loop-engineering-poc.md` filed with results from 3 manual `/goal` runs and 1 manual automation run
 - [ ] `vespyr goal "npm test && npm run lint"` runs iterations, invokes @goal-verifier, and stops when the condition passes
 - [ ] @goal-verifier returns `DONE` or `NOT-DONE: <reason>` — never grades the maker's code, only the verification output
 - [ ] `vespyr goal status` shows current iteration, last failure, and next action
@@ -113,6 +125,13 @@ The model forgets between runs. The repo doesn't. Loop state lives on disk so to
 - **Cognitive surrender.** "The loop runs itself" is tempting. The user stops having opinions. Mitigation: `/goal` requires a verifiable condition (forces the user to define "done" upfront). Automations require a human review gate before any code modification. The loop is a tool, not an autopilot.
 - **Worktree sprawl.** Orphaned worktrees accumulate. Mitigation: `worktree.js clean-all` (Phase 0 T7.1b) + `stop:session-end` hook (Phase 2 F2.2) can auto-clean stale worktrees. `loop-state.json` tracks active worktrees.
 - **Automations run all 21 agents.** This is the expensive failure mode. Mitigation: each automation invokes ONE skill or ONE agent. No automation spawns the full swarm. The starter automation uses @reader + @writer only.
+
+### Rollback plan
+
+If Phase 6 breaks:
+- **`/goal` primitive:** `goal_check.js clear` resets the active goal. Delete `loop-state.json` to fully reset. The `/goal` skill is standalone — removing it doesn't affect any other skill.
+- **Automations:** `automation.js archive <id>` archives any automation's findings. Delete `.agents/state/automations.json` to remove all automations. The starter automation (CI-failure triage) is the only one that ships; if it causes issues, delete it.
+- **Loop state:** `loop-state.json` is committed to the repo. If it becomes corrupted, delete it — goals and automations reset, but no data is lost (triage files remain on disk).
 
 ## Handoff to Phase 3
 

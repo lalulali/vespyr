@@ -64,9 +64,11 @@ sync();
 #!/usr/bin/env node
 // validate_frontmatter.js — enforce v2 agent frontmatter schema
 // Usage: node .agents/scripts/validate_frontmatter.js
+// Requires: npm install js-yaml
 
 const fs = require('fs');
 const path = require('path');
+const yaml = require('js-yaml');
 
 const AGENTS_DIR = path.join(__dirname, '..', 'agents');
 const REQUIRED = ['name', 'icon', 'description', 'version', 'human_name', 'mode', 'permission', 'capabilities', 'default_squad', 'origin', 'channeled_mentor'];
@@ -75,12 +77,8 @@ const SQUADS = ['full-team', 'startup', 'build', 'research', 'design', 'ship', '
 function parseFrontmatter(content) {
   const match = content.match(/^---\n([\s\S]*?)\n---/);
   if (!match) return null;
-  const fm = {};
-  for (const line of match[1].split('\n')) {
-    const m = line.match(/^(\w+):\s*(.+)$/);
-    if (m) fm[m[1]] = m[2].replace(/^["']|["']$/g, '');
-  }
-  return fm;
+  try { return yaml.load(match[1]); }
+  catch { return null; }
 }
 
 const files = fs.readdirSync(AGENTS_DIR).filter(f => f.endsWith('.md'));
@@ -142,57 +140,14 @@ console.log(`\n[OK] All ${files.length} agents pass v2 frontmatter validation.`)
 // merge_customization.js — 2-file TOML merge for agent customization
 // Usage: node .agents/scripts/merge_customization.js <agent-name>
 //        node .agents/scripts/merge_customization.js developer
+// Requires: npm install @iarna/toml
 
 const fs = require('fs');
 const path = require('path');
+const TOML = require('@iarna/toml');
 
 const AGENTS_DIR = path.join(__dirname, '..', 'agents');
 const CUSTOM_DIR = path.join(__dirname, '..', 'custom');
-
-// Minimal TOML parser (handles key=value, [tables], [[arrays of tables]])
-function parseTOML(content) {
-  const result = {};
-  let currentTable = result;
-  let currentArray = null;
-  for (const line of content.split('\n')) {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith('#')) continue;
-    // [[array of tables]]
-    const aotMatch = trimmed.match(/^\[\[(.+)\]\]$/);
-    if (aotMatch) {
-      const key = aotMatch[1].trim();
-      if (!result[key]) result[key] = [];
-      const newItem = {};
-      result[key].push(newItem);
-      currentTable = newItem;
-      currentArray = key;
-      continue;
-    }
-    // [table]
-    const tableMatch = trimmed.match(/^\[(.+)\]$/);
-    if (tableMatch) {
-      const key = tableMatch[1].trim();
-      if (!result[key]) result[key] = {};
-      currentTable = result[key];
-      currentArray = null;
-      continue;
-    }
-    // key = value
-    const kvMatch = trimmed.match(/^(\w+)\s*=\s*(.+)$/);
-    if (kvMatch) {
-      const [, k, v] = kvMatch;
-      let parsed = v.trim();
-      // Strip quotes from strings
-      if ((parsed.startsWith('"') && parsed.endsWith('"')) || (parsed.startsWith("'") && parsed.endsWith("'"))) {
-        parsed = parsed.slice(1, -1);
-      } else if (parsed === 'true') parsed = true;
-      else if (parsed === 'false') parsed = false;
-      else if (!isNaN(parseFloat(parsed))) parsed = parseFloat(parsed);
-      currentTable[k] = parsed;
-    }
-  }
-  return result;
-}
 
 // Deep merge: scalars override-wins, tables deep-merge, arrays of tables keyed-merge, other arrays append
 function deepMerge(defaults, override) {
@@ -238,10 +193,10 @@ let defaults = {};
 let override = {};
 
 if (fs.existsSync(defaultsPath)) {
-  defaults = parseTOML(fs.readFileSync(defaultsPath, 'utf8'));
+  defaults = TOML.parse(fs.readFileSync(defaultsPath, 'utf8'));
 }
 if (fs.existsSync(overridePath)) {
-  override = parseTOML(fs.readFileSync(overridePath, 'utf8'));
+  override = TOML.parse(fs.readFileSync(overridePath, 'utf8'));
 }
 
 if (!fs.existsSync(defaultsPath) && !fs.existsSync(overridePath)) {

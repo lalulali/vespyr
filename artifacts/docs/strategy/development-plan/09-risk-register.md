@@ -1,7 +1,7 @@
 # Risk Register — Consolidated
 
 > **Source:** Consolidated from master roadmap Part 5 (13 rows), enrichment plan §8 (15 rows), each phase file's risks, and 3 new risks identified during review.
-> **Total:** 36 risks — 12 high-impact, 17 medium-impact, 7 low-impact.
+> **Total:** 40 risks — 14 high-impact, 20 medium-impact, 6 low-impact.
 
 ---
 
@@ -101,3 +101,14 @@
 | R34 | @goal-verifier rubber-stamps (returns DONE when it shouldn't) | Medium | High | @goal-verifier reads ONLY the verification command output, not the maker's code or reasoning. If the command exits non-zero, verifier MUST return `NOT-DONE`. The verifier cannot be talked into "done" by the maker — it has no access to the maker's context. |
 | R35 | Comprehension debt accelerates — loop ships code the user didn't write or review | High | High | `/goal` writes a report at the end (what changed, what passed, what to review). Automations write to a triage inbox for human review — they do not auto-merge. The loop surfaces work; the human reviews it. No auto-merge, no auto-advance past the QA hard gate (Phase 2 F2.23). |
 | R36 | Cognitive surrender — user stops having opinions and just takes what the loop produces | Medium | High | `/goal` requires a verifiable condition (forces the user to define "done" upfront). Automations require a human review gate before any code modification. The loop is a tool, not an autopilot. This is the article's own warning, not a new one — and it maps to Vespyr's existing "Think Before Acting" guardrail. |
+
+---
+
+## Cross-cutting risks (added during review)
+
+| # | Risk | Likelihood | Impact | Mitigation |
+|---|---|---|---|---|
+| R37 | v1.7.x → v2.0 upgrade destroys user customizations | High | High | Migration script (Phase 0 F0.23) backs up all agent files before changes, extracts hand-edits into `.agents/custom/*.toml` overrides. `npx vespyr migrate` is the safe upgrade path. |
+| R38 | Session-start latency exceeds 1 second | Medium | Medium | Latency budget defined in README §13 (total < 1000ms). Operations 4-6 are non-blocking with timeouts. CI test (`test_session_latency.js`) enforces the budget. |
+| R39 | Self-learning accumulates noise without measuring value | Medium | Medium | 3 outcome metrics (Phase 2 F2.15.a-c): instinct hit rate (>50% target), pattern freshness (flag >90 days stale), token cost tracking (cap at 200 tokens). |
+| R40 | No validation that the full pipeline works end-to-end | High | High | Dogfood project (Phase 4 F4.16) exercises `/validate-idea` → `/iterate` on a real project before shipping. Integration bugs filed as GitHub issues. |

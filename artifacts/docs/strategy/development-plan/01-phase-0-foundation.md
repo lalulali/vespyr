@@ -1,7 +1,6 @@
 # Phase 0 — Foundation + Vespyr Identity
 
 > **Release:** v2.0
-> **Effort:** ~28h (18h foundation + 6h T7 identity + 4h T7.1b worktree tooling)
 > **Calendar:** Week 1-2
 > **Themes:** T1 (Agent depth), T3 (Artifact rigor), T7 (Vespyr identity)
 > **Goal:** Establish the contracts that everything else builds on AND advance Vespyr's 3 differentiators. After this phase, Vespyr is "rigorous" and "identity-locked" — agents are locked, customization works, entry points consolidated, terminology fixed, and the 3 moats (permission-denial, Socratic depth, 3-tier memory) are explicitly strengthened.
@@ -64,9 +63,9 @@ Create `.agents/references/phase-table.md` with the following full content:
 | 3 | `03-architecture/` | Architecture | (sub-skill of design) | `@architect` | ADR sign-off |
 | 4 | `04-planning/` | Planning | `plan` (execution plan) | `@tech-lead` | Plan approval |
 | 5 | `05-execution/` | Execution | `develop` | `@developer` (multi-worktree) | All tests green |
-| 6 | `06-quality/` | Quality | `develop` (QA cycle) | `@qa-engineer` + `@security-engineer` | Sign-off |
-| 7 | `07-infrastructure/` | Launch | `launch` | `@devops-engineer` + `@product-manager` | Production deploy |
-| 8 | `08-documentation/` | Iteration | `iterate` | `@product-manager` + `@data-analyst` | Insights reviewed |
+| 6 | `06-launch/` | Launch | `launch` | `@devops-engineer` + `@product-manager` | Production deploy |
+| 7 | `07-iteration/` | Iteration | `iterate` | `@product-manager` + `@data-analyst` | Insights reviewed |
+| 8 | `08-documentation/` | Documentation | (cross-cutting) | `@technical-writer` | Docs current |
 | 9 | `09-retro/` | Retro | `retro` | `@product-manager` | Action items filed |
 
 **Conventions:**
@@ -74,6 +73,8 @@ Create `.agents/references/phase-table.md` with the following full content:
 - Phase numbers are 0-indexed (Phase 0 = Discovery)
 - The folder name does not always equal the phase number when 2 phases share a folder (e.g., 02-strategy contains both Phase 2 and Phase 3 outputs)
 - Validation (Phase -1) has no folder — its outputs live in `artifacts/memory/active-decisions.md`
+
+**Known inconsistency:** Several agents (`security-engineer.md`, `qa-engineer.md`, `performance-engineer.md`) and `develop/SKILL.md` reference `06-quality/` for QA/security/performance artifacts. This folder is not in the canonical table. These references should be consolidated to `05-execution/` (QA happens during execution) during Phase 1.
 ```
 
 ### Why this matters
@@ -159,24 +160,7 @@ This is 21 micro-tasks. Use a scripted migration.
 - ml-engineer 🤖, devops-engineer 🚀, technical-writer ✍️
 - reader 📖, writer ✏️, executor ⚙️, memory-controller 🧠
 
-**Channeled mentors (1-2 per agent):**
-- founder: Andy Rachleff (IMVU), Paul Graham
-- product-manager: Marty Cagan, Teresa Torres
-- product-designer: Don Norman, Luke Wroblewski
-- architect: Martin Fowler, Werner Vogels
-- tech-lead: Will Larson, Camille Fournier
-- developer: Kent Beck, Robert C. Martin
-- code-reviewer: Mike Bland, Adrian Cockcroft
-- qa-engineer: James Bach, Michael Bolton
-- researcher: Clayton Christensen, Michael Porter
-- user-researcher: Indi Young, Steve Portigal
-- ux-researcher: Don Norman, Jared Spool
-- data-analyst: Avinash Kaushik, Edward Tufte
-- security-engineer: Bruce Schneier, OWASP team
-- performance-engineer: Brendan Gregg, Gil Tene
-- ml-engineer: Andrew Ng, François Chollet
-- devops-engineer: Kelsey Hightower, Gene Kim
-- technical-writer: John McPhee, Barbara Minto
+**Channeled mentors (1-2 per agent):** See canonical table in F0.7 below. I/O sub-agent archetypes:
 - reader: librarian archetype
 - writer: scrivener archetype
 - executor: operator archetype
@@ -241,40 +225,30 @@ Every agent's frontmatter has a `channeled_mentor` field (1-2 real-world experts
 
 ### Proposed content
 
-Add to each agent's YAML frontmatter:
+Canonical mentor assignments (1-2 per agent, hard rule). Add `channeled_mentor:` to each agent's frontmatter using this table:
 
-```yaml
-channeled_mentor: "Marty Cagan + Teresa Torres"  # for @product-manager
-channeled_mentor: "Paul Graham + Ben Horowitz"     # for @founder
-channeled_mentor: "Rich Hickey + John Carmack"    # for @architect
-channeled_mentor: "Linus Torvalds + Martin Fowler" # for @tech-lead
-channeled_mentor: "Kent Beck + Robert C. Martin"   # for @developer
-# ... etc.
-```
+| Agent | Channeled Mentor |
+|---|---|
+| `@founder` | Paul Graham + Ben Horowitz |
+| `@product-manager` | Marty Cagan + Teresa Torres |
+| `@product-designer` | Don Norman + Julie Zhuo |
+| `@architect` | Rich Hickey + John Carmack |
+| `@tech-lead` | Will Larson + Camille Fournier |
+| `@developer` | Kent Beck + Robert C. Martin |
+| `@code-reviewer` | Dave Cheney + John Regehr |
+| `@qa-engineer` | James Bach + Michael Bolton |
+| `@researcher` | Clayton Christensen + Cindy Alvarez |
+| `@user-researcher` | Steve Krug + Erika Hall |
+| `@ux-researcher` | Don Norman + Jakob Nielsen |
+| `@data-analyst` | Avinash Kaushik + Edward Tufte |
+| `@security-engineer` | Bruce Schneier + OWASP contributors |
+| `@performance-engineer` | Brendan Gregg + Aleksey Shipilëv |
+| `@ml-engineer` | Andrej Karpathy + François Chollet |
+| `@devops-engineer` | Kelsey Hightower + Charity Majors |
+| `@technical-writer` | Strunk + White |
+| I/O sub-agents | Archetypes (see F0.6 above) |
 
-**Mapping proposal (from Evolution §3.2):**
-
-| Agent | Human Name | Channeled Mentor |
-|---|---|---|
-| `@founder` | Elena | Paul Graham + Ben Horowitz |
-| `@product-manager` | Sarah | Marty Cagan + Teresa Torres |
-| `@product-designer` | Ivy | Don Norman + Julie Zhuo |
-| `@architect` | Vera | Rich Hickey + John Carmack |
-| `@tech-lead` | Grant | Linus Torvalds + Martin Fowler |
-| `@developer` | Rex | Kent Beck + Robert C. Martin |
-| `@code-reviewer` | Scout | Dave Cheney + John Regehr |
-| `@qa-engineer` | Nina | James Bach + Michael Bolton |
-| `@researcher` | Iris | Clayton Christensen + Cindy Alvarez |
-| `@user-researcher` | Paige | Steve Krug + Erika Hall |
-| `@ux-researcher` | Zara | Don Norman + Jakob Nielsen |
-| `@data-analyst` | Nova | Avinash Kaushik + Edward Tufte |
-| `@security-engineer` | Victor | Bruce Schneier + OWASP contributors |
-| `@performance-engineer` | Felix | Brendan Gregg + Aleksey Shipilëv |
-| `@ml-engineer` | Kai | Andrej Karpathy + François Chollet |
-| `@devops-engineer` | Axel | Kelsey Hightower + Charity Majors |
-| `@technical-writer` | Clara | Strunk + White + The Docs-as-Code movement |
-
-> **Note:** The icon-assignments and channeled-mentor lists in the checklist above (F0.6 section) are the authoritative Phase 0 assignments. Where the Evolution §3.2 table and the checklist differ, the checklist wins (it was updated for v2.0).
+The persona body should reference the mentor's principles in voice/tone.
 
 ### Why this matters
 A new `references/persona-roster.md` cross-references all 21. The persona body references the mentor's principles, giving each agent a grounded voice rather than generic LLM output.
@@ -303,6 +277,12 @@ In the agent file, hardcode the core identity at the top with a clear `<!-- IDEN
 You are a {role} with {depth}.
 ## Persona voice
 ## Persona principles (non-negotiable)
+## See the Unseen (non-negotiable)
+Before producing any output:
+- Query the code/doc graphs for blast radius and dependents of any proposed change
+- Surface hidden assumptions that are implicit but not verified
+- Check recent telemetry for cost anomalies relevant to this task
+- Begin every response with {icon} {Human Name}: so agent transitions are never hidden
 <!-- /IDENTITY -->
 
 # Customizable surface (overridable via .agents/custom/{name}.toml)
@@ -915,6 +895,46 @@ This section is the "elevator pitch" for why Vespyr exists. It states: (1) Permi
 
 ---
 
+## F0.23 — v1.7.x migration path
+
+**Problem:** Someone upgrades from v1.7 to v2.0. Their `artifacts/memory/` files use old terminology. Their `pipeline-state.json` schema may differ. Their hand-edited agent files get overwritten by the installer. The 2-file TOML customization system (F0.20-F0.22) protects *future* edits, but existing hand-edits in agent `.md` files are lost on upgrade. This is a trust-destroying gap.
+
+**Target:** A migration script that converts existing v1.7.x installs to v2.0 safely:
+
+- [ ] Create `.agents/scripts/migrate_v1_to_v2.js` (~100 lines):
+  - **Backup:** copies the entire `.agents/agents/` directory to `.agents/agents.v1-backup/` before any changes
+  - **Extract customizations:** diffs each agent file against the v1.7.x canonical version, extracts user edits into `.agents/custom/<agent>.toml` overrides
+  - **Migrate memory:** scans `artifacts/memory/*.md` for deprecated terminology (per glossary), flags entries for review (does not auto-edit)
+  - **Migrate state:** converts `pipeline-state.json` to the new schema if needed (adds `sprint-status.yaml` alongside)
+  - **Report:** prints a migration summary (N agents backed up, N customizations extracted, N memory entries flagged)
+- [ ] Wire into `bin/cli.js init`: detect v1.7.x install (check for old frontmatter schema), prompt user to run migration
+- [ ] Add `npx vespyr migrate` command
+- [ ] Test against a real v1.7.x install
+
+### Done when (additions)
+
+- [ ] `npx vespyr migrate` on a v1.7.x install produces `.agents/custom/*.toml` files from existing hand-edits
+- [ ] `.agents/agents.v1-backup/` exists after migration
+- [ ] Migration report lists every action taken
+
+---
+
+## F0.24 — Glossary compliance audit
+
+**Problem:** The glossary (F0.11) locks terminology ("one definition per term, no synonyms"), but the 21 existing agent bodies were written independently and likely use "ticket," "issue," "feature," "spec" internally. There's no audit step to verify agent bodies conform to the glossary after it's locked.
+
+**Target:** A one-time audit that runs after the glossary is created:
+
+- [ ] Create `.agents/scripts/glossary_audit.js` (~60 lines):
+  - Reads `glossary.md` to extract locked terms and their forbidden synonyms
+  - Scans all agent `.md` files for forbidden synonyms
+  - Reports violations: `agent.md:42 uses "ticket" (should be "user story")`
+  - Exit 1 if violations found (informational, not blocking — fix during Phase 1 agent depth work)
+- [ ] Run audit after glossary is locked; file violations as a checklist for Phase 1 agent rewrites
+- [ ] Wire into `npm test` as a non-blocking check (warn, don't fail)
+
+---
+
 ## Done when
 
 - [ ] `npx vespyr init` produces a working install with the new frontmatter schema
@@ -930,6 +950,9 @@ This section is the "elevator pitch" for why Vespyr exists. It states: (1) Permi
 - [ ] **T7:** `memory-controller.md` has the pattern pre-fetch step; `memory_filter.js` supports `--prefetch-patterns`
 - [ ] **T7:** `validate_frontmatter.js` checks for `## Socratic Stance` section on reasoning agents
 - [ ] **T7:** `AGENTS.md` and `README.md` have the "Vespyr Identity" section stating the 3 differentiators
+- [ ] **See the Unseen:** IDENTITY block template includes the "See the Unseen" section as non-negotiable DNA for all agents
+- [ ] **Migration:** `npx vespyr migrate` converts v1.7.x hand-edits into `.agents/custom/*.toml` overrides with backup
+- [ ] **Glossary audit:** `glossary_audit.js` runs on all 21 agents; violations filed as Phase 1 checklist items
 
 ## Risks
 
@@ -938,6 +961,13 @@ This section is the "elevator pitch" for why Vespyr exists. It states: (1) Permi
 - **Channeled mentor overload**: hard rule = 1-2 references per agent. Reject 3+.
 - **Glossary becomes a bikeshed magnet**: lock it at end of phase; future changes require explicit review.
 - **T7.1 delegation contract blocks** add boilerplate to 13 agents. Keep each block ≤ 8 lines. The policy lives in `delegation-pattern.md`, not in each agent.
+
+### Rollback plan
+
+If Phase 0 breaks:
+- **Frontmatter migration:** `git checkout -- .agents/agents/` reverts all agent files. The migration script (F0.23) created `.agents/agents.v1-backup/` as a safety net.
+- **Entry-point symlinks:** `sync-entry-points.js` can regenerate all entry points from `agent.md.canonical`. If symlinks break, delete them and re-run.
+- **Customization TOML:** if merge script produces wrong output, delete `.agents/custom/*.toml` — agents fall back to defaults.
 
 ## Handoff to Phase 1
 

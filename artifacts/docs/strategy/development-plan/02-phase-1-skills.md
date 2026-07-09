@@ -1,7 +1,6 @@
 # Phase 1 — Skill Restructure + Artifact Rigor
 
 > **Release:** v2.0
-> **Effort:** ~54h
 > **Calendar:** Weeks 3-4
 > **Themes:** T2 (Skill atomicity), T3 (Artifact rigor)
 > **Goal:** Skills become atomic + tri-modal. Artifacts become kernel + companions. State is dual-format (JSON + YAML). After this phase, Vespyr is "atomic" — skills resume, skills have phases, skills are first-class tools; artifacts are rigorous.
@@ -32,7 +31,7 @@
 
 ---
 
-## F1.1-F1.2 — Restructure `develop` skill (278 lines → folder + 9 step files)
+## F1.1-F1.2 — Restructure `develop` skill (278 lines → folder + 10 step files)
 
 **Source:** Evolution §2.1, Adoption §3.1 | **Theme:** T2
 
@@ -176,7 +175,7 @@ BMAD uses `<step n="1" goal="...">`, `<action>`, `<check if="...">`, `<goto>`, `
   - `## Mode detection` (always "create"; resume is automatic from `stepsCompleted`)
   - `## Step loader` (reads `steps/step-01-*.md` or jumps to first uncompleted step)
   - `## State machine integration`, `## Done when`
-- [ ] F1.2 — Create `.agents/skills/develop/steps/` with 9 step files:
+- [ ] F1.2 — Create `.agents/skills/develop/steps/` with 10 step files:
   - `step-01-spec-alignment.md` — read spec-kernel + user stories; align before coding
   - `step-02-architecture.md` — conditional (if ArchitectPhase: true); produces ADRs
   - `step-03a-arch-review.md` — tech-lead reviews architecture
@@ -885,6 +884,13 @@ We adopt the *idea* (one reviewer per language family) as v2.1 work, not the 20-
 - **Spec-kernel is too thin for some artifacts.** Kernel is the minimum; additional content lives in companion files.
 - **CSV method libraries drift.** Pin a version comment at top of each CSV.
 - **Ivy's dynamic HTML generation produces inconsistent structure.** Enforce standard spec sections (Overview, User Flows, Screen Specs, Interaction Details, Visual System, Edge Cases, Open Questions, Cross-References) in the generation template.
+
+### Rollback plan
+
+If Phase 1 breaks:
+- **Skill restructure:** the old monolithic SKILL.md files are in git history. `git checkout HEAD~1 -- .agents/skills/develop/SKILL.md` (etc.) reverts any skill.
+- **Spec-kernel:** the old `prd-template.md` is in git history. Restore it if the kernel+companions approach doesn't work for a specific artifact.
+- **sprint-status.yaml:** `orchestrator_state.js` still writes `pipeline-state.json` as a derived cache. If YAML breaks, the JSON fallback keeps the state machine running.
 
 ## Handoff to Phase 2
 
