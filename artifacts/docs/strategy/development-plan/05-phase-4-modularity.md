@@ -10,16 +10,64 @@
 
 | Item | Original | This file | Why |
 |---|---|---|---|
-| 35-harness future table | ROADMAP.md (35 rows) | **Deleted** | Performative. Solo maintainer cannot port to 35 harnesses. Replaced with: "additional harnesses added as community demand warrants." |
+| 35-harness future table | ROADMAP.md (35 rows) | **Deleted** | Performative. Solo maintainer cannot port to 35 harnesses. |
 
 ## F4.1-F4.3 — install-modules (selective install)
 
 **Source:** Evolution §3.1 | **Theme:** T6
 
-- [ ] F4.1 — Create `.agents/manifests/install-modules.json` (~180 lines):
-  - 7 modules: `core` (required), `research`, `design`, `architecture`, `game`, `memory`, `orchestration`
-  - Each module: `name`, `version`, `description`, `depends_on`, `agents` (list), `skills` (list), `templates` (list), `squads` (list)
-  - `core` always required; default install = all 7
+**Problem:** The `game-studio` squad, the `ml-engineer` agent, and the `validate-game-idea` skill are not core to most users. Today they ship anyway. Users can't opt out.
+
+**Target:** 7 installable modules with explicit dependencies. `core` is always required.
+
+**Full install-modules.json structure:**
+
+```json
+{
+  "version": "1.0",
+  "modules": {
+    "core": {
+      "description": "Core orchestration: founder, PM, tech-lead, developer, code-reviewer, QA",
+      "agents": ["founder", "product-manager", "tech-lead", "developer", "code-reviewer", "qa-engineer"],
+      "skills": ["validate-idea", "design", "develop", "launch", "iterate", "retro"],
+      "required": true
+    },
+    "research": {
+      "description": "Research agents: market, user, UX researchers",
+      "agents": ["researcher", "user-researcher", "ux-researcher"],
+      "skills": ["explore-idea"]
+    },
+    "design": {
+      "description": "Design agents and UX skills",
+      "agents": ["product-designer", "ux-researcher"],
+      "skills": ["design", "humanize"]
+    },
+    "architecture": {
+      "description": "Architecture + specialist technical agents",
+      "agents": ["architect", "security-engineer", "performance-engineer", "ml-engineer", "data-analyst", "devops-engineer"],
+      "skills": ["incident"]
+    },
+    "game": {
+      "description": "Game development overlay",
+      "agents": [],
+      "skills": ["validate-game-idea", "explore-game-idea"]
+    },
+    "memory": {
+      "description": "Memory controller + memory skills",
+      "agents": ["memory-controller"],
+      "skills": ["memory", "retro"]
+    },
+    "orchestration": {
+      "description": "Cross-cutting skills: grill, plan, review, test, kanban, status, phase, squad, delegate, code-graph, doc-graph, help-me",
+      "agents": [],
+      "skills": ["grill-me", "plan", "review", "test", "kanban", "status", "phase", "squad", "delegate", "code-graph", "doc-graph", "help-me", "round-table", "elicitation"]
+    }
+  },
+  "default": ["core", "research", "design", "architecture", "memory", "orchestration"]
+}
+```
+
+- [ ] F4.1 — Create `.agents/manifests/install-modules.json` (~180 lines, structure above)
 - [ ] F4.2 — Create `.agents/scripts/install-modules.js` (~100 lines): `list`, `install <module-list>`, `remove <module-list>`, `--dry-run`. Reads manifest, resolves dependency closure, copies files, writes `install-state.json` for safe uninstall.
 - [ ] F4.3 — Add `install-modules` subcommand to `bin/cli.js`: `npx vespyr install-modules core,design`, `--list`, `--remove`, `--dry-run`
 
@@ -27,40 +75,123 @@
 
 **Source:** Adoption §4.1, ECC pattern | **Theme:** T6
 
-- [ ] F4.4 — Create `.agents/rules/common/` with 8 baseline rule files (~50 lines each):
-  - `coding-style.md`, `testing.md`, `git-workflow.md`, `performance.md`, `patterns.md`, `hooks.md`, `agents.md`, `security.md`
-- [ ] F4.5 — Create `.agents/rules/<lang>/` for 4 languages:
-  - `typescript/` (5 files, ~60 lines each)
-  - `python/` (5 files)
-  - `go/` (5 files)
-  - `rust/` (3 files, lighter coverage as placeholder)
-- [ ] Create `.agents/rules/README.md`: document merge order (common first, language overrides second; most-specific wins)
+**Problem:** Vespyr agents write code in 1-2 languages per project. With language-specific rules, `@developer` automatically follows that language's idioms (Python prefers pytest, Go prefers table tests, TypeScript prefers Vitest).
+
+**Full rules/ directory structure:**
+
+```
+.agents/rules/
+├── common/
+│   ├── coding-style.md       # universal style (naming, file size, function size)
+│   ├── testing.md            # universal testing rules (test the right layer)
+│   ├── git-workflow.md       # branches, commits, worktrees
+│   ├── performance.md        # universal perf rules
+│   ├── patterns.md           # common patterns
+│   ├── hooks.md              # how to use vespyr hooks
+│   ├── agents.md             # how to use vespyr agents
+│   └── security.md           # universal security baseline
+├── typescript/
+│   ├── coding-style.md       # TS-specific: interfaces over types, const assertions
+│   ├── testing.md            # Vitest patterns
+│   ├── git-workflow.md       # TS-specific: build before commit
+│   ├── performance.md        # TS perf: avoid any, use satisfies
+│   └── patterns.md           # TS patterns: discriminated unions, branded types
+├── python/
+│   ├── coding-style.md       # Pythonic style, type hints
+│   ├── testing.md            # pytest patterns
+│   ├── git-workflow.md       # Python-specific: venv, requirements.txt
+│   ├── performance.md        # Python perf: generators, asyncio
+│   └── patterns.md           # Python patterns: dataclasses, protocols
+├── go/
+│   ├── coding-style.md       # Go idioms: gofmt, error handling
+│   ├── testing.md            # Table-driven tests
+│   ├── git-workflow.md       # Go-specific: go mod, go build
+│   ├── performance.md        # Go perf: goroutines, channels
+│   └── patterns.md           # Go patterns: interfaces, context
+└── rust/                     # lighter coverage as placeholder
+    ├── coding-style.md
+    └── testing.md
+```
+
+**Merge priority:** language > common. A `rules/python/testing.md` overrides `rules/common/testing.md` for Python projects. Most-specific (deepest) wins.
+
+- [ ] F4.4 — Create `.agents/rules/common/` with 8 baseline rule files (~50 lines each, structure above)
+- [ ] F4.5 — Create `.agents/rules/<lang>/` for 4 languages (structure above)
+- [ ] Create `.agents/rules/README.md`: document merge order and specificity rule
 
 ## F4.6-F4.8 — Builder skills (eat your own dog food)
 
 **Source:** Adoption §4.3, BMAD pattern | **Theme:** T6
 
-- [ ] F4.6 — Create `.agents/skills/agent-builder/SKILL.md` (~220 lines): 5-step guided flow (Define role → Pick channeled mentor → Pick icon → Set permissions → Write charter). Output: one new agent file via `@writer`, validated by `validate_frontmatter.js`.
-- [ ] F4.7 — Create `.agents/skills/skill-builder/SKILL.md` (~220 lines): 4-step flow (Define goal → Identify steps max 10 → Pick mode single/tri-modal/chained → Write SKILL.md bootloader). Uses `@writer` for folder scaffolding.
-- [ ] F4.8 — Create `.agents/skills/workflow-builder/SKILL.md` (~240 lines): 6-step flow (Define trigger → Pick agents → Define order → Define gates → Pick output format → Pick squad(s)). Output: a workflow file consumed by `bin/cli.js workflow`.
+**Problem:** Adding a new skill means hand-editing 4 files. A guided builder makes the cost of adding a domain-specific skill ~5 minutes.
+
+**Agent-builder 5-step guided flow:**
+
+```
+Step 1: Define the role (one sentence)
+Step 2: Pick the channeled mentor (1-2 references)
+Step 3: Pick the icon
+Step 4: Set the permissions (read + question for thinkers; bash + edit for doers)
+Step 5: Write the charter (when to invoke, when NOT, output artifacts)
+```
+Output: one new agent file via `@writer`, validated by `validate_frontmatter.js`.
+
+**Skill-builder 4-step guided flow:**
+
+```
+Step 1: Define the workflow goal
+Step 2: Identify the steps (max 10)
+Step 3: Pick the mode (single, tri-modal, or chained)
+Step 4: Write the SKILL.md bootloader
+```
+Uses `@writer` for folder scaffolding. Output: folder + SKILL.md + steps/ + customize.toml.
+
+**Workflow-builder 6-step guided flow:**
+
+```
+Step 1: Define the trigger
+Step 2: Pick the agents
+Step 3: Define the order
+Step 4: Define the gates
+Step 5: Pick the output format
+Step 6: Pick the squad(s) that own the workflow
+```
+Output: a workflow file consumed by `bin/cli.js workflow`.
+
+- [ ] F4.6 — Create `.agents/skills/agent-builder/SKILL.md` (~220 lines, 5-step flow above)
+- [ ] F4.7 — Create `.agents/skills/skill-builder/SKILL.md` (~220 lines, 4-step flow above)
+- [ ] F4.8 — Create `.agents/skills/workflow-builder/SKILL.md` (~240 lines, 6-step flow above)
 
 ## F4.9-F4.10 — Example project (worked example)
 
 **Source:** Evolution §1.6 | **Theme:** T6
 
-- [ ] F4.9 — Create `.agents/templates/example-project/` with all 10 phase folders populated:
-  - `00-discovery/idea-brief.md` (~80 lines)
-  - `01-research/market-analysis.md` (~60 lines)
-  - `02-strategy/prd.md` (~120 lines, uses spec-kernel)
-  - `02-strategy/companions/` (glossary, acceptance-criteria, user-journey, decision-log — each ~30 lines)
-  - `03-architecture/adr-001.md` (~40 lines)
-  - `04-planning/execution-plan.md` (~50 lines)
-  - `05-execution/code-sample.ts` (~30 lines, real working code)
-  - `06-quality/qa-report.md` (~40 lines)
-  - `07-infrastructure/launch-log.md` (~30 lines)
-  - `08-documentation/iteration-backlog.md` (~20 lines)
-  - `09-retro/action-items.md` (~30 lines)
-  - All cross-references intact; deliberately trivial project (CLI todo list)
+**Problem:** The README claims "tested with real projects," but the only artifacts are meta-plans about Vespyr itself. A new user has no example to learn from.
+
+**Full example project file list:**
+
+```
+example-project/
+├── 00-discovery/idea-brief.md       (~80 lines, sample)
+├── 01-research/market-analysis.md   (~60 lines, sample)
+├── 02-strategy/prd.md               (~120 lines, sample — uses spec-kernel)
+├── 02-strategy/companions/
+│   ├── glossary.md                   (~30 lines)
+│   ├── acceptance-criteria.md        (~30 lines)
+│   ├── user-journey.md               (~30 lines)
+│   └── decision-log.md               (~30 lines)
+├── 03-architecture/adr-001.md       (~40 lines, sample)
+├── 04-planning/execution-plan.md    (~50 lines, sample)
+├── 05-execution/code-sample.ts      (~30 lines, real working code)
+├── 06-quality/qa-report.md          (~40 lines, sample)
+├── 07-infrastructure/launch-log.md  (~30 lines, sample)
+├── 08-documentation/iteration-backlog.md (~20 lines, sample)
+└── 09-retro/action-items.md         (~30 lines, sample)
+```
+
+The example is a deliberately trivial project ("a CLI todo list") — the point is to show the **shape** of artifacts, not to solve a real problem. Each file has realistic-looking (not lorem-ipsum) content. Cross-references work (PRD cites the brief, execution plan cites the PRD, etc.).
+
+- [ ] F4.9 — Create `.agents/templates/example-project/` with all 10 phase folders populated (structure above)
 - [ ] F4.10 — Add `init --example` to `bin/cli.js`: copies example project to `artifacts/output/`, updates `project-context.md`, sets `squad: full-team`. Should complete in < 30 seconds.
 
 ## F4.11 — Rewrite README.md
@@ -73,7 +204,7 @@
 
 ## F4.13 — Update QUICK-REFERENCE.md
 
-- [ ] Add new commands: `mcp start`/`list-tools`/`test`, `install-modules`, `witness check`/`sign`, `graph_query` (9 sub-commands), `self_learn scan`/`promote-pattern`/`promote-instinct`, `delegation_audit`, `qa_check`
+- [ ] Add new commands: `mcp start`/`list-tools`/`test`, `install-modules`, `witness check`/`sign`, `graph_query` (9 sub-commands), `self_learn scan`/`promote-pattern`/`promote-instinct`, `delegation_audit`, `qa_check`, `goal`/`automation` (Phase 6)
 
 ## F4.14 — Update ROADMAP.md
 
@@ -84,9 +215,9 @@
 
 ## F4.15 — Add CHANGELOG.md v2.0 entry
 
-- [ ] Summarize the 8 v2.0 DoD criteria (from README.md §4)
+- [ ] Summarize the 8 v2.0 DoD criteria
 - [ ] List the ~48 new files, ~30 modified files
-- [ ] Note the effort (78h over 5 weeks)
+- [ ] Note the effort (82h over 5 weeks)
 - [ ] Reference this development-plan/ folder
 
 ---

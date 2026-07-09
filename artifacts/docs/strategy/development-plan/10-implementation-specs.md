@@ -128,31 +128,199 @@ console.log(`\n[OK] All ${files.length} agents pass v2 frontmatter validation.`)
 **Path:** `.agents/scripts/merge_customization.js`
 **Purpose:** 2-file TOML merge (defaults + project override). Scalars override-wins, tables deep-merge, arrays of tables with code/id keyed-merge, other arrays append.
 
-**Spec:** Read `<agent>/customize.toml` (defaults) and `.agents/custom/<agent>.toml` (override). Apply merge rules. Output merged config. Use a minimal hand-written TOML parser or vendor BMAD's Python resolver logic as JS. See Adoption §3.3 for merge rules table.
+**Merge rules (from Adoption §3.3):**
+
+| Type | Rule |
+|---|---|
+| Scalars | override wins |
+| Tables | deep merge |
+| Arrays of tables where every item has `code` OR `id` | keyed merge (matching replace, new append) |
+| All other arrays | append |
+
+```javascript
+#!/usr/bin/env node
+// merge_customization.js — 2-file TOML merge for agent customization
+// Usage: node .agents/scripts/merge_customization.js <agent-name>
+//        node .agents/scripts/merge_customization.js developer
+
+const fs = require('fs');
+const path = require('path');
+
+const AGENTS_DIR = path.join(__dirname, '..', 'agents');
+const CUSTOM_DIR = path.join(__dirname, '..', 'custom');
+
+// Minimal TOML parser (handles key=value, [tables], [[arrays of tables]])
+function parseTOML(content) {
+  const result = {};
+  let currentTable = result;
+  let currentArray = null;
+  for (const line of content.split('\n')) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) continue;
+    // [[array of tables]]
+    const aotMatch = trimmed.match(/^\[\[(.+)\]\]$/);
+    if (aotMatch) {
+      const key = aotMatch[1].trim();
+      if (!result[key]) result[key] = [];
+      const newItem = {};
+      result[key].push(newItem);
+      currentTable = newItem;
+      currentArray = key;
+      continue;
+    }
+    // [table]
+    const tableMatch = trimmed.match(/^\[(.+)\]$/);
+    if (tableMatch) {
+      const key = tableMatch[1].trim();
+      if (!result[key]) result[key] = {};
+      currentTable = result[key];
+      currentArray = null;
+      continue;
+    }
+    // key = value
+    const kvMatch = trimmed.match(/^(\w+)\s*=\s*(.+)$/);
+    if (kvMatch) {
+      const [, k, v] = kvMatch;
+      let parsed = v.trim();
+      // Strip quotes from strings
+      if ((parsed.startsWith('"') && parsed.endsWith('"')) || (parsed.startsWith("'") && parsed.endsWith("'"))) {
+        parsed = parsed.slice(1, -1);
+      } else if (parsed === 'true') parsed = true;
+      else if (parsed === 'false') parsed = false;
+      else if (!isNaN(parseFloat(parsed))) parsed = parseFloat(parsed);
+      currentTable[k] = parsed;
+    }
+  }
+  return result;
+}
+
+// Deep merge: scalars override-wins, tables deep-merge, arrays of tables keyed-merge, other arrays append
+function deepMerge(defaults, override) {
+  const result = { ...defaults };
+  for (const key of Object.keys(override)) {
+    const dv = defaults[key];
+    const ov = override[key];
+    if (dv === undefined) { result[key] = ov; continue; }
+    if (Array.isArray(dv) && Array.isArray(ov)) {
+      // Check if items have 'code' or 'id' for keyed merge
+      const hasKey = dv.every(item => item && (item.code || item.id));
+      if (hasKey) {
+        // Keyed merge: matching replace, new append
+        const merged = [...dv];
+        for (const newItem of ov) {
+          const matchIdx = merged.findIndex(old => (old.code && old.code === newItem.code) || (old.id && old.id === newItem.id));
+          if (matchIdx >= 0) merged[matchIdx] = deepMerge(merged[matchIdx], newItem);
+          else merged.push(newItem);
+        }
+        result[key] = merged;
+      } else {
+        // Append
+        result[key] = [...dv, ...ov];
+      }
+    } else if (typeof dv === 'object' && typeof ov === 'object' && dv !== null && ov !== null) {
+      result[key] = deepMerge(dv, ov);
+    } else {
+      // Scalar: override wins
+      result[key] = ov;
+    }
+  }
+  return result;
+}
+
+// Main
+const agentName = process.argv[2];
+if (!agentName) { console.error('Usage: merge_customization.js <agent-name>'); process.exit(1); }
+
+const defaultsPath = path.join(AGENTS_DIR, agentName, 'customize.toml');
+const overridePath = path.join(CUSTOM_DIR, `${agentName}.toml`);
+
+let defaults = {};
+let override = {};
+
+if (fs.existsSync(defaultsPath)) {
+  defaults = parseTOML(fs.readFileSync(defaultsPath, 'utf8'));
+}
+if (fs.existsSync(overridePath)) {
+  override = parseTOML(fs.readFileSync(overridePath, 'utf8'));
+}
+
+if (!fs.existsSync(defaultsPath) && !fs.existsSync(overridePath)) {
+  console.error(`[ERROR] no customization files found for agent: ${agentName}`);
+  process.exit(1);
+}
+
+const merged = deepMerge(defaults, override);
+console.log(JSON.stringify(merged, null, 2));
+```
 
 ---
 
 ## §4 — Memory filter prefetch extension (Phase 0, T7.2, ~80 lines)
 
 **Path:** Update to `.agents/scripts/memory_filter.js`
-**Purpose:** Add `--prefetch-patterns` flag that returns matching patterns from `patterns-and-conventions.md` before the full 3-tier load.
-
-**Spec:**
+**Purpose:** Add `--prefetch-patterns` flag that returns matching patterns from `patterns-and-conventions.md` before the full 3-tier load. This is the T7.2 differentiator: the memory system proactively surfaces relevant patterns based on the current agent + phase, rather than waiting for the agent to search.
 
 ```javascript
-// Add to memory_filter.js:
-// --prefetch-patterns flag: scan patterns-and-conventions.md for entries
-// tagged with the current phase + agent, return matching patterns first
+#!/usr/bin/env node
+// memory_filter_prefetch.js — prefetch relevant patterns before full 3-tier load
+// Usage: node .agents/scripts/memory_filter.js --prefetch-patterns --agent=developer --phase=execution
+//        (intended to be called by memory-controller Step 0.3 before the full load)
+
+const fs = require('fs');
+const path = require('path');
+
+const MEMORY_DIR = path.join(__dirname, '..', '..', 'artifacts', 'memory');
+const PATTERNS_FILE = path.join(MEMORY_DIR, 'patterns-and-conventions.md');
 
 function prefetchPatterns(agent, phase) {
-  const patternsFile = path.join(MEMORY_DIR, 'patterns-and-conventions.md');
-  if (!fs.existsSync(patternsFile)) return [];
-  const content = fs.readFileSync(patternsFile, 'utf8');
+  if (!fs.existsSync(PATTERNS_FILE)) {
+    console.log('[PREFETCH] no patterns file');
+    return;
+  }
+  const content = fs.readFileSync(PATTERNS_FILE, 'utf8');
+  // Split on ### headers to get individual entries
   const entries = content.split(/^###\s+/m).filter(s => s.trim());
-  return entries.filter(e => {
+  // Filter for entries tagged with this agent or this phase
+  const matched = entries.filter(e => {
     const lower = e.toLowerCase();
-    return lower.includes(`[agent: @${agent}]`) || lower.includes(`[phase: ${phase}]`);
+    return lower.includes(`[agent: @${agent}]`) ||
+           lower.includes(`[agent: ${agent}]`) ||
+           lower.includes(`[phase: ${phase}]`);
   }).slice(0, 5); // top 5 matching patterns
+
+  if (matched.length === 0) {
+    console.log('[PREFETCH] no matching patterns');
+    return;
+  }
+  console.log('[PREFETCH — top 5 patterns for ' + agent + ' / ' + phase + ']');
+  for (const entry of matched) {
+    // Extract just the title line + first 2 lines of content
+    const lines = entry.split('\n').filter(l => l.trim());
+    const title = lines[0] || '(untitled)';
+    const detail = lines.slice(1, 3).join(' ');
+    console.log(`- ${title}`);
+    if (detail) console.log(`  ${detail.substring(0, 120)}${detail.length > 120 ? '...' : ''}`);
+  }
+}
+
+// Parse args
+const args = process.argv.slice(2);
+const agentArg = args.find(a => a.startsWith('--agent='));
+const phaseArg = args.find(a => a.startsWith('--phase='));
+const prefetchFlag = args.includes('--prefetch-patterns');
+
+if (prefetchFlag && agentArg && phaseArg) {
+  const agent = agentArg.split('=')[1];
+  const phase = phaseArg.split('=')[1];
+  prefetchPatterns(agent, phase);
+} else if (args.length === 0) {
+  console.log('Usage: memory_filter.js --prefetch-patterns --agent=<name> --phase=<phase>');
+  console.log('       (or the normal 3-tier load — see existing memory_filter.js for that mode)');
+} else {
+  // Fall through to existing memory_filter.js logic for normal load
+  // (This file is an ADDITION to memory_filter.js, not a replacement.
+  //  In practice, merge this prefetch function into the existing memory_filter.js
+  //  and add the --prefetch-patterns flag handling at the top of the arg parser.)
 }
 ```
 

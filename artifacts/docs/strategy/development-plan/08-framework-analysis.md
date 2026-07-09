@@ -94,6 +94,75 @@ Four AI agent frameworks occupy four distinct positions:
 
 ---
 
+## Architecture Comparison (key dimensions)
+
+| Dimension | Vespyr | ECC | BMAD | Ruflo |
+|---|---|---|---|---|
+| **Distribution** | `npx vespyr` CLI; 2,563 lines of `bin/cli.js` | Plugin via `install.sh`/`install.ps1` | `_bmad/` installable; module-config TOML | Monorepo pnpm workspace; 27 `@claude-flow/*` packages |
+| **Source of truth** | `.agents/agents/*.md` (21), `.agents/skills/*/SKILL.md` (24), `.agents/templates/` (41), `.agents/scripts/*.js` (18) | `agents/`, `skills/`, `commands/`, `rules/`, `hooks/`, `manifests/`, `schemas/` | `_bmad/<module>/` + `.agent/skills/<skill>/SKILL.md` (119) + 4 IDE mirrors | `v3/@claude-flow/*` (27 pkgs) + `ruflo/` wrapper + `plugins/` (33) |
+| **Total markdown** | ~7,500 lines skills + ~1,700 lines agents | 1,487 docs files; 262 skills × 189-line median | ~5,361 markdown files | 1,697 markdown files |
+| **Executable code** | 18 Node.js scripts (~150 KB) | 190 Node.js + Python scripts; 2,000+ lines Python; 20 files Rust | 2 Python scripts + 6 Node.js WDS scaffold scripts | 1,789 TypeScript files; 198 `.mjs` scripts; Rust crates |
+| **Multi-harness** | 8 active + 36 future | 9+ first-class with per-IDE adapters | 4 IDE layers mirrored | Dual Claude Code + Codex mode |
+| **Memory layer** | 3-tier progressive: ~200+~300+~500 tokens; keyword+recency; auto-compaction; NDJSON archive | Session persistence to `~/.claude/sessions/`; 4-step `memory-persistence`; continuous-learning | Persistent facts via `file:` prefix; per-agent `progress/[agent].md` | AgentDB + HNSW (claimed ~1.9x–4.7x faster than brute force, recall@10 ~0.99) |
+| **Testing surface** | `tests/test_cli.js` (39 KB) — CLI parser/transpiler tests; no tests for memory/orchestrator scripts | 166 test files, ~1,764 tests passing | 1 test file | 1,999 vitest tests in `@claude-flow/cli` |
+| **Security posture** | GUARDRAILS.md with upstream-artifact read policy, change-request protocol, decision-authority table | `the-security-guide.md` (456 lines) with named CVEs, Snyk ToxicSkills data, AURA trust-check | TOML customization merge; locked terminology; agent contracts | `.harness/mcp-policy.json` (default-deny); AIDefence; CVE-REMEDIATION.ts; Ed25519 witness |
+| **On-disk size** | Modest — 22 dirs, ~1,500 files | Massive — 80 dirs, ~750 surface files + 1,487 docs | Compact top-level but vast under `_bmad/` | Largest — 1.1 GB; 30+ dirs in `v3/`; 33 plugins |
+
+---
+
+## Recommendations (Tiered by Impact/Cost)
+
+### Tier 1 — High impact, low cost (adopt quickly)
+
+1. **From BMAD: Step-file architecture for complex skills.** Break the largest skills into ordered step files loaded sequentially. Prevents LLM context drift.
+2. **From BMAD: Tri-modal workflows (create/edit/validate).** Adding edit/validate modes gives the user iteration power.
+3. **From ECC: Code-reviewer false-positive guard list.** A 10+ item "Common False Positives - Skip These" list. Costs almost nothing; dramatically improves the review experience.
+4. **From Ruflo: Honest self-assessment in CLAUDE.md.** Either mark the plan as "v1.2 aspirational" with explicit status, or split into "shipped" vs "planned" sections.
+5. **From ECC: Manifest with version-aware install-modules.json.** Allow users to opt out of the game pipeline or specific domain experts.
+
+### Tier 2 — High impact, medium cost (plan carefully)
+
+6. **From BMAD: CSV-driven technique libraries.** Extend `elicitation/methods.csv`, add `brain-methods.csv` (61 techniques), `validation-patterns.csv`.
+7. **From ECC: Cross-platform sync scripts.** Replace duplicated `CLAUDE.md`/`agent.md`/`AGENTS.md` with a `sync-entry-points.js` script.
+8. **From Ruflo: Verification/witness system.** Hash artifacts with SHA-256. Verify on subsequent invocations. Catches regressions.
+9. **From BMAD: Persona-channeled mentor references.** Replace bare "persona" descriptions with explicit "channeled mentor" attributions.
+
+### Tier 3 — Speculative, high cost (research first)
+
+10. **From BMAD: WDS-style locked terminology + agent contracts.** A `references/glossary.md` with "One definition per term" plus an `agent-contracts.md` with "owns / does NOT own" boundaries.
+11. **From Ruflo: HNSW vector memory for `artifacts/memory/`.** Only worth it if memory becomes the bottleneck. Vespyr is deliberately file-based.
+12. **From ECC: AURA-style trust integration.** A read-only adapter with explicit threat model for any third-party content the agent consumes.
+
+### Tier 4 — Do NOT adopt (would dilute Vespyr)
+
+- **Ruflo's 314-MCP-tool catalog** — Vespyr's strength is curation, not coverage.
+- **Ruflo's federation / consensus stack** — Vespyr runs locally; federation is a different problem domain.
+- **ECC's domain sprawl** (homelab, prediction-market, supply-chain) — these are the maintainer's own consulting work.
+- **BMAD's WDS agency-style opinionation** — Norse mythology, Swedish/English bilingual. Doesn't fit Vespyr's product-team positioning.
+- **Ruflo's "v3 is the current version" naming** — confusing; don't repeat.
+
+---
+
+## Patterns NOT Adopted (with reason)
+
+| Source pattern | Why not |
+|---|---|
+| **Ruflo — vector DB / HNSW / embeddings** | Vespyr is deliberately file-based. `memory_filter.js` keyword scoring is the right primitive. |
+| **Ruflo — plugin marketplace (30+ plugins)** | Out of scope; v3.0 backlog. |
+| **Ruflo — federation / multi-node trust** | Single-repo, single-machine. |
+| **Ruflo — WASM neural runtime (SONA, EWC++, LoRA)** | Out of scope; no model fine-tuning in Vespyr. |
+| **BMAD — 10+ harness dotfolder mirrors (literal copies)** | We use symlinks + thin shims. |
+| **BMAD — `<workflow>` XML pseudo-DSL** | Adds a parsing layer; plain Markdown is just as expressive for short step files. |
+| **BMAD — 3-file TOML with 4-layer merge** | Overkill; 2-file is enough. |
+| **BMAD — WDS persona handoff (wrap/start)** | Round-table skill already does multi-agent spawning. Defer to v3.0. |
+| **ECC — AIDefence 3-gate PII pipeline** | Out of scope; Vespyr is a dev framework, not a production PII handler. |
+| **ECC — 12-locale README translations** | High effort, low value. Backlog for v3.0+. |
+| **ECC — 20+ language-specific reviewer agents** | Captured as language subagents of `@developer`/`@code-reviewer`, not 20 top-level personas. |
+
+**Principle:** adopt the *idea*, not the *inventory*. We do not want Vespyr to look like BMAD v6.8 with different file names.
+
+---
+
 ## The Single Most Important Takeaway
 
 **Vespyr's permission-denial reasoning/I/O split is unique among the four.** This is the kind of architectural insight that's easy to miss and hard to replicate. Protect it.

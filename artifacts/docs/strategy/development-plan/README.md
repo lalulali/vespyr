@@ -20,7 +20,7 @@ This folder supersedes the following files in `strategy/`:
 | `ROADMAP.md` (442 lines) | Keep as public-facing | This README is the internal source; ROADMAP.md is the public mirror |
 | `development/` (1,678 lines) | Superseded | Corrected and merged into `01-06` phase files |
 
-**Original total: 7,330 lines across 13 files. This folder: ~3,500 lines across 11 files.** The reduction comes from de-duplication (themes were defined 4x, DoD 3x, risks 4x, adoption matrix 2x).
+**Original total: 8,318 lines across 15 files (strategy + harness plans). This folder: ~5,500 lines across 12 files.** The reduction comes from de-duplication (themes were defined 4x, DoD 3x, risks 4x, adoption matrix 2x). The enrichment comes from adding full implementation context (proposed content, templates, persona charters, JS code, tool mappings) to every phase file so an AI developer has everything needed to build.
 
 ---
 
@@ -252,20 +252,20 @@ The "1-day ECC repackage" pattern is insufficient. Personas that don't clear eit
 
 ## 9. This Folder's Files
 
-| File | What it contains | Lines (est.) |
+| File | What it contains | Lines |
 |---|---|---|
-| `README.md` (this file) | Single source of truth: releases, phases, DoD, themes, counts, adoption matrix | ~250 |
-| `01-phase-0-foundation.md` | Phase 0 micro-tasks (F0.1-F0.22 + T7 identity, v2.0) | ~350 |
-| `02-phase-1-skills.md` | Phase 1 micro-tasks (F1.1-F1.26, v2.0) | ~300 |
-| `03-phase-2-enablement.md` | Phase 2 micro-tasks (F2.1-F2.27, v2.1) | ~250 |
-| `04-phase-3-observability.md` | Phase 3 micro-tasks (F3.1-F3.16, v2.1) | ~200 |
-| `05-phase-4-modularity.md` | Phase 4 micro-tasks (F4.1-F4.15, v2.1) | ~200 |
-| `06-phase-5-deeper-bench.md` | Phase 5: T1/T2/T3 personas + skills + squads (v2.2) | ~300 |
-| `07-harness-integration.md` | Hermes + OpenClaw (honest, condensed, OpenClaw prioritized) | ~200 |
-| `08-framework-analysis.md` | Condensed 4-framework comparison (insights only) | ~200 |
-| `09-risk-register.md` | Consolidated risk register (single source) | ~100 |
-| `10-implementation-specs.md` | JS code specs: graph_query.js, witness.js, self_learn.js, etc. | ~500 |
-| `11-phase-6-loop-engineering.md` | Loop Engineering: `/goal` + automations + loop state (v2.1) | ~150 |
+| `README.md` (this file) | Single source of truth: releases, phases, DoD, themes, counts, adoption matrix | 300 |
+| `01-phase-0-foundation.md` | Phase 0: full templates (phase table, glossary, agent contracts, grill-me, delegation-policy, IDENTITY block, frontmatter v2) + T7 identity work | 954 |
+| `02-phase-1-skills.md` | Phase 1: full templates (spec-kernel, spec-law, sprint-status.yaml, Ivy rubric, 15-item false-positive guard, step-file architecture) | 898 |
+| `03-phase-2-enablement.md` | Phase 2: full hooks table, MCP tool signatures, self-learning 3-tier spec, QA hard gate wording, delegation-policy content | 286 |
+| `04-phase-3-observability.md` | Phase 3: graph query contracts per agent, See the Unseen directives, telemetry protocol, build-wiki spec | 240 |
+| `05-phase-4-modularity.md` | Phase 4: full install-modules.json, rules/ directory structure, builder flows, example project file list | 249 |
+| `06-phase-5-deeper-bench.md` | Phase 5: FULL persona charters (channeled mentor, charter, permissions, squad, complements) for all 22 new personas + 18 new skills | 682 |
+| `07-harness-integration.md` | Hermes + OpenClaw: full directory structures, SKILL.md templates, sandbox configs, invocation patterns, memory protocols | 445 |
+| `08-framework-analysis.md` | Condensed 4-framework comparison (insights only) | 101 |
+| `09-risk-register.md` | Consolidated risk register (31 risks, single source) | 103 |
+| `10-implementation-specs.md` | Full JS code for 14 scripts: sync-entry-points, validate_frontmatter, merge_customization, memory prefetch, auto_graph, graph_query, telemetry_surface, witness, self_learn, delegation_audit, qa_check, worktree, goal_check, automation | 1078 |
+| `11-phase-6-loop-engineering.md` | Loop Engineering: `/goal` primitive + automations + loop state (v2.1) | 130 |
 
 ---
 
