@@ -250,6 +250,12 @@ The example is a deliberately trivial project ("a CLI todo list") — the point 
 
 ### F4.17 — Web guide (maintained documentation site)
 
+> **🧵 Discuss when reaching this phase.** Open questions:
+> - Should the guide *replace* existing docs or *point to* them? (duplication vs. navigation layer)
+> - Static site generator (VitePress/Docusaurus/Astro) vs. raw Markdown on GitHub Pages?
+> - Versioning: (a) `docs/` folder from `main`, (b) `gh-pages` branch per release tag, or (c) subdirectories `/v2.0/`, `/v2.1/`?
+> - Auto-generated from frontmatter vs. hand-authored? (maintenance friction for solo maintainer)
+
 - [ ] Create a web-based guide (GitHub Pages or similar) covering:
   - **Getting started:** install → first session → first skill → first artifact
   - **Concepts:** themes, phases, squads, agents, skills, memory, customization
