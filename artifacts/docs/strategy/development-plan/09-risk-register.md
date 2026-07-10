@@ -1,7 +1,7 @@
 # Risk Register — Consolidated
 
 > **Source:** Consolidated from master roadmap Part 5 (13 rows), enrichment plan §8 (15 rows), each phase file's risks, and 3 new risks identified during review.
-> **Total:** 40 risks — 14 high-impact, 20 medium-impact, 6 low-impact.
+> **Total:** 41 risks — 14 high-impact, 21 medium-impact, 6 low-impact.
 
 ---
 
@@ -50,6 +50,7 @@
 | R18 | `witness.js` false positives (legitimate edits trigger INTEGRITY-WARNING) | Medium | Medium | Re-sign on every `@memory-controller write`. Witness is a history, not a lock. First warning is informational. |
 | R19 | Self-learning promotes false patterns too aggressively | Medium | High | 3+ occurrences, 2+ agents, 7+ day span — all required. Every promotion is human-in-the-loop. `instincts.md` is opt-in. |
 | R20 | Delegation audit reveals low delegation rate | High | Low | This is the audit's job; don't game the metric. Use the data to improve agent prompts. |
+| R20a | Delegation hooks block legitimate direct I/O | Medium | Medium | `[DIRECT-IO-JUSTIFIED: ...]` protocol is the escape hatch. Hook checks for the justification string — if present, it passes. Users can disable via `VESPYR_DISABLED_HOOKS=pre:bash:delegation,pre:edit:delegation` if too aggressive. |
 
 ---
 

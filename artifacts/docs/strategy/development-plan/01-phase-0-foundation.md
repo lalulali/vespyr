@@ -72,7 +72,7 @@ Create `.agents/references/phase-table.md` with the following full content:
 - Folder names use 2-digit zero-padded numbers (00, 01, ..., 09)
 - Phase numbers are 0-indexed (Phase 0 = Discovery)
 - The folder name does not always equal the phase number when 2 phases share a folder (e.g., 02-strategy contains both Phase 2 and Phase 3 outputs)
-- Validation (Phase -1) has no folder — its outputs live in `artifacts/memory/active-decisions.md`
+- Validation (Phase -1) has no folder by design — it is a pre-phase gate, not a phase. Its output is a GO/PIVOT/KILL decision that seeds `00-discovery/idea-brief.md`, not a folder of its own.
 
 **Known inconsistency:** Several agents (`security-engineer.md`, `qa-engineer.md`, `performance-engineer.md`) and `develop/SKILL.md` reference `06-quality/` for QA/security/performance artifacts. This folder is not in the canonical table. These references should be consolidated to `05-execution/` (QA happens during execution) during Phase 1.
 ```
@@ -978,7 +978,7 @@ Once Phase 0 is done, every new file in Phase 1+ can assume:
 - Entry points are symlinks (one source).
 - Phase table is canonical.
 - Glossary and contracts are the single source of terminology.
-- Delegation is policy-enforced (audit comes in Phase 2).
+- Delegation is policy-enforced (audit + harness-level hooks come in Phase 2).
 - Memory pre-fetches relevant patterns.
 - Every reasoning agent has a Socratic stance.
 - AGENTS.md states the 3 differentiators explicitly.

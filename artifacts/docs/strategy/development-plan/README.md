@@ -62,7 +62,7 @@ Every file in the plan maps to exactly one theme. Themes are capability-shaped, 
 |---|---|---|---|---|
 | **0** | v2.0 | T1, T3, T7 | Frontmatter v2, IDENTITY block, customization TOML, thin skills ≥80 lines, entry-point consolidation, phase table, glossary, agent contracts, **+ T7: worktree delegation enforcement + tooling (T7.1b), memory auto-loading, Socratic minimum bar, identity docs** | `01-phase-0-foundation.md` |
 | **1** | v2.0 | T2, T3 | 5 long skills → folder + steps (develop, validate-idea, retro, design, launch); tri-modal flows; spec-kernel PRD; sprint-status.yaml; ASCII CLI dashboards; 9 domain experts ≥200 lines; code-reviewer 15-item false-positive guard; Ivy design.md + dynamic HTML | `02-phase-1-skills.md` |
-| **2** | v2.1 | T4, T5 | 10 lifecycle hooks; MCP server (10 tools); self-learning (episode→pattern→instinct); SHA-256 witness; delegation enforcement; QA as hard gate | `03-phase-2-enablement.md` |
+| **2** | v2.1 | T4, T5 | 12 lifecycle hooks; MCP server (10 tools); self-learning (episode→pattern→instinct); SHA-256 witness; delegation enforcement; QA as hard gate | `03-phase-2-enablement.md` |
 | **3** | v2.1 | T3, T4 | Graph auto-build at 5 lifecycle moments; graph query API; telemetry surface; catalog parity test; "See the Unseen" on all 21 agents; data analyst CLI tools | `04-phase-3-observability.md` |
 | **4** | v2.1 | T6 | install-modules (7 modules); rules/common + per-language; agent-builder/skill-builder/workflow-builder; worked example project; README/AGENTS/QUICK-REFERENCE/CHANGELOG rewrite | `05-phase-4-modularity.md` |
 | **5** | v2.2 | T1, T2 | Deeper Bench: T1 (14 personas + 14 skills + 3 squads), T2 (7 personas + 4 skills), T3 (1 persona) | `06-phase-5-deeper-bench.md` |
@@ -89,7 +89,7 @@ This is the single DoD list.
 
 ### v2.1 DoD (criteria 9-14)
 
-9. 10 lifecycle hooks registered, env-var-disablable, documented.
+9. 12 lifecycle hooks registered, env-var-disablable, documented.
 10. MCP tool surface exposes 10 tools, callable from Claude Code or OpenCode.
 11. `orchestrator_state.js next` refuses to advance out of `development` without `qa-signoff.md`.
 12. Self-learning works end-to-end (episode → pattern → instinct). `instincts.md` loaded FIRST by `@memory-controller`.
@@ -151,7 +151,7 @@ Principle: **adopt the idea, not the inventory.** We do not want Vespyr to look 
 | BMAD — channeled mentor | T1 | 0 | 1-2 references per agent |
 | BMAD — sprint-status.yaml | T3 | 1 | Layered on pipeline-state.json |
 | BMAD — glossary + agent-contracts | T1, T3 | 0 | One definition per term, owns/doesn't-own table |
-| Ruflo — lifecycle hooks | T4 | 2 | 10 hooks with stable IDs + env-var disable |
+| Ruflo — lifecycle hooks | T4 | 2 | 12 hooks with stable IDs + env-var disable |
 | Ruflo — MCP tool surface | T4 | 2 | 10 tools wrapping existing scripts |
 | Ruflo — witness/verification | T3 | 2 | SHA-256 (no Ed25519 — overkill for local-first) |
 | Ruflo — self-learning / instincts | T5 | 2 | 3-tier episode → pattern → instinct |
@@ -257,7 +257,7 @@ The "1-day ECC repackage" pattern is insufficient. Personas that don't clear eit
 | `06-phase-5-deeper-bench.md` | Phase 5: FULL persona charters (channeled mentor, charter, permissions, squad, complements) for all 22 new personas + 18 new skills | 682 |
 | `07-harness-integration.md` | Hermes + OpenClaw: full directory structures, SKILL.md templates, sandbox configs, invocation patterns, memory protocols | 445 |
 | `08-framework-analysis.md` | Condensed 4-framework comparison (insights only) | 101 |
-| `09-risk-register.md` | Consolidated risk register (40 risks, single source) | 103 |
+| `09-risk-register.md` | Consolidated risk register (41 risks, single source) | 103 |
 | `10-implementation-specs.md` | Full JS code for 14 scripts: sync-entry-points, validate_frontmatter, merge_customization, memory prefetch, auto_graph, graph_query, telemetry_surface, witness, self_learn, delegation_audit, qa_check, worktree, goal_check, automation | 1078 |
 | `11-phase-6-loop-engineering.md` | Loop Engineering: `/goal` primitive + automations + loop state (v2.1) | 130 |
 

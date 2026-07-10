@@ -12,13 +12,13 @@
 | F2.19 (delegation policy + contract blocks) | Phase 2 only | **Split:** policy + blocks in Phase 0 T7.1; audit script + invocation logging in Phase 2 | T7 promotes the policy to Phase 0 (the moat ships first). Phase 2 ships the enforcement tooling. |
 | Pre-Phase 0 (Hermes/OpenClaw) | v2.0 | **Deferred to v2.1+** | See `07-harness-integration.md` |
 
-## F2.1-F2.5 — Lifecycle hooks (10 hooks with stable IDs)
+## F2.1-F2.5 — Lifecycle hooks (12 hooks with stable IDs)
 
 **Source:** Adoption §3.5 | **Theme:** T4
 
 **Problem:** Vespyr has zero lifecycle hooks. The agent's only contract with the harness is the frontmatter and the markdown body. There is no PreToolUse, no PostToolUse, no SessionStart, no PreCompact. We cannot enforce policy at the harness layer.
 
-**Target:** Add a hook graph in `.agents/hooks/hooks.json` with 10 hooks, each with a stable ID so users can disable selectively via env var.
+**Target:** Add a hook graph in `.agents/hooks/hooks.json` with 12 hooks, each with a stable ID so users can disable selectively via env var.
 
 **Full hook table:**
 
@@ -29,6 +29,8 @@
 | `UserPromptSubmit` | `route:task` | Run a routing pass: classify the user query, suggest a squad or agent, surface the suggestion to the calling agent. |
 | `PreToolUse` (Bash) | `pre:bash:safety` | Block destructive commands (`rm -rf /`, `diskutil eraseDisk`, `mkfs.*`, etc.) — the GUARDRAILS rules are enforced at the harness layer. Must support `exit 2` to block. |
 | `PreToolUse` (Bash) | `pre:bash:tmux` | If a long-running test is launched, suggest tmux to free the main thread. |
+| `PreToolUse` (Bash) | `pre:bash:delegation` | If the invoking agent is a reasoning agent (developer, architect, code-reviewer, etc.), block the bash call with `exit 2` unless the response contains `[DIRECT-IO-JUSTIFIED: ...]`. Forces delegation to `@executor`. |
+| `PreToolUse` (Write\|Edit) | `pre:edit:delegation` | If the invoking agent is a reasoning agent, block the write/edit call with `exit 2` unless the response contains `[DIRECT-IO-JUSTIFIED: ...]` OR the file is < 50 lines. Forces delegation to `@writer`. |
 | `PostToolUse` (Write\|Edit) | `post:edit:format` | Auto-format the edited file via the project's formatter (prettier, ruff, gofmt). |
 | `PostToolUse` (Write\|Edit) | `post:edit:dedupe` | Run `@memory-controller dedupe-validate` on the last write to `artifacts/memory/`. |
 | `Stop` | `stop:session-end` | Invoke `@memory-controller session-write` automatically. |
@@ -38,18 +40,18 @@
 
 **Why this matters:** Enforcement at the harness layer. GUARDRAILS.md is documentation today. Hooks turn it into a runtime contract. `rm -rf /` is blocked even if `@developer` somehow tries it. Less cognitive load on agents — the agent doesn't need to remember to format, dedupe, or save state. The hooks do it.
 
-**Why we don't adopt Ruflo's 27 hooks + 12 background workers.** That's the Ruflo ceiling. Vespyr's hook graph should be 8–12 hooks. Adding more is easy later; the cost of removing or rewriting a hook grows.
+**Why we don't adopt Ruflo's 27 hooks + 12 background workers.** That's the Ruflo ceiling. Vespyr's hook graph should be 10–14 hooks. Adding more is easy later; the cost of removing or rewriting a hook grows.
 
 **Why we don't adopt Ruflo's "always exit 0" rule.** It's correct for hooks that learn / train. For our safety hooks, we want to be able to block an action — exit 2 to refuse.
 
-- [ ] F2.1 — Create `.agents/hooks/hooks.json` with the 10 hooks above
-- [ ] F2.2 — Create `.agents/scripts/hooks/` with 10 Node.js hook scripts (~30-50 lines each)
+- [ ] F2.1 — Create `.agents/hooks/hooks.json` with the 12 hooks above
+- [ ] F2.2 — Create `.agents/scripts/hooks/` with 12 Node.js hook scripts (~30-50 lines each)
 - [ ] F2.3 — Update `bin/install.js` with per-harness adapter (Claude Code → `.claude/settings.json`; OpenCode → `opencode.json`; Cursor → `.cursor/hooks/hooks.json`)
 - [ ] F2.4 — Add env-var support: `VESPYR_DISABLED_HOOKS=<comma,separated>` + `VESPYR_HOOK_PROFILE=minimal|standard|strict` (default: standard)
-  - `minimal`: safety hooks only (pre:bash:safety, stop:session-end)
-  - `standard`: all 10 (default)
-  - `strict`: all 10 + block on warnings (not just errors)
-- [ ] F2.5 — Create `.agents/hooks/README.md`: list all 10 IDs, document env vars, document per-harness adapter
+  - `minimal`: safety hooks only (pre:bash:safety, pre:bash:delegation, pre:edit:delegation, stop:session-end)
+  - `standard`: all 12 (default)
+  - `strict`: all 12 + block on warnings (not just errors)
+- [ ] F2.5 — Create `.agents/hooks/README.md`: list all 12 IDs, document env vars, document per-harness adapter
 
 ## F2.6-F2.10 — MCP tool surface (10 tools)
 
@@ -273,7 +275,7 @@ The orchestrator reads this file's existence as the gate token to advance from d
 
 ## Done when
 
-- [ ] 10 hooks registered, env-var-disablable, documented
+- [ ] 12 hooks registered, env-var-disablable, documented
 - [ ] `mcp__vespyr__memory_load` returns valid context (test from Claude Code or OpenCode)
 - [ ] `npx vespyr mcp start` works
 - [ ] `/self-learning` runs end-to-end on a real project, producing a digest
@@ -282,6 +284,7 @@ The orchestrator reads this file's existence as the gate token to advance from d
 - [ ] `orchestrator_state.js next` refuses to advance out of `development` without `qa-signoff.md`
 - [ ] `VESPYR_DISABLED_HOOKS=pre:bash:tmux` actually disables that hook
 - [ ] `VESPYR_HOOK_PROFILE=minimal` strips the format/quality hooks
+- [ ] **Delegation enforcement:** `pre:bash:delegation` and `pre:edit:delegation` hooks block direct I/O from reasoning agents unless `[DIRECT-IO-JUSTIFIED: ...]` is present
 - [ ] **Self-learning metrics:** instinct hit tracking, stale pattern reporting, and token cost tracking all functional
 
 ## Risks
@@ -291,6 +294,7 @@ The orchestrator reads this file's existence as the gate token to advance from d
 - **`witness.js` false positives.** Re-sign on every `@memory-controller write`. Witness is a history, not a lock. First warning is informational.
 - **Self-learning promotes false patterns.** 3+ occurrences, 2+ agents, 7+ day span — all required. Every promotion is human-in-the-loop.
 - **Delegation audit reveals low rate.** This is the audit's job; don't game the metric.
+- **Delegation hooks block legitimate direct I/O.** The `[DIRECT-IO-JUSTIFIED: ...]` protocol is the escape hatch. If the hook blocks too aggressively, users can disable it via `VESPYR_DISABLED_HOOKS=pre:bash:delegation,pre:edit:delegation`. The hook checks for the justification string in the agent's response — if present, it passes.
 
 ### Rollback plan
 
@@ -302,9 +306,9 @@ If Phase 2 breaks:
 
 ## Handoff to Phase 3
 
-- 10 hooks live, with stable IDs and env-var disable.
+- 12 hooks live, with stable IDs and env-var disable.
 - 10 MCP tools callable from external harnesses.
 - `instincts.md` is the first thing loaded in every session.
 - `witness.json` tracks every critical artifact's hash.
-- Delegation is auditable.
+- Delegation is enforced at the harness layer (hooks block direct I/O) and auditable (audit script).
 - QA is a hard gate.
