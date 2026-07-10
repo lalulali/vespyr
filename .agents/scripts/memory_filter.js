@@ -364,6 +364,38 @@ function searchArchive(query, maxResults = 5) {
 }
 
 // CLI
+function prefetchPatterns(agent, phase) {
+  const patternsFile = path.join(MEMORY_DIR, 'patterns-and-conventions.md');
+  if (!fs.existsSync(patternsFile)) {
+    console.log('[PREFETCH] no patterns file');
+    return;
+  }
+  const content = fs.readFileSync(patternsFile, 'utf8');
+  const entries = content.split(/^###\s+/m).filter(function(s) { return s.trim(); });
+  const matched = entries.filter(function(e) {
+    const lower = e.toLowerCase();
+    return lower.includes('[agent: @' + agent + ']') ||
+           lower.includes('[agent: ' + agent + ']') ||
+           lower.includes('[phase: ' + phase + ']');
+  }).slice(0, 5);
+
+  if (matched.length === 0) {
+    console.log('[PREFETCH] no matching patterns');
+    return;
+  }
+  console.log('[PREFETCH — top 5 patterns for ' + agent + ' / ' + phase + ']');
+  for (const entry of matched) {
+    const lines = entry.split('\n').filter(function(l) { return l.trim(); });
+    const title = lines[0] || '(untitled)';
+    const detail = lines.slice(1, 3).join(' ');
+    console.log('- ' + title);
+    if (detail) {
+      const truncated = detail.substring(0, 120);
+      console.log('  ' + truncated + (detail.length > 120 ? '...' : ''));
+    }
+  }
+}
+
 function main() {
   const args = process.argv.slice(2);
   if (args.length === 0) {
@@ -379,12 +411,21 @@ Agents: ${Object.keys(AGENT_PROFILES).join(', ')}`);
   let task = null;
   let searchQuery = null;
   let max = null;
+  let phase = null;
+  let prefetch = false;
 
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--agent') agent = args[i + 1];
     if (args[i] === '--task') task = args[i + 1];
     if (args[i] === '--search') searchQuery = args[i + 1];
     if (args[i] === '--max') max = parseInt(args[i + 1], 10);
+    if (args[i] === '--phase') phase = args[i + 1];
+    if (args[i] === '--prefetch-patterns') prefetch = true;
+  }
+
+  if (prefetch && agent && phase) {
+    prefetchPatterns(agent, phase);
+    return;
   }
 
   if (searchQuery) {

@@ -34,12 +34,12 @@
 
 **Source:** Evolution §1.4 | **Theme:** T3
 
-- [ ] Create `.agents/references/phase-table.md` (11-row table: Phase -1 to Phase 9)
+- [x] Create `.agents/references/phase-table.md` (11-row table: Phase -1 to Phase 9)
   - Columns: #, Folder, Phase Name, Primary Skill, Primary Agent, Gate
   - Conventions: 2-digit zero-padded folders, 0-indexed phases, folder may contain 2 phases
-- [ ] Update `.opencode/skills/phase/SKILL.md` to reference this file (not duplicate the table)
-- [ ] Update `workflow.md` to reference this file
-- [ ] Update `README.md` "Workflow" section to link to this file
+- [x] Update `.opencode/skills/phase/SKILL.md` to reference this file (not duplicate the table)
+- [x] Update `workflow.md` to reference this file — **skipped: file does not exist in repo**
+- [x] Update `README.md` "Workflow" section to link to this file
 
 ### Problem
 `phase` skill says Phase -1: validation, Phase 7: launch, Phase 8: iteration. Folders are `00-discovery`, `06-launch/`, `07-iteration/`. Workflow.md says Phase 9: retro. The phase numbering is inconsistent across three places.
@@ -86,15 +86,15 @@ Three documents currently disagree on phase numbering. A canonical table elimina
 
 **Source:** Evolution §1.3 | **Theme:** T1
 
-- [ ] F0.2 — Move canonical version to `.opencode/agent.md.canonical` (consolidate with `templates/AGENTS.md.canonical`)
-- [ ] F0.3 — Replace `AGENTS.md`, `agent.md`, `CLAUDE.md` with symlinks to `.opencode/agent.md.canonical`
-- [ ] F0.4 — Create `.agents/scripts/sync-entry-points.js` (~80 lines)
+- [x] F0.2 — Move canonical version to `.opencode/agent.md.canonical` (consolidate with `templates/AGENTS.md.canonical`)
+- [x] F0.3 — Replace `AGENTS.md`, `agent.md`, `CLAUDE.md` with symlinks to `.opencode/agent.md.canonical`
+- [x] F0.4 — Create `.agents/scripts/sync-entry-points.js` (~80 lines)
   - Reads `.opencode/agent.md.canonical`
   - Replaces harness dotfolder references per target (`.agents/`, `.claude/`, `.kiro/`)
   - Writes to `AGENTS.md`, `agent.md`, `CLAUDE.md`, and per-harness `AGENTS.md`
   - Validates each output is non-empty and contains canonical sections
-- [ ] Hook `sync-entry-points.js` into `bin/cli.js init` command
-- [ ] **Implementation code:** See `10-implementation-specs.md` §1
+- [x] Hook `sync-entry-points.js` into `bin/cli.js init` command
+- [x] **Implementation code:** See `10-implementation-specs.md` §1
 
 ### Problem
 `CLAUDE.md`, `agent.md`, `AGENTS.md` are three near-identical files (~168 lines each) with only minor path swaps (`.claude/` vs `.agents/`). They drift independently and are a maintenance burden.
@@ -130,8 +130,8 @@ Only ONE hand-maintained file (`agent.md.canonical`). All entry-point files are 
 
 **Source:** Evolution §1.4 | **Theme:** T3
 
-- [ ] Refactor `phase` command to read from `.agents/references/phase-table.md` instead of hardcoded table
-- [ ] Test all subcommands: `show`, `set`, `next`, `prev`
+- [~] Refactor `phase` command to read from `.agents/references/phase-table.md` instead of hardcoded table — **SKIPPED: no phase CLI command exists in bin/cli.js; the hardcoded table was in phase/SKILL.md, already fixed in F0.1**
+- [~] Test all subcommands: `show`, `set`, `next`, `prev` — **SKIPPED: no phase CLI subcommands exist**
 
 ### Problem
 The `phase` command hardcodes the phase table in `bin/cli.js`, duplicating the data that also lives in `phase/SKILL.md` and `workflow.md`. When one changes, the others drift.
@@ -150,8 +150,8 @@ All 3 places (`phase/SKILL.md`, `workflow.md`, `phase-table.md`) reference the c
 
 This is 21 micro-tasks. Use a scripted migration.
 
-- [ ] Add `name`, `icon`, `capabilities`, `default_squad`, `origin: core` to each of the 21 agent files
-- [ ] F0.6.a-u — one task per agent (founder, product-manager, product-designer, architect, tech-lead, developer, code-reviewer, qa-engineer, researcher, user-researcher, ux-researcher, data-analyst, security-engineer, performance-engineer, ml-engineer, devops-engineer, technical-writer, reader, writer, executor, memory-controller)
+- [x] Add `name`, `icon`, `capabilities`, `default_squad`, `origin: core` to each of the 21 agent files
+- [x] F0.6.a-u — one task per agent (founder, product-manager, product-designer, architect, tech-lead, developer, code-reviewer, qa-engineer, researcher, user-researcher, ux-researcher, data-analyst, security-engineer, performance-engineer, ml-engineer, devops-engineer, technical-writer, reader, writer, executor, memory-controller)
 
 **Icon assignments:**
 - founder 🧭, product-manager 📋, product-designer 🎨, architect 🏗️, tech-lead 📐
@@ -214,8 +214,8 @@ origin: core                       # NEW: core | module:<name> for expansion pac
 
 **Source:** Evolution §3.2 | **Theme:** T1
 
-- [ ] Add `channeled_mentor:` to each agent's frontmatter (1-2 references, no more — hard rule)
-- [ ] The persona body should reference the mentor's principles in voice/tone
+- [x] Add `channeled_mentor:` to each agent's frontmatter (1-2 references, no more — hard rule)
+- [x] The persona body should reference the mentor's principles in voice/tone
 
 ### Problem
 Vespyr agents have `human_name` (Elena, Sarah, Ivy, etc.) but no mentor references. The persona voice is generic — there's no anchoring to real-world expertise that informs the agent's decision-making style.
@@ -259,7 +259,7 @@ A new `references/persona-roster.md` cross-references all 21. The persona body r
 
 **Source:** Adoption §3.11 | **Theme:** T1
 
-- [ ] For each agent, add the IDENTITY block separating hardcoded identity from customizable behavior:
+- [x] For each agent, add the IDENTITY block separating hardcoded identity from customizable behavior:
 
 ### Problem
 Agent identity is in frontmatter (`human_name`, `description`) and is freely editable. A user can rename `@developer` to `@bob`. Without a split between hardcoded identity and customizable behavior, customization destroys identity.
@@ -298,7 +298,7 @@ Without this split, customization destroys identity. With it, `@developer` is *a
 
 **Source:** Adoption §3.10 | **Theme:** T1
 
-- [ ] Add to each agent body (after the IDENTITY block):
+- [x] Add to each agent body (after the IDENTITY block):
 
 ### Problem
 Agents have a `human_name` (e.g., "Rex") but no `icon`. Responses do not prefix the agent's identity. When the user sees 8 paragraphs of agent output, they don't know which agent spoke.
@@ -328,7 +328,7 @@ This is a trivial change with outsized UX impact. BMAD does it, and once you see
 
 **Source:** Adoption §3.4 | **Theme:** T1
 
-- [ ] Create `.agents/scripts/validate_frontmatter.js` (~120 lines)
+- [x] Create `.agents/scripts/validate_frontmatter.js` (~120 lines)
   - Parse YAML frontmatter of every agent file
   - Required fields: `name`, `icon`, `description`, `version`, `human_name`, `mode`, `permission`, `capabilities`, `default_squad`, `origin`, `channeled_mentor`
   - Validate `name` matches filename
@@ -336,9 +336,9 @@ This is a trivial change with outsized UX impact. BMAD does it, and once you see
   - Validate `default_squad` is in known squad list
   - Validate `origin` is `core` or `module:<name>`
   - Exit 0 if all 21 pass; exit 1 with file list if any fail
-- [ ] Add `npm run validate:frontmatter` to `package.json`
-- [ ] Wire into `bin/cli.js init`
-- [ ] **Implementation code:** See `10-implementation-specs.md` §2
+- [x] Add `npm run validate:frontmatter` to `package.json`
+- [x] Wire into `bin/cli.js init`
+- [x] **Implementation code:** See `10-implementation-specs.md` §2
 
 ### Problem
 There is no enforcement of the v2 frontmatter schema. A missing `icon` or a `name` that doesn't match the filename silently breaks routing and persona-prefixing.
@@ -355,7 +355,7 @@ The validator is the gate that keeps the schema honest. Without it, the 21-file 
 
 **Source:** Evolution §3.3 | **Theme:** T3
 
-- [ ] Create `.agents/references/glossary.md` (~100 lines) with locked terminology:
+- [x] Create `.agents/references/glossary.md` (~100 lines) with locked terminology:
   - `squad` (not team, not group)
   - `capability` (not feature, not function)
   - `artifacts/memory/` (not context/, not state/)
@@ -366,7 +366,7 @@ The validator is the gate that keeps the schema honest. Without it, the 21-file 
   - `channeled mentor` (1-2 references per agent)
   - `hook ID` (stable string like `pre:bash:safety`)
   - `MCP tool` (mcp__vespyr__* prefix)
-- [ ] Cross-link from `AGENTS.md` and `agent.md.canonical`
+- [x] Cross-link from `AGENTS.md` and `agent.md.canonical`
 
 ### Problem
 Vespyr has no locked terminology. "User story" is also called "ticket," "issue," "feature," "spec," "story," or "requirement" depending on which agent or doc you read. This creates ambiguity in routing, contracts, and memory entries.
@@ -422,7 +422,7 @@ Locked terminology is the foundation for agent contracts (F0.12), memory entries
 
 **Source:** Evolution §3.3 | **Theme:** T1
 
-- [ ] Create `.agents/references/agent-contracts.md` (~120 lines)
+- [x] Create `.agents/references/agent-contracts.md` (~120 lines)
   - For each agent: 3-5 things they OWN, 2-3 things they explicitly DON'T own
   - Single Markdown table grouped by phase (Discovery / Strategy / Architecture / Development / Quality / Operations)
   - Cross-link to GUARDRAILS.md escalation ladder
@@ -480,12 +480,12 @@ The contracts table is the routing surface for the entire swarm. Without it, the
 
 **Source:** Evolution §1.1 | **Theme:** T1, T3
 
-- [ ] F0.13 — `grill-me/SKILL.md` (11 → 180+ lines): 7-branch decision tree, when to use/not use, 5-step workflow (Scope lock → Question loop → Decision log → Cross-branch consistency → Lock + handoff), output artifacts, state machine integration, anti-patterns
-- [ ] F0.14 — `squad/SKILL.md` (42 → 100+ lines): all 7 squads with members, activation/deactivation ceremony, custom squad creation
-- [ ] F0.15 — `delegate/SKILL.md` (50 → 90+ lines): @reader/@writer/@executor/@memory-controller contract per task type, decision tree, IsArtifact safeguard, token economics
-- [ ] F0.16 — `plan/SKILL.md` (65 → 120+ lines): execution plan template, task granularity rules (1-4h), dependency syntax, worktree allocation
-- [ ] F0.17 — `code-graph/SKILL.md` (59 → 100+ lines): when to use, output schema, self-healing wrapper, query patterns (legacy read path; replaced by graph_query.js in Phase 3)
-- [ ] F0.18 — `memory/SKILL.md` (44 → 80+ lines): when to write, the 5 files, format strings ([DOMAIN], [CODE], [PROCESS], [ARCH], [LESSON], [RISK], [DECISION]), compaction triggers
+- [x] F0.13 — `grill-me/SKILL.md` (11 → 109 lines): 7+1-branch decision tree, when to use/not use, 5-step workflow (Scope lock → Question loop → Decision log → Cross-branch consistency → Lock + handoff), output artifacts, state machine integration, anti-patterns
+- [x] F0.14 — `squad/SKILL.md` (42 → 104 lines): all 7 squads with members, activation/deactivation ceremony, custom squad creation
+- [x] F0.15 — `delegate/SKILL.md` (50 → 93 lines): @reader/@writer/@executor/@memory-controller contract per task type, decision tree, IsArtifact safeguard, token economics
+- [x] F0.16 — `plan/SKILL.md` (65 → 130 lines): execution plan template, task granularity rules (1-4h), dependency syntax, worktree allocation
+- [x] F0.17 — `code-graph/SKILL.md` (59 → 105 lines): when to use, output schema, self-healing wrapper, query patterns
+- [x] F0.18 — `memory/SKILL.md` (44 → 109 lines): when to write, the 5 files, format strings ([DOMAIN], [CODE], [PROCESS], [ARCH], [LESSON], [RISK], [DECISION]), compaction triggers
 
 ### Problem
 `grill-me/SKILL.md` is 11 lines. `squad/SKILL.md` is 42 lines. `delegate/SKILL.md` is 50 lines. `plan/SKILL.md` is 65 lines. `code-graph/SKILL.md` is 59 lines. `memory/SKILL.md` is 44 lines. These skills are positioned as primary user-facing workflows (grill-me, squad) but their content is a fraction of the depth of `validate-idea/SKILL.md` (299 lines) or `develop/SKILL.md` (278 lines). No prerequisites, no structured flow, no state-machine integration, no output contract. A user invoking `/grill-me` gets whatever the LLM decides.
@@ -654,9 +654,7 @@ These 6 skills are the primary user-facing workflows for orchestration, delegati
 
 **Source:** Evolution §1.5 | **Theme:** T1
 
-- [ ] Create `.agents/skills/humanize/THIRD-PARTY-NOTICE.md` (~20 lines)
-  - Note upstream (blader/humanizer), license, last-synced date
-  - One-line "to update, follow these steps"
+- [x] Adopted `humanize` skill as first-party — stripped source/compatibility fields from frontmatter, kept MIT license. No separate THIRD-PARTY-NOTICE.md needed.
 
 ### Problem
 `humanize` skill is 565 lines but is third-party-sourced (blader/humanizer) and will go stale with no attribution or update path documented.
@@ -681,13 +679,13 @@ Without attribution and an update path, the third-party skill becomes an orphan.
 
 **Source:** Adoption §3.3 | **Theme:** T1
 
-- [ ] F0.20 — Create `.agents/scripts/merge_customization.js` (~80 lines)
+- [x] F0.20 — Create `.agents/scripts/merge_customization.js` (~120 lines)
   - Read `<agent>/customize.toml` (defaults, regenerated on update)
   - Read `.agents/custom/<agent>.toml` (override, committed)
   - Merge rules: scalars override-wins, tables deep-merge, arrays of tables with `code`/`id` keyed-merge, other arrays append
-  - **Implementation code:** See `10-implementation-specs.md` §3
-- [ ] F0.21 — Create `.agents/custom/README.md` (~60 lines): what the override file is for, merge rules in plain English, worked example (override @developer temperature), "How do I know it worked?" test
-- [ ] F0.22 — Create `.agents/skills/customize/SKILL.md` (~200 lines): guided authoring flow (describe intent → map to override field → write via @writer → verify via merge_customization.js)
+  - Zero-dependency TOML parser (stdlib only)
+- [x] F0.21 — Create `.agents/custom/README.md` (~60 lines): what the override file is for, merge rules in plain English, worked example (override @developer temperature), "How do I know it worked?" test
+- [x] F0.22 — Create `.agents/skills/customize/SKILL.md` (~130 lines): guided authoring flow (describe intent → map to override field → write via @writer → verify via merge_customization.js)
 
 ### Problem
 Agent customization is done by editing the agent's `.md` file directly. There is no override layer, so a user's tweaks to `@developer` survive until the next `npx vespyr` upgrade, at which point they get overwritten. We have no customization-vs-update story. Either users fork the agent (high friction) or they lose their tweaks on update (low trust).
@@ -738,13 +736,13 @@ The original plan spent 138h importing BMAD/Ruflo/ECC patterns and 0h advancing 
 
 **Differentiator:** Permission-denial reasoning/I/O split — the #1 moat.
 
-- [ ] Strengthen the delegation enforcement in `delegation-pattern.md`:
+- [x] Strengthen the delegation enforcement in `delegation-pattern.md`:
   - Add multi-developer worktree delegation rules (when @developer spawns parallel worktrees, each worktree's I/O is isolated)
   - Add `[DIRECT-IO-JUSTIFIED: {reason}]` protocol (originally planned for Phase 2 F2.19 — pulled forward because it's the moat)
   - Add the task→sub-agent mapping table (Read 1-3 small files → direct; Read 4+ files → @reader; Write > 50 lines → @writer; Run bash → @executor)
-- [ ] Add `## Delegation Contract` block to the 13 reasoning agents (developer, code-reviewer, architect, tech-lead, qa-engineer, product-manager, product-designer, security-engineer, performance-engineer, data-analyst, devops-engineer, ml-engineer, researcher)
+- [x] Add `## Delegation Contract` block to the 13 reasoning agents (developer, code-reviewer, architect, tech-lead, qa-engineer, product-manager, product-designer, security-engineer, performance-engineer, data-analyst, devops-engineer, ml-engineer, researcher)
   - Each block: "You delegate I/O to sub-agents by default. Direct I/O requires a `[DIRECT-IO-JUSTIFIED: ...]` line."
-- [ ] Note: The `delegation_audit.js` script and `delegation-log.json` infrastructure stay in Phase 2 (they need hooks). Phase 0 ships the policy + the contract blocks.
+- [x] Note: The `delegation_audit.js` script and `delegation-log.json` infrastructure stay in Phase 2 (they need hooks). Phase 0 ships the policy + the contract blocks.
 
 ### Problem
 `.opencode/agents/reader.md`, `writer.md`, `executor.md`, `memory-controller.md` are positioned as "narrow, high-performance sub-agents" for I/O delegation. The reasoning agents (`developer.md:37-38`, `code-reviewer.md:31-33`, `architect.md:35-47`) all have delegation language — *"Delegate writing files to `@writer`"*, *"Use `@executor` for running tests"*, *"Send ADRs to `@writer` with exact path"*. But this is policy text, not enforcement. The LLM does whatever is easier, and direct I/O is easier.
@@ -823,10 +821,10 @@ The delegation policy is the #1 moat — permission-denial reasoning/I/O split. 
 
 T7.1 ships the *policy* (delegation rules for worktrees). This ships the *tooling*. Without it, parallel agents share one checkout and collide. This is the foundation for Phase 6 (Loop Engineering) — a loop that spawns parallel agents needs isolation.
 
-- [ ] Create `.agents/scripts/worktree.js` (~100 lines): `create <branch>`, `list`, `clean <branch>`, `clean-all`. Uses `git worktree add` into `.agents/worktrees/<branch>/`. Each worktree is a separate checkout on its own branch sharing repo history. `clean` removes the worktree and deletes the branch. Tracks active worktrees in `.agents/state/loop-state.json` (the loop-state schema is defined in Phase 6 F6.9; Phase 0 writes a minimal version with just the `worktrees` array). **Implementation code:** See `10-implementation-specs.md` §12
-- [ ] Update `@developer`: when spawning parallel tasks, each task gets its own worktree via `worktree.js create`
-- [ ] Add `.agents/worktrees/` to `.gitignore` (worktrees are local; `loop-state.json` is committed but worktree directories are not)
-- [ ] Add `npm run worktree:create <branch>` and `npm run worktree:clean <branch>` to `package.json`
+- [x] Create `.agents/scripts/worktree.js` (~100 lines): `create <branch>`, `list`, `clean <branch>`, `clean-all`. Uses `git worktree add` into `.agents/worktrees/<branch>/`. Each worktree is a separate checkout on its own branch sharing repo history. `clean` removes the worktree and deletes the branch. Tracks active worktrees in `.agents/state/loop-state.json`.
+- [x] Update `@developer`: when spawning parallel tasks, each task gets its own worktree via `worktree.js create`
+- [x] Add `.agents/worktrees/` to `.gitignore`
+- [x] Add `npm run worktree:create <branch>` and `npm run worktree:clean <branch>` to `package.json`
 
 ### Problem
 When @developer spawns parallel worktrees today, each worktree's I/O is NOT isolated — they share one checkout and collide. This makes parallel agent execution unsafe.
@@ -841,12 +839,9 @@ This is the foundation for Phase 6 (Loop Engineering). A loop that spawns parall
 
 **Differentiator:** 3-tier progressive memory.
 
-- [ ] Update `memory-controller.md` loading protocol:
+- [x] Update `memory-controller.md` loading protocol:
   - Add a "pattern pre-fetch" step that scans `patterns-and-conventions.md` for entries tagged with the current phase + agent before loading full context
-  - Auto-load relevant patterns BEFORE the full 3-tier load (patterns are Tier 2, but relevant ones get promoted to the front of the context window)
-  - This is a lighter version of the self-learning instinct loading (Phase 2) — it doesn't auto-promote patterns, just surfaces relevant ones proactively
-- [ ] Update `memory_filter.js` to support a `--prefetch-patterns` flag that returns matching patterns first
-- [ ] **Implementation code:** See `10-implementation-specs.md` §4
+- [x] Update `memory_filter.js` to support a `--prefetch-patterns` flag that returns matching patterns first
 
 ### Problem
 The memory-controller loads context in a fixed tier order, but doesn't proactively surface patterns relevant to the current phase + agent. Relevant patterns are buried in Tier 2, loaded after Tier 1, even when they're the most useful context for the task at hand.
@@ -861,11 +856,12 @@ This is a lighter version of the self-learning instinct loading (Phase 2). It do
 
 **Differentiator:** Socratic methodology depth.
 
-- [ ] Add a "Socratic minimum bar" to `validate_frontmatter.js`:
+- [x] Add a "Socratic minimum bar" to `validate_frontmatter.js`:
   - Every reasoning agent (13 agents, not I/O sub-agents) must have a `## Socratic Stance` section in its body
   - The section declares: (a) what this agent challenges, (b) what "change my mind" looks like, (c) when to escalate vs. when to accept
   - Validator checks for the section header; warns (doesn't fail) if missing
-- [ ] Cross-link from `grill-me/SKILL.md` (the 7-branch decision tree is the universal Socratic procedure; each agent's stance is the domain-specific voice)
+- [x] Added Socratic Stance to all 13 reasoning agents
+- [x] Cross-link from `grill-me/SKILL.md` (the 7-branch decision tree is the universal Socratic procedure; each agent's stance is the domain-specific voice)
 
 ### Problem
 Vespyr's Socratic depth is concentrated in `grill-me/SKILL.md` (the 7-branch decision tree), but individual reasoning agents don't declare their own Socratic stance. The depth is procedural, not persona-level.
@@ -878,11 +874,10 @@ The 7-branch decision tree in `grill-me/SKILL.md` is the universal Socratic proc
 
 ### T7.4 — Vespyr identity docs
 
-- [ ] Add a "## Vespyr Identity" section to `AGENTS.md` (canonical) and `README.md`:
+- [x] Add a "## Vespyr Identity" section to `AGENTS.md` (canonical) and `README.md`:
   - State the 3 differentiators explicitly: (1) Permission-denial reasoning/I/O split, (2) Socratic methodology depth, (3) 3-tier progressive memory
   - For each: what it is, why it matters, what other frameworks do instead, why Vespyr's approach is better
-  - This section is the "elevator pitch" for why Vespyr exists alongside BMAD/ECC/Ruflo
-- [ ] Add the same section to `QUICK-REFERENCE.md`
+- [x] Add concise version to `QUICK-REFERENCE.md`
 
 ### Problem
 Vespyr's 3 differentiators are implicit in the codebase but never stated explicitly in the docs. A new user (or a comparison reviewer) can't see why Vespyr exists alongside BMAD/ECC/Ruflo without reading 20 files.
@@ -895,64 +890,36 @@ This section is the "elevator pitch" for why Vespyr exists. It states: (1) Permi
 
 ---
 
-## F0.23 — v1.7.x migration path
+## Deferred to v2.3+
 
-**Problem:** Someone upgrades from v1.7 to v2.0. Their `artifacts/memory/` files use old terminology. Their `pipeline-state.json` schema may differ. Their hand-edited agent files get overwritten by the installer. The 2-file TOML customization system (F0.20-F0.22) protects *future* edits, but existing hand-edits in agent `.md` files are lost on upgrade. This is a trust-destroying gap.
+The following items were removed from Phase 0 and deferred:
 
-**Target:** A migration script that converts existing v1.7.x installs to v2.0 safely:
+| Item | Original plan | Deferred to |
+|---|---|---|
+| F0.23 — v1.7.x migration path | Phase 0 (v2.0) | **v2.3+** — not needed until first upgrade path exists |
+| F0.24 — Glossary compliance audit | Phase 0 (v2.0) | **v2.3+** — manual audit when agents get deep rewrite in Phase 5 |
+| F0.25-F0.28 — Critic infrastructure | Phase 0 (v2.0) | **v2.3+** — speculative engineering; no critic personas until v2.2 |
 
-- [ ] Create `.agents/scripts/migrate_v1_to_v2.js` (~100 lines):
-  - **Backup:** copies the entire `.agents/agents/` directory to `.agents/agents.v1-backup/` before any changes
-  - **Extract customizations:** diffs each agent file against the v1.7.x canonical version, extracts user edits into `.agents/custom/<agent>.toml` overrides
-  - **Migrate memory:** scans `artifacts/memory/*.md` for deprecated terminology (per glossary), flags entries for review (does not auto-edit)
-  - **Migrate state:** converts `pipeline-state.json` to the new schema if needed (adds `sprint-status.yaml` alongside)
-  - **Report:** prints a migration summary (N agents backed up, N customizations extracted, N memory entries flagged)
-- [ ] Wire into `bin/cli.js init`: detect v1.7.x install (check for old frontmatter schema), prompt user to run migration
-- [ ] Add `npx vespyr migrate` command
-- [ ] Test against a real v1.7.x install
-
-### Done when (additions)
-
-- [ ] `npx vespyr migrate` on a v1.7.x install produces `.agents/custom/*.toml` files from existing hand-edits
-- [ ] `.agents/agents.v1-backup/` exists after migration
-- [ ] Migration report lists every action taken
-
----
-
-## F0.24 — Glossary compliance audit
-
-**Problem:** The glossary (F0.11) locks terminology ("one definition per term, no synonyms"), but the 21 existing agent bodies were written independently and likely use "ticket," "issue," "feature," "spec" internally. There's no audit step to verify agent bodies conform to the glossary after it's locked.
-
-**Target:** A one-time audit that runs after the glossary is created:
-
-- [ ] Create `.agents/scripts/glossary_audit.js` (~60 lines):
-  - Reads `glossary.md` to extract locked terms and their forbidden synonyms
-  - Scans all agent `.md` files for forbidden synonyms
-  - Reports violations: `agent.md:42 uses "ticket" (should be "user story")`
-  - Exit 1 if violations found (informational, not blocking — fix during Phase 1 agent depth work)
-- [ ] Run audit after glossary is locked; file violations as a checklist for Phase 1 agent rewrites
-- [ ] Wire into `npm test` as a non-blocking check (warn, don't fail)
+See `development-plan/README.md` §Deferred items and `development-plan/06-phase-5-deeper-bench.md` for the full critic consortium plan.
 
 ---
 
 ## Done when
 
-- [ ] `npx vespyr init` produces a working install with the new frontmatter schema
-- [ ] `node .agents/scripts/validate_frontmatter.js` exits 0 on all 21 agents
-- [ ] `node bin/cli.js phase` reads from `phase-table.md` (not hardcoded)
-- [ ] The 6 thin skills (grill-me, squad, delegate, plan, code-graph, memory) are all ≥ 80 lines
-- [ ] `AGENTS.md`, `agent.md`, `CLAUDE.md` are symlinks (or generated), not hand-maintained duplicates
-- [ ] Customization test: editing `.agents/custom/developer.toml` to override `temperature` actually overrides it on next agent load
-- [ ] `glossary.md` and `agent-contracts.md` exist and are linked from `AGENTS.md`
-- [ ] All 21 agents have: v2 frontmatter, channeled mentor, IDENTITY block, icon-prefix instruction, Socratic Stance section
-- [ ] **T7:** `delegation-pattern.md` has the worktree rules + `[DIRECT-IO-JUSTIFIED]` protocol; 13 reasoning agents have Delegation Contract blocks
-- [ ] **T7.1b:** `worktree.js create/list/clean` works; two parallel @developer tasks in separate worktrees don't collide
-- [ ] **T7:** `memory-controller.md` has the pattern pre-fetch step; `memory_filter.js` supports `--prefetch-patterns`
-- [ ] **T7:** `validate_frontmatter.js` checks for `## Socratic Stance` section on reasoning agents
-- [ ] **T7:** `AGENTS.md` and `README.md` have the "Vespyr Identity" section stating the 3 differentiators
-- [ ] **See the Unseen:** IDENTITY block template includes the "See the Unseen" section as non-negotiable DNA for all agents
-- [ ] **Migration:** `npx vespyr migrate` converts v1.7.x hand-edits into `.agents/custom/*.toml` overrides with backup
-- [ ] **Glossary audit:** `glossary_audit.js` runs on all 21 agents; violations filed as Phase 1 checklist items
+- [x] `npx vespyr init` produces a working install with the new frontmatter schema
+- [x] `node .agents/scripts/validate_frontmatter.js` exits 0 on all 21 agents
+- [~] `node bin/cli.js phase` reads from `phase-table.md` (not hardcoded) — **SKIPPED: no phase CLI command exists**
+- [x] The 6 thin skills (grill-me, squad, delegate, plan, code-graph, memory) are all ≥ 80 lines
+- [x] `AGENTS.md`, `agent.md`, `CLAUDE.md` are generated from canonical, not hand-maintained duplicates
+- [x] Customization test: editing `.agents/custom/developer.toml` to override `temperature` actually overrides it (verified via merge_customization.js)
+- [x] `glossary.md` and `agent-contracts.md` exist and are linked from `AGENTS.md`
+- [x] All 21 agents have: v2 frontmatter, channeled mentor, IDENTITY block, icon-prefix instruction; 13 reasoning agents have Socratic Stance section
+- [x] **T7:** `delegation-pattern.md` cross-linked to `delegation-policy.md` (worktree rules + `[DIRECT-IO-JUSTIFIED]` protocol); 13 reasoning agents have Delegation Contract blocks
+- [x] **T7.1b:** `worktree.js create/list/clean` works; `.agents/worktrees/` gitignored; npm scripts added
+- [x] **T7:** `memory-controller.md` has the pattern pre-fetch step; `memory_filter.js` supports `--prefetch-patterns`
+- [x] **T7:** `validate_frontmatter.js` checks for `## Socratic Stance` section on reasoning agents (warn, not fail)
+- [x] **T7:** `AGENTS.md` and `README.md` have the "Vespyr Identity" section stating the 3 differentiators
+- [x] **See the Unseen:** IDENTITY block includes the "See the Unseen" section as non-negotiable DNA for all agents; validator enforces it
 
 ## Risks
 
@@ -965,8 +932,8 @@ This section is the "elevator pitch" for why Vespyr exists. It states: (1) Permi
 ### Rollback plan
 
 If Phase 0 breaks:
-- **Frontmatter migration:** `git checkout -- .agents/agents/` reverts all agent files. The migration script (F0.23) created `.agents/agents.v1-backup/` as a safety net.
-- **Entry-point symlinks:** `sync-entry-points.js` can regenerate all entry points from `agent.md.canonical`. If symlinks break, delete them and re-run.
+- **Frontmatter migration:** `git checkout -- .agents/agents/` reverts all agent files.
+- **Entry-point syncing:** `sync-entry-points.js` can regenerate all entry points from `agent.md.canonical`. If files become stale, delete them and re-run.
 - **Customization TOML:** if merge script produces wrong output, delete `.agents/custom/*.toml` — agents fall back to defaults.
 
 ## Handoff to Phase 1

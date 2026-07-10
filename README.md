@@ -101,6 +101,26 @@ When an agent invokes the `@memory-controller`, it pulls a highly compressed bun
 
 ---
 
+## 🏛️ Why Vespyr
+
+Three architectural choices set Vespyr apart from other multi-agent frameworks:
+
+| Differentiator | What it means | Why it matters |
+|---|---|---|
+| **Permission-denial I/O split** | Reasoning agents can't touch files or run commands. All I/O goes through narrow sub-agents (`@reader`, `@writer`, `@executor`). | Context windows stay lean (~1,000 tokens vs 15,000+). 85-95% API cost savings. Structured, consistent output. |
+| **Socratic methodology depth** | Every reasoning agent has a `## Socratic Stance` declaring what they challenge. `/grill-me` runs a 7+1-branch decision tree before code is written. | Catches hidden assumptions, architectural conflicts, and edge cases that consensus-seeking teams miss. |
+| **3-tier progressive memory** | Memory loads in tiers (core → agent-specific → task-relevant), with pattern pre-fetch that surfaces relevant past decisions proactively. | No context bloat from loading everything. No amnesia from loading nothing. Agents get exactly what they need. |
+
+---
+
+## 📋 Workflow Phases
+
+Vespyr organizes all work into 11 sequential phases, from idea validation through retrospective. The canonical phase table at `.agents/references/phase-table.md` is the single source of truth for phase numbering, folder structure, and gates.
+
+For a quick summary: `/phase` displays your current phase, and the phase table maps every phase to its primary skill and agent.
+
+---
+
 ## 👥 Core Squads & Agents
 
 Vespyr organizes its 21 specialized agents into roles that activate based on your project phase:

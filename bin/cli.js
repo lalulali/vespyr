@@ -1607,6 +1607,7 @@ async function performFreshInstall(targetDir, flags) {
 	const projectName = path.basename(targetDir);
 	scaffoldArtifacts(targetDir, projectName, userNickname);
 	bootstrapRootDocs(targetDir, projectName, selections);
+	performSyncDocs(targetDir);
 	const installResults = await installHarnesses(targetDir, selections, method, flags.model);
 
 	if (!dryRun) {
@@ -2192,6 +2193,27 @@ async function showActionMenu(targetDir, flags) {
 }
 
 function performSyncDocs(targetDir) {
+	const syncScript = path.join(
+		targetDir,
+		".agents",
+		"scripts",
+		"sync-entry-points.js",
+	);
+
+	if (fs.existsSync(syncScript)) {
+		const { execSync } = require("child_process");
+		execSync(`node "${syncScript}"`, { cwd: targetDir, stdio: "inherit" });
+
+		const validateScript = path.join(
+			targetDir, ".agents", "scripts", "validate_frontmatter.js",
+		);
+		if (fs.existsSync(validateScript)) {
+			execSync(`node "${validateScript}"`, { cwd: targetDir, stdio: "inherit" });
+		}
+		return;
+	}
+
+	// Fallback: legacy template-based approach
 	const canonicalPath = path.join(
 		AGENTS_SRC,
 		"templates",

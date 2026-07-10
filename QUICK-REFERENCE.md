@@ -1,6 +1,12 @@
 # Quick Reference Card
 
 ```
+VESPYR IDENTITY — 3 differentiators
+────────────────────────────────────
+1. Permission-denial I/O split — reasoning agents delegate all I/O to sub-agents
+2. Socratic methodology depth — every reasoning agent challenges assumptions
+3. 3-tier progressive memory — context loaded in tiers, not all-at-once or not-at-all
+
 PHASES
 ──────
 Product:   Validation → Exploration → Design → Development

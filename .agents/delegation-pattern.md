@@ -232,3 +232,9 @@ To apply this pattern to any AI coding harness:
 4. **Restrict the reasoning agent** — Remove I/O permissions so it must delegate
 5. **Instruct delegation** — Add to the reasoning agent's prompt: "Use @reader/@writer/@executor for I/O"
 6. **Verify enforcement** — Confirm the reasoning agent cannot bypass delegation (e.g., by attempting to write directly)
+
+---
+
+## Operational Policy
+
+For Vespyr's specific enforcement rules — task-to-sub-agent mapping, worktree isolation, and the `[DIRECT-IO-JUSTIFIED]` override protocol — see `.agents/references/delegation-policy.md`.

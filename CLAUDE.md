@@ -1,7 +1,15 @@
-# CLAUDE.md Vespyr — Multi-Agent Engine
+# Vespyr — Multi-Agent Engine
 
 A platform-agnostic, file-based multi-agent system configured to streamline product development and engineering operations. This system consists of 21 specialized agent personas, structured workflows, and a shared persistent memory layer.
 
+> [!IMPORTANT]
+> **Harness Directory Adaptation**
+> Depending on your active AI assistant harness, the base configuration directory (originally `.opencode/`) should be renamed or adapted to your harness's expected dotfolder. Throughout this document, we refer to this base folder as `.agents`. Common names include:
+> - **Kiro**: `.kiro/`
+> - **OpenCode**: `.opencode/`
+> - **Antigravity**: `.claude/`
+> - **Claude Code**: `.claude/`
+> - **General**: `.harness/` or `.opencode/`
 
 **Trade-Off Policy**: The guidelines below prioritize absolute execution quality, simplicity, and precision over sheer speed. Adhere to them strictly for all tasks.
 
@@ -21,7 +29,7 @@ Since agents are defined as plain Markdown personas, they can be loaded and exec
   ```
   Adopt the role of the agent defined in: .claude/agents/[agent-name].md
   Read that file to understand your persona, goals, workflow, and safety guardrails.
-  Strictly adhere to the 4 Core Behavioral Guidelines (Think Before Acting, Simplicity First, Surgical Actions, Goal-Driven Execution) defined in CLAUDE.md.
+  Strictly adhere to the 4 Core Behavioral Guidelines (Think Before Acting, Simplicity First, Surgical Actions, Goal-Driven Execution) defined in this document.
   Then, execute this task: [detailed instructions]
   ```
 
@@ -167,3 +175,41 @@ To maximize reliability, reduce over-engineering, and enforce high-fidelity exec
 ## 🛡️ Guardrails
 
 All agents follow the safety and conflict resolution rules in `.claude/GUARDRAILS.md`.
+
+---
+
+## 🏛️ Vespyr Identity — Why Vespyr Exists
+
+Vespyr is defined by three differentiators that no other multi-agent framework combines:
+
+### 1. Permission-denial reasoning/I/O split
+
+**What it is:** Reasoning agents (developer, architect, etc.) are denied direct I/O permissions. They must delegate to narrow sub-agents (`@reader`, `@writer`, `@executor`, `@memory-controller`) for all file and shell operations.
+
+**Why it matters:** This keeps reasoning agents' context windows lean (~1,000 tokens instead of 15,000+), saving 85-95% on API costs. It also forces structured output — sub-agents produce consistent formatting, not ad-hoc diffs.
+
+**What others do:** BMAD and Ruflo allow direct I/O; context bloat is managed by the user manually. ECC uses a single-agent model with no delegation pattern.
+
+### 2. Socratic methodology depth
+
+**What it is:** Every reasoning agent has a `## Socratic Stance` declaring what it challenges, what "change my mind" looks like, and when to escalate. The `/grill-me` skill runs a 7+1-branch decision tree that stress-tests every assumption before a single line of code is written.
+
+**Why it matters:** Without structured challenge, agent teams converge on consensus too quickly — missing edge cases, architectural conflicts, and hidden assumptions. Vespyr bakes challenge into the persona layer, not just a single skill.
+
+**What others do:** BMAD has mentors but no systematic challenge framework. Ruflo and ECC have no challenge infrastructure.
+
+### 3. 3-tier progressive memory
+
+**What it is:** Memory loads in three tiers: Tier 1 (core context, ~200 tokens), Tier 2 (agent-specific patterns, ~300 tokens), Tier 3 (task-relevant results, ~500 tokens). Plus a pattern pre-fetch step that promotes relevant Tier 2 patterns to the front of the context window before the full load.
+
+**Why it matters:** Most frameworks either load everything (context bloat) or nothing (no continuity). Vespyr's progressive loading gives the agent exactly what it needs — relevant past decisions, patterns, and risks — without flooding the context window.
+
+**What others do:** BMAD uses file-based memory but loads it monolithically. ECC and Ruflo have no persistent memory layer.
+
+---
+
+## 📚 References
+
+- **Phase Table** — `.claude/references/phase-table.md` — canonical 11-phase pipeline
+- **Glossary** — `.claude/references/glossary.md` — locked terminology (no synonyms)
+- **Agent Contracts** — `.claude/references/agent-contracts.md` — owns vs. does NOT own per agent

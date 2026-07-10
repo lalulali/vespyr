@@ -27,14 +27,27 @@
 | **Total new** | **22** | **18** | **3** | |
 | **Grand total** | **43** | **42** | **10** | |
 
-### Deferred to v2.3+ (critic consortium)
+### Deferred to v2.3+ (F0.25-F0.28 Critic Infrastructure)
 
-| Item | Count | Why |
+These items were originally planned for Phase 0 (v2.0) but deferred because no critic personas exist until v2.2. The infrastructure has no consumers until then.
+
+| Item | What it does | Why deferred |
 |---|---|---|
-| Critic personas (@research-critic, @code-critic, @ux-critic, @doc-critic) | 4 | Depends on critic infrastructure (F0.23-F0.28) which is deferred. |
-| /critic-review skill | 1 | Same. |
-| Multi-agent patterns reference | 1 | Same. |
-| Domain rubrics | 5 | Same. |
+| F0.25 — Multi-agent patterns reference | A `.agents/references/multi-agent-patterns.md` documenting structured interaction patterns between agents (critic-review, peer-review, consensus, escalation, handoff). Used by `/critic-review` and the critic consortium. | No critics exist to use it. |
+| F0.26 — `/critic-review` skill | A reusable skill that runs a critic agent against any artifact (PRD, ADR, code, doc) and produces a structured findings report with severity, rationale, and suggested fix. Independent of which critic persona invokes it. | Requires F0.25 (patterns) and F0.27 (rubrics) as prerequisites. |
+| F0.27 — Domain rubrics (5) | Five domain-specific evaluation rubrics that critic agents load: (1) Product Rubric — strategic alignment, JTBD, scope creep; (2) Architecture Rubric — ADR quality, trade-off documentation, reversibility; (3) Code Rubric — correctness, security, test coverage, performance; (4) UX Rubric — accessibility, usability, design system compliance; (5) Documentation Rubric — completeness, accuracy, readability. | Criticism without rubrics is opinion disguised as insight. Rubrics must be battle-tested before scaling to 4 critics. |
+| F0.28 — `patterns:` and `critics:` frontmatter | Extensions to the v2 frontmatter schema: `patterns:` lists which multi-agent patterns this agent participates in; `critics:` lists which critic personas review this agent's output. Enables automated critic routing. | Round-table and router surface must exist first (Phase 2). |
+
+**Dependency chain:** F0.27 (rubrics) → F0.26 (critic-review skill) → F0.25 (patterns) → F0.28 (frontmatter). All four must ship together in v2.3+.
+
+**Critic personas** (@research-critic, @code-critic, @ux-critic, @doc-critic) are 4 personas that depend on this infrastructure. They're defined in this file's T1 section but gated behind F0.25-F0.28 completion.
+
+| Critic persona | Reviews output of | Rubric used |
+|---|---|---|
+| `@research-critic` | @researcher, @user-researcher, @ux-researcher | Product Rubric |
+| `@code-critic` | @developer | Code Rubric |
+| `@ux-critic` | @product-designer | UX Rubric |
+| `@doc-critic` | @technical-writer | Documentation Rubric |
 
 ### Persona gating
 

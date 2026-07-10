@@ -11,7 +11,10 @@
   ],
   "scripts": {
     "test": "node --test tests/test_cli.js",
-    "sync-docs": "node bin/cli.js --sync-docs"
+    "sync-docs": "node bin/cli.js --sync-docs",
+    "validate:frontmatter": "node .agents/scripts/validate_frontmatter.js",
+    "worktree:create": "node .agents/scripts/worktree.js create",
+    "worktree:clean": "node .agents/scripts/worktree.js clean"
   },
   "keywords": [
     "ai",

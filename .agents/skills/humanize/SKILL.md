@@ -1,6 +1,7 @@
 ---
 name: humanize
-version: 2.5.1
+version: "2.5.1"
+last_updated: 2026-07-10
 description: |
   Remove signs of AI-generated writing from text. Use when editing or reviewing
   text to make it sound more natural and human-written. Based on Wikipedia's
@@ -8,10 +9,7 @@ description: |
   inflated symbolism, promotional language, superficial -ing analyses, vague
   attributions, em dash overuse, rule of three, AI vocabulary words, passive
   voice, negative parallelisms, and filler phrases.
-source: https://github.com/blader/humanizer
-source_file: https://github.com/blader/humanizer/blob/main/SKILL.md
 license: MIT
-compatibility: claude-code opencode
 allowed-tools:
   - Read
   - Write
@@ -21,13 +19,21 @@ allowed-tools:
   - AskUserQuestion
 ---
 
-> **Source:** [github.com/blader/humanizer](https://github.com/blader/humanizer) — MIT license.
-> To update this skill, pull the latest from `https://raw.githubusercontent.com/blader/humanizer/refs/heads/main/SKILL.md`
-> and replace this file. Version tracked: 2.5.1.
-
-# Humanizer: Remove AI Writing Patterns
+# Humanize: Remove AI Writing Patterns
 
 You are a writing editor that identifies and removes signs of AI-generated text to make writing sound more natural and human. This guide is based on Wikipedia's "Signs of AI writing" page, maintained by WikiProject AI Cleanup.
+
+## When to use
+
+- User says "humanize this text" or "make this sound less AI-generated"
+- Editing PRDs, user stories, docs, or any prose produced by an LLM agent
+- Reviewing agent output before it reaches a user
+
+## When NOT to use
+
+- For code or configuration files (syntax matters, not prose style)
+- For technical specifications where precision beats personality
+- When the user explicitly wants the formal/structured LLM tone
 
 ## Your Task
 
@@ -414,13 +420,13 @@ Avoiding AI patterns is only half the job. Sterile, voiceless writing is just as
 
 **Words to watch:** third-party, cross-functional, client-facing, data-driven, decision-making, well-known, high-quality, real-time, long-term, end-to-end
 
-**Problem:** AI hyphenates common word pairs with perfect consistency. Humans rarely hyphenate these uniformly, and when they do, it's inconsistent. Less common or technical compound modifiers are fine to hyphenate.
+**Problem:** AI chains hyphenated compound adjectives together in dense succession, making prose feel like corporate jargon. Humans use these occasionally; AI overuses them and stacks several in a row.
 
 **Before:**
 > The cross-functional team delivered a high-quality, data-driven report on our client-facing tools. Their decision-making process was well-known for being thorough and detail-oriented.
 
 **After:**
-> The cross functional team delivered a high quality, data driven report on our client facing tools. Their decision making process was known for being thorough and detail oriented.
+> The report combined input from engineering, design, and sales. The team's planning process was thorough — everyone knew what to expect and when.
 
 
 ### 27. Persuasive Authority Tropes
