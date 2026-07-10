@@ -242,6 +242,61 @@ The example is a deliberately trivial project ("a CLI todo list") — the point 
 - [ ] File bugs found during dogfood as issues on GitHub
 - [ ] Publish the dogfood artifacts as a second worked example alongside the CLI todo list
 
+### Success metrics
+
+These are quantitative pass/fail criteria. The dogfood project is NOT complete until every metric is measured and the human-in-the-loop gate (below) confirms the results.
+
+| # | Metric | Target | How measured |
+|---|---|---|---|
+| M1 | **Pipeline step completion** | 10/10 steps (phases -1 through 9) | Orchestrator state: all phases marked complete |
+| M2 | **Squad diversity** | ≥3 squads exercised | Squad switch log in `loop-state.json` |
+| M3 | **Agent invocation breadth** | ≥15 of 21 agents invoked during the pipeline | `delegation-log.json` agent list |
+| M4 | **Delegation rate** | ≥70% of I/O calls delegated to sub-agents | `delegation_audit.js --since 14d` |
+| M5 | **Self-learning output** | ≥1 pattern promoted from episodes | Episodes count in `self_learn scan` output; at least 1 promoted |
+| M6 | **QA hard gate exercised** | `qa-signoff.md` blocked advancement at least once | Orchestrator log shows a `BLOCKED` state before `qa-signoff.md` |
+| M7 | **Loop engineering** | `/goal` converged within ≤10 iterations; 1 automation produced a triage file | `loop-state.json` + `artifacts/output/00-discovery/triage/` |
+| M8 | **Latency budget** | All 6 session-start operations under budget (≤1000ms total per README §13) | `test_session_latency.js` exit 0 |
+| M9 | **Bug discovery** | ≥5 integration bugs filed as GitHub issues | GitHub Issues count, label `dogfood` |
+| M10 | **Time-to-completion** | Informational baseline — no target, just measured | Wall clock: `validate-idea` start → `/iterate` end |
+
+### Human-in-the-loop validation gate
+
+> **⛔ STOP. Do not mark F4.16 complete without this step.**
+
+After the automated pipeline runs, Chris (maintainer) must manually review the dogfood artifacts and confirm:
+
+- [ ] **Artifact quality**: every output file is coherent, not LLM slop. The PRD reads like a real PRD. The ADR is arguable. The QA report is not a form letter.
+- [ ] **Metrics honest**: M1-M10 numbers are measured, not estimated. No metric was gamed.
+- [ ] **Integration bugs filed**: every blocker and rough edge is a GitHub issue. No "I'll remember this" bugs.
+- [ ] **Self-learning sample**: the promoted pattern is reviewed, edited if needed, and confirmed as a pattern worth reusing.
+- [ ] **Go/No-Go on metrics**: for each metric M1-M10, confirm PASS or FAIL with a 1-line note why. Failures are bugs, not excuses to lower the target.
+
+Write the validation sign-off to `artifacts/output/dogfood/validation-signoff.md`:
+```markdown
+# Dogfood Validation Sign-off
+**Date:** YYYY-MM-DD
+**Reviewer:** Chris
+**Result:** GO / NO-GO / CONDITIONAL
+
+## Metric review
+| # | Metric | Result | Note |
+|---|--------|--------|------|
+| M1 | ... | PASS/FAIL | ... |
+
+## Artifact quality review
+...
+
+## Filed issues
+- #N
+- #N+1
+...
+
+## Decision
+[GO | NO-GO | CONDITIONAL — if CONDITIONAL, list what must be fixed]
+```
+
+Only after sign-off with **GO** or **CONDITIONAL** (with conditions satisfied) is F4.16 considered done.
+
 ## F4.17-F4.19 — New-user onboarding
 
 **Problem:** After all 3 releases ship, a new user's first 10 minutes are undefined. `npx vespyr` → then what? The README rewrite (F4.11) lists sections but doesn't specify the onboarding flow. The `init --example` command exists but there's no guided path from "just installed" to "first skill completed."
@@ -294,7 +349,7 @@ The example is a deliberately trivial project ("a CLI todo list") — the point 
 - [ ] `README.md` reflects v2.0 architecture (7 themes, identity section, hooks, MCP, modules)
 - [ ] `AGENTS.md` (canonical) surfaces all new contracts
 - [ ] `ROADMAP.md` no longer has the 35-harness table
-- [ ] **Dogfood:** full pipeline exercised end-to-end on a real project; integration bugs filed as GitHub issues
+- [ ] **Dogfood:** full pipeline exercised end-to-end on a real project; all 10 metrics (M1-M10) measured; integration bugs filed as GitHub issues; **human-in-the-loop validation sign-off** completed in `validation-signoff.md`
 - [ ] **Onboarding:** web guide published; `npx vespyr doctor` runs health check; README has "Last verified" dates
 
 ## Risks
