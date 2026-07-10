@@ -188,23 +188,17 @@ Vespyr is defined by three differentiators that no other multi-agent framework c
 
 **Why it matters:** This keeps reasoning agents' context windows lean (~1,000 tokens instead of 15,000+), saving 85-95% on API costs. It also forces structured output — sub-agents produce consistent formatting, not ad-hoc diffs.
 
-**What others do:** BMAD and Ruflo allow direct I/O; context bloat is managed by the user manually. ECC uses a single-agent model with no delegation pattern.
-
 ### 2. Socratic methodology depth
 
 **What it is:** Every reasoning agent has a `## Socratic Stance` declaring what it challenges, what "change my mind" looks like, and when to escalate. The `/grill-me` skill runs a 7+1-branch decision tree that stress-tests every assumption before a single line of code is written.
 
 **Why it matters:** Without structured challenge, agent teams converge on consensus too quickly — missing edge cases, architectural conflicts, and hidden assumptions. Vespyr bakes challenge into the persona layer, not just a single skill.
 
-**What others do:** BMAD has mentors but no systematic challenge framework. Ruflo and ECC have no challenge infrastructure.
-
 ### 3. 3-tier progressive memory
 
 **What it is:** Memory loads in three tiers: Tier 1 (core context, ~200 tokens), Tier 2 (agent-specific patterns, ~300 tokens), Tier 3 (task-relevant results, ~500 tokens). Plus a pattern pre-fetch step that promotes relevant Tier 2 patterns to the front of the context window before the full load.
 
 **Why it matters:** Most frameworks either load everything (context bloat) or nothing (no continuity). Vespyr's progressive loading gives the agent exactly what it needs — relevant past decisions, patterns, and risks — without flooding the context window.
-
-**What others do:** BMAD uses file-based memory but loads it monolithically. ECC and Ruflo have no persistent memory layer.
 
 ---
 
