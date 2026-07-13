@@ -31,13 +31,13 @@
 ### Step 0: Graph freshness check
 
 After reading instincts.md (or any context-loading step), invoke:
-@executor node .opencode/scripts/auto_graph.js check
+@executor node .agents/scripts/auto_graph.js check
 
 Parse the one-line response:
 - [OK] both — no action
-- [STALE] code — run node .opencode/scripts/auto_graph.js build code
-- [STALE] doc — run node .opencode/scripts/auto_graph.js build doc
-- [STALE] both — run node .opencode/scripts/auto_graph.js build both
+- [STALE] code — run node .agents/scripts/auto_graph.js build code
+- [STALE] doc — run node .agents/scripts/auto_graph.js build doc
+- [STALE] both — run node .agents/scripts/auto_graph.js build both
 
 After any rebuild, inject into the loaded context: "Graph rebuilt: {files_indexed} code, {docs_indexed} doc files."
 ```
@@ -66,8 +66,8 @@ After any rebuild, inject into the loaded context: "Graph rebuilt: {files_indexe
 ## Graph Query Contract
 
 Before proposing ANY structural change:
-- @executor node .opencode/scripts/graph_query.js code blast-radius <target-file>
-- @executor node .opencode/scripts/graph_query.js doc adr-constrains <module>
+- @executor node .agents/scripts/graph_query.js code blast-radius <target-file>
+- @executor node .agents/scripts/graph_query.js doc adr-constrains <module>
 
 Emit the result as a "## Blast Radius" section in the ADR. Cost: ~1 query, ~50 tokens output. Without the graph: read every file in src/ and grep for the target — ~5000+ tokens.
 ```
@@ -77,8 +77,8 @@ Emit the result as a "## Blast Radius" section in the ADR. Cost: ~1 query, ~50 t
 ## Graph Query Contract
 
 Before breaking the architecture into tasks:
-- @executor node .opencode/scripts/graph_query.js code summary — get topology
-- For each candidate parallel task: @executor node .opencode/scripts/graph_query.js code blast-radius <file> — verify the tasks touch non-overlapping files (parallelism check)
+- @executor node .agents/scripts/graph_query.js code summary — get topology
+- For each candidate parallel task: @executor node .agents/scripts/graph_query.js code blast-radius <file> — verify the tasks touch non-overlapping files (parallelism check)
 
 Emit a "## Topology" section in the execution plan citing the graph stats.
 ```
@@ -89,7 +89,7 @@ Emit a "## Topology" section in the execution plan citing the graph stats.
 
 For every PR review:
 - Identify files changed (git diff --name-only)
-- For each: @executor node .opencode/scripts/graph_query.js code blast-radius <file>
+- For each: @executor node .agents/scripts/graph_query.js code blast-radius <file>
 - Flag any change with blast_size > 5 as a "high-blast-radius" finding — these deserve extra scrutiny
 
 This catches refactors that miss dependent callers.
@@ -100,7 +100,7 @@ This catches refactors that miss dependent callers.
 ## Graph Query Contract
 
 Before any refactor (rename, signature change, file move):
-- @executor node .opencode/scripts/graph_query.js code dependents <target-file>
+- @executor node .agents/scripts/graph_query.js code dependents <target-file>
 - Update every file in the response before committing
 
 Cost: 1 query. Without it: break the build, then re-grep and fix in a second pass (~3x the tokens).
@@ -133,7 +133,7 @@ Cost: 1 query. Without it: break the build, then re-grep and fix in a second pas
 ### Step 0.5: Telemetry snapshot
 
 After the graph check, invoke:
-@executor node .opencode/scripts/telemetry_surface.js session
+@executor node .agents/scripts/telemetry_surface.js session
 
 Inject the output into the loaded context (max 20 lines) under a "## Recent Telemetry" heading. This gives the agent cost awareness before it starts spending tokens.
 ```

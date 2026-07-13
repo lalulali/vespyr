@@ -4,7 +4,7 @@ A platform-agnostic, file-based multi-agent system configured to streamline prod
 
 > [!IMPORTANT]
 > **Harness Directory Adaptation**
-> Depending on your active AI assistant harness, the base configuration directory (originally `.opencode/`) should be renamed or adapted to your harness's expected dotfolder. Throughout this document, we refer to this base folder as `.agents`. Common names include:
+> Depending on your active AI assistant harness, the base configuration directory should be renamed or adapted to your harness's expected dotfolder. Throughout this document, we refer to this base folder as `.agents`. Common names include:
 > - **Kiro**: `.kiro/`
 > - **OpenCode**: `.opencode/`
 > - **Antigravity**: `.agents/`
@@ -149,7 +149,7 @@ To maximize reliability, reduce over-engineering, and enforce high-fidelity exec
 *   **Surface Trade-Offs**: Present multiple potential paths (e.g., in design, architecture, research, or testing) with their pros and cons. Never select a path silently.
 *   **Push Back When Warranted**: If a simpler path, lighter design, or more direct method exists to solve the problem, suggest it. Push back on unnecessary overhead.
 *   **Pause on Ambiguity & Active Discussion**: If any inputs (requirements, user feedback, APIs) are unclear, stop immediately, identify the confusion, and ask the user or squad lead. In `semi-autonomous` mode, if the user raises questions or wants to discuss requirements, features, or design, the agent swarm must finish the discussion and **MUST NOT** proceed to the next phase or step without receiving explicit user confirmation/approval.
-*   **Honesty & Fact-Checking (No Hallucination)**: If you do not know the answer or lack information, honestly say "I don't know" or "I am not sure" and ask relevant follow-up questions, or search the internet to find the resources needed to understand the topic. Stick strictly to facts and do not hallucinate. When using information retrieved from the internet, provide clear citations and footnotes so the user can easily confirm and fact-check the source. (Note: This is strictly for fact-checking validation and does not limit your design or implementation creativity).
+*   **Honesty & Fact-Checking (No Hallucination)**: If you do not know the answer or lack information, honestly say "I don't know" or "I am not sure" and ask relevant follow-up questions, or search the internet to find the resources needed to understand the topic. When using information from any real source (web, books, papers, code, interviews, data, benchmarks, frameworks), provide inline citations `[N]` with footnotes so the user can validate. See `.agents/references/citation-format.md` for the format. If you cannot find the source, say "Source: unverified" — never fabricate a citation. This expands the earlier internet-only policy to cover all sources and is enforced per-agent via the `## Citation Protocol` section.
 
 ### 2. Simplicity First
 *   **Minimum Complexity**: Build/write/design the minimum necessary to fulfill the requirements. No speculative engineering or "just-in-case" abstractions.

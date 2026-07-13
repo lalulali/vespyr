@@ -72,7 +72,7 @@ This work is positioned as a **separate pre-Phase 0 phase** (rather than absorbe
 - **P0.3** — Per-harness adapter design (~2h): extend `bin/install.js` with a Phase 0 stub for both harnesses (full implementation is v2.1 Phase 2 F2.3)
 - **P0.4** — Smoke-test plan (~2h): design the "does this install work?" check for each new harness, including the OpenClaw root-level verification
 
-**OpenClaw no-dotfolder deployment model.** OpenClaw expects `skills/` at the project root, not `.opencode/skills/` or similar. This conflicts with Vespyr's default per-harness dotfolder convention. The pre-Phase 0 adapter must answer: (a) does Vespyr mirror skills to the root on install, (b) does OpenClaw read from a configurable path, or (c) does Vespyr add a `.openclaw` symlink at the root? Each option has different security implications:
+**OpenClaw no-dotfolder deployment model.** OpenClaw expects `skills/` at the project root, not `.agents/skills/` or similar. This conflicts with Vespyr's default per-harness dotfolder convention. The pre-Phase 0 adapter must answer: (a) does Vespyr mirror skills to the root on install, (b) does OpenClaw read from a configurable path, or (c) does Vespyr add a `.openclaw` symlink at the root? Each option has different security implications:
 
 - **Mirror (a):** skills exist in two places post-install → drift risk, double the disk footprint
 - **Configurable path (b):** OpenClaw reads from `artifacts/memory/` or wherever Vespyr stores them → requires OpenClaw to support custom paths, which may or may not be supported
@@ -155,9 +155,9 @@ npx create-vespyr
     Enter a path
 
 Installing Vespyr for opencode with the startup squad...
-✓ Created .opencode/agents/ (21 agents)
-✓ Created .opencode/skills/
-✓ Created .opencode/templates/
+✓ Created .agents/agents/ (21 agents)
+✓ Created .agents/skills/
+✓ Created .agents/templates/
 ✓ Created artifacts/memory/
 ✓ Created artifacts/output/
 ✓ Created AGENTS.md

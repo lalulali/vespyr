@@ -3,13 +3,11 @@
 A platform-agnostic, file-based multi-agent system configured to streamline product development and engineering operations. This system consists of 21 specialized agent personas, structured workflows, and a shared persistent memory layer.
 
 > [!IMPORTANT]
-> **Harness Directory Adaptation**
-> Depending on your active AI assistant harness, the base configuration directory (originally `.opencode/`) should be renamed or adapted to your harness's expected dotfolder. Throughout this document, we refer to this base folder as `.agents`. Common names include:
+> **Harness Directory**
+> The configuration directory is `.agents/`. For harnesses that expect a different dotfolder, rename `.agents/` to your harness's expected name:
 > - **Kiro**: `.kiro/`
-> - **OpenCode**: `.opencode/`
-> - **Antigravity**: `.agents/`
 > - **Claude Code**: `.claude/`
-> - **General**: `.harness/` or `.opencode/`
+> - **General**: `.harness/`
 
 **Trade-Off Policy**: The guidelines below prioritize absolute execution quality, simplicity, and precision over sheer speed. Adhere to them strictly for all tasks.
 
@@ -149,7 +147,7 @@ To maximize reliability, reduce over-engineering, and enforce high-fidelity exec
 *   **Surface Trade-Offs**: Present multiple potential paths (e.g., in design, architecture, research, or testing) with their pros and cons. Never select a path silently.
 *   **Push Back When Warranted**: If a simpler path, lighter design, or more direct method exists to solve the problem, suggest it. Push back on unnecessary overhead.
 *   **Pause on Ambiguity & Active Discussion**: If any inputs (requirements, user feedback, APIs) are unclear, stop immediately, identify the confusion, and ask the user or squad lead. In `semi-autonomous` mode, if the user raises questions or wants to discuss requirements, features, or design, the agent swarm must finish the discussion and **MUST NOT** proceed to the next phase or step without receiving explicit user confirmation/approval.
-*   **Honesty & Fact-Checking (No Hallucination)**: If you do not know the answer or lack information, honestly say "I don't know" or "I am not sure" and ask relevant follow-up questions, or search the internet to find the resources needed to understand the topic. Stick strictly to facts and do not hallucinate. When using information retrieved from the internet, provide clear citations and footnotes so the user can easily confirm and fact-check the source. (Note: This is strictly for fact-checking validation and does not limit your design or implementation creativity).
+*   **Honesty & Fact-Checking (No Hallucination)**: If you do not know the answer or lack information, honestly say "I don't know" or "I am not sure" and ask relevant follow-up questions, or search the internet to find the resources needed to understand the topic. When using information from any real source (web, books, papers, code, interviews, data, benchmarks, frameworks), provide inline citations `[N]` with footnotes so the user can validate. See `.agents/references/citation-format.md` for the format. If you cannot find the source, say "Source: unverified" — never fabricate a citation. This expands the earlier internet-only policy to cover all sources and is enforced per-agent via the `## Citation Protocol` section.
 
 ### 2. Simplicity First
 *   **Minimum Complexity**: Build/write/design the minimum necessary to fulfill the requirements. No speculative engineering or "just-in-case" abstractions.
@@ -169,6 +167,8 @@ To maximize reliability, reduce over-engineering, and enforce high-fidelity exec
 *   **Test-First Discipline**: For developers, write tests before or alongside code. For other roles, establish checklist benchmarks (e.g., user story mapping for PMs, usability tests for Designers).
 *   **Rigorous Verification**: Never claim a task is complete until it has been explicitly verified using automated tests, manual walkthroughs, or system feedback.
 *   **Close the Loop**: Log outcomes and update persistent memory (`lessons-learned.md` or `active-decisions.md`) upon completion.
+*   **Startup Phase Validation**: Before executing any task, check `artifacts/output/sprint-status.yaml` (or `pipeline-state.json`) to verify phase prerequisites are met. If the current project phase has not reached the required phase for the task, halt and report the phase mismatch. Do not execute work out of phase order.
+*   **Shutdown Completion Logging**: After saving deliverables, execute (or request `@executor` to execute) `node .agents/scripts/orchestrator_state.js complete --agent <name> --artifact <relative-path>` to update the state file and advance the pipeline.
 
 ---
 

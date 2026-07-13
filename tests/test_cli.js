@@ -8,7 +8,6 @@ const {
   parseFlags,
   parseFrontmatter,
   detectState,
-  detectUnlinkedHarnesses,
   createLinkOrCopy,
   transpileCopilotYAML,
   transpileCursorMDC,
@@ -379,7 +378,7 @@ describe('Test 11: handleConflict()', () => {
   });
 });
 
-describe('Test 5: detectState() / detectUnlinkedHarnesses()', () => {
+describe('Test 5: detectState()', () => {
   let tmpDir;
 
   beforeEach(() => {
@@ -400,14 +399,13 @@ describe('Test 5: detectState() / detectUnlinkedHarnesses()', () => {
     assert.strictEqual(detectState(tmpDir), 'installed');
   });
 
-  it('should treat legacy .opencode dir as fresh (no more migrate state)', () => {
+  it('should detect migration needed', () => {
     fs.mkdirSync(path.join(tmpDir, '.opencode'));
-    assert.strictEqual(detectState(tmpDir), 'fresh');
+    assert.strictEqual(detectState(tmpDir), 'migrate');
   });
 
-  it('should prioritize installed over any harness folders', () => {
+  it('should prioritize installed over migrate', () => {
     fs.mkdirSync(path.join(tmpDir, '.opencode'));
-    fs.mkdirSync(path.join(tmpDir, '.kiro', 'steering'), { recursive: true });
     fs.mkdirSync(path.join(tmpDir, '.agents'));
     fs.writeFileSync(path.join(tmpDir, '.agents', '.vespyr-version'), JSON.stringify({ version: '1.7.0' }));
     assert.strictEqual(detectState(tmpDir), 'installed');
@@ -416,29 +414,6 @@ describe('Test 5: detectState() / detectUnlinkedHarnesses()', () => {
   it('should detect fresh if .agents folder exists but has no .vespyr-version file', () => {
     fs.mkdirSync(path.join(tmpDir, '.agents'));
     assert.strictEqual(detectState(tmpDir), 'fresh');
-  });
-
-  it('detectUnlinkedHarnesses returns empty when nothing exists', () => {
-    assert.deepStrictEqual(detectUnlinkedHarnesses(tmpDir), []);
-  });
-
-  it('detectUnlinkedHarnesses returns empty when all targets are symlinks', () => {
-    const agentsDir = path.join(tmpDir, '.agents');
-    fs.mkdirSync(agentsDir, { recursive: true });
-    fs.symlinkSync(agentsDir, path.join(tmpDir, '.opencode'), 'dir');
-    fs.symlinkSync(agentsDir, path.join(tmpDir, '.claude'), 'dir');
-    assert.deepStrictEqual(detectUnlinkedHarnesses(tmpDir), []);
-  });
-
-  it('detectUnlinkedHarnesses flags real directories as unlinked', () => {
-    const agentsDir = path.join(tmpDir, '.agents');
-    fs.mkdirSync(agentsDir, { recursive: true });
-    fs.mkdirSync(path.join(tmpDir, '.opencode'));
-    fs.mkdirSync(path.join(tmpDir, '.kiro', 'steering'), { recursive: true });
-    fs.writeFileSync(path.join(tmpDir, '.windsurfrules'), 'GUARDRAILS');
-    const unlinked = detectUnlinkedHarnesses(tmpDir);
-    const ids = unlinked.map((s) => s.id).sort();
-    assert.deepStrictEqual(ids, ['kiro', 'opencode', 'windsurf-rules']);
   });
 });
 
@@ -550,15 +525,14 @@ describe('Test 8: bootstrapRootDocs()', () => {
 
   beforeEach(() => {
     tmpDir = makeTempDir();
-    fs.mkdirSync(path.join(tmpDir, '.agents', 'templates'), { recursive: true });
+    fs.mkdirSync(path.join(tmpDir, '.agents', 'commands'), { recursive: true });
 
-    fs.writeFileSync(
-      path.join(tmpDir, '.agents', 'templates', 'AGENTS.md.canonical'),
-      '# {DOC_LABEL}Vespyr — Test\n\n' +
-      '<!-- BEGIN: ROOT_ONLY -->ROOT-ONLY-CONTENT<!-- END: ROOT_ONLY -->\n\n' +
-      'Path: [.harness-folder]/agents/\n' +
-      'Self: {SELF_REF}\n'
-    );
+    fs.writeFileSync(path.join(tmpDir, '.agents', 'commands', 'scaffold-agents.md'),
+      '# {Project Name} — Vespyr\n\nPath: .agents/agents/\n');
+    fs.writeFileSync(path.join(tmpDir, '.agents', 'commands', 'scaffold-agent.md'),
+      '# Vespyr\n\nPath: .agents/agents/\n');
+    fs.writeFileSync(path.join(tmpDir, '.agents', 'commands', 'scaffold-claude.md'),
+      '# CLAUDE.md — Vespyr\n\nPath: .claude/agents/\n');
   });
 
   afterEach(() => {
@@ -588,29 +562,19 @@ describe('Test 8: bootstrapRootDocs()', () => {
     assert.strictEqual(fs.readFileSync(path.join(tmpDir, 'AGENTS.md'), 'utf8'), 'existing');
   });
 
-  it('should substitute harness directory in AGENTS.md', () => {
+  it('should contain .agents/ references in AGENTS.md', () => {
     bootstrapRootDocs(tmpDir, 'test-project', []);
 
     const agents = fs.readFileSync(path.join(tmpDir, 'AGENTS.md'), 'utf8');
     assert.ok(agents.includes('.agents/'));
-    assert.ok(!agents.includes('[.harness-folder]'));
+    assert.ok(!agents.includes('.opencode/'));
   });
 
-  it('should include ROOT_ONLY block only in AGENTS.md', () => {
-    bootstrapRootDocs(tmpDir, 'test-project', []);
+  it('should replace {Project Name} in AGENTS.md', () => {
+    bootstrapRootDocs(tmpDir, 'my-app', []);
 
     const agents = fs.readFileSync(path.join(tmpDir, 'AGENTS.md'), 'utf8');
-    const agent = fs.readFileSync(path.join(tmpDir, 'agent.md'), 'utf8');
-
-    assert.ok(agents.includes('ROOT-ONLY-CONTENT'));
-    assert.ok(!agent.includes('ROOT-ONLY-CONTENT'));
-  });
-
-  it('should render CLAUDE.md title with DOC_LABEL prefix', () => {
-    bootstrapRootDocs(tmpDir, 'test-project', ['claude']);
-
-    const claude = fs.readFileSync(path.join(tmpDir, 'CLAUDE.md'), 'utf8');
-    assert.ok(claude.startsWith('# CLAUDE.md Vespyr — Test'));
+    assert.ok(agents.includes('my-app'));
   });
 });
 
@@ -647,7 +611,7 @@ describe('Test 10: parseFlags()', () => {
   it('should handle no flags', () => {
     const result = parseFlags(['node', 'cli.js']);
     assert.deepStrictEqual(result, {
-      dryRun: false, yes: false, target: null, harnesses: [], model: null, syncDocs: false, version: false, help: false,
+      dryRun: false, yes: false, target: null, harnesses: [], version: false, help: false,
     });
   });
 

@@ -30,18 +30,18 @@ const AGENT_PROFILES = {
     max_results: 10
   },
   'product-manager': {
-    tier2: ['project-context.md', 'active-decisions.md', 'lessons-learned.md'],
-    domains: ['product', 'feature', 'requirement', 'user story', 'roadmap', 'priority', 'scope', 'metric', 'kpi'],
+    tier2: ['project-context.md', 'active-decisions.md', 'lessons-learned.md', 'blockers-and-risks.md', 'agent-notes/product-manager-notes.md'],
+    domains: ['product', 'feature', 'requirement', 'user story', 'roadmap', 'priority', 'scope', 'metric', 'kpi', 'timeline', 'blocker', 'risk', 'milestone', 'sprint', 'stakeholder', 'delivery'],
+    max_results: 10
+  },
+  'product-designer': {
+    tier2: ['project-context.md', 'active-decisions.md', 'patterns-and-conventions.md'],
+    domains: ['design', 'ux', 'ui', 'wireframe', 'screen', 'interaction', 'accessibility', 'prototype', 'design system'],
     max_results: 10
   },
   'tech-lead': {
     tier2: ['active-decisions.md', 'patterns-and-conventions.md', 'blockers-and-risks.md', 'agent-notes/tech-lead-notes.md'],
     domains: ['task', 'estimate', 'sprint', 'dependency', 'risk', 'execution', 'plan', 'milestone'],
-    max_results: 10
-  },
-  'product-manager': {
-    tier2: ['project-context.md', 'active-decisions.md', 'blockers-and-risks.md', 'agent-notes/product-manager-notes.md'],
-    domains: ['timeline', 'blocker', 'risk', 'milestone', 'sprint', 'stakeholder', 'delivery', 'scope'],
     max_results: 10
   },
   founder: {
@@ -159,31 +159,28 @@ function parseSections(content, filename) {
   let currentSection = null;
   let currentLines = [];
 
-  function finalizeSection(section, linesList) {
-    section.body = linesList.join('\n');
-    section.isResolved = section.body.includes('**Status:** resolved') ||
-                         section.body.includes('**Status:** superseded') ||
-                         section.body.includes('**Status:** archived');
-  }
-
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     if (line.startsWith('### ')) {
       if (currentSection) {
-        finalizeSection(currentSection, currentLines);
+        currentSection.body = currentLines.join('\n');
         sections.push(currentSection);
       }
       const header = line.replace(/^###\s+/, '').trim();
       const statusMatch = header.match(/\[date:\s*(\d{4}-\d{2}-\d{2})\]/);
       const date = statusMatch ? statusMatch[1] : null;
       const isCritical = header.includes('[CRITICAL]');
+      const isResolved = content.substring(content.indexOf(line)).includes('**Status:** resolved') ||
+                         content.substring(content.indexOf(line)).includes('**Status:** superseded') ||
+                         content.substring(content.indexOf(line)).includes('**Status:** archived');
 
       currentSection = {
         header,
         file: filename,
         date,
         isCritical,
-        isResolved: false,
+        isResolved,
+        lines: [],
         body: ''
       };
       currentLines = [line];
@@ -193,7 +190,7 @@ function parseSections(content, filename) {
   }
 
   if (currentSection) {
-    finalizeSection(currentSection, currentLines);
+    currentSection.body = currentLines.join('\n');
     sections.push(currentSection);
   }
 

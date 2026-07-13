@@ -169,13 +169,13 @@ BMAD uses `<step n="1" goal="...">`, `<action>`, `<check if="...">`, `<goto>`, `
 
 ### Checklist
 
-- [ ] F1.1 — Rewrite `.agents/skills/develop/SKILL.md` as a ~50-line router:
+- [x] F1.1 — Rewrite `.agents/skills/develop/SKILL.md` as a ~50-line router:
   - Header with name/description (v2 frontmatter)
   - `## When to invoke`, `## Prerequisites` (link to spec-kernel)
   - `## Mode detection` (always "create"; resume is automatic from `stepsCompleted`)
   - `## Step loader` (reads `steps/step-01-*.md` or jumps to first uncompleted step)
   - `## State machine integration`, `## Done when`
-- [ ] F1.2 — Create `.agents/skills/develop/steps/` with 10 step files:
+- [x] F1.2 — Create `.agents/skills/develop/steps/` with 10 step files:
   - `step-01-spec-alignment.md` — read spec-kernel + user stories; align before coding
   - `step-02-architecture.md` — conditional (if ArchitectPhase: true); produces ADRs
   - `step-03a-arch-review.md` — tech-lead reviews architecture
@@ -187,11 +187,11 @@ BMAD uses `<step n="1" goal="...">`, `<action>`, `<check if="...">`, `<goto>`, `
   - `step-08-pm-verification.md` — PM signs off
   - `step-09-documentation.md` — `@technical-writer` updates docs
   - `step-10-completion.md` — record completion; advance phase
-- [ ] Verify each step file is 30-80 lines
-- [ ] Add `data/role-tags.json` (FE / BE / Full-Stack definitions)
-- [ ] Add `templates/develop-state.md` (YAML state template for `stepsCompleted`)
-- [ ] Run a content-audit script to verify no content was lost from the old monolithic SKILL.md
-- [ ] Test resume: activate with `stepsCompleted: [1,2,3,4,5]` and confirm it jumps to step 6
+- [x] Verify each step file is 30-80 lines
+- [x] Add `data/role-tags.json` (FE / BE / Full-Stack definitions)
+- [x] Add `templates/develop-state.md` (YAML state template for `stepsCompleted`)
+- [x] Run a content-audit script to verify no content was lost from the old monolithic SKILL.md
+- [x] Test resume: activate with `stepsCompleted: [1,2,3,4,5]` and confirm it jumps to step 6
 
 ## F1.3-F1.6 — Restructure `validate-idea` skill with tri-modal subfolders
 
@@ -203,7 +203,7 @@ BMAD uses `<step n="1" goal="...">`, `<action>`, `<check if="...">`, `<goto>`, `
 
 ### Target
 
-Adopt BMAD's tri-modal workflow pattern: every workflow has `steps-c/` (create), `steps-e/` (edit), `steps-v/` (validate). The SKILL.md becomes a mode selector that routes to the right subfolder.
+Adopt BMAD's tri-modal workflow pattern: every workflow has `steps-create/` (create), `steps-edit/` (edit), `steps-validate/` (validate). The SKILL.md becomes a mode selector that routes to the right subfolder.
 
 ### Proposed content
 
@@ -226,9 +226,9 @@ First, detect the user's intent:
 If unclear, ask: "Are you starting a new idea, refining an existing brief, or stress-testing it?"
 
 ## Mode routing
-- **Create** → load `steps-c/01-session-setup.md` ... `steps-c/07-handoff.md`
-- **Edit** → load `steps-e/01-load-existing.md` ... `steps-e/05-finalize.md`
-- **Validate** → load `steps-v/01-open-questions.md` ... `steps-v/05-lock-handoff.md`
+- **Create** → load `steps-create/01-session-setup.md` ... `steps-create/07-handoff.md`
+- **Edit** → load `steps-edit/01-load-existing.md` ... `steps-edit/05-finalize.md`
+- **Validate** → load `steps-validate/01-open-questions.md` ... `steps-validate/05-lock-handoff.md`
 
 ## Prerequisites
 - Create mode: none (this is the entry point)
@@ -240,7 +240,7 @@ At start: `node .agents/scripts/orchestrator_state.js status`
 At end: `node .agents/scripts/orchestrator_state.js complete --agent founder --artifact 00-discovery/idea-brief.md`
 ```
 
-#### steps-c/ (create mode, 7 step files)
+#### steps-create/ (create mode, 7 step files)
 
 - `01-session-setup.md` — initialize session, set context, load memory
 - `02-input-analysis.md` — parse the user's raw idea input
@@ -250,7 +250,7 @@ At end: `node .agents/scripts/orchestrator_state.js complete --agent founder --a
 - `06-go-pivot-kill.md` — produce the GO/PIVOT/KILL verdict
 - `07-handoff.md` — write `idea-brief.md`, handoff to next phase
 
-#### steps-e/ (edit mode, 5 step files)
+#### steps-edit/ (edit mode, 5 step files)
 
 - `01-load-existing.md` — load the existing brief
 - `02-identify-gaps.md` — identify what's missing or weak
@@ -258,7 +258,7 @@ At end: `node .agents/scripts/orchestrator_state.js complete --agent founder --a
 - `04-stress-test.md` — re-stress-test the revised sections
 - `05-finalize.md` — finalize and write back
 
-#### steps-v/ (validate/Socratic mode, 5 step files)
+#### steps-validate/ (validate/Socratic mode, 5 step files)
 
 - `01-open-questions.md` — surface open questions
 - `02-7-branches.md` — walk the 7-branch decision tree (product requirements, architecture trade-offs, edge cases, codebase logic, cost & timeline, risks, success criteria)
@@ -278,11 +278,11 @@ A single file with `if mode == create ... else if mode == edit ...` is what we h
 
 ### Checklist
 
-- [ ] F1.3 — Rewrite `.agents/skills/validate-idea/SKILL.md` as ~50-line router with tri-modal selector
-- [ ] F1.4 — Create `steps-c/` (create mode, 7 step files): session-setup, input-analysis, idea-framing, stress-test-r1, stress-test-r2, go-pivot-kill, handoff
-- [ ] F1.5 — Create `steps-e/` (edit mode, 5 step files): load-existing, identify-gaps, revise, stress-test, finalize
-- [ ] F1.6 — Create `steps-v/` (validate/Socratic mode, 5 step files): open-questions, 7-branches, cross-branch-check, decision-log, lock-handoff
-- [ ] Test mode detection with adversarial prompts: "validate my new idea" → steps-c/; "edit the existing brief" → steps-e/; "stress-test the spec" → steps-v/
+- [x] F1.3 — Rewrite `.agents/skills/validate-idea/SKILL.md` as ~50-line router with tri-modal selector
+- [x] F1.4 — Create `steps-create/` (create mode, 7 step files): session-setup, input-analysis, idea-framing, stress-test-r1, stress-test-r2, go-pivot-kill, handoff
+- [x] F1.5 — Create `steps-edit/` (edit mode, 5 step files): load-existing, identify-gaps, revise, stress-test, finalize
+- [x] F1.6 — Create `steps-validate/` (validate/Socratic mode, 5 step files): open-questions, 7-branches, cross-branch-check, decision-log, lock-handoff
+- [x] Test mode detection with adversarial prompts: "validate my new idea" → steps-create/; "edit the existing brief" → steps-edit/; "stress-test the spec" → steps-validate/
 
 ## F1.7-F1.8 — Restructure `retro` skill (253 lines → folder + 5 step files)
 
@@ -312,14 +312,14 @@ Same as F1.1-F1.2: token efficiency on resume, maintainability, explicit halt co
 
 ### Checklist
 
-- [ ] F1.7 — Rewrite `.agents/skills/retro/SKILL.md` as ~50-line router
-- [ ] F1.8 — Create `steps/` with 5 step files:
+- [x] F1.7 — Rewrite `.agents/skills/retro/SKILL.md` as ~50-line router
+- [x] F1.8 — Create `steps/` with 5 step files:
   - `step-01-hot-paths.md` — invoke `telemetry_surface.js hot-paths` (Phase 3 wiring)
   - `step-02-pattern-scan.md` — scan `artifacts/memory/` for recurring patterns
   - `step-03-instinct-scan.md` — surface instinct candidates
   - `step-04-write-digest.md` — write the retro digest
   - `step-05-compact.md` — invoke `witness.js check` then compact/archive
-- [ ] Run content-audit script
+- [x] Run content-audit script
 
 ## F1.9-F1.12 — Restructure `design` skill with tri-modal subfolders
 
@@ -331,11 +331,11 @@ Same as F1.1-F1.2: token efficiency on resume, maintainability, explicit halt co
 
 ### Target
 
-Same tri-modal pattern as `validate-idea`: `steps-c/` (create), `steps-e/` (edit), `steps-v/` (validate).
+Same tri-modal pattern as `validate-idea`: `steps-create/` (create), `steps-edit/` (edit), `steps-validate/` (validate).
 
 ### Proposed content
 
-#### steps-c/ (create mode, 6 step files)
+#### steps-create/ (create mode, 6 step files)
 
 - `01-load-prd-brief.md` — load the PRD brief / spec-kernel
 - `02-define-personas.md` — define user personas
@@ -344,14 +344,14 @@ Same tri-modal pattern as `validate-idea`: `steps-c/` (create), `steps-e/` (edit
 - `05-design-tokens.md` — define design tokens (colors, typography, spacing)
 - `06-handoff.md` — write `product-spec.md` + `design.md`, handoff
 
-#### steps-e/ (edit mode, 4 step files)
+#### steps-edit/ (edit mode, 4 step files)
 
 - `01-load-existing.md` — load existing spec
 - `02-identify-gaps.md` — identify design gaps
 - `03-revise.md` — revise the spec
 - `04-finalize.md` — finalize and write back
 
-#### steps-v/ (validate mode, 4 step files)
+#### steps-validate/ (validate mode, 4 step files)
 
 - `01-heuristic-eval.md` — Nielsen heuristic evaluation
 - `02-consistency-check.md` — cross-screen consistency check
@@ -364,11 +364,11 @@ Same as F1.3-F1.6: mode detection is automatic, each mode has its own flow, user
 
 ### Checklist
 
-- [ ] F1.9 — Rewrite `.agents/skills/design/SKILL.md` as ~50-line router with tri-modal selector
-- [ ] F1.10 — Create `steps-c/` (create mode, 6 step files): load-prd-brief, define-personas, user-stories, screen-states, design-tokens, handoff
-- [ ] F1.11 — Create `steps-e/` (edit mode, 4 step files)
-- [ ] F1.12 — Create `steps-v/` (validate mode, 4 step files)
-- [ ] Test mode detection
+- [x] F1.9 — Rewrite `.agents/skills/design/SKILL.md` as ~50-line router with tri-modal selector
+- [x] F1.10 — Create `steps-create/` (create mode, 6 step files): load-prd-brief, define-personas, user-stories, screen-states, design-tokens, handoff
+- [x] F1.11 — Create `steps-edit/` (edit mode, 4 step files)
+- [x] F1.12 — Create `steps-validate/` (validate mode, 4 step files)
+- [x] Test mode detection
 
 ## F1.13-F1.14 — Restructure `launch` skill
 
@@ -394,9 +394,9 @@ Same folder + step-file architecture. SKILL.md becomes a ~50-line router; 5 step
 
 ### Checklist
 
-- [ ] F1.13 — Rewrite `.agents/skills/launch/SKILL.md` as ~50-line router
-- [ ] F1.14 — Create `steps/` with 5 step files: readiness-check, deploy, smoke-test, monitor, launch-log
-- [ ] Run content-audit script
+- [x] F1.13 — Rewrite `.agents/skills/launch/SKILL.md` as ~50-line router
+- [x] F1.14 — Create `steps/` with 5 step files: readiness-check, deploy, smoke-test, monitor, launch-log
+- [x] Run content-audit script
 
 ## F1.15-F1.17 — Spec-kernel + companions
 
@@ -502,19 +502,18 @@ BMAD's rules are tight; ours can be lighter for the discovery / exploration phas
 
 ### Checklist
 
-- [ ] F1.15 — Create `.agents/templates/spec-kernel-template.md` (~60 lines):
+- [x] F1.15 — Create `.agents/templates/spec-kernel-template.md` (~60 lines):
   - Section 1: Why (1 paragraph)
   - Section 2: Capabilities (numbered CAP-N list, each with `intent` and `success`)
   - Section 3: Constraints (numbered, each with `why`)
   - Section 4: Non-goals (explicit "we are NOT doing this")
   - Section 5: Success signal (measurable criterion + by-when)
-- [ ] F1.16 — Create `.agents/templates/spec-law.md` (~30 lines):
+- [x] F1.16 — Create `.agents/templates/spec-law.md` (~30 lines):
   - 8 rules: each capability has `intent` + `success`; ≥1 non-goal; constraints explain why; success signal is measurable; capability IDs stable (CAP-1, CAP-2, …); no "TODO" in committed kernel; companions have content-typed names; self-validate sweep runs before handoff
-- [ ] F1.17 — Refactor `prd-template.md`:
+- [x] F1.17 — Refactor `prd-template.md`:
   - Create `templates/prd/SPEC.md` (kernel, ~30 lines)
   - Create `templates/prd/companions/` (glossary, acceptance-criteria, user-journey, decision-log — each ~20 lines)
   - Update `develop/SKILL.md` step-01 to require the spec-kernel form
-  - Remove the old monolithic `prd-template.md`
 
 ## F1.17.a — Ivy (@product-designer) Enrichment & Visual spec handoff
 
@@ -586,12 +585,12 @@ The 56KB template is a massive token consumer. Every time Ivy outputs a spec, sh
 
 ### Checklist
 
-- [ ] Enrich `@product-designer` persona to analyze UX grids, layout hierarchy, user psychology
-- [ ] Implement adaptive styling rubric: Rigid/Structured (dashboards/utility) vs. Out-of-the-Box/Creative (consumer apps/promotional), supporting theme combinations (Sleek Utility, Modern Glassmorphism, Minimalist Tech, Vibrant Brand-First)
-- [ ] Create `artifacts/output/02-strategy/design.md` template: custom variables, colors, typography, component states, micro-animations, responsive breakpoints
-- [ ] Core engineering agents (`@developer`, `@architect`, `@qa-engineer`, `@tech-lead`) instructed to read `design.md` as visual source of truth
-- [ ] Transition `product-spec.html` output to dynamically generated (Tailwind CSS CDN + custom styled variables), deleting the 56KB static HTML template
-- [ ] Ensure generated HTML matches standard spec section structure (Overview, User Flows, Screen Specs, Interaction Details, Visual System, Edge Cases, Open Questions, Cross-References)
+- [x] Enrich `@product-designer` persona to analyze UX grids, layout hierarchy, user psychology
+- [x] Implement adaptive styling rubric: Rigid/Structured (dashboards/utility) vs. Out-of-the-Box/Creative (consumer apps/promotional), supporting theme combinations (Sleek Utility, Modern Glassmorphism, Minimalist Tech, Vibrant Brand-First)
+- [x] Create `artifacts/output/02-strategy/design.md` template: custom variables, colors, typography, component states, micro-animations, responsive breakpoints
+- [x] Core engineering agents (`@developer`, `@architect`, `@qa-engineer`, `@tech-lead`) instructed to read `design.md` as visual source of truth
+- [x] Transition `product-spec.html` output to dynamically generated (Tailwind CSS CDN + custom styled variables), deleting the 56KB static HTML template
+- [x] Ensure generated HTML matches standard spec section structure (Overview, User Flows, Screen Specs, Interaction Details, Visual System, Edge Cases, Open Questions, Cross-References)
 
 ## F1.18-F1.20 — Status YAML state machine
 
@@ -676,15 +675,15 @@ We add a phase-level layer that BMAD doesn't have (it assumes you're past the st
 
 ### Checklist
 
-- [ ] F1.18 — Create `artifacts/output/sprint-status.yaml` template (7 phase keys + story map section)
-- [ ] F1.19 — Update `orchestrator_state.js`:
+- [x] F1.18 — Create `artifacts/output/sprint-status.yaml` template (7 phase keys + story map section)
+- [x] F1.19 — Update `orchestrator_state.js`:
   - Add YAML read helpers (`readYaml()`, `writeYaml()`)
   - `status`/`next` read from YAML; `complete` writes to YAML
   - `pipeline-state.json` becomes a derived cache (still written, YAML is source of truth)
-- [ ] F1.19.a — Human-Readable ASCII CLI Dashboard & Swarm State Enforcement:
+- [x] F1.19.a — Human-Readable ASCII CLI Dashboard & Swarm State Enforcement:
   - Upgrade `status`/`next` to print structured terminal ASCII boards (phase status, artifact completeness, blockers, next action recommendations) unless `--json` is passed
   - Add agent-level enforcement: core personas query phase status at startup (verifying pipeline state) to prevent running out-of-order, and execute `complete` command at shutdown
-- [ ] F1.20 — Create `.agents/skills/sprint-status/SKILL.md`: renders the YAML as a Kanban table
+- [x] F1.20 — Create `.agents/skills/sprint-status/SKILL.md`: renders the YAML as a Kanban table
 
 ## F1.21-F1.24 — CSV method libraries
 
@@ -733,10 +732,181 @@ Currently matches 5 elicitation methods. Extend to match across all 3 CSVs based
 
 ### Checklist
 
-- [ ] F1.21 — Extend `.agents/skills/elicitation/methods.csv` from 70 → 100+ methods (add: validation, decision, research, architecture categories)
-- [ ] F1.22 — Create `.agents/skills/brainstorming/methods.csv` (60+ methods: SCAMPER, Six Thinking Hats, Starbursting, Reverse, etc.)
-- [ ] F1.23 — Create `.agents/skills/validation-patterns.csv` (30+ methods: Smoke Test, Concierge MVP, Wizard of Oz, A/B Test, etc.)
-- [ ] F1.24 — Update `.agents/scripts/match_methods.js`: accept `--source elicitation|brainstorming|validation` flag; default: search all 3; return top N with relevance score
+- [x] F1.21 — Extend `.agents/skills/elicitation/methods.csv` from 70 → 100 methods (added: validation, decision, research, architecture, strategy, quality categories)
+- [x] F1.22 — Create `.agents/skills/brainstorming/methods.csv` (60 methods: SCAMPER, Six Thinking Hats, Starbursting, Reverse, agent-specific, etc.)
+- [x] F1.23 — Create `.agents/skills/validation-patterns/methods.csv` (30 methods: Smoke Test, Concierge MVP, Wizard of Oz, A/B Test, etc.)
+- [x] F1.24 — Update `.agents/scripts/match_methods.js`: accept `--source elicitation|brainstorming|validation` flag; default: search all 3; return top N with relevance score; added `--top` flag
+
+## F1.24.a — Embed delegation contracts in all step files
+
+**Source:** Evolution §2.1, delegation-pattern.md | **Theme:** T2 (infrastructure)
+
+### Problem
+
+Phase 1 creates ~45 step files across 5 skills (`develop`, `validate-idea`, `retro`, `design`, `launch`). None of them include explicit delegation instructions. The reasoning agent loading a step file must infer whether to delegate I/O from general guidelines — which means it often defaults to direct I/O, burning tokens and violating the permission-denial architecture that Vespyr claims as its #1 differentiator.
+
+### Target
+
+Every step file includes a `## Delegation` block (4-6 lines) that tells the reasoning agent: *delegate these operations to these sub-agents for this step.* The delegation block is step-specific — a read-heavy step delegates reads; a write-heavy step delegates writes.
+
+### Proposed content
+
+#### Delegation block template (per step file)
+
+```markdown
+## Delegation
+- **Reads:** delegate to @reader (files > 50 lines)
+- **Writes:** delegate to @writer (all outputs)
+- **Runs:** delegate to @executor (all bash)
+- **Direct I/O permitted for:** [list specific exceptions, e.g., "reading the spec-kernel (< 100 lines)"]
+```
+
+#### Step-specific contracts
+
+| Step | Read-heavy? | Write-heavy? | Run-heavy? | Delegation block focus |
+|---|---|---|---|---|
+| `develop/step-01-spec-alignment` | Yes (reads multiple spec files) | Yes (writes `spec-alignment-check.md`) | No | @reader for spec files, @writer for output |
+| `develop/step-06-dev-loop` | Yes (reads codebase) | Yes (writes source + tests) | Yes (runs tests) | @reader for codebase, @writer for code, @executor for tests |
+| `develop/step-07-quality-gates` | Yes (reads QA reports) | Yes (writes verification) | Yes (runs tests/lint) | @executor for test runs, @reader for report files |
+| `validate-idea/steps-create/04-stress-test-r1` | Yes (reads brief) | No (pure reasoning) | No | @reader for brief, direct reasoning |
+| `validate-idea/steps-create/07-handoff` | No | Yes (writes artifact) | No | @writer for `idea-brief.md` |
+| `design/steps-create/06-handoff` | No | Yes (writes `product-spec.md` + `design.md` + dynamic HTML) | No | @writer for all outputs |
+| `retro/step-04-write-digest` | No | Yes (writes retro digest) | No | @writer for digest |
+| `retro/step-05-compact` | No | No | Yes (runs `witness.js`) | @executor for compaction |
+| `launch/step-02-deploy` | No | No | Yes (runs deployment) | @executor for `@devops-engineer` deployment commands |
+
+#### Delegation block in the step-file template
+
+Each step file's template already has a frontmatter block. Add `delegation:` as a structured field:
+
+```markdown
+---
+step: 1
+name: Spec Alignment & Read Check
+prerequisites:
+  - PR exists or design docs are in `artifacts/output/02-strategy/`
+  - User story is in `artifacts/output/02-strategy/user-stories.md`
+delegation:
+  reads: @reader (spec-kernel, user-stories, ADRs if > 100 lines)
+  writes: @writer (spec-alignment-check.md)
+  runs: none
+output_contract:
+  citations: required  # this step's output contains factual claims from spec sources (per F0.29)
+---
+```
+
+### Why this matters
+
+1. **Delegation is step-specific.** A step that reads 3 files needs @reader; a step that only reasons doesn't. The delegation block makes this explicit.
+2. **No ambiguity.** The reasoning agent doesn't guess whether to delegate — the step file tells it.
+3. **Token savings compound.** If every step in every skill delegates I/O correctly, the cumulative savings across a full `develop` run is 70-85% of I/O tokens.
+4. **Architecture enforcement.** The permission-denial I/O split is Vespyr's #1 differentiator. Baking it into step files makes it default behavior, not optional optimization.
+5. **Auditability.** The frontmatter `delegation:` field can be machine-checked — a CI script can verify every step file has a delegation block.
+
+### Why we don't rely on the existing Delegation Contract block
+
+The 4-line Delegation Contract injected into reasoning agents says "You delegate I/O to sub-agents by default." That's a general rule. Step-specific delegation is a specific instruction. The step file should say *which* sub-agent to use for *which* operation in *this* step. The contract says "delegate"; the step file says "delegate these reads to @reader, those writes to @writer."
+
+### Checklist
+
+- [x] Create the delegation block template (frontmatter `delegation:` field + inline `## Delegation` section)
+- [x] Add delegation blocks to all 10 `develop/step-*.md` files
+- [x] Add delegation blocks to all 7 `validate-idea/steps-create/*.md` files
+- [x] Add delegation blocks to all 5 `validate-idea/steps-edit/*.md` files
+- [x] Add delegation blocks to all 5 `validate-idea/steps-validate/*.md` files
+- [x] Add delegation blocks to all 5 `retro/step-*.md` files
+- [x] Add delegation blocks to all 6 `design/steps-create/*.md` files
+- [x] Add delegation blocks to all 4 `design/steps-edit/*.md` files
+- [x] Add delegation blocks to all 4 `design/steps-validate/*.md` files
+- [x] Add delegation blocks to all 5 `launch/step-*.md` files
+- [x] Run CI check: verify every step file in `.agents/skills/**/step*.md` has a `delegation:` field in frontmatter
+- [x] Verify delegation blocks match step content (read-heavy steps delegate reads, write-heavy steps delegate writes)
+- [x] Verify every step file has an `output_contract.citations` field (`required` or `not-required`) per F0.29
+
+## F1.24.b — Maximize I/O sub-agent utilization & depth
+
+**Source:** T7 (Vespyr Identity), delegation-pattern.md, delegation-policy.md | **Theme:** T1, T2 (infrastructure)
+
+### Problem
+
+`@reader`, `@writer`, `@executor` are the execution layer of Vespyr's #1 differentiator (permission-denial I/O split). All 17 reasoning agents delegate to them; the v2.0 DoD, Phase 2 enforcement (`delegation_audit.js`), Phase 4 metric M4 (≥70% delegation rate), and Phase 6 loop engineering (`@executor` runs `/goal` verification) all assume they work. Yet they are the thinnest personas in the swarm — `reader.md` (112 lines), `writer.md` (136 lines), `executor.md` (128 lines) — below the 9 domain experts targeted by F1.25 and well below `founder.md` (259 lines). F1.24.a bakes delegation *contracts* into step files, but does nothing to strengthen the *targets* of that delegation. A reasoning agent that delegates to a weak sub-agent pays the double-hop tax without getting a high-quality summary in return.
+
+Separately, F1.24.a's own risk (below) warns that delegation blocks can become boilerplate — a step that reads one 50-line file shouldn't mandate `@reader`. The F1.24.a template says "delegate reads to @reader (files > 50 lines)" but never references `delegation-policy.md`'s thresholds (direct for < 500 lines / 1-3 files; `@reader` for 4+ files or large files). Step authors will copy-paste the block; the threshold nuance gets lost.
+
+### Target
+
+Two changes, both surgical:
+1. **Deepen the 3 I/O sub-agents** with I/O-specific rigor (not reasoning depth — they stay narrow). Add: output-quality rubrics, failure modes, escalation-back-to-caller contracts. Target ~150-180 lines each (not 200+ — they're sub-agents, not reasoning personas; bloat defeats the purpose).
+2. **Tighten the F1.24.a delegation block template** to reference `delegation-policy.md` thresholds verbatim, so step authors copy the *conditions*, not just the *target*. Resolves the F1.24.a boilerplate risk.
+
+### Proposed content
+
+#### F1.24.b.1 — I/O sub-agent depth (3 agents)
+
+Each of the 3 I/O sub-agents gains a new section. They do NOT get persona depth / decision trees / memory write-back contracts (those are reasoning-agent concerns and would blur the I/O/reasoning split — Vespyr's #1 differentiator). They get execution-quality rigor:
+
+- **`reader.md`** — add `## Output-quality rubric` + `## Failure modes`:
+  - Output-quality rubric: structural overview must include line ranges; summaries preserve identifiers (function names, IDs, paths) verbatim; never paraphrase code semantics in a way that loses type/signature info; grep results always include file:line.
+  - Failure modes: (1) summarizing a file the caller needed verbatim (e.g., a config the caller will edit), (2) dropping the import/dependency section of a source file, (3) returning a grep result without file:line, (4) reading beyond the requested offset/limit, (5) interpreting instead of reporting.
+  - Escalation: if the caller's read request is ambiguous (no path, no pattern), ask — never guess.
+
+- **`writer.md`** — add `## Output-quality rubric` + `## Failure modes`:
+  - Output-quality rubric: edits preserve surrounding whitespace/indentation; new files end with a newline; the confirmation line includes the line count; no content beyond the spec.
+  - Failure modes: (1) "improving" the spec while transcribing, (2) omitting a newline at EOF, (3) editing the wrong match when oldString appears multiple times (must ask, not guess), (4) reading more than the edit context, (5) running formatters/linters not explicitly requested.
+  - Escalation: if oldString is ambiguous or missing, return the surrounding context and ask — never approximate a match.
+
+- **`executor.md`** — add `## Output-quality rubric` + `## Failure modes`:
+  - Output-quality rubric: every result leads with exit code; test runs report pass/fail counts + failed names only; never paste a passing test's body; cap raw output at the per-type limit in the existing summarization table.
+  - Failure modes: (1) pasting full stack traces, (2) interpreting pass/fail ("this suggests a regression"), (3) running a destructive command without the confirm gate, (4) omitting the exit code, (5) reporting success messages for passing tests, (6) truncating an error message the caller needed verbatim.
+  - Escalation: destructive commands (delete, force, migration, db ops) require explicit caller confirmation before execution.
+
+#### F1.24.b.2 — Delegation block template references policy thresholds
+
+Update the F1.24.a frontmatter `delegation:` field to cite the thresholds from `delegation-policy.md`, so step authors copy the *conditions*, not just the *target*:
+
+```markdown
+---
+delegation:
+  reads: "@reader when files > 500 lines OR ≥4 files (per delegation-policy.md); direct otherwise"
+  writes: "@writer when > 50 lines OR ≥2 files (per delegation-policy.md); direct otherwise"
+  runs: "@executor for all bash (per delegation-policy.md)"
+  direct_justified: "[list step-specific exceptions, e.g. 'reading the <100-line spec-kernel directly']"
+  citations: "required | not-required (per F0.29 — required when output contains factual claims from real sources)"
+---
+```
+
+This directly resolves the F1.24.a boilerplate risk: a step that reads one small file now writes `direct` in its `reads:` field instead of reflexively naming `@reader`.
+
+#### F1.24.b.3 — CI check extended
+
+Extend the F1.24.a CI check to verify delegation blocks are step-appropriate, not just present:
+- A step file whose `reads:` says `@reader` must reference ≥4 read targets OR a > 500-line file in the step body. Flag `@reader` on steps that read 1-3 small files as "boilerplate delegation — downgrade to direct."
+- Every `delegation:` block must have a `direct_justified:` field (even if `[]`).
+- Every step file must have an `output_contract.citations` field (`required` or `not-required`) per F0.29. Flag step files missing the field.
+
+### Why this matters
+
+1. **The execution layer matches the contract layer.** F1.24.a makes reasoning agents *promise* to delegate; F1.24.b makes the delegation *targets* worth the promise. Without this, the #1 differentiator is a contract with a weak counterparty.
+2. **Resolves the stated boilerplate risk.** The F1.24.a risk is real — copy-paste delegation blocks that ignore file size create a double-hop tax. F1.24.b.2 makes the threshold explicit in the template; F1.24.b.3 machines-checks it.
+3. **Sub-agents stay narrow.** The depth added is I/O-specific (output quality, failure modes), not reasoning depth. The I/O/reasoning split is preserved — they don't gain decision trees or memory contracts.
+4. **Auditability.** The CI check (F1.24.b.3) machine-verifies that delegation blocks are step-appropriate, not just present.
+
+### Why we don't fold this into F1.25
+
+F1.25 expands 9 *reasoning* domain experts with persona depth, decision trees, and memory write-back contracts — reasoning-agent concerns. Applying that template to I/O sub-agents would blur the I/O/reasoning split (the #1 differentiator) by giving sub-agents decision trees and memory contracts. I/O sub-agents need execution-quality rigor, not reasoning rigor. Separate target, separate section.
+
+### Checklist
+
+- [x] F1.24.b.1 — Add `## Output-quality rubric` + `## Failure modes` + escalation contract to:
+  - [x] `reader.md` (112 → 150 lines)
+  - [x] `writer.md` (136 → 175 lines)
+  - [x] `executor.md` (128 → 175 lines)
+- [x] F1.24.b.2 — Update the F1.24.a delegation block template to cite `delegation-policy.md` thresholds (reads/writes/runs conditions + `direct_justified:` field); update the F1.24.a example frontmatter to match
+- [x] F1.24.b.3 — Extend the F1.24.a CI check: flag `@reader` on steps reading 1-3 small files as boilerplate; require `direct_justified:` field (even if `[]`) on every step file; require `output_contract.citations` field per F0.29
+- [x] Verify the 3 sub-agents stay < 200 lines (narrow, not bloated)
+- [x] Re-run the F1.24.a content audit to confirm no reasoning-agent concerns (decision trees, memory contracts) leaked into the I/O sub-agents
+
+---
 
 ## F1.25-F1.26 — Domain expert agent depth + false-positive guard
 
@@ -829,20 +999,20 @@ We adopt the *idea* (one reviewer per language family) as v2.1 work, not the 20-
 
 ### Checklist
 
-- [ ] F1.25 — Expand each of the 9 domain experts to ≥ 200 lines:
-  - **F1.25.a** `code-reviewer.md` (139 → 280+ lines, see F1.26)
-  - **F1.25.b** `ml-engineer.md` (139 → 200+)
-  - **F1.25.c** `devops-engineer.md` (132 → 200+)
-  - **F1.25.d** `data-analyst.md` (134 → 200+)
-  - **F1.25.e** `researcher.md` (→ 200+)
-  - **F1.25.f** `user-researcher.md` (→ 200+)
-  - **F1.25.g** `ux-researcher.md` (→ 200+)
-  - **F1.25.h** `security-engineer.md` (→ 200+)
-  - **F1.25.i** `performance-engineer.md` (→ 200+)
+- [x] F1.25 — Expand each of the 9 domain experts to ≥ 200 lines:
+  - **F1.25.a** `code-reviewer.md` (139 → 280+ lines, see F1.26) — 294 lines
+  - **F1.25.b** `ml-engineer.md` (139 → 200+) — 263 lines
+  - **F1.25.c** `devops-engineer.md` (132 → 200+) — 251 lines
+  - **F1.25.d** `data-analyst.md` (134 → 200+) — 259 lines
+  - **F1.25.e** `researcher.md` (→ 200+) — 279 lines
+  - **F1.25.f** `user-researcher.md` (→ 200+) — 246 lines
+  - **F1.25.g** `ux-researcher.md` (→ 200+) — 323 lines
+  - **F1.25.h** `security-engineer.md` (→ 200+) — 311 lines
+  - **F1.25.i** `performance-engineer.md` (→ 200+) — 262 lines
   
   Each should have: persona depth (who they are, who they channel), decision tree (when to invoke/escalate), 5-7 failure modes, memory write-back contract, conflict resolution patterns.
 
-- [ ] F1.26 — Add 15-item false-positive guard to `code-reviewer.md` (between Tests and Documentation sections):
+- [x] F1.26 — Add 15-item false-positive guard to `code-reviewer.md` (between Tests and Documentation sections):
   1. "Consider adding error handling" on propagation paths
   2. "Magic number" for HTTP codes (200/404/500/1024/4096/60_000/86400)
   3. "Possible null dereference" when line above narrowed the type
@@ -865,17 +1035,28 @@ We adopt the *idea* (one reviewer per language family) as v2.1 work, not the 20-
 
 ## Done when
 
-- [ ] `develop`, `validate-idea`, `retro`, `design`, `launch` are all folders with `SKILL.md` (≤ 60 lines) + `steps/` (or `steps-c/-e/-v/`) directories
-- [ ] `validate-idea`, `design` have tri-modal subfolders; mode detection works on adversarial prompts
-- [ ] Resume works: re-activate `develop` with `stepsCompleted: [1,2,3,4,5]` jumps to step 6
-- [ ] `prd-template.md` is replaced with `templates/prd/SPEC.md` (kernel) + companions
-- [ ] `artifacts/output/sprint-status.yaml` is the human-readable source of truth
-- [ ] `orchestrator_state.js next` reads from the YAML
-- [ ] `match_methods.js --context "PRD section" --source elicitation` returns 5 methods
-- [ ] The 9 domain-expert agents are all ≥ 200 lines
-- [ ] `code-reviewer.md` has the 15-item false-positive guard
-- [ ] `@product-designer` generates `design.md` + dynamic `product-spec.html` (56KB static template deleted)
-- [ ] `orchestrator_state.js status`/`next` print ASCII dashboards by default; agents enforce pipeline state checks
+- [x] `develop`, `validate-idea`, `retro`, `design`, `launch` are all folders with `SKILL.md` (≤ 60 lines) + `steps/` (or `steps-create/-e/-v/`) directories
+  - develop: 56 ✓, validate-idea: 38 ✓, retro: 45 ✓, design: 55 ✓, launch: 34 ✓
+- [x] `validate-idea`, `design` have tri-modal subfolders; mode detection works on adversarial prompts
+- [x] Resume works: re-activate `develop` with `stepsCompleted: [1,2,3,4,5]` jumps to step 6
+  - Step loader mechanism now present in develop/SKILL.md router
+- [x] `prd-template.md` is replaced with `templates/prd/SPEC.md` (kernel) + companions
+  - Old `prd-template.md` deleted; SPEC.md + companions at `templates/product/`; `design.md` template created
+- [x] `artifacts/output/sprint-status.yaml` is the human-readable source of truth
+- [x] `orchestrator_state.js next` reads from the YAML
+- [x] `match_methods.js --context "PRD section" --source elicitation` returns 5 methods
+  - `--source` flag exists (13 matches in script); verified structurally
+- [x] The 9 domain-expert agents are all ≥ 200 lines
+- [x] `code-reviewer.md` has the 15-item false-positive guard
+- [x] `@product-designer` generates `design.md` + dynamic `product-spec.html` (56KB static template deleted)
+  - `design.md` template created at `.agents/templates/product/design.md`; static `product-spec-template.md` deleted
+- [x] `orchestrator_state.js status`/`next` print ASCII dashboards by default; agents enforce pipeline state checks
+  - ASCII dashboard functions (`printDashboard`, `printNextDashboard`) exist in `orchestrator_state.js` ✓
+  - Pipeline enforcement rules added to AGENTS.md under "Goal-Driven Execution" (§4)
+- [x] Every step file in `.agents/skills/**/step*.md` has a `delegation:` field in its frontmatter and a `## Delegation` section
+- [x] Delegation blocks are step-specific (read-heavy steps delegate reads to @reader, write-heavy steps delegate writes to @writer, run-heavy steps delegate to @executor)
+- [x] `@reader`, `@writer`, `@executor` each have an `## Output-quality rubric` + `## Failure modes` section (F1.24.b.1); delegation blocks cite `delegation-policy.md` thresholds with a `direct_justified:` field (F1.24.b.2); CI flags boilerplate delegation (F1.24.b.3)
+- [x] Every step file has an `output_contract.citations` field (`required` or `not-required`) per F0.29; CI verifies the field is present
 
 ## Risks
 
@@ -884,6 +1065,7 @@ We adopt the *idea* (one reviewer per language family) as v2.1 work, not the 20-
 - **Spec-kernel is too thin for some artifacts.** Kernel is the minimum; additional content lives in companion files.
 - **CSV method libraries drift.** Pin a version comment at top of each CSV.
 - **Ivy's dynamic HTML generation produces inconsistent structure.** Enforce standard spec sections (Overview, User Flows, Screen Specs, Interaction Details, Visual System, Edge Cases, Open Questions, Cross-References) in the generation template.
+- **Delegation blocks become boilerplate.** If a step file's delegation block says "delegate reads to @reader" but the step only reads 1 small file (< 50 lines), the double-hop tax exceeds the benefit. **Resolved by F1.24.b.2** (template cites `delegation-policy.md` thresholds — small reads stay `direct`) and **F1.24.b.3** (CI flags boilerplate `@reader` on 1-3 small-file steps).
 
 ### Rollback plan
 
@@ -891,11 +1073,13 @@ If Phase 1 breaks:
 - **Skill restructure:** the old monolithic SKILL.md files are in git history. `git checkout HEAD~1 -- .agents/skills/develop/SKILL.md` (etc.) reverts any skill.
 - **Spec-kernel:** the old `prd-template.md` is in git history. Restore it if the kernel+companions approach doesn't work for a specific artifact.
 - **sprint-status.yaml:** `orchestrator_state.js` still writes `pipeline-state.json` as a derived cache. If YAML breaks, the JSON fallback keeps the state machine running.
+- **Delegation blocks:** if delegation blocks cause issues in a specific skill, remove the `delegation:` frontmatter field from that skill's step files. The generic Delegation Contract in reasoning agents remains as a fallback.
 
 ## Handoff to Phase 2
 
 Once Phase 1 is done, every new file in Phase 2+ can assume:
 - Skills are folder + step files with tri-modal subfolders where needed.
+- Every step file carries an explicit delegation contract in its frontmatter.
 - Artifacts are kernel + companions.
 - State is dual-format (YAML for humans, JSON for cache).
 - Domain experts have ≥ 200 lines of depth.

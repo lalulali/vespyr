@@ -131,11 +131,11 @@ Deduplication: write validation rejects near-identical entries
 
 KEY FILES
 ──────────────────────────────────────────────────
-Workflow              .opencode/workflow.md
-Workflows & Skills   .opencode/skills.md
-Troubleshooting       .opencode/TROUBLESHOOTING.md
-Agent library         .opencode/agents/
-Agent templates       .opencode/agents/templates/
+Workflow              .agents/workflow.md
+Workflows & Skills   .agents/skills.md
+Troubleshooting       .agents/TROUBLESHOOTING.md
+Agent library         .agents/agents/
+Agent templates       .agents/agents/templates/
 
 ──────────────────────────────────────────────────
 ```
@@ -144,4 +144,4 @@ Agent templates       .opencode/agents/templates/
 
 **Usage:** Keep this in your project root as `QUICK-REFERENCE.md` or paste into your team wiki. It summarizes the entire agent system in one view.
 
-*Full documentation: [workflow.md](.opencode/workflow.md) · [skills.md](.opencode/skills.md) · [troubleshooting](.opencode/TROUBLESHOOTING.md)*
+*Full documentation: [workflow.md](.agents/workflow.md) · [skills.md](.agents/skills.md) · [troubleshooting](.agents/TROUBLESHOOTING.md)*

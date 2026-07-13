@@ -35,26 +35,23 @@ Searches the archive index for historical context. Use when you need to find a p
 
 ## When to write to memory
 
-Write to memory for **systemic patterns only**, not single-instance events:
-
-- **Write**: "Tests in the auth module consistently need JWT mocking — documented the pattern."
-- **Don't write**: "Fixed a typo in auth.ts."
-- **Write**: "The API gateway times out under load because of unbounded connection pooling — root cause identified."
-- **Don't write**: "Saw a 504 once."
+Write for systemic patterns only, not single-instance events:
+- Write: "Tests consistently need JWT mocking — documented the pattern."
+- Don't write: "Fixed a typo in auth.ts."
+- Write: "API gateway times out due to unbounded connection pooling."
+- Don't write: "Saw a 504 once."
 
 ## Entry format strings
 
-Each memory entry follows a domain-tagged format:
-
 | Tag | Use for | Example |
 |---|---|---|
-| `[DOMAIN]` | Business domain knowledge | `[DOMAIN] Auth flow requires email verification before API access` |
-| `[CODE]` | Codebase patterns, conventions | `[CODE] All React components use named exports, no default exports` |
-| `[PROCESS]` | Workflow improvements | `[PROCESS] CI pipeline runs integration tests before deployment gate` |
-| `[ARCH]` | Architecture decisions, trade-offs | `[ARCH] Chose PostgreSQL over MongoDB for ACID compliance on payments` |
-| `[LESSON]` | Bugs, gotchas, fixes | `[LESSON] Race condition in websocket handler — mutex added` |
-| `[RISK]` | Known risks, blockers | `[RISK] Rate limiting not implemented — DDoS vector open` |
-| `[DECISION]` | Resolved decisions with rationale | `[DECISION] Monorepo with Nx — unified tooling, slower CI startup` |
+| `[DOMAIN]` | Business domain knowledge | Auth flow requires email verification |
+| `[CODE]` | Codebase patterns | All React components use named exports |
+| `[PROCESS]` | Workflow improvements | CI runs integration tests before deployment |
+| `[ARCH]` | Architecture decisions | Chose PostgreSQL over MongoDB for ACID compliance |
+| `[LESSON]` | Bugs, gotchas, fixes | Race condition in websocket handler |
+| `[RISK]` | Known risks, blockers | Rate limiting not implemented |
+| `[DECISION]` | Resolved decisions with rationale | Monorepo with Nx — unified tooling |
 
 ## Workflow
 
@@ -64,11 +61,7 @@ Each memory entry follows a domain-tagged format:
 @memory-controller search $ARGUMENTS
 ```
 
-The controller delegates to `memory_filter.js --search` which scans `archive/index.ndjson` using keyword matching + recency weighting. Returns top 5 matches with relevance scores, summaries, and file locations.
-
 ### Step 2: Load specific entries (optional)
-
-If a specific archived entry is found and needed in full:
 
 ```
 @memory-controller load-archive [entry-id]
@@ -76,31 +69,19 @@ If a specific archived entry is found and needed in full:
 
 ### Step 3: Report
 
-Return the search results with:
-- Entry title and domain tag
-- Relevance score
-- Summary
-- Original file location
-- Date
-
-If no results found, suggest broader search terms.
+Return results with title, domain tag, relevance score, summary, source, and date.
 
 ### Step 4: Write to memory (on request)
-
-If the user wants to record a finding:
 
 ```
 @memory-controller write [entry-type] [content]
 ```
 
-The controller validates format, assigns the correct domain tag, and appends to the appropriate memory file.
-
 ## Compaction triggers
 
-Compaction runs automatically when:
-- `active-decisions.md` exceeds 500 lines → oldest entries archived to `archive/index.ndjson`
-- `lessons-learned.md` exceeds 300 lines → oldest entries archived
-- `patterns-and-conventions.md` exceeds 200 lines → oldest entries archived
+- `active-decisions.md` > 500 lines → oldest archived
+- `lessons-learned.md` > 300 lines → oldest archived
+- `patterns-and-conventions.md` > 200 lines → oldest archived
 
 Archived entries remain searchable via `@memory-controller search`.
 

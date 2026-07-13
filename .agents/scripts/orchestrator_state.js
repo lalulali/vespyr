@@ -41,6 +41,97 @@ function readState() {
 function writeState(state) {
   ensureDir();
   fs.writeFileSync(STATE_FILE, JSON.stringify(state, null, 2), 'utf8');
+  syncYaml(state);
+}
+
+// Sync pipeline state to sprint-status.yaml (human-readable mirror)
+const YAML_STATE = path.join(OUTPUT_DIR, 'sprint-status.yaml');
+
+function syncYaml(state) {
+  const name = (state.project && state.project.name) || state.name || '';
+  const phase = state.current_phase || state.phase || 'discovery';
+  const squad = (state.project && state.project.squad) || state.squad || 'full-team';
+  const yaml = [
+    '# artifacts/output/sprint-status.yaml',
+    `generated: ${state.created_at ? state.created_at.split('T')[0] : new Date().toISOString().split('T')[0]}`,
+    `last_updated: ${new Date().toISOString().split('T')[0]}`,
+    `project: ${name}`,
+    `project_key: ${name.toLowerCase().replace(/\s+/g, '-')}`,
+    'tracking_system: file-system',
+    `squad: ${squad}`,
+    `phase: ${phase}`,
+    '',
+    '# Phase-level status',
+    'phases:',
+  ];
+  for (const [p, v] of Object.entries(state.phases || {})) {
+    const status = typeof v === 'string' ? v : (v.status || 'pending');
+    yaml.push(`  ${p}: ${status}`);
+  }
+  yaml.push('');
+  yaml.push('# Story-level status (when in development)');
+  yaml.push('stories:');
+  if (state.stories && Object.keys(state.stories).length > 0) {
+    for (const [id, v] of Object.entries(state.stories)) {
+      const status = typeof v === 'string' ? v : (v.status || v);
+      yaml.push(`  ${id}: ${status}`);
+    }
+  } else {
+    yaml.push('  # US-001-feature-name: done');
+  }
+  yaml.push('');
+  try {
+    fs.writeFileSync(YAML_STATE, yaml.join('\n'), 'utf8');
+  } catch (e) {
+    // YAML sync is best-effort; don't block on write failure
+  }
+}
+
+// ASCII dashboard for 'status' command
+function printDashboard(state) {
+  const icon = (s) => s === 'done' ? '✅' : s === 'in-progress' ? '▶️ ' : s === 'pending' ? '  ' : '  ';
+  const name = (state.project && state.project.name) || state.name || 'unnamed';
+  const phase = state.current_phase || state.phase || 'unknown';
+  const squad = (state.project && state.project.squad) || state.squad || 'full-team';
+  console.log(`\n╔══════════════════════════════════════════╗`);
+  console.log(`║  Project: ${name.padEnd(28)} ║`);
+  console.log(`║  Phase:   ${phase.padEnd(28)} ║`);
+  console.log(`║  Squad:   ${squad.padEnd(28)} ║`);
+  console.log(`╠══════════════════════════════════════════╣`);
+  console.log(`║  Phase Pipeline                          ║`);
+  console.log(`╠══════════════════════════════════════════╣`);
+  if (state.phases) {
+    const entries = Object.entries(state.phases);
+    for (const [p, v] of entries) {
+      const s = typeof v === 'string' ? v : (v.status || 'pending');
+      console.log(`║  ${icon(s)} ${p.padEnd(34)} ║`);
+    }
+  }
+  console.log(`╚══════════════════════════════════════════╝\n`);
+}
+
+// ASCII dashboard for 'next' command
+function printNextDashboard(state, action) {
+  printDashboard(state);
+  if (action.phase) {
+    console.log(`Current phase:  ${action.phase}`);
+    console.log(`Phase status:   ${action.status || 'unknown'}`);
+  }
+  if (action.action === 'generate-artifacts' && action.artifacts) {
+    console.log(`Action needed:  generate artifacts`);
+    for (const a of action.artifacts) {
+      console.log(`  - ${a}`);
+    }
+  } else if (action.action === 'advance-phase') {
+    console.log(`Next phase:     ${action.next_phase || 'unknown'}`);
+  }
+  if (action.recommendations) {
+    console.log(`\nRecommendations:`);
+    for (const r of action.recommendations) {
+      console.log(`  → ${r}`);
+    }
+  }
+  console.log('');
 }
 
 // Best-effort token estimate from file size: ~0.75 words per token on average.
@@ -340,7 +431,12 @@ function main() {
         console.log(JSON.stringify({ error: 'No pipeline state found. Run init first.' }));
         process.exit(1);
       }
-      console.log(JSON.stringify(state, null, 2));
+      const useJson = args.includes('--json');
+      if (useJson) {
+        console.log(JSON.stringify(state, null, 2));
+      } else {
+        printDashboard(state);
+      }
     }
 
     if (cmd === 'next') {
@@ -353,7 +449,12 @@ function main() {
         return;
       }
       const action = determineNextAction(state);
-      console.log(JSON.stringify(action, null, 2));
+      const useJson = args.includes('--json');
+      if (useJson) {
+        console.log(JSON.stringify(action, null, 2));
+      } else {
+        printNextDashboard(state, action);
+      }
     }
 
     if (cmd === 'complete') {

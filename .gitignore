@@ -39,5 +39,4 @@ coverage/
 
 temp/
 tmp/
-.opencode/
-.agents/worktrees/
+artifacts/.agents/worktrees/

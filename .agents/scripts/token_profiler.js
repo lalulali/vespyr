@@ -15,9 +15,9 @@ const fs = require('fs');
 const path = require('path');
 
 const ROOT = process.cwd();
-const AGENTS_DIR = path.join(ROOT, '.opencode', 'agents');
-const TEMPLATES_DIR = path.join(ROOT, '.opencode', 'templates');
-const SCRIPTS_DIR = path.join(ROOT, '.opencode', 'scripts');
+const AGENTS_DIR = path.join(ROOT, '.agents', 'agents');
+const TEMPLATES_DIR = path.join(ROOT, '.agents', 'templates');
+const SCRIPTS_DIR = path.join(ROOT, '.agents', 'scripts');
 
 // Rough token estimation: ~1.3 tokens per word for English
 const TOKENS_PER_WORD = 1.3;

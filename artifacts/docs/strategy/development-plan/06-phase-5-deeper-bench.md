@@ -9,8 +9,8 @@
 
 | Item | Original | This file | Why |
 |---|---|---|---|
-| T1 personas count | 14 (ROADMAP) / 18 (enrichment plan) | **14** | Canonical count. Game personas moved to T2; critic personas deferred. |
-| T1 skills count | 13 (ROADMAP) / 14 (enrichment plan) | **14** (incl. llm-wiki) | Canonical count. |
+| T1 personas count | 14 (ROADMAP) / 18 (enrichment plan) | **15** | Canonical count. Game personas moved to T2; critic personas deferred; +@artifact-judge (axis-bound scorer, not a critic). |
+| T1 skills count | 13 (ROADMAP) / 14 (enrichment plan) | **15** (incl. llm-wiki + grade-artifact) | Canonical count. |
 | T2 personas count | 5 (5-deeper-bench) / 6 (enrichment plan) | **7** | Added @finance-analyst. Game personas confirmed T2. |
 | T2 skills count | 4 (5-deeper-bench) / 6 (enrichment plan) | **4** | Canonical count. |
 | Critic consortium | T1 (v2.1) | **Deferred to v2.3+** | No consumers until infrastructure ships. |
@@ -21,11 +21,11 @@
 
 | Tier | New personas | New skills | New squads | Ships in |
 |---|---|---|---|---|
-| T1 | 14 | 14 (incl. llm-wiki) | 3 (growth, data-platform, migration) | v2.1 |
+| T1 | 15 | 15 (incl. llm-wiki + grade-artifact) | 3 (growth, data-platform, migration) | v2.1 |
 | T2 | 7 | 4 | 0 | v2.2 |
 | T3 | 1 | 0 | 0 | v2.2 |
-| **Total new** | **22** | **18** | **3** | |
-| **Grand total** | **43** | **42** | **10** | |
+| **Total new** | **23** | **19** | **3** | |
+| **Grand total** | **44** | **43** | **10** | |
 
 ### Deferred to v2.3+ (F0.25-F0.28 Critic Infrastructure)
 
@@ -61,7 +61,7 @@ The "1-day ECC repackage" pattern is insufficient. Personas that don't clear eit
 
 ## Tier 1 — Deeper Bench (ships with v2.1, ~60h)
 
-### T1 Personas (14)
+### T1 Personas (15)
 
 For each: create agent file (v2 frontmatter, IDENTITY block, channeled mentor, icon), wire into squad(s), add to agent-contracts.md, add to glossary.md if new terminology.
 
@@ -294,7 +294,34 @@ For each: create agent file (v2 frontmatter, IDENTITY block, channeled mentor, i
 
 ---
 
-### T1 Skills (14)
+- [ ] **T1.14b** `@artifact-judge` (Minerva) — Artifact Quality Judge (LLM-as-a-Judge)
+
+**Channeled mentor:** Eleanor Rosch (prototype categorization — what makes a thing a good instance of its kind) + Paul Meehl (clinical vs. statistical prediction — actuarial judgment over gut feeling). Speaks like a psychometrician crossed with a tough-but-fair grader — every score is a number, every number has a rationale, "I don't do vibes."
+
+**Charter:**
+- Scores any artifact (PRD, spec-kernel, ADR, research report, changelog, retro digest, launch copy, user-stories, GDD) across 4 fixed axes, 1–5 each:
+  1. **Accuracy / Factuality** — every claim traceable to a source (code symbol, ADR, research citation, interview quote, spec-kernel CAP-ID). No hallucinated facts, numbers, citations, or capability IDs. Verifiable references.
+  2. **Completeness** — covers the artifact's declared scope. Every capability has intent+success (Spec Law F1.16); every AC is Given/When/Then; every kernel+companions section present (F1.15); no "TODO" in committed kernel.
+  3. **Relevance** — every section serves the artifact's stated Why (kernel field 1). No scope creep, no boilerplate that doesn't apply to *this* artifact, non-goals respected.
+  4. **Tone & Formatting** — matches the artifact type's convention (PRD ≠ ADR ≠ changelog). Structure follows the kernel+companions shape (F1.15). For text artifacts, defers the tone check to the `humanize` skill and reports its verdict as the tone score.
+- **Verdict logic** (weakest-axis, not average — prevents a hallucinated-but-well-formatted artifact from passing):
+  - All axes ≥ 4 → **PASS**
+  - Any axis = 3 → **REVISE** (with the specific axis + rationale)
+  - Any axis ≤ 2 → **REJECT**
+  - Accuracy = 1 → **REJECT** regardless of others (factuality is a hard floor)
+- Output: `artifacts/output/{phase}/scorecard-{artifact-name}.md` with: per-axis score (1–5), one-paragraph rationale per axis, overall verdict, and the single weakest axis flagged as "fix this first."
+- **Hard rules:** never writes the artifact under review (only the scorecard); never drafts fixes (that's the producing agent's job); never averages scores (weakest-axis logic is non-negotiable); read-only on the artifact under review.
+
+**Socratic stance:** challenges the producing agent's "done" claim. "Change my mind: show me a verifiable source for every factual claim, every template-required section present, every section serving the stated Why, and a clean humanize pass." Escalates to `@code-reviewer` (code artifacts) or `@researcher` (research artifacts) when Accuracy = 1.
+
+**Permissions:** read + question only. No edit, no bash.
+**Default squad:** none. Invoked by any artifact-producing skill at handoff (develop step-08/10, validate-idea handoff, design handoff, launch launch-log).
+**Complements:** `@qa-engineer` (tests *code behavior* — @artifact-judge grades *artifact quality*, no overlap). `@code-reviewer` (reviews *source code* — @artifact-judge reviews *artifacts*, no overlap). `humanize` (the tone axis defers to humanize for text — no overlap, they compose). **Not a critic persona** — critics (F0.25–F0.28, v2.3+) are domain-bound (code/ux/research/docs) and produce findings+fixes; @artifact-judge is axis-bound and produces scores+verdict. They compose: a critic can invoke @artifact-judge for the baseline score, then layer domain judgment on top.
+**Effort:** ~2 days.
+
+---
+
+### T1 Skills (15)
 
 For each skill: create folder + SKILL.md (bootloader) + steps/ (when multi-step). Add to orchestrator if it gates a phase. Document in skills.md. Test with a real example.
 
@@ -446,6 +473,27 @@ For each skill: create folder + SKILL.md (bootloader) + steps/ (when multi-step)
 
 ---
 
+- [ ] **T1.28b** `/grade-artifact` — LLM-as-a-Judge Artifact Scoring
+
+**Source:** LLM-as-a-judge pattern (Zheng et al. 2023); scoring rubric referenced in `youtube.com/watch?v=N8EO-lSiLYw` ("Use AI to Score and Compare Ideas").
+**When to invoke:** At any artifact handoff — before step-08 PM verification in `/develop`; at idea-brief handoff in `/validate-idea`; at product-spec handoff in `/design`; at launch-log in `/launch`. Also invocable ad-hoc: `/grade-artifact artifacts/output/02-strategy/prd/SPEC.md`.
+**Primary agent:** `@artifact-judge` (Minerva).
+**Modes:**
+- **Advisory (default):** produces the scorecard; the producing agent decides whether to revise. Low friction.
+- **Gate (`--gate` flag):** the scorecard's verdict blocks handoff. REVISE/REJECT returns the artifact to the producing agent; only PASS advances. Use for regulated or external-facing artifacts.
+**Output:** `artifacts/output/{phase}/scorecard-{artifact-name}.md` — 4 axis scores (1–5), per-axis rationale, overall verdict (PASS/REVISE/REJECT), weakest-axis-first fix order.
+**Hard rule:** the verdict is the weakest axis, not the average — a score of [5,5,5,1] is REJECT, not PASS.
+**Effort:** ~1.5 days.
+
+#### Why we don't fold this into the critic consortium (F0.25–F0.28, v2.3+)
+
+- **Critic personas are domain-bound** (research-critic / code-critic / ux-critic / doc-critic) and produce *findings + suggested fixes* against domain rubrics (F0.27: Product / Architecture / Code / UX / Documentation).
+- **@artifact-judge is axis-bound** (accuracy / completeness / relevance / tone) and produces *scores + verdict*, not fixes.
+- They compose, they don't compete: a critic can invoke @artifact-judge for the generic quality baseline, then layer domain judgment on top. F0.27's Documentation Rubric ("completeness, accuracy, readability") overlaps 3 of @artifact-judge's axes — by design, so @doc-critic gets a consistent baseline score before applying doc-specific judgment.
+- **Why ship @artifact-judge in v2.1, not v2.3+ with critics:** every Phase 1 artifact-producing skill (develop, validate-idea, design, launch) has an immediate quality-floor need. Waiting for F0.25–F0.28 leaves all v2.0/v2.1 artifacts unscored. @artifact-judge is self-contained (4 axes inline, no F0.27 dependency) and ships now; critics arrive later and build on top.
+
+---
+
 ### T1 Squad Updates
 
 - [ ] **T1.29** Create `growth` squad (opt-in): @growth-marketer, @seo-specialist, @customer-success, @support-engineer, @data-analyst, @technical-writer
@@ -455,8 +503,8 @@ For each skill: create folder + SKILL.md (bootloader) + steps/ (when multi-step)
 
 ### T1 Done when
 
-- [ ] All 14 T1 personas have v2 frontmatter, IDENTITY block, channeled mentor, icon, charter
-- [ ] All 14 T1 skills are folder + SKILL.md + steps/ (or tri-modal), integrated with orchestrator
+- [ ] All 15 T1 personas have v2 frontmatter, IDENTITY block, channeled mentor, icon, charter
+- [ ] All 15 T1 skills are folder + SKILL.md + steps/ (or tri-modal), integrated with orchestrator
 - [ ] The 3 new squads (`growth`, `data-platform`, `migration`) are opt-in via `install-modules`
 - [ ] `brainstormer ↔ founder` pairing documented in AGENTS.md (divergent vs convergent)
 - [ ] `humanize` skill invoked by default by every external-facing persona (@storyteller, @presentation-master, @growth-marketer, @seo-specialist)
@@ -621,6 +669,39 @@ For each skill: create folder + SKILL.md (bootloader) + steps/ (when multi-step)
 
 ---
 
+### T2 Skill Upgrades (1)
+
+- [ ] **T2.7b** Upgrade `/validate-game-idea` — Game Concept Diagnostic Depth
+
+**Source:** Parity gap with `/validate-idea`. The game skill was adapted from `/validate-idea` but lacks Phase 3.5 (Framework Application) and game-specific diagnostic dimensions such as monetization model scrutiny, platform strategy, and genre lifecycle analysis.
+
+**Scope:**
+
+1. **Add Phase 3.5: Framework Application** — mirror `/validate-idea`'s framework phase. `@founder` applies 1-2 game-specific frameworks from an expanded toolkit:
+   - **MDA (Mechanics-Dynamics-Aesthetics)** — does the mechanics → dynamics → aesthetics chain hold? What's the aesthetic target: sensation, fantasy, narrative, challenge, fellowship, discovery, expression, submission?
+   - **Genre Lifecycle Analysis** — where is this genre on the maturity curve (emerging / growing / mature / declining)? What does that mean for discoverability, player expectations, and the viability of a new entrant?
+   - **Platform Viability Matrix** — for the target platform(s) (PC, mobile, console, web): storefront saturation, platform holder gatekeeping, technical feasibility, control scheme fit.
+   - **Monetization Model Fit** — premium vs. free-to-play vs. subscription vs. battle pass vs. hybrid. Does the monetization model support or undermine the core fun loop? What's the $/hour-of-fun ratio for the player?
+   - **Content Pipeline Viability** — for live-service / GaaS concepts: can the team sustain the content cadence the genre demands within the assumed budget/timeline? What's the minimum viable post-launch content pipeline?
+
+2. **Add monetization model scrutiny** — a standalone Phase 2 diagnostic dimension (Q8 for Startup/Company modes): "How does this game make money? Does the monetization model support or undermine the core fun loop?"
+
+3. **Add platform strategy dimension** — new Phase 1 context question: "What platform(s)? PC-first, mobile-first, console-first, simultaneous?" The answer routes the diagnostic differently (e.g., mobile → different Q2 competitive landscape, different Q4 wedge mechanics).
+
+4. **Deepen Q2 (Genre Landscape)** — add genre lifecycle stage assessment and platform-specific competitive landscape: "Is this genre ascending (hot), mature (established expectations), or declining (players leaving)? What does a genre veteran expect that a new player won't know to ask for?"
+
+5. **Deepen Q6 (Future-fit)** — add platform trajectory: "Where is the target platform in 3 years? Are new platforms, engines, or distribution models emerging that could obsolete the current target?"
+
+6. **Create missing template** — `.agents/templates/discovery/game-validation-brief-template.md` (referenced by the skill at line 233 but does not exist in the templates directory).
+
+**Primary agent:** `@founder` (Elena). May optionally invoke `@game-designer` (Samus) for MDA decomposition when the user struggles to articulate the mechanics-dynamics-aesthetics chain.
+
+**Output:** Updated `SKILL.md` (~80-120 added lines). New template file (~100 lines).
+
+**Effort:** ~2 days.
+
+---
+
 ### T2 Squad Updates
 
 - [ ] **T2.12** Update `game-studio` squad: add @game-designer, @game-developer, @narrative-engineer, @level-designer
@@ -630,6 +711,7 @@ For each skill: create folder + SKILL.md (bootloader) + steps/ (when multi-step)
 
 - [ ] All 7 T2 personas have full charters (same criteria as T1)
 - [ ] All 4 T2 skills are folder + step files
+- [ ] `/validate-game-idea` upgraded with Phase 3.5, monetization model, platform strategy, deepened Q2/Q6, and game-validation-brief-template.md
 - [ ] `game-studio` squad fully populated
 - [ ] **Ship-block:** a working game project (even a prototype) exercises every game persona and skill. If none found, game personas defer to a separate minor release.
 
@@ -663,18 +745,18 @@ For each skill: create folder + SKILL.md (bootloader) + steps/ (when multi-step)
 ## Cross-cutting updates
 
 - [ ] **T5.60** `validate_frontmatter.js` updates: persona count ≤ 50 (sanity alarm); no duplicate charter descriptions; channeled mentor count ≤ 2
-- [ ] **T5.61** `test_catalog_parity.js` updates with new persona/skill/squad counts (43/42/10)
-- [ ] **T5.62** `agent-contracts.md` updates with 22 new personas' owns/doesn't-own
-- [ ] **T5.63** `skills.md` quick-reference updates with 18 new skills
-- [ ] **T5.64** `AGENTS.md` updates agent count from 21 → 43
+- [ ] **T5.61** `test_catalog_parity.js` updates with new persona/skill/squad counts (44/43/10)
+- [ ] **T5.62** `agent-contracts.md` updates with 23 new personas' owns/doesn't-own
+- [ ] **T5.63** `skills.md` quick-reference updates with 19 new skills
+- [ ] **T5.64** `AGENTS.md` updates agent count from 21 → 44
 - [ ] **T5.65** `ROADMAP.md` updates with v2.2 entry
 
 ---
 
 ## Phase 5 Done when
 
-- [ ] 22 new personas all have v2 frontmatter, IDENTITY block, channeled mentor, icon, charter
-- [ ] 18 new skills all folder + step files
+- [ ] 23 new personas all have v2 frontmatter, IDENTITY block, channeled mentor, icon, charter
+- [ ] 19 new skills all folder + step files
 - [ ] 3 new opt-in squads work via `install-modules`
 - [ ] `humanize` invoked by default by every external-facing persona
 - [ ] No persona duplicates an existing persona's charter

@@ -1,0 +1,31 @@
+num,category,method_name,description,output_pattern
+1,testing,Smoke Test Design,Create a minimal offer that tests willingness to sign up or pay before building anything — the cheapest demand signal you can get,concept → landing page → signup conversion rate
+2,testing,Customer Discovery Interview,Structured interview protocol to test problem hypotheses — Steve Blank's framework for finding product-market fit before writing code,hypothesis → interview protocol → validated/invalidated
+3,testing,Five Second Test,Show users a design for 5 seconds then ask what they remember — tests whether your value prop is instantly clear,design → 5-second exposure → recall → clarity score
+4,testing,Concierge MVP,Manually deliver the service to early users before automating — learn what actually matters before building infrastructure,manual service → user feedback → feature priorities
+5,testing,Wizard of Oz MVP,Users interact with what appears to be a working product but you're doing the work behind the curtain — test desirability with zero code,simulated product → user belief → genuine feedback → validated need
+6,testing,Fake Door Test,Add a button or feature to your product that doesn't exist yet and measure clicks — gauges demand before committing engineering,button → click tracking → demand signal
+7,testing,A/B Test Design,Statistical comparison of two variants to determine which performs better — requires sample size calculation and success metric,control → variant → statistical analysis → winner
+8,testing,Cohort Analysis Setup,Define user segments based on common characteristics or time periods and track behavior differences — reveals patterns aggregate metrics hide,segments → time → behavior patterns → insights
+9,testing,North Star Metric Definition,Identify the single metric that best captures the core value your product delivers — aligns the entire team on what success means,candidates → evaluation → one metric to rule them all
+10,testing,HEART Framework,Happiness / Engagement / Adoption / Retention / Task Success — Google's UX measurement framework for product health,framework → metrics per dimension → dashboard
+11,testing,Pirate Metrics (AARRR),Acquisition / Activation / Retention / Revenue / Referral — the startup funnel that maps the full user journey,stages → funnel → bottlenecks → priorities
+12,testing,Usability Benchmark Study,Measure task completion rates, time-on-task, and error rates with real users — baseline for tracking improvement over time,tasks → metrics → baseline → improvement tracking
+13,testing,First Click Test,Where would users click first to accomplish a task? — the single most predictive usability metric,task → click location → % correct first click
+14,testing,Tree Testing,Evaluate information architecture by asking users to find items in a text-only structure — removes visual design influence,IA → task → findability → problems identified
+15,testing,Cognitive Walkthrough,Step through the interface as a new user asking "would the user know what to do at each step?" — expert review that catches learnability issues,walkthrough → confusion points → fixes
+16,testing,Session Recording Analysis,Watch real user sessions without interfering — reveals behavior that surveys and interviews miss,recordings → patterns → friction points
+17,testing,Net Promoter Score (NPS),Single-question survey: "How likely are you to recommend?" — industry standard for customer loyalty,ask → score → promoters / passives / detractors
+18,testing,CSAT (Customer Satisfaction),Immediate satisfaction rating after a specific interaction — more actionable than NPS for UX changes,interaction → rating → satisfaction trend
+19,testing,Feature Adoption Funnel,Measure the percentage of users who discover, try, and adopt a new feature — identifies where the funnel leaks,feature → awareness → trial → adoption → bottlenecks
+20,testing,RITE Method (Rapid Iterative Testing),Test with a few users, fix immediately, test again — ultra-fast iteration cycle for early-stage products,test → fix → test → fix → converge
+21,strategy,Lean Canvas,One-page business model template capturing problem/solution/key metrics/unfair advantage — startup validation on a single page,9 blocks → filled canvas → hypotheses identified
+22,strategy,Value Proposition Canvas,Map customer jobs/pains/gains against your product features/pain relievers/gain creators — ensures product-market fit,user profile → value map → fit assessment
+23,strategy,Opportunity Solution Tree,Trees of opportunities mapped to solutions mapped to experiments — visualizes product discovery from problem to validated solution,opportunities → solutions → experiments → validated path
+24,strategy,Minimum Viable Product (MVP),Smallest version that delivers value and enables learning — not the cheapest version, the fastest learning loop,idea → smallest testable version → learn → iterate
+25,strategy,Minimum Lovable Product (MLP),Smallest version users actually enjoy using — goes beyond functional MVP to emotional connection,MVP → delight factors → retention → love
+26,strategy,Innovation Accounting,Ries' framework for measuring progress in conditions of extreme uncertainty — replaces vanity metrics with actionable metrics,leap-of-faith assumptions → metrics → learning milestones
+27,validation,Pre-launch Waitlist,Collect emails or signups with a compelling value proposition before building — the cheapest way to gauge genuine interest,landing page → email collection → conversion → waitlist size
+28,validation,Crowdfunding Validation,Launch a crowdfunding campaign not just for money but for market validation — real commitment signals from real people,product → campaign → backers → market signal
+29,validation,Letter of Intent Collection,Ask potential customers to sign a non-binding letter of intent to purchase — stronger signal than surveys, lighter than pre-orders,outreach → LOI → commitment rate
+30,validation,Pilot Program Design,Run a paid pilot with 3-5 design partners who commit real money and time — deep learning from committed early adopters,design partners → pilot → deep feedback → iteration

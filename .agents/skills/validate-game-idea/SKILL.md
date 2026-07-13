@@ -230,7 +230,7 @@ Every verdict includes one concrete **next action** — a specific real-world st
 
 `artifacts/output/00-discovery/validation-brief.md`
 
-Use the template: `.agents/templates/game-validation-brief-template.md`
+Use the template: `.agents/templates/discovery/game-validation-brief-template.md`
 
 ## Handoff
 

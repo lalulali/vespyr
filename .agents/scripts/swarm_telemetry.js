@@ -246,13 +246,13 @@ function recordBaseline() {
   }
 
   // Count agent files
-  const agentsDir = path.join(process.cwd(), '.opencode', 'agents');
+  const agentsDir = path.join(process.cwd(), '.agents', 'agents');
   if (fs.existsSync(agentsDir)) {
     baseline.data.agent_files = fs.readdirSync(agentsDir).filter(f => f.endsWith('.md')).length;
   }
 
   // Count skill files
-  const skillsDir = path.join(process.cwd(), '.opencode', 'skills');
+  const skillsDir = path.join(process.cwd(), '.agents', 'skills');
   if (fs.existsSync(skillsDir)) {
     const countSkills = (dir) => {
       let count = 0;

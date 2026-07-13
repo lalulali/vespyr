@@ -10,7 +10,7 @@ When working in multi-developer mode (assigned a Developer ID like `@developer-N
 
 1.  **Identify Assignment:** Inspect the `Backlog` / `To Do` lists in `artifacts/output/04-planning/kanban.md` to identify your assigned Developer ID, worktree path, feature branch, and files.
 2.  **Work in Assigned Worktree:** All file writes, modifications, and command executions MUST happen in your assigned worktree directory:
-    *   *Path Example:* `~/.local/share/opencode/worktree/worktree-dev-N`
+    *   *Path Example:* `~/.local/share/agents/worktree/worktree-dev-N`
 3.  **Read Shared Repository Context:** You may read the Kanban board, architecture ADRs, product specs, user stories, and shared memory from the main repository directory (read-only access).
 4.  **Isolate Commit Boundaries:** Only perform commits and file modifications inside your worktree's designated feature branch (e.g., `feat/{base}/task-N`). Do NOT modify files assigned to other developers.
 5.  **Declare Dependencies:** If you require a modification in a file assigned to another developer, log the dependency in shared memory (`blockers-and-risks.md`) and coordinate before proceeding.

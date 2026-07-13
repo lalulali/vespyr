@@ -1,6 +1,8 @@
 # Vespyr
 
-A platform-agnostic, file-based multi-agent engine that installs a structured product development team directly into your repository. 21 specialized agent personas, 24 skills, shared persistent memory, and three architectural moats that no other framework combines.
+> English | [中文](README_CN.md)
+
+A platform-agnostic, file-based multi-agent engine that installs a structured product development team directly into your repository. 21 specialized agent personas, 24 atomic skills, spec-kernel artifacts, shared persistent memory, and three architectural moats that no other framework combines.
 
 [![Vespyr Version](https://img.shields.io/badge/version-2.0.0-blue)](https://github.com/lalulali/vespyr)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -125,6 +127,41 @@ Vespyr organizes work into 11 sequential phases. The canonical phase table at `.
 **Delegation Protocol:** Reasoning agents follow `.agents/references/delegation-policy.md` — a task-to-sub-agent mapping with threshold rules (≤3 small files read directly, >3 delegated to @reader; ≤50 lines written directly, >50 delegated to @writer). Direct I/O outside these rules requires `[DIRECT-IO-JUSTIFIED: ...]`.
 
 **Memory System:** 5 persistent files (`project-context`, `active-decisions`, `patterns-and-conventions`, `lessons-learned`, `blockers-and-risks`) plus an archive with keyword+recency scoring. Pattern pre-fetch surfaces relevant past decisions before the full context load.
+
+---
+
+## 🧩 Atomic Skills & Artifacts
+
+### Skills
+
+Every skill is a folder with a `SKILL.md` router (≤ 60 lines) + `steps/` directory. Each step is a self-contained 30-80 line file with its own halt conditions and delegation contract.
+
+- **Tri-modal:** `validate-idea` and `design` have `steps-create/`, `steps-edit/`, `steps-validate/` subfolders. Mode detection is automatic — the skill checks for the artifact and routes accordingly.
+- **Resumable:** The `stepsCompleted` array in the output document's YAML frontmatter makes resumption deterministic. Re-activate `develop` with `stepsCompleted: [1,2,3,4,5]` and it jumps to step 6.
+- **Delegation contracts:** Every step file declares which sub-agents to use for reads, writes, and runs — step-specific, not generic.
+
+### Artifacts
+
+Long monolithic templates (14KB PRDs) are replaced by a **5-field spec kernel** + content-typed companions:
+
+```
+<artifact-folder>/
+├── SPEC.md                  # Why / Capabilities / Constraints / Non-goals / Success signal
+├── glossary.md              # term definitions
+├── acceptance-criteria.md   # Given/When/Then per AC
+├── user-journey.md          # journey map
+└── decision-log.md          # canonical memory for this spec
+```
+
+Capability IDs (`CAP-1`, `CAP-2`, ...) are stable — subsequent artifacts reference them for traceability. `design.md` defines the visual spec (colors, typography, component states, animations, breakpoints, spacing) as the engineering source of truth.
+
+### State & Pipeline Enforcement
+
+`sprint-status.yaml` is the human-readable source of truth. `orchestrator_state.js status`/`next` print ASCII dashboards by default (phase pipeline, artifact completeness, blockers). Pipeline enforcement rules ensure agents verify phase state at startup and log completion at shutdown — no out-of-order execution.
+
+### Agent Depth
+
+All 9 domain expert agents have ≥ 200 lines with decision trees (when to invoke/escalate), failure modes (5-7 domain-specific), and conflict resolution patterns. `@code-reviewer` includes a 15-item false-positive guard that stops LLM reviewers from pattern-matching against their training corpus.
 
 ---
 

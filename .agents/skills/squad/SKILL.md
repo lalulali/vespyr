@@ -43,7 +43,7 @@ Manages Vespyr squads — predefined subsets of agents that activate together fo
 
 Read `artifacts/memory/project-context.md` to see if a squad is already configured. If not, default is `full-team`.
 
-If the project is brand new (no `project-context.md` exists), initialize it first using the template: `.agents/templates/project-context-template.md`. Fill in the `[CORE]` section with the project name, type, stack, phase, and squad.
+If the project is brand new (no `project-context.md` exists), initialize it first using the template: `.agents/templates/memory/project-context-template.md`. Fill in the `[CORE]` section with the project name, type, stack, phase, and squad.
 
 ### Step 2: List squads or switch squad
 
@@ -61,41 +61,32 @@ If the user specifies a squad (e.g., `/squad startup` or via `@squad:startup`):
    ```bash
    node .agents/scripts/orchestrator_state.js init --name "{projectName}" --type {projectType} --squad {squadName}
    ```
-   *(Note: Extract the `{projectName}` and `{projectType}` from the `[CORE]` section of `project-context.md` first, or default to "Blank Project" and "startup" if not found).*
-5. Report the switch to the user, displaying the active agents for the selected squad and the new starting phase.
+5. Report the switch to the user, displaying the active agents and the new starting phase.
 
 ### Step 3: Activation ceremony
 
 When a squad is activated:
-1. Write `artifacts/memory/active-squad.md`:
-   ```
-   # Active Squad
-   **Squad:** {squadName}
-   **Activated:** YYYY-MM-DD HH:MM
-   **Agents:** {comma-separated list}
-   **Context:** {reason for switching, from user}
-   ```
+1. Write `artifacts/memory/active-squad.md` with squad name, timestamp, agents, and context.
 2. Log the activation to `artifacts/memory/active-decisions.md`.
-3. Report to the user which agents are now active and which phase to start from.
+3. Report which agents are now active.
 
 ### Step 4: Deactivation ceremony
 
-When a squad is deactivated (switching to a new squad):
+When switching squads:
 1. Append a deactivation timestamp to `active-squad.md`.
-2. Note any incomplete work that the next squad inherits.
+2. Note any incomplete work for the next squad.
 3. Log to `active-decisions.md`.
 
 ### Step 5: Custom squad creation
 
-If the user wants a custom squad:
-1. Ask for: squad name, description, member agents (from the 21).
-2. Create `.agents/squads/{name}.md` with frontmatter listing agents.
+1. Ask for: squad name, description, member agents.
+2. Create `.agents/squads/{name}.md` with frontmatter.
 3. The new squad is immediately available for activation.
 
 ## Output artifacts
 
-- `artifacts/memory/active-squad.md` (current squad state)
-- `artifacts/memory/active-decisions.md` (activation log entry)
+- `artifacts/memory/active-squad.md`
+- `artifacts/memory/active-decisions.md`
 - `.agents/squads/{name}.md` (custom squad, if created)
 
 ## State machine integration

@@ -7,7 +7,6 @@ const readline = require("readline");
 
 const VERSION = "2.0.0";
 const AGENTS_SRC = path.join(__dirname, "..", ".agents");
-const DEFAULT_SUBAGENT_MODEL = "anthropic/claude-sonnet-4-5";
 
 const ASCII_ART = `
  __  __                                         
@@ -20,196 +19,39 @@ const ASCII_ART = `
                             \\ \\_\\     /\\___/    
                              \\/_/     \\/__/`;
 
-// Single source of truth for all harness capabilities. Each harness
-// declares an "engine" (primary install slot) and optional "channels"
-// (additional files/links). The installer, uninstaller, summary printer,
-// and migration detector all derive their behavior from this table —
-// no per-harness branching.
-//
-// Engine / channel fields:
-//   type:        "link" | "transpile" | "opencode-config"
-//   target:      project-relative path (joined to targetDir at install time)
-//   source:      project-relative source path (joined to targetDir)
-//   transpiler:  key in TRANSPILERS (only for type:"transpile")
-//   ext:         output file extension for uninstall mapping (transpile only)
-//   isFile:      hint for link engine — target is a single file, not a dir
-//   skipGlobal:  skip this channel during global install
-//   globalTarget: explicit global path override (rare; e.g. .windsurfrules
-//                 lives outside its harness's normal root folder)
-const HARNESS_CONFIG = {
-	opencode: {
+const HARNESS_OPTIONS = [
+	{
+		id: "opencode",
 		label: "opencode",
 		description: "scaffolds .opencode -> .agents symlink",
-		engine: {
-			type: "link",
-			target: ".opencode",
-			source: ".agents",
-			summary: ".opencode -> .agents",
-			summaryTag: "opencode harness",
-		},
-		channels: [
-			{
-				type: "opencode-config",
-				target: "opencode.json",
-				summary: "opencode.json",
-				summaryTag: "subagent + skill config",
-				skipGlobal: true,
-			},
-		],
 	},
-	claude: {
+	{
+		id: "claude",
 		label: "Claude Code",
 		description: "scaffolds .claude -> .agents symlink + CLAUDE.md",
-		engine: {
-			type: "link",
-			target: ".claude",
-			source: ".agents",
-			summary: ".claude -> .agents",
-			summaryTag: "Claude Code harness",
-		},
-		rootDoc: { filename: "CLAUDE.md" },
 	},
-	cursor: {
+	{
+		id: "cursor",
 		label: "Cursor Rules",
 		description: "scaffolds .cursor/rules/*.mdc rules with metadata",
-		engine: {
-			type: "transpile",
-			target: ".cursor/rules",
-			source: ".agents/agents",
-			transpiler: "cursor",
-			ext: "mdc",
-			summary: ".cursor/rules/*.mdc",
-			summaryTag: "Cursor rules",
-		},
 	},
-	github: {
+	{
+		id: "github",
 		label: "GitHub Copilot & CLI",
 		description: "scaffolds .github/agents/*.yml compiled rules",
-		engine: {
-			type: "transpile",
-			target: ".github/agents",
-			source: ".agents/agents",
-			transpiler: "copilot",
-			ext: "yml",
-			summary: ".github/agents/*.yml",
-			summaryTag: "Copilot agents",
-		},
-		channels: [
-			{
-				type: "link",
-				target: ".github/copilot-instructions.md",
-				source: "AGENTS.md",
-				isFile: true,
-				summary: ".github/copilot-instructions.md",
-				summaryTag: "Copilot instructions",
-			},
-		],
 	},
-	kiro: {
-		label: "Kiro Steering",
-		description: "scaffolds .kiro/steering/ manual rule folder",
-		engine: {
-			type: "link",
-			target: ".kiro/steering",
-			source: ".agents/agents",
-			summary: ".kiro/steering -> agents",
-			summaryTag: "Kiro steering",
-		},
-	},
-	windsurf: {
+	{
+		id: "windsurf",
 		label: "Windsurf",
 		description:
 			"scaffolds .windsurf/workflows symlink & .windsurfrules symlink",
-		engine: {
-			type: "link",
-			target: ".windsurf/workflows",
-			source: ".agents/skills",
-			summary: ".windsurf/workflows -> skills",
-			summaryTag: "Windsurf workflows",
-		},
-		channels: [
-			{
-				id: "windsurf-rules",
-				type: "link",
-				target: ".windsurfrules",
-				source: ".agents/GUARDRAILS.md",
-				isFile: true,
-				globalTarget: ".windsurfrules",
-				summary: ".windsurfrules -> GUARDRAILS",
-				summaryTag: "Windsurf rules",
-			},
-		],
 	},
-	hermes: {
-		label: "Hermes Agent",
-		description: "scaffolds .hermes/skills/ -> .agents/skills (agentskills.io)",
-		engine: {
-			type: "link",
-			target: ".hermes/skills",
-			source: ".agents/skills",
-			summary: ".hermes/skills",
-			summaryTag: "Hermes Agent, agentskills.io",
-		},
+	{
+		id: "kiro",
+		label: "Kiro Steering",
+		description: "scaffolds .kiro/steering/ manual rule folder",
 	},
-	openclaw: {
-		label: "OpenClaw",
-		description:
-			"scaffolds .openclaw/workspace/{AGENTS.md,skills/} (agentskills.io)",
-		engine: {
-			type: "link",
-			target: ".openclaw/workspace/skills",
-			source: ".agents/skills",
-			summary: ".openclaw/workspace/skills",
-			summaryTag: "OpenClaw skills, agentskills.io",
-		},
-		channels: [
-			{
-				type: "link",
-				target: ".openclaw/workspace/AGENTS.md",
-				source: "AGENTS.md",
-				isFile: true,
-				summary: ".openclaw/workspace/AGENTS.md",
-				summaryTag: "OpenClaw project memory",
-				skipGlobal: true,
-			},
-		],
-	},
-};
-
-// Derived: harness options for the wizard
-const HARNESS_OPTIONS = Object.entries(HARNESS_CONFIG).map(([id, c]) => ({
-	id,
-	label: c.label,
-	description: c.description,
-}));
-
-// Derived: symlink migration specs (one per link-type channel)
-const HARNESS_SYMLINK_SPECS = Object.entries(HARNESS_CONFIG).flatMap(
-	([id, c]) => {
-		const specs = [];
-		if (c.engine.type === "link") {
-			specs.push({
-				id,
-				label: c.engine.summary,
-				target: c.engine.target,
-				source: c.engine.source,
-				type: c.engine.isFile ? "file" : "dir",
-			});
-		}
-		for (const ch of c.channels || []) {
-			if (ch.type === "link") {
-				specs.push({
-					id: ch.id || `${id}-${path.basename(ch.target)}`,
-					label: ch.summary,
-					target: ch.target,
-					source: ch.source,
-					type: ch.isFile ? "file" : "dir",
-				});
-			}
-		}
-		return specs;
-	},
-);
+];
 
 let createdLinks = [];
 let installed = false;
@@ -240,8 +82,6 @@ function parseFlags(argv) {
 		yes: false,
 		target: null,
 		harnesses: [],
-		model: null,
-		syncDocs: false,
 		version: false,
 		help: false,
 	};
@@ -260,10 +100,6 @@ function parseFlags(argv) {
 				.split(",")
 				.map((s) => s.trim())
 				.filter(Boolean);
-		} else if (arg === "--model") {
-			flags.model = args[++i] || null;
-		} else if (arg === "--sync-docs") {
-			flags.syncDocs = true;
 		} else if (arg === "--version" || arg === "-v") {
 			flags.version = true;
 		} else if (arg === "--help" || arg === "-h") {
@@ -278,24 +114,29 @@ function parseFlags(argv) {
 }
 
 function detectState(targetDir) {
+	const opencodePath = path.join(targetDir, ".opencode");
 	const agentsPath = path.join(targetDir, ".agents");
 	const versionPath = path.join(agentsPath, ".vespyr-version");
-	if (fs.existsSync(agentsPath) && fs.existsSync(versionPath)) {
+
+	const opencodeExists = fs.existsSync(opencodePath);
+	const agentsExists = fs.existsSync(agentsPath) && fs.existsSync(versionPath);
+
+	if (agentsExists) {
 		return "installed";
 	}
-	return "fresh";
-}
 
-function detectUnlinkedHarnesses(targetDir) {
-	return HARNESS_SYMLINK_SPECS.filter((spec) => {
-		const target = path.join(targetDir, spec.target);
+	if (opencodeExists) {
 		try {
-			const stat = fs.lstatSync(target);
-			return !stat.isSymbolicLink();
+			const stat = fs.lstatSync(opencodePath);
+			if (!stat.isSymbolicLink()) {
+				return "migrate";
+			}
 		} catch (e) {
-			return false;
+			// ignore
 		}
-	});
+	}
+
+	return "fresh";
 }
 
 function parseFrontmatter(content) {
@@ -377,25 +218,17 @@ function createLinkOrCopy(target, linkPath, type = "dir", method = "symlink") {
 	}
 }
 
-function transpileCopilotYAML(agentsDir, outputDir, options = {}) {
-	const merge = options.merge === true;
-	const ext = "yml";
-	if (dryRun) {
-		const fileCount = fs.existsSync(agentsDir)
-			? fs.readdirSync(agentsDir).filter((f) => f.endsWith(".md")).length
-			: "vespyr";
-		logDry(
-			`${merge ? "Would merge" : "Would create"} ${fileCount} Copilot YAML files in ${outputDir}`,
-		);
-		return { written: 0, preserved: 0 };
-	}
-
+function transpileCopilotYAML(agentsDir, outputDir) {
 	const agentFiles = fs.readdirSync(agentsDir).filter((f) => f.endsWith(".md"));
+	if (dryRun) {
+		logDry(
+			`Would create ${agentFiles.length} Copilot YAML files in ${outputDir}`,
+		);
+		return;
+	}
 
 	fs.mkdirSync(outputDir, { recursive: true });
 
-	let written = 0;
-	let preserved = 0;
 	for (const file of agentFiles) {
 		const content = fs.readFileSync(path.join(agentsDir, file), "utf8");
 		const { data, body } = parseFrontmatter(content);
@@ -406,12 +239,6 @@ function transpileCopilotYAML(agentsDir, outputDir, options = {}) {
 
 		const name = path.basename(file, ".md");
 		const desc = (data.description || "").replace(/"/g, '\\"');
-		const targetFile = path.join(outputDir, `${name}.${ext}`);
-
-		if (merge && fs.existsSync(targetFile)) {
-			preserved++;
-			continue;
-		}
 
 		const yml = [
 			`name: ${name}`,
@@ -421,31 +248,21 @@ function transpileCopilotYAML(agentsDir, outputDir, options = {}) {
 			"",
 		].join("\n");
 
-		fs.writeFileSync(targetFile, yml);
-		written++;
+		fs.writeFileSync(path.join(outputDir, `${name}.yml`), yml);
 	}
-	return { written, preserved };
 }
 
-function transpileCursorMDC(agentsDir, outputDir, options = {}) {
-	const merge = options.merge === true;
-	const ext = "mdc";
-	if (dryRun) {
-		const fileCount = fs.existsSync(agentsDir)
-			? fs.readdirSync(agentsDir).filter((f) => f.endsWith(".md")).length
-			: "vespyr";
-		logDry(
-			`${merge ? "Would merge" : "Would create"} ${fileCount} Cursor MDC files in ${outputDir}`,
-		);
-		return { written: 0, preserved: 0 };
-	}
-
+function transpileCursorMDC(agentsDir, outputDir) {
 	const agentFiles = fs.readdirSync(agentsDir).filter((f) => f.endsWith(".md"));
+	if (dryRun) {
+		logDry(
+			`Would create ${agentFiles.length} Cursor MDC files in ${outputDir}`,
+		);
+		return;
+	}
 
 	fs.mkdirSync(outputDir, { recursive: true });
 
-	let written = 0;
-	let preserved = 0;
 	for (const file of agentFiles) {
 		const content = fs.readFileSync(path.join(agentsDir, file), "utf8");
 		const { data, body } = parseFrontmatter(content);
@@ -456,12 +273,6 @@ function transpileCursorMDC(agentsDir, outputDir, options = {}) {
 
 		const name = path.basename(file, ".md");
 		const desc = (data.description || "").replace(/"/g, '\\"');
-		const targetFile = path.join(outputDir, `${name}.${ext}`);
-
-		if (merge && fs.existsSync(targetFile)) {
-			preserved++;
-			continue;
-		}
 
 		const mdc = [
 			"---",
@@ -473,17 +284,9 @@ function transpileCursorMDC(agentsDir, outputDir, options = {}) {
 			body,
 		].join("\n");
 
-		fs.writeFileSync(targetFile, mdc);
-		written++;
+		fs.writeFileSync(path.join(outputDir, `${name}.mdc`), mdc);
 	}
-	return { written, preserved };
 }
-
-// Transpiler registry — populated after the transpile functions are defined.
-const TRANSPILERS = {
-	cursor: transpileCursorMDC,
-	copilot: transpileCopilotYAML,
-};
 
 function scaffoldArtifacts(targetDir, projectName, userNickname = "User") {
 	const artifactsDir = path.join(targetDir, "artifacts");
@@ -592,84 +395,39 @@ function scaffoldArtifacts(targetDir, projectName, userNickname = "User") {
 	);
 }
 
-const ROOT_DOC_CONFIGS = [
-	{
-		filename: "AGENTS.md",
-		harnessDir: ".agents",
-		selfRef: "this document",
-		docLabel: "",
-		includeRootOnly: true,
-	},
-	{
-		filename: "agent.md",
-		harnessDir: ".agents",
-		selfRef: "agent.md",
-		docLabel: "",
-		includeRootOnly: false,
-	},
-	{
-		filename: "CLAUDE.md",
-		harnessDir: ".claude",
-		selfRef: "CLAUDE.md",
-		docLabel: "CLAUDE.md ",
-		includeRootOnly: false,
-		requiresHarness: "claude",
-	},
-];
-
-function renderScaffold(canonical, config) {
-	let result = canonical;
-
-	if (config.includeRootOnly) {
-		result = result
-			.replace(/<!-- BEGIN: ROOT_ONLY -->\n?/g, "")
-			.replace(/\n?<!-- END: ROOT_ONLY -->/g, "");
-	} else {
-		result = result.replace(
-			/<!-- BEGIN: ROOT_ONLY -->[\s\S]*?<!-- END: ROOT_ONLY -->\n?/g,
-			"",
-		);
-	}
-
-	result = result.replace(/\[.harness-folder\]/g, config.harnessDir);
-	result = result.replace(/\{SELF_REF\}/g, config.selfRef);
-	result = result.replace(/\{DOC_LABEL\}/g, config.docLabel);
-
-	return result;
-}
-
 function bootstrapRootDocs(targetDir, projectName, selectedHarnesses) {
-	const templatesDir = fs.existsSync(
-		path.join(targetDir, ".agents", "templates"),
-	)
-		? path.join(targetDir, ".agents", "templates")
-		: path.join(AGENTS_SRC, "templates");
-	const canonicalPath = path.join(templatesDir, "AGENTS.md.canonical");
-	if (!fs.existsSync(canonicalPath)) {
-		logWarn(
-			`Canonical template missing at ${canonicalPath} — skipping root docs`,
-		);
-		return;
-	}
-	const canonical = fs.readFileSync(canonicalPath, "utf8");
+	const commandsDir = fs.existsSync(path.join(targetDir, ".agents", "commands"))
+		? path.join(targetDir, ".agents", "commands")
+		: path.join(AGENTS_SRC, "commands");
 
-	const docsToWrite = ROOT_DOC_CONFIGS.filter(
-		(cfg) =>
-			!cfg.requiresHarness || selectedHarnesses.includes(cfg.requiresHarness),
+	const agentsMd = fs
+		.readFileSync(path.join(commandsDir, "scaffold-agents.md"), "utf8")
+		.replace(/\{Project Name\}/g, projectName);
+	const agentMd = fs.readFileSync(
+		path.join(commandsDir, "scaffold-agent.md"),
+		"utf8",
 	);
 
+	const agentsPath = path.join(targetDir, "AGENTS.md");
+	const agentPath = path.join(targetDir, "agent.md");
+
 	if (dryRun) {
-		for (const cfg of docsToWrite) {
-			const target = path.join(targetDir, cfg.filename);
-			if (!fs.existsSync(target)) logDry(`Would create ${cfg.filename}`);
-		}
+		if (!fs.existsSync(agentsPath)) logDry(`Would create AGENTS.md`);
+		if (!fs.existsSync(agentPath)) logDry(`Would create agent.md`);
+		if (selectedHarnesses.includes("claude")) logDry(`Would create CLAUDE.md`);
 		return;
 	}
 
-	for (const cfg of docsToWrite) {
-		const target = path.join(targetDir, cfg.filename);
-		if (fs.existsSync(target)) continue;
-		fs.writeFileSync(target, renderScaffold(canonical, cfg), "utf8");
+	if (!fs.existsSync(agentsPath)) fs.writeFileSync(agentsPath, agentsMd);
+	if (!fs.existsSync(agentPath)) fs.writeFileSync(agentPath, agentMd);
+
+	if (selectedHarnesses.includes("claude")) {
+		const claudeMd = fs.readFileSync(
+			path.join(commandsDir, "scaffold-claude.md"),
+			"utf8",
+		);
+		const claudePath = path.join(targetDir, "CLAUDE.md");
+		if (!fs.existsSync(claudePath)) fs.writeFileSync(claudePath, claudeMd);
 	}
 }
 
@@ -724,38 +482,7 @@ function updatePathsInDir(dir) {
 	}
 }
 
-function summaryActionMarker(action) {
-	if (action === "skipped") return "⚠";
-	return "✓";
-}
-
-function summaryActionNote(action, fallback) {
-	if (action === "merged") return "merged with user content";
-	if (action === "skipped") return "skipped (user content preserved)";
-	if (action === "unchanged") return "unchanged";
-	return fallback || "done";
-}
-
-function summaryDefaultNote(channel) {
-	if (channel.type === "transpile") return "transpiled";
-	if (channel.type === "opencode-config") return "written";
-	if (channel.type === "link") {
-		// Hermes / OpenClaw skills historically surfaced a "agentskills.io" note
-		// when freshly linked; the summaryTag already carries that information.
-		return "linked";
-	}
-	return "done";
-}
-
-function pushSummaryLine(lines, channel, action) {
-	const marker = summaryActionMarker(action);
-	const note = summaryActionNote(action, summaryDefaultNote(channel));
-	const summary = (channel.summary || channel.target || "").padEnd(32);
-	const tag = channel.summaryTag || "harness";
-	lines.push(`    ${marker} ${summary} (${tag} — ${note})`);
-}
-
-function printSummary(targetDir, selections, installResults = {}) {
+function printSummary(targetDir, selections) {
 	const lines = [
 		`\n============================================================`,
 		`   VESPYR v${VERSION} — Installation Complete`,
@@ -772,24 +499,24 @@ function printSummary(targetDir, selections, installResults = {}) {
 		`    ✓ artifacts/                      (memory + output directories)`,
 	];
 
-	for (const id of selections.harnesses) {
-		const config = HARNESS_CONFIG[id];
-		const result = installResults[id];
-		if (!config || !result) continue;
-
-		pushSummaryLine(lines, config.engine, result.engine);
-
-		const channels = config.channels || [];
-		for (let i = 0; i < channels.length; i++) {
-			pushSummaryLine(lines, channels[i], result.channels?.[i]);
-		}
-
-		if (config.rootDoc) {
-			lines.push(
-				`    ✓ ${config.rootDoc.filename.padEnd(32)} (${config.label} project memory)`,
-			);
-		}
+	if (selections.harnesses.includes("opencode"))
+		lines.push(`    ✓ .opencode -> .agents            (opencode harness)`);
+	if (selections.harnesses.includes("claude")) {
+		lines.push(`    ✓ .claude -> .agents              (Claude Code harness)`);
+		lines.push(
+			`    ✓ CLAUDE.md                       (Claude Code project memory)`,
+		);
 	}
+	if (selections.harnesses.includes("cursor"))
+		lines.push(`    ✓ .cursor/rules/*.mdc             (21 Cursor rules)`);
+	if (selections.harnesses.includes("github"))
+		lines.push(`    ✓ .github/agents/*.yml            (21 Copilot agents)`);
+	if (selections.harnesses.includes("windsurf")) {
+		lines.push(`    ✓ .windsurf/workflows -> skills   (Windsurf workflows)`);
+		lines.push(`    ✓ .windsurfrules -> GUARDRAILS    (Windsurf rules)`);
+	}
+	if (selections.harnesses.includes("kiro"))
+		lines.push(`    ✓ .kiro/steering -> agents        (Kiro steering)`);
 
 	lines.push(
 		``,
@@ -799,8 +526,8 @@ function printSummary(targetDir, selections, installResults = {}) {
 		`    3. Use @help-me for a tailored navigation report`,
 		`    4. Use /squad to view or switch team presets`,
 		``,
-		`  Docs: https://github.com/lalulali/vespyr`,
-		`  Report issues: https://github.com/lalulali/vespyr/issues`,
+		`  Docs: https://github.com/anomalyco/vespyr`,
+		`  Report issues: https://github.com/anomalyco/vespyr/issues`,
 		`============================================================`,
 	);
 
@@ -1029,62 +756,125 @@ function askQuestion(question, defaultVal = "") {
 	});
 }
 
-async function installHarnesses(targetDir, selections, method, model) {
-	const ctx = { targetDir, method, model, isGlobal: false };
-	const results = {};
-	for (const id of selections) {
-		results[id] = installHarness(id, ctx);
+async function installHarnesses(targetDir, selections, method) {
+	const agentsTarget = path.join(targetDir, ".agents");
+
+	if (selections.includes("opencode")) {
+		const linkPath = path.join(targetDir, ".opencode");
+		handleConflict(linkPath, ".opencode", targetDir, method);
+		if (!fs.existsSync(linkPath)) {
+			createLinkOrCopy(
+				path.relative(targetDir, agentsTarget),
+				linkPath,
+				"dir",
+				method,
+			);
+		}
 	}
 
-	// Drop the .agents/commands folder when opencode is not selected
+	if (selections.includes("claude")) {
+		const linkPath = path.join(targetDir, ".claude");
+		handleConflict(linkPath, ".claude", targetDir, method);
+		if (!fs.existsSync(linkPath)) {
+			createLinkOrCopy(
+				path.relative(targetDir, agentsTarget),
+				linkPath,
+				"dir",
+				method,
+			);
+		}
+	}
+
+	if (selections.includes("cursor")) {
+		const rulesDir = path.join(targetDir, ".cursor", "rules");
+		if (!dryRun && !fs.existsSync(rulesDir)) {
+			fs.mkdirSync(rulesDir, { recursive: true });
+		}
+		transpileCursorMDC(path.join(agentsTarget, "agents"), rulesDir);
+	}
+
+	if (selections.includes("github")) {
+		const agentsOutDir = path.join(targetDir, ".github", "agents");
+		if (!dryRun && !fs.existsSync(agentsOutDir)) {
+			fs.mkdirSync(agentsOutDir, { recursive: true });
+		}
+		transpileCopilotYAML(path.join(agentsTarget, "agents"), agentsOutDir);
+
+		const copilotInstructions = path.join(
+			targetDir,
+			".github",
+			"copilot-instructions.md",
+		);
+		const agentsMdPath = path.join(targetDir, "AGENTS.md");
+		if (!fs.existsSync(copilotInstructions)) {
+			createLinkOrCopy(
+				path.relative(path.join(targetDir, ".github"), agentsMdPath),
+				copilotInstructions,
+				"file",
+				method,
+			);
+		}
+	}
+
+	if (selections.includes("windsurf")) {
+		const workflowsDir = path.join(targetDir, ".windsurf", "workflows");
+		if (!dryRun) {
+			fs.mkdirSync(path.join(targetDir, ".windsurf"), { recursive: true });
+		}
+		handleConflict(workflowsDir, "windsurf workflows", targetDir, method);
+		if (!fs.existsSync(workflowsDir)) {
+			createLinkOrCopy(
+				path.relative(
+					path.join(targetDir, ".windsurf"),
+					path.join(agentsTarget, "skills"),
+				),
+				workflowsDir,
+				"dir",
+				method,
+			);
+		}
+
+		const windsurfRules = path.join(targetDir, ".windsurfrules");
+		handleConflict(windsurfRules, ".windsurfrules", targetDir, method);
+		if (!fs.existsSync(windsurfRules)) {
+			createLinkOrCopy(
+				path.relative(targetDir, path.join(agentsTarget, "GUARDRAILS.md")),
+				windsurfRules,
+				"file",
+				method,
+			);
+		}
+	}
+
+	if (selections.includes("kiro")) {
+		const steeringDir = path.join(targetDir, ".kiro", "steering");
+		if (!dryRun) {
+			fs.mkdirSync(path.join(targetDir, ".kiro"), { recursive: true });
+		}
+		handleConflict(steeringDir, "kiro steering", targetDir, method);
+		if (!fs.existsSync(steeringDir)) {
+			createLinkOrCopy(
+				path.relative(
+					path.join(targetDir, ".kiro"),
+					path.join(agentsTarget, "agents"),
+				),
+				steeringDir,
+				"dir",
+				method,
+			);
+		}
+	}
+
 	if (!selections.includes("opencode")) {
-		const targetCommands = path.join(targetDir, ".agents", "commands");
+		const targetCommands = path.join(agentsTarget, "commands");
 		if (fs.existsSync(targetCommands)) {
 			if (!dryRun) {
 				fs.rmSync(targetCommands, { recursive: true, force: true });
 			} else {
-				logDry(
-					`Would remove commands folder from ${targetDir}/.agents because opencode is not selected`,
-				);
+				logDry(`Would remove commands folder from ${agentsTarget} because opencode is not selected`);
 			}
 		}
 	}
-
-	return results;
-}
-
-function installOpencodeConfig(targetDir, model) {
-	const target = path.join(targetDir, "opencode.json");
-	if (fs.existsSync(target)) {
-		if (dryRun) {
-			logDry(`Would skip opencode.json (already exists)`);
-		}
-		return "unchanged";
-	}
-
-	const templatePath = path.join(
-		AGENTS_SRC,
-		"templates",
-		"opencode.json.template",
-	);
-	if (!fs.existsSync(templatePath)) {
-		logWarn(`opencode.json template missing at ${templatePath} — skipping`);
-		return "skipped";
-	}
-
-	const resolvedModel = model !== null ? model : DEFAULT_SUBAGENT_MODEL;
-	const rendered = fs
-		.readFileSync(templatePath, "utf8")
-		.replace(/\{DEFAULT_MODEL\}/g, resolvedModel);
-
-	if (dryRun) {
-		logDry(`Would write opencode.json (model: ${resolvedModel})`);
-		return "created";
-	}
-
-	fs.writeFileSync(target, rendered, "utf8");
-	log(`  ✓ opencode.json                       (model: ${resolvedModel})`);
-	return "created";
 }
 
 function handleConflict(linkPath, name, targetDir, method = "symlink") {
@@ -1126,151 +916,6 @@ function handleConflict(linkPath, name, targetDir, method = "symlink") {
 	}
 }
 
-function enrichHarnessTarget(targetPath, sourcePath, method, label) {
-	let existingStat = null;
-	try {
-		existingStat = fs.lstatSync(targetPath);
-	} catch (e) {
-		/* does not exist */
-	}
-
-	if (!existingStat) {
-		const parentDir = path.dirname(targetPath);
-		if (!dryRun) {
-			fs.mkdirSync(parentDir, { recursive: true });
-		}
-		if (method === "symlink") {
-			if (dryRun) {
-				logDry(
-					`Would symlink ${targetPath} -> ${path.relative(parentDir, sourcePath)}`,
-				);
-			} else {
-				const sourceStat = fs.statSync(sourcePath);
-				createLinkOrCopy(
-					path.relative(parentDir, sourcePath),
-					targetPath,
-					sourceStat.isDirectory() ? "dir" : "file",
-					"symlink",
-				);
-			}
-		} else if (!dryRun) {
-			if (fs.statSync(sourcePath).isDirectory()) {
-				fs.cpSync(sourcePath, targetPath, { recursive: true });
-			} else {
-				fs.copyFileSync(sourcePath, targetPath);
-			}
-		} else {
-			logDry(`Would copy ${sourcePath} to ${targetPath}`);
-		}
-		return "created";
-	}
-
-	if (existingStat.isSymbolicLink()) {
-		const linkTarget = fs.readlinkSync(targetPath);
-		const resolved = path.resolve(path.dirname(targetPath), linkTarget);
-		if (resolved === path.resolve(sourcePath)) {
-			return "unchanged";
-		}
-		logWarn(
-			`${label} is a symlink to "${linkTarget}" — leaving it alone to preserve user content.`,
-		);
-		return "skipped";
-	}
-
-	if (existingStat.isDirectory()) {
-		if (method === "symlink") {
-			logWarn(
-				`${label} already exists as a directory. Vespyr content NOT symlinked. To include vespyr ${existingStat.isDirectory() ? "skills" : "items"} alongside, configure "${sourcePath}" as an external directory in your ${label.split(" ")[0]} config, or rename/remove the existing folder first.`,
-			);
-			return "skipped";
-		}
-		const existingItems = fs.readdirSync(targetPath);
-		const userOnlyCount = existingItems.filter(
-			(name) => !fs.existsSync(path.join(sourcePath, name)),
-		).length;
-		let copied = 0;
-		let skipped = 0;
-		const items = fs.readdirSync(sourcePath);
-		for (const item of items) {
-			const dest = path.join(targetPath, item);
-			if (fs.existsSync(dest)) {
-				skipped++;
-				continue;
-			}
-			if (!dryRun) {
-				fs.cpSync(path.join(sourcePath, item), dest, { recursive: true });
-			}
-			copied++;
-		}
-		if (!dryRun) {
-			log(
-				`  ${label}: merged ${copied} vespyr item(s), kept ${skipped} user-named item(s), preserved ${userOnlyCount} user-only item(s)`,
-			);
-		} else {
-			logDry(
-				`Would merge ${copied} vespyr item(s) into ${targetPath}, keep ${skipped} user-named item(s), preserve ${userOnlyCount} user-only item(s)`,
-			);
-		}
-		return "merged";
-	}
-
-	logWarn(
-		`${label} already exists as a file. Not overwriting. To use vespyr's version, remove or rename the existing file first.`,
-	);
-	return "skipped";
-}
-
-function enrichHarnessTranspileTarget(
-	outputDir,
-	agentsDir,
-	label,
-	transpileFn,
-) {
-	let existingStat = null;
-	try {
-		existingStat = fs.lstatSync(outputDir);
-	} catch (e) {
-		/* does not exist */
-	}
-
-	if (!existingStat) {
-		const parentDir = path.dirname(outputDir);
-		if (!dryRun) {
-			fs.mkdirSync(parentDir, { recursive: true });
-		}
-		const result = transpileFn(agentsDir, outputDir);
-		if (!dryRun) {
-			log(
-				`  ${label}: wrote ${result.written} file(s) into ${outputDir}`,
-			);
-		}
-		return "created";
-	}
-
-	if (existingStat.isSymbolicLink()) {
-		const linkTarget = fs.readlinkSync(outputDir);
-		logWarn(
-			`${label} is a symlink to "${linkTarget}" — leaving it alone to preserve user content.`,
-		);
-		return "skipped";
-	}
-
-	if (existingStat.isDirectory()) {
-		const result = transpileFn(agentsDir, outputDir, { merge: true });
-		if (!dryRun) {
-			log(
-				`  ${label}: merged ${result.written} vespyr file(s), preserved ${result.preserved} user file(s) in ${outputDir}`,
-			);
-		}
-		return "merged";
-	}
-
-	logWarn(
-		`${label} already exists as a file. Not overwriting. To use vespyr's output, remove or rename the existing file first.`,
-	);
-	return "skipped";
-}
-
 function getGlobalPath(harness) {
 	const home = os.homedir();
 	const platform = process.platform;
@@ -1298,109 +943,9 @@ function getGlobalPath(harness) {
 				: platform === "linux"
 					? path.join(home, ".config", "Cursor", "User", "globalRules")
 					: path.join(home, ".config", "Cursor", "User", "globalRules"),
-		hermes: path.join(home, ".hermes"),
-		openclaw: path.join(home, ".openclaw", "workspace"),
 	};
 
 	return paths[harness] || null;
-}
-
-// ---------------------------------------------------------------------------
-// Unified harness install engine
-//
-// All harnesses go through the same code path. Each harness's HARNESS_CONFIG
-// entry describes its engine (primary slot) and optional channels (extras).
-// These helpers translate those declarations into concrete file operations.
-// ---------------------------------------------------------------------------
-
-// Resolve the global install path for a channel under the global install ctx.
-// For most harnesses the path is getGlobalPath(harnessId) + the last segment
-// of channel.target. For opencode/claude the harness root IS the target.
-// For channels with an explicit globalTarget (e.g. .windsurfrules) the
-// override is used verbatim relative to home.
-function resolveGlobalTarget(channel, harnessId) {
-	if (channel.globalTarget) {
-		return path.join(os.homedir(), channel.globalTarget);
-	}
-	const root = getGlobalPath(harnessId);
-	if (harnessId === "opencode" || harnessId === "claude") return root;
-	return path.join(root, path.basename(channel.target));
-}
-
-// Resolve (target, source) absolute paths for a channel under a given ctx.
-// ctx: { harnessId, targetDir, isGlobal, globalAgentsDir }
-function resolveChannelPaths(channel, ctx) {
-	if (!ctx.isGlobal) {
-		return {
-			target: path.join(ctx.targetDir, channel.target),
-			source: path.join(ctx.targetDir, channel.source),
-		};
-	}
-	const source = path.join(
-		ctx.globalAgentsDir,
-		channel.source.replace(/^\.agents\/?/, ""),
-	);
-	return { target: resolveGlobalTarget(channel, ctx.harnessId), source };
-}
-
-// Apply a single channel (link / transpile / opencode-config) to the install
-// context. Returns the action string ("created" | "merged" | "skipped" | ...).
-function applyChannel(channel, ctx) {
-	switch (channel.type) {
-		case "link": {
-			const { target, source } = resolveChannelPaths(channel, ctx);
-			return enrichHarnessTarget(
-				target,
-				source,
-				ctx.method,
-				channel.summaryTag || ctx.harnessId,
-			);
-		}
-		case "transpile": {
-			const { target, source } = resolveChannelPaths(channel, ctx);
-			return enrichHarnessTranspileTarget(
-				target,
-				source,
-				channel.summaryTag || ctx.harnessId,
-				TRANSPILERS[channel.transpiler],
-			);
-		}
-		case "opencode-config":
-			return installOpencodeConfig(ctx.targetDir, ctx.model);
-		default:
-			logWarn(`Unknown channel type for ${ctx.harnessId}: ${channel.type}`);
-			return "skipped";
-	}
-}
-
-// Install a single harness: its engine plus any non-skipped channels.
-function installHarness(harnessId, ctx) {
-	const config = HARNESS_CONFIG[harnessId];
-	if (!config) {
-		logWarn(`Unknown harness: ${harnessId}`);
-		return null;
-	}
-	const channelCtx = { ...ctx, harnessId };
-	const channels = config.channels || [];
-	const visible = ctx.isGlobal
-		? channels.filter((ch) => !ch.skipGlobal)
-		: channels;
-	return {
-		engine: applyChannel(config.engine, channelCtx),
-		channels: visible.map((ch) => applyChannel(ch, channelCtx)),
-	};
-}
-
-// Detect which harnesses are currently installed (used by update / reconfigure).
-// isGlobal: false → check project-relative targets, true → check global paths.
-function detectInstalledHarnesses(targetDir, isGlobal) {
-	return Object.keys(HARNESS_CONFIG).filter((id) => {
-		const config = HARNESS_CONFIG[id];
-		const target = isGlobal
-			? resolveGlobalTarget(config.engine, id)
-			: path.join(targetDir, config.engine.target);
-		return fs.existsSync(target);
-	});
 }
 
 async function performGlobalInstall(selections, method, userNickname) {
@@ -1440,17 +985,88 @@ async function performGlobalInstall(selections, method, userNickname) {
 		}
 	}
 
-	// Install every selected harness through the same engine used for
-	// project installs — only the targetDir and isGlobal flag differ.
-	const ctx = {
-		targetDir: home,
-		method,
-		model: null,
-		isGlobal: true,
-		globalAgentsDir,
+	// Create harness links at global paths
+	const harnessLinkMap = {
+		opencode: { type: "dir", source: path.join(globalAgentsDir) },
+		claude: { type: "dir", source: path.join(globalAgentsDir) },
+		cursor: {
+			type: "dir",
+			source: path.join(globalAgentsDir, "agents"),
+			output: "rules",
+		},
+		github: {
+			type: "dir",
+			source: path.join(globalAgentsDir, "agents"),
+			output: "agents",
+		},
+		windsurf: {
+			type: "dir",
+			source: path.join(globalAgentsDir, "skills"),
+			output: "workflows",
+		},
+		kiro: {
+			type: "dir",
+			source: path.join(globalAgentsDir, "agents"),
+			output: "steering",
+		},
 	};
-	for (const id of selections) {
-		installHarness(id, ctx);
+
+	for (const h of selections) {
+		const config = harnessLinkMap[h];
+		if (!config) continue;
+
+		const globalTarget = getGlobalPath(h);
+		if (!globalTarget) continue;
+
+		if (h === "cursor" || h === "github" || h === "windsurf" || h === "kiro") {
+			// These need subdirectory handling
+			const parentDir = path.dirname(globalTarget);
+			if (!fs.existsSync(parentDir))
+				fs.mkdirSync(parentDir, { recursive: true });
+			if (!fs.existsSync(globalTarget))
+				fs.mkdirSync(globalTarget, { recursive: true });
+
+			if (h === "cursor") {
+				const rulesDir = path.join(globalTarget, "rules");
+				if (!fs.existsSync(rulesDir))
+					fs.mkdirSync(rulesDir, { recursive: true });
+				transpileCursorMDC(config.source, rulesDir);
+			} else if (h === "github") {
+				const agentsDir = path.join(globalTarget, "agents");
+				if (!fs.existsSync(agentsDir))
+					fs.mkdirSync(agentsDir, { recursive: true });
+				transpileCopilotYAML(config.source, agentsDir);
+			} else if (h === "windsurf") {
+				const workflowsDir = path.join(globalTarget, "workflows");
+				handleConflict(workflowsDir, `${h} workflows`, home, method);
+				if (!fs.existsSync(workflowsDir)) {
+					createLinkOrCopy(config.source, workflowsDir, "dir", method);
+				}
+				// Also create .windsurfrules
+				const windsurfRules = path.join(home, ".windsurfrules");
+				handleConflict(windsurfRules, ".windsurfrules", home, method);
+				if (!fs.existsSync(windsurfRules)) {
+					createLinkOrCopy(
+						path.join(globalAgentsDir, "GUARDRAILS.md"),
+						windsurfRules,
+						"file",
+						method,
+					);
+				}
+			} else if (h === "kiro") {
+				const steeringDir = path.join(globalTarget, "steering");
+				handleConflict(steeringDir, `${h} steering`, home, method);
+				if (!fs.existsSync(steeringDir)) {
+					createLinkOrCopy(config.source, steeringDir, "dir", method);
+				}
+			}
+		} else {
+			// Simple dir symlinks (opencode, claude)
+			handleConflict(globalTarget, h, home, method);
+			if (!fs.existsSync(globalTarget)) {
+				createLinkOrCopy(config.source, globalTarget, "dir", method);
+			}
+		}
 	}
 
 	log(`  Global install complete.`);
@@ -1540,7 +1156,7 @@ async function performFreshInstall(targetDir, flags) {
 				}
 			} else if (step === "name") {
 				userNickname = await askQuestion(
-					"What should the agent squad call you? (e.g., Lyor)",
+					"What should the agent squad call you? (e.g., Christian, Sarah)",
 					userNickname || "User",
 				);
 				userNickname =
@@ -1608,10 +1224,10 @@ async function performFreshInstall(targetDir, flags) {
 	scaffoldArtifacts(targetDir, projectName, userNickname);
 	bootstrapRootDocs(targetDir, projectName, selections);
 	performSyncDocs(targetDir);
-	const installResults = await installHarnesses(targetDir, selections, method, flags.model);
+	await installHarnesses(targetDir, selections, method);
 
 	if (!dryRun) {
-		printSummary(targetDir, { harnesses: selections }, installResults);
+		printSummary(targetDir, { harnesses: selections });
 	}
 }
 
@@ -1636,7 +1252,19 @@ async function performUpdate(targetDir, flags) {
 	writeVersionFile(targetDir);
 
 	const versionFile = path.join(targetDir, ".agents", ".vespyr-version");
-	const installedHarnesses = detectInstalledHarnesses(targetDir, false);
+	let installedHarnesses = [];
+	if (fs.existsSync(path.join(targetDir, ".opencode")))
+		installedHarnesses.push("opencode");
+	if (fs.existsSync(path.join(targetDir, ".claude")))
+		installedHarnesses.push("claude");
+	if (fs.existsSync(path.join(targetDir, ".cursor", "rules")))
+		installedHarnesses.push("cursor");
+	if (fs.existsSync(path.join(targetDir, ".github", "agents")))
+		installedHarnesses.push("github");
+	if (fs.existsSync(path.join(targetDir, ".windsurf", "workflows")))
+		installedHarnesses.push("windsurf");
+	if (fs.existsSync(path.join(targetDir, ".kiro", "steering")))
+		installedHarnesses.push("kiro");
 
 	// Detect method from existing installation
 	let method = "symlink";
@@ -1716,8 +1344,26 @@ async function performReconfigure(targetDir, flags) {
 		isGlobal = true;
 	}
 
+	const getPath = (harness, localRel) => {
+		if (isGlobal) {
+			return getGlobalPath(harness);
+		}
+		return path.join(targetDir, localRel);
+	};
+
 	// Detect previously installed harnesses
-	const prevHarnesses = detectInstalledHarnesses(targetDir, isGlobal);
+	let prevHarnesses = [];
+	if (fs.existsSync(getPath("opencode", ".opencode")))
+		prevHarnesses.push("opencode");
+	if (fs.existsSync(getPath("claude", ".claude"))) prevHarnesses.push("claude");
+	if (fs.existsSync(path.join(getPath("cursor", ".cursor"), "rules")))
+		prevHarnesses.push("cursor");
+	if (fs.existsSync(path.join(getPath("github", ".github"), "agents")))
+		prevHarnesses.push("github");
+	if (fs.existsSync(path.join(getPath("windsurf", ".windsurf"), "workflows")))
+		prevHarnesses.push("windsurf");
+	if (fs.existsSync(path.join(getPath("kiro", ".kiro"), "steering")))
+		prevHarnesses.push("kiro");
 
 	let selections = flags.harnesses.length > 0 ? flags.harnesses : [];
 	let userNickname = getExistingUserNickname(targetDir);
@@ -1738,7 +1384,7 @@ async function performReconfigure(targetDir, flags) {
 		);
 		if (fs.existsSync(contextPath)) {
 			userNickname = await askQuestion(
-				"What should the agent squad call you? (e.g., Lyor)",
+				"What should the agent squad call you? (e.g., Christian, Sarah)",
 				userNickname,
 			);
 			userNickname = userNickname.replace(/[^a-zA-Z0-9\s\-_.]/g, "") || "User";
@@ -1748,11 +1394,6 @@ async function performReconfigure(targetDir, flags) {
 
 	// Detect method from existing installation
 	let method = "symlink";
-	const getPath = (id, defaultSub) => {
-		return isGlobal
-			? getGlobalPath(id)
-			: path.join(targetDir, HARNESS_CONFIG[id]?.engine?.target || defaultSub);
-	};
 	const opencodePath = getPath("opencode", ".opencode");
 	const claudePath = getPath("claude", ".claude");
 	try {
@@ -1882,109 +1523,171 @@ function surgicallyCleanupAgentsDir(agentsTarget) {
 	removeDirIfEmpty(agentsTarget);
 }
 
-function uninstallChannel(channel, ctx) {
-	const { harnessId, isGlobal, targetDir } = ctx;
-	const target = isGlobal
-		? resolveGlobalTarget(channel, harnessId)
-		: path.join(targetDir, channel.target);
-
-	// lstatSync (not existsSync) — existsSync follows symlinks and would
-	// return false for dangling symlinks, e.g. .kiro/steering -> ../.agents/agents
-	// after surgicallyCleanupAgentsDir has already removed the target.
-	let stat;
-	try {
-		stat = fs.lstatSync(target);
-	} catch (e) {
-		return; // target doesn't exist
-	}
-
-	// Special case: the opencode/claude engine is the entire .opencode/.claude
-	// directory, which mirrors the .agents tree. Use the surgical cleanup so
-	// we only remove canonical vespyr items, not anything the user added.
-	if (
-		channel.type === "link" &&
-		channel.source === ".agents" &&
-		(harnessId === "opencode" || harnessId === "claude")
-	) {
-		surgicallyCleanupAgentsDir(target);
-		return;
-	}
-
-	// Symlink (including dangling) → just unlink
-	if (stat.isSymbolicLink()) {
-		try {
-			fs.unlinkSync(target);
-		} catch (e) {}
-		removeDirIfEmpty(path.dirname(target));
-		return;
-	}
-
-	// File (e.g. .windsurfrules, AGENTS.md, copilot-instructions.md) → unlink
-	if (stat.isFile()) {
-		try {
-			fs.unlinkSync(target);
-		} catch (e) {}
-		removeDirIfEmpty(path.dirname(target));
-		return;
-	}
-
-	// Directory → surgically remove only the items that came from vespyr
-	const sourceRoot = isGlobal ? getGlobalPath("agents") : AGENTS_SRC;
-	const sourceSubpath = channel.source.replace(/^\.agents\/?/, "");
-	const sourceDir = sourceSubpath
-		? path.join(sourceRoot, sourceSubpath)
-		: sourceRoot;
-
-	if (fs.existsSync(sourceDir)) {
-		const sourceStat = fs.statSync(sourceDir);
-		if (sourceStat.isDirectory()) {
-			const items = fs.readdirSync(sourceDir);
-			for (const item of items) {
-				// Transpile channels map source file extensions (e.g. .md → .mdc, .yml)
-				const baseName = path.basename(item, path.extname(item));
-				const targetName = channel.ext ? `${baseName}.${channel.ext}` : item;
-				const itemPath = path.join(target, targetName);
-				if (fs.existsSync(itemPath)) {
-					try {
-						fs.rmSync(itemPath, { recursive: true, force: true });
-					} catch (e) {}
-				}
-			}
-		} else {
-			try {
-				fs.unlinkSync(target);
-			} catch (e) {}
-		}
-	}
-
-	removeDirIfEmpty(target);
-	removeDirIfEmpty(path.dirname(target));
-}
-
 function uninstallHarnesses(targetDir, harnesses, isGlobal) {
 	const home = os.homedir();
-	const effectiveTargetDir = isGlobal ? home : targetDir;
-	const ctx = { isGlobal, targetDir: effectiveTargetDir };
+	const getPath = (harness, localRel) => {
+		if (isGlobal) {
+			return getGlobalPath(harness);
+		}
+		return path.join(targetDir, localRel);
+	};
 
-	for (const id of harnesses) {
-		const config = HARNESS_CONFIG[id];
-		if (!config) continue;
-		const harnessCtx = { ...ctx, harnessId: id };
-
-		uninstallChannel(config.engine, harnessCtx);
-
-		for (const ch of config.channels || []) {
-			if (isGlobal && ch.skipGlobal) continue;
-			uninstallChannel(ch, harnessCtx);
+	for (const h of harnesses) {
+		if (h === "opencode") {
+			const opencodePath = getPath("opencode", ".opencode");
+			if (fs.existsSync(opencodePath)) {
+				surgicallyCleanupAgentsDir(opencodePath);
+			}
 		}
 
-		// Final cleanup: try to remove the harness's root directory if empty.
-		// For opencode/claude the surgical cleanup already removed the engine
-		// dir itself, so this is a no-op for them.
-		const harnessRoot = isGlobal
-			? getGlobalPath(id)
-			: path.join(effectiveTargetDir, config.engine.target.split("/")[0]);
-		removeDirIfEmpty(harnessRoot);
+		if (h === "claude") {
+			const claudePath = getPath("claude", ".claude");
+			if (fs.existsSync(claudePath)) {
+				surgicallyCleanupAgentsDir(claudePath);
+			}
+		}
+
+		if (h === "cursor") {
+			const cursorTargetDir = getPath("cursor", ".cursor");
+			if (fs.existsSync(cursorTargetDir)) {
+				const rulesDir = path.join(cursorTargetDir, "rules");
+				if (fs.existsSync(rulesDir)) {
+					try {
+						const stat = fs.lstatSync(rulesDir);
+						if (stat.isSymbolicLink()) {
+							fs.unlinkSync(rulesDir);
+						} else {
+							const agentsSrcDir = path.join(AGENTS_SRC, "agents");
+							if (fs.existsSync(agentsSrcDir)) {
+								const coreAgents = fs
+									.readdirSync(agentsSrcDir)
+									.filter((f) => f.endsWith(".md"));
+								for (const agent of coreAgents) {
+									const name = path.basename(agent, ".md");
+									const mdcFile = path.join(rulesDir, `${name}.mdc`);
+									if (fs.existsSync(mdcFile)) {
+										fs.unlinkSync(mdcFile);
+									}
+								}
+							}
+							removeDirIfEmpty(rulesDir);
+						}
+					} catch (e) {}
+				}
+				removeDirIfEmpty(cursorTargetDir);
+			}
+		}
+
+		if (h === "github") {
+			const githubTargetDir = getPath("github", ".github");
+			if (fs.existsSync(githubTargetDir)) {
+				const agentsDir = path.join(githubTargetDir, "agents");
+				if (fs.existsSync(agentsDir)) {
+					try {
+						const stat = fs.lstatSync(agentsDir);
+						if (stat.isSymbolicLink()) {
+							fs.unlinkSync(agentsDir);
+						} else {
+							const agentsSrcDir = path.join(AGENTS_SRC, "agents");
+							if (fs.existsSync(agentsSrcDir)) {
+								const coreAgents = fs
+									.readdirSync(agentsSrcDir)
+									.filter((f) => f.endsWith(".md"));
+								for (const agent of coreAgents) {
+									const name = path.basename(agent, ".md");
+									const ymlFile = path.join(agentsDir, `${name}.yml`);
+									if (fs.existsSync(ymlFile)) {
+										fs.unlinkSync(ymlFile);
+									}
+								}
+							}
+							removeDirIfEmpty(agentsDir);
+						}
+					} catch (e) {}
+				}
+
+				const copilotInstructions = path.join(
+					githubTargetDir,
+					"copilot-instructions.md",
+				);
+				if (fs.existsSync(copilotInstructions)) {
+					try {
+						fs.unlinkSync(copilotInstructions);
+					} catch (e) {}
+				}
+
+				removeDirIfEmpty(githubTargetDir);
+			}
+		}
+
+		if (h === "windsurf") {
+			const windsurfTargetDir = getPath("windsurf", ".windsurf");
+			if (fs.existsSync(windsurfTargetDir)) {
+				const workflowsDir = path.join(windsurfTargetDir, "workflows");
+				if (fs.existsSync(workflowsDir)) {
+					try {
+						const stat = fs.lstatSync(workflowsDir);
+						if (stat.isSymbolicLink()) {
+							fs.unlinkSync(workflowsDir);
+						} else {
+							const skillsSrcDir = path.join(AGENTS_SRC, "skills");
+							if (fs.existsSync(skillsSrcDir)) {
+								const coreSkills = fs.readdirSync(skillsSrcDir);
+								for (const skill of coreSkills) {
+									const skillPath = path.join(workflowsDir, skill);
+									if (fs.existsSync(skillPath)) {
+										fs.rmSync(skillPath, { recursive: true, force: true });
+									}
+								}
+							}
+							removeDirIfEmpty(workflowsDir);
+						}
+					} catch (e) {}
+				}
+				removeDirIfEmpty(windsurfTargetDir);
+			}
+			const windsurfRulesPath = isGlobal
+				? path.join(home, ".windsurfrules")
+				: path.join(targetDir, ".windsurfrules");
+			if (fs.existsSync(windsurfRulesPath)) {
+				try {
+					fs.unlinkSync(windsurfRulesPath);
+				} catch (e) {}
+			}
+		}
+
+		if (h === "kiro") {
+			const kiroTargetDir = getPath("kiro", ".kiro");
+			if (fs.existsSync(kiroTargetDir)) {
+				const steeringDir = path.join(kiroTargetDir, "steering");
+				if (fs.existsSync(steeringDir)) {
+					try {
+						const stat = fs.lstatSync(steeringDir);
+						if (stat.isSymbolicLink()) {
+							fs.unlinkSync(steeringDir);
+						} else {
+							const agentsSrcDir = path.join(AGENTS_SRC, "agents");
+							if (fs.existsSync(agentsSrcDir)) {
+								const coreAgents = fs
+									.readdirSync(agentsSrcDir)
+									.filter((f) => f.endsWith(".md"));
+								for (const agent of coreAgents) {
+									const targetAgentPath = path.join(steeringDir, agent);
+									if (fs.existsSync(targetAgentPath)) {
+										fs.rmSync(targetAgentPath, {
+											recursive: true,
+											force: true,
+										});
+									}
+								}
+							}
+							removeDirIfEmpty(steeringDir);
+						}
+					} catch (e) {}
+				}
+				removeDirIfEmpty(kiroTargetDir);
+			}
+		}
 	}
 }
 
@@ -2024,8 +1727,6 @@ async function performUninstall(targetDir) {
 		"github",
 		"windsurf",
 		"kiro",
-		"hermes",
-		"openclaw",
 	];
 	uninstallHarnesses(targetDir, allHarnesses, isGlobal);
 
@@ -2043,161 +1744,89 @@ async function performUninstall(targetDir) {
 	log(`  Uninstall complete. artifacts/ preserved.\n`);
 }
 
-async function performCopyToSymlinkMigration(targetDir, flags) {
-	const unlinked = detectUnlinkedHarnesses(targetDir);
-
-	if (unlinked.length === 0) {
-		log(`\n  No copy-style harness folders detected. Nothing to migrate.\n`);
-		return;
-	}
-
+async function performMigration(targetDir, flags) {
 	log(`\n============================================================`);
-	log(`   VESPYR v${VERSION} — Copy → Symlink Migration`);
+	log(`   VESPYR v${VERSION} — Migration Detected`);
 	log(`============================================================`);
-	log(`Detected ${unlinked.length} harness folder(s) that are currently`);
-	log(`copies but should be symlinks into .agents/.\n`);
+	log(`An existing .opencode/ directory was found. This appears to be`);
+	log(`a pre-v1.7.0 Vespyr installation (cloned repo style).`);
+	log(``);
+	log(`Vespyr v1.7.0 uses .agents/ as the canonical folder with`);
+	log(`optional harness symlinks. We can migrate your setup.\n`);
 
 	if (flags.yes) {
-		await executeCopyToSymlinkMigration(targetDir, unlinked.map((s) => s.id));
+		await executeMigration(targetDir);
 		return;
 	}
 
-	const options = unlinked.map((spec) => ({ id: spec.id, label: spec.label }));
-	const initialSelections = unlinked.map((s) => s.id);
-
-	const result = await askChecklist(
-		"Select harness folders to convert to symlinks:",
-		options,
-		true,
-		initialSelections,
-	);
-
-	if (result.back) {
-		log(`\n  Migration cancelled.\n`);
-		return;
-	}
-
-	if (result.length === 0) {
-		log(`\n  No folders selected. Nothing to migrate.\n`);
-		return;
-	}
-
-	await executeCopyToSymlinkMigration(targetDir, result);
-}
-
-async function executeCopyToSymlinkMigration(targetDir, selectedIds) {
-	log(`\n  Converting copies to symlinks in ${targetDir}...\n`);
-
-	if (dryRun) {
-		for (const id of selectedIds) {
-			const spec = HARNESS_SYMLINK_SPECS.find((s) => s.id === id);
-			if (!spec) continue;
-			logDry(`Would convert ${spec.target} → ${spec.source} (${spec.type})`);
-		}
-		logDry(
-			`Would create timestamped .backup of each converted folder before symlinking`,
-		);
-		return;
-	}
-
-	let converted = 0;
-	let skipped = 0;
-	let failed = 0;
-
-	for (const id of selectedIds) {
-		const spec = HARNESS_SYMLINK_SPECS.find((s) => s.id === id);
-		if (!spec) continue;
-
-		const target = path.join(targetDir, spec.target);
-		const source = path.join(targetDir, spec.source);
-
-		try {
-			const stat = fs.lstatSync(target);
-			if (stat.isSymbolicLink()) {
-				log(`  ${spec.target} is already a symlink, skipping.`);
-				skipped++;
-				continue;
-			}
-
-			if (!fs.existsSync(source)) {
-				logWarn(
-					`Source ${spec.source} not found — cannot create symlink for ${spec.target}.`,
-				);
-				skipped++;
-				continue;
-			}
-
-			const backupPath = `${target}.backup.${Date.now()}`;
-			fs.renameSync(target, backupPath);
-			log(`  Backed up ${spec.target} → ${path.basename(backupPath)}`);
-
-			const parentDir = path.dirname(target);
-			fs.mkdirSync(parentDir, { recursive: true });
-
-			const relSource = path.relative(parentDir, source);
-			fs.symlinkSync(relSource, target, spec.type);
-			log(`  Created symlink: ${spec.target} → ${relSource}`);
-			converted++;
-		} catch (e) {
-			logError(`  Failed to migrate ${spec.target}: ${e.message}`);
-			failed++;
-		}
-	}
-
-	log(
-		`\n  Migration complete. Converted: ${converted}, Skipped: ${skipped}, Failed: ${failed}\n`,
-	);
-}
-
-async function showActionMenu(targetDir, flags) {
-	log(`\n============================================================`);
-	log(`   VESPYR v${VERSION} — AI Agent Team CLI`);
-	log(`============================================================`);
-	log(`Vespyr is already configured in this directory.\n`);
-
-	if (flags.yes) {
-		await performUpdate(targetDir, flags);
-		return;
-	}
-
-	const unlinked = detectUnlinkedHarnesses(targetDir);
-	const hasUnlinked = unlinked.length > 0;
-
-	const choices = [
-		"Update Vespyr (Sync latest agent prompts, scripts, and skills)",
-	];
-	if (hasUnlinked) {
-		choices.push(
-			`Migrate (Convert ${unlinked.length} copied harness folder${unlinked.length === 1 ? "" : "s"} to symlinks)`,
-		);
-	}
-	choices.push(
-		"Reconfigure (Re-run interactive setup / add or remove harnesses)",
-		"Uninstall Vespyr (Cleanly remove all Vespyr folders and files)",
-	);
-
-	const choice = await askSingleChoice("Select an action:", choices);
+	const choice = await askSingleChoice("Select an action:", [
+		"Migrate (Rename .opencode/ to .agents/, create .opencode symlink)",
+		"Fresh install (Back up .opencode/ to .opencode.backup/, start fresh)",
+		"Cancel (Keep everything as-is)",
+	]);
 
 	if (choice === 0) {
-		await performUpdate(targetDir, flags);
-	} else if (hasUnlinked && choice === 1) {
-		await performCopyToSymlinkMigration(targetDir, flags);
-	} else if (
-		(hasUnlinked && choice === 2) ||
-		(!hasUnlinked && choice === 1)
-	) {
-		await performReconfigure(targetDir, flags);
+		await executeMigration(targetDir);
+	} else if (choice === 1) {
+		const backupPath = path.join(targetDir, `.opencode.backup.${Date.now()}`);
+		if (!dryRun) {
+			fs.renameSync(path.join(targetDir, ".opencode"), backupPath);
+		}
+		log(`  Backed up .opencode/ to ${path.basename(backupPath)}`);
+		await performFreshInstall(targetDir, flags);
 	} else {
-		await performUninstall(targetDir);
+		log(`  Migration cancelled.\n`);
+		process.exit(0);
 	}
+}
+
+async function executeMigration(targetDir) {
+	log(`\n  Migrating .opencode/ to .agents/...\n`);
+
+	if (dryRun) {
+		logDry(`Would backup .opencode/ to .opencode.backup/`);
+		logDry(`Would rename .opencode/ to .agents/`);
+		logDry(`Would move tests/ to workspace root`);
+		logDry(`Would create .opencode -> .agents symlink`);
+		logDry(`Would update .opencode/ references to .agents/ in all files`);
+		return;
+	}
+
+	const opencodePath = path.join(targetDir, ".opencode");
+	const agentsPath = path.join(targetDir, ".agents");
+	const backupPath = path.join(targetDir, `.opencode.backup.${Date.now()}`);
+
+	fs.cpSync(opencodePath, backupPath, { recursive: true });
+	log(`  Backed up to ${path.basename(backupPath)}`);
+
+	fs.renameSync(opencodePath, agentsPath);
+	log(`  Renamed .opencode/ to .agents/`);
+
+	const testsInAgents = path.join(agentsPath, "tests");
+	const testsAtRoot = path.join(targetDir, "tests");
+	if (fs.existsSync(testsInAgents) && !fs.existsSync(testsAtRoot)) {
+		fs.renameSync(testsInAgents, testsAtRoot);
+		log(`  Moved tests/ to workspace root`);
+	}
+
+	try {
+		fs.symlinkSync(".agents", opencodePath, "dir");
+		createdLinks.push(opencodePath);
+		log(`  Created .opencode -> .agents symlink`);
+	} catch (e) {
+		logWarn(`Could not create .opencode symlink: ${e.message}`);
+	}
+
+	updatePathsInDir(agentsPath);
+	log(`  Updated .opencode/ -> .agents/ references in all files`);
+
+	writeVersionFile(targetDir);
+	log(`\n  Migration complete.\n`);
 }
 
 function performSyncDocs(targetDir) {
 	const syncScript = path.join(
-		targetDir,
-		".agents",
-		"scripts",
-		"sync-entry-points.js",
+		targetDir, ".agents", "scripts", "sync-entry-points.js",
 	);
 
 	if (fs.existsSync(syncScript)) {
@@ -2214,25 +1843,48 @@ function performSyncDocs(targetDir) {
 	}
 
 	// Fallback: legacy template-based approach
-	const canonicalPath = path.join(
-		AGENTS_SRC,
-		"templates",
-		"AGENTS.md.canonical",
-	);
-	if (!fs.existsSync(canonicalPath)) {
-		logError(`Canonical template not found at ${canonicalPath}`);
-		process.exit(1);
-	}
-	const canonical = fs.readFileSync(canonicalPath, "utf8");
+	const commandsDir = fs.existsSync(path.join(targetDir, ".agents", "commands"))
+		? path.join(targetDir, ".agents", "commands")
+		: path.join(AGENTS_SRC, "commands");
 
-	const written = [];
-	for (const cfg of ROOT_DOC_CONFIGS) {
-		const target = path.join(targetDir, cfg.filename);
-		fs.writeFileSync(target, renderScaffold(canonical, cfg), "utf8");
-		written.push(target);
+	const agentsMd = fs
+		.readFileSync(path.join(commandsDir, "scaffold-agents.md"), "utf8")
+		.replace(/\{Project Name\}/g, path.basename(targetDir));
+	const agentMd = fs.readFileSync(
+		path.join(commandsDir, "scaffold-agent.md"), "utf8",
+	);
+
+	const agentsPath = path.join(targetDir, "AGENTS.md");
+	const agentPath = path.join(targetDir, "agent.md");
+
+	if (!fs.existsSync(agentsPath)) fs.writeFileSync(agentsPath, agentsMd);
+	if (!fs.existsSync(agentPath)) fs.writeFileSync(agentPath, agentMd);
+}
+
+async function showActionMenu(targetDir, flags) {
+	log(`\n============================================================`);
+	log(`   VESPYR v${VERSION} — AI Agent Team CLI`);
+	log(`============================================================`);
+	log(`Vespyr is already configured in this directory.\n`);
+
+	if (flags.yes) {
+		await performUpdate(targetDir, flags);
+		return;
 	}
-	log(`\n  Synced ${written.length} root doc(s) from canonical:`);
-	for (const p of written) log(`    ✓ ${path.relative(targetDir, p)}`);
+
+	const choice = await askSingleChoice("Select an action:", [
+		"Update Vespyr (Sync latest agent prompts, scripts, and skills)",
+		"Reconfigure (Re-run interactive setup / add or remove harnesses)",
+		"Uninstall Vespyr (Cleanly remove all Vespyr folders and files)",
+	]);
+
+	if (choice === 0) {
+		await performUpdate(targetDir, flags);
+	} else if (choice === 1) {
+		await performReconfigure(targetDir, flags);
+	} else if (choice === 2) {
+		await performUninstall(targetDir);
+	}
 }
 
 async function main() {
@@ -2255,8 +1907,6 @@ Options:
   --yes, -y            Skip all interactive prompts, use defaults
   --target <path>      Specify installation directory
   --harness <names>    Pre-select harness(es), comma-separated
-  --model <id>         Default subagent model for opencode.json (default: anthropic/claude-sonnet-4-5)
-  --sync-docs          Regenerate root AGENTS.md, agent.md, CLAUDE.md from the canonical template
   --version, -v        Print version and exit
   --help, -h           Print usage and exit
 
@@ -2264,7 +1914,6 @@ Examples:
   npx vespyr                          Interactive install
   npx vespyr --yes                    Install with defaults
   npx vespyr --harness opencode,claude  Pre-select harnesses
-  npx vespyr --model google/gemini-2.5-pro  Override default subagent model
   npx vespyr --target ./my-project    Install to specific directory
   npx vespyr --dry-run                Preview actions
 `);
@@ -2275,16 +1924,13 @@ Examples:
 
 	let targetDir = flags.target ? path.resolve(flags.target) : process.cwd();
 
-	if (flags.syncDocs) {
-		await performSyncDocs(targetDir);
-		return;
-	}
-
 	const state = detectState(targetDir);
 
 	try {
 		if (state === "installed") {
 			await showActionMenu(targetDir, flags);
+		} else if (state === "migrate") {
+			await performMigration(targetDir, flags);
 		} else {
 			log(`\n============================================================`);
 			log(`   VESPYR v${VERSION} — AI Agent Team Installer`);
@@ -2304,7 +1950,7 @@ Examples:
 			);
 		} else {
 			logError(
-				`Installation failed: ${err.message}. Run with --dry-run to debug, or report at github.com/lalulali/vespyr/issues.`,
+				`Installation failed: ${err.message}. Run with --dry-run to debug, or report at github.com/anomalyco/vespyr/issues.`,
 			);
 		}
 
@@ -2349,28 +1995,15 @@ module.exports = {
 	updatePathsInDir,
 	printSummary,
 	handleConflict,
-	enrichHarnessTarget,
-	enrichHarnessTranspileTarget,
 	performUninstall,
 	surgicallyCleanupAgentsDir,
 	removeDirIfEmpty,
 	getExistingUserNickname,
 	updateUserNickname,
 	uninstallHarnesses,
-	uninstallChannel,
-	installHarness,
-	applyChannel,
-	resolveChannelPaths,
-	resolveGlobalTarget,
-	detectInstalledHarnesses,
 	performReconfigure,
 	performUpdate,
-	performCopyToSymlinkMigration,
-	detectUnlinkedHarnesses,
 	ASCII_ART,
 	VERSION,
-	HARNESS_CONFIG,
 	HARNESS_OPTIONS,
-	HARNESS_SYMLINK_SPECS,
-	TRANSPILERS,
 };

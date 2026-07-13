@@ -223,7 +223,7 @@ function scanDirectory(dir, projectRoot, fileMap = {}) {
 
     if (entry.isDirectory()) {
       // Skip common non-source directories
-      if (['node_modules', '.git', 'dist', 'build', 'coverage', '.opencode', 'artifacts'].includes(entry.name)) {
+      if (['node_modules', '.git', 'dist', 'build', 'coverage', '.agents', 'artifacts'].includes(entry.name)) {
         continue;
       }
       scanDirectory(fullPath, projectRoot, fileMap);

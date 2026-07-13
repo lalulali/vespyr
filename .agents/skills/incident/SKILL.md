@@ -27,7 +27,7 @@ Invoke `@product-manager` to lead triage:
   - Performance degradation → @performance-engineer + @architect
 - **Open incident channel** — create `artifacts/output/08-incidents/INC-NNN/` directory
 
-**Output:** `artifacts/output/08-incidents/INC-NNN/triage.md` (Use template: `.agents/templates/incident-triage-template.md`)
+**Output:** `artifacts/output/08-incidents/INC-NNN/triage.md` (Use template: `.agents/templates/incident/incident-triage-template.md`)
 
 ### Step 2: Mitigate
 
@@ -52,7 +52,7 @@ Once users are unblocked, invoke `@architect` or `@tech-lead` to lead RCA:
 - **Detection gaps** — why wasn't this caught before reaching users
 - **Prevention mechanisms** — what would stop this class of issue in the future
 
-**Output:** `artifacts/output/08-incidents/INC-NNN/rca.md` (Use template: `.agents/templates/rca-template.md`)
+**Output:** `artifacts/output/08-incidents/INC-NNN/rca.md` (Use template: `.agents/templates/incident/rca-template.md`)
 
 ### Step 4: Remediation (parallelizable)
 
@@ -89,7 +89,7 @@ Invoke `@product-manager` to conduct a blameless post-incident review:
 - **What could be improved** — detection, response, communication, prevention
 - **Action items with owners and deadlines**
 
-**Output:** `artifacts/output/08-incidents/INC-NNN/post-incident-review.md` (Use template: `.agents/templates/post-incident-review-template.md`)
+**Output:** `artifacts/output/08-incidents/INC-NNN/post-incident-review.md` (Use template: `.agents/templates/incident/post-incident-review-template.md`)
 
 ### Step 6: Update Knowledge Base
 

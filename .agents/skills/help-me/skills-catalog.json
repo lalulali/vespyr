@@ -1,516 +1,432 @@
-{
-  "skills": [
-    {
-      "name": "code-graph",
-      "description": "Codebase structural dependency mapper — initialize, view status, and run incremental updates for modified codebase files",
-      "prerequisites": [],
-      "outputs": [
-        "artifacts/memory/structural/code-graph.json"
-      ],
-      "key_agents": [
-        "@architect",
-        "@tech-lead"
-      ]
-    },
-    {
-      "name": "delegate",
-      "description": "One-shot I/O offload to @reader, @writer, or @executor — keeps your context focused on reasoning",
-      "prerequisites": [],
-      "outputs": [],
-      "key_agents": []
-    },
-    {
-      "name": "design",
-      "description": "Defines product requirements from validated ideas, then produces detailed developer-ready specs",
-      "prerequisites": [
-        "  artifacts/output/00-discovery/validation-brief.md OR artifacts/output/00-discovery/idea-brief.md (exactly 1 required)",
-        "  artifacts/output/01-research/market-analysis.md",
-        "  artifacts/output/01-research/competitive-analysis.md",
-        "  artifacts/output/01-research/user-personas.md"
-      ],
-      "outputs": [
-        "artifacts/output/00-discovery/validation-brief.md",
-        "artifacts/output/00-discovery/idea-brief.md",
-        "artifacts/output/01-research/market-analysis.md",
-        "artifacts/output/01-research/competitive-analysis.md",
-        "artifacts/output/01-research/user-personas.md",
-        "artifacts/output/02-strategy/requirements.md",
-        "artifacts/output/02-strategy/user-stories.md",
-        "artifacts/output/02-strategy/product-spec.md",
-        "artifacts/output/02-strategy/product-spec.html",
-        "artifacts/output/02-strategy/measurement-plan.md",
-        "artifacts/output/01-research/ux-research-report.md",
-        "artifacts/output/04-planning/kanban.md"
-      ],
-      "key_agents": [
-        "@product-manager",
-        "@product-designer",
-        "@architect",
-        "@developer",
-        "@tech-lead",
-        "@qa-engineer",
-        "@data-analyst",
-        "@ux-researcher"
-      ]
-    },
-    {
-      "name": "develop",
-      "description": "Core MVP workflow — spec review, architecture, planning, implementation, QA, verification, and documentation",
-      "prerequisites": [
-        "  artifacts/output/02-strategy/product-spec.md",
-        "  artifacts/output/02-strategy/requirements.md",
-        "  artifacts/output/02-strategy/user-stories.md"
-      ],
-      "outputs": [
-        "artifacts/output/02-strategy/product-spec.md",
-        "artifacts/output/02-strategy/requirements.md",
-        "artifacts/output/02-strategy/user-stories.md",
-        "artifacts/output/03-architecture/",
-        "artifacts/output/03-architecture/adr-NNN-",
-        "artifacts/output/04-planning/execution-plan.md",
-        "artifacts/output/04-planning/kanban.md",
-        "artifacts/output/06-quality/findings-report.md",
-        "artifacts/output/06-quality/report.md"
-      ],
-      "key_agents": [
-        "@mentions",
-        "@product-manager",
-        "@product-designer",
-        "@developer",
-        "@tech-lead",
-        "@architect",
-        "@founder",
-        "@developer-1",
-        "@code-reviewer",
-        "@developer-2",
-        "@developer-N",
-        "@qa-engineer",
-        "@security-engineer",
-        "@performance-engineer",
-        "@technical-writer"
-      ]
-    },
-    {
-      "name": "doc-graph",
-      "description": "Document relationship and traceability graph mapper — parse and update connections between PRDs, user stories, ADRs, active decisions, and codebase references",
-      "prerequisites": [],
-      "outputs": [
-        "artifacts/memory/structural/doc-graph.json"
-      ],
-      "key_agents": []
-    },
-    {
-      "name": "elicitation",
-      "description": "Push the LLM to reconsider, refine, and improve its recent output. Use when user asks for deeper critique or mentions a known deeper critique method, e.g. socratic, first principles, pre-mortem, red team.",
-      "prerequisites": [],
-      "outputs": [],
-      "key_agents": [
-        "@architect",
-        "@security-engineer",
-        "@qa-engineer",
-        "@developer"
-      ]
-    },
-    {
-      "name": "explore-game-idea",
-      "description": "Validates a game concept through genre market, competitive landscape, and player research — turns a validated game idea into evidence-backed research",
-      "prerequisites": [
-        "*Path A — Has validation brief (recommended):**",
-        "  artifacts/output/00-discovery/validation-brief.md exists with a GO verdict",
-        "Skip Phase 1 (Synthesize) entirely. Go straight to Phase 2 research. Downstream agents will use validation-brief.md directly.",
-        "*Path B — No validation brief (direct entry):**",
-        "If the user skips validate-game-idea and comes here directly with a clear concept, run Phase 1 (founder synthesis) to produce idea-brief.md first.",
-        "Consider suggesting validate-game-idea if the idea seems unvalidated."
-      ],
-      "outputs": [
-        "artifacts/output/00-discovery/validation-brief.md",
-        "artifacts/output/00-discovery/idea-brief.md",
-        "artifacts/output/01-research/market-analysis.md",
-        "artifacts/output/01-research/competitive-analysis.md",
-        "artifacts/output/01-research/user-personas.md"
-      ],
-      "key_agents": [
-        "@founder",
-        "@researcher",
-        "@user-researcher"
-      ]
-    },
-    {
-      "name": "explore-idea",
-      "description": "Validates a concept through market, competitor, and user research — turns a validated idea into evidence-backed research",
-      "prerequisites": [
-        "*Path A — Has validation brief (recommended):**",
-        "  artifacts/output/00-discovery/validation-brief.md exists with a GO verdict",
-        "Skip Phase 1 (Synthesize) entirely. Go straight to Phase 2 research. Downstream agents will use validation-brief.md directly.",
-        "*Path B — No validation brief (direct entry):**",
-        "If the user skips validate-idea and comes here directly with a clear concept, run Phase 1 (founder synthesis) to produce idea-brief.md first.",
-        "Consider suggesting validate-idea if the idea seems unvalidated."
-      ],
-      "outputs": [
-        "artifacts/output/00-discovery/validation-brief.md",
-        "artifacts/output/00-discovery/idea-brief.md",
-        "artifacts/output/01-research/market-analysis.md",
-        "artifacts/output/01-research/competitive-analysis.md",
-        "artifacts/output/01-research/user-personas.md"
-      ],
-      "key_agents": [
-        "@founder",
-        "@researcher",
-        "@user-researcher"
-      ]
-    },
-    {
-      "name": "grill-me",
-      "description": "End-to-end Socratic alignment loop — stress-tests requirements, specifications, and architecture decisions before implementation. Use when user wants to be grilled on a plan, design, or idea.",
-      "prerequisites": [],
-      "outputs": [
-        "artifacts/memory/active-decisions.md"
-      ],
-      "key_agents": []
-    },
-    {
-      "name": "help-me",
-      "description": "Dynamic next-step navigator — evaluates project state, checks skill catalog, codebase/doc graphs, and provides a tailored navigation report with recommended slash commands.",
-      "prerequisites": [],
-      "outputs": [
-        "artifacts/output/pipeline-state.json",
-        "artifacts/memory/project-context.md",
-        "artifacts/memory/active-decisions.md",
-        "artifacts/memory/lessons-learned.md"
-      ],
-      "key_agents": [
-        "@founder",
-        "@product-manager",
-        "@architect"
-      ]
-    },
-    {
-      "name": "humanize",
-      "description": "|",
-      "prerequisites": [],
-      "outputs": [],
-      "key_agents": []
-    },
-    {
-      "name": "incident",
-      "description": "Production incident management — triage, mitigate, root-cause analysis, and post-incident review",
-      "prerequisites": [],
-      "outputs": [
-        "artifacts/output/08-incidents/INC-NNN/",
-        "artifacts/output/08-incidents/INC-NNN/triage.md",
-        "artifacts/output/08-incidents/INC-NNN/mitigation.md",
-        "artifacts/output/08-incidents/INC-NNN/rca.md",
-        "artifacts/output/08-incidents/INC-NNN/remediation.md",
-        "artifacts/output/08-incidents/INC-NNN/post-incident-review.md"
-      ],
-      "key_agents": [
-        "@product-manager",
-        "@devops-engineer",
-        "@architect",
-        "@developer",
-        "@tech-lead",
-        "@security-engineer",
-        "@performance-engineer",
-        "@code-reviewer",
-        "@qa-engineer"
-      ]
-    },
-    {
-      "name": "iterate",
-      "description": "Post-launch feature iteration — analyze user data, prioritize improvements, ship incremental value",
-      "prerequisites": [
-        "  Product is live and accessible to users",
-        "  Post-launch monitoring period is complete (24-72 hours)",
-        "  artifacts/output/06-launch/post-launch-report.md exists"
-      ],
-      "outputs": [
-        "artifacts/output/06-launch/post-launch-report.md",
-        "artifacts/output/07-iteration/analytics-insights.md",
-        "artifacts/output/07-iteration/iteration-backlog.md",
-        "artifacts/output/07-iteration/iteration-spec.md",
-        "artifacts/output/07-iteration/iteration-adr.md",
-        "artifacts/output/07-iteration/iteration-plan.md",
-        "artifacts/output/07-iteration/iteration-results.md"
-      ],
-      "key_agents": [
-        "@data-analyst",
-        "@product-manager",
-        "@product-designer",
-        "@architect",
-        "@tech-lead",
-        "@developer",
-        "@code-reviewer",
-        "@qa-engineer",
-        "@devops-engineer"
-      ]
-    },
-    {
-      "name": "kanban",
-      "description": "Display and update the Kanban board — track task progress across phases",
-      "prerequisites": [],
-      "outputs": [
-        "artifacts/output/04-planning/kanban.md",
-        "artifacts/memory/product-manager-notes.md"
-      ],
-      "key_agents": [
-        "@developer-1",
-        "@code-reviewer"
-      ]
-    },
-    {
-      "name": "launch",
-      "description": "Go-to-market coordination — release readiness, stakeholder alignment, launch orchestration, and post-launch monitoring",
-      "prerequisites": [
-        "  All tasks in artifacts/output/04-planning/execution-plan.md are complete",
-        "  Code review and QA passed",
-        "  PM signed off on the feature"
-      ],
-      "outputs": [
-        "artifacts/output/04-planning/execution-plan.md",
-        "artifacts/output/06-launch/release-readiness.md",
-        "artifacts/output/06-launch/go-nogo-decision.md",
-        "artifacts/output/06-launch/launch-log.md",
-        "artifacts/output/06-launch/post-launch-report.md",
-        "artifacts/output/06-launch/launch-retro.md"
-      ],
-      "key_agents": [
-        "@product-manager",
-        "@security-engineer",
-        "@performance-engineer",
-        "@technical-writer",
-        "@devops-engineer",
-        "@data-analyst",
-        "@developer",
-        "@code-reviewer",
-        "@qa-engineer"
-      ]
-    },
-    {
-      "name": "memory",
-      "description": "Search archived memory entries — retrieve historical context that has been compacted",
-      "prerequisites": [],
-      "outputs": [],
-      "key_agents": []
-    },
-    {
-      "name": "phase",
-      "description": "Show current phase, switch phases, list phase artifacts",
-      "prerequisites": [],
-      "outputs": [
-        "artifacts/output/pipeline-state.json",
-        "artifacts/memory/project-context.md",
-        "artifacts/memory/active-decisions.md"
-      ],
-      "key_agents": []
-    },
-    {
-      "name": "plan",
-      "description": "Create an execution plan from existing specs — standalone, outside the full develop cycle",
-      "prerequisites": [
-        "artifacts/output/02-strategy/product-spec.md exists",
-        "artifacts/output/02-strategy/user-stories.md exists (recommended)"
-      ],
-      "outputs": [
-        "artifacts/output/02-strategy/product-spec.md",
-        "artifacts/output/02-strategy/user-stories.md",
-        "artifacts/output/04-planning/execution-plan.md"
-      ],
-      "key_agents": []
-    },
-    {
-      "name": "retro",
-      "description": "Post-cycle review — extract lessons, calibrate estimates, improve processes, compact memory, and update team knowledge",
-      "prerequisites": [],
-      "outputs": [
-        "artifacts/output/04-planning/kanban.md",
-        "artifacts/output/08-incidents/",
-        "artifacts/output/09-retro/data-collection.md",
-        "artifacts/output/09-retro/execution-review.md",
-        "artifacts/output/09-retro/process-review.md",
-        "artifacts/output/09-retro/product-review.md",
-        "artifacts/output/09-retro/architecture-review.md",
-        "artifacts/output/09-retro/action-items.md",
-        "artifacts/memory/archive/YYYY-QN/",
-        "artifacts/memory/archive/index.json",
-        "artifacts/output/09-retro/archive-review.md",
-        "artifacts/memory/structural/doc-graph.json"
-      ],
-      "key_agents": [
-        "@product-manager",
-        "@tech-lead",
-        "@product-designer",
-        "@architect"
-      ]
-    },
-    {
-      "name": "review",
-      "description": "Standalone code review on current changes — outside the dev loop",
-      "prerequisites": [],
-      "outputs": [],
-      "key_agents": []
-    },
-    {
-      "name": "round-table",
-      "description": "Orchestrates group discussions between Vespyr agents, enabling natural multi-agent conversations where each agent is a real subagent with independent thinking. Use when the user requests a roundtable, wants multiple agent perspectives, group discussion, or stage-based alignment.",
-      "prerequisites": [],
-      "outputs": [
-        "artifacts/memory/project-context.md",
-        "artifacts/output/pipeline-state.json"
-      ],
-      "key_agents": [
-        "@founder",
-        "@product-manager",
-        "@researcher",
-        "@user-researcher",
-        "@ux-researcher",
-        "@product-designer",
-        "@architect",
-        "@tech-lead",
-        "@developer",
-        "@qa-engineer",
-        "@code-reviewer",
-        "@security-engineer",
-        "@performance-engineer",
-        "@ml-engineer",
-        "@data-analyst",
-        "@technical-writer"
-      ]
-    },
-    {
-      "name": "squad",
-      "description": "Show available agent squads, switch active squad, and initialize the team preset",
-      "prerequisites": [],
-      "outputs": [
-        "artifacts/memory/project-context.md"
-      ],
-      "key_agents": [
-        "@squad"
-      ]
-    },
-    {
-      "name": "status",
-      "description": "Quick snapshot of current project state — phase, blockers, memory health, sprint progress",
-      "prerequisites": [],
-      "outputs": [
-        "artifacts/output/pipeline-state.json",
-        "artifacts/memory/session-summaries/latest.md"
-      ],
-      "key_agents": []
-    },
-    {
-      "name": "test",
-      "description": "Run tests and summarize failures — quick feedback without loading the full QA workflow",
-      "prerequisites": [],
-      "outputs": [],
-      "key_agents": []
-    },
-    {
-      "name": "validate-game-idea",
-      "description": "Stress-test a game concept before investing production cycles — Socratic diagnostic for indie devs, game studios, and hobbyists",
-      "prerequisites": [],
-      "outputs": [
-        "artifacts/output/00-discovery/validation-brief.md"
-      ],
-      "key_agents": [
-        "@founder"
-      ]
-    },
-    {
-      "name": "validate-idea",
-      "description": "Stress-test an idea before investing research cycles — Socratic diagnostic for startup, company, and personal contexts",
-      "prerequisites": [],
-      "outputs": [
-        "artifacts/output/00-discovery/validation-brief.md"
-      ],
-      "key_agents": [
-        "@founder"
-      ]
-    }
-  ],
-  "agents": {
-    "architect": {
-      "name": "Vera",
-      "description": "Designs system architecture, tech stack, data models, API contracts, and produces ADRs"
-    },
-    "code-reviewer": {
-      "name": "Scout",
-      "description": "Reviews code for correctness, security, performance, and adherence to team standards"
-    },
-    "data-analyst": {
-      "name": "Nova",
-      "description": "Defines success metrics, plans analytics instrumentation, validates data, builds dashboards"
-    },
-    "developer": {
-      "name": "Rex",
-      "description": "Writes production code for specific tasks, following project patterns and conventions"
-    },
-    "devops-engineer": {
-      "name": "Axel",
-      "description": "Manages CI/CD, infrastructure, environments, deployment, and release processes"
-    },
-    "executor": {
-      "name": "Max",
-      "description": "Runs bash commands and returns summarized output. Lightweight execution layer for the agent system."
-    },
-    "founder": {
-      "name": "Elena",
-      "description": "Acts as a strategic founder — takes rough ideas, makes hard decisions, and produces a single validated concept before spending research cycles"
-    },
-    "memory-controller": {
-      "name": "Mnemos",
-      "description": "Manages shared memory reads and writes — delegates scoring to memory_filter.js, incremental writes, automatic compaction, and session continuity"
-    },
-    "ml-engineer": {
-      "name": "Kai",
-      "description": "Designs, builds, and deploys ML models, training pipelines, and inference infrastructure"
-    },
-    "performance-engineer": {
-      "name": "Felix",
-      "description": "Load testing, profiling, bottleneck analysis, query optimization, and caching strategy"
-    },
-    "product-designer": {
-      "name": "Ivy",
-      "description": "End-to-end product design — user flows, interaction design, wireframes, visual design, and design system"
-    },
-    "product-manager": {
-      "name": "Sarah",
-      "description": "Product manager for strategy, roadmapping, prioritization, and requirements — from initial PRDs to iterative backlog management"
-    },
-    "qa-engineer": {
-      "name": "Nina",
-      "description": "Writes and runs tests, ensures quality coverage, validates behavior against specs"
-    },
-    "reader": {
-      "name": "Page",
-      "description": "Reads files and searches codebase — returns summarized, structured results. Delegation target for thinking agents."
-    },
-    "researcher": {
-      "name": "Iris",
-      "description": "Researches market trends, TAM/SAM/SOM, competitive landscape, pricing, and strategic gaps"
-    },
-    "security-engineer": {
-      "name": "Victor",
-      "description": "Performs security audits, threat modeling, dependency scanning, and vulnerability assessment"
-    },
-    "tech-lead": {
-      "name": "Grant",
-      "description": "Breaks specs into implementable tasks, estimates effort, manages dependencies and execution plan"
-    },
-    "technical-writer": {
-      "name": "Clara",
-      "description": "Writes and maintains project documentation, API references, README, and user guides"
-    },
-    "user-researcher": {
-      "name": "Paige",
-      "description": "Synthesizes user needs, pain points, jobs-to-be-done, and generates personas"
-    },
-    "ux-researcher": {
-      "name": "Zara",
-      "description": "Evaluates usability, interaction patterns, information architecture, and accessibility through structured research methods"
-    },
-    "writer": {
-      "name": "Quill",
-      "description": "Writes and edits files based on precise specifications from thinking agents. Delegation target for all file mutations."
-    }
+[
+  {
+    "name": "code-graph",
+    "description": "Codebase structural dependency mapper — initialize, view status, and run incremental updates for modified codebase files",
+    "prerequisites": [],
+    "outputs": [
+      "artifacts/memory/structural/code-graph.json"
+    ],
+    "key_agents": [
+      "@architect",
+      "@tech-lead"
+    ]
+  },
+  {
+    "name": "customize",
+    "description": "Guided authoring flow for agent customization — describe your intent, map it to override fields, write the TOML, and verify it works",
+    "prerequisites": [
+      "The agent file exists under .agents/agents/<name>.md",
+      "You know which agent you want to customize",
+      "If the agent has no customize.toml defaults yet, the merge will only apply your override"
+    ],
+    "outputs": [
+      "artifacts/memory/active-decisions.md"
+    ],
+    "key_agents": [
+      "@developer",
+      "@architect",
+      "@qa-engineer",
+      "@testing-library"
+    ]
+  },
+  {
+    "name": "delegate",
+    "description": "One-shot I/O offload to @reader, @writer, or @executor — keeps your context focused on reasoning",
+    "prerequisites": [],
+    "outputs": [],
+    "key_agents": []
+  },
+  {
+    "name": "design",
+    "description": "Defines product requirements from validated ideas, then produces detailed developer-ready specs. Supports create/edit/validate modes.",
+    "prerequisites": [
+      "artifacts/output/00-discovery/validation-brief.md OR idea-brief.md",
+      "artifacts/output/01-research/market-analysis.md",
+      "artifacts/output/01-research/competitive-analysis.md",
+      "artifacts/output/01-research/user-personas.md"
+    ],
+    "outputs": [
+      "artifacts/output/00-discovery/validation-brief.md",
+      "artifacts/output/01-research/market-analysis.md",
+      "artifacts/output/01-research/competitive-analysis.md",
+      "artifacts/output/01-research/user-personas.md"
+    ],
+    "key_agents": []
+  },
+  {
+    "name": "develop",
+    "description": "Core MVP workflow — spec review, architecture, planning, implementation, QA, verification, and documentation",
+    "prerequisites": [
+      "  artifacts/output/02-strategy/product-spec.md",
+      "  artifacts/output/02-strategy/requirements.md",
+      "  artifacts/output/02-strategy/user-stories.md"
+    ],
+    "outputs": [
+      "artifacts/output/02-strategy/product-spec.md",
+      "artifacts/output/02-strategy/requirements.md",
+      "artifacts/output/02-strategy/user-stories.md",
+      "artifacts/output/03-architecture/",
+      "artifacts/output/03-architecture/adr-NNN-",
+      "artifacts/output/04-planning/execution-plan.md",
+      "artifacts/output/04-planning/kanban.md",
+      "artifacts/output/06-quality/findings-report.md",
+      "artifacts/output/06-quality/report.md"
+    ],
+    "key_agents": [
+      "@mentions",
+      "@product-manager",
+      "@product-designer",
+      "@developer",
+      "@tech-lead",
+      "@architect",
+      "@founder",
+      "@developer-1",
+      "@code-reviewer",
+      "@developer-2",
+      "@developer-N",
+      "@qa-engineer",
+      "@security-engineer",
+      "@performance-engineer",
+      "@technical-writer"
+    ]
+  },
+  {
+    "name": "doc-graph",
+    "description": "Document relationship and traceability graph mapper — parse and update connections between PRDs, user stories, ADRs, active decisions, and codebase references",
+    "prerequisites": [],
+    "outputs": [
+      "artifacts/memory/structural/doc-graph.json"
+    ],
+    "key_agents": []
+  },
+  {
+    "name": "elicitation",
+    "description": "Push the LLM to reconsider, refine, and improve its recent output. Use when user asks for deeper critique or mentions a known deeper critique method, e.g. socratic, first principles, pre-mortem, red team.",
+    "prerequisites": [],
+    "outputs": [],
+    "key_agents": [
+      "@architect",
+      "@security-engineer",
+      "@qa-engineer",
+      "@developer"
+    ]
+  },
+  {
+    "name": "explore-game-idea",
+    "description": "Validates a game concept through genre market, competitive landscape, and player research — turns a validated game idea into evidence-backed research",
+    "prerequisites": [
+      "*Path A — Has validation brief (recommended):**",
+      "  artifacts/output/00-discovery/validation-brief.md exists with a GO verdict",
+      "Skip Phase 1 (Synthesize) entirely. Go straight to Phase 2 research. Downstream agents will use validation-brief.md directly.",
+      "*Path B — No validation brief (direct entry):**",
+      "If the user skips validate-game-idea and comes here directly with a clear concept, run Phase 1 (founder synthesis) to produce idea-brief.md first.",
+      "Consider suggesting validate-game-idea if the idea seems unvalidated."
+    ],
+    "outputs": [
+      "artifacts/output/00-discovery/validation-brief.md",
+      "artifacts/output/00-discovery/idea-brief.md",
+      "artifacts/output/01-research/market-analysis.md",
+      "artifacts/output/01-research/competitive-analysis.md",
+      "artifacts/output/01-research/user-personas.md"
+    ],
+    "key_agents": [
+      "@founder",
+      "@researcher",
+      "@user-researcher"
+    ]
+  },
+  {
+    "name": "explore-idea",
+    "description": "Validates a concept through market, competitor, and user research — turns a validated idea into evidence-backed research",
+    "prerequisites": [
+      "*Path A — Has validation brief (recommended):**",
+      "  artifacts/output/00-discovery/validation-brief.md exists with a GO verdict",
+      "Skip Phase 1 (Synthesize) entirely. Go straight to Phase 2 research. Downstream agents will use validation-brief.md directly.",
+      "*Path B — No validation brief (direct entry):**",
+      "If the user skips validate-idea and comes here directly with a clear concept, run Phase 1 (founder synthesis) to produce idea-brief.md first.",
+      "Consider suggesting validate-idea if the idea seems unvalidated."
+    ],
+    "outputs": [
+      "artifacts/output/00-discovery/validation-brief.md",
+      "artifacts/output/00-discovery/idea-brief.md",
+      "artifacts/output/01-research/market-analysis.md",
+      "artifacts/output/01-research/competitive-analysis.md",
+      "artifacts/output/01-research/user-personas.md"
+    ],
+    "key_agents": [
+      "@founder",
+      "@researcher",
+      "@user-researcher"
+    ]
+  },
+  {
+    "name": "grill-me",
+    "description": "End-to-end Socratic alignment loop — stress-tests requirements, specifications, and architecture decisions before implementation. Use when user wants to be grilled on a plan, design, or idea.",
+    "prerequisites": [
+      "A concrete artifact to interrogate (plan, spec, architecture, hypothesis, design)",
+      "If no artifact exists, run /validate-idea first to produce a brief"
+    ],
+    "outputs": [
+      "artifacts/memory/active-decisions.md"
+    ],
+    "key_agents": []
+  },
+  {
+    "name": "help-me",
+    "description": "Dynamic next-step navigator — evaluates project state, checks skill catalog, codebase/doc graphs, and provides a tailored navigation report with recommended slash commands.",
+    "prerequisites": [],
+    "outputs": [
+      "artifacts/output/pipeline-state.json",
+      "artifacts/memory/project-context.md"
+    ],
+    "key_agents": [
+      "@architect"
+    ]
+  },
+  {
+    "name": "humanize",
+    "description": "Remove signs of AI-generated writing from text. Use when editing or reviewing\n",
+    "prerequisites": [],
+    "outputs": [],
+    "key_agents": []
+  },
+  {
+    "name": "incident",
+    "description": "Production incident management — triage, mitigate, root-cause analysis, and post-incident review",
+    "prerequisites": [],
+    "outputs": [
+      "artifacts/output/08-incidents/INC-NNN/",
+      "artifacts/output/08-incidents/INC-NNN/triage.md",
+      "artifacts/output/08-incidents/INC-NNN/mitigation.md",
+      "artifacts/output/08-incidents/INC-NNN/rca.md",
+      "artifacts/output/08-incidents/INC-NNN/remediation.md",
+      "artifacts/output/08-incidents/INC-NNN/post-incident-review.md"
+    ],
+    "key_agents": [
+      "@product-manager",
+      "@devops-engineer",
+      "@architect",
+      "@developer",
+      "@tech-lead",
+      "@security-engineer",
+      "@performance-engineer",
+      "@code-reviewer",
+      "@qa-engineer"
+    ]
+  },
+  {
+    "name": "iterate",
+    "description": "Post-launch feature iteration — analyze user data, prioritize improvements, ship incremental value",
+    "prerequisites": [
+      "  Product is live and accessible to users",
+      "  Post-launch monitoring period is complete (24-72 hours)",
+      "  artifacts/output/06-launch/post-launch-report.md exists"
+    ],
+    "outputs": [
+      "artifacts/output/06-launch/post-launch-report.md",
+      "artifacts/output/07-iteration/analytics-insights.md",
+      "artifacts/output/07-iteration/iteration-backlog.md",
+      "artifacts/output/07-iteration/iteration-spec.md",
+      "artifacts/output/07-iteration/iteration-adr.md",
+      "artifacts/output/07-iteration/iteration-plan.md",
+      "artifacts/output/07-iteration/iteration-results.md"
+    ],
+    "key_agents": [
+      "@data-analyst",
+      "@product-manager",
+      "@product-designer",
+      "@architect",
+      "@tech-lead",
+      "@developer",
+      "@code-reviewer",
+      "@qa-engineer",
+      "@devops-engineer"
+    ]
+  },
+  {
+    "name": "kanban",
+    "description": "Display and update the Kanban board — track task progress across phases",
+    "prerequisites": [],
+    "outputs": [
+      "artifacts/output/04-planning/kanban.md",
+      "artifacts/memory/product-manager-notes.md"
+    ],
+    "key_agents": [
+      "@developer-1",
+      "@code-reviewer"
+    ]
+  },
+  {
+    "name": "launch",
+    "description": "Go-to-market coordination — release readiness, stakeholder alignment, launch orchestration, and post-launch monitoring",
+    "prerequisites": [
+      "  All tasks in artifacts/output/04-planning/execution-plan.md are complete",
+      "  Code review and QA passed",
+      "  PM signed off on the feature"
+    ],
+    "outputs": [
+      "artifacts/output/04-planning/execution-plan.md",
+      "artifacts/output/06-launch/release-readiness.md",
+      "artifacts/output/06-launch/go-nogo-decision.md",
+      "artifacts/output/06-launch/launch-log.md",
+      "artifacts/output/06-launch/post-launch-report.md",
+      "artifacts/output/06-launch/launch-retro.md"
+    ],
+    "key_agents": [
+      "@product-manager",
+      "@security-engineer",
+      "@performance-engineer",
+      "@technical-writer",
+      "@devops-engineer",
+      "@data-analyst",
+      "@developer",
+      "@code-reviewer",
+      "@qa-engineer"
+    ]
+  },
+  {
+    "name": "memory",
+    "description": "Search archived memory entries — retrieve historical context that has been compacted",
+    "prerequisites": [],
+    "outputs": [],
+    "key_agents": []
+  },
+  {
+    "name": "phase",
+    "description": "Show current phase, switch phases, list phase artifacts",
+    "prerequisites": [],
+    "outputs": [
+      "artifacts/output/pipeline-state.json",
+      "artifacts/memory/project-context.md",
+      "artifacts/memory/active-decisions.md"
+    ],
+    "key_agents": []
+  },
+  {
+    "name": "plan",
+    "description": "Create an execution plan from existing specs — standalone, outside the full develop cycle",
+    "prerequisites": [
+      "artifacts/output/02-strategy/product-spec.md exists",
+      "Architecture decisions (ADRs) in 03-architecture/ (recommended)"
+    ],
+    "outputs": [
+      "artifacts/output/02-strategy/product-spec.md",
+      "artifacts/output/04-planning/execution-plan.md"
+    ],
+    "key_agents": [
+      "@tech-lead"
+    ]
+  },
+  {
+    "name": "retro",
+    "description": "Post-cycle review — extract lessons, calibrate estimates, improve processes, compact memory, and update team knowledge",
+    "prerequisites": [],
+    "outputs": [
+      "artifacts/output/04-planning/kanban.md",
+      "artifacts/output/08-incidents/",
+      "artifacts/output/09-retro/data-collection.md",
+      "artifacts/output/09-retro/execution-review.md",
+      "artifacts/output/09-retro/process-review.md",
+      "artifacts/output/09-retro/product-review.md",
+      "artifacts/output/09-retro/architecture-review.md",
+      "artifacts/output/09-retro/action-items.md",
+      "artifacts/memory/archive/YYYY-QN/",
+      "artifacts/memory/archive/index.json",
+      "artifacts/output/09-retro/archive-review.md",
+      "artifacts/memory/structural/doc-graph.json"
+    ],
+    "key_agents": [
+      "@product-manager",
+      "@tech-lead",
+      "@product-designer",
+      "@architect"
+    ]
+  },
+  {
+    "name": "review",
+    "description": "Standalone code review on current changes — outside the dev loop",
+    "prerequisites": [],
+    "outputs": [],
+    "key_agents": []
+  },
+  {
+    "name": "round-table",
+    "description": "Orchestrates group discussions between Vespyr agents, enabling natural multi-agent conversations where each agent is a real subagent with independent thinking. Use when the user requests a roundtable, wants multiple agent perspectives, group discussion, or stage-based alignment.",
+    "prerequisites": [],
+    "outputs": [
+      "artifacts/memory/project-context.md",
+      "artifacts/output/pipeline-state.json"
+    ],
+    "key_agents": [
+      "@founder",
+      "@product-manager",
+      "@researcher",
+      "@user-researcher",
+      "@ux-researcher",
+      "@product-designer",
+      "@architect",
+      "@tech-lead",
+      "@developer",
+      "@qa-engineer",
+      "@code-reviewer",
+      "@security-engineer",
+      "@performance-engineer",
+      "@ml-engineer",
+      "@data-analyst",
+      "@technical-writer"
+    ]
+  },
+  {
+    "name": "squad",
+    "description": "Show available agent squads, switch active squad, and initialize the team preset",
+    "prerequisites": [],
+    "outputs": [
+      "artifacts/memory/project-context.md",
+      "artifacts/memory/active-squad.md",
+      "artifacts/memory/active-decisions.md"
+    ],
+    "key_agents": [
+      "@squad",
+      "@agent-name"
+    ]
+  },
+  {
+    "name": "status",
+    "description": "Quick snapshot of current project state — phase, blockers, memory health, sprint progress",
+    "prerequisites": [],
+    "outputs": [
+      "artifacts/output/pipeline-state.json",
+      "artifacts/memory/session-summaries/latest.md"
+    ],
+    "key_agents": []
+  },
+  {
+    "name": "test",
+    "description": "Run tests and summarize failures — quick feedback without loading the full QA workflow",
+    "prerequisites": [],
+    "outputs": [],
+    "key_agents": []
+  },
+  {
+    "name": "validate-game-idea",
+    "description": "Stress-test a game concept before investing production cycles — Socratic diagnostic for indie devs, game studios, and hobbyists",
+    "prerequisites": [],
+    "outputs": [
+      "artifacts/output/00-discovery/validation-brief.md"
+    ],
+    "key_agents": [
+      "@founder"
+    ]
+  },
+  {
+    "name": "validate-idea",
+    "description": "Stress-test an idea before investing research cycles — Socratic diagnostic for startup, company, and personal contexts",
+    "prerequisites": [],
+    "outputs": [
+      "artifacts/output/00-discovery/validation-brief.md"
+    ],
+    "key_agents": [
+      "@founder"
+    ]
   }
-}
+]

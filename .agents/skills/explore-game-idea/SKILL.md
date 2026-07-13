@@ -26,7 +26,7 @@ Before starting, check for a validation brief:
 
 ### Phase 1: Synthesize (skip if validation brief exists)
 
-**Template:** Use `.agents/templates/game-idea-brief-template.md` for the founder memo.
+**Template:** Use `.agents/templates/discovery/game-idea-brief-template.md` for the founder memo.
 
 **grill-me offer (Path B only — no validation brief):** Before synthesizing, ask the user:
 > "Would you like me to grill you on this game concept first (Socratic Q&A, one question at a time) before I produce the idea brief? Or should I proceed with synthesis directly?"
@@ -59,7 +59,7 @@ Research agents use the validation brief (or idea brief) as their primary input.
 Steps 2a and 2b can run **in parallel**. Step 2c depends on 2b's output.
 
 #### Step 2a: Market Research ⟨parallel⟩
-**Template:** `.agents/templates/game-market-analysis-template.md`
+**Template:** `.agents/templates/research/game-market-analysis-template.md`
 
 Invoke `@researcher market` to validate genre market potential:
 - Genre market size and growth (Steam Spy, platform data, genre reports)
@@ -76,7 +76,7 @@ Invoke `@researcher market` to validate genre market potential:
 **Output:** `artifacts/output/01-research/market-analysis.md`
 
 #### Step 2b: Competitor Analysis ⟨parallel with 2a⟩
-**Template:** `.agents/templates/game-competitive-analysis-template.md`
+**Template:** `.agents/templates/research/game-competitive-analysis-template.md`
 
 Invoke `@researcher competitive` to map the genre landscape:
 - Direct competitors (same genre + similar experience loop)
@@ -95,7 +95,7 @@ Invoke `@researcher competitive` to map the genre landscape:
 **Output:** `artifacts/output/01-research/competitive-analysis.md`
 
 #### Step 2c: Player Research ⟨after 2b⟩
-**Template:** `.agents/templates/game-user-personas-template.md`
+**Template:** `.agents/templates/research/game-user-personas-template.md`
 
 Invoke `@user-researcher` to validate player needs:
 - Target player personas (play style, library, session habits, what makes them evangelize)

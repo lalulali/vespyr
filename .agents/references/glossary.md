@@ -30,3 +30,6 @@
 - **Escalation ladder** — The named-decision-authority chain for resolving agent disputes.
 - **Memory write-back** — The contract by which an agent commits patterns to shared memory.
 - **Preflight check** — A check that runs before high-risk tasks to verify required context is loaded.
+- **Citation Protocol** — The contract by which reasoning agents cite real sources inline with footnotes. See `references/citation-format.md`.
+- **Footnote** — A markdown footnote (`[^N]:`) at the end of an artifact, providing source details for an inline citation `[N]`. The only permitted citation format.
+- **Citation** — An inline `[N]` marker linking to a footnote. Required for every factual claim from a real source.

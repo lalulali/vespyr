@@ -28,7 +28,7 @@ Invoke `@data-analyst` to collect and analyze post-launch data:
 - A/B test results (if any experiments are running)
 - Qualitative feedback (reviews, support conversations, user interviews)
 
-**Output:** `artifacts/output/07-iteration/analytics-insights.md` (Use template: `.agents/templates/analytics-insights-template.md`)
+**Output:** `artifacts/output/07-iteration/analytics-insights.md` (Use template: `.agents/templates/quality/analytics-insights-template.md`)
 
 ### Step 2: Identify Opportunities
 
@@ -40,7 +40,7 @@ Invoke `@product-manager` to synthesize insights into opportunities:
 - Determine what to iterate on vs. what to leave as-is
 
 **Input:** `artifacts/output/07-iteration/analytics-insights.md`
-**Output:** `artifacts/output/07-iteration/iteration-backlog.md` (Use template: `.agents/templates/iteration-backlog-template.md`)
+**Output:** `artifacts/output/07-iteration/iteration-backlog.md` (Use template: `.agents/templates/planning/iteration-backlog-template.md`)
 
 ### Step 3: Design + Architecture Assessment (parallelizable)
 
@@ -54,7 +54,7 @@ Invoke `@product-designer` to design improvements:
 - Document design rationale linking back to data signals
 
 **Input:** `artifacts/output/07-iteration/iteration-backlog.md`
-**Output:** `artifacts/output/07-iteration/iteration-spec.md` (Use template: `.agents/templates/product-spec-template.md`)
+**Output:** `artifacts/output/07-iteration/iteration-spec.md` (Use template: `.agents/templates/product/product-spec-template.md`)
 
 #### Step 3b: Architecture Impact Assessment ⟨parallel⟩
 Invoke `@architect` to assess:
@@ -64,7 +64,7 @@ Invoke `@architect` to assess:
 - Flag any technical debt that should be addressed alongside
 
 **Input:** `artifacts/output/07-iteration/iteration-backlog.md`
-**Output:** `artifacts/output/07-iteration/iteration-adr.md` (only if architectural changes needed. Use template: `.agents/templates/adr-template.md`)
+**Output:** `artifacts/output/07-iteration/iteration-adr.md` (only if architectural changes needed. Use template: `.agents/templates/architecture/adr-template.md`)
 
 ### Step 4: Plan and Execute
 
@@ -84,7 +84,7 @@ Then execute the same dev loop from `develop`:
 - `@qa-engineer` validates (max 2 QA cycles)
 - `@product-manager` verifies
 
-**Output:** `artifacts/output/07-iteration/iteration-plan.md` (Use template: `.agents/templates/execution-plan-template.md`)
+**Output:** `artifacts/output/07-iteration/iteration-plan.md` (Use template: `.agents/templates/planning/execution-plan-template.md`)
 
 ### Step 5: Ship and Measure
 
@@ -113,7 +113,7 @@ Next step: {continue iterating / load retro / load develop}
 New blockers: {any issues, or "none"}
 ```
 
-**Output:** `artifacts/output/07-iteration/iteration-results.md` (Use template: `.agents/templates/iteration-results-template.md`)
+**Output:** `artifacts/output/07-iteration/iteration-results.md` (Use template: `.agents/templates/planning/iteration-results-template.md`)
 
 ### Step 6: Decide Next Action (gate)
 

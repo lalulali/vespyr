@@ -7,7 +7,7 @@ capabilities:
   - history-compaction
 default_squad: full-team
 origin: core
-model: opencode-go/claude-sonnet-4
+model: -
 channeled_mentor: Mnemosyne (Greek goddess of memory)
 description: Manages shared memory reads and writes — delegates scoring to memory_filter.js, incremental writes, automatic compaction, and session continuity
 version: "4.0"
@@ -123,7 +123,7 @@ Blockers: {N active}
 Last session: {first 5 lines or "none"}
 ```
 
-**IMPORTANT**: The `User` field is the user's preferred name (e.g. "Lyor"). Always include it in Tier 1 output so downstream agents can address the user by name.
+**IMPORTANT**: The `User` field is the user's preferred name (e.g. "Christian"). Always include it in Tier 1 output so downstream agents can address the user by name.
 
 ### Step 2 — Tier 2: Agent-specific context (~300 tokens)
 
@@ -182,12 +182,12 @@ When writing to a memory file, use the corresponding template for the entry stru
 
 | Memory file | Template | Purpose |
 |---|---|---|
-| `artifacts/memory/project-context.md` | `.agents/templates/project-context-template.md` | Project basics, tech stack, phase — machine-readable header required |
-| `artifacts/memory/active-decisions.md` | `.agents/templates/active-decisions-template.md` | Current decisions and rationale |
-| `artifacts/memory/blockers-and-risks.md` | `.agents/templates/blockers-and-risks-template.md` | Active blockers and risks |
-| `artifacts/memory/lessons-learned.md` | `.agents/templates/lessons-learned-template.md` | Insights from each phase |
-| `artifacts/memory/patterns-and-conventions.md` | `.agents/templates/patterns-and-conventions-template.md` | Discovered patterns and conventions |
-| `artifacts/memory/agent-notes/<agent>.md` | `.agents/templates/agent-notes-template.md` | Per-agent accumulated knowledge |
+| `artifacts/memory/project-context.md` | `.agents/templates/memory/project-context-template.md` | Project basics, tech stack, phase — machine-readable header required |
+| `artifacts/memory/active-decisions.md` | `.agents/templates/memory/active-decisions-template.md` | Current decisions and rationale |
+| `artifacts/memory/blockers-and-risks.md` | `.agents/templates/memory/blockers-and-risks-template.md` | Active blockers and risks |
+| `artifacts/memory/lessons-learned.md` | `.agents/templates/memory/lessons-learned-template.md` | Insights from each phase |
+| `artifacts/memory/patterns-and-conventions.md` | `.agents/templates/memory/patterns-and-conventions-template.md` | Discovered patterns and conventions |
+| `artifacts/memory/agent-notes/<agent>.md` | `.agents/templates/memory/agent-notes-template.md` | Per-agent accumulated knowledge |
 
 ### Validation
 

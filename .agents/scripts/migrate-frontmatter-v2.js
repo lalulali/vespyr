@@ -16,25 +16,25 @@ const AGENT_DATA = {
   'product-manager': {
     icon: '📋',
     capabilities: ['requirements-scoping', 'prd-generation', 'backlog-management', 'user-story-mapping'],
-    default_squad: 'strategy',
+    default_squad: 'design',
     channeled_mentor: 'Marty Cagan + Teresa Torres',
   },
   'product-designer': {
     icon: '🎨',
     capabilities: ['ui-design', 'ux-specification', 'wireframing', 'design-system'],
-    default_squad: 'strategy',
+    default_squad: 'design',
     channeled_mentor: 'Don Norman + Julie Zhuo',
   },
   architect: {
     icon: '🏗️',
     capabilities: ['system-design', 'adr-writing', 'api-contracts', 'data-modeling'],
-    default_squad: 'strategy',
+    default_squad: 'design',
     channeled_mentor: 'Rich Hickey + John Carmack',
   },
   'tech-lead': {
     icon: '📐',
     capabilities: ['task-breakdown', 'estimation', 'execution-planning', 'dependency-management'],
-    default_squad: 'strategy',
+    default_squad: 'design',
     channeled_mentor: 'Will Larson + Camille Fournier',
   },
   developer: {
@@ -46,49 +46,49 @@ const AGENT_DATA = {
   'code-reviewer': {
     icon: '🔍',
     capabilities: ['code-review', 'security-audit', 'pattern-analysis'],
-    default_squad: 'quality',
+    default_squad: 'build',
     channeled_mentor: 'Dave Cheney + John Regehr',
   },
   'qa-engineer': {
     icon: '🧪',
     capabilities: ['test-planning', 'regression-testing', 'integration-testing', 'release-certification'],
-    default_squad: 'quality',
+    default_squad: 'build',
     channeled_mentor: 'James Bach + Michael Bolton',
   },
   researcher: {
     icon: '🔬',
     capabilities: ['market-analysis', 'competitor-research', 'technology-trends'],
-    default_squad: 'startup',
+    default_squad: 'research',
     channeled_mentor: 'Clayton Christensen + Cindy Alvarez',
   },
   'user-researcher': {
     icon: '👥',
     capabilities: ['user-interviews', 'persona-mapping', 'jobs-to-be-done'],
-    default_squad: 'startup',
+    default_squad: 'research',
     channeled_mentor: 'Steve Krug + Erika Hall',
   },
   'ux-researcher': {
     icon: '🎭',
     capabilities: ['usability-evaluation', 'journey-mapping', 'interaction-design'],
-    default_squad: 'startup',
+    default_squad: 'research',
     channeled_mentor: 'Don Norman + Jakob Nielsen',
   },
   'data-analyst': {
     icon: '📊',
     capabilities: ['telemetry', 'dashboards', 'funnel-analysis', 'experiment-design'],
-    default_squad: 'iterate',
+    default_squad: 'design',
     channeled_mentor: 'Avinash Kaushik + Edward Tufte',
   },
   'security-engineer': {
     icon: '🔒',
     capabilities: ['threat-modeling', 'vulnerability-scanning', 'security-review'],
-    default_squad: 'quality',
+    default_squad: 'build',
     channeled_mentor: 'Bruce Schneier + OWASP contributors',
   },
   'performance-engineer': {
     icon: '⚡',
     capabilities: ['latency-analysis', 'profiling', 'optimization', 'load-testing'],
-    default_squad: 'quality',
+    default_squad: 'build',
     channeled_mentor: 'Brendan Gregg + Aleksey Shipilëv',
   },
   'ml-engineer': {
@@ -135,7 +135,7 @@ const AGENT_DATA = {
   },
 };
 
-const KNOWN_SQUADS = ['startup', 'strategy', 'build', 'quality', 'ship', 'iterate', 'full-team'];
+const KNOWN_SQUADS = ['build', 'design', 'full-team', 'game-studio', 'research', 'ship', 'startup'];
 
 function parseFrontmatter(content) {
   const match = content.match(/^---\n([\s\S]*?)\n---/);

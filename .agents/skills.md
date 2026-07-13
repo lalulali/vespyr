@@ -146,12 +146,12 @@ All agents read from and write to `artifacts/memory/` through `@memory-controlle
 
 **Protocol:**
 - **Read:** Invoke `@memory-controller load [agent-type] [task-description]` before starting. Do NOT read memory files directly — the controller filters and compresses context for you.
-- **Write:** Invoke `@memory-controller write [file] [entry]` after completing. Use the format in `.agents/templates/memory-entry-template.md`.
-- **End of session:** Invoke `@memory-controller session-write [content]` when wrapping up. Use the format in `.agents/templates/session-summary-template.md`. This gives the next session ~100 tokens of recent context instead of re-reading everything.
+- **Write:** Invoke `@memory-controller write [file] [entry]` after completing. Use the format in `.agents/templates/memory/memory-entry-template.md`.
+- **End of session:** Invoke `@memory-controller session-write [content]` when wrapping up. Use the format in `.agents/templates/memory/session-summary-template.md`. This gives the next session ~100 tokens of recent context instead of re-reading everything.
 
 ### Memory Entry Format
 
-Every entry written to memory must follow the structured format in `.agents/templates/memory-entry-template.md`:
+Every entry written to memory must follow the structured format in `.agents/templates/memory/memory-entry-template.md`:
 - Domain tag: `[AUTH]`, `[CODE]`, `[RISK]`, etc.
 - Date tag: `[date: YYYY-MM-DD]`
 - Agent tag: `[agent: @agent-name]`

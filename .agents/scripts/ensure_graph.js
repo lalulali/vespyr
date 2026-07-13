@@ -71,7 +71,7 @@ function walk(dir, results = [], ignore = new Set()) {
 // For code: any source file under --src dirs.
 // For doc: any .md under artifacts/memory/ and artifacts/output/.
 function maxMtimeOfSources(srcDirs) {
-  const ignore = new Set(['node_modules', '.git', 'dist', 'build', 'coverage', '.opencode', 'artifacts', 'archive', 'telemetry']);
+  const ignore = new Set(['node_modules', '.git', 'dist', 'build', 'coverage', '.agents', 'artifacts', 'archive', 'telemetry']);
   let maxMtime = 0;
   for (const dir of srcDirs) {
     const absDir = path.resolve(PROJECT_ROOT, dir);
@@ -86,7 +86,7 @@ function maxMtimeOfSources(srcDirs) {
 }
 
 function maxMtimeOfDocs() {
-  const ignore = new Set(['node_modules', '.git', 'archive', 'telemetry', '.opencode']);
+  const ignore = new Set(['node_modules', '.git', 'archive', 'telemetry', '.agents']);
   const roots = [
     path.join(PROJECT_ROOT, 'artifacts', 'input'),
     path.join(PROJECT_ROOT, 'artifacts', 'memory'),

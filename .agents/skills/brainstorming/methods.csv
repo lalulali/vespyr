@@ -1,0 +1,61 @@
+num,category,method_name,description,output_pattern
+1,ideation,SCAMPER,Substitute / Combine / Adapt / Modify / Put to another use / Eliminate / Reverse — the Swiss Army knife of creative thinking,existing → each lens → transformed ideas
+2,ideation,Six Thinking Hats,White (facts) / Red (feelings) / Black (risks) / Yellow (benefits) / Green (creativity) / Blue (process) — structured parallel thinking,hats → perspectives → comprehensive view
+3,ideation,Starbursting,Generate questions not answers — who/what/where/when/why/how for every aspect of the idea before evaluating,idea → question flood → knowledge gaps
+4,ideation,Reverse Brainstorming,How could we make this problem worse? — inverts the question to unlock creative solutions blocked by assumptions,reverse question → worst ideas → inverted solutions
+5,ideation,Brain-writing,Everyone writes ideas silently then passes them on for others to build on — eliminates groupthink and loudest-voice bias,solo ideas → pass → build → combined insights
+6,ideation,Round Robin,Each person contributes one idea in turn until everyone runs dry — guarantees equal participation across introverts and extroverts,turns → equal contribution → full idea pool
+7,ideation,Nominal Group Technique,Silent generation → round-robin sharing → clarification → voting — structured to prevent dominance and premature convergence,generate → share → clarify → vote
+8,collaborative,World Cafe,Small groups rotate between tables discussing different aspects of a question — scales structured conversation to large groups,tables → rotations → cross-pollination → harvest
+9,collaborative,Fishbowl Discussion,Inner circle discusses while outer circle observes then swaps — ensures deep listening and prevents side conversations,listen → reflect → swap → continue
+10,collaborative,Gallery Walk,Teams create visual displays of their ideas then walk around to comment and build — turns discussion into exhibition,create → display → walk → comment → iterate
+11,collaborative,Silent Sorting,Participants silently arrange sticky notes into groups — surfaces natural categories without anchoring bias,individual → grouping → patterns → consensus
+12,agent,Founder's Pre-mortem,The project failed — Elena walks backward from catastrophe to uncover assumptions no one is stating,imagine failure → root causes → prevention plan
+13,agent,Architect's Trade-off Storm,Vera maps every architecture option against 5 dimensions simultaneously — makes the invisible costs visible,options → dimensions → trade-off landscape
+14,agent,Developer's Implementation Spike,Rex prototypes the riskiest piece in isolation — replaces speculation with data before committing,unknown → prototype → data → decision
+15,agent,PM's Scope Stress Test,Sarah challenges every feature against the constraint triad — finds the 20% of features that deliver 80% of value,features → constraints → prioritized scope
+16,strategic,Morphological Box,Create a matrix of all possible combinations of parameters — finds non-obvious solutions through systematic combination,parameters → combinations → novel solutions
+17,strategic,TRIZ (Theory of Inventive Problem Solving),Apply 40 inventive principles derived from analyzing millions of patents — systematic innovation from engineering patterns,contradiction → principles → solution
+18,strategic,Lotus Blossom,Start from a central idea and expand outward in layers — structured divergence that prevents premature narrowing,center → layer 1 → layer 2 → full map
+19,strategic,Attribute Listing,Decompose the problem into its component attributes then improve each one — systematic breakthrough through decomposition,problem → attributes → improvements → recombination
+20,strategic,Mind Mapping,Radiate ideas outward from a central concept in a visual web — surfaces connections that linear lists hide,center → branches → sub-branches → holistic view
+21,creative,Random Stimulus,Introduce a random word or image and force connections to the problem — breaks cognitive ruts with unexpected associations,random input → forced connection → breakthrough
+22,creative,Provocation (PO),State a deliberately absurd statement then extract useful ideas from it — bypasses the brain's filtering mechanism,absurd statement → extract ideas → novel solutions
+23,creative,Forced Analogy,Compare your problem to something completely unrelated — how would a beehive solve this? — lateral thinking at its best,unrelated domain → analogy → transferred insights
+24,creative,Exquisite Corpse,Each person adds to a creation without seeing the full context — produces combinations no individual would imagine,sequential blind contributions → emergent whole
+25,creative,What If? Scenario,Explore a radically different premise — what if budget was unlimited? what if it had to work offline? — unlocks thinking beyond constraints,premise change → implications → creative paths
+26,structured,Pareto Analysis,Identify the 20% of causes producing 80% of effects — focuses brainstorming on the highest-impact areas,data → frequency → vital few
+27,structured,5 Whys,Ask why 5 times to reach the root cause — prevents brainstorming solutions for symptoms instead of problems,symptom → why? → why? → why? → why? → why? → root cause
+28,structured,A3 Problem Solving,Single-page structured thinking from Toyota — background / current condition / goal / root cause / countermeasures / check / follow-up,problem → structured analysis → plan on one page
+29,structured,Issue Tree,Decompose the problem into a hierarchical tree of sub-questions — MECE (Mutually Exclusive, Collectively Exhaustive) — ensures complete coverage,problem → branches → leaves → full decomposition
+30,evaluation,PMI (Plus/Minus/Interesting),List all positives, negatives, and interesting implications of each idea — prevents emotional rejection of unconventional ideas,idea → plus/minus/interesting → balanced assessment
+31,evaluation,NUF Test,Rate each idea on Novelty, Usefulness, and Feasibility — quick triage for large idea pools,ideas → NUF scores → prioritized shortlist
+32,evaluation,Impact-Difficulty Matrix,Map ideas on impact vs difficulty axes — finds the sweet spot of high impact, low effort,ideas → matrix → quick wins
+33,evaluation,Buy a Feature,Give participants a limited budget to purchase features from a list — reveals true priorities through resource allocation,budget → choices → revealed preferences
+34,evaluation,20/20 Vision,Describe what the solution looks like after 20 minutes / 20 hours / 20 days / 20 weeks — stretches thinking across time horizons,time horizons → evolutions → roadmap
+35,remote,Brain-netting,Online brainstorming using shared documents with silent generation periods — async-first method that scales across timezones,solo generation → shared document → async build
+36,remote,Lightning Demos,Each person finds and presents one inspiring example from another domain — short bursts of inspiration that prevent groupthink,diverse examples → rapid sharing → inspiration
+37,remote,Asynchronous Critique,Post ideas and let people comment over time — avoids the scheduling pressure of real-time sessions and gives reflective thinkers space,post → reflect → comment → collate
+38,remote,1-2-4-All,Individual reflection → pairs discuss → groups of 4 synthesize → share with all — scales from personal to collective,self → pair → quartet → whole group
+39,facilitation,Energizer Break,Short physical or mental shift exercise between intense sessions — resets attention and prevents cognitive fatigue,fatigue → energizer → renewed focus
+40,facilitation,Parking Lot,Designated space for important-but-off-topic ideas that emerge during focused sessions — captures without derailing,relevant distraction → parking lot → revisit later
+41,facilitation,Temperature Check,Quick pulse on group energy, engagement, or agreement — prevents sessions from running past the point of diminishing returns,check → adjust → continue or break
+42,framing,Challenge Mapping,Map the ecosystem of challenges around the core problem before solutioning — prevents solving the wrong problem,problem → related challenges → challenge landscape
+43,framing,How Might We,Reframe problems as opportunities — "How might we help ops managers reduce scheduling time?" — opens possibility space,problem → opportunity frame → possibilities
+44,framing,Design Principles Canvas,Define the principles that will guide solution evaluation before brainstorming — prevents subjective judging later,context → principles → evaluation framework
+45,framing,Job-to-be-Done Framing,What job is the user hiring this solution for? — shifts focus from features to progress the user is trying to make,job → progress → solution fit
+46,hybrid,Silent Brainstorming + Group Discussion,Start silent then discuss — combines the depth of individual reflection with the breadth of group dialogue,silent generation → group discussion → synthesis
+47,hybrid,Individual + Group + Individual,Start alone / share and build in group / final solo refinement — three passes at different levels of depth,alone → group → alone → deep refinement
+48,hybrid,Brain-writing Pool,Write ideas on cards that circulate through the group with each person building on previous contributions — anonymous, iterative, cumulative,circulate → build → accumulate → harvest
+49,hybrid,Worst Possible Idea,Generate the worst ideas possible then invert them — lowers the barrier to participation and surfaces unexpected gold,worst ideas → inversion → novel solutions
+50,hybrid,Crawford Slip Method,Write ideas on slips of paper and collect them without names — completely anonymous brainstorming that eliminates hierarchy effects,write → collect → anonymous pool
+51,large-group,Open Space Technology,Participants create the agenda in real time around topics they care about — self-organizing conference format for 10-1000+ people,themes → self-organized sessions → convergence
+52,large-group,Delphi Method,Iterative anonymous expert polling with feedback between rounds — converges on consensus without groupthink in large expert groups,anonymous input → feedback → converge
+53,large-group,Future Search,Bring the whole system into the room to create a shared vision — past/present/future timeline for 50-200+ stakeholders,whole system → timeline → shared future
+54,large-group,Appreciative Inquiry Summit,Focus on what's working and amplify it — strengths-based approach for organizational change across large groups,discover → dream → design → destiny
+55,decision,Stakeholder Decision Matrix,Map every decision to the stakeholders it affects with their influence level — ensures no one who can veto is surprised,decision → stakeholders → influence map → plan
+56,decision,Weighted Decision Matrix,Score options against weighted criteria — replaces gut feel with transparent, defendable rankings,options → criteria weights → scored ranking
+57,decision,Decision Journal,Record the decision, rationale, expected outcome, and review date before committing — builds a learning loop over time,decision → forecast → review → calibration
+58,risk,Risk Brainstorm,Generate every conceivable risk without evaluating — volume over quality in the first pass then filter and prioritize,generate → categorize → filter → prioritize risk register
+59,risk,Pre-mortem + Timeline,Risk storming mapped onto a project timeline — when do specific risks become most dangerous?,risks → timeline → critical windows → mitigations by phase
+60,risk,Assumption Reversal,Take every assumption underlying the plan and flip it — what if the opposite is true? — surfaces Plan B thinking,assumption → reversal → new plan → resilience

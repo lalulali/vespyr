@@ -55,7 +55,7 @@ The reader returns structured, summarized content. Be specific about what you ne
 [exact content]
 ```
 
-**Always set `IsArtifact: false`** for standard workspace files (within `artifacts/`, `src/`, or `.agents/`). Set `IsArtifact: true` only for IDE planning artifacts (`task.md`, `implementation_plan.md`, `walkthrough.md`). This ensures files write directly to the workspace instead of the IDE's internal app data folders.
+Always set `IsArtifact: false` for standard workspace files. Set `IsArtifact: true` only for IDE planning artifacts. This ensures files write directly to the workspace instead of the IDE's internal app data folders.
 
 ### For command tasks
 
@@ -63,7 +63,7 @@ The reader returns structured, summarized content. Be specific about what you ne
 @executor — Run [command] and summarize output
 ```
 
-Specify what output matters. "Run tests and tell me which failed" not just "run tests".
+Specify what output matters.
 
 ### For memory tasks
 
@@ -71,11 +71,9 @@ Specify what output matters. "Run tests and tell me which failed" not just "run 
 @memory-controller load [task description]
 ```
 
-The controller filters context by relevance, returns a compressed bundle.
-
 ## Token economics
 
-Delegation saves 85-95% of I/O tokens by keeping raw file content and command output out of the reasoning agent's context window. A task that reads 5 large files costs ~15,000 tokens inline vs. ~1,000 tokens via @reader (summarized).
+Delegation saves 85-95% of I/O tokens by keeping raw file content and command output out of the reasoning agent's context window.
 
 ## Override protocol
 
@@ -87,7 +85,7 @@ If you must do I/O directly (outside the table above), emit one line:
 
 ## Anti-patterns
 
-- **Reading 5 files then summarizing inline** — that's `@reader`'s job
-- **Running `npm test` and pasting output** — that's `@executor`'s job
-- **Writing 3 related files in 3 separate edit calls** — batch into one `@writer` call
-- **Direct memory writes without `@memory-controller`** — bypasses schema validation
+- Reading 5 files then summarizing inline — that's @reader's job
+- Running npm test and pasting output — that's @executor's job
+- Writing 3 related files in 3 separate edit calls — batch into one @writer call
+- Direct memory writes without @memory-controller — bypasses schema validation

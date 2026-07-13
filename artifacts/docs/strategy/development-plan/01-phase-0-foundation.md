@@ -11,7 +11,8 @@
 |---|---|---|---|
 | F0.23-F0.28 (critic infrastructure) | In Phase 0 (12h) | **Removed — deferred to v2.3+** | Speculative engineering. No critic personas exist until v2.2. The infrastructure has no consumers. |
 | T7 Vespyr Identity | Backlog (no timeline) | **Added to Phase 0** (6h) | The differentiators are the moat. Ship first, not last. |
-| Budget | 18h (master) / 30h (phase file with F0.23-F0.28) | **24h** (18h + 6h T7) | Matches the master's 78h total for v2.0. |
+| F0.29 (citation & footnote protocol) | Not in original plan | **Added to Phase 0** (~4h) | All reasoning agents + skills must cite real sources. Expands "Honesty & Fact-Checking" from internet-only to all sources. |
+| Budget | 18h (master) / 30h (phase file with F0.23-F0.28) | **28h** (18h + 6h T7 + 4h F0.29) | F0.29 adds ~4h for 17 agent files + reference + validator. |
 
 ## Source mapping
 
@@ -27,6 +28,7 @@
 | F0.20-F0.22 | Phase 0 / T1 | Adoption §3.3 |
 | F0.23-F0.28 | **Removed** | Deferred to v2.3+ (critic infrastructure) |
 | T7.1-T7.4 | **New** (was backlog) | ROADMAP §T7 — promoted to Phase 0 |
+| F0.29 | **New** | User request — citation & footnote protocol for information integrity |
 
 ---
 
@@ -37,7 +39,7 @@
 - [x] Create `.agents/references/phase-table.md` (11-row table: Phase -1 to Phase 9)
   - Columns: #, Folder, Phase Name, Primary Skill, Primary Agent, Gate
   - Conventions: 2-digit zero-padded folders, 0-indexed phases, folder may contain 2 phases
-- [x] Update `.opencode/skills/phase/SKILL.md` to reference this file (not duplicate the table)
+- [x] Update `.agents/skills/phase/SKILL.md` to reference this file (not duplicate the table)
 - [x] Update `workflow.md` to reference this file — **skipped: file does not exist in repo**
 - [x] Update `README.md` "Workflow" section to link to this file
 
@@ -86,10 +88,10 @@ Three documents currently disagree on phase numbering. A canonical table elimina
 
 **Source:** Evolution §1.3 | **Theme:** T1
 
-- [x] F0.2 — Move canonical version to `.opencode/agent.md.canonical` (consolidate with `templates/AGENTS.md.canonical`)
-- [x] F0.3 — Replace `AGENTS.md`, `agent.md`, `CLAUDE.md` with symlinks to `.opencode/agent.md.canonical`
+- [x] F0.2 — Move canonical version to `.agents/agent.md.canonical` (consolidate with `templates/system/AGENTS.md.canonical`)
+- [x] F0.3 — Replace `AGENTS.md`, `agent.md`, `CLAUDE.md` with symlinks to `.agents/agent.md.canonical`
 - [x] F0.4 — Create `.agents/scripts/sync-entry-points.js` (~80 lines)
-  - Reads `.opencode/agent.md.canonical`
+  - Reads `.agents/agent.md.canonical`
   - Replaces harness dotfolder references per target (`.agents/`, `.claude/`, `.kiro/`)
   - Writes to `AGENTS.md`, `agent.md`, `CLAUDE.md`, and per-harness `AGENTS.md`
   - Validates each output is non-empty and contains canonical sections
@@ -104,19 +106,19 @@ Single source of truth + generated derivatives.
 
 ### Proposed content
 
-**F0.2 — Canonical file:** Move the canonical version to `.opencode/agent.md.canonical` (already exists as `templates/AGENTS.md.canonical` — consolidate).
+**F0.2 — Canonical file:** Move the canonical version to `.agents/agent.md.canonical` (already exists as `templates/system/AGENTS.md.canonical` — consolidate).
 
 **F0.3 — Symlinks:**
 
 ```bash
 cd /Users/christianhadianto/Documents/TechSmith/vespyr
-ln -sf .opencode/agent.md.canonical AGENTS.md
-ln -sf .opencode/agent.md.canonical agent.md
-ln -sf .opencode/agent.md.canonical CLAUDE.md
+ln -sf .agents/agent.md.canonical AGENTS.md
+ln -sf .agents/agent.md.canonical agent.md
+ln -sf .agents/agent.md.canonical CLAUDE.md
 ```
 
 **F0.4 — `sync-entry-points.js` (~80 lines):** A Node.js script that:
-- Reads `.opencode/agent.md.canonical`
+- Reads `.agents/agent.md.canonical`
 - Replaces the harness dotfolder references per target (`.agents/`, `.claude/`, `.kiro/`, etc.)
 - Writes to `AGENTS.md`, `agent.md`, `CLAUDE.md`, and per-harness `AGENTS.md` in `.claude/`, `.kiro/`, etc.
 - Validates each output is non-empty and contains the canonical sections
@@ -366,6 +368,9 @@ The validator is the gate that keeps the schema honest. Without it, the 21-file 
   - `channeled mentor` (1-2 references per agent)
   - `hook ID` (stable string like `pre:bash:safety`)
   - `MCP tool` (mcp__vespyr__* prefix)
+  - `Citation Protocol` (cite real sources inline with footnotes)
+  - `footnote` (`[^N]` markdown footnote — only permitted format)
+  - `citation` (inline `[N]` marker linking to a footnote)
 - [x] Cross-link from `AGENTS.md` and `agent.md.canonical`
 
 ### Problem
@@ -745,7 +750,7 @@ The original plan spent 138h importing BMAD/Ruflo/ECC patterns and 0h advancing 
 - [x] Note: The `delegation_audit.js` script and `delegation-log.json` infrastructure stay in Phase 2 (they need hooks). Phase 0 ships the policy + the contract blocks.
 
 ### Problem
-`.opencode/agents/reader.md`, `writer.md`, `executor.md`, `memory-controller.md` are positioned as "narrow, high-performance sub-agents" for I/O delegation. The reasoning agents (`developer.md:37-38`, `code-reviewer.md:31-33`, `architect.md:35-47`) all have delegation language — *"Delegate writing files to `@writer`"*, *"Use `@executor` for running tests"*, *"Send ADRs to `@writer` with exact path"*. But this is policy text, not enforcement. The LLM does whatever is easier, and direct I/O is easier.
+`.agents/agents/reader.md`, `writer.md`, `executor.md`, `memory-controller.md` are positioned as "narrow, high-performance sub-agents" for I/O delegation. The reasoning agents (`developer.md:37-38`, `code-reviewer.md:31-33`, `architect.md:35-47`) all have delegation language — *"Delegate writing files to `@writer`"*, *"Use `@executor` for running tests"*, *"Send ADRs to `@writer` with exact path"*. But this is policy text, not enforcement. The LLM does whatever is easier, and direct I/O is easier.
 
 Consequence:
 - **Context bloat** — read outputs land in the main thread, not a sub-agent context
@@ -758,7 +763,7 @@ Make sub-agent delegation the default path for high-volume I/O, with a single-li
 
 ### Proposed content
 
-Create `.opencode/references/delegation-policy.md` (new, ~90 lines) with the following full content:
+Create `.agents/references/delegation-policy.md` (new, ~90 lines) with the following full content:
 
 ```markdown
 # Delegation Policy — When to Use Sub-Agents
@@ -801,7 +806,7 @@ Allowed for tiny, low-risk operations. The justification is logged to `state/del
 ```markdown
 ## Delegation Contract
 
-**You delegate I/O to sub-agents by default.** See `.opencode/references/delegation-policy.md` for the task→agent mapping. Direct I/O requires a `[DIRECT-IO-JUSTIFIED: ...]` line in your response.
+**You delegate I/O to sub-agents by default.** See `.agents/references/delegation-policy.md` for the task→agent mapping. Direct I/O requires a `[DIRECT-IO-JUSTIFIED: ...]` line in your response.
 
 Common patterns (don't think, just follow):
 - Reading code or docs → `@reader`
@@ -890,6 +895,168 @@ This section is the "elevator pitch" for why Vespyr exists. It states: (1) Permi
 
 ---
 
+## F0.29 — Citation & Footnote Protocol (cross-cutting)
+
+**Source:** User request — information integrity for all reasoning agents + skills | **Theme:** T1, T3
+
+### Problem
+
+The existing "Honesty & Fact-Checking" guideline in the Core Behavioral Guidelines (`agent.md.canonical` §1, Think Before Acting) says: "When using information retrieved from the internet, provide clear citations and footnotes so the user can easily confirm and fact-check the source." This is:
+
+1. **Scoped only to internet-retrieved info** — not books, papers, code, interviews, data, benchmarks, or framework attributions.
+2. **A general guideline, not enforced per-agent** — no reasoning agent has a citation protocol section; the guideline lives only in the canonical contract.
+3. **Not machine-checked** — `validate_frontmatter.js` does not verify the presence of a citation protocol.
+4. **Not integrated into skill step files** — step output contracts don't require citations, so artifacts ship with factual claims that have no traceable sources.
+
+Consequence: agents produce artifacts (research reports, ADRs, PRDs, launch copy, retro digests) with factual claims, statistics, quotes, and data points that users cannot validate. This violates the "Honesty & Fact-Checking" guideline's intent and undermines artifact credibility — especially for `@researcher`, `@user-researcher`, `@data-analyst`, and `@architect` outputs that are evidence-dependent.
+
+### Target
+
+Five changes, all foundational:
+1. **Expand the canonical guideline** from internet-only to all real sources.
+2. **Add `## Citation Protocol` to all 17 reasoning agents** (not the 4 I/O sub-agents — they transcribe, not claim).
+3. **Create `.agents/references/citation-format.md`** — the canonical citation format spec.
+4. **Add `citations:` to skill step-file output contracts** — step files declare whether their output requires citations.
+5. **Extend `validate_frontmatter.js`** to warn on missing Citation Protocol sections.
+
+### Proposed content
+
+#### F0.29.a — Expand the "Honesty & Fact-Checking" guideline
+
+Update the guideline in `agent.md.canonical` §1 (Think Before Acting → Honesty & Fact-Checking) from:
+
+> When using information retrieved from the internet, provide clear citations and footnotes so the user can easily confirm and fact-check the source.
+
+To:
+
+> When using information from any real source (web, books, papers, code, interviews, data, benchmarks, frameworks), provide inline citations `[N]` with footnotes so the user can validate. See `.agents/references/citation-format.md` for the format. If you cannot find the source, say "Source: unverified" — never fabricate a citation.
+
+#### F0.29.b — Citation Protocol section in all 17 reasoning agents
+
+Add a `## Citation Protocol` section to each of the 17 reasoning agents (founder, product-manager, product-designer, architect, tech-lead, developer, code-reviewer, qa-engineer, researcher, user-researcher, ux-researcher, data-analyst, security-engineer, performance-engineer, ml-engineer, devops-engineer, technical-writer). NOT the 4 I/O sub-agents (reader, writer, executor, memory-controller) — they transcribe/summarize/execute, they don't produce original factual claims.
+
+The shared section (~20 lines, identical across all 17):
+
+```markdown
+## Citation Protocol
+
+When your output includes facts, quotes, statistics, data, or claims from a real source, you MUST cite the source inline and provide a footnote.
+
+**Inline format:** `[N]` — bracketed number linking to the footnote at the end of the artifact.
+
+**Footnote format:**
+[^N]: Author/Org, "Title," Source, Date. URL (if applicable). Accessed: YYYY-MM-DD.
+
+**What requires a citation:**
+- Direct quotes (verbatim text from a source)
+- Paraphrased claims from a specific source
+- Statistics, numbers, benchmarks, survey results
+- Frameworks, methodologies, or models attributed to a person/org
+- Code patterns or algorithms from external sources
+
+**What does NOT require a citation:**
+- Your own analysis or reasoning (original thought)
+- General knowledge not attributable to a specific source
+- Internal project artifacts (cite by file path, not footnote)
+- Spec-kernel content (already has CAP-IDs for traceability)
+
+**If you cannot find the source:** say "Source: unverified" and flag it for the user. Never fabricate a citation.
+
+See `.agents/references/citation-format.md` for the full format spec.
+```
+
+**Agent-specific citation emphasis** (1-2 lines appended after the shared block):
+
+| Agent | Citation emphasis |
+|---|---|
+| `@researcher` | Every market statistic, competitor data point, and trend claim gets a footnote |
+| `@user-researcher` | Every interview quote gets a participant ID + date; survey results get source + sample size |
+| `@data-analyst` | Every metric, funnel number, and experiment result gets a telemetry source + date range |
+| `@architect` | Every trade-off claim references the ADR or external paper that informs it |
+| `@ml-engineer` | Every model benchmark references the paper, model card, or eval harness |
+| `@security-engineer` | Every vulnerability reference gets a CVE ID or OWASP reference |
+| `@performance-engineer` | Every latency benchmark references the measurement method + hardware |
+| `@technical-writer` | Every API claim references the source file:line or spec section |
+| `@founder` | Every market-sizing or competitive claim in the GO/PIVOT/KILL gets a source |
+| `@product-manager` | Every user need, JTBD claim, and market reference in the PRD gets a source |
+| `@product-designer` | Every design principle reference (Norman, Nielsen, etc.) gets a source |
+| `@tech-lead` | Every estimation benchmark or pattern reference gets a source |
+| `@developer` | Every code pattern, library usage, or API reference gets a source link |
+| `@code-reviewer` | Every pattern violation reference gets a source (style guide, lint rule, etc.) |
+| `@qa-engineer` | Every test standard or compliance reference gets a source |
+| `@ux-researcher` | Every usability heuristic reference (Nielsen, WCAG, etc.) gets a source |
+| `@devops-engineer` | Every infrastructure best-practice or cloud reference gets a source |
+
+#### F0.29.c — Citation format reference
+
+Create `.agents/references/citation-format.md` (~60 lines) with:
+- Inline citation format: `[N]` bracketed number
+- Footnote format per source type:
+
+| Source type | Format |
+|---|---|
+| Web page | Author/Org, "Title," URL, Date published. Accessed: YYYY-MM-DD. |
+| Book | Author, *Title*, Publisher, Year, page(s). |
+| Paper | Author(s), "Title," Journal/Conference, Year. DOI/URL. |
+| Code/library | Library name, version, URL. File:line if specific. |
+| Interview | Participant ID (anonymized), "Quote," interview date. |
+| Data/telemetry | Source system, metric name, date range, filter. |
+| Benchmark | Tool name, version, hardware spec, date, methodology. |
+
+- The "Source: unverified" protocol (what to do when you can't find the source)
+- Edge cases: citing a citation (use "as cited in"), multi-source claims (one footnote per source), conflicting sources (cite both + note the conflict)
+- 1 worked example per source type
+
+#### F0.29.d — Skill step-file integration
+
+Add an `output_contract.citations` field to the step-file frontmatter template (the template from F1.24.a/F1.24.b.2 in Phase 1):
+
+```yaml
+output_contract:
+  citations: "required"  # or "not-required" for pure-reasoning steps
+```
+
+- **`required`** — the step's output artifact contains factual claims from real sources; inline `[N]` citations + footnotes are mandatory.
+- **`not-required`** — the step is pure reasoning (e.g., Socratic stress-test, brainstorming) with no external-source claims.
+
+Step files created in Phase 1 (F1.1-F1.14) and Phase 5 (T1.15-T1.28b) declare this field. The CI check from F1.24.a/F1.24.b.3 verifies the field is present.
+
+#### F0.29.e — Validator extension
+
+Extend `validate_frontmatter.js`:
+- Warn (not fail) if a reasoning agent (17 agents) is missing `## Citation Protocol` section — same pattern as the Socratic Stance check (T7.3).
+- Warn (not fail) if a step file in `.agents/skills/**/step*.md` is missing `citations:` in its output contract frontmatter.
+
+### Why this matters
+
+1. **Information integrity.** Every factual claim in every artifact is traceable to a source. The user can validate by checking the footnote — one click, not a re-search.
+2. **Ease of validation.** Footnotes give the user a single place to check every claim. This is the "Honesty & Fact-Checking" guideline made enforceable.
+3. **Anti-hallucination.** "Source: unverified" catches hallucinated citations. An agent that fabricates a source will produce a footnote the user can't verify — and the unverified protocol makes this visible.
+4. **@artifact-judge integration.** The Accuracy/Factuality axis (Phase 5, T1.14b `@artifact-judge`) checks "every claim traceable to a source." The Citation Protocol makes this checkable — without citations, the judge can't verify accuracy, and the score is 1 (hard floor → REJECT).
+5. **Cross-harness portability.** Citations are plain Markdown footnotes (`[^N]:`) — they render in any Markdown viewer, any harness. No tooling dependency.
+
+### Why we don't make this a hard gate (fail, not warn)
+
+The Socratic Stance validator (T7.3) warns, not fails — because it's a behavioral guideline, not a structural requirement. The Citation Protocol follows the same pattern. A hard gate would block agent loading if the section is missing, which is too aggressive for a guideline. The warn level surfaces the issue without blocking. The `@artifact-judge` (Phase 5, T1.14b) is the hard gate — it rejects artifacts with uncited claims. The pipeline is: warn at agent-load time, reject at artifact-grade time.
+
+### Why we don't scope this to I/O sub-agents
+
+The 4 I/O sub-agents (reader, writer, executor, memory-controller) transcribe, summarize, and execute — they don't produce original factual claims. The reasoning agent that delegated the I/O owns the claim and the citation. Adding a Citation Protocol to sub-agents would blur the I/O/reasoning split (Vespyr's #1 differentiator) by implying sub-agents have agency over content.
+
+### Checklist
+
+- [x] F0.29.a — Expand "Honesty & Fact-Checking" guideline in `agent.md.canonical` to cover all real sources (not just internet); link to `citation-format.md`; add the "Source: unverified" protocol
+- [x] F0.29.b — Add `## Citation Protocol` section to all 17 reasoning agents:
+  - [x] Core Swarm: founder, product-manager, product-designer, architect, tech-lead, developer, code-reviewer, qa-engineer (8)
+  - [x] Domain Experts: researcher, user-researcher, ux-researcher, data-analyst, security-engineer, performance-engineer, ml-engineer, devops-engineer, technical-writer (9)
+  - [x] Add agent-specific citation emphasis (1-2 lines per agent from the table above)
+- [x] F0.29.c — Create `.agents/references/citation-format.md` (~110 lines): inline format, footnote format per source type (web/book/paper/code/interview/data/benchmark), "Source: unverified" protocol, edge cases, 1 worked example per type
+- [x] F0.29.e — Extend `validate_frontmatter.js`: warn if a reasoning agent (17) is missing `## Citation Protocol` section
+- [x] Add "Citation Protocol" to the glossary (F0.11): "the contract by which reasoning agents cite real sources inline with footnotes"
+- [x] Add "citation" and "footnote" to the glossary as locked terms
+
+---
+
 ## Deferred to v2.3+
 
 The following items were removed from Phase 0 and deferred:
@@ -920,6 +1087,7 @@ See `development-plan/README.md` §Deferred items and `development-plan/06-phase
 - [x] **T7:** `validate_frontmatter.js` checks for `## Socratic Stance` section on reasoning agents (warn, not fail)
 - [x] **T7:** `AGENTS.md` and `README.md` have the "Vespyr Identity" section stating the 3 differentiators
 - [x] **See the Unseen:** IDENTITY block includes the "See the Unseen" section as non-negotiable DNA for all agents; validator enforces it
+- [x] **F0.29:** All 17 reasoning agents have `## Citation Protocol` section; `citation-format.md` exists; `validate_frontmatter.js` warns on missing protocol; `citations:` in step-file output contract deferred to Phase 1 (F1.24.a)
 
 ## Risks
 
@@ -948,4 +1116,5 @@ Once Phase 0 is done, every new file in Phase 1+ can assume:
 - Delegation is policy-enforced (audit + harness-level hooks come in Phase 2).
 - Memory pre-fetches relevant patterns.
 - Every reasoning agent has a Socratic stance.
+- Every reasoning agent has a Citation Protocol (facts from real sources get inline `[N]` citations + footnotes).
 - AGENTS.md states the 3 differentiators explicitly.

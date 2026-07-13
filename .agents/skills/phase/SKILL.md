@@ -16,7 +16,16 @@ Displays the current phase in the product pipeline, allows switching between pha
 
 ## Pipeline phases
 
-The canonical phase table is the single source of truth. See `.agents/references/phase-table.md` for the complete 11-phase table with folder mappings, primary skills, primary agents, and gates.
+| Phase | Skill | Key Output |
+|-------|-------|------------|
+| **-1: Validation** | `validate-idea` / `validate-game-idea` | Validation brief (GO/PIVOT/KILL) |
+| **0-1: Exploration** | `explore-idea` / `explore-game-idea` | Market analysis, personas, competitive landscape |
+| **2: Design** | `design` | PRD, user stories, product spec |
+| **3-5: Development** | `develop` | Working, tested feature |
+| **7: Launch** | `launch` | Shipped feature in production |
+| **8: Iteration** | `iterate` | Measured improvement |
+| **Any: Incident** | `incident` | Mitigated incident, RCA |
+| **9: Retrospective** | `retro` | Action items for improvement |
 
 ## Workflow
 

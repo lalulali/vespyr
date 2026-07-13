@@ -86,6 +86,7 @@ This is the single DoD list.
 6. `@product-designer` (Ivy) generates `design.md` + dynamic HTML. 56KB static template deleted.
 7. Orchestrator CLI prints ASCII dashboards by default. Agents enforce pipeline state checks at startup/shutdown.
 8. **T7 — Vespyr Identity:** 3 differentiators explicitly advanced — (a) worktree delegation enforcement + tooling (T7.1b, ~160 lines), (b) cross-session memory pattern auto-loading (~80 lines), (c) Socratic universal minimum bar (~40 lines). Identity section added to AGENTS.md + README.
+8b. **Citation Protocol (F0.29):** All 17 reasoning agents have `## Citation Protocol` section. `.agents/references/citation-format.md` exists. `validate_frontmatter.js` warns on missing protocol. Step files declare `citations:` in output contract.
 
 ### v2.1 DoD (criteria 9-14)
 
@@ -113,7 +114,7 @@ This is the single DoD list.
 
 - **v2.0-rc1:** DoD 1, 2, 8 (frontmatter, skill folders, T7 identity) — minimum structural rigor
 - **v2.0-rc2:** + DoD 3, 4, 19 (spec-kernel, sprint-status, migration path) — upgrade-safe
-- **v2.0-rc3:** + DoD 5, 6, 7, 21 (false-positive guard, Ivy, ASCII dashboards, See the Unseen DNA) — release-ready
+- **v2.0-rc3:** + DoD 5, 6, 7, 8b, 21 (false-positive guard, Ivy, ASCII dashboards, citation protocol, See the Unseen DNA) — release-ready
 
 ---
 

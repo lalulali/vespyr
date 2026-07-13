@@ -68,3 +68,33 @@ num,category,method_name,description,output_pattern
 67,technical,Security Audit Personas,Hacker + defender + auditor examine system from different threat models - comprehensive security review from multiple angles,vulnerabilities → defenses → compliance
 68,technical,Performance Profiler Panel,Database expert + frontend specialist + DevOps engineer diagnose slowness - finds bottlenecks across the full stack,symptoms → analysis → optimizations
 69,technical,Boundary & Edge Case Sweep,Systematically test extremes - zeros - nulls - maximums - and type mismatches — catches the failures that happy-path thinking always misses,inputs → boundaries → edge cases → failures found
+70,validation,Risk Storming,Identify every plausible risk then rate by likelihood and impact — surfaces hidden threats before they manifest,risks → likelihood/impact matrix → mitigations
+71,validation,FMEA (Failure Mode & Effects Analysis),Score each failure mode by severity/occurrence/detection to prioritize what to fix first — standard in aerospace and medical,failure modes → RPN scores → prioritized fixes
+72,validation,Assumption Surfacing,List every assumption the plan depends on then test each one — most project failures trace to an unexamined assumption,assumptions → evidence check → confidence levels
+73,validation,Confidence Calibration,Rate confidence in each claim on a 0-100 scale then validate against evidence — surfaces overconfidence,claims → confidence scores → evidence match
+74,validation,Red Team Exercise,Assign someone to attack the idea from every angle — adversarial stress-testing that finds what normal review misses,idea → attack → vulnerabilities found
+75,decision,RAPID Framework,Assign Recommend / Agree / Perform / Input / Decide roles for every decision — eliminates ambiguity about who decides what,decision → roles assigned → accountability
+76,decision,DACI Framework,Driver / Approver / Contributors / Informed — lightweight decision governance for fast-moving teams without bureaucracy,decision → DACI matrix → clarity
+77,decision,Eisenhower Matrix,Classify tasks by urgency and importance — the classic framework that prevents busywork from masquerading as progress,tasks → quadrants → priorities
+78,decision,Pre-mortem,Project has failed — explain why — works backward from imagined failure to surface risks forward-looking analysis misses,future failure → causes identified → prevention
+79,decision,CATWOE Analysis,Clients / Actors / Transformation / Worldview / Owner / Environment — systems-thinking decision framework from Soft Systems Methodology,perspectives → system view → decision
+80,decision,Impact-Effort Matrix,Plot every option by impact vs effort — the fastest way to find high-leverage opportunities,options → impact/effort grid → quick wins
+81,research,User Interview Mining,Extract patterns from raw interview transcripts using thematic analysis — turns conversations into actionable insights,interviews → themes → patterns → insights
+82,research,Diary Studies,Users log their experiences over days or weeks — captures longitudinal behavior that lab studies miss,time → logs → behavior patterns
+83,research,Conjoint Analysis,Measure how users value different feature combinations by asking them to choose between options — pricing and prioritization gold standard,features → trade-offs → preference weights
+84,research,Ethnographic Observation,Observe users in their natural environment without interfering — surfaces behavior that users can't articulate,context → observation → hidden needs
+85,research,Card Sorting,Users organize topics into groups that make sense to them — reveals mental models and information architecture,topics → user groupings → IA patterns
+86,architecture,C4 Model,Context / Containers / Components / Code — four zoom levels of architecture that keep diagrams useful at every audience,levels → diagrams → decisions
+87,architecture,Trade-off Quadrant,Map every architecture decision on cost vs flexibility axes — makes trade-offs visible and comparable,options → axes → trade-offs visible
+88,architecture,ADR as Storytelling,Write Architecture Decision Records as narratives with context/decision/consequences — makes decisions discoverable months later,story → decision → consequences → traceability
+89,architecture,Fitness Functions,Define automated tests that verify architecture characteristics — prevents drift without manual reviews,characteristics → automated checks → drift detection
+90,collaboration,Disney Creative Strategy,Step through Dreamer/Realist/Critic roles sequentially — prevents ideas from being killed too early or too late,dream → reality-check → critique → refined plan
+91,collaboration,Consensus Mapping,Build agreement incrementally starting from shared ground — avoids the false consensus of nodding heads,perspectives → shared ground → genuine consensus
+92,collaboration,Force Field Analysis,List driving and restraining forces for any change initiative — reveals what needs to be strengthened or removed,change → driving forces vs restraining forces → strategy
+93,strategy,Wardley Mapping,Map value chain position and evolution — shows what to build vs buy and where to differentiate,value chain → evolution → strategic play
+94,strategy,Blue Ocean Strategy Canvas,Compare your offering against competitors across key factors — identify where to eliminate/reduce/raise/create,dimensions → comparison → differentiation opportunities
+95,strategy,Three Horizons Framework,H1 (core) / H2 (emerging) / H3 (future) — balances today's revenue with tomorrow's growth,time horizons → portfolio → balance
+96,quality,Bug Bash,Organized group testing session with diverse participants — finds edge cases systematic QA misses,diverse testers → rapid testing → edge case discovery
+97,quality,Exploratory Testing Charter,Time-boxed testing mission with a specific objective — structured enough to be repeatable, flexible enough to find surprises,charter → exploration → findings
+98,quality,Regression Test Selection,Identify which tests to run based on change impact — speed without sacrificing confidence,changes → impact analysis → minimal test suite
+

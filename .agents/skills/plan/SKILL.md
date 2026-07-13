@@ -9,7 +9,7 @@ last_updated: 2026-07-10
 
 ## What this skill does
 
-Takes existing product specs and produces a task breakdown with effort estimates, dependencies, and parallelization opportunities. Use when you need a plan without running the full `/develop` workflow.
+Takes existing product specs and produces a task breakdown with effort estimates, dependencies, and parallelization opportunities.
 
 ## When to use
 
@@ -26,7 +26,6 @@ Takes existing product specs and produces a task breakdown with effort estimates
 ## Prerequisites
 
 - `artifacts/output/02-strategy/product-spec.md` exists
-- `artifacts/output/02-strategy/user-stories.md` exists (recommended)
 - Architecture decisions (ADRs) in `03-architecture/` (recommended)
 
 ## Execution plan template
@@ -58,28 +57,28 @@ T002 ← T003
 
 ## Task granularity rules
 
-- **1-4 hours per task** — per `@tech-lead` charter. Tasks smaller than 1h are over-specified. Tasks larger than 4h need decomposition.
-- **Idempotent tasks** — each task can be run from scratch without side effects.
-- **Independent where possible** — mark parallelizable tasks explicitly.
-- **Spike tasks** — if a task is exploratory, mark it as a spike with a timebox (max 2h).
+- 1-4 hours per task — per @tech-lead charter. Tasks smaller than 1h are over-specified. Tasks larger than 4h need decomposition.
+- Each task can be run from scratch without side effects.
+- Mark parallelizable tasks explicitly.
+- Spike tasks: mark as spike with a timebox (max 2h).
 
 ## Dependency syntax
 
 | Syntax | Meaning |
 |---|---|
-| `T001 ← T003` | T003 depends on T001 (T001 must finish first) |
+| `T001 ← T003` | T003 depends on T001 (must finish first) |
 | `—` | No dependencies |
-| `T001 → T003` | T001 feeds T003 (data/artifact dependency, not execution order) |
+| `T001 → T003` | Data/artifact dependency |
 
 ## Worktree allocation
 
-For parallel development (Phase 6 Loop Engineering), each developer gets its own git worktree:
+For parallel development, each developer gets its own git worktree:
 
-```bash
+```
 node .agents/scripts/worktree.js create feature/T003
 ```
 
-Each worktree is an isolated checkout on its own branch. Worktrees are tracked in `.agents/state/loop-state.json`. Use `worktree.js clean <branch>` to remove a completed worktree.
+Worktrees are tracked in `.agents/state/loop-state.json`.
 
 ## Workflow
 
@@ -91,39 +90,23 @@ Each worktree is an isolated checkout on its own branch. Worktrees are tracked i
 
 ### Step 2: Review specs
 
-Read the product spec and user stories. Identify:
-- All features and their acceptance criteria
-- Edge cases and error states
-- Technical constraints from the spec
+Read the product spec and user stories. Identify all features, ACs, edge cases, and constraints.
 
 ### Step 3: Architecture check
 
-If no architecture artifacts exist:
-- Flag that architecture decisions are needed
-- Recommend running `develop` for the full workflow
-
-If ADRs exist:
-- Verify the architecture supports all spec requirements
-- Note any gaps
+If no architecture artifacts exist, flag that ADRs are needed. If ADRs exist, verify they support the spec.
 
 ### Step 4: Break down tasks
 
-For each feature:
-- Break into small, independent tasks (1-4 hours each)
-- Define task dependencies using the dependency syntax above
-- Estimate effort (small=1-2h, medium=3-4h)
-- Identify risky areas (spikes, max 2h)
-- Mark parallelizable tasks
+For each feature: break into 1-4h tasks, define dependencies, estimate effort, identify risks, mark parallelizable tasks.
 
 ### Step 5: Write execution plan
 
-Output: `artifacts/output/04-planning/execution-plan.md`
-
-Use the template above. Include the full task table, dependency graph, and risk register.
+Output to `artifacts/output/04-planning/execution-plan.md` using the template above.
 
 ## Output artifacts
 
-- `artifacts/output/04-planning/execution-plan.md` (primary output)
+- `artifacts/output/04-planning/execution-plan.md`
 
 ## State machine integration
 

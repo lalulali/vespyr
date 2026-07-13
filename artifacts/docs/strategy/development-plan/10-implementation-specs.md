@@ -8,7 +8,7 @@
 ## §1 — sync-entry-points.js (Phase 0, F0.4, ~80 lines)
 
 **Path:** `.agents/scripts/sync-entry-points.js`
-**Purpose:** Reads `.opencode/agent.md.canonical`, replaces harness dotfolder references per target, writes to `AGENTS.md`, `agent.md`, `CLAUDE.md`, and per-harness `AGENTS.md`.
+**Purpose:** Reads `.agents/agent.md.canonical`, replaces harness dotfolder references per target, writes to `AGENTS.md`, `agent.md`, `CLAUDE.md`, and per-harness `AGENTS.md`.
 
 **Spec (no full code in source — implement from this spec):**
 
@@ -20,7 +20,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const CANONICAL = path.join(__dirname, '..', '..', '.opencode', 'agent.md.canonical');
+const CANONICAL = path.join(__dirname, '..', '..', '.agents', 'agent.md.canonical');
 const TARGETS = [
   { file: 'AGENTS.md', dotfolder: '.agents' },
   { file: 'agent.md', dotfolder: '.opencode' },

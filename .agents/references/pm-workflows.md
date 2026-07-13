@@ -16,7 +16,7 @@ Absorb everything before writing a single word:
 *   `artifacts/output/01-research/user-personas.md` — target users, pain points, journeys.
 
 ### Step 2: Draft the PRD & Handle Human Validation (Interactive Gate)
-Follow the PRD template exactly (`.agents/templates/prd-template.md`). Key rules:
+Follow the PRD template (`.agents/templates/product/prd-template.md`). For the agent-facing contract, also produce the spec kernel (`templates/product/SPEC.md` + companions). Key rules:
 *   **Audience:** Business stakeholders, executives, sales, marketing — NOT engineers.
 *   **Tone:** Strategic, narrative, persuasive. No implementation details.
 *   **Must include:**
@@ -40,7 +40,7 @@ Only AFTER the PRD is finalized and validated, generate the User Stories.
 *   **AC Mapping:** All screen transitions, loading, success, empty, and error states documented in the product spec must be translated into explicit acceptance criteria (Happy, Unhappy, Edge) inside the user stories.
 *   **Traceability:** User Stories in `user-stories.md` must trace back explicitly to their corresponding Functional Requirement in the PRD (e.g., `Traces to PRD: Section 5.3: FR-001`). A single Functional Requirement (`FR-XXX`) can translate into one or more modular User Stories (`US-XXX`).
 
-Follow the user story template exactly (`.agents/templates/user-story-template.md`). Key rules:
+Follow the user story template exactly (`.agents/templates/product/user-story-template.md`). Key rules:
 *   **Audience:** Engineering — developers, QA, architects, tech lead.
 *   **Tone:** Precise, exhaustive, testable. Every sentence must be verifiable.
 *   **Story Content & Granularity Standards (NON-NEGOTIABLE):**

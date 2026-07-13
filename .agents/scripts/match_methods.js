@@ -50,16 +50,19 @@ function parseCSV(content) {
   return records;
 }
 
-function getMethodsPath() {
-  const possiblePaths = [
-    path.join(__dirname, '..', 'skills', 'elicitation', 'methods.csv'),
-    path.join(__dirname, '..', '..', '.agents', 'skills', 'elicitation', 'methods.csv'),
-    path.join(__dirname, '..', '..', '.opencode', 'skills', 'elicitation', 'methods.csv')
-  ];
-  for (const p of possiblePaths) {
-    if (fs.existsSync(p)) return p;
+function getMethodsPaths(source) {
+  const base = path.join(__dirname, '..', 'skills');
+  const sources = {
+    elicitation: path.join(base, 'elicitation', 'methods.csv'),
+    brainstorming: path.join(base, 'brainstorming', 'methods.csv'),
+    validation: path.join(base, 'validation-patterns', 'methods.csv'),
+  };
+  if (source && sources[source]) {
+    const p = sources[source];
+    return fs.existsSync(p) ? [p] : [];
   }
-  return null;
+  // default: all three
+  return Object.values(sources).filter(p => fs.existsSync(p));
 }
 
 function tokenize(text) {
@@ -138,50 +141,54 @@ function main() {
   if (contextIndex !== -1 && args[contextIndex + 1]) {
     context = args[contextIndex + 1];
   } else {
-    // If no explicit context argument, merge all args
     context = args.join(' ');
   }
 
-  const methodsPath = getMethodsPath();
-  if (!methodsPath) {
-    console.error(JSON.stringify({ error: 'methods.csv not found' }));
+  let source = null;
+  const sourceIndex = args.indexOf('--source');
+  if (sourceIndex !== -1 && args[sourceIndex + 1]) {
+    source = args[sourceIndex + 1];
+  }
+
+  let topN = 5;
+  const topIndex = args.indexOf('--top');
+  if (topIndex !== -1 && args[topIndex + 1]) {
+    topN = parseInt(args[topIndex + 1], 10) || 5;
+  }
+
+  const paths = getMethodsPaths(source);
+  if (paths.length === 0) {
+    console.error(JSON.stringify({ error: 'No method CSV files found' }));
     process.exit(1);
   }
 
-  const content = fs.readFileSync(methodsPath, 'utf8');
-  const methods = parseCSV(content);
+  const allMethods = [];
+  for (const p of paths) {
+    const content = fs.readFileSync(p, 'utf8');
+    const methods = parseCSV(content);
+    const sourceName = path.basename(path.dirname(p));
+    for (const m of methods) {
+      m.source = sourceName;
+      allMethods.push(m);
+    }
+  }
 
   const tokens = tokenize(context);
   const keywords = expandKeywords(tokens);
 
-  // Score each method
-  const scored = methods.map(m => {
-    return {
-      method: m,
-      score: scoreMethod(m, keywords)
-    };
-  });
+  const scored = allMethods.map(m => ({
+    method: m,
+    score: scoreMethod(m, keywords)
+  }));
 
-  // Sort by score descending
   scored.sort((a, b) => b.score - a.score);
-
-  // Get top 5 matches
-  const topMatches = scored.filter(s => s.score > 0).slice(0, 5).map(s => s.method);
-
-  // If we have fewer than 5 matches, fill with defaults
-  while (topMatches.length < 5) {
-    const nextDefault = DEFAULT_METHODS.find(defName => 
-      !topMatches.some(m => m.method_name === defName)
-    );
-    if (!nextDefault) break;
-
-    const defaultMethodObj = methods.find(m => m.method_name === nextDefault);
-    if (defaultMethodObj) {
-      topMatches.push(defaultMethodObj);
-    } else {
-      break;
-    }
-  }
+  const topMatches = scored.filter(s => s.score > 0).slice(0, topN).map(s => ({
+    method_name: s.method.method_name,
+    category: s.method.category,
+    source: s.method.source,
+    score: s.score,
+    description: s.method.description
+  }));
 
   console.log(JSON.stringify(topMatches, null, 2));
 }

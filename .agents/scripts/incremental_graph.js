@@ -203,7 +203,7 @@ function scanDirectory(dir, projectRoot, fileMap = {}) {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
     const fullPath = path.join(dir, entry.name);
     if (entry.isDirectory()) {
-      if (['node_modules', '.git', 'dist', 'build', 'coverage', '.opencode', 'artifacts'].includes(entry.name)) continue;
+      if (['node_modules', '.git', 'dist', 'build', 'coverage', '.agents', 'artifacts'].includes(entry.name)) continue;
       scanDirectory(fullPath, projectRoot, fileMap);
     } else {
       const lang = detectLanguage(fullPath);

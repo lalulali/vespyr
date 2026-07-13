@@ -181,15 +181,15 @@ git worktree list 2>/dev/null && echo "WORKTREE_SUPPORTED" || echo "WORKTREE_NOT
 
 # 2. Create worktrees for each developer (from the main working branch)
 BRANCH=$(git branch --show-current)
-git worktree add ~/.local/share/opencode/worktree/worktree-dev-1 -b feat/${BRANCH}/task-1
-git worktree add ~/.local/share/opencode/worktree/worktree-dev-2 -b feat/${BRANCH}/task-2
+git worktree add ~/.local/share/agents/worktree/worktree-dev-1 -b feat/${BRANCH}/task-1
+git worktree add ~/.local/share/agents/worktree/worktree-dev-2 -b feat/${BRANCH}/task-2
 # ... one per developer
 
 # 3. List active worktrees
 git worktree list
 ```
 
-**Worktree location:** `~/.local/share/opencode/worktree/worktree-dev-N` — isolates worktrees within the allowed sandboxed path.
+**Worktree location:** `~/.local/share/agents/worktree/worktree-dev-N` — isolates worktrees within the allowed sandboxed path.
 **Branch naming:** `feat/{base-branch}/task-{N}` — tracks which base branch and task.
 
 ### Task assignment
@@ -201,9 +201,9 @@ git worktree list
 
 | Developer | Worktree | Branch | Role | Tasks | Files touched |
 |---|---|---|---|---|---|
-| @developer-1 | ~/.local/share/opencode/worktree/worktree-dev-1 | feat/main/task-1 | FE | Auth flow, login page | src/auth/*, src/pages/login.* |
-| @developer-2 | ~/.local/share/opencode/worktree/worktree-dev-2 | feat/main/task-2 | BE | Dashboard API, charts | src/api/dashboard.*, src/components/chart.* |
-| @developer-3 | ~/.local/share/opencode/worktree/worktree-dev-3 | feat/main/task-3 | Full-Stack | Notification system | src/notifications/*, src/services/notify.* |
+| @developer-1 | ~/.local/share/agents/worktree/worktree-dev-1 | feat/main/task-1 | FE | Auth flow, login page | src/auth/*, src/pages/login.* |
+| @developer-2 | ~/.local/share/agents/worktree/worktree-dev-2 | feat/main/task-2 | BE | Dashboard API, charts | src/api/dashboard.*, src/components/chart.* |
+| @developer-3 | ~/.local/share/agents/worktree/worktree-dev-3 | feat/main/task-3 | Full-Stack | Notification system | src/notifications/*, src/services/notify.* |
 ```
 
 **Role tags** determine the developer's communication permissions:
@@ -244,9 +244,9 @@ git merge feat/${BRANCH}/task-3 --no-ff -m "feat: notification system"
 npm test  # or equivalent
 
 # 4. Clean up worktrees
-git worktree remove ~/.local/share/opencode/worktree/worktree-dev-1
-git worktree remove ~/.local/share/opencode/worktree/worktree-dev-2
-git worktree remove ~/.local/share/opencode/worktree/worktree-dev-3
+git worktree remove ~/.local/share/agents/worktree/worktree-dev-1
+git worktree remove ~/.local/share/agents/worktree/worktree-dev-2
+git worktree remove ~/.local/share/agents/worktree/worktree-dev-3
 
 # 5. Clean up branches
 git branch -d feat/${BRANCH}/task-1 feat/${BRANCH}/task-2 feat/${BRANCH}/task-3
@@ -564,13 +564,13 @@ The controller returns ~1,000 tokens of filtered context across three tiers:
 ```
 @memory-controller write [file] [entry]
 ```
-Use the format in `.agents/templates/memory-entry-template.md`. The controller validates the entry, checks for duplicates, persists it, and triggers compaction if the file exceeds its threshold.
+Use the format in `.agents/templates/memory/memory-entry-template.md`. The controller validates the entry, checks for duplicates, persists it, and triggers compaction if the file exceeds its threshold.
 
 **At the end of a significant session, every agent MUST:**
 ```
 @memory-controller session-write [content]
 ```
-Use the format in `.agents/templates/session-summary-template.md`. This writes to `session-summaries/latest.md` (overwrite) and appends to `session-summaries/history.md`. The next session loads this as part of Tier 1 — ~100 tokens of recent context.
+Use the format in `.agents/templates/memory/session-summary-template.md`. This writes to `session-summaries/latest.md` (overwrite) and appends to `session-summaries/history.md`. The next session loads this as part of Tier 1 — ~100 tokens of recent context.
 
 **Memory Rules:**
 - **Never read memory files directly.** Always use `@memory-controller load`.

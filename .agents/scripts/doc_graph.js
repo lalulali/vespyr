@@ -113,7 +113,7 @@ function scanDirectory(dir, projectRoot, nodes = []) {
 
     if (entry.isDirectory()) {
       // Skip ignorable folders
-      if (['node_modules', '.git', 'archive', 'telemetry', '.opencode'].includes(entry.name)) {
+      if (['node_modules', '.git', 'archive', 'telemetry', '.agents'].includes(entry.name)) {
         continue;
       }
       scanDirectory(fullPath, projectRoot, nodes);

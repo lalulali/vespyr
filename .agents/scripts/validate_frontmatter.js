@@ -14,7 +14,7 @@ const KNOWN_SQUADS = (() => {
         .map(f => path.basename(f, '.md'));
     }
   } catch (_) {}
-  return ['startup', 'strategy', 'build', 'quality', 'ship', 'iterate', 'full-team'];
+  return ['build', 'design', 'full-team', 'game-studio', 'research', 'ship', 'startup'];
 })();
 
 const REQUIRED_FIELDS = [
@@ -92,7 +92,7 @@ function validateAgent(filePath) {
   }
 
   const modelMatch = fm.match(/^model: (.+)$/m);
-  if (modelMatch && !/^[\w-]+\/[\w.-]+$/.test(modelMatch[1])) {
+  if (modelMatch && modelMatch[1] !== '-' && !/^[\w-]+\/[\w.-]+$/.test(modelMatch[1])) {
     errors.push(`model "${modelMatch[1]}" doesn't match provider/model-name format`);
   }
 
@@ -133,6 +133,18 @@ function validateAgent(filePath) {
   ];
   if (REASONING_AGENTS.includes(filename) && !content.includes('## Socratic Stance')) {
     console.warn('WARN: ' + filename + ' — missing Socratic Stance section (recommended, not required)');
+  }
+
+  // Citation Protocol check: warn only for all 17 reasoning agents
+  const CITATION_AGENTS = [
+    'architect', 'code-reviewer', 'data-analyst', 'developer',
+    'devops-engineer', 'founder', 'ml-engineer', 'performance-engineer',
+    'product-designer', 'product-manager', 'qa-engineer',
+    'researcher', 'security-engineer', 'tech-lead', 'technical-writer',
+    'user-researcher', 'ux-researcher',
+  ];
+  if (CITATION_AGENTS.includes(filename) && !content.includes('## Citation Protocol')) {
+    console.warn('WARN: ' + filename + ' — missing Citation Protocol section (recommended, not required)');
   }
 
   if (errors.length > 0) {

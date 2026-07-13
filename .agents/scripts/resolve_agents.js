@@ -34,7 +34,7 @@ function getAgentsDir() {
   const possibleDirs = [
     path.join(__dirname, '..', 'agents'),
     path.join(__dirname, '..', '..', '.agents', 'agents'),
-    path.join(__dirname, '..', '..', '.opencode', 'agents')
+    path.join(__dirname, '..', '..', '.agents', 'agents')
   ];
   for (const dir of possibleDirs) {
     if (fs.existsSync(dir)) {

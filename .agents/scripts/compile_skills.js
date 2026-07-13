@@ -30,18 +30,31 @@ function parseFrontmatter(content) {
       continue;
     }
 
+    // Accumulate multi-line block scalar content
+    if (currentKey && typeof data[currentKey] === 'string' && data[currentKey] === '' && line[0] === ' ') {
+      let suffix = trimmed;
+      if (suffix) data[currentKey] += suffix + '\n';
+      else data[currentKey] += '\n';
+      continue;
+    }
+
     const colonIdx = line.indexOf(':');
     if (colonIdx !== -1) {
       const key = line.substring(0, colonIdx).trim();
-      const val = line.substring(colonIdx + 1).trim().replace(/^['"]|['"]$/g, '');
-      if (val === '') {
+      const val = line.substring(colonIdx + 1).trim();
+      if (val === '|' || val === '>' || val === '|-' || val === '>-') {
+        // YAML literal/folded block scalar — skip the marker, value is empty until next key
+        currentKey = key;
+        currentArray = null;
+        data[key] = '';
+      } else if (val === '') {
         currentKey = key;
         currentArray = [];
         data[key] = currentArray;
       } else {
         currentKey = key;
         currentArray = null;
-        data[key] = val;
+        data[key] = val.replace(/^['"]|['"]$/g, '');
       }
     }
   }
@@ -115,31 +128,11 @@ function compileSkills() {
     }
   }
 
-  const agents = {};
-  const agentsDir = path.join(SKILLS_DIR, '..', 'agents');
-  if (fs.existsSync(agentsDir)) {
-    for (const file of fs.readdirSync(agentsDir)) {
-      if (!file.endsWith('.md')) continue;
-      const filePath = path.join(agentsDir, file);
-      try {
-        const content = fs.readFileSync(filePath, 'utf8');
-        const { data } = parseFrontmatter(content);
-        const code = path.basename(file, '.md');
-        agents[code] = {
-          name: data.human_name || (code.charAt(0).toUpperCase() + code.slice(1)),
-          description: data.description || ''
-        };
-      } catch (e) {
-        console.error(`Error parsing agent ${file}: ${e.message}`);
-      }
-    }
-  }
-
   const outputDir = path.dirname(OUTPUT_FILE);
   if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true });
 
-  fs.writeFileSync(OUTPUT_FILE, JSON.stringify({ skills: catalog, agents }, null, 2), 'utf8');
-  console.log(`✓ Compiled ${catalog.length} skills and ${Object.keys(agents).length} agents → ${OUTPUT_FILE}`);
+  fs.writeFileSync(OUTPUT_FILE, JSON.stringify(catalog, null, 2), 'utf8');
+  console.log(`✓ Compiled ${catalog.length} skills → ${OUTPUT_FILE}`);
 }
 
 if (require.main === module) compileSkills();

@@ -14,20 +14,20 @@ Runs a relentless Socratic interview, branch by branch, until the user can artic
 ## When to use
 
 - User says "grill me on this plan/architecture/spec/idea"
-- Before `/validate-idea` exits the loop phase
+- Before /validate-idea exits the loop phase
 - Before any ADR is written (forces decisions to be explicit)
-- After `/design` produces a PRD (sanity check before `/develop`)
+- After /design produces a PRD (sanity check before /develop)
 
 ## When NOT to use
 
-- For open-ended brainstorming (use `/validate-idea` first)
-- For technical debugging (use `/incident` instead)
-- For retrospective analysis (use `/retro` instead)
+- For open-ended brainstorming (use /validate-idea first)
+- For technical debugging (use /incident instead)
+- For retrospective analysis (use /retro instead)
 
 ## Prerequisites
 
 - A concrete artifact to interrogate (plan, spec, architecture, hypothesis, design)
-- If no artifact exists, run `/validate-idea` first to produce a brief
+- If no artifact exists, run /validate-idea first to produce a brief
 
 ## The 7+1 decision tree
 
@@ -97,16 +97,8 @@ For each open question in the active branch:
 
 ### Step 3: Decision log
 
-After each resolved question, write to `artifacts/memory/active-decisions.md`:
-```
-### [DECISION] {question-summary} [date: YYYY-MM-DD] [agent: @grill-me-facilitator]
-**Question:** {verbatim question}
-**Answer:** {user's chosen answer}
-**Rejected alternatives:** {list of other options considered}
-**Rationale:** {why this answer}
-**Status:** active
-```
-
+After each resolved question, write to artifacts/memory/active-decisions.md:
+\\n
 ### Step 4: Cross-branch consistency check
 
 After all 7+1 branches are exhausted, scan the decision log for contradictions:
@@ -119,7 +111,7 @@ If contradictions found, present them to the user and ask which branch to revisi
 
 ### Step 5: Lock + handoff
 
-Append a summary block to `artifacts/output/{phase}/grill-me-decisions.md` with:
+Append a summary block to artifacts/output/{phase}/grill-me-decisions.md with:
 - Date
 - Branches covered
 - Number of decisions resolved
@@ -128,13 +120,13 @@ Append a summary block to `artifacts/output/{phase}/grill-me-decisions.md` with:
 
 ## Output artifacts
 
-- `artifacts/memory/active-decisions.md` (running decision log)
-- `artifacts/output/{current-phase}/grill-me-decisions.md` (final summary)
+- artifacts/memory/active-decisions.md (running decision log)
+- artifacts/output/{current-phase}/grill-me-decisions.md (final summary)
 
 ## State machine integration
 
-At start: `node .agents/scripts/orchestrator_state.js status`
-At end: `node .agents/scripts/orchestrator_state.js complete --agent grill-me --artifact grill-me-decisions.md`
+At start: node .agents/scripts/orchestrator_state.js status
+At end: node .agents/scripts/orchestrator_state.js complete --agent grill-me --artifact grill-me-decisions.md
 
 ## Anti-patterns to avoid
 
