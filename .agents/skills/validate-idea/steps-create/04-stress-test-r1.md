@@ -2,10 +2,15 @@
 step: 4
 name: Stress-Test Round 1
 mode: create
-delegation: { reads: "@reader", writes: "@writer", runs: "@executor" }
-output_contract.citations: not-required
 prerequisites:
   - step-03 completed
+delegation:
+  reads: "direct (brief < 200 lines; per delegation-policy.md 1 file < 500 lines)"
+  writes: none
+  runs: none
+  direct_justified: ["pure Socratic reasoning; brief is < 200 lines; no file writes"]
+output_contract:
+  citations: not-required
 ---
 
 # Step 4 — Stress-Test Round 1
@@ -55,6 +60,6 @@ Red flag: "Need the full platform first." "Stripping it down removes differentia
 If the user invokes the escape hatch after Q1+Q2, skip remaining Qs and proceed to step 05.
 
 ## Delegation
-- Reads: @reader (brief files, research artifacts)
-- Writes: @writer (validation outputs)
-- Direct: founder reasoning is direct (no delegation needed for Socratic questioning)
+- **Reads:** direct — brief (< 200 lines)
+- **Writes:** none
+- **Direct:** pure Socratic reasoning; no file writes

@@ -2,9 +2,14 @@
 step: 3a
 name: Architecture Review
 prerequisites:
-delegation: { reads: "@reader", writes: "@writer", runs: "@executor" }
-output_contract.citations: not-required
   - step-02 completed OR ArchitectPhase: false
+delegation:
+  reads: "@reader (ADRs + strategy specs; per delegation-policy.md ≥4 files)"
+  writes: "@writer (review notes)"
+  runs: none
+  direct_justified: []
+output_contract:
+  citations: not-required
 ---
 
 # Step 3a — Architecture Review
@@ -34,5 +39,5 @@ Max 2 revision cycles. After 2 cycles with unresolved gaps, escalate to `@founde
 Review notes in `artifacts/output/04-planning/` (inline with execution-plan prep).
 
 ## Delegation
-- Reads: @reader (architecture artifacts, strategy specs)
-- Writes: @writer (review notes)
+- **Reads:** @reader for architecture artifacts and strategy specs
+- **Writes:** @writer for review notes

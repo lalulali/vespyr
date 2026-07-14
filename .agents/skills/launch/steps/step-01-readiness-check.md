@@ -2,8 +2,13 @@
 step: 1
 name: Readiness Check
 prerequisites: []
-delegation: { reads: "@reader", writes: "@writer", runs: "@executor" }
-output_contract.citations: not-required
+delegation:
+  reads: "@reader (QA signoff + security audit + perf review; per delegation-policy.md ≥3 files)"
+  writes: "@writer (readiness-check.md)"
+  runs: none
+  direct_justified: []
+output_contract:
+  citations: not-required
 ---
 
 # Step 1 — Readiness Check
@@ -45,5 +50,5 @@ Verify all pre-launch gates have passed. Any red item blocks launch.
 Any red item on the readiness checklist. Resolve before proceeding. Max 2 readiness cycles.
 
 ## Delegation
-- Reads: @reader (execution plan, QA reports)
-- Writes: @writer (release-readiness.md, go-nogo-decision.md)
+- **Reads:** @reader for QA signoff, security audit, and performance review reports
+- **Writes:** @writer for readiness-check.md

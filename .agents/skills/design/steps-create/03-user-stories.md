@@ -2,10 +2,15 @@
 step: 3
 name: User Stories
 mode: create
-delegation: { reads: "@reader", writes: "@writer", runs: "@executor" }
-output_contract.citations: not-required
 prerequisites:
   - step-02 completed
+delegation:
+  reads: "direct (personas + spec-kernel; per delegation-policy.md < 3 files < 500 lines)"
+  writes: "@writer (user-stories.md; per delegation-policy.md output file)"
+  runs: none
+  direct_justified: ["< 3 small input files already in context"]
+output_contract:
+  citations: not-required
 ---
 
 # Step 3 — User Stories
@@ -41,6 +46,5 @@ node .agents/scripts/orchestrator_state.js complete --agent product-manager --ar
 ```
 
 ## Delegation
-- Reads: @reader (research artifacts, PRD, stories)
-- Writes: @writer (PRD, user stories, spec files, design.md)
-- Direct: PM and designer reasoning is direct
+- **Reads:** direct — personas + spec-kernel (< 3 files, < 500 lines)
+- **Writes:** @writer for user-stories.md

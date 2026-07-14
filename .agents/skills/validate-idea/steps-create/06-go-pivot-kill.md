@@ -2,10 +2,15 @@
 step: 6
 name: GO/PIVOT/KILL
 mode: create
-delegation: { reads: "@reader", writes: "@writer", runs: "@executor" }
-output_contract.citations: not-required
 prerequisites:
   - step-05 completed
+delegation:
+  reads: "direct (brief < 200 lines; per delegation-policy.md 1 file < 500 lines)"
+  writes: none
+  runs: none
+  direct_justified: ["pure reasoning; verdict is conversational, no file output"]
+output_contract:
+  citations: not-required
 ---
 
 # Step 6 — GO/PIVOT/KILL
@@ -51,6 +56,6 @@ Every verdict includes one concrete **next action** — a specific real-world st
 Verdict (GO/PIVOT/KILL) with rationale, alternatives assessment, and next action.
 
 ## Delegation
-- Reads: @reader (brief files, research artifacts)
-- Writes: @writer (validation outputs)
-- Direct: founder reasoning is direct (no delegation needed for Socratic questioning)
+- **Reads:** direct — brief (< 200 lines)
+- **Writes:** none
+- **Direct:** pure reasoning; verdict is conversational

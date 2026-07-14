@@ -2,9 +2,14 @@
 step: 4
 name: Write Digest
 prerequisites:
-delegation: { reads: "@reader", writes: "@writer", runs: "@executor" }
-output_contract.citations: not-required
   - step-03 completed
+delegation:
+  reads: none
+  writes: "@writer (retro-digest.md; per delegation-policy.md output file)"
+  runs: none
+  direct_justified: []
+output_contract:
+  citations: not-required
 ---
 
 # Step 4 — Write Digest
@@ -41,6 +46,5 @@ node .agents/scripts/orchestrator_state.js complete --agent product-manager --ar
 ```
 
 ## Delegation
-- Reads: @reader (review outputs from steps 1-3)
-- Writes: @writer (action-items.md, retro-digest.md)
-- Runs: @executor (orchestrator_state.js complete)
+- **Reads:** none
+- **Writes:** @writer for retro-digest.md

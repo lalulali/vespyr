@@ -2,9 +2,14 @@
 step: 8
 name: PM Verification
 prerequisites:
-delegation: { reads: "@reader", writes: "@writer", runs: "@executor" }
-output_contract.citations: not-required
   - step-07 completed
+delegation:
+  reads: "direct (SPEC.md + user-stories.md; per delegation-policy.md 2 files < 500 lines)"
+  writes: none
+  runs: none
+  direct_justified: ["SPEC.md + user-stories.md direct read — 2 small files for CAP-N verification"]
+output_contract:
+  citations: not-required
 ---
 
 # Step 8 — PM Verification
@@ -33,5 +38,5 @@ Max 2 rejection cycles:
 PM rejects 3 times. Escalate per the loop limit rules above.
 
 ## Delegation
-- Reads: @reader (acceptance criteria, user stories if > 50 lines)
-- Direct I/O: reading SPEC.md for CAP-N verification permitted
+- **Reads:** direct — SPEC.md + user-stories.md (2 files < 500 lines, CAP-N verification)
+- **Writes:** none (this step produces a decision, not a file)

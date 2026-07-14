@@ -2,9 +2,14 @@
 step: 2
 name: Deploy
 prerequisites:
-delegation: { reads: "@reader", writes: "@writer", runs: "@executor" }
-output_contract.citations: not-required
   - step-01 completed
+delegation:
+  reads: none
+  writes: none
+  runs: "@executor (deployment commands; per delegation-policy.md all bash)"
+  direct_justified: []
+output_contract:
+  citations: not-required
 ---
 
 # Step 2 — Deploy
@@ -38,6 +43,6 @@ Deploy the feature to production.
 `artifacts/output/06-launch/launch-log.md` — use template `.agents/templates/launch/launch-log-template.md`
 
 ## Delegation
-- Reads: @reader (runbook, release notes)
-- Writes: @writer (launch-log.md, release notes)
-- Runs: @executor (deployment commands, health checks)
+- **Reads:** none
+- **Writes:** none
+- **Runs:** @executor for deployment commands (@devops-engineer)

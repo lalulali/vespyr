@@ -2,10 +2,15 @@
 step: 4
 name: Screen States
 mode: create
-delegation: { reads: "@reader", writes: "@writer", runs: "@executor" }
-output_contract.citations: not-required
 prerequisites:
   - step-03 completed
+delegation:
+  reads: "direct (user stories + personas; per delegation-policy.md < 3 files < 500 lines)"
+  writes: "@writer (screen-states output; per delegation-policy.md output file)"
+  runs: none
+  direct_justified: ["< 3 small input files already in context"]
+output_contract:
+  citations: not-required
 ---
 
 # Step 4 — Screen States
@@ -43,6 +48,5 @@ If analytics instrumentation is needed, invoke `@data-analyst`:
 - `artifacts/output/02-strategy/product-spec.html` — human-readable, dynamic Tailwind generation
 
 ## Delegation
-- Reads: @reader (research artifacts, PRD, stories)
-- Writes: @writer (PRD, user stories, spec files, design.md)
-- Direct: PM and designer reasoning is direct
+- **Reads:** direct — user stories + personas (< 3 files)
+- **Writes:** @writer for screen-states output

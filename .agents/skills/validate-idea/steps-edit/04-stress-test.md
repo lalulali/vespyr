@@ -2,10 +2,15 @@
 step: 4
 name: Stress-Test
 mode: edit
-delegation: { reads: "@reader", writes: "@writer", runs: "@executor" }
-output_contract.citations: not-required
 prerequisites:
   - step-03 completed
+delegation:
+  reads: "direct (revised brief in context)"
+  writes: none
+  runs: none
+  direct_justified: ["pure Socratic reasoning on in-context content"]
+output_contract:
+  citations: not-required
 ---
 
 # Step 4 — Stress-Test Revised Sections
@@ -34,6 +39,6 @@ If revisions introduce a contradiction that can't be resolved in 2 rounds, escal
 Re-validated brief with stress-test results.
 
 ## Delegation
-- Reads: @reader (existing brief, specs)
-- Writes: @writer (revised sections)
-- Direct: founder reasoning is direct
+- **Reads:** direct — revised brief already in context
+- **Writes:** none
+- **Direct:** pure Socratic reasoning

@@ -2,9 +2,14 @@
 step: 1
 name: Load PRD Brief
 mode: create
-delegation: { reads: "@reader", writes: "@writer", runs: "@executor" }
-output_contract.citations: not-required
 prerequisites: []
+delegation:
+  reads: "@reader (spec-kernel + research artifacts; per delegation-policy.md ≥4 files)"
+  writes: none
+  runs: none
+  direct_justified: []
+output_contract:
+  citations: not-required
 ---
 
 # Step 1 — Load PRD Brief
@@ -38,6 +43,5 @@ If operating in `semi-autonomous` mode and `FeatureDesignInteraction` is not `fa
 Loaded context: brief summary, feature scope (approved or auto-selected), research key points.
 
 ## Delegation
-- Reads: @reader (research artifacts, PRD, stories)
-- Writes: @writer (PRD, user stories, spec files, design.md)
-- Direct: PM and designer reasoning is direct
+- **Reads:** @reader for spec-kernel, research artifacts (4+ files across 00-discovery/ and 01-research/)
+- **Writes:** none

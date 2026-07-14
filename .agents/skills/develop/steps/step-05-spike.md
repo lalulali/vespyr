@@ -2,10 +2,15 @@
 step: 5
 name: Spike
 prerequisites:
-delegation: { reads: "@reader", writes: "@writer", runs: "@executor" }
-output_contract.citations: not-required
   - step-04 completed
 optional: true
+delegation:
+  reads: "direct or @reader (depends on spike scope; use @reader if codebase exploration spans ≥4 files)"
+  writes: "@writer (spike-findings.md)"
+  runs: none
+  direct_justified: ["small-scope spikes exploring 1-3 files"]
+output_contract:
+  citations: not-required
 ---
 
 # Step 5 — Spike
@@ -38,6 +43,6 @@ Persist findings:
 Spike reveals a fundamental infeasibility. Escalate to `@founder` for GO/PIVOT/KILL.
 
 ## Delegation
-- Reads: @reader (codebase exploration if needed)
-- Writes: @writer (spike-findings.md)
-- Memory: @memory-controller (lessons, blockers, patterns)
+- **Reads:** direct for small spikes (1-3 files); @reader for codebase exploration (≥4 files)
+- **Writes:** @writer for spike-findings.md
+- **Memory:** @memory-controller for lessons, blockers, patterns

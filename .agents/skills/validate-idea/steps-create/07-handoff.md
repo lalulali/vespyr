@@ -2,10 +2,15 @@
 step: 7
 name: Handoff
 mode: create
-delegation: { reads: "@reader", writes: "@writer", runs: "@executor" }
-output_contract.citations: not-required
 prerequisites:
   - step-06 completed
+delegation:
+  reads: none
+  writes: "@writer (idea-brief.md / validation-brief.md; per delegation-policy.md output file)"
+  runs: "@executor (orchestrator_state.js complete)"
+  direct_justified: []
+output_contract:
+  citations: not-required
 ---
 
 # Step 7 — Handoff
@@ -37,6 +42,7 @@ node .agents/scripts/orchestrator_state.js complete --agent founder --artifact 0
 - **KILL** → stop. The brief documents why. Revisit only if new evidence emerges.
 
 ## Delegation
-- Writes: @writer (validation-brief.md)
-- Runs: @executor (orchestrator_state.js complete)
-- Memory: @memory-controller (active-decisions, session-write)
+- **Reads:** none
+- **Writes:** @writer for idea-brief.md / validation-brief.md
+- **Runs:** @executor for orchestrator_state.js complete
+- **Memory:** @memory-controller for active-decisions and session-write

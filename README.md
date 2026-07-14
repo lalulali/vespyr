@@ -2,7 +2,7 @@
 
 > English | [中文](README_CN.md)
 
-A platform-agnostic, file-based multi-agent engine that installs a structured product development team directly into your repository. 21 specialized agent personas, 24 atomic skills, spec-kernel artifacts, shared persistent memory, and three architectural moats that no other framework combines.
+A platform-agnostic, file-based multi-agent engine that installs a structured product development team directly into your repository. 21 specialized agent personas, 30 atomic skills, spec-kernel artifacts, shared persistent memory, and three architectural moats that no other framework combines.
 
 [![Vespyr Version](https://img.shields.io/badge/version-2.0.0-blue)](https://github.com/lalulali/vespyr)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)

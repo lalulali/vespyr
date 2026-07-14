@@ -2,8 +2,14 @@
 step: 1
 name: Session Setup
 mode: create
-delegation: { reads: "@reader", writes: "@writer", runs: "@executor" }
-output_contract.citations: not-required
+prerequisites: []
+delegation:
+  reads: "direct (1 small context file; per delegation-policy.md < 3 files < 500 lines)"
+  writes: none
+  runs: none
+  direct_justified: ["pure reasoning + context load; single small file"]
+output_contract:
+  citations: not-required
 ---
 
 # Step 1 — Session Setup
@@ -34,6 +40,6 @@ Establish the validation environment: load memory, check for prior artifacts, an
 Context mode and maturity stored for use in subsequent steps.
 
 ## Delegation
-- Reads: @reader (brief files, research artifacts)
-- Writes: @writer (validation outputs)
-- Direct: founder reasoning is direct (no delegation needed for Socratic questioning)
+- **Reads:** direct — single context file (< 500 lines)
+- **Writes:** none
+- **Direct:** founder reasoning is direct (no delegation needed for session setup)

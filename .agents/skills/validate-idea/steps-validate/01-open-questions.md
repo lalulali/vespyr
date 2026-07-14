@@ -2,8 +2,14 @@
 step: 1
 name: Open Questions
 mode: validate
-delegation: { reads: "@reader", writes: "@writer", runs: "@executor" }
-output_contract.citations: not-required
+prerequisites: []
+delegation:
+  reads: "direct (brief < 200 lines; per delegation-policy.md 1 file < 500 lines)"
+  writes: none
+  runs: none
+  direct_justified: ["pure reasoning; single small file"]
+output_contract:
+  citations: not-required
 ---
 
 # Step 1 — Open Questions
@@ -35,7 +41,6 @@ Tag each open question by branch:
 A categorized inventory of open questions, ranked by severity (blocker / major / minor).
 
 ## Delegation
-- Reads: @reader (brief sections)
-- Writes: @writer (validation reports)
-- Memory: @memory-controller (active-decisions)
-- Direct: founder reasoning is direct
+- **Reads:** direct — brief (< 200 lines)
+- **Writes:** none
+- **Direct:** pure reasoning on single small file

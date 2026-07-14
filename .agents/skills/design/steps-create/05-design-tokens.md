@@ -2,10 +2,15 @@
 step: 5
 name: Design Tokens
 mode: create
-delegation: { reads: "@reader", writes: "@writer", runs: "@executor" }
-output_contract.citations: not-required
 prerequisites:
   - step-04 completed
+delegation:
+  reads: "direct (screen states; per delegation-policy.md 1 file < 500 lines)"
+  writes: "@writer (design.md; per delegation-policy.md output file)"
+  runs: none
+  direct_justified: ["single input reference already in context"]
+output_contract:
+  citations: not-required
 ---
 
 # Step 5 — Design Tokens
@@ -44,6 +49,5 @@ Theme combinations:
 `artifacts/output/02-strategy/design.md`
 
 ## Delegation
-- Reads: @reader (research artifacts, PRD, stories)
-- Writes: @writer (PRD, user stories, spec files, design.md)
-- Direct: PM and designer reasoning is direct
+- **Reads:** direct — screen states (single reference in context)
+- **Writes:** @writer for design.md

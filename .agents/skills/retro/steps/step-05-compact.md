@@ -2,9 +2,14 @@
 step: 5
 name: Compact
 prerequisites:
-delegation: { reads: "@reader", writes: "@writer", runs: "@executor" }
-output_contract.citations: not-required
   - step-04 completed
+delegation:
+  reads: none
+  writes: none
+  runs: "@executor (witness.js check, compaction commands; per delegation-policy.md all bash)"
+  direct_justified: []
+output_contract:
+  citations: not-required
 ---
 
 # Step 5 — Compact
@@ -104,6 +109,6 @@ Blockers: {any new blockers, or "none"}
 - Session summary written
 
 ## Delegation
-- Writes: @writer (memory file updates)
-- Runs: @executor (witness.js check, ensure_graph.js doc)
-- Memory: @memory-controller (compaction, status, session-write)
+- **Reads:** none
+- **Writes:** none
+- **Runs:** @executor for witness.js check and memory compaction

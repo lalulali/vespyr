@@ -2,8 +2,14 @@
 step: 1
 name: Heuristic Evaluation
 mode: validate
-delegation: { reads: "@reader", writes: "@writer", runs: "@executor" }
-output_contract.citations: not-required
+prerequisites: []
+delegation:
+  reads: "@reader (product-spec + screen states; per delegation-policy.md ≥2 large files)"
+  writes: "@writer (heuristic evaluation report)"
+  runs: none
+  direct_justified: []
+output_contract:
+  citations: not-required
 ---
 
 # Step 1 — Heuristic Evaluation
@@ -38,5 +44,5 @@ Identify usability issues in the current design before they reach implementation
 Use template `.agents/templates/research/ux-research-report-template.md`.
 
 ## Delegation
-- Reads: @reader (product spec, design tokens)
-- Writes: @writer (ux-research-report.md sections)
+- **Reads:** @reader for product-spec and screen states
+- **Writes:** @writer for heuristic evaluation report

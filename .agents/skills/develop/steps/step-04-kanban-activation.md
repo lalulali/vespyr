@@ -2,10 +2,15 @@
 step: 4
 name: Kanban Activation
 prerequisites:
-delegation: { reads: "@reader", writes: "@writer", runs: "@executor" }
-output_contract.citations: not-required
   - step-03b completed
   - execution-plan.md exists
+delegation:
+  reads: "direct (2 small files: kanban.md + execution-plan.md; per delegation-policy.md < 3 files < 500 lines)"
+  writes: "@writer (updated kanban.md)"
+  runs: none
+  direct_justified: ["kanban.md + execution-plan.md direct read — 2 files < 500 lines total"]
+output_contract:
+  citations: not-required
 ---
 
 # Step 4 — Kanban Activation
@@ -34,5 +39,5 @@ Updated `artifacts/output/04-planning/kanban.md` with tasks in "To Do" — use t
 PM does not sign off. Re-scope with `@product-manager` before continuing.
 
 ## Delegation
-- Reads: @reader (kanban board, execution plan)
-- Writes: @writer (updated kanban.md)
+- **Reads:** direct — kanban.md + execution-plan.md (2 files < 500 lines total)
+- **Writes:** @writer for updated kanban.md

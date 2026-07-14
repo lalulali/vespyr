@@ -2,8 +2,14 @@
 step: 1
 name: Load Existing
 mode: edit
-delegation: { reads: "@reader", writes: "@writer", runs: "@executor" }
-output_contract.citations: not-required
+prerequisites: []
+delegation:
+  reads: "direct (1 brief file < 500 lines; per delegation-policy.md < 3 files)"
+  writes: none
+  runs: none
+  direct_justified: ["single brief file < 500 lines"]
+output_contract:
+  citations: not-required
 ---
 
 # Step 1 — Load Existing Brief
@@ -32,6 +38,5 @@ If any core section is missing, flag it immediately — the brief may be corrupt
 Loaded brief with user's edit targets identified.
 
 ## Delegation
-- Reads: @reader (existing brief, specs)
-- Writes: @writer (revised sections)
-- Direct: founder reasoning is direct
+- **Reads:** direct — single brief file (< 500 lines)
+- **Writes:** none

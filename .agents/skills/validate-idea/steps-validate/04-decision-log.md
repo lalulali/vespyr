@@ -2,10 +2,15 @@
 step: 4
 name: Decision Log
 mode: validate
-delegation: { reads: "@reader", writes: "@writer", runs: "@executor" }
-output_contract.citations: not-required
 prerequisites:
   - step-03 completed
+delegation:
+  reads: none
+  writes: "@writer (active-decisions.md; per delegation-policy.md output file)"
+  runs: none
+  direct_justified: []
+output_contract:
+  citations: not-required
 ---
 
 # Step 4 — Decision Log
@@ -43,7 +48,5 @@ If the validate mode CHANGES the verdict: document why with specific branch evid
 Decisions persisted to `active-decisions.md`. Verdict reaffirmed or revised with rationale.
 
 ## Delegation
-- Reads: @reader (brief sections)
-- Writes: @writer (validation reports)
-- Memory: @memory-controller (active-decisions)
-- Direct: founder reasoning is direct
+- **Reads:** none
+- **Writes:** @writer for active-decisions.md

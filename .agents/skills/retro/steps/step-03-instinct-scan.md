@@ -2,9 +2,14 @@
 step: 3
 name: Instinct Scan
 prerequisites:
-delegation: { reads: "@reader", writes: "@writer", runs: "@executor" }
-output_contract.citations: not-required
   - step-02 completed
+delegation:
+  reads: "@reader (memory files + ADR cross-refs; per delegation-policy.md ≥4 files)"
+  writes: none
+  runs: none
+  direct_justified: []
+output_contract:
+  citations: not-required
 ---
 
 # Step 3 — Instinct Scan
@@ -54,5 +59,5 @@ All reviews use template `.agents/templates/memory/retrospective-template.md`.
 After all reviews, identify patterns stable 30+ days with 2+ ADR references. These are candidates for promotion to conventions or guardrails.
 
 ## Delegation
-- Reads: @reader (ADRs, execution reviews, process reviews)
-- Writes: @writer (execution-review.md, process-review.md, product-review.md, architecture-review.md)
+- **Reads:** @reader for memory files and ADR cross-references
+- **Writes:** none

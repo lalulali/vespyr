@@ -2,10 +2,15 @@
 step: 2
 name: Input Analysis
 mode: create
-delegation: { reads: "@reader", writes: "@writer", runs: "@executor" }
-output_contract.citations: not-required
 prerequisites:
   - step-01 completed
+delegation:
+  reads: "direct (user input only; no file I/O)"
+  writes: none
+  runs: none
+  direct_justified: ["pure reasoning on user input; no file reads"]
+output_contract:
+  citations: not-required
 ---
 
 # Step 2 — Input Analysis
@@ -35,6 +40,6 @@ Reframe constructively: "Let me try restating: you're saying [problem reframe] a
 Don't move to Step 3 until you have both a **stated problem** and a **proposed solution**, even if rough.
 
 ## Delegation
-- Reads: @reader (brief files, research artifacts)
-- Writes: @writer (validation outputs)
-- Direct: founder reasoning is direct (no delegation needed for Socratic questioning)
+- **Reads:** direct — user input only (no file I/O)
+- **Writes:** none
+- **Direct:** pure reasoning step; no file operations

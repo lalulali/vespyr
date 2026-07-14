@@ -2,10 +2,15 @@
 step: 5
 name: Stress-Test Round 2
 mode: create
-delegation: { reads: "@reader", writes: "@writer", runs: "@executor" }
-output_contract.citations: not-required
 prerequisites:
   - step-04 completed
+delegation:
+  reads: "direct (brief < 200 lines; per delegation-policy.md 1 file < 500 lines)"
+  writes: none
+  runs: none
+  direct_justified: ["pure Socratic reasoning; brief is < 200 lines; no file writes"]
+output_contract:
+  citations: not-required
 ---
 
 # Step 5 — Stress-Test Round 2
@@ -76,6 +81,6 @@ Score: 🟢 PASS / 🟡 WEAK / 🔴 FAIL.
 Qualified answers for all relevant Qs, synthesized value proposition, premise agreement, framework score.
 
 ## Delegation
-- Reads: @reader (brief files, research artifacts)
-- Writes: @writer (validation outputs)
-- Direct: founder reasoning is direct (no delegation needed for Socratic questioning)
+- **Reads:** direct — brief (< 200 lines)
+- **Writes:** none
+- **Direct:** pure Socratic reasoning; no file writes

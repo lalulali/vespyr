@@ -2,10 +2,15 @@
 step: 3
 name: Revise
 mode: edit
-delegation: { reads: "@reader", writes: "@writer", runs: "@executor" }
-output_contract.citations: not-required
 prerequisites:
   - step-02 completed
+delegation:
+  reads: "direct (brief sections in context)"
+  writes: "direct (targeted edits < 50 lines to single file; per delegation-policy.md < 50 lines)"
+  runs: none
+  direct_justified: ["small targeted edits to single file < 50 lines"]
+output_contract:
+  citations: not-required
 ---
 
 # Step 3 — Revise
@@ -33,6 +38,5 @@ Never introduce new content that wasn't prompted by the user's edit target. The 
 Revised brief sections, integrated into the existing document.
 
 ## Delegation
-- Reads: @reader (existing brief, specs)
-- Writes: @writer (revised sections)
-- Direct: founder reasoning is direct
+- **Reads:** direct — brief sections already in context
+- **Writes:** direct — targeted edits < 50 lines to single file

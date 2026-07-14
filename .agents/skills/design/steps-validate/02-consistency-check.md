@@ -2,10 +2,15 @@
 step: 2
 name: Consistency Check
 mode: validate
-delegation: { reads: "@reader", writes: "@writer", runs: "@executor" }
-output_contract.citations: not-required
 prerequisites:
   - step-01 completed
+delegation:
+  reads: "direct (heuristic results + spec in context)"
+  writes: "@writer (consistency check report)"
+  runs: none
+  direct_justified: ["in-context data from step 1; no new file reads"]
+output_contract:
+  citations: not-required
 ---
 
 # Step 2 — Consistency Check
@@ -32,5 +37,5 @@ Find inconsistencies: one screen's button says "Save" and another says "Submit",
 Consistency report appended to `artifacts/output/01-research/ux-research-report.md` with findings mapped to screens/stories.
 
 ## Delegation
-- Reads: @reader (product spec, design tokens)
-- Writes: @writer (ux-research-report.md sections)
+- **Reads:** direct — heuristic results and spec already in context
+- **Writes:** @writer for consistency check report

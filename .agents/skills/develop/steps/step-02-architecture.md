@@ -2,10 +2,15 @@
 step: 2
 name: Architecture
 prerequisites:
-delegation: { reads: "@reader", writes: "@writer", runs: "@executor" }
-output_contract.citations: not-required
   - step-01 completed
 conditional: ArchitectPhase
+delegation:
+  reads: "@reader (project context + existing artifacts; per delegation-policy.md ≥4 files)"
+  writes: "@writer (ADR files in 03-architecture/; per delegation-policy.md multi-file output)"
+  runs: none
+  direct_justified: []
+output_contract:
+  citations: not-required
 ---
 
 # Step 2 — Architecture
@@ -41,5 +46,5 @@ After each key decision, persist:
 Architecture gap that breaks a user story's feasibility. Escalate to `@tech-lead`.
 
 ## Delegation
-- Reads: @reader (project context, existing artifacts)
-- Writes: @writer (ADR files in 03-architecture/)
+- **Reads:** @reader for project context and existing artifacts
+- **Writes:** @writer for ADR files in 03-architecture/

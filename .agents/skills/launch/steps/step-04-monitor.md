@@ -2,9 +2,14 @@
 step: 4
 name: Monitor
 prerequisites:
-delegation: { reads: "@reader", writes: "@writer", runs: "@executor" }
-output_contract.citations: not-required
   - step-03 completed
+delegation:
+  reads: none
+  writes: "@writer (monitoring report)"
+  runs: "@executor (monitoring commands; per delegation-policy.md all bash)"
+  direct_justified: []
+output_contract:
+  citations: not-required
 ---
 
 # Step 4 — Monitor
@@ -34,6 +39,6 @@ Track core metrics against success criteria from the PRD. Catch anomalies before
 `artifacts/output/06-launch/post-launch-report.md` — use template `.agents/templates/launch/post-launch-report-template.md`
 
 ## Delegation
-- Reads: @reader (PRD success criteria)
-- Writes: @writer (post-launch-report.md)
-- Runs: @executor (monitoring dashboards)
+- **Reads:** none
+- **Writes:** @writer for monitoring report
+- **Runs:** @executor for monitoring commands

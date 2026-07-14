@@ -2,10 +2,15 @@
 step: 5
 name: Finalize
 mode: edit
-delegation: { reads: "@reader", writes: "@writer", runs: "@executor" }
-output_contract.citations: not-required
 prerequisites:
   - step-04 completed
+delegation:
+  reads: none
+  writes: "@writer (finalized idea-brief.md; per delegation-policy.md output file)"
+  runs: "@executor (orchestrator_state.js complete)"
+  direct_justified: []
+output_contract:
+  citations: not-required
 ---
 
 # Step 5 — Finalize
@@ -34,6 +39,6 @@ node .agents/scripts/orchestrator_state.js complete --agent founder --artifact 0
 - If verdict unchanged → resume the pipeline from where it was.
 
 ## Delegation
-- Writes: @writer (revised brief)
-- Runs: @executor (orchestrator_state.js complete)
-- Memory: @memory-controller (active-decisions, session-write)
+- **Reads:** none
+- **Writes:** @writer for finalized idea-brief.md
+- **Runs:** @executor for orchestrator_state.js complete

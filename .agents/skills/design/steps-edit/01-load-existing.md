@@ -2,8 +2,14 @@
 step: 1
 name: Load Existing
 mode: edit
-delegation: { reads: "@reader", writes: "@writer", runs: "@executor" }
-output_contract.citations: not-required
+prerequisites: []
+delegation:
+  reads: "@reader (product-spec + design.md + user-stories; per delegation-policy.md ≥3 files)"
+  writes: none
+  runs: none
+  direct_justified: []
+output_contract:
+  citations: not-required
 ---
 
 # Step 1 — Load Existing Spec
@@ -28,5 +34,5 @@ Loaded design artifacts with user's edit targets identified.
 If any core artifact is missing (no PRD, no spec), flag immediately — the edit may need a full create-mode run instead.
 
 ## Delegation
-- Reads: @reader (existing spec files)
-- Writes: @writer (revised sections)
+- **Reads:** @reader for product-spec.md, design.md, and user-stories.md
+- **Writes:** none

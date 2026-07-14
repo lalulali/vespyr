@@ -2,9 +2,14 @@
 step: 10
 name: Completion
 prerequisites:
-delegation: { reads: "@reader", writes: "@writer", runs: "@executor" }
-output_contract.citations: not-required
   - step-09 completed
+delegation:
+  reads: none
+  writes: "@writer (develop-state.md)"
+  runs: "@executor (orchestrator_state.js complete, orchestrator_state.js next)"
+  direct_justified: []
+output_contract:
+  citations: not-required
 ---
 
 # Step 10 — Completion
@@ -51,6 +56,7 @@ Finalize the development cycle: verify all completion criteria, write the state,
 - Production incident → load `incident` skill
 
 ## Delegation
-- Writes: @writer (develop-state.md)
-- Runs: @executor (orchestrator_state.js complete, orchestrator_state.js next)
-- Memory: @memory-controller (lessons, decisions, blockers, session-write)
+- **Reads:** none
+- **Writes:** @writer for develop-state.md
+- **Runs:** @executor for orchestrator_state.js complete and next
+- **Memory:** @memory-controller for lessons, decisions, blockers, session-write

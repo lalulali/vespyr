@@ -2,10 +2,15 @@
 step: 5
 name: Lock & Handoff
 mode: validate
-delegation: { reads: "@reader", writes: "@writer", runs: "@executor" }
-output_contract.citations: not-required
 prerequisites:
   - step-04 completed
+delegation:
+  reads: none
+  writes: "@writer (locked brief; per delegation-policy.md output file)"
+  runs: "@executor (orchestrator_state.js complete)"
+  direct_justified: []
+output_contract:
+  citations: not-required
 ---
 
 # Step 5 — Lock & Handoff
@@ -46,6 +51,6 @@ node .agents/scripts/orchestrator_state.js complete --agent founder --artifact 0
 - Pipeline state updated
 
 ## Delegation
-- Writes: @writer (updated brief)
-- Runs: @executor (orchestrator_state.js complete)
-- Memory: @memory-controller (lessons, session-write)
+- **Reads:** none
+- **Writes:** @writer for locked brief
+- **Runs:** @executor for orchestrator_state.js complete

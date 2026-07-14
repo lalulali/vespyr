@@ -2,10 +2,15 @@
 step: 3
 name: Accessibility Check
 mode: validate
-delegation: { reads: "@reader", writes: "@writer", runs: "@executor" }
-output_contract.citations: not-required
 prerequisites:
   - step-02 completed
+delegation:
+  reads: "direct (screen states reference; per delegation-policy.md 1 file < 500 lines)"
+  writes: "@writer (accessibility check report)"
+  runs: none
+  direct_justified: ["single spec reference file"]
+output_contract:
+  citations: not-required
 ---
 
 # Step 3 — Accessibility Check
@@ -36,5 +41,5 @@ Ensure the product is usable by people with disabilities. Catch a11y issues befo
 A11y report appended to `artifacts/output/01-research/ux-research-report.md`.
 
 ## Delegation
-- Reads: @reader (product spec, design tokens)
-- Writes: @writer (ux-research-report.md sections)
+- **Reads:** direct — screen states (single reference)
+- **Writes:** @writer for accessibility check report

@@ -2,9 +2,14 @@
 step: 2
 name: Pattern Scan
 prerequisites:
-delegation: { reads: "@reader", writes: "@writer", runs: "@executor" }
-output_contract.citations: not-required
   - step-01 completed
+delegation:
+  reads: "@reader (artifacts/memory/ — multiple files; per delegation-policy.md ≥4 files)"
+  writes: none
+  runs: none
+  direct_justified: []
+output_contract:
+  citations: not-required
 ---
 
 # Step 2 — Pattern Scan
@@ -40,5 +45,5 @@ Flag when an episode appears:
 `artifacts/output/09-retro/pattern-scan.md` — list of recurring patterns with source references.
 
 ## Delegation
-- Reads: @reader (lessons learned, agent notes, incident reports)
-- Writes: @writer (pattern-scan.md)
+- **Reads:** @reader for artifacts/memory/ (multiple files)
+- **Writes:** none

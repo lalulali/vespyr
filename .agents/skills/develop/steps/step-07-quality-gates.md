@@ -2,9 +2,14 @@
 step: 7
 name: Quality Gates
 prerequisites:
-delegation: { reads: "@reader", writes: "@writer", runs: "@executor" }
-output_contract.citations: not-required
   - step-06 completed
+delegation:
+  reads: "@reader (QA reports, security findings; per delegation-policy.md multi-file)"
+  writes: "@writer (quality reports, findings-report.md)"
+  runs: "@executor (orchestrator_state.js complete; per delegation-policy.md all bash)"
+  direct_justified: []
+output_contract:
+  citations: not-required
 ---
 
 # Step 7 — Quality Gates
@@ -67,7 +72,7 @@ Invoke `@performance-engineer` when the feature:
 - Performance benchmark exceeds SLA by >20%
 
 ## Delegation
-- Reads: @reader (QA reports, security findings)
-- Writes: @writer (quality reports, findings-report.md)
-- Runs: @executor (orchestrator_state.js complete)
-- Memory: @memory-controller (blockers-and-risks for Critical/High findings)
+- **Reads:** @reader for QA reports and security findings
+- **Writes:** @writer for quality reports and findings-report.md
+- **Runs:** @executor for orchestrator_state.js complete
+- **Memory:** @memory-controller for blockers-and-risks (Critical/High findings)

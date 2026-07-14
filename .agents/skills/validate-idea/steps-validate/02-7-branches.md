@@ -2,10 +2,15 @@
 step: 2
 name: 7-Branch Decision Tree
 mode: validate
-delegation: { reads: "@reader", writes: "@writer", runs: "@executor" }
-output_contract.citations: not-required
 prerequisites:
   - step-01 completed
+delegation:
+  reads: "direct (brief + open questions in context)"
+  writes: none
+  runs: none
+  direct_justified: ["pure Socratic reasoning; no file I/O"]
+output_contract:
+  citations: not-required
 ---
 
 # Step 2 — 7-Branch Decision Tree
@@ -52,7 +57,6 @@ Push for: a measurable threshold and by-when date.
 7-branch scorecard with strongest/weakest branches identified.
 
 ## Delegation
-- Reads: @reader (brief sections)
-- Writes: @writer (validation reports)
-- Memory: @memory-controller (active-decisions)
-- Direct: founder reasoning is direct
+- **Reads:** direct — brief and open questions already in context
+- **Writes:** none
+- **Direct:** pure Socratic reasoning; no file I/O

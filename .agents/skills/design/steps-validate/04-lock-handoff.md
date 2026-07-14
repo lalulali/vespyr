@@ -2,10 +2,15 @@
 step: 4
 name: Lock & Handoff
 mode: validate
-delegation: { reads: "@reader", writes: "@writer", runs: "@executor" }
-output_contract.citations: not-required
 prerequisites:
   - step-03 completed
+delegation:
+  reads: none
+  writes: "@writer (locked spec; per delegation-policy.md output file)"
+  runs: "@executor (orchestrator_state.js complete)"
+  direct_justified: []
+output_contract:
+  citations: not-required
 ---
 
 # Step 4 — Lock & Handoff
@@ -48,6 +53,6 @@ Blockers: {critical unresolved issues, or "none"}
 - **FIX** → loop back to `steps-create/04-screen-states.md` or `steps-edit/03-revise.md`
 
 ## Delegation
-- Writes: @writer (final report)
-- Runs: @executor (orchestrator_state.js complete, ensure_graph.js doc)
-- Memory: @memory-controller (session-write)
+- **Reads:** none
+- **Writes:** @writer for locked spec
+- **Runs:** @executor for orchestrator_state.js complete

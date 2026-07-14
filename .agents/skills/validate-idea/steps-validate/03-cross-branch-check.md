@@ -2,10 +2,15 @@
 step: 3
 name: Cross-Branch Check
 mode: validate
-delegation: { reads: "@reader", writes: "@writer", runs: "@executor" }
-output_contract.citations: not-required
 prerequisites:
   - step-02 completed
+delegation:
+  reads: "direct (branch outputs in context)"
+  writes: none
+  runs: none
+  direct_justified: ["pure reasoning on in-context data"]
+output_contract:
+  citations: not-required
 ---
 
 # Step 3 — Cross-Branch Check
@@ -37,7 +42,6 @@ For each contradiction, ask: "Your [Branch A] answer says [X], but your [Branch 
 Cross-branch contradiction map with resolution status per pair.
 
 ## Delegation
-- Reads: @reader (brief sections)
-- Writes: @writer (validation reports)
-- Memory: @memory-controller (active-decisions)
-- Direct: founder reasoning is direct
+- **Reads:** direct — branch outputs already in context
+- **Writes:** none
+- **Direct:** pure reasoning on in-context data

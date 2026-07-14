@@ -8,6 +8,11 @@
  * `@executor`. There is no @orchestrator subagent; the script itself
  * is the state machine.
  *
+ * State hierarchy:
+ *   Source of truth: artifacts/output/sprint-status.yaml (human-readable)
+ *   Derived cache:   artifacts/output/pipeline-state.json (backward compat)
+ *   readState() tries YAML first, falls back to JSON.
+ *
  * Usage:
  *   node orchestrator_state.js init --name "My Project" --type startup
  *   node orchestrator_state.js status
@@ -29,7 +34,69 @@ function ensureDir() {
   if (!fs.existsSync(OUTPUT_DIR)) fs.mkdirSync(OUTPUT_DIR, { recursive: true });
 }
 
+// Parse sprint-status.yaml into a state-compatible object.
+// This is a lightweight parser for the known YAML schema — no external deps.
+function readYaml() {
+  if (!fs.existsSync(YAML_STATE)) return null;
+  try {
+    const raw = fs.readFileSync(YAML_STATE, 'utf8');
+    const lines = raw.split('\n');
+    const state = {
+      project: { name: '', type: '', squad: '' },
+      created_at: null,
+      last_updated: null,
+      current_phase: 'discovery',
+      phases: {},
+      artifacts: {},
+      change_requests: [],
+      blockers: [],
+      stories: {},
+      history: []
+    };
+
+    let section = null; // 'phases' | 'stories'
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (trimmed.startsWith('#') || trimmed === '') continue;
+
+      // Top-level scalar fields
+      if (trimmed.startsWith('generated:')) {
+        state.created_at = trimmed.split(':').slice(1).join(':').trim();
+      } else if (trimmed.startsWith('last_updated:')) {
+        state.last_updated = trimmed.split(':').slice(1).join(':').trim();
+      } else if (trimmed.startsWith('project:') && !trimmed.startsWith('project_key:')) {
+        state.project.name = trimmed.split(':').slice(1).join(':').trim();
+        state.name = state.project.name;
+      } else if (trimmed.startsWith('squad:')) {
+        state.project.squad = trimmed.split(':').slice(1).join(':').trim();
+        state.squad = state.project.squad;
+      } else if (trimmed.startsWith('phase:')) {
+        state.current_phase = trimmed.split(':').slice(1).join(':').trim();
+        state.phase = state.current_phase;
+      } else if (trimmed === 'phases:') {
+        section = 'phases';
+      } else if (trimmed === 'stories:') {
+        section = 'stories';
+      } else if (section && line.startsWith('  ') && trimmed.includes(':')) {
+        const [key, ...valParts] = trimmed.split(':');
+        const val = valParts.join(':').trim();
+        if (section === 'phases') {
+          state.phases[key.trim()] = { status: val, started_at: null, completed_at: null, agents: [] };
+        } else if (section === 'stories') {
+          state.stories[key.trim()] = val;
+        }
+      }
+    }
+    return state;
+  } catch (e) {
+    return null;
+  }
+}
+
 function readState() {
+  // Source of truth: YAML. Fallback: JSON.
+  const yamlState = readYaml();
+  if (yamlState) return yamlState;
   if (!fs.existsSync(STATE_FILE)) return null;
   try {
     return JSON.parse(fs.readFileSync(STATE_FILE, 'utf8'));

@@ -2,9 +2,14 @@
 step: 3b
 name: Backlog Preparation
 prerequisites:
-delegation: { reads: "@reader", writes: "@writer", runs: "@executor" }
-output_contract.citations: not-required
   - step-03a completed
+delegation:
+  reads: "@reader (user stories, kanban, ADRs; per delegation-policy.md ≥3 files)"
+  writes: "@writer (execution-plan.md; per delegation-policy.md output file)"
+  runs: "@executor (orchestrator_state.js complete)"
+  direct_justified: []
+output_contract:
+  citations: not-required
 ---
 
 # Step 3b — Backlog Preparation
@@ -39,6 +44,6 @@ node .agents/scripts/orchestrator_state.js complete --agent tech-lead --artifact
 Dependency chain that forces serial execution on a time-critical feature. Escalate to `@product-manager` for scope negotiation.
 
 ## Delegation
-- Reads: @reader (user stories, kanban board, ADRs)
-- Writes: @writer (execution-plan.md)
-- Runs: @executor (orchestrator_state.js complete)
+- **Reads:** @reader for user stories, kanban board, and ADRs
+- **Writes:** @writer for execution-plan.md
+- **Runs:** @executor for orchestrator_state.js complete

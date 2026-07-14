@@ -2,8 +2,13 @@
 step: 1
 name: Hot Paths
 prerequisites: []
-delegation: { reads: "@reader", writes: "@writer", runs: "@executor" }
-output_contract.citations: not-required
+delegation:
+  reads: none
+  writes: none
+  runs: "@executor (telemetry_surface.js hot-paths; per delegation-policy.md all bash)"
+  direct_justified: []
+output_contract:
+  citations: not-required
 ---
 
 # Step 1 — Hot Paths
@@ -39,5 +44,6 @@ Surfaces the top 3 most frequent agent paths, most common failure points, and hi
 `artifacts/output/09-retro/data-collection.md` — use template `.agents/templates/memory/retrospective-template.md`
 
 ## Delegation
-- Reads: @reader (kanban board, memory files, agent notes)
-- Writes: @writer (data-collection.md)
+- **Reads:** none
+- **Writes:** none
+- **Runs:** @executor for telemetry_surface.js hot-paths

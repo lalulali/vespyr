@@ -2,10 +2,15 @@
 step: 6
 name: Handoff
 mode: create
-delegation: { reads: "@reader", writes: "@writer", runs: "@executor" }
-output_contract.citations: not-required
 prerequisites:
   - step-05 completed
+delegation:
+  reads: none
+  writes: "@writer (product-spec.md + design.md + product-spec.html; per delegation-policy.md multi-file output)"
+  runs: "@executor (orchestrator_state.js complete)"
+  direct_justified: []
+output_contract:
+  citations: not-required
 ---
 
 # Step 6 — Handoff
@@ -68,6 +73,6 @@ Blockers: {any open design questions, or "none"}
 Load `develop` to proceed.
 
 ## Delegation
-- Writes: @writer (spec files, kanban.md)
-- Runs: @executor (orchestrator_state.js complete, ensure_graph.js doc)
-- Memory: @memory-controller (session-write)
+- **Reads:** none
+- **Writes:** @writer for product-spec.md, design.md, and product-spec.html
+- **Runs:** @executor for orchestrator_state.js complete

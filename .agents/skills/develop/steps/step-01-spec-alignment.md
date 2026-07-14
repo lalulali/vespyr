@@ -2,10 +2,15 @@
 step: 1
 name: Spec Alignment & Read Check
 prerequisites:
-delegation: { reads: "@reader", writes: "@writer", runs: "@executor" }
-output_contract.citations: not-required
   - PR exists or design docs are in `artifacts/output/02-strategy/`
   - User story is in `artifacts/output/02-strategy/user-stories.md`
+delegation:
+  reads: "@reader (5+ spec files across 02-strategy/ and 03-architecture/; per delegation-policy.md ≥4 files)"
+  writes: "@writer (spec-alignment-check.md; per delegation-policy.md output file)"
+  runs: none
+  direct_justified: ["SPEC.md direct read — < 100 lines, agent contract"]
+output_contract:
+  citations: not-required
 ---
 
 # Step 1 — Spec Alignment & Read Check
@@ -40,6 +45,6 @@ Load and cross-check every strategy artifact against the user stories. Confirm a
 Any spec gap unfilled after 2 CR cycles. Escalate to `@founder`.
 
 ## Delegation
-- Reads: @reader (load spec files > 50 lines)
-- Writes: @writer (spec-alignment-check.md)
-- Direct I/O: reading SPEC.md directly permitted (23 lines, agent contract)
+- **Reads:** @reader for spec files (5+ artifacts across 02-strategy/ and 03-architecture/)
+- **Writes:** @writer for spec-alignment-check.md
+- **Direct I/O:** reading SPEC.md directly permitted (< 100 lines, agent contract)

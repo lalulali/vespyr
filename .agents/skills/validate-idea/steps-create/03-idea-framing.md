@@ -2,10 +2,15 @@
 step: 3
 name: Idea Framing
 mode: create
-delegation: { reads: "@reader", writes: "@writer", runs: "@executor" }
-output_contract.citations: not-required
 prerequisites:
   - step-02 completed
+delegation:
+  reads: "direct (1 brief-in-progress < 200 lines; per delegation-policy.md < 3 files < 500 lines)"
+  writes: none
+  runs: none
+  direct_justified: ["pure reasoning on single small document"]
+output_contract:
+  citations: not-required
 ---
 
 # Step 3 — Idea Framing
@@ -44,6 +49,6 @@ If the user says "just do it" or shows impatience:
 Framed idea (4 components) + question routing decision.
 
 ## Delegation
-- Reads: @reader (brief files, research artifacts)
-- Writes: @writer (validation outputs)
-- Direct: founder reasoning is direct (no delegation needed for Socratic questioning)
+- **Reads:** direct — single brief-in-progress (< 200 lines)
+- **Writes:** none
+- **Direct:** pure reasoning step; single small document

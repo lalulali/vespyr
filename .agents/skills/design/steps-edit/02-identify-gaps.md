@@ -2,10 +2,15 @@
 step: 2
 name: Identify Gaps
 mode: edit
-delegation: { reads: "@reader", writes: "@writer", runs: "@executor" }
-output_contract.citations: not-required
 prerequisites:
   - step-01 completed
+delegation:
+  reads: "direct (loaded spec in context)"
+  writes: none
+  runs: none
+  direct_justified: ["pure reasoning on loaded content; no new file reads"]
+output_contract:
+  citations: not-required
 ---
 
 # Step 2 — Identify Gaps
@@ -33,5 +38,6 @@ Find what's incomplete or misaligned. A spec with screens but no error states, o
 Gap map per artifact: which sections are green/yellow/red.
 
 ## Delegation
-- Reads: @reader (existing spec files)
-- Writes: @writer (revised sections)
+- **Reads:** direct — spec already loaded in context
+- **Writes:** none
+- **Direct:** pure reasoning on loaded content

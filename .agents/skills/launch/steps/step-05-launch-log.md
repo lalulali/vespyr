@@ -2,9 +2,14 @@
 step: 5
 name: Launch Log
 prerequisites:
-delegation: { reads: "@reader", writes: "@writer", runs: "@executor" }
-output_contract.citations: not-required
   - step-04 completed
+delegation:
+  reads: none
+  writes: "@writer (launch-log.md; per delegation-policy.md output file)"
+  runs: "@executor (orchestrator_state.js complete)"
+  direct_justified: []
+output_contract:
+  citations: not-required
 ---
 
 # Step 5 — Launch Log
@@ -57,6 +62,6 @@ node .agents/scripts/orchestrator_state.js complete --agent product-manager --ar
 - For production incidents → load `incident`
 
 ## Delegation
-- Writes: @writer (launch-retro.md)
-- Runs: @executor (orchestrator_state.js complete)
-- Memory: @memory-controller (lessons, session-write)
+- **Reads:** none
+- **Writes:** @writer for launch-log.md
+- **Runs:** @executor for orchestrator_state.js complete

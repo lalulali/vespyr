@@ -2,10 +2,15 @@
 step: 3
 name: Revise
 mode: edit
-delegation: { reads: "@reader", writes: "@writer", runs: "@executor" }
-output_contract.citations: not-required
 prerequisites:
   - step-02 completed
+delegation:
+  reads: "direct (spec sections in context)"
+  writes: "@writer (revised spec sections; per delegation-policy.md output)"
+  runs: none
+  direct_justified: ["spec sections already in context from step 1"]
+output_contract:
+  citations: not-required
 ---
 
 # Step 3 — Revise
@@ -33,5 +38,5 @@ Never introduce new content that wasn't prompted by the user's edit target. If t
 Revised artifact sections, integrated into the existing documents.
 
 ## Delegation
-- Reads: @reader (existing spec files)
-- Writes: @writer (revised sections)
+- **Reads:** direct — spec sections already in context
+- **Writes:** @writer for revised spec sections

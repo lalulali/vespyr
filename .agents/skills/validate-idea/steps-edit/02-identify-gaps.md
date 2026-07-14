@@ -2,10 +2,15 @@
 step: 2
 name: Identify Gaps
 mode: edit
-delegation: { reads: "@reader", writes: "@writer", runs: "@executor" }
-output_contract.citations: not-required
 prerequisites:
   - step-01 completed
+delegation:
+  reads: "direct (brief already loaded in context)"
+  writes: none
+  runs: none
+  direct_justified: ["pure reasoning on loaded content; no new file reads"]
+output_contract:
+  citations: not-required
 ---
 
 # Step 2 — Identify Gaps
@@ -33,6 +38,6 @@ Find what's incomplete. A brief with a verdict but no user specificity, or a pro
 Gap map: which sections are green/yellow/red, with brief notes on what's missing.
 
 ## Delegation
-- Reads: @reader (existing brief, specs)
-- Writes: @writer (revised sections)
-- Direct: founder reasoning is direct
+- **Reads:** direct — brief already loaded in context
+- **Writes:** none
+- **Direct:** pure reasoning on loaded content

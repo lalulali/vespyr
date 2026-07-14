@@ -2,9 +2,14 @@
 step: 9
 name: Documentation
 prerequisites:
-delegation: { reads: "@reader", writes: "@writer", runs: "@executor" }
-output_contract.citations: not-required
   - step-08 completed (PM accepted)
+delegation:
+  reads: "@reader (feature code, ADRs, user stories; per delegation-policy.md ≥4 files)"
+  writes: "@writer (docs/, README, changelog; per delegation-policy.md multi-file output)"
+  runs: none
+  direct_justified: []
+output_contract:
+  citations: not-required
 ---
 
 # Step 9 — Documentation
@@ -33,5 +38,5 @@ Updated documentation in the project's `docs/` directory or README.
 None — documentation is important but non-blocking. If the writer identifies a spec gap, file a follow-up task.
 
 ## Delegation
-- Reads: @reader (feature code, ADRs, user stories)
-- Writes: @writer (docs/ updates, README, changelog)
+- **Reads:** @reader for feature code, ADRs, and user stories
+- **Writes:** @writer for docs/ updates, README, and changelog

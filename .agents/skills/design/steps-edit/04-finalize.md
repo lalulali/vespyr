@@ -2,10 +2,15 @@
 step: 4
 name: Finalize
 mode: edit
-delegation: { reads: "@reader", writes: "@writer", runs: "@executor" }
-output_contract.citations: not-required
 prerequisites:
   - step-03 completed
+delegation:
+  reads: none
+  writes: "@writer (finalized spec files; per delegation-policy.md multi-file output)"
+  runs: "@executor (orchestrator_state.js complete)"
+  direct_justified: []
+output_contract:
+  citations: not-required
 ---
 
 # Step 4 — Finalize
@@ -47,6 +52,6 @@ Blockers: {any unresolved design questions, or "none"}
 Load `develop` to proceed. If revisions changed scope significantly, re-offer the Architect phase gate.
 
 ## Delegation
-- Writes: @writer (revised artifacts)
-- Runs: @executor (orchestrator_state.js complete, ensure_graph.js doc)
-- Memory: @memory-controller (session-write)
+- **Reads:** none
+- **Writes:** @writer for finalized spec files
+- **Runs:** @executor for orchestrator_state.js complete

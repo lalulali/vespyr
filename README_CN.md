@@ -2,7 +2,7 @@
 
 > [English](README.md) | 中文
 
-一个平台无关、基于文件的多智能体引擎，可直接将结构化的产品研发团队安装到你的仓库中。包含 21 个专业智能体角色、24 个原子化技能、Spec-Kernel 工件体系、共享持久化记忆，以及三大其他框架无法同时具备的架构护城河。
+一个平台无关、基于文件的多智能体引擎，可直接将结构化的产品研发团队安装到你的仓库中。包含 21 个专业智能体角色、30 个原子化技能、Spec-Kernel 工件体系、共享持久化记忆，以及三大其他框架无法同时具备的架构护城河。
 
 [![Vespyr Version](https://img.shields.io/badge/version-2.0.0-blue)](https://github.com/lalulali/vespyr)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)

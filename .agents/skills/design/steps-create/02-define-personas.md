@@ -2,10 +2,15 @@
 step: 2
 name: Define Personas
 mode: create
-delegation: { reads: "@reader", writes: "@writer", runs: "@executor" }
-output_contract.citations: not-required
 prerequisites:
   - step-01 completed
+delegation:
+  reads: "direct (research summaries; per delegation-policy.md < 3 files < 500 lines)"
+  writes: "@writer (personas output; per delegation-policy.md output file)"
+  runs: none
+  direct_justified: ["research artifacts < 500 lines total, < 3 files"]
+output_contract:
+  citations: not-required
 ---
 
 # Step 2 — Define Personas
@@ -49,6 +54,5 @@ If in `semi-autonomous` mode and `FeatureDesignInteraction` is not `false`:
 - Persona definitions (integrated into PRD)
 
 ## Delegation
-- Reads: @reader (research artifacts, PRD, stories)
-- Writes: @writer (PRD, user stories, spec files, design.md)
-- Direct: PM and designer reasoning is direct
+- **Reads:** direct — research summaries (< 3 files, < 500 lines total)
+- **Writes:** @writer for personas output
