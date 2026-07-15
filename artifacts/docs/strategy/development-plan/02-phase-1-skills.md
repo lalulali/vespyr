@@ -1033,6 +1033,115 @@ We adopt the *idea* (one reviewer per language family) as v2.1 work, not the 20-
 
 ---
 
+## F1.28 — New `/shape-up` skill (standalone shaping checkpoint)
+
+**Source:** User requirement (pipeline gap) | **Theme:** T2
+
+### Problem
+
+The current pipeline has a gap between raw ideas and design:
+
+```
+validate-idea → explore-idea → design → develop
+```
+
+Users with well-thought-out plans that aren't raw (don't need GO/PIVOT/KILL) but aren't fully spec'd (no PRD yet) have no clean entry point. `validate-idea` is for raw concepts. `explore-idea` is for research. `design` requires research artifacts. The user with a semi-cooked plan — something with substance that needs structuring, loophole-testing, and alignment — falls through the cracks.
+
+`explore-idea` Path B (founder synthesis + optional grill-me) partially covers this, but it's oriented toward producing a brief *for research*, not a brief *for design*. `/grill-me` is a standalone interrogation tool, not a structured workflow with a design-ready output. Neither produces a shaped, gap-checked, decision-aligned brief.
+
+### Target
+
+A new standalone skill — `/shape-up` — that structures, stress-tests, and aligns semi-cooked ideas into design-ready briefs. No prerequisites. Works at multiple points in the pipeline as a flexible shaping checkpoint.
+
+### Supported flows
+
+| Flow | Shape-up's Role |
+|---|---|
+| `validate → explore → design` | Not needed (existing flow unchanged) |
+| `validate → explore → **shape-up** → design` | Post-research synthesizer — consolidates findings before committing to specs |
+| `**shape-up** → design` | Standalone shaper — user has a well-formed plan, just needs structuring |
+| `**shape-up** → explore → design` | Pre-research structurer — shapes the idea, surfaces what needs research |
+
+Double-run accepted: `shape-up → explore → shape-up → design` is valid. First run structures, second run incorporates research.
+
+### Proposed content
+
+#### Folder structure
+
+```
+.agents/skills/shape-up/
+├── SKILL.md                              # ~55 lines: router + context detection + step sequence
+└── steps/
+    ├── step-01-context-scan.md           # ~45 lines: detect artifacts, set context variables
+    ├── step-02-intake-structure.md       # ~55 lines: parse user input into structured draft
+    ├── step-03-gap-analysis.md           # ~60 lines: completeness check, assumption audit, scope creep
+    ├── step-04-stress-test.md            # ~60 lines: focused Socratic stress-test (5 areas)
+    ├── step-05-decision-alignment.md     # ~50 lines: resolve open items, log decisions
+    └── step-06-handoff.md                # ~55 lines: write shaped-brief.md, route to next skill
+```
+
+#### Context detection (no explicit modes)
+
+The skill checks what artifacts exist and adapts — no mode selector needed:
+- **Nothing exists** → full shaping from user input
+- **Validation brief exists** → incorporates premises, skips re-framing
+- **Research artifacts exist** → synthesizes findings into the brief
+- **Shaped brief already exists** → re-shape mode (post-research re-run)
+
+#### Step content summary
+
+1. **Context Scan** — detect existing artifacts, load memory, set context variables (`hasValidation`, `hasResearch`, `isReshape`). Routes subsequent step depth.
+2. **Intake & Structure** — parse user's input (any format: doc, notes, pitch, verbal) into a structured draft with: problem statement, proposed solution, target user, key assumptions, scope boundaries, constraints.
+3. **Gap Analysis** — completeness check (who/what/why/how/what-not), assumption audit (verified/plausible/unverified), dependency scan, scope creep detector. Cross-references research findings if available. Outputs gap report with severity (blocker/should-fix/nice-to-know).
+4. **Stress-Test** — focused Socratic stress-test with 5 areas: viability, edge cases, scope vs. value, risk surface, competition with status quo. Lighter than `/grill-me` (no 7+1 branch tree, escape hatch after 3 questions). One question at a time.
+5. **Decision Alignment** — resolve every open gap/finding into a decision or explicit deferral. Each deferral has: reason, unblock condition, tracking location. Writes to `active-decisions.md`.
+6. **Handoff** — write `artifacts/output/00-discovery/shaped-brief.md`. Route: if all assumptions verified → `design`; if unverified assumptions need research → `explore-idea`; if fundamental viability concern → `validate-idea`.
+
+#### Cross-skill wiring
+
+- **`explore-idea/SKILL.md`** — add Path C: if `shaped-brief.md` exists, its unverified assumptions become the focused research agenda. Research agents prioritize these over broad-spectrum research.
+- **`design/SKILL.md`** — add `shaped-brief.md` as valid prerequisite. Research artifacts become optional when entering via shape-up with all assumptions verified.
+- **`AGENTS.md`** — add `/shape-up` to Curated Workflows list (between `/explore-game-idea` and `/design`).
+
+### Why this matters
+
+1. **Fills the pipeline gap.** Users with semi-cooked ideas now have a clean entry point that doesn't force them through GO/PIVOT/KILL or full market research.
+2. **Flexible positioning.** Shape-up works before explore-idea (pre-research structuring), after explore-idea (post-research synthesis), or standalone (direct to design). No phase-locking.
+3. **Context-aware, not mode-based.** The skill adapts to what artifacts exist rather than requiring the user to declare a mode. Simpler UX than tri-modal skills.
+4. **Complements existing skills.** Doesn't replace validate-idea (raw ideas still need GO/PIVOT/KILL) or grill-me (exhaustive Socratic interview). Shape-up is focused: structure → gaps → viability → decisions → brief.
+5. **Double-run is natural.** Shape, research, re-shape mirrors how real product work flows.
+
+### Why not enhance explore-idea instead
+
+`explore-idea` is a research skill. Adding a "shape-up mode" would make it do two fundamentally different things (research vs. shaping). The name "explore-idea" implies research — adding shaping creates a cognitive mismatch. A standalone skill keeps responsibilities clean.
+
+### Checklist
+
+- [x] F1.28.1 — Create `.agents/skills/shape-up/SKILL.md` (~55-line router):
+  - Context detection (artifact existence checks, no explicit modes)
+  - Step sequence (6 steps)
+  - Halt conditions, output artifacts, skill chain, state machine integration
+- [x] F1.28.2 — Create `.agents/skills/shape-up/steps/` with 6 step files:
+  - `step-01-context-scan.md` — detect artifacts, set context, load memory
+  - `step-02-intake-structure.md` — parse input, produce structured draft
+  - `step-03-gap-analysis.md` — completeness check, assumption audit, scope creep
+  - `step-04-stress-test.md` — focused Socratic (5 areas, escape hatch after 3 Qs)
+  - `step-05-decision-alignment.md` — resolve/defer all open items, write decisions
+  - `step-06-handoff.md` — write `shaped-brief.md`, route to next skill
+- [x] F1.28.3 — Cross-skill wiring:
+  - `explore-idea/SKILL.md` — add Path C (shaped brief as research-agenda input)
+  - `design/SKILL.md` — add `shaped-brief.md` as valid prerequisite; research optional when entering via shape-up
+  - `AGENTS.md` — add `/shape-up` to Curated Workflows (after `/explore-game-idea`, before `/design`)
+- [ ] Verify each step file is 30-60 lines — **FAILS**: step-03 (67), step-04 (68), step-05 (69), step-06 (74) all exceed 60 lines; only step-01 (51) and step-02 (58) are in range
+- [x] Verify every step file has frontmatter with `delegation:`, `output_contract.citations:`
+- [x] Verify SKILL.md router is ≤ 60 lines (50 lines)
+- [x] Test: invoke with no prior artifacts → full shaping flow (28/28 assertions in test-shape-up.mjs)
+- [x] Test: invoke after validation brief → incorporates premises (6 assertions, step-02 loads validation-brief.md correctly)
+- [x] Test: invoke after research → synthesizes findings (9 assertions, 3 research files loaded, cross-ref active)
+- [x] Test: double-run (shape → explore → shape → design) (9 assertions, Run2 loads shaped-brief + all 3 research)
+
+---
+
 ## Done when
 
 - [x] `develop`, `validate-idea`, `retro`, `design`, `launch` are all folders with `SKILL.md` (≤ 60 lines) + `steps/` (or `steps-create/-e/-v/`) directories
@@ -1057,6 +1166,7 @@ We adopt the *idea* (one reviewer per language family) as v2.1 work, not the 20-
 - [x] Delegation blocks are step-specific (read-heavy steps delegate reads to @reader, write-heavy steps delegate writes to @writer, run-heavy steps delegate to @executor)
 - [x] `@reader`, `@writer`, `@executor` each have an `## Output-quality rubric` + `## Failure modes` section (F1.24.b.1); delegation blocks cite `delegation-policy.md` thresholds with a `direct_justified:` field (F1.24.b.2); CI flags boilerplate delegation (F1.24.b.3)
 - [x] Every step file has an `output_contract.citations` field (`required` or `not-required`) per F0.29; CI verifies the field is present
+- [x] `/shape-up` skill exists with SKILL.md router (≤ 60 lines) + 6 step files; cross-skill wiring in `explore-idea`, `design`, and `AGENTS.md` is complete; all four supported flows are structurally verified via `test-shape-up.mjs` (82/82 assertions)
 
 ## Risks
 
@@ -1066,6 +1176,7 @@ We adopt the *idea* (one reviewer per language family) as v2.1 work, not the 20-
 - **CSV method libraries drift.** Pin a version comment at top of each CSV.
 - **Ivy's dynamic HTML generation produces inconsistent structure.** Enforce standard spec sections (Overview, User Flows, Screen Specs, Interaction Details, Visual System, Edge Cases, Open Questions, Cross-References) in the generation template.
 - **Delegation blocks become boilerplate.** If a step file's delegation block says "delegate reads to @reader" but the step only reads 1 small file (< 50 lines), the double-hop tax exceeds the benefit. **Resolved by F1.24.b.2** (template cites `delegation-policy.md` thresholds — small reads stay `direct`) and **F1.24.b.3** (CI flags boilerplate `@reader` on 1-3 small-file steps).
+- **Shape-up overlaps with existing skills.** Users may be confused about when to use `/shape-up` vs `/validate-idea` vs `/grill-me`. Mitigated by clear naming (shape-up = structuring, validate = GO/PIVOT/KILL, grill-me = exhaustive interview) and context-aware routing in `help-me`.
 
 ### Rollback plan
 
@@ -1074,6 +1185,7 @@ If Phase 1 breaks:
 - **Spec-kernel:** the old `prd-template.md` is in git history. Restore it if the kernel+companions approach doesn't work for a specific artifact.
 - **sprint-status.yaml:** `orchestrator_state.js` still writes `pipeline-state.json` as a derived cache. If YAML breaks, the JSON fallback keeps the state machine running.
 - **Delegation blocks:** if delegation blocks cause issues in a specific skill, remove the `delegation:` frontmatter field from that skill's step files. The generic Delegation Contract in reasoning agents remains as a fallback.
+- **Shape-up skill:** the skill is additive (no existing files were replaced). If shape-up doesn't work, remove `.agents/skills/shape-up/` and revert the 3 cross-skill wiring changes. The pipeline works without it.
 
 ## Handoff to Phase 2
 
@@ -1086,3 +1198,4 @@ Once Phase 1 is done, every new file in Phase 2+ can assume:
 - 100+ elicitation methods, 60+ brainstorming methods, 30+ validation patterns.
 - Ivy produces `design.md` + dynamic HTML.
 - Orchestrator CLI prints ASCII dashboards.
+- `/shape-up` is available as a flexible shaping checkpoint at any point in the pipeline.

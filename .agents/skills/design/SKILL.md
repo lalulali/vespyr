@@ -8,15 +8,16 @@ description: Defines product requirements from validated ideas, then produces de
 Bridges exploration and development. Takes validated ideas and turns them into a PRD with requirements, user stories, and detailed product specs with flows, interactions, and visual direction.
 
 ## Prerequisites
-- `artifacts/output/00-discovery/validation-brief.md` OR `idea-brief.md`
-- `artifacts/output/01-research/market-analysis.md`
-- `artifacts/output/01-research/competitive-analysis.md`
-- `artifacts/output/01-research/user-personas.md`
+- `artifacts/output/00-discovery/validation-brief.md` OR `idea-brief.md` OR `shaped-brief.md`
+- `artifacts/output/01-research/market-analysis.md` (optional if entering via `shape-up` with all assumptions verified)
+- `artifacts/output/01-research/competitive-analysis.md` (optional if entering via `shape-up`)
+- `artifacts/output/01-research/user-personas.md` (optional if entering via `shape-up`)
 
-If any are missing, load `explore-idea` first.
+If entering from `shape-up` with all assumptions verified, research artifacts are optional.
+If entering from `explore-idea`, all research artifacts should exist. If any are missing, load `explore-idea` first.
 
 ## Skill chain
-- Prev: `explore-idea` or `game-explore-idea`
+- Prev: `explore-idea`, `shape-up`, or `game-explore-idea`
 - Next: `develop`
 
 ## Mode selection + routing

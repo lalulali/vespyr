@@ -2,7 +2,7 @@
 
 > [English](README.md) | 中文
 
-一个平台无关、基于文件的多智能体引擎，可直接将结构化的产品研发团队安装到你的仓库中。包含 21 个专业智能体角色、30 个原子化技能、Spec-Kernel 工件体系、共享持久化记忆，以及三大其他框架无法同时具备的架构护城河。
+一个平台无关、基于文件的多智能体引擎，可直接将结构化的产品研发团队安装到你的仓库中。包含 21 个专业智能体角色、31 个原子化技能、Spec-Kernel 工件体系、共享持久化记忆，以及三大其他框架无法同时具备的架构护城河。
 
 [![Vespyr Version](https://img.shields.io/badge/version-2.0.0-blue)](https://github.com/lalulali/vespyr)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -94,7 +94,7 @@ Vespyr 将工作组织为 11 个顺序阶段。`.agents/references/phase-table.m
 | 8 | 文档 | (贯穿) | 文档已更新 |
 | 9 | 回顾 | `/retro` | 行动项已记录 |
 
-**关键工作流：** `/help-me`（导航助手）、`/grill-me`（苏格拉底式压力测试）、`/squad`（团队预设）、`/memory`（归档搜索）、`/customize`（智能体覆盖配置）。
+**关键工作流：** `/shape-up`（创意结构化）、`/help-me`（导航助手）、`/grill-me`（苏格拉底式压力测试）、`/squad`（团队预设）、`/memory`（归档搜索）、`/customize`（智能体覆盖配置）。
 
 ---
 
@@ -137,6 +137,7 @@ Vespyr 将工作组织为 11 个顺序阶段。`.agents/references/phase-table.m
 每个技能是一个文件夹，包含 `SKILL.md` 路由器（≤ 60 行）+ `steps/` 目录。每个步骤是一个自包含的 30-80 行文件，拥有自己的停止条件和委托契约。
 
 - **三态模式：** `validate-idea` 和 `design` 拥有 `steps-create/`、`steps-edit/`、`steps-validate/` 子文件夹。模式检测是自动的——技能检查工件是否存在并据此路由。
+- **上下文检测：** `shape-up` 检测已有工件（验证简报、研究报告、已塑形简报）并自动适配其 6 步流程——无需模式选择器。可独立运行（`shape-up → design`）或在流水线的任意阶段之间运行（`validate → explore → shape-up → design`）。
 - **可恢复：** 输出文档 YAML 前置元数据中的 `stepsCompleted` 数组使恢复操作是确定性的。以 `stepsCompleted: [1,2,3,4,5]` 重新激活 `develop`，它会直接跳到步骤 6。
 - **委托契约：** 每个步骤文件声明读取、写入、运行操作所使用的子代理——步骤专属，而非通用。
 

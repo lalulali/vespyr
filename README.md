@@ -2,7 +2,7 @@
 
 > English | [中文](README_CN.md)
 
-A platform-agnostic, file-based multi-agent engine that installs a structured product development team directly into your repository. 21 specialized agent personas, 30 atomic skills, spec-kernel artifacts, shared persistent memory, and three architectural moats that no other framework combines.
+A platform-agnostic, file-based multi-agent engine that installs a structured product development team directly into your repository. 21 specialized agent personas, 31 atomic skills, spec-kernel artifacts, shared persistent memory, and three architectural moats that no other framework combines.
 
 [![Vespyr Version](https://img.shields.io/badge/version-2.0.0-blue)](https://github.com/lalulali/vespyr)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -94,7 +94,7 @@ Vespyr organizes work into 11 sequential phases. The canonical phase table at `.
 | 8 | Documentation | (cross-cutting) | Docs current |
 | 9 | Retro | `/retro` | Action items filed |
 
-**Key workflows:** `/help-me` (navigator), `/grill-me` (Socratic stress-test), `/squad` (team presets), `/memory` (archive search), `/customize` (agent overrides).
+**Key workflows:** `/shape-up` (idea structuring), `/help-me` (navigator), `/grill-me` (Socratic stress-test), `/squad` (team presets), `/memory` (archive search), `/customize` (agent overrides).
 
 ---
 
@@ -137,6 +137,7 @@ Vespyr organizes work into 11 sequential phases. The canonical phase table at `.
 Every skill is a folder with a `SKILL.md` router (≤ 60 lines) + `steps/` directory. Each step is a self-contained 30-80 line file with its own halt conditions and delegation contract.
 
 - **Tri-modal:** `validate-idea` and `design` have `steps-create/`, `steps-edit/`, `steps-validate/` subfolders. Mode detection is automatic — the skill checks for the artifact and routes accordingly.
+- **Context-detecting:** `shape-up` detects existing artifacts (validation brief, research, shaped brief) and adapts its 6-step flow — no mode selector. Works standalone (`shape-up → design`) or between any pipeline phases (`validate → explore → shape-up → design`).
 - **Resumable:** The `stepsCompleted` array in the output document's YAML frontmatter makes resumption deterministic. Re-activate `develop` with `stepsCompleted: [1,2,3,4,5]` and it jumps to step 6.
 - **Delegation contracts:** Every step file declares which sub-agents to use for reads, writes, and runs — step-specific, not generic.
 

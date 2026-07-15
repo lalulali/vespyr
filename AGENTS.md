@@ -92,6 +92,7 @@ Vespyr organizes complex, multi-agent operations into highly structured **skills
 *   `/validate-game-idea` — Stress-test game concepts before production
 *   `/explore-idea` — Market, competitor, and user research
 *   `/explore-game-idea` — Genre market and player research
+*   `/shape-up` — Structure and stress-test semi-cooked ideas into design-ready briefs
 *   `/design` — PRD and screen specs creation
 *   `/develop` — MVP development cycle
 *   `/launch` — Release readiness and deployment

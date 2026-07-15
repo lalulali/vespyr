@@ -22,6 +22,12 @@ Before starting, check for a validation brief:
 - If the user skips `validate-idea` and comes here directly with a clear concept, run Phase 1 (founder synthesis) to produce `idea-brief.md` first.
 - Consider suggesting `validate-idea` if the idea seems unvalidated.
 
+**Path C — Has shaped brief:**
+- [ ] `artifacts/output/00-discovery/shaped-brief.md` exists (from `shape-up`)
+- The shaped brief's **unverified assumptions** and **open questions** become the focused research agenda. Research agents prioritize validating/invalidating these specific items rather than running a broad-spectrum sweep.
+- Skip Phase 1 (Synthesize) entirely. Go straight to Phase 2 research.
+- After research completes, recommend re-running `shape-up` to incorporate findings before proceeding to `design`.
+
 ## Workflow steps
 
 ### Phase 1: Synthesize (skip if validation brief exists)
@@ -141,7 +147,7 @@ When exploration is complete:
    Next step: Load design to define requirements and create specs
    New blockers: {any research gaps or unresolved questions, or "none"}
    ```
-7. Load `design` to define requirements and create specs
+7. Load `design` to define requirements and create specs — or load `shape-up` first if findings need consolidation before specs
 
 ---
 

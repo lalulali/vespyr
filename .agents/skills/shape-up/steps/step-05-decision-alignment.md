@@ -1,0 +1,69 @@
+---
+step: 5
+name: Decision Alignment
+prerequisites:
+  - step-04 completed
+delegation:
+  reads: none
+  writes: "@writer (active-decisions.md; per delegation-policy.md output file)"
+  runs: none
+  direct_justified: ["decision reasoning is pure analysis; only output is memory write"]
+output_contract:
+  citations: not-required
+---
+
+# Step 5 — Decision Alignment
+
+Resolve open questions and lock decisions. Every gap and stress-test finding becomes either a resolved decision or an explicit deferral.
+
+## Goal
+Close the loop on every open item. No silent assumptions survive this step — everything is either decided or explicitly deferred with rationale.
+
+## Process
+
+### Present the open items
+Compile from steps 3 and 4:
+- Blocker-severity gaps from gap analysis
+- Should-fix gaps from gap analysis
+- Weaknesses surfaced by stress-test
+- Open questions accumulated throughout
+
+### For each open item
+1. **Propose a resolution** with reasoning.
+2. **Ask the user:** "Do you agree, want to counter, or want to defer this?"
+3. Record the outcome:
+   - **Resolved** → decision + rationale + who decided
+   - **Deferred** → reason for deferral + what would unblock it + where it's tracked
+   - **Contradicted** → flag as needing further discussion
+
+### Decision log format
+For each resolved decision, append to `artifacts/memory/active-decisions.md`:
+```markdown
+### [DECISION-{N}] {short title}
+- **Context:** {what prompted this decision}
+- **Decision:** {what was decided}
+- **Rationale:** {why}
+- **Alternatives considered:** {what was rejected and why}
+- **Decided by:** user + @founder (shape-up step 5)
+- **Date:** {date}
+```
+
+### Deferral handling
+Deferred items are NOT silent omissions. Each deferral gets:
+- A clear statement of what's deferred
+- Why it's deferred (not enough info, not blocking v1, needs research)
+- What would unblock it (specific action or information needed)
+- Where it's tracked (open questions in the shaped brief)
+
+## Halt condition
+If 3+ blocker-severity items are deferred without a clear unblock path, pause and ask:
+> "We have [N] unresolved blockers. Should we continue shaping, or do you need to step back and run `/validate-idea` or `/explore-idea` first?"
+
+## Output
+All open items resolved or explicitly deferred. Decision log written to memory.
+
+## Delegation
+- **Reads:** none
+- **Writes:** @writer for `active-decisions.md`
+- **Memory:** @memory-controller for decision log entries
+- **Direct:** decision reasoning is pure analysis
