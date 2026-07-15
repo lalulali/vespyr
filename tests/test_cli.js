@@ -472,8 +472,8 @@ describe('Test 7: scaffoldArtifacts()', () => {
   it('should create full directory tree on first run', () => {
     scaffoldArtifacts(tmpDir, 'test-project');
 
-    assert.ok(fs.existsSync(path.join(tmpDir, 'artifacts', 'output', '00-discovery')));
-    assert.ok(fs.existsSync(path.join(tmpDir, 'artifacts', 'output', '01-research')));
+    assert.ok(fs.existsSync(path.join(tmpDir, 'artifacts', 'output', '01-discovery')));
+    assert.ok(fs.existsSync(path.join(tmpDir, 'artifacts', 'output', '02-research')));
     assert.ok(fs.existsSync(path.join(tmpDir, 'artifacts', 'memory')));
     assert.ok(fs.existsSync(path.join(tmpDir, 'artifacts', 'telemetry')));
     assert.ok(fs.existsSync(path.join(tmpDir, 'artifacts', 'directions')));

@@ -41,11 +41,11 @@ If a `.claude` folder is present, or if the user is using the Claude Code harnes
 ## Step 3: Initialize artifact tree
 
 Create these directories under `artifacts/output/`:
-- `00-discovery/`
-- `01-research/`
-- `02-strategy/`
-- `03-architecture/`
-- `04-planning/`
+- `01-discovery/`
+- `02-research/`
+- `03-strategy/`
+- `04-architecture/`
+- `05-planning/`
 - `06-launch/`
 - `07-iteration/`
 - `08-incidents/`

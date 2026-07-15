@@ -307,21 +307,21 @@ function createInitialState(name, type, squadName = 'full-team') {
 function getPhaseArtifacts(phase) {
   const artifactMap = {
     validation: [
-      { name: 'idea-brief.md', path: '00-discovery/idea-brief.md', required: true, fallbackPath: '00-discovery/validation-brief.md', fallbackName: 'validation-brief.md' }
+      { name: 'idea-brief.md', path: '01-discovery/idea-brief.md', required: true, fallbackPath: '01-discovery/validation-brief.md', fallbackName: 'validation-brief.md' }
     ],
     exploration: [
-      { name: 'market-analysis.md', path: '01-research/market-analysis.md', required: true },
-      { name: 'competitive-analysis.md', path: '01-research/competitive-analysis.md', required: true },
-      { name: 'user-personas.md', path: '01-research/user-personas.md', required: true }
+      { name: 'market-analysis.md', path: '02-research/market-analysis.md', required: true },
+      { name: 'competitive-analysis.md', path: '02-research/competitive-analysis.md', required: true },
+      { name: 'user-personas.md', path: '02-research/user-personas.md', required: true }
     ],
     design: [
-      { name: 'requirements.md', path: '02-strategy/requirements.md', required: true },
-      { name: 'user-stories.md', path: '02-strategy/user-stories.md', required: true },
-      { name: 'product-spec.md', path: '02-strategy/product-spec.md', required: true }
+      { name: 'requirements.md', path: '03-strategy/requirements.md', required: true },
+      { name: 'user-stories.md', path: '03-strategy/user-stories.md', required: true },
+      { name: 'product-spec.md', path: '03-strategy/product-spec.md', required: true }
     ],
     development: [
-      { name: 'execution-plan.md', path: '04-planning/execution-plan.md', required: true },
-      { name: 'change-requests.md', path: '04-planning/change-requests.md', required: false }
+      { name: 'execution-plan.md', path: '05-planning/execution-plan.md', required: true },
+      { name: 'change-requests.md', path: '05-planning/change-requests.md', required: false }
     ]
   };
   return artifactMap[phase] || [];

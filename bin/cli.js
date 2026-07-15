@@ -301,11 +301,11 @@ function scaffoldArtifacts(targetDir, projectName, userNickname = "User") {
 	}
 
 	const outputDirs = [
-		"output/00-discovery",
-		"output/01-research",
-		"output/02-strategy",
-		"output/03-architecture",
-		"output/04-planning",
+		"output/01-discovery",
+		"output/02-research",
+		"output/03-strategy",
+		"output/04-architecture",
+		"output/05-planning",
 		"output/06-launch",
 		"output/07-iteration",
 		"output/08-incidents",

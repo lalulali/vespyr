@@ -15,11 +15,11 @@ const path = require('path');
 
 // Determine document type based on its directory path
 function getDocType(relPath) {
-  if (relPath.includes('00-discovery')) return 'discovery';
-  if (relPath.includes('01-research')) return 'research';
-  if (relPath.includes('02-strategy')) return 'strategy';
-  if (relPath.includes('03-architecture')) return 'architecture';
-  if (relPath.includes('04-planning')) return 'planning';
+  if (relPath.includes('01-discovery')) return 'discovery';
+  if (relPath.includes('02-research')) return 'research';
+  if (relPath.includes('03-strategy')) return 'strategy';
+  if (relPath.includes('04-architecture')) return 'architecture';
+  if (relPath.includes('05-planning')) return 'planning';
   if (relPath.includes('06-launch')) return 'launch';
   if (relPath.includes('07-iteration')) return 'iteration';
   if (relPath.includes('08-incidents')) return 'incident';
