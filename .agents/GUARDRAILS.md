@@ -130,5 +130,10 @@ Thinking agents (@founder, @architect, @product-manager, @product-designer, @tec
 - **Exception:** Only use `IsArtifact: true` for system-defined planning mode artifacts (`task.md`, `implementation_plan.md`, `walkthrough.md`) that are designed to be intercepted and managed by the IDE's internal planning engine.
 - This prevents the Antigravity harness from redirecting standard project documents into the IDE's internal private app data folders.
 
+## Step Tracking
 
-
+- Each step file includes `begin` and `complete` calls to `node .agents/scripts/step_tracker.js`. Agents must run them via `@executor`.
+- The tracker reads `.agents/config.yaml` for `step_tracking` mode (`off` | `silent` | `verbose`). In `off` mode the script exits immediately — 0 output, 0 files written.
+- **Never skip the tracker calls** even in `off` mode. The script self-governs based on config. Skipping breaks audit continuity when the mode is later enabled.
+- Drift warnings are soft — the tracker logs them but never blocks. Continue the step regardless.
+- To inspect step compliance: `node .agents/scripts/step_tracker.js audit --skill {skill}` → writes `artifacts/output/step-audit-report.md`.

@@ -17,6 +17,8 @@ output_contract:
 Focused Socratic stress-test for plan viability. Lighter than full `/grill-me` — targets loopholes and blind spots specifically.
 
 ## Guiding principles
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill shape-up --step 4`
+
 - **One question at a time.** Wait for each answer before the next.
 - **Take a position.** Don't say "that's interesting." Say "this is weak because..." or "this works because..." and state what would change your mind.
 - **Challenge the plan, not the person.** The goal is a stronger plan, not a defeated user.
@@ -66,3 +68,5 @@ Stress-test findings: confirmed strengths, identified weaknesses, and open quest
 - **Reads:** direct — structured draft (< 200 lines)
 - **Writes:** none
 - **Direct:** pure Socratic reasoning
+
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill shape-up --step 4`

@@ -20,6 +20,7 @@ Resolve open questions and lock decisions. Every gap and stress-test finding bec
 Close the loop on every open item. No silent assumptions survive this step — everything is either decided or explicitly deferred with rationale.
 
 ## Process
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill shape-up --step 5`
 
 ### Present the open items
 Compile from steps 3 and 4:
@@ -67,3 +68,5 @@ All open items resolved or explicitly deferred. Decision log written to memory.
 - **Writes:** @writer for `active-decisions.md`
 - **Memory:** @memory-controller for decision log entries
 - **Direct:** decision reasoning is pure analysis
+
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill shape-up --step 5`

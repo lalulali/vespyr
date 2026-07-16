@@ -20,6 +20,7 @@ Systematic gap detection on the structured draft. Find what's missing, weak, or 
 Produce a gap report that tells the user exactly what needs attention before this idea is design-ready.
 
 ## Process
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill shape-up --step 3`
 
 ### Completeness check
 Verify the structured draft covers all required elements:
@@ -65,3 +66,5 @@ Gap report presented to user. Each gap has: description, severity, and suggested
 - **Reads:** @reader if research artifacts exist (3+ files, potentially > 500 lines total); direct for small files
 - **Writes:** none
 - **Direct:** gap reasoning is pure analysis
+
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill shape-up --step 3`

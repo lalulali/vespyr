@@ -19,6 +19,8 @@ Detect existing artifacts and determine the shaping context. This step decides h
 Establish what the user is bringing and what prior work exists. Set context variables that subsequent steps use to adapt their behavior.
 
 ## Process
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill shape-up --step 1`
+
 1. `@memory-controller load founder [shape-up — {concept}]` — seed project context.
 2. Check pipeline state via `@executor`:
    ```bash
@@ -49,3 +51,5 @@ Context state established for use in subsequent steps.
 - **Reads:** direct — artifact existence checks (< 10 lines each)
 - **Runs:** @executor for orchestrator_state.js status
 - **Direct:** routing logic is pure reasoning
+
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill shape-up --step 1`

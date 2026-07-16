@@ -1,0 +1,10 @@
+# Vespyr Agent System Configuration
+# This file is part of the agent system, not project output.
+# It exists from install and covers the full lifecycle (discovery → retro).
+# Edit manually — never generated or overwritten by orchestrator_state.js.
+
+# Step Tracker — controls step-level audit breadcrumbs
+# off     — script called but exits immediately; 0 output, 0 files written (default)
+# silent  — writes breadcrumbs to artifacts/output/step-audit.json; no agent output
+# verbose — writes breadcrumbs + prints one-liner to agent stdout per step transition
+step_tracking: verbose

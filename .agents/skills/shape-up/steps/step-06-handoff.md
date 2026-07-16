@@ -17,6 +17,8 @@ output_contract:
 Write the shaped brief and hand off to the next skill.
 
 ## Output artifact
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill shape-up --step 6`
+
 `artifacts/output/00-discovery/shaped-brief.md` containing: Problem Statement, Proposed Solution, Target User, Key Assumptions (verified/plausible/unverified), Scope In (v1), Scope Out (non-goals), Constraints (with rationale), Key Decisions (reference active-decisions.md), Open Questions, Recommended Next Step, and Shaping Context.
 
 ## Handoff routing
@@ -36,3 +38,5 @@ node .agents/scripts/orchestrator_state.js complete --agent founder --artifact 0
 - **Writes:** @writer for shaped-brief.md
 - **Runs:** @executor for orchestrator_state.js complete
 - **Memory:** @memory-controller for active-decisions and session-write
+
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill shape-up --step 6`
