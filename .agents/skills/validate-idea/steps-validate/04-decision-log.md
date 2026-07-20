@@ -21,6 +21,7 @@ Write resolved decisions to persistent memory. The Socratic session produces imp
 Persist every resolved branch decision, contradiction resolution, and verdict so future agents can build on this foundation.
 
 ## Process
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill validate-idea-validate --step 4`
 For each resolved item, write to active decisions:
 
 ```
@@ -50,3 +51,5 @@ Decisions persisted to `active-decisions.md`. Verdict reaffirmed or revised with
 ## Delegation
 - **Reads:** none
 - **Writes:** @writer for active-decisions.md
+
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill validate-idea-validate --step 4`

@@ -17,6 +17,8 @@ output_contract:
 
 Final review, architect phase gate, Kanban seeding, and handoff to develop.
 
+
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill design-create --step 6`
 ## Design review gate
 - All acceptance criteria trace back to user stories?
 - Edge cases covered and testable?
@@ -76,3 +78,5 @@ Load `develop` to proceed.
 - **Reads:** none
 - **Writes:** @writer for product-spec.md, design.md, and product-spec.html
 - **Runs:** @executor for orchestrator_state.js complete
+
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill design-create --step 6`

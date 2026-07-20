@@ -16,6 +16,8 @@ output_contract:
 
 `@technical-writer` updates project documentation for the shipped feature.
 
+
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill develop --step 9`
 ## Goal
 Ensure the feature is documented for both developers and end users. APIs, configs, and interfaces must be discoverable.
 
@@ -40,3 +42,5 @@ None — documentation is important but non-blocking. If the writer identifies a
 ## Delegation
 - **Reads:** @reader for feature code, ADRs, and user stories
 - **Writes:** @writer for docs/ updates, README, and changelog
+
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill develop --step 9`

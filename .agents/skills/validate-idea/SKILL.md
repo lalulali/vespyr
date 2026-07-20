@@ -7,7 +7,7 @@ description: Stress-test product concepts before research. Supports create/edit/
 
 ## Mode selection
 First, detect the user's intent:
-- **Create mode** → no `artifacts/output/00-discovery/idea-brief.md` exists
+- **Create mode** → no `artifacts/output/01-discovery/idea-brief.md` exists
 - **Edit mode** → brief exists, user wants to refine it
 - **Validate mode** → brief exists, user wants to stress-test it (this is the Socratic mode)
 
@@ -20,8 +20,8 @@ If unclear, ask: "Are you starting a new idea, refining an existing brief, or st
 
 ## Prerequisites
 - Create mode: none (this is the entry point)
-- Edit mode: `artifacts/output/00-discovery/idea-brief.md` exists
-- Validate mode: `artifacts/output/00-discovery/idea-brief.md` exists
+- Edit mode: `artifacts/output/01-discovery/idea-brief.md` exists
+- Validate mode: `artifacts/output/01-discovery/idea-brief.md` exists
 
 ## Halt conditions
 - @founder issues KILL verdict (create mode)
@@ -30,9 +30,9 @@ If unclear, ask: "Are you starting a new idea, refining an existing brief, or st
 
 ## State machine integration
 At start: `node .agents/scripts/orchestrator_state.js status`
-At end: `node .agents/scripts/orchestrator_state.js complete --agent founder --artifact 00-discovery/idea-brief.md`
+At end: `node .agents/scripts/orchestrator_state.js complete --agent founder --artifact 01-discovery/idea-brief.md`
 
 ## Done when
-- Brief written to `artifacts/output/00-discovery/idea-brief.md`
+- Brief written to `artifacts/output/01-discovery/idea-brief.md`
 - Verdict recorded (GO / PIVOT / KILL)
 - Handoff to next phase is unambiguous

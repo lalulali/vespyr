@@ -20,6 +20,7 @@ Initialize the validation session. Load project context and determine the user's
 Establish the validation environment: load memory, check for prior artifacts, and identify the user's context (startup/company/personal) and product maturity (greenfield/brownfield).
 
 ## Process
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill validate-idea-create --step 1`
 1. `@memory-controller load founder [idea validation]` — seed project context. If memory files don't exist yet (new project), proceed without context.
 2. Check `artifacts/output/` for prior validation briefs or design docs.
 3. Ask: **What's your context?** (startup / company / personal)
@@ -43,3 +44,5 @@ Context mode and maturity stored for use in subsequent steps.
 - **Reads:** direct — single context file (< 500 lines)
 - **Writes:** none
 - **Direct:** founder reasoning is direct (no delegation needed for session setup)
+
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill validate-idea-create --step 1`

@@ -17,6 +17,8 @@ output_contract:
 
 Second round: deeper questions, premise challenge, value synthesis, framework application.
 
+
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill validate-idea-create --step 5`
 ## Q5: Observation
 **Ask:** "Have you watched someone struggle with this problem? What surprised you?"
 
@@ -84,3 +86,5 @@ Qualified answers for all relevant Qs, synthesized value proposition, premise ag
 - **Reads:** direct — brief (< 200 lines)
 - **Writes:** none
 - **Direct:** pure Socratic reasoning; no file writes
+
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill validate-idea-create --step 5`

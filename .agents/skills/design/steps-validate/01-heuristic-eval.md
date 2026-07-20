@@ -16,6 +16,8 @@ output_contract:
 
 Evaluate the product spec against Nielsen's 10 usability heuristics.
 
+
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill design-validate --step 1`
 ## Goal
 Identify usability issues in the current design before they reach implementation.
 
@@ -39,10 +41,12 @@ Identify usability issues in the current design before they reach implementation
 🔴 Fail — must be fixed before development
 
 ## Output
-`artifacts/output/01-research/ux-research-report.md` — heuristic scorecard with issues per screen.
+`artifacts/output/02-research/ux-research-report.md` — heuristic scorecard with issues per screen.
 
 Use template `.agents/templates/research/ux-research-report-template.md`.
 
 ## Delegation
 - **Reads:** @reader for product-spec and screen states
 - **Writes:** @writer for heuristic evaluation report
+
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill design-validate --step 1`

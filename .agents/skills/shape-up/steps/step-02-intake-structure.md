@@ -33,10 +33,10 @@ Load and incorporate based on what step-01 detected:
 
 | Context | Load | Focus |
 |---|---|---|
-| `hasIdeaBrief` | `00-discovery/idea-brief.md` | Refine existing framing |
-| `hasValidation` | `00-discovery/validation-brief.md` | Incorporate premises + verdict |
-| `hasResearch` | `01-research/{market,competitive,user-personas}-analysis.md` | Map findings → assumption status |
-| `isReshape` | `00-discovery/shaped-brief.md` (+ research if present) | Revise with new evidence |
+| `hasIdeaBrief` | `01-discovery/idea-brief.md` | Refine existing framing |
+| `hasValidation` | `01-discovery/validation-brief.md` | Incorporate premises + verdict |
+| `hasResearch` | `02-research/{market,competitive,user-personas}-analysis.md` | Map findings → assumption status |
+| `isReshape` | `01-discovery/shaped-brief.md` (+ research if present) | Revise with new evidence |
 
 For each:
 1. Extract relevant signals (premises, findings, validated/invalidated assumptions).

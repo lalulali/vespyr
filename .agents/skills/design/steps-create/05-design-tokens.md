@@ -17,6 +17,8 @@ output_contract:
 
 Define visual design system: colors, typography, spacing, component states, responsive breakpoints.
 
+
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill design-create --step 5`
 ## Goal
 Produce `design.md` as the visual source of truth. Engineering agents read it at startup and implement to spec, not to guess.
 
@@ -51,3 +53,5 @@ Theme combinations:
 ## Delegation
 - **Reads:** direct — screen states (single reference in context)
 - **Writes:** @writer for design.md
+
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill design-create --step 5`

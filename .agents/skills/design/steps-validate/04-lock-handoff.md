@@ -17,6 +17,8 @@ output_contract:
 
 Finalize the validation report, record findings, and route based on results.
 
+
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill design-validate --step 4`
 ## Goal
 Consolidate findings from heuristic eval, consistency check, and a11y review. Determine if the design passes or needs revision.
 
@@ -33,7 +35,7 @@ Based on findings:
 
 ## State machine
 ```bash
-node .agents/scripts/orchestrator_state.js complete --agent ux-researcher --artifact 01-research/ux-research-report.md
+node .agents/scripts/orchestrator_state.js complete --agent ux-researcher --artifact 02-research/ux-research-report.md
 node .agents/scripts/ensure_graph.js doc
 ```
 
@@ -56,3 +58,5 @@ Blockers: {critical unresolved issues, or "none"}
 - **Reads:** none
 - **Writes:** @writer for locked spec
 - **Runs:** @executor for orchestrator_state.js complete
+
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill design-validate --step 4`

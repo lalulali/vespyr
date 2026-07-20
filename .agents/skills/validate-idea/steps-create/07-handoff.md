@@ -17,19 +17,21 @@ output_contract:
 
 Write the validation brief and hand off to the next phase.
 
+
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill validate-idea-create --step 7`
 ## Output
-`artifacts/output/00-discovery/validation-brief.md` — use template `.agents/templates/discovery/validation-brief-template.md`
+`artifacts/output/01-discovery/validation-brief.md` — use template `.agents/templates/discovery/validation-brief-template.md`
 
 Include: context mode, problem statement, proposed solution, target user, Q1-Q7 responses, value proposition, premises, framework scores, alternatives, verdict, next action.
 
 ## State machine
 ```bash
-node .agents/scripts/orchestrator_state.js complete --agent founder --artifact 00-discovery/validation-brief.md
+node .agents/scripts/orchestrator_state.js complete --agent founder --artifact 01-discovery/validation-brief.md
 ```
 
 If the user chose to skip validation and go straight to exploration (producing `idea-brief.md` instead):
 ```bash
-node .agents/scripts/orchestrator_state.js complete --agent founder --artifact 00-discovery/idea-brief.md
+node .agents/scripts/orchestrator_state.js complete --agent founder --artifact 01-discovery/idea-brief.md
 ```
 
 ## Memory closeout
@@ -46,3 +48,5 @@ node .agents/scripts/orchestrator_state.js complete --agent founder --artifact 0
 - **Writes:** @writer for idea-brief.md / validation-brief.md
 - **Runs:** @executor for orchestrator_state.js complete
 - **Memory:** @memory-controller for active-decisions and session-write
+
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill validate-idea-create --step 7`

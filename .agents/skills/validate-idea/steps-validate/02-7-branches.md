@@ -17,6 +17,8 @@ output_contract:
 
 Walk the 7-branch Socratic decision tree. Each branch is a lens that stress-tests a different dimension of the brief.
 
+
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill validate-idea-validate --step 2`
 ## Goal
 For each of the 7 branches, ask the hardest single question and push for a concrete answer. This is the core of Socratic validation.
 
@@ -60,3 +62,5 @@ Push for: a measurable threshold and by-when date.
 - **Reads:** direct — brief and open questions already in context
 - **Writes:** none
 - **Direct:** pure Socratic reasoning; no file I/O
+
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill validate-idea-validate --step 2`

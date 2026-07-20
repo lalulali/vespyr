@@ -21,6 +21,7 @@ Revise the weak sections identified in the gap scan.
 Strengthen yellow and red sections. Don't rewrite — refine.
 
 ## Process
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill design-edit --step 3`
 For each gap, the responsible agent revises:
 
 - **PRD gap** → `@product-manager` refines scope, goals, or feature descriptions
@@ -40,3 +41,5 @@ Revised artifact sections, integrated into the existing documents.
 ## Delegation
 - **Reads:** direct — spec sections already in context
 - **Writes:** @writer for revised spec sections
+
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill design-edit --step 3`

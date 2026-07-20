@@ -20,6 +20,7 @@ Record completion, update state, and advance the phase.
 Finalize the development cycle: verify all completion criteria, write the state, and hand off to the next phase.
 
 ## Process
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill develop --step 10`
 1. Confirm all completion criteria are met:
    - All tasks in execution plan are complete
    - Code review passes with no blocking issues
@@ -60,3 +61,5 @@ Finalize the development cycle: verify all completion criteria, write the state,
 - **Writes:** @writer for develop-state.md
 - **Runs:** @executor for orchestrator_state.js complete and next
 - **Memory:** @memory-controller for lessons, decisions, blockers, session-write
+
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill develop --step 10`

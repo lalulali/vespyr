@@ -21,6 +21,7 @@ Frame the idea in structured terms before stress-testing. Turn the raw problem/s
 Structure the idea so the diagnostic questions have clear targets.
 
 ## Process
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill validate-idea-create --step 3`
 `@founder` frames the idea in these terms:
 
 1. **Problem statement** — one sentence. What's broken and who's affected?
@@ -52,3 +53,5 @@ Framed idea (4 components) + question routing decision.
 - **Reads:** direct — single brief-in-progress (< 200 lines)
 - **Writes:** none
 - **Direct:** pure reasoning step; single small document
+
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill validate-idea-create --step 3`

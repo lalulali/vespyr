@@ -21,6 +21,7 @@ Cross-screen and cross-artifact consistency validation.
 Find inconsistencies: one screen's button says "Save" and another says "Submit", or a user story references a state that doesn't exist in the spec.
 
 ## Process
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill design-validate --step 2`
 `@product-designer` checks:
 
 1. **Cross-screen consistency** — Same elements look and behave identically across screens? Navigation patterns consistent?
@@ -34,8 +35,10 @@ Find inconsistencies: one screen's button says "Save" and another says "Submit",
 - **Minor** — cosmetic inconsistency
 
 ## Output
-Consistency report appended to `artifacts/output/01-research/ux-research-report.md` with findings mapped to screens/stories.
+Consistency report appended to `artifacts/output/02-research/ux-research-report.md` with findings mapped to screens/stories.
 
 ## Delegation
 - **Reads:** direct — heuristic results and spec already in context
 - **Writes:** @writer for consistency check report
+
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill design-validate --step 2`

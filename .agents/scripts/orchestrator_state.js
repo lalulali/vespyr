@@ -97,7 +97,28 @@ function readState() {
   // Source of truth: YAML. Fallback: JSON.
   const yamlState = readYaml();
   if (yamlState) return yamlState;
-  if (!fs.existsSync(STATE_FILE)) return null;
+  if (!fs.existsSync(STATE_FILE)) {
+    // Auto-initialize if missing, to prevent "No pipeline state found" errors.
+    try {
+      const name = path.basename(process.cwd());
+      const state = createInitialState(name, 'startup', 'full-team');
+      writeState(state);
+      
+      // Pre-create project-context.md under artifacts/memory/
+      const memoryDir = path.join(process.cwd(), 'artifacts', 'memory');
+      if (!fs.existsSync(memoryDir)) {
+        fs.mkdirSync(memoryDir, { recursive: true });
+      }
+      const projectContextFile = path.join(memoryDir, 'project-context.md');
+      if (!fs.existsSync(projectContextFile)) {
+        const content = `# Project Context\n\n## Identity\nUser Nickname: User\n\n## CORE\nProject: ${name} (startup)\nStack: None\nPhase: ${state.current_phase}\nSprint: none\nBlockers: 0\nSquad: full-team\n`;
+        fs.writeFileSync(projectContextFile, content, 'utf8');
+      }
+      return state;
+    } catch (e) {
+      return null;
+    }
+  }
   try {
     return JSON.parse(fs.readFileSync(STATE_FILE, 'utf8'));
   } catch (e) {

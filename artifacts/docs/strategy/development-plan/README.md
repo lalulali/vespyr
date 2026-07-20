@@ -261,6 +261,8 @@ The "1-day ECC repackage" pattern is insufficient. Personas that don't clear eit
 | `09-risk-register.md` | Consolidated risk register (41 risks, single source) | 103 |
 | `10-implementation-specs.md` | Full JS code for 14 scripts: sync-entry-points, validate_frontmatter, merge_customization, memory prefetch, auto_graph, graph_query, telemetry_surface, witness, self_learn, delegation_audit, qa_check, worktree, goal_check, automation | 1078 |
 | `11-phase-6-loop-engineering.md` | Loop Engineering: `/goal` primitive + automations + loop state (v2.1) | 130 |
+| `12-step-tracker.md` | Step Tracker — debug-mode step enforcement audit breadcrumbs | 153 |
+| `13-token-effective-mode.md` | Quick Mode — token-effective discussion mode (ponytail-inspired) | ~170 |
 
 ---
 

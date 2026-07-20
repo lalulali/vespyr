@@ -17,6 +17,8 @@ output_contract:
 
 Define user personas from research data. Personas drive user stories and screen design.
 
+
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill design-create --step 2`
 ## Goal
 Create concrete, named personas that represent the target users. Personas make requirements user-centered instead of feature-centered.
 
@@ -56,3 +58,5 @@ If in `semi-autonomous` mode and `FeatureDesignInteraction` is not `false`:
 ## Delegation
 - **Reads:** direct — research summaries (< 3 files, < 500 lines total)
 - **Writes:** @writer for personas output
+
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill design-create --step 2`

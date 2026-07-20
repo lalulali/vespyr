@@ -61,8 +61,8 @@ Return a concise, premium status card:
 
 ### Artifact Progress
 {For each phase (validation, exploration, design, development), list all required artifacts from pipeline-state.json's artifacts registry, indicating whether they exist and their active version number, e.g.:
-- 00-discovery/validation-brief.md: [Exists ✅ (Version: X)] or [Missing ❌]
-- 01-research/market-analysis.md: [Exists ✅ (Version: Y)] or [Missing ❌]
+- 01-discovery/validation-brief.md: [Exists ✅ (Version: X)] or [Missing ❌]
+- 02-research/market-analysis.md: [Exists ✅ (Version: Y)] or [Missing ❌]
 }
 
 ### Memory Health

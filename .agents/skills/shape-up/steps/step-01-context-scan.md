@@ -27,10 +27,10 @@ Establish what the user is bringing and what prior work exists. Set context vari
    node .agents/scripts/orchestrator_state.js status
    ```
 3. Scan for existing artifacts:
-   - `artifacts/output/00-discovery/validation-brief.md` → set `hasValidation = true`
-   - `artifacts/output/00-discovery/idea-brief.md` → set `hasIdeaBrief = true`
-   - `artifacts/output/00-discovery/shaped-brief.md` → set `isReshape = true`
-   - `artifacts/output/01-research/market-analysis.md` → set `hasResearch = true` (check all 3 research files)
+   - `artifacts/output/01-discovery/validation-brief.md` → set `hasValidation = true`
+   - `artifacts/output/01-discovery/idea-brief.md` → set `hasIdeaBrief = true`
+   - `artifacts/output/01-discovery/shaped-brief.md` → set `isReshape = true`
+   - `artifacts/output/02-research/market-analysis.md` → set `hasResearch = true` (check all 3 research files)
 4. Report context to user:
    > "I found [X artifacts]. Here's how I'll adapt the shaping process: [adaptation summary]."
 

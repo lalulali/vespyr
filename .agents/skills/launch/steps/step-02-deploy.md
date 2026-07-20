@@ -16,6 +16,8 @@ output_contract:
 
 Deploy the feature to production.
 
+
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill launch --step 2`
 ## Agent invocation
 `@devops-engineer` prepares and executes deployment:
 
@@ -46,3 +48,5 @@ Deploy the feature to production.
 - **Reads:** none
 - **Writes:** none
 - **Runs:** @executor for deployment commands (@devops-engineer)
+
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill launch --step 2`

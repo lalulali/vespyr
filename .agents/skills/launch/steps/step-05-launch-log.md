@@ -16,6 +16,8 @@ output_contract:
 
 Write the final launch report, record completion, and close the session.
 
+
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill launch --step 5`
 ## Launch retrospective
 `@product-manager` conducts a quick launch retro:
 - What went well in the launch process?
@@ -65,3 +67,5 @@ node .agents/scripts/orchestrator_state.js complete --agent product-manager --ar
 - **Reads:** none
 - **Writes:** @writer for launch-log.md
 - **Runs:** @executor for orchestrator_state.js complete
+
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill launch --step 5`

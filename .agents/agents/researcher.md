@@ -181,6 +181,19 @@ The controller returns filtered context (~1,000 tokens). Do NOT read memory file
 **Status:** active
 ```
 
+
+### Pipeline Bookkeeping (NON-NEGOTIABLE)
+
+After all deliverables are saved and memory writes are complete:
+
+1. **Orchestrator completion** — always run (or request `@executor` to run):
+   ```
+   node .agents/scripts/orchestrator_state.js complete --agent researcher --artifact <relative-path-to-artifact>
+   ```
+2. **Step tracker** — if executing a skill with step files, run the `begin` and `complete` calls shown in each step file. The tracker self-governs based on `.agents/config.yaml` `step_tracking` mode (`off` exits immediately).
+
+Never skip these calls. They are required for pipeline state continuity.
+
 ## Research tools
 
 Use these tools in order:

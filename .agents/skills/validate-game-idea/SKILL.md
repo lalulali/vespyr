@@ -228,7 +228,7 @@ Every verdict includes one concrete **next action** — a specific real-world st
 
 ## Output
 
-`artifacts/output/00-discovery/validation-brief.md`
+`artifacts/output/01-discovery/validation-brief.md`
 
 Use the template: `.agents/templates/discovery/game-validation-brief-template.md`
 
@@ -274,12 +274,12 @@ Then run `next` to confirm the current phase expects validation work.
 
 For the validation brief this skill produces, run via `@executor`:
 ```bash
-node .agents/scripts/orchestrator_state.js complete --agent founder --artifact 00-discovery/validation-brief.md
+node .agents/scripts/orchestrator_state.js complete --agent founder --artifact 01-discovery/validation-brief.md
 ```
 
 If the user chose to skip validation and go straight to exploration (producing an `idea-brief.md` instead), record that:
 ```bash
-node .agents/scripts/orchestrator_state.js complete --agent founder --artifact 00-discovery/idea-brief.md
+node .agents/scripts/orchestrator_state.js complete --agent founder --artifact 01-discovery/idea-brief.md
 ```
 
 This records the artifact, fires `agent_invoke` telemetry, and updates the pipeline history.

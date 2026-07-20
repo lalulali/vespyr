@@ -16,9 +16,9 @@ Takes a semi-cooked idea — a plan, pitch, doc, or set of notes — and shapes 
 ## Context detection
 No explicit modes. The skill checks what artifacts exist and adapts:
 - **Nothing exists** → full shaping from user input
-- **Validation brief exists** (`00-discovery/validation-brief.md`) → incorporates premises, skips re-framing
-- **Research artifacts exist** (`01-research/*.md`) → synthesizes findings into the brief
-- **Shaped brief already exists** (`00-discovery/shaped-brief.md`) → re-shape mode (post-research re-run)
+- **Validation brief exists** (`01-discovery/validation-brief.md`) → incorporates premises, skips re-framing
+- **Research artifacts exist** (`02-research/*.md`) → synthesizes findings into the brief
+- **Shaped brief already exists** (`01-discovery/shaped-brief.md`) → re-shape mode (post-research re-run)
 
 ## Prerequisites
 None. This is a flexible entry point.
@@ -37,7 +37,7 @@ None. This is a flexible entry point.
 - User abandons shaping mid-flow (decisions logged, partial brief saved)
 
 ## Output artifacts
-- `artifacts/output/00-discovery/shaped-brief.md`
+- `artifacts/output/01-discovery/shaped-brief.md`
 - `artifacts/memory/active-decisions.md` (appended)
 
 ## Skill chain
@@ -46,5 +46,5 @@ None. This is a flexible entry point.
 
 ## State & memory integration
 At start, via `@executor`: `node .agents/scripts/orchestrator_state.js status`
-At end: `node .agents/scripts/orchestrator_state.js complete --agent founder --artifact 00-discovery/shaped-brief.md`
+At end: `node .agents/scripts/orchestrator_state.js complete --agent founder --artifact 01-discovery/shaped-brief.md`
 **Memory:** Final step closes with `@memory-controller session-write` — mandatory per GUARDRAILS §Session Continuity.

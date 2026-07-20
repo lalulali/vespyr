@@ -17,6 +17,8 @@ output_contract:
 
 Generate alternatives and deliver the verdict. This is the decision point.
 
+
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill validate-idea-create --step 6`
 ## Alternatives
 Generate 2-3 distinct approaches:
 
@@ -59,3 +61,5 @@ Verdict (GO/PIVOT/KILL) with rationale, alternatives assessment, and next action
 - **Reads:** direct — brief (< 200 lines)
 - **Writes:** none
 - **Direct:** pure reasoning; verdict is conversational
+
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill validate-idea-create --step 6`

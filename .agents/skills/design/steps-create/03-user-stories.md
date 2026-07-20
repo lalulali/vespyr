@@ -17,6 +17,8 @@ output_contract:
 
 Write exhaustive, testable user stories from the validated PRD. These are the engineering contract.
 
+
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill design-create --step 3`
 ## Goal
 Every PRD feature must have ≥1 user story. Every user story must have acceptance criteria. Stories must be testable by QA.
 
@@ -48,3 +50,5 @@ node .agents/scripts/orchestrator_state.js complete --agent product-manager --ar
 ## Delegation
 - **Reads:** direct — personas + spec-kernel (< 3 files, < 500 lines)
 - **Writes:** @writer for user-stories.md
+
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill design-create --step 3`

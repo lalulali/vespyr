@@ -132,8 +132,8 @@ Thinking agents (@founder, @architect, @product-manager, @product-designer, @tec
 
 ## Step Tracking
 
-- Each step file includes `begin` and `complete` calls to `node .agents/scripts/step_tracker.js`. Agents must run them via `@executor`.
+- Each step file includes `begin` and `complete` calls to `node .agents/scripts/step_tracker.js`. Agents must run them via `@executor` (or directly if they have bash permission).
 - The tracker reads `.agents/config.yaml` for `step_tracking` mode (`off` | `silent` | `verbose`). In `off` mode the script exits immediately — 0 output, 0 files written.
-- **Never skip the tracker calls** even in `off` mode. The script self-governs based on config. Skipping breaks audit continuity when the mode is later enabled.
+- **Never skip the tracker calls** even when `step_tracking` is `off`. The script self-governs based on config — skipping calls breaks audit continuity when the user later enables tracking.
 - Drift warnings are soft — the tracker logs them but never blocks. Continue the step regardless.
 - To inspect step compliance: `node .agents/scripts/step_tracker.js audit --skill {skill}` → writes `artifacts/output/step-audit-report.md`.

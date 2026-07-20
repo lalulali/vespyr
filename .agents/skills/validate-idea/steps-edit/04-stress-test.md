@@ -21,6 +21,7 @@ Re-stress-test the revised sections to confirm they hold up.
 Apply the premise challenge and framework test to the revised content. The revision may have fixed one weakness but exposed another.
 
 ## Process
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill validate-idea-edit --step 4`
 1. **Re-run premises** on the revised sections:
    - "Based on the revisions, here are the premises that must hold. Do you still agree?"
    - If new information was added, surface new premises.
@@ -42,3 +43,5 @@ Re-validated brief with stress-test results.
 - **Reads:** direct — revised brief already in context
 - **Writes:** none
 - **Direct:** pure Socratic reasoning
+
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill validate-idea-edit --step 4`

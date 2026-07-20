@@ -16,6 +16,8 @@ output_contract:
 
 Validate the production deployment with smoke tests.
 
+
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill launch --step 3`
 ## Goal
 Confirm the deployed feature works in production. Catch deployment issues before users do.
 
@@ -44,3 +46,5 @@ Smoke test identifies a critical flow failure. Rollback and resolve before retry
 - **Reads:** none
 - **Writes:** @writer for smoke-test-results.md
 - **Runs:** @executor for smoke test commands
+
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill launch --step 3`

@@ -17,6 +17,8 @@ output_contract:
 
 Activate the Kanban board. This is a gate — development cannot start until the PM confirms the backlog and the tech-lead activates tasks.
 
+
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill develop --step 4`
 ## Goal
 PM confirms the prioritized backlog is correct and aligned with sprint deadlines. Tech-lead activates tasks by moving them to "To Do" on the Kanban board.
 
@@ -41,3 +43,5 @@ PM does not sign off. Re-scope with `@product-manager` before continuing.
 ## Delegation
 - **Reads:** direct — kanban.md + execution-plan.md (2 files < 500 lines total)
 - **Writes:** @writer for updated kanban.md
+
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill develop --step 4`

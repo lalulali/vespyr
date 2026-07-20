@@ -27,6 +27,7 @@ Confirm the architecture (or strategy specs if architecture was bypassed) suppor
 - Are there missing interfaces or structural risks?
 
 ## Process
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill develop --step 3`
 1. `@tech-lead` reads architecture artifacts and user stories.
 2. Cross-checks capabilities (CAP-N) against architectural support.
 3. Flags missing interfaces, structural risks, or feasibility issues.
@@ -41,3 +42,5 @@ Review notes in `artifacts/output/04-planning/` (inline with execution-plan prep
 ## Delegation
 - **Reads:** @reader for architecture artifacts and strategy specs
 - **Writes:** @writer for review notes
+
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill develop --step 3`

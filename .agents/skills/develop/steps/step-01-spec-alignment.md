@@ -33,6 +33,7 @@ Load and cross-check every strategy artifact against the user stories. Confirm a
 - All files in `artifacts/output/03-architecture/` (if they exist)
 
 ## Process
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill develop --step 1`
 1. Read every file in the inputs list. If any file > 1000 words, invoke `@reader` to summarize.
 2. Cross-check ACs against the spec-kernel capabilities (CAP-1, CAP-2, ...).
 3. Confirm all edge cases and scope boundaries are defined.
@@ -48,3 +49,5 @@ Any spec gap unfilled after 2 CR cycles. Escalate to `@founder`.
 - **Reads:** @reader for spec files (5+ artifacts across 02-strategy/ and 03-architecture/)
 - **Writes:** @writer for spec-alignment-check.md
 - **Direct I/O:** reading SPEC.md directly permitted (< 100 lines, agent contract)
+
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill develop --step 1`

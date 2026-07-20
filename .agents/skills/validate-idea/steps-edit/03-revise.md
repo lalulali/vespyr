@@ -21,6 +21,7 @@ Revise the weak sections identified in the gap scan.
 Strengthen yellow and red sections by asking targeted follow-up questions. Don't rewrite — refine.
 
 ## Process
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill validate-idea-edit --step 3`
 For each red/yellow section, `@founder` asks one targeted question:
 
 - **Problem is vague** → "You said [problem]. Can you describe one specific instance where this caused real pain? What happened and what was the cost?"
@@ -40,3 +41,5 @@ Revised brief sections, integrated into the existing document.
 ## Delegation
 - **Reads:** direct — brief sections already in context
 - **Writes:** direct — targeted edits < 50 lines to single file
+
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill validate-idea-edit --step 3`

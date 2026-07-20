@@ -20,7 +20,8 @@ Load the current brief and establish the edit baseline.
 Read the existing brief, understand its current state, and confirm what the user wants to change.
 
 ## Process
-1. Read `artifacts/output/00-discovery/validation-brief.md` (or `idea-brief.md` if validation-brief doesn't exist).
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill validate-idea-edit --step 1`
+1. Read `artifacts/output/01-discovery/validation-brief.md` (or `idea-brief.md` if validation-brief doesn't exist).
 2. If > 1000 words, invoke `@reader` to summarize.
 3. Ask the user: **"What specifically do you want to refine? The problem statement, the user, the solution, or the verdict?"**
 
@@ -40,3 +41,5 @@ Loaded brief with user's edit targets identified.
 ## Delegation
 - **Reads:** direct — single brief file (< 500 lines)
 - **Writes:** none
+
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill validate-idea-edit --step 1`

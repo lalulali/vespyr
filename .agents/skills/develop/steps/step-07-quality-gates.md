@@ -16,6 +16,8 @@ output_contract:
 
 QA is a hard gate. Security and performance are conditional gates. They can run in parallel once the dev loop completes.
 
+
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill develop --step 7`
 ## 7a. QA (hard gate — cannot be skipped)
 
 `@qa-engineer`:
@@ -76,3 +78,5 @@ Invoke `@performance-engineer` when the feature:
 - **Writes:** @writer for quality reports and findings-report.md
 - **Runs:** @executor for orchestrator_state.js complete
 - **Memory:** @memory-controller for blockers-and-risks (Critical/High findings)
+
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill develop --step 7`

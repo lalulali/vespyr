@@ -20,6 +20,7 @@ Load the current design artifacts and confirm edit targets.
 Read the existing PRD, user stories, and product spec. Understand current state before revising.
 
 ## Process
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill design-edit --step 1`
 1. Read `artifacts/output/02-strategy/SPEC.md` (spec kernel — if PRD changes, kernel must be updated too)
 2. Read `artifacts/output/02-strategy/requirements.md`
 3. Read `artifacts/output/02-strategy/user-stories.md`
@@ -36,3 +37,5 @@ If any core artifact is missing (no PRD, no spec), flag immediately — the edit
 ## Delegation
 - **Reads:** @reader for product-spec.md, design.md, and user-stories.md
 - **Writes:** none
+
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill design-edit --step 1`

@@ -15,6 +15,8 @@ output_contract:
 
 Collect quantitative data. Invoke telemetry and operational metrics to surface the top 3 hot paths from the last 30 days.
 
+
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill retro --step 1`
 ## Goal
 Gather hard numbers — kanban state, cycle times, code review cycles, bug counts, deployment success rate. Data anchors the retro in facts, not feelings.
 
@@ -47,3 +49,5 @@ Surfaces the top 3 most frequent agent paths, most common failure points, and hi
 - **Reads:** none
 - **Writes:** none
 - **Runs:** @executor for telemetry_surface.js hot-paths
+
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill retro --step 1`

@@ -15,7 +15,7 @@ Takes a validated idea (from `validate-idea`) and runs the research pipeline. Sp
 Before starting, check for a validation brief:
 
 **Path A — Has validation brief (recommended):**
-- [ ] `artifacts/output/00-discovery/validation-brief.md` exists with a GO verdict
+- [ ] `artifacts/output/01-discovery/validation-brief.md` exists with a GO verdict
 - Skip Phase 1 (Synthesize) entirely. Go straight to Phase 2 research. Downstream agents will use `validation-brief.md` directly.
 
 **Path B — No validation brief (direct entry):**
@@ -23,7 +23,7 @@ Before starting, check for a validation brief:
 - Consider suggesting `validate-idea` if the idea seems unvalidated.
 
 **Path C — Has shaped brief:**
-- [ ] `artifacts/output/00-discovery/shaped-brief.md` exists (from `shape-up`)
+- [ ] `artifacts/output/01-discovery/shaped-brief.md` exists (from `shape-up`)
 - The shaped brief's **unverified assumptions** and **open questions** become the focused research agenda. Research agents prioritize validating/invalidating these specific items rather than running a broad-spectrum sweep.
 - Skip Phase 1 (Synthesize) entirely. Go straight to Phase 2 research.
 - After research completes, recommend re-running `shape-up` to incorporate findings before proceeding to `design`.
@@ -49,7 +49,8 @@ Invoke `@founder` to take the concept and produce a structured brief. Before sta
 - Identify fatal assumptions for researchers to validate
 - Decide which optional agents to summon (§5 of workflow.md)
 
-**Output:** `artifacts/output/00-discovery/idea-brief.md`
+**Output:** `artifacts/output/01-discovery/idea-brief.md`
+- Run completion command: `node .agents/scripts/orchestrator_state.js complete --agent founder --artifact 01-discovery/idea-brief.md`
 
 **Gate check:** Before proceeding to Phase 2, verify:
 - [ ] Brief contains a one-sentence summary
@@ -75,7 +76,11 @@ Invoke `@researcher market` to validate market potential:
 - **Personal mode:** Lightweight — is anyone else building this? What's the landscape?
 
 **Input:** validation brief or idea brief
-**Output:** `artifacts/output/01-research/market-analysis.md`
+**Output:** `artifacts/output/02-research/market-analysis.md`
+**Completion:** Run `@executor` command immediately when complete:
+```bash
+node .agents/scripts/orchestrator_state.js complete --agent researcher --artifact 02-research/market-analysis.md
+```
 
 #### Step 2b: Competitor Analysis ⟨parallel with 2a⟩
 Invoke `@researcher competitive` to map the landscape:
@@ -90,7 +95,11 @@ Invoke `@researcher competitive` to map the landscape:
 - **Personal mode:** What open source or free tools exist? What's different about your approach?
 
 **Input:** validation brief or idea brief
-**Output:** `artifacts/output/01-research/competitive-analysis.md`
+**Output:** `artifacts/output/02-research/competitive-analysis.md`
+**Completion:** Run `@executor` command immediately when complete:
+```bash
+node .agents/scripts/orchestrator_state.js complete --agent researcher --artifact 02-research/competitive-analysis.md
+```
 
 #### Step 2c: User Research ⟨after 2b⟩
 Invoke `@user-researcher` to validate user needs:
@@ -104,8 +113,12 @@ Invoke `@user-researcher` to validate user needs:
 - **Company mode:** Stakeholder interviews, internal workflow analysis, team pain points
 - **Personal mode:** Self-research — your own pain points and use cases
 
-**Input:** validation brief or idea brief + `artifacts/output/01-research/competitive-analysis.md`
-**Output:** `artifacts/output/01-research/user-personas.md`
+**Input:** validation brief or idea brief + `artifacts/output/02-research/competitive-analysis.md`
+**Output:** `artifacts/output/02-research/user-personas.md`
+**Completion:** Run `@executor` command immediately when complete:
+```bash
+node .agents/scripts/orchestrator_state.js complete --agent user-researcher --artifact 02-research/user-personas.md
+```
 
 ### Phase 3: Founder Review (gate)
 
@@ -120,10 +133,10 @@ After all research completes, review findings against the brief:
 - Maximum 1 pivot before committing to a direction
 
 ## Output artifacts
-- `artifacts/output/00-discovery/idea-brief.md` (only if no validation brief existed)
-- `artifacts/output/01-research/market-analysis.md`
-- `artifacts/output/01-research/competitive-analysis.md`
-- `artifacts/output/01-research/user-personas.md`
+- `artifacts/output/01-discovery/idea-brief.md` (only if no validation brief existed)
+- `artifacts/output/02-research/market-analysis.md`
+- `artifacts/output/02-research/competitive-analysis.md`
+- `artifacts/output/02-research/user-personas.md`
 
 ## Handoff to design
 When exploration is complete:
@@ -174,10 +187,10 @@ Then run `next` to confirm the current phase expects exploration work.
 Record each artifact produced, in this order. The first one transitions the project out of validation; the rest record research outputs.
 
 ```bash
-node .agents/scripts/orchestrator_state.js complete --agent founder --artifact 00-discovery/idea-brief.md
-node .agents/scripts/orchestrator_state.js complete --agent researcher --artifact 01-research/market-analysis.md
-node .agents/scripts/orchestrator_state.js complete --agent researcher --artifact 01-research/competitive-analysis.md
-node .agents/scripts/orchestrator_state.js complete --agent user-researcher --artifact 01-research/user-personas.md
+node .agents/scripts/orchestrator_state.js complete --agent founder --artifact 01-discovery/idea-brief.md
+node .agents/scripts/orchestrator_state.js complete --agent researcher --artifact 02-research/market-analysis.md
+node .agents/scripts/orchestrator_state.js complete --agent researcher --artifact 02-research/competitive-analysis.md
+node .agents/scripts/orchestrator_state.js complete --agent user-researcher --artifact 02-research/user-personas.md
 ```
 
 Skip any artifact that was not produced (e.g., if the user came in with a validation brief, `idea-brief.md` may be skipped).

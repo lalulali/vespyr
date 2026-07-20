@@ -21,17 +21,18 @@ Lock the brief and hand off. The validation session is complete.
 Finalize the brief with the Socratic findings, update the state machine, write session memory, and route to the next step.
 
 ## Process
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill validate-idea-validate --step 5`
 1. Append a "## Socratic Validation" section to the brief with:
    - 7-branch scorecard summary
    - Cross-branch contradictions found and resolved
    - Verdict reaffirmation or revision
    - Open questions that remain
 
-2. Lock the brief: `artifacts/output/00-discovery/validation-brief.md` is now the canonical record.
+2. Lock the brief: `artifacts/output/01-discovery/validation-brief.md` is now the canonical record.
 
 ## State machine
 ```bash
-node .agents/scripts/orchestrator_state.js complete --agent founder --artifact 00-discovery/validation-brief.md
+node .agents/scripts/orchestrator_state.js complete --agent founder --artifact 01-discovery/validation-brief.md
 ```
 
 ## Memory closeout
@@ -54,3 +55,5 @@ node .agents/scripts/orchestrator_state.js complete --agent founder --artifact 0
 - **Reads:** none
 - **Writes:** @writer for locked brief
 - **Runs:** @executor for orchestrator_state.js complete
+
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill validate-idea-validate --step 5`

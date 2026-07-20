@@ -17,6 +17,8 @@ output_contract:
 
 Define screen-by-screen specs: purpose, content, layout, states, transitions.
 
+
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill design-create --step 4`
 ## Goal
 Produce detailed screen specifications that engineers can implement without guessing. Every screen has defined states and interactions.
 
@@ -50,3 +52,5 @@ If analytics instrumentation is needed, invoke `@data-analyst`:
 ## Delegation
 - **Reads:** direct — user stories + personas (< 3 files)
 - **Writes:** @writer for screen-states output
+
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill design-create --step 4`

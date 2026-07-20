@@ -16,6 +16,8 @@ output_contract:
 
 Synthesize all reviews into actionable improvements. Write the retro digest.
 
+
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill retro --step 4`
 ## Goal
 Convert observations into concrete, owned, deadline-bound action items. An observation without an action item is a complaint.
 
@@ -48,3 +50,5 @@ node .agents/scripts/orchestrator_state.js complete --agent product-manager --ar
 ## Delegation
 - **Reads:** none
 - **Writes:** @writer for retro-digest.md
+
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill retro --step 4`

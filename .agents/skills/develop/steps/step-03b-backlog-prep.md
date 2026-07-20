@@ -16,6 +16,8 @@ output_contract:
 
 `@tech-lead` reviews stories, plans the build sequence, and evaluates parallelism for multi-developer execution.
 
+
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill develop --step 3`
 ## Goal
 Produce the execution plan: task breakdown, estimates, dependencies, and parallelism decisions. This document gates all development work.
 
@@ -47,3 +49,5 @@ Dependency chain that forces serial execution on a time-critical feature. Escala
 - **Reads:** @reader for user stories, kanban board, and ADRs
 - **Writes:** @writer for execution-plan.md
 - **Runs:** @executor for orchestrator_state.js complete
+
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill develop --step 3`

@@ -15,6 +15,8 @@ output_contract:
 
 Verify all pre-launch gates have passed. Any red item blocks launch.
 
+
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill launch --step 1`
 ## Agent invocation
 `@product-manager` assesses launch readiness across all dimensions:
 
@@ -52,3 +54,5 @@ Any red item on the readiness checklist. Resolve before proceeding. Max 2 readin
 ## Delegation
 - **Reads:** @reader for QA signoff, security audit, and performance review reports
 - **Writes:** @writer for readiness-check.md
+
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill launch --step 1`

@@ -16,6 +16,8 @@ output_contract:
 
 Scan memory for recurring patterns — episodes that appear 3+ times across 2+ agents. Surface repeated issues, not one-off incidents.
 
+
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill retro --step 2`
 ## Goal
 Find structural patterns in agent notes, lessons learned, and memory files. A single bug is a fix. The same bug across 3 cycles is a process failure.
 
@@ -47,3 +49,5 @@ Flag when an episode appears:
 ## Delegation
 - **Reads:** @reader for artifacts/memory/ (multiple files)
 - **Writes:** none
+
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill retro --step 2`

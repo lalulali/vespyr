@@ -21,6 +21,7 @@ Write revised artifacts back and close the session.
 Persist updated design documents, record decisions, and hand off.
 
 ## Process
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill design-edit --step 4`
 1. Write revised files back to `artifacts/output/02-strategy/`.
 2. Update dates and revision notes.
 3. Re-run the design review gate from create mode step 06 to confirm all checks pass.
@@ -55,3 +56,5 @@ Load `develop` to proceed. If revisions changed scope significantly, re-offer th
 - **Reads:** none
 - **Writes:** @writer for finalized spec files
 - **Runs:** @executor for orchestrator_state.js complete
+
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill design-edit --step 4`

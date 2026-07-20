@@ -526,8 +526,8 @@ function printSummary(targetDir, selections) {
 		`    3. Use @help-me for a tailored navigation report`,
 		`    4. Use /squad to view or switch team presets`,
 		``,
-		`  Docs: https://github.com/anomalyco/vespyr`,
-		`  Report issues: https://github.com/anomalyco/vespyr/issues`,
+		`  Docs: https://github.com/lalulali/vespyr`,
+		`  Report issues: https://github.com/lalulali/vespyr/issues`,
 		`============================================================`,
 	);
 
@@ -871,7 +871,9 @@ async function installHarnesses(targetDir, selections, method) {
 			if (!dryRun) {
 				fs.rmSync(targetCommands, { recursive: true, force: true });
 			} else {
-				logDry(`Would remove commands folder from ${agentsTarget} because opencode is not selected`);
+				logDry(
+					`Would remove commands folder from ${agentsTarget} because opencode is not selected`,
+				);
 			}
 		}
 	}
@@ -1156,7 +1158,7 @@ async function performFreshInstall(targetDir, flags) {
 				}
 			} else if (step === "name") {
 				userNickname = await askQuestion(
-					"What should the agent squad call you? (e.g., Christian, Sarah)",
+					"What should the agent squad call you? (e.g., Lyor, Giovanni)",
 					userNickname || "User",
 				);
 				userNickname =
@@ -1384,7 +1386,7 @@ async function performReconfigure(targetDir, flags) {
 		);
 		if (fs.existsSync(contextPath)) {
 			userNickname = await askQuestion(
-				"What should the agent squad call you? (e.g., Christian, Sarah)",
+				"What should the agent squad call you? (e.g., Lyor, Giovanni)",
 				userNickname,
 			);
 			userNickname = userNickname.replace(/[^a-zA-Z0-9\s\-_.]/g, "") || "User";
@@ -1826,7 +1828,10 @@ async function executeMigration(targetDir) {
 
 function performSyncDocs(targetDir) {
 	const syncScript = path.join(
-		targetDir, ".agents", "scripts", "sync-entry-points.js",
+		targetDir,
+		".agents",
+		"scripts",
+		"sync-entry-points.js",
 	);
 
 	if (fs.existsSync(syncScript)) {
@@ -1834,10 +1839,16 @@ function performSyncDocs(targetDir) {
 		execSync(`node "${syncScript}"`, { cwd: targetDir, stdio: "inherit" });
 
 		const validateScript = path.join(
-			targetDir, ".agents", "scripts", "validate_frontmatter.js",
+			targetDir,
+			".agents",
+			"scripts",
+			"validate_frontmatter.js",
 		);
 		if (fs.existsSync(validateScript)) {
-			execSync(`node "${validateScript}"`, { cwd: targetDir, stdio: "inherit" });
+			execSync(`node "${validateScript}"`, {
+				cwd: targetDir,
+				stdio: "inherit",
+			});
 		}
 		return;
 	}
@@ -1851,7 +1862,8 @@ function performSyncDocs(targetDir) {
 		.readFileSync(path.join(commandsDir, "scaffold-agents.md"), "utf8")
 		.replace(/\{Project Name\}/g, path.basename(targetDir));
 	const agentMd = fs.readFileSync(
-		path.join(commandsDir, "scaffold-agent.md"), "utf8",
+		path.join(commandsDir, "scaffold-agent.md"),
+		"utf8",
 	);
 
 	const agentsPath = path.join(targetDir, "AGENTS.md");
@@ -1950,7 +1962,7 @@ Examples:
 			);
 		} else {
 			logError(
-				`Installation failed: ${err.message}. Run with --dry-run to debug, or report at github.com/anomalyco/vespyr/issues.`,
+				`Installation failed: ${err.message}. Run with --dry-run to debug, or report at github.com/lalulali/vespyr/issues.`,
 			);
 		}
 

@@ -16,6 +16,8 @@ output_contract:
 
 Update shared memory, compact old entries, and close the session.
 
+
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill retro --step 5`
 ## 5a. Memory updates
 `@product-manager` writes findings to memory via `@memory-controller`:
 
@@ -112,3 +114,5 @@ Blockers: {any new blockers, or "none"}
 - **Reads:** none
 - **Writes:** none
 - **Runs:** @executor for witness.js check and memory compaction
+
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill retro --step 5`

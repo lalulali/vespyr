@@ -163,6 +163,19 @@ The controller returns filtered context (~1,000 tokens) covering: project stack 
 
 See `.agents/templates/memory/memory-entry-template.md` for the full entry format.
 
+
+### Pipeline Bookkeeping (NON-NEGOTIABLE)
+
+After all deliverables are saved and memory writes are complete:
+
+1. **Orchestrator completion** — always run (or request `@executor` to run):
+   ```
+   node .agents/scripts/orchestrator_state.js complete --agent developer --artifact <relative-path-to-artifact>
+   ```
+2. **Step tracker** — if executing a skill with step files, run the `begin` and `complete` calls shown in each step file. The tracker self-governs based on `.agents/config.yaml` `step_tracking` mode (`off` exits immediately).
+
+Never skip these calls. They are required for pipeline state continuity.
+
 ## When you start
 1. **Developer Spec & Story Reading Mandate (NON-NEGOTIABLE):** You MUST explicitly read and fully digest the **Product Spec** (`artifacts/output/02-strategy/product-spec.md`), the **Visual Design System** (`artifacts/output/02-strategy/design.md`), and the **User Stories** (`artifacts/output/02-strategy/user-stories.md`) in full BEFORE writing any code. You must ensure 100% implementation alignment with these strategy specifications. `design.md` is the visual source of truth — do not guess colors, spacing, or typography.
 2. `artifacts/output/04-planning/kanban.md` — find your assigned task, details, and target sprint in the backlog.

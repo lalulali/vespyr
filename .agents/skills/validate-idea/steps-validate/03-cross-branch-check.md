@@ -21,6 +21,7 @@ Scan for contradictions across branches. A brief can pass each branch individual
 Find where one branch's answer undermines another's. Cross-branch contradictions are the most dangerous because they're invisible in siloed review.
 
 ## Process
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill validate-idea-validate --step 3`
 `@founder` checks these cross-branch pairs:
 
 1. **Product vs. Cost** — Does the required scope match the assumed timeline and team?
@@ -45,3 +46,5 @@ Cross-branch contradiction map with resolution status per pair.
 - **Reads:** direct — branch outputs already in context
 - **Writes:** none
 - **Direct:** pure reasoning on in-context data
+
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill validate-idea-validate --step 3`

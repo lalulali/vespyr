@@ -21,13 +21,14 @@ Write the revised brief back and close the session.
 Persist the updated brief, record decisions, and hand off.
 
 ## Process
-1. Write the revised brief back to `artifacts/output/00-discovery/validation-brief.md` (or `idea-brief.md`).
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill validate-idea-edit --step 5`
+1. Write the revised brief back to `artifacts/output/01-discovery/validation-brief.md` (or `idea-brief.md`).
 2. Update the date and revision note in the brief header.
 3. Ensure all red sections from the gap scan are now yellow or green (or marked "unresolved").
 
 ## State machine
 ```bash
-node .agents/scripts/orchestrator_state.js complete --agent founder --artifact 00-discovery/validation-brief.md
+node .agents/scripts/orchestrator_state.js complete --agent founder --artifact 01-discovery/validation-brief.md
 ```
 
 ## Memory closeout
@@ -42,3 +43,5 @@ node .agents/scripts/orchestrator_state.js complete --agent founder --artifact 0
 - **Reads:** none
 - **Writes:** @writer for finalized idea-brief.md
 - **Runs:** @executor for orchestrator_state.js complete
+
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill validate-idea-edit --step 5`

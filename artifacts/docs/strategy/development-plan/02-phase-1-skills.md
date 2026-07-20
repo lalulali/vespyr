@@ -1142,6 +1142,153 @@ The skill checks what artifacts exist and adapts — no mode selector needed:
 
 ---
 
+## F1.29 — QA / Tester Acceptance Criteria Enrichment & Multi-Scenario Testing
+
+**Source:** User requirement (QA enhancement) | **Theme:** T1, T2
+
+### Problem
+
+Currently, the Product Manager (`@product-manager`) is solely responsible for creating acceptance criteria, which often misses real-world edge cases, user behavior variations, or technical constraints. When the QA/Tester (`@qa-engineer`) runs tests, they follow existing specs rather than actively identifying unthought-of scenarios or enriching the acceptance criteria. Furthermore, there is no structured distinction between granular feature-level testing and end-to-end full-cycle testing workflows.
+
+### Target
+
+1. **QA-Driven Acceptance Criteria Enrichment**: Modify the QA/test skill to mandate that the `@qa-engineer` actively reviews the PRD/acceptance criteria, runs exploratory sweeps to identify missing scenarios (e.g., edge cases, network failures, session timeouts, validation boundary limits), and appends them back to the project's acceptance criteria in the PRD (under an `Enriched by QA` section).
+2. **Multi-Scenario Testing Framework**: Restructure test execution into two distinct tracks:
+   - **Feature Testing**: Micro-level testing focusing on specific user stories, API contracts, unit validations, and component isolated UI behavior.
+   - **Full-Cycle Testing**: Macro-level testing focusing on end-to-end user journeys (e.g., signup -> checkout -> notification -> refund), cross-service integration, data consistency, and system recovery.
+
+### Proposed content
+
+#### Folder structure
+```
+.agents/skills/test/
+├── SKILL.md                              # ~55 lines: router + scenario selector
+└── steps/
+    ├── step-01-exploratory-enrichment.md # ~50 lines: review PRD/AC, storm assumptions, output missing scenarios
+    ├── step-02a-feature-test.md          # ~60 lines: execute unit/component tests in isolation
+    ├── step-02b-fullcycle-test.md        # ~60 lines: execute end-to-end integration workflows
+    ├── step-03-criteria-backport.md      # ~45 lines: append newly discovered scenarios to PRD spec
+    └── step-04-completion.md             # ~40 lines: write test-report.md and update status
+```
+
+### Why this matters
+
+1. **Shared ownership of quality.** PMs define baseline expectations, but testers expand and catch edge cases before and during implementation.
+2. **Deeper test coverage.** Distinguishing isolated feature tests from multi-step full-cycle workflows ensures complex integration paths are not neglected.
+3. **Traceability.** Discovered edge cases are formalized back into the requirements document, establishing a feedback loop from QA back to Product.
+
+### Checklist
+
+- [ ] F1.29.1 — Update `@qa-engineer` persona (`.agents/agents/qa-engineer.md`) to own the "Acceptance Criteria Enrichment" contract and define "Feature" vs. "Full-Cycle" testing methodologies.
+- [ ] F1.29.2 — Restructure `.agents/skills/test/` workflow to integrate Socratic gap discovery phase for the QA engineer to challenge initial PM acceptance criteria.
+- [ ] F1.29.3 — Implement separate step files for `steps/step-02a-feature-test.md` and `steps/step-02b-fullcycle-test.md` under `.agents/skills/test/`.
+- [ ] F1.29.4 — Implement automated template update for PRDs to include a standardized `## Acceptance Criteria (QA Enriched)` section, tracking edge cases captured during testing.
+- [ ] F1.29.5 — Create verification tests checking that QA fails the test stage if it cannot produce at least 3 newly discovered edge cases or fails to verify full-cycle user paths.
+
+---
+
+## F1.30 — New `/unpack-problem` Skill (Guided Problem-First Orchestration)
+
+**Source:** User requirement (pipeline gap) | **Theme:** T2
+
+### Problem
+
+There is a major pipeline gap for "Problem-First" entry. The existing starting points (`validate-idea`, `explore-idea`, `shape-up`) all assume the user already has a *solution* or *idea* in mind. If a user only has a *problem* (e.g., "users are dropping off at checkout step 2" or "freemium conversion is low") and wants to explore the problem space, discuss it without committing to a solution, or perform manual/facilitated research to design a solution from scratch, there is no harness entry point.
+
+### Target
+
+Create a new standalone guided skill `/unpack-problem` (facilitated by `@product-manager` and `@user-researcher`) that provides a structured problem-exploration workspace.
+This workflow enables the user to:
+1. **Intake & Define the Problem**: Describe a raw pain point, symptom, or business problem (rejecting solution-first thinking).
+2. **Guided Analysis Pathing**: Act as an orchestrator that guides the user through modular diagnostics (calling `/root-cause`, `/interview-kit`, `/empathy-map`, `/journey-map`, `/jtbd`).
+3. **Ideation & Handoff**: Synthesize insights and run ideation to draft candidate solution concepts. Outputs a structured `problem-space-brief.md` which acts as a valid input to `/validate-idea` or `/shape-up`.
+
+### Supported flows
+
+| Flow | Unpack-problem's Role |
+|---|---|
+| `/unpack-problem` -> `/explore-idea` | Problem-first research. Formulate interview kits, execute manual/AI research, then analyze. |
+| `/unpack-problem` -> `/validate-idea` | Transition from problem definition to testing a specific solution concept. |
+| `/unpack-problem` -> `/shape-up` | Direct bridge to shaping the chosen solution concept. |
+
+### Proposed content
+
+#### Folder structure
+```
+.agents/skills/unpack-problem/
+├── SKILL.md                              # ~55 lines: router + problem-first routing
+└── steps/
+    ├── step-01-problem-intake.md         # ~45 lines: intake pain points, enforce zero-solution framing
+    ├── step-02-modular-routing.md        # ~50 lines: direct user to run specific modular sub-skills
+    ├── step-03-synthesis-ideation.md     # ~55 lines: map problem findings to candidate solution concepts
+    └── step-04-brief-generation.md       # ~50 lines: write problem-space-brief.md and route to next skill
+```
+
+### Why this matters
+
+1. **Avoids building the wrong thing.** Forcing users to have an "idea" first promotes solution-bias. Exploring the problem space first ensures the solution targets root causes.
+2. **Cohesive guidance.** Unifies a set of disparate analysis techniques into a single, step-by-step product discovery workflow.
+
+### Checklist
+
+- [ ] F1.30.1 — Create `.agents/skills/unpack-problem/SKILL.md` (router and entry point config).
+- [ ] F1.30.2 — Create the step files in `.agents/skills/unpack-problem/steps/` detailing the intake, modular routing, synthesis, and handoff stages.
+- [ ] F1.30.3 — Add template `.agents/templates/discovery/problem-brief.md` for the output artifact.
+- [ ] F1.30.4 — Wire the output `problem-space-brief.md` into the prerequisite checks of `validate-idea/SKILL.md` and `shape-up/SKILL.md`.
+- [ ] F1.30.5 — Update `AGENTS.md` to list `/unpack-problem` as the starting workflow for problem-first discovery.
+
+---
+
+## F1.31 — Modular Design Thinking Skills (`/root-cause`, `/interview-kit`, `/empathy-map`, `/journey-map`, `/jtbd`)
+
+**Source:** User requirement (design thinking toolkit) | **Theme:** T2
+
+### Problem
+
+Users who already have an established problem definition but want to perform specific, isolated design thinking tasks (e.g., just generate user interview questions or just draft a user journey map) currently have no way to run those tools in isolation without entering a long, sequential multi-step workflow.
+
+### Target
+
+Introduce five highly specialized, standalone modular skills that can be invoked independently or run as sub-steps of `/unpack-problem`:
+1. `/root-cause`: Guides Root Cause Analysis using Socratic techniques (e.g., 5 Whys, Ishikawa/Fishbone diagrams). Outputs a `root-cause-analysis.md` report.
+2. `/interview-kit`: Constructs customer/user interview guides using scientific interview methodologies (e.g., "The Mom Test" rules to avoid confirmation bias, Jobs-to-be-Done query frameworks, active listening prompts). Outputs `user-interview-guide.md`.
+3. `/empathy-map`: Facilitates mapping user feelings, thoughts, and behaviors from manual observation data. Outputs `empathy-map.md`.
+4. `/journey-map`: Visualizes user touchpoints, emotional state transitions, and pain points over current workflows. Outputs `journey-map.md`.
+5. `/jtbd`: Formulates core Customer Jobs using the standard Jobs-to-be-Done template ("When... I want to... So I can..."). Outputs `jtbd-canvas.md`.
+
+### Proposed content
+
+#### Skill directory layout
+```
+.agents/skills/
+├── root-cause/
+│   └── SKILL.md                          # ~60 lines: guides Socratic 5-Whys/Fishbone
+├── interview-kit/
+│   └── SKILL.md                          # ~65 lines: builds guides based on Mom Test rules
+├── empathy-map/
+│   └── SKILL.md                          # ~55 lines: constructs empathy quadrant canvas
+├── journey-map/
+│   └── SKILL.md                          # ~65 lines: maps current-state journey steps
+└── jtbd/
+    └── SKILL.md                          # ~50 lines: defines job statements and outcomes
+```
+
+### Why this matters
+
+1. **Granular utility.** Users can use the agent as an ad-hoc facilitator for specific design exercises without pipeline overhead.
+2. **Modular reuse.** Outputs from these skills can be directly linked as inputs to other workflows (e.g., a standalone journey map becomes input for a `/shape-up` run).
+
+### Checklist
+
+- [ ] F1.31.1 — Create `.agents/skills/root-cause/SKILL.md` to facilitate Socratic 5-Whys and Fishbone diagram structuring.
+- [ ] F1.31.2 — Create `.agents/skills/interview-kit/SKILL.md` to automate the generation of bias-free user interview questions.
+- [ ] F1.31.3 — Create `.agents/skills/empathy-map/SKILL.md` to structure user observations into Empathy quadrants.
+- [ ] F1.31.4 — Create `.agents/skills/journey-map/SKILL.md` to capture user touchpoints and emotional friction.
+- [ ] F1.31.5 — Create `.agents/skills/jtbd/SKILL.md` to define Job Statements and Outcome Metrics.
+- [ ] F1.31.6 — Register all 5 skills under `AGENTS.md` Curated Workflows list.
+
+---
+
 ## Done when
 
 - [x] `develop`, `validate-idea`, `retro`, `design`, `launch` are all folders with `SKILL.md` (≤ 60 lines) + `steps/` (or `steps-create/-e/-v/`) directories
@@ -1167,6 +1314,9 @@ The skill checks what artifacts exist and adapts — no mode selector needed:
 - [x] `@reader`, `@writer`, `@executor` each have an `## Output-quality rubric` + `## Failure modes` section (F1.24.b.1); delegation blocks cite `delegation-policy.md` thresholds with a `direct_justified:` field (F1.24.b.2); CI flags boilerplate delegation (F1.24.b.3)
 - [x] Every step file has an `output_contract.citations` field (`required` or `not-required`) per F0.29; CI verifies the field is present
 - [x] `/shape-up` skill exists with SKILL.md router (≤ 60 lines) + 6 step files; cross-skill wiring in `explore-idea`, `design`, and `AGENTS.md` is complete; all four supported flows are structurally verified via `test-shape-up.mjs` (82/82 assertions)
+- [ ] `/test` skill restructured to separate feature and full-cycle test tracks; QA engineer enrichment flows verified.
+- [ ] `/unpack-problem` skill exists with SKILL.md router + 4 step files; output brief successfully routes to `/validate-idea` and `/shape-up`.
+- [ ] Modular design thinking skills (`/root-cause`, `/interview-kit`, `/empathy-map`, `/journey-map`, `/jtbd`) exist with independent `SKILL.md` facilitators and are registered in `AGENTS.md`.
 
 ## Risks
 

@@ -20,6 +20,7 @@ Surface every open question in the existing brief. This is the Socratic entry po
 Before stress-testing, catalog everything that's unverified, assumed, or unclear. The 7-branch tree needs a complete question inventory.
 
 ## Process
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill validate-idea-validate --step 1`
 `@founder` reads the entire brief and extracts:
 
 1. **Unverified claims** — statements presented as facts but lacking evidence.
@@ -44,3 +45,5 @@ A categorized inventory of open questions, ranked by severity (blocker / major /
 - **Reads:** direct — brief (< 200 lines)
 - **Writes:** none
 - **Direct:** pure reasoning on single small file
+
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill validate-idea-validate --step 1`

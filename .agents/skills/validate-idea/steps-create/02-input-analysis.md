@@ -17,6 +17,8 @@ output_contract:
 
 Parse the user's raw idea input. Clarify ambiguity before the diagnostic begins.
 
+
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill validate-idea-create --step 2`
 ## Goal
 Extract both the stated problem and the proposed solution. Push on vague answers. Don't proceed until you have both.
 
@@ -43,3 +45,5 @@ Don't move to Step 3 until you have both a **stated problem** and a **proposed s
 - **Reads:** direct — user input only (no file I/O)
 - **Writes:** none
 - **Direct:** pure reasoning step; no file operations
+
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill validate-idea-create --step 2`

@@ -16,6 +16,8 @@ output_contract:
 
 Post-launch monitoring — observe the feature in production.
 
+
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill launch --step 4`
 ## Goal
 Track core metrics against success criteria from the PRD. Catch anomalies before they become incidents.
 
@@ -42,3 +44,5 @@ Track core metrics against success criteria from the PRD. Catch anomalies before
 - **Reads:** none
 - **Writes:** @writer for monitoring report
 - **Runs:** @executor for monitoring commands
+
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill launch --step 4`

@@ -16,6 +16,8 @@ output_contract:
 
 Review execution quality, team process, product alignment, and architecture. Surface instinct candidates — patterns stable 30+ days with 2+ ADR refs that should become conventions.
 
+
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill retro --step 3`
 ## 3a. Execution Review
 `@tech-lead` reviews execution quality:
 - Were estimates accurate? Compare planned vs. actual for each task
@@ -61,3 +63,5 @@ After all reviews, identify patterns stable 30+ days with 2+ ADR references. The
 ## Delegation
 - **Reads:** @reader for memory files and ADR cross-references
 - **Writes:** none
+
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill retro --step 3`

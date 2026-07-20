@@ -17,6 +17,8 @@ output_contract:
 
 Produce architectural decisions and trade-off documentation. This step is conditional — it only runs if `ArchitectPhase: true` in `project-context.md`.
 
+
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill develop --step 2`
 ## Goal
 Design system architecture, select the tech stack, define data models, and document decisions in ADRs.
 
@@ -48,3 +50,5 @@ Architecture gap that breaks a user story's feasibility. Escalate to `@tech-lead
 ## Delegation
 - **Reads:** @reader for project context and existing artifacts
 - **Writes:** @writer for ADR files in 03-architecture/
+
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill develop --step 2`

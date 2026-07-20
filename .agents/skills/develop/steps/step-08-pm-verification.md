@@ -16,6 +16,8 @@ output_contract:
 
 `@product-manager` verifies the shipped feature against the original acceptance criteria. This is a gate — PM must accept before documentation and completion.
 
+
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill develop --step 8`
 ## Goal
 Confirm the feature meets all acceptance criteria, edge cases, and error states defined in the spec.
 
@@ -40,3 +42,5 @@ PM rejects 3 times. Escalate per the loop limit rules above.
 ## Delegation
 - **Reads:** direct — SPEC.md + user-stories.md (2 files < 500 lines, CAP-N verification)
 - **Writes:** none (this step produces a decision, not a file)
+
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill develop --step 8`

@@ -17,6 +17,8 @@ output_contract:
 
 Investigate technical unknowns before committing to production code. This step is optional — skip if no unknowns or risks were identified in step 3b.
 
+
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill develop --step 5`
 ## Goal
 De-risk the execution plan by prototyping, benchmarking, or researching identified unknowns. Produce a short findings document, not production code.
 
@@ -46,3 +48,5 @@ Spike reveals a fundamental infeasibility. Escalate to `@founder` for GO/PIVOT/K
 - **Reads:** direct for small spikes (1-3 files); @reader for codebase exploration (≥4 files)
 - **Writes:** @writer for spike-findings.md
 - **Memory:** @memory-controller for lessons, blockers, patterns
+
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill develop --step 5`

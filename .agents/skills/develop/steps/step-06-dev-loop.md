@@ -17,6 +17,8 @@ output_contract:
 
 The core implementation step. Write code, run tests, get reviewed, merge.
 
+
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill develop --step 6`
 ## Mode selection
 
 **Multi-developer mode** — if the execution plan has 2+ independent tasks:
@@ -113,3 +115,5 @@ Merged code on the working branch, updated kanban board.
 - **Writes:** @writer for source code, test files, commit messages
 - **Runs:** @executor for worktree setup, npm test, npm run lint, git merge
 - **Memory:** @memory-controller for developer notes
+
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill develop --step 6`

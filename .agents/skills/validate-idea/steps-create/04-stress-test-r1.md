@@ -17,6 +17,8 @@ output_contract:
 
 First round of Socratic diagnostic. Ask questions one at a time. Wait for each answer.
 
+
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill validate-idea-create --step 4`
 ## Guiding principles
 - **One question at a time.** Wait for each answer before the next.
 - **Push, then push again.** The first answer is polished; the real answer follows the second push.
@@ -63,3 +65,5 @@ If the user invokes the escape hatch after Q1+Q2, skip remaining Qs and proceed 
 - **Reads:** direct — brief (< 200 lines)
 - **Writes:** none
 - **Direct:** pure Socratic reasoning; no file writes
+
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill validate-idea-create --step 4`

@@ -17,6 +17,8 @@ output_contract:
 
 Validate the design against WCAG 2.2 AA accessibility standards.
 
+
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill design-validate --step 3`
 ## Goal
 Ensure the product is usable by people with disabilities. Catch a11y issues before they become code.
 
@@ -38,8 +40,10 @@ Ensure the product is usable by people with disabilities. Catch a11y issues befo
 🔴 Fail — blocks users, must be fixed before development
 
 ## Output
-A11y report appended to `artifacts/output/01-research/ux-research-report.md`.
+A11y report appended to `artifacts/output/02-research/ux-research-report.md`.
 
 ## Delegation
 - **Reads:** direct — screen states (single reference)
 - **Writes:** @writer for accessibility check report
+
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill design-validate --step 3`

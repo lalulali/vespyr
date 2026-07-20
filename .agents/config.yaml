@@ -7,4 +7,4 @@
 # off     — script called but exits immediately; 0 output, 0 files written (default)
 # silent  — writes breadcrumbs to artifacts/output/step-audit.json; no agent output
 # verbose — writes breadcrumbs + prints one-liner to agent stdout per step transition
-step_tracking: verbose
+step_tracking: off

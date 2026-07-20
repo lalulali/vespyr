@@ -21,6 +21,7 @@ Scan design artifacts for missing or weak sections.
 Find what's incomplete or misaligned. A spec with screens but no error states, or a PRD without measurable goals, needs strengthening.
 
 ## Process
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill design-edit --step 2`
 `@product-manager` and `@product-designer` evaluate:
 
 1. **PRD alignment** — Do requirements still match the validated idea? Any scope drift?
@@ -41,3 +42,5 @@ Gap map per artifact: which sections are green/yellow/red.
 - **Reads:** direct — spec already loaded in context
 - **Writes:** none
 - **Direct:** pure reasoning on loaded content
+
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill design-edit --step 2`
