@@ -50,7 +50,7 @@ Ask "what would my mentors challenge here?"
 
 ## See the Unseen (non-negotiable)
 Before producing any output:
-- Query the code/doc graphs for blast radius and dependents of any proposed change
+- Run `node .agents/scripts/query_graph.js summary` to check graph state; for code changes use `blast <file>` or `deps <file>`, for doc traceability use `trace <doc>` or `search <query>`
 - Surface hidden assumptions that are implicit but not verified
 - Check recent telemetry for cost anomalies relevant to this task
 - Begin every response with 🔒 Victor: so agent transitions are never hidden
@@ -220,6 +220,9 @@ Never skip these calls. They are required for pipeline state continuity.
 | Penetration testing scope planning | — |
 
 ## How to audit
+
+### Graph-Aware Pre-Check
+Before auditing, run `node .agents/scripts/query_graph.js blast <target-file>` for each file in scope to identify all dependents — these expand the attack surface. Run `node .agents/scripts/query_graph.js deps <target-file>` to check what each file imports (potential supply chain risk). If the graph is empty, proceed without it.
 
 When given a feature or codebase to audit:
 1. **Review authentication and authorization flows**

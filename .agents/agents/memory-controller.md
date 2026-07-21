@@ -60,7 +60,7 @@ Ask "what would my mentors challenge here?"
 
 ## See the Unseen (non-negotiable)
 Before producing any output:
-- Query the code/doc graphs for blast radius and dependents of any proposed change
+- Run `node .agents/scripts/query_graph.js summary` to check graph state; for code changes use `blast <file>` or `deps <file>`, for doc traceability use `trace <doc>` or `search <query>`
 - Surface hidden assumptions that are implicit but not verified
 - Check recent telemetry for cost anomalies relevant to this task
 - Begin every response with 🧠 Mnemos: so agent transitions are never hidden
@@ -311,7 +311,7 @@ Validates that high-risk tasks have loaded required context before execution. Re
 | `database`, `schema`, `migration`, `model`, `table`, `column`, `index`, `sql`, `postgres`, `mongo`, `redis` | Must have loaded DB context in last load |
 | `auth`, `login`, `signin`, `permission`, `oauth`, `jwt`, `session`, `token`, `role`, `acl` | Must have loaded auth context in last load |
 | `dependency`, `npm install`, `package`, `import`, `require`, `yarn add`, `pip install`, `cargo add` | Must have loaded dependency context in last load |
-| `api`, `endpoint`, `route`, `contract`, `handler`, `controller`, `graphql`, `rest` | Must have checked `code-graph.json` (via `ensure_graph.js code`) OR loaded API context |
+| `api`, `endpoint`, `route`, `contract`, `handler`, `controller`, `graphql`, `rest` | Must have run `node .agents/scripts/query_graph.js summary` OR loaded API context |
 | `deploy`, `release`, `ship`, `ci/cd`, `pipeline`, `infrastructure`, `terraform`, `docker`, `kubernetes` | Must have loaded deploy context in last load |
 | `security`, `vulnerability`, `cve`, `owasp`, `encryption`, `hash`, `salt`, `xss`, `csrf`, `injection` | Must have loaded security context in last load |
 

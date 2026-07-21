@@ -111,12 +111,14 @@ If contradictions found, present them to the user and ask which branch to revisi
 
 ### Step 5: Lock + handoff
 
-Append a summary block to artifacts/output/{phase}/grill-me-decisions.md with:
+Append a summary block to `artifacts/output/{current-phase}/grill-me-decisions.md` with:
 - Date
 - Branches covered
 - Number of decisions resolved
 - Cross-branch contradictions found
 - Handoff recommendation (e.g., "ready for /design" or "needs /validate-idea first")
+
+> **Path note:** `{current-phase}` maps to the active phase directory under `artifacts/output/` (e.g., `02-strategy`, `03-architecture`, `04-planning`). If the active phase is unknown, use `artifacts/memory/grill-me-decisions.md` as fallback.
 
 ## Output artifacts
 
@@ -125,8 +127,8 @@ Append a summary block to artifacts/output/{phase}/grill-me-decisions.md with:
 
 ## State machine integration
 
-At start: node .agents/scripts/orchestrator_state.js status
-At end: node .agents/scripts/orchestrator_state.js complete --agent grill-me --artifact grill-me-decisions.md
+At start: `@executor` runs `node .agents/scripts/orchestrator_state.js status`
+At end: `@executor` runs `node .agents/scripts/orchestrator_state.js complete --agent founder --artifact grill-me-decisions.md`
 
 ## Anti-patterns to avoid
 

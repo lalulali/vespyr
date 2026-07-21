@@ -1,5 +1,16 @@
 [
   {
+    "name": "brainstorming",
+    "description": "Select and apply brainstorming methods from a 60-method catalog — SCAMPER, Six Thinking Hats, Starbursting, and more",
+    "prerequisites": [],
+    "outputs": [
+      "artifacts/memory/agent-notes/founder-notes.md"
+    ],
+    "key_agents": [
+      "@founder"
+    ]
+  },
+  {
     "name": "code-graph",
     "description": "Codebase structural dependency mapper — initialize, view status, and run incremental updates for modified codebase files",
     "prerequisites": [],
@@ -40,10 +51,10 @@
     "name": "design",
     "description": "Defines product requirements from validated ideas, then produces detailed developer-ready specs. Supports create/edit/validate modes.",
     "prerequisites": [
-      "artifacts/output/01-discovery/validation-brief.md OR idea-brief.md",
-      "artifacts/output/02-research/market-analysis.md",
-      "artifacts/output/02-research/competitive-analysis.md",
-      "artifacts/output/02-research/user-personas.md"
+      "artifacts/output/01-discovery/validation-brief.md OR idea-brief.md OR shaped-brief.md",
+      "artifacts/output/02-research/market-analysis.md (optional if entering via shape-up with all assumptions verified)",
+      "artifacts/output/02-research/competitive-analysis.md (optional if entering via shape-up)",
+      "artifacts/output/02-research/user-personas.md (optional if entering via shape-up)"
     ],
     "outputs": [
       "artifacts/output/01-discovery/validation-brief.md",
@@ -51,43 +62,37 @@
       "artifacts/output/02-research/competitive-analysis.md",
       "artifacts/output/02-research/user-personas.md"
     ],
-    "key_agents": []
+    "key_agents": [
+      "@product-manager",
+      "@product-designer"
+    ]
   },
   {
     "name": "develop",
     "description": "Core MVP workflow — spec review, architecture, planning, implementation, QA, verification, and documentation",
     "prerequisites": [
-      "  artifacts/output/02-strategy/product-spec.md",
-      "  artifacts/output/02-strategy/requirements.md",
-      "  artifacts/output/02-strategy/user-stories.md"
+      "Spec-kernel exists at artifacts/output/02-strategy/ (see spec-kernel-template.md)",
+      "User stories in artifacts/output/02-strategy/user-stories.md"
     ],
     "outputs": [
-      "artifacts/output/02-strategy/product-spec.md",
-      "artifacts/output/02-strategy/requirements.md",
-      "artifacts/output/02-strategy/user-stories.md",
-      "artifacts/output/03-architecture/",
-      "artifacts/output/03-architecture/adr-NNN-",
       "artifacts/output/04-planning/execution-plan.md",
-      "artifacts/output/04-planning/kanban.md",
-      "artifacts/output/06-quality/findings-report.md",
-      "artifacts/output/06-quality/report.md"
+      "artifacts/output/02-strategy/",
+      "artifacts/output/02-strategy/user-stories.md",
+      "artifacts/output/05-execution/develop-state.md"
     ],
     "key_agents": [
-      "@mentions",
-      "@product-manager",
-      "@product-designer",
-      "@developer",
-      "@tech-lead",
-      "@architect",
-      "@founder",
-      "@developer-1",
-      "@code-reviewer",
-      "@developer-2",
-      "@developer-N",
-      "@qa-engineer",
-      "@security-engineer",
-      "@performance-engineer",
-      "@technical-writer"
+      "@tech-lead"
+    ]
+  },
+  {
+    "name": "discovery-report",
+    "description": "Compile design thinking and research outputs into a unified report with dynamic usability testing scoring",
+    "prerequisites": [],
+    "outputs": [
+      "artifacts/output/01-research/"
+    ],
+    "key_agents": [
+      "@product-manager"
     ]
   },
   {
@@ -109,6 +114,17 @@
       "@security-engineer",
       "@qa-engineer",
       "@developer"
+    ]
+  },
+  {
+    "name": "empathy-map",
+    "description": "Map user feelings, thoughts, sayings, and doings from observation data into an empathy quadrant canvas",
+    "prerequisites": [],
+    "outputs": [
+      "artifacts/output/01-research/empathy-map.md"
+    ],
+    "key_agents": [
+      "@user-researcher"
     ]
   },
   {
@@ -144,10 +160,16 @@
       "Skip Phase 1 (Synthesize) entirely. Go straight to Phase 2 research. Downstream agents will use validation-brief.md directly.",
       "*Path B — No validation brief (direct entry):**",
       "If the user skips validate-idea and comes here directly with a clear concept, run Phase 1 (founder synthesis) to produce idea-brief.md first.",
-      "Consider suggesting validate-idea if the idea seems unvalidated."
+      "Consider suggesting validate-idea if the idea seems unvalidated.",
+      "*Path C — Has shaped brief:**",
+      "  artifacts/output/01-discovery/shaped-brief.md exists (from shape-up)",
+      "The shaped brief's **unverified assumptions** and **open questions** become the focused research agenda. Research agents prioritize validating/invalidating these specific items rather than running a broad-spectrum sweep.",
+      "Skip Phase 1 (Synthesize) entirely. Go straight to Phase 2 research.",
+      "After research completes, recommend re-running shape-up to incorporate findings before proceeding to design."
     ],
     "outputs": [
       "artifacts/output/01-discovery/validation-brief.md",
+      "artifacts/output/01-discovery/shaped-brief.md",
       "artifacts/output/01-discovery/idea-brief.md",
       "artifacts/output/02-research/market-analysis.md",
       "artifacts/output/02-research/competitive-analysis.md",
@@ -167,7 +189,8 @@
       "If no artifact exists, run /validate-idea first to produce a brief"
     ],
     "outputs": [
-      "artifacts/memory/active-decisions.md"
+      "artifacts/memory/active-decisions.md",
+      "artifacts/memory/grill-me-decisions.md"
     ],
     "key_agents": []
   },
@@ -244,6 +267,28 @@
     ]
   },
   {
+    "name": "journey-map",
+    "description": "Visualize user touchpoints, emotional state transitions, and friction points across current workflows",
+    "prerequisites": [],
+    "outputs": [
+      "artifacts/output/01-research/journey-map.md"
+    ],
+    "key_agents": [
+      "@user-researcher"
+    ]
+  },
+  {
+    "name": "jtbd",
+    "description": "Formulate Jobs-to-be-Done statements and map How Might We opportunity questions in a single canvas",
+    "prerequisites": [],
+    "outputs": [
+      "artifacts/output/01-research/jtbd-hmw.md"
+    ],
+    "key_agents": [
+      "@product-manager"
+    ]
+  },
+  {
     "name": "kanban",
     "description": "Display and update the Kanban board — track task progress across phases",
     "prerequisites": [],
@@ -252,37 +297,23 @@
       "artifacts/memory/product-manager-notes.md"
     ],
     "key_agents": [
+      "@product-manager",
       "@developer-1",
       "@code-reviewer"
     ]
   },
   {
     "name": "launch",
-    "description": "Go-to-market coordination — release readiness, stakeholder alignment, launch orchestration, and post-launch monitoring",
+    "description": "Go-to-market coordination — release readiness, deployment, smoke testing, post-launch monitoring, and completion",
     "prerequisites": [
-      "  All tasks in artifacts/output/04-planning/execution-plan.md are complete",
-      "  Code review and QA passed",
-      "  PM signed off on the feature"
+      "All tasks in artifacts/output/04-planning/execution-plan.md are complete",
+      "Code review passed, QA validated, PM signed off",
+      "qa-signoff.md exists with GO/CONDITIONAL"
     ],
     "outputs": [
-      "artifacts/output/04-planning/execution-plan.md",
-      "artifacts/output/06-launch/release-readiness.md",
-      "artifacts/output/06-launch/go-nogo-decision.md",
-      "artifacts/output/06-launch/launch-log.md",
-      "artifacts/output/06-launch/post-launch-report.md",
-      "artifacts/output/06-launch/launch-retro.md"
+      "artifacts/output/04-planning/execution-plan.md"
     ],
-    "key_agents": [
-      "@product-manager",
-      "@security-engineer",
-      "@performance-engineer",
-      "@technical-writer",
-      "@devops-engineer",
-      "@data-analyst",
-      "@developer",
-      "@code-reviewer",
-      "@qa-engineer"
-    ]
+    "key_agents": []
   },
   {
     "name": "memory",
@@ -318,28 +349,29 @@
     ]
   },
   {
-    "name": "retro",
-    "description": "Post-cycle review — extract lessons, calibrate estimates, improve processes, compact memory, and update team knowledge",
+    "name": "research-plan",
+    "description": "Construct comprehensive research plans with goals, hypotheses, cohort definitions, methodology, and a 2-part interview guide (Profile + Behavioral)",
     "prerequisites": [],
     "outputs": [
-      "artifacts/output/04-planning/kanban.md",
-      "artifacts/output/08-incidents/",
-      "artifacts/output/09-retro/data-collection.md",
-      "artifacts/output/09-retro/execution-review.md",
-      "artifacts/output/09-retro/process-review.md",
-      "artifacts/output/09-retro/product-review.md",
-      "artifacts/output/09-retro/architecture-review.md",
-      "artifacts/output/09-retro/action-items.md",
-      "artifacts/memory/archive/YYYY-QN/",
-      "artifacts/memory/archive/index.json",
-      "artifacts/output/09-retro/archive-review.md",
-      "artifacts/memory/structural/doc-graph.json"
+      "artifacts/output/01-research/research-plan.md"
     ],
     "key_agents": [
-      "@product-manager",
-      "@tech-lead",
-      "@product-designer",
-      "@architect"
+      "@user-researcher"
+    ]
+  },
+  {
+    "name": "retro",
+    "description": "Post-cycle review — extract lessons, calibrate estimates, improve processes, compact memory, and update team knowledge",
+    "prerequisites": [
+      "Completed phase artifact (launch-log.md, incident-postmortem.md, or iteration report)",
+      "artifacts/memory/ directory with active entries"
+    ],
+    "outputs": [
+      "artifacts/output/09-retro/retro-state.md",
+      "artifacts/output/09-retro/"
+    ],
+    "key_agents": [
+      "@tech-lead"
     ]
   },
   {
@@ -347,7 +379,20 @@
     "description": "Standalone code review on current changes — outside the dev loop",
     "prerequisites": [],
     "outputs": [],
-    "key_agents": []
+    "key_agents": [
+      "@code-reviewer"
+    ]
+  },
+  {
+    "name": "root-cause",
+    "description": "Guide root cause analysis using 5 Whys and Ishikawa/Fishbone diagrams. Use when you need to find why a problem exists before jumping to solutions.",
+    "prerequisites": [],
+    "outputs": [
+      "artifacts/output/01-research/root-cause-analysis.md"
+    ],
+    "key_agents": [
+      "@product-manager"
+    ]
   },
   {
     "name": "round-table",
@@ -377,6 +422,25 @@
     ]
   },
   {
+    "name": "shape-up",
+    "description": "Structure and stress-test semi-cooked ideas into design-ready briefs. No prerequisites — works at any point in the pipeline.",
+    "prerequisites": [],
+    "outputs": [
+      "artifacts/output/01-discovery/shaped-brief.md",
+      "artifacts/memory/active-decisions.md"
+    ],
+    "key_agents": []
+  },
+  {
+    "name": "sprint-status",
+    "description": "Display and update the sprint-status.yaml pipeline state as a Kanban table",
+    "prerequisites": [],
+    "outputs": [
+      "artifacts/output/sprint-status.yaml"
+    ],
+    "key_agents": []
+  },
+  {
     "name": "squad",
     "description": "Show available agent squads, switch active squad, and initialize the team preset",
     "prerequisites": [],
@@ -402,10 +466,30 @@
   },
   {
     "name": "test",
-    "description": "Run tests and summarize failures — quick feedback without loading the full QA workflow",
+    "description": "Run tests, analyze failures, enrich acceptance criteria, and produce structured QA reports — supports feature and full-cycle testing",
     "prerequisites": [],
-    "outputs": [],
-    "key_agents": []
+    "outputs": [
+      "artifacts/output/06-quality/test-report.md"
+    ],
+    "key_agents": [
+      "@qa-engineer"
+    ]
+  },
+  {
+    "name": "unpack-problem",
+    "description": "Problem-first exploration before solution ideation — supports guided, automated, and combination modes. Facilitated by @product-manager and @user-researcher.",
+    "prerequisites": [],
+    "outputs": [
+      "artifacts/output/01-research/problem-space-brief.md",
+      "artifacts/output/01-research/root-cause-analysis.md",
+      "artifacts/output/01-research/empathy-map.md",
+      "artifacts/output/01-research/journey-map.md",
+      "artifacts/output/01-research/jtbd-hmw.md"
+    ],
+    "key_agents": [
+      "@product-manager",
+      "@user-researcher"
+    ]
   },
   {
     "name": "validate-game-idea",
@@ -420,10 +504,27 @@
   },
   {
     "name": "validate-idea",
-    "description": "Stress-test an idea before investing research cycles — Socratic diagnostic for startup, company, and personal contexts",
+    "description": "Stress-test product concepts before research. Supports create/edit/validate modes.",
+    "prerequisites": [
+      "Edit mode: artifacts/output/01-discovery/idea-brief.md exists",
+      "Validate mode: artifacts/output/01-discovery/idea-brief.md exists",
+      "Problem-first entry: artifacts/output/01-research/problem-space-brief.md from /unpack-problem is accepted as equivalent to idea-brief.md for create mode — the problem brief becomes the idea to validate"
+    ],
+    "outputs": [
+      "artifacts/output/01-discovery/idea-brief.md",
+      "artifacts/output/01-research/problem-space-brief.md"
+    ],
+    "key_agents": [
+      "@founder"
+    ]
+  },
+  {
+    "name": "validation-patterns",
+    "description": "Apply validation methods from a 30-method catalog — smoke tests, concierge MVPs, five-second tests, and more",
     "prerequisites": [],
     "outputs": [
-      "artifacts/output/01-discovery/validation-brief.md"
+      "artifacts/memory/agent-notes/founder-notes.md",
+      "artifacts/output/01-research/validation-results.md"
     ],
     "key_agents": [
       "@founder"

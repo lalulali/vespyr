@@ -20,6 +20,8 @@ QA is a hard gate. Security and performance are conditional gates. They can run 
 > **Tracker:** `node .agents/scripts/step_tracker.js begin --skill develop --step 7`
 ## 7a. QA (hard gate — cannot be skipped)
 
+**Auto-execution rule (non-negotiable):** QA runs automatically without asking the user. The swarm does NOT block on human input — QA proceeds automatically. Humans review test results asynchronously via `report.md`. Do NOT ask "should I run tests?" or "want me to write tests?" — just run them.
+
 `@qa-engineer`:
 - Writes and runs comprehensive tests against acceptance criteria (AC-H, AC-U, AC-E)
 - If bugs found, feeds back to developer for fixes
@@ -37,6 +39,8 @@ node .agents/scripts/orchestrator_state.js complete --agent qa-engineer --artifa
 ```
 
 ## 7b. Security Audit (conditional)
+
+**Auto-decision rule (non-negotiable):** Determine whether this gate applies by checking the spec-kernel and user stories yourself. Do NOT ask the user. If the spec mentions auth, PII, payments, or external APIs → invoke `@security-engineer` automatically. If the spec contains none of these → skip this gate silently and note "Security gate skipped — no auth/sensitive-data/API surface detected."
 
 Invoke `@security-engineer` when the feature touches:
 - Authentication, authorization, or session management
@@ -60,6 +64,8 @@ If any Critical or High findings:
 ```
 
 ## 7c. Performance Review (conditional)
+
+**Auto-decision rule (non-negotiable):** Determine whether this gate applies by checking the spec-kernel and user stories yourself. Do NOT ask the user. If the spec mentions core user paths, large data sets, or performance SLAs → invoke `@performance-engineer` automatically. If the spec contains none of these → skip this gate silently and note "Performance gate skipped — no core-path/data/SLA surface detected."
 
 Invoke `@performance-engineer` when the feature:
 - Impacts core user paths (page load, key interactions)

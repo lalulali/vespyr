@@ -11,14 +11,21 @@ Takes a semi-cooked idea — a plan, pitch, doc, or set of notes — and shapes 
 - `validate-idea → explore-idea → **shape-up** → design` — post-research synthesis
 - `**shape-up** → design` — standalone shaping (skip validation + research)
 - `**shape-up** → explore-idea → design` — pre-research structuring
+- `unpack-problem → **shape-up** → design` — problem-first: explore problem → shape solution → design
 - Double-run: `shape-up → explore → shape-up → design` — shape, research, re-shape
 
 ## Context detection
 No explicit modes. The skill checks what artifacts exist and adapts:
 - **Nothing exists** → full shaping from user input
 - **Validation brief exists** (`01-discovery/validation-brief.md`) → incorporates premises, skips re-framing
+- **Problem brief exists** (`01-research/problem-space-brief.md`) → uses problem definition as intake, shapes the selected solution concept
 - **Research artifacts exist** (`02-research/*.md`) → synthesizes findings into the brief
 - **Shaped brief already exists** (`01-discovery/shaped-brief.md`) → re-shape mode (post-research re-run)
+
+## Harness adherence (non-negotiable)
+- Follow the step sequence exactly. Do NOT skip steps or reorder them.
+- Each step file is a contract. Read it fully before executing.
+- Context detection is automatic — adapt step depth based on existing artifacts. Do NOT ask the user which mode to use.
 
 ## Prerequisites
 None. This is a flexible entry point.

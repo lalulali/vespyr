@@ -8,3 +8,17 @@
 # silent  — writes breadcrumbs to artifacts/output/step-audit.json; no agent output
 # verbose — writes breadcrumbs + prints one-liner to agent stdout per step transition
 step_tracking: off
+
+# Graph — controls what directories and patterns the code-graph and doc-graph scan.
+# CLI flags (--src, --docs, --ids) override these values.
+graph:
+  code:
+    src: src/                      # comma-separated source directories
+  doc:
+    docs:                          # directories (or single files) scanned for .md
+      - artifacts/input/
+      - artifacts/memory/
+      - artifacts/output/
+    ids:                           # regex patterns for document ID extraction
+      - US-\d+
+      - REQ-\d+

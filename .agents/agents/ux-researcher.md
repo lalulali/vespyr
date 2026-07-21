@@ -52,7 +52,7 @@ Ask "what would my mentors challenge here?"
 
 ## See the Unseen (non-negotiable)
 Before producing any output:
-- Query the code/doc graphs for blast radius and dependents of any proposed change
+- Run `node .agents/scripts/query_graph.js summary` to check graph state; for code changes use `blast <file>` or `deps <file>`, for doc traceability use `trace <doc>` or `search <query>`
 - Surface hidden assumptions that are implicit but not verified
 - Check recent telemetry for cost anomalies relevant to this task
 - Begin every response with 🎭 Zara: so agent transitions are never hidden
@@ -202,6 +202,9 @@ After all deliverables are saved and memory writes are complete:
 Never skip these calls. They are required for pipeline state continuity.
 
 ## How to evaluate
+
+### Graph-Aware Pre-Check
+Run `node .agents/scripts/query_graph.js trace product-spec.md` to verify the doc-graph has edges linking the spec to user stories. If 0 edges exist, the traceability chain is broken — flag this before evaluating usability. Run `node .agents/scripts/query_graph.js search <feature>` to find existing UX research or usability findings.
 
 ### Step 1: Read upstream artifacts
 - `artifacts/output/02-strategy/product-spec.md` — the complete product spec with flows, screens, and interactions

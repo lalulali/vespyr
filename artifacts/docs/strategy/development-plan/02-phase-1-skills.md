@@ -28,6 +28,10 @@
 | F1.21-F1.24 | Phase 1 / T2 | Evolution §2.4 (CSV method libraries) |
 | F1.25-F1.26 | Phase 1 / T1 | Evolution §1.2 (domain expert depth + false-positive guard) |
 | F1.27-F1.28 | **Removed** | Moved to Phase 3 (build-wiki depends on doc-graph) |
+| F1.29 | Phase 1 / T1, T2 | User requirement (QA enrichment + multi-scenario testing) |
+| F1.30 | Phase 1 / T2 | User requirement (problem-first pipeline gap) |
+| F1.31 | Phase 1 / T2 | User requirement (modular design thinking toolkit) |
+| F1.32 | Phase 1 / T1, T2 | User requirement (delegation gaps + auto-gates + harness adherence) |
 
 ---
 
@@ -1179,15 +1183,15 @@ Currently, the Product Manager (`@product-manager`) is solely responsible for cr
 
 ### Checklist
 
-- [ ] F1.29.1 — Update `@qa-engineer` persona (`.agents/agents/qa-engineer.md`) to own the "Acceptance Criteria Enrichment" contract and define "Feature" vs. "Full-Cycle" testing methodologies.
-- [ ] F1.29.2 — Restructure `.agents/skills/test/` workflow to integrate Socratic gap discovery phase for the QA engineer to challenge initial PM acceptance criteria.
-- [ ] F1.29.3 — Implement separate step files for `steps/step-02a-feature-test.md` and `steps/step-02b-fullcycle-test.md` under `.agents/skills/test/`.
-- [ ] F1.29.4 — Implement automated template update for PRDs to include a standardized `## Acceptance Criteria (QA Enriched)` section, tracking edge cases captured during testing.
-- [ ] F1.29.5 — Create verification tests checking that QA fails the test stage if it cannot produce at least 3 newly discovered edge cases or fails to verify full-cycle user paths.
+- [x] F1.29.1 — Update `@qa-engineer` persona (`.agents/agents/qa-engineer.md`) to own the "Acceptance Criteria Enrichment" contract and define "Feature" vs. "Full-Cycle" testing methodologies.
+- [x] F1.29.2 — Restructure `.agents/skills/test/` workflow to integrate Socratic gap discovery phase for the QA engineer to challenge initial PM acceptance criteria.
+- [x] F1.29.3 — Implement separate step files for `steps/step-02a-feature-test.md` and `steps/step-02b-fullcycle-test.md` under `.agents/skills/test/`.
+- [x] F1.29.4 — Implement automated template update for PRDs to include a standardized `## Acceptance Criteria (QA Enriched)` section, tracking edge cases captured during testing.
+- [x] F1.29.5 — Create verification tests checking that QA fails the test stage if it cannot produce at least 3 newly discovered edge cases or fails to verify full-cycle user paths.
 
 ---
 
-## F1.30 — New `/unpack-problem` Skill (Guided Problem-First Orchestration)
+## F1.30 — New `/unpack-problem` Skill (Tri-Modal Problem-First Orchestration)
 
 **Source:** User requirement (pipeline gap) | **Theme:** T2
 
@@ -1198,16 +1202,17 @@ There is a major pipeline gap for "Problem-First" entry. The existing starting p
 ### Target
 
 Create a new standalone guided skill `/unpack-problem` (facilitated by `@product-manager` and `@user-researcher`) that provides a structured problem-exploration workspace.
-This workflow enables the user to:
-1. **Intake & Define the Problem**: Describe a raw pain point, symptom, or business problem (rejecting solution-first thinking).
-2. **Guided Analysis Pathing**: Act as an orchestrator that guides the user through modular diagnostics (calling `/root-cause`, `/interview-kit`, `/empathy-map`, `/journey-map`, `/jtbd`).
-3. **Ideation & Handoff**: Synthesize insights and run ideation to draft candidate solution concepts. Outputs a structured `problem-space-brief.md` which acts as a valid input to `/validate-idea` or `/shape-up`.
+This workflow supports **three operational modes** selected dynamically upon invocation:
+
+1. **Guided Mode (Human-Heavy)**: The agent acts as an interactive facilitator, asking probing questions and guiding the user step-by-step through modular analysis skills (`/root-cause`, `/research-plan`, `/empathy-map`, `/journey-map`, `/jtbd`).
+2. **Automated Mode (AI-Heavy)**: The agent takes the user's initial problem statement and context inputs, simulates user perspectives, and automatically drafts the full suite of design thinking artifacts (`root-cause-analysis.md`, `empathy-map.md`, `journey-map.md`, `jtbd-hmw.md`).
+3. **Combination Mode (Hybrid)**: The agent executes the automated drafting pass first, then leads the human through a structured review, interactive refinement, and section-by-section approval.
 
 ### Supported flows
 
 | Flow | Unpack-problem's Role |
 |---|---|
-| `/unpack-problem` -> `/explore-idea` | Problem-first research. Formulate interview kits, execute manual/AI research, then analyze. |
+| `/unpack-problem` -> `/explore-idea` | Problem-first research. Formulate research plans, execute manual/AI research, then analyze. |
 | `/unpack-problem` -> `/validate-idea` | Transition from problem definition to testing a specific solution concept. |
 | `/unpack-problem` -> `/shape-up` | Direct bridge to shaping the chosen solution concept. |
 
@@ -1216,45 +1221,52 @@ This workflow enables the user to:
 #### Folder structure
 ```
 .agents/skills/unpack-problem/
-├── SKILL.md                              # ~55 lines: router + problem-first routing
+├── SKILL.md                              # ~60 lines: bootloader + mode selection (Guided / Automated / Combination)
 └── steps/
     ├── step-01-problem-intake.md         # ~45 lines: intake pain points, enforce zero-solution framing
-    ├── step-02-modular-routing.md        # ~50 lines: direct user to run specific modular sub-skills
+    ├── step-02-analysis-execution.md     # ~60 lines: run or prompt modular sub-skills based on selected mode
     ├── step-03-synthesis-ideation.md     # ~55 lines: map problem findings to candidate solution concepts
-    └── step-04-brief-generation.md       # ~50 lines: write problem-space-brief.md and route to next skill
+    └── step-04-brief-generation.md       # ~50 lines: write problem-space-brief.md & compile discovery report
 ```
 
 ### Why this matters
 
 1. **Avoids building the wrong thing.** Forcing users to have an "idea" first promotes solution-bias. Exploring the problem space first ensures the solution targets root causes.
-2. **Cohesive guidance.** Unifies a set of disparate analysis techniques into a single, step-by-step product discovery workflow.
+2. **Flexible execution styles.** Accommodates users who want deep hands-on workshop guidance, users who want rapid AI drafting, and users who want a review-driven hybrid flow.
 
 ### Checklist
 
-- [ ] F1.30.1 — Create `.agents/skills/unpack-problem/SKILL.md` (router and entry point config).
-- [ ] F1.30.2 — Create the step files in `.agents/skills/unpack-problem/steps/` detailing the intake, modular routing, synthesis, and handoff stages.
-- [ ] F1.30.3 — Add template `.agents/templates/discovery/problem-brief.md` for the output artifact.
-- [ ] F1.30.4 — Wire the output `problem-space-brief.md` into the prerequisite checks of `validate-idea/SKILL.md` and `shape-up/SKILL.md`.
-- [ ] F1.30.5 — Update `AGENTS.md` to list `/unpack-problem` as the starting workflow for problem-first discovery.
+- [x] F1.30.1 — Create `.agents/skills/unpack-problem/SKILL.md` with tri-modal router logic (`guided`, `automated`, `combination`).
+- [x] F1.30.2 — Create the step files in `.agents/skills/unpack-problem/steps/` detailing intake, mode execution, synthesis, and handoff stages.
+- [x] F1.30.3 — Add template `.agents/templates/discovery/problem-brief.md` for the output artifact.
+- [x] F1.30.4 — Wire the output `problem-space-brief.md` into the prerequisite checks of `validate-idea/SKILL.md` and `shape-up/SKILL.md`.
+- [x] F1.30.5 — Update `AGENTS.md` to list `/unpack-problem` as the starting workflow for problem-first discovery.
 
 ---
 
-## F1.31 — Modular Design Thinking Skills (`/root-cause`, `/interview-kit`, `/empathy-map`, `/journey-map`, `/jtbd`)
+## F1.31 — Modular Design Thinking Skills (`/root-cause`, `/research-plan`, `/empathy-map`, `/journey-map`, `/jtbd`, `/discovery-report`)
 
 **Source:** User requirement (design thinking toolkit) | **Theme:** T2
 
 ### Problem
 
-Users who already have an established problem definition but want to perform specific, isolated design thinking tasks (e.g., just generate user interview questions or just draft a user journey map) currently have no way to run those tools in isolation without entering a long, sequential multi-step workflow.
+Users who already have an established problem definition but want to perform specific, isolated design thinking tasks (e.g., just generate a research plan with interview questions or just draft a user journey map) currently have no way to run those tools in isolation without entering a long, sequential multi-step workflow.
 
 ### Target
 
-Introduce five highly specialized, standalone modular skills that can be invoked independently or run as sub-steps of `/unpack-problem`:
-1. `/root-cause`: Guides Root Cause Analysis using Socratic techniques (e.g., 5 Whys, Ishikawa/Fishbone diagrams). Outputs a `root-cause-analysis.md` report.
-2. `/interview-kit`: Constructs customer/user interview guides using scientific interview methodologies (e.g., "The Mom Test" rules to avoid confirmation bias, Jobs-to-be-Done query frameworks, active listening prompts). Outputs `user-interview-guide.md`.
-3. `/empathy-map`: Facilitates mapping user feelings, thoughts, and behaviors from manual observation data. Outputs `empathy-map.md`.
-4. `/journey-map`: Visualizes user touchpoints, emotional state transitions, and pain points over current workflows. Outputs `journey-map.md`.
-5. `/jtbd`: Formulates core Customer Jobs using the standard Jobs-to-be-Done template ("When... I want to... So I can..."). Outputs `jtbd-canvas.md`.
+Introduce six highly specialized, standalone modular skills that can be invoked independently or run as sub-steps of `/unpack-problem`:
+
+1. **`/root-cause`**: Guides Root Cause Analysis using Socratic techniques (e.g., 5 Whys, Ishikawa/Fishbone diagrams). Outputs `artifacts/output/01-research/root-cause-analysis.md`.
+2. **`/research-plan`** *(Expanded from interview kit)*: Constructs comprehensive research plans containing research goals, hypotheses, target cohort definitions, methodology recommendations (e.g., qualitative interviews, surveys, usability testing, card sorting), and a 2-part interview guide:
+   - *Part 1: User Profile Questions* (demographics, background, role, current tools).
+   - *Part 2: Behavioral Questions* (past actions, specific event stories, "The Mom Test" rules to avoid future speculation bias).
+   Outputs `artifacts/output/01-research/research-plan.md`.
+3. **`/empathy-map`**: Facilitates mapping user feelings, thoughts, sayings, and doings from observation data. Outputs `artifacts/output/01-research/empathy-map.md`.
+4. **`/journey-map`**: Visualizes user touchpoints, emotional state transitions, and friction points across current workflows. Outputs `artifacts/output/01-research/journey-map.md`.
+5. **`/jtbd`**: Formulates core Customer Jobs using the Jobs-to-be-Done template (`When [context], I want to [action], so I can [outcome]`) **and directly maps How Might We (HMW) opportunity questions** for each job in a single canvas. Outputs `artifacts/output/01-research/jtbd-hmw.md`.
+6. **`/discovery-report`**: Compiles design thinking and research outputs into a single unified report using `.agents/templates/discovery/discovery-report.md`. Dynamically includes or excludes the **Usability Testing (UT) Score** section based on whether usability testing data exists:
+   - If UT score is present -> outputs `artifacts/output/01-research/usability-report.md`.
+   - If UT score is omitted -> outputs `artifacts/output/01-research/user-research-report.md`.
 
 ### Proposed content
 
@@ -1262,30 +1274,154 @@ Introduce five highly specialized, standalone modular skills that can be invoked
 ```
 .agents/skills/
 ├── root-cause/
-│   └── SKILL.md                          # ~60 lines: guides Socratic 5-Whys/Fishbone
-├── interview-kit/
-│   └── SKILL.md                          # ~65 lines: builds guides based on Mom Test rules
+│   └── SKILL.md                          # ~60 lines: Socratic 5-Whys/Fishbone facilitator
+├── research-plan/
+│   └── SKILL.md                          # ~70 lines: research goals, methodology & 2-part interview guide
 ├── empathy-map/
 │   └── SKILL.md                          # ~55 lines: constructs empathy quadrant canvas
 ├── journey-map/
 │   └── SKILL.md                          # ~65 lines: maps current-state journey steps
-└── jtbd/
-    └── SKILL.md                          # ~50 lines: defines job statements and outcomes
+├── jtbd/
+│   └── SKILL.md                          # ~60 lines: defines JTBD statements + HMW opportunity questions
+└── discovery-report/
+    └── SKILL.md                          # ~55 lines: compiles design thinking outputs & dynamic UT scoring
+```
+
+#### Template directory additions
+```
+.agents/templates/discovery/
+├── problem-brief.md                      # Problem space brief template
+├── research-plan.md                      # Research plan & 2-part interview kit template
+├── jtbd-hmw.md                           # Combined JTBD and HMW opportunity canvas template
+└── discovery-report.md                   # Unified research/usability report template (with optional UT score section)
 ```
 
 ### Why this matters
 
 1. **Granular utility.** Users can use the agent as an ad-hoc facilitator for specific design exercises without pipeline overhead.
 2. **Modular reuse.** Outputs from these skills can be directly linked as inputs to other workflows (e.g., a standalone journey map becomes input for a `/shape-up` run).
+3. **Navigation visibility.** Updating `/help-me` ensures users are guided to the right design thinking skill based on their current stage.
 
 ### Checklist
 
-- [ ] F1.31.1 — Create `.agents/skills/root-cause/SKILL.md` to facilitate Socratic 5-Whys and Fishbone diagram structuring.
-- [ ] F1.31.2 — Create `.agents/skills/interview-kit/SKILL.md` to automate the generation of bias-free user interview questions.
-- [ ] F1.31.3 — Create `.agents/skills/empathy-map/SKILL.md` to structure user observations into Empathy quadrants.
-- [ ] F1.31.4 — Create `.agents/skills/journey-map/SKILL.md` to capture user touchpoints and emotional friction.
-- [ ] F1.31.5 — Create `.agents/skills/jtbd/SKILL.md` to define Job Statements and Outcome Metrics.
-- [ ] F1.31.6 — Register all 5 skills under `AGENTS.md` Curated Workflows list.
+- [x] F1.31.1 — Create `.agents/skills/root-cause/SKILL.md` to facilitate Socratic 5-Whys and Fishbone diagram structuring.
+- [x] F1.31.2 — Create `.agents/skills/research-plan/SKILL.md` to build research plans and 2-part interview guides (Profile + Behavioral).
+- [x] F1.31.3 — Create `.agents/skills/empathy-map/SKILL.md` to structure user observations into Empathy quadrants.
+- [x] F1.31.4 — Create `.agents/skills/journey-map/SKILL.md` to capture user touchpoints and emotional friction.
+- [x] F1.31.5 — Create `.agents/skills/jtbd/SKILL.md` to define JTBD statements and map How Might We (HMW) questions.
+- [x] F1.31.6 — Create `.agents/skills/discovery-report/SKILL.md` to compile design thinking outputs into a unified report with dynamic UT scoring.
+- [x] F1.31.7 — Create the 4 templates in `.agents/templates/discovery/` (`problem-brief.md`, `research-plan.md`, `jtbd-hmw.md`, `discovery-report.md`).
+- [x] F1.31.8 — Update `/help-me` routing engine (`.agents/skills/help-me/SKILL.md`) and register all 6 skills under `AGENTS.md` Curated Workflows list.
+
+---
+
+## F1.32 — Agent Delegation to Reasoning Personas + Non-Negotiable Auto-Gates + Harness Adherence
+
+**Source:** User requirement (gaps in delegation and auto-execution) | **Theme:** T1, T2
+
+### Problem
+
+Two compounding gaps discovered during comprehensive audit of all 31 skills:
+
+**Gap A: Skills with missing reasoning persona delegation.** `plan`, `review`, `test`, `kanban` describe work squarely in a reasoning persona's charter but never explicitly invoke that persona. The skill operates as a generic LLM prompt, losing the depth, decision trees, failure-mode awareness, and memory contracts baked into each persona:
+
+| Skill | Missing Persona | Why It Matters |
+|---|---|---|
+| **plan** (113 lines) | `@tech-lead` | Produces execution plans, task breakdowns, estimates (1-4h granularity), and dependency analysis — `@tech-lead`'s entire charter. Only delegates to `@executor` for orchestrator state. |
+| **review** (51 lines) | `@code-reviewer` | Loads `@code-reviewer` context from memory but never invokes the agent. The review (correctness, security, performance, patterns, tests) is `@code-reviewer`'s sole job. |
+| **test** (54 lines) | `@qa-engineer` | Only delegates to `@executor` to run test commands. Does no failure analysis, regression assessment, or coverage evaluation — all `@qa-engineer` responsibilities. |
+| **kanban** (61 lines) | `@product-manager` | Kanban management (backlog prioritization, task movement, blocker management) is `@product-manager`'s domain. Skill only delegates to `@memory-controller` for writes. |
+
+Additionally, `design/SKILL.md` references step files (`steps-create/`, `steps-edit/`, `steps-validate/`) that exist but never explicitly invoke `@product-manager` or `@product-designer` in the router — the step files handle delegation, but the router itself should declare the primary personas.
+
+**Gap B: Quality gates and other automated steps lack non-negotiable auto-proceed language.** The `develop` skill's Quality Gates step (step-07) labels QA as "hard gate — cannot be skipped" but lacks "do NOT ask, just proceed" language. Agents inconsistently pause and ask "want me to write tests?" or "should I run QA now?" instead of proceeding automatically. The audit found:
+
+- **0 of 58 step files** use the word "non-negotiable" for automated gates.
+- **Only 1 of 58 step files** (`retro/step-05-compact.md` line 85) has explicit auto-proceed guardrail language: *"The swarm does NOT block on human input — archive proceeds automatically. Humans review asynchronously."*
+- **`develop/steps/step-06-dev-loop.md`** line 35-36 says "pause and initiate a conversation with the human user" on spec ambiguity — making human intervention the default, not the exception.
+- **`develop/steps/step-07-quality-gates.md`** labels security and performance as "conditional" but provides no auto-decision logic: an agent might ask "does this feature touch auth?" instead of checking the spec and deciding.
+
+### Target
+
+1. **Add explicit reasoning persona delegation** to `plan`, `review`, `test`, `kanban` SKILL.md files so the work is done BY the right agent, not AS the skill itself.
+2. **Add non-negotiable auto-proceed language** to `develop/steps/step-07-quality-gates.md` modeled on `retro/step-05-compact.md`'s proven pattern.
+3. **Remove default human pauses** from `develop/steps/step-06-dev-loop.md` — ambiguity defaults to internal resolution (escalate within the swarm), not a user block.
+4. **Add harness adherence block** to `develop/SKILL.md` router — reminding the agent to follow step files sequentially and never skip gates.
+5. **Add persona delegation** to `design/SKILL.md` router declaring `@product-manager` and `@product-designer` as primary personas for all design step files.
+
+### Proposed content
+
+#### F1.32.1 — Non-negotiable auto-proceed language (develop/step-07-quality-gates.md update)
+
+Add after the title line "## 7a. QA (hard gate — cannot be skipped)":
+
+```markdown
+**Auto-execution rule (non-negotiable):** QA runs automatically without asking the user. The swarm does NOT block on human input — QA proceeds automatically. Humans review test results asynchronously via `report.md`. Do NOT ask "should I run tests?" or "want me to write tests?" — just run them.
+
+**Auto-decision for conditional gates:** Determine whether security or performance gates apply by checking the spec-kernel and user stories. Do NOT ask the user. If the spec mentions auth, PII, payments, or external APIs → invoke @security-engineer. If the spec mentions core user paths, large data, or performance SLAs → invoke @performance-engineer. Decide and proceed.
+```
+
+#### F1.32.2 — Remove default human pause (develop/step-06-dev-loop.md update)
+
+Change the role-based guardrails from default pause to default resolve:
+
+```markdown
+## Role-based guardrails
+- **FE:** Focus on visual accuracy, UI polish, and premium user experience. If frontend spec is unclear, first resolve internally by consulting @product-designer and @product-manager. Only escalate to the human user if the persona chain cannot resolve the ambiguity.
+- **BE:** Focus on clean API contracts, model safety, and robust error flows. If backend spec is unclear, first resolve internally by consulting @product-manager. Only escalate to the human user if the persona chain cannot resolve the ambiguity.
+- **Full-Stack:** Both FE and BE communication channels are available. Apply both visual and backend quality standards.
+```
+
+#### F1.32.3 — Harness adherence block (develop/SKILL.md update)
+
+Add to the SKILL.md after the step loader:
+
+```markdown
+## Harness adherence (non-negotiable)
+- Follow the step sequence exactly. Do NOT skip steps.
+- Quality gates are not optional. QA runs automatically at step 7 — do not ask.
+- Each step file is a contract. Read it fully before executing.
+- If a step halts (test failure, security finding), stop and escalate. Do not proceed past a halt condition.
+```
+
+#### F1.32.4 — Add explicit persona delegation to `plan`, `review`, `test`, `kanban`
+
+Each skill receives a `## Persona delegation` section:
+
+- **`plan/SKILL.md`** — add: `## Persona delegation: This skill delegates to @tech-lead. The tech-lead produces the execution plan (task breakdown, estimates, dependency analysis, parallelism assessment). The skill file provides structure; @tech-lead provides the reasoning.`
+- **`review/SKILL.md`** — add: `## Persona delegation: This skill delegates to @code-reviewer. The code-reviewer performs the review (correctness, security, performance, patterns, tests). The skill file provides the checklist; @code-reviewer provides the depth.`
+- **`test/SKILL.md`** — add: `## Persona delegation: This skill delegates to @qa-engineer. The qa-engineer runs tests, analyzes failures, assesses regression risk, evaluates coverage, and produces a test report. The skill file provides the workflow; @qa-engineer provides the analysis.`
+- **`kanban/SKILL.md`** — add: `## Persona delegation: This skill delegates to @product-manager. The pm manages backlog prioritization, task state transitions, and blocker resolution. The skill file provides the display format; @product-manager provides the decisions.`
+
+#### F1.32.5 — Add persona declaration to `design/SKILL.md` router
+
+Add to the router after mode routing:
+
+```markdown
+## Primary personas
+- `@product-manager` — owns requirements, user stories, and PRD scope
+- `@product-designer` — owns screen specs, design tokens, and product spec
+These personas are invoked by step files. The router declares them so the agent knows which reasoning personas are active for this skill.
+```
+
+### Why this matters
+
+1. **Skills don't impersonate agents.** When `plan` runs, `@tech-lead` does the thinking — with its decision tree, failure modes, and memory contract. The skill is a workflow scaffold; the agent is the intelligence.
+2. **Auto-execution is the default.** Quality gates run automatically. The agent doesn't ask permission to test any more than a CI pipeline asks permission to build. The only exception is the PM verification gate (step-08), which is explicitly an interactive sign-off.
+3. **Harness adherence is explicit.** The agent now has a non-negotiable instruction to follow the step sequence and not skip gates. Combined with the auto-proceed language in step-07, this removes the "maybe I should ask the user" ambiguity.
+4. **The `retro/step-05` pattern scales.** "The swarm does NOT block on human input — proceeds automatically. Humans review asynchronously." This becomes the standard auto-gate template for every step that should run without user interaction.
+
+### Checklist
+
+- [x] F1.32.1 — Update `develop/steps/step-07-quality-gates.md`:
+  - Add non-negotiable auto-proceed block for QA
+  - Add auto-decision block for security/performance conditional gates
+  - Add "do NOT ask the user" guardrail language
+- [x] F1.32.2 — Update `develop/steps/step-06-dev-loop.md`: remove default human pause; default to internal resolution via persona chain
+- [x] F1.32.3 — Update `develop/SKILL.md`: add harness adherence block (non-negotiable step sequence, QA auto-execution)
+- [x] F1.32.4 — Add `## Persona delegation` to `plan/SKILL.md` (@tech-lead), `review/SKILL.md` (@code-reviewer), `test/SKILL.md` (@qa-engineer), `kanban/SKILL.md` (@product-manager)
+- [x] F1.32.5 — Add `## Primary personas` to `design/SKILL.md` router (@product-manager, @product-designer)
+- [x] Run content audit: verify all 7 changed files have the intended additions
 
 ---
 
@@ -1314,9 +1450,9 @@ Introduce five highly specialized, standalone modular skills that can be invoked
 - [x] `@reader`, `@writer`, `@executor` each have an `## Output-quality rubric` + `## Failure modes` section (F1.24.b.1); delegation blocks cite `delegation-policy.md` thresholds with a `direct_justified:` field (F1.24.b.2); CI flags boilerplate delegation (F1.24.b.3)
 - [x] Every step file has an `output_contract.citations` field (`required` or `not-required`) per F0.29; CI verifies the field is present
 - [x] `/shape-up` skill exists with SKILL.md router (≤ 60 lines) + 6 step files; cross-skill wiring in `explore-idea`, `design`, and `AGENTS.md` is complete; all four supported flows are structurally verified via `test-shape-up.mjs` (82/82 assertions)
-- [ ] `/test` skill restructured to separate feature and full-cycle test tracks; QA engineer enrichment flows verified.
-- [ ] `/unpack-problem` skill exists with SKILL.md router + 4 step files; output brief successfully routes to `/validate-idea` and `/shape-up`.
-- [ ] Modular design thinking skills (`/root-cause`, `/interview-kit`, `/empathy-map`, `/journey-map`, `/jtbd`) exist with independent `SKILL.md` facilitators and are registered in `AGENTS.md`.
+- [x] `/test` skill restructured to separate feature and full-cycle test tracks; QA engineer enrichment flows verified via `test-qa-enrichment.mjs` (104/104 assertions).
+- [x] `/unpack-problem` skill exists with tri-modal SKILL.md router + 4 step files; output brief successfully routes to `/validate-idea`, `/shape-up`, and `/explore-idea`; verified via `test-unpack-problem.mjs` (103/103 assertions).
+- [x] Modular design thinking skills (`/root-cause`, `/research-plan`, `/empathy-map`, `/journey-map`, `/jtbd`, `/discovery-report`) exist with independent `SKILL.md` facilitators, templates in `.agents/templates/discovery/`, `/help-me` integration, and registration in `AGENTS.md`.
 
 ## Risks
 

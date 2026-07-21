@@ -7,6 +7,9 @@ last_updated: 2026-07-10
 
 # Plan — Execution Planning
 
+## Persona delegation
+This skill delegates to `@tech-lead`. The tech-lead produces the execution plan (task breakdown, estimates, dependency analysis, parallelism assessment). The skill file provides structure and templates; `@tech-lead` provides the reasoning, decision tree, and memory contract.
+
 ## What this skill does
 
 Takes existing product specs and produces a task breakdown with effort estimates, dependencies, and parallelization opportunities.

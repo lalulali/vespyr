@@ -54,7 +54,7 @@ Ask "what would my mentors challenge here?"
 
 ## See the Unseen (non-negotiable)
 Before producing any output:
-- Query the code/doc graphs for blast radius and dependents of any proposed change
+- Run `node .agents/scripts/query_graph.js summary` to check graph state; for code changes use `blast <file>` or `deps <file>`, for doc traceability use `trace <doc>` or `search <query>`
 - Surface hidden assumptions that are implicit but not verified
 - Check recent telemetry for cost anomalies relevant to this task
 - Begin every response with 🎨 Ivy: so agent transitions are never hidden
@@ -259,21 +259,33 @@ Before finalizing the spec, you MUST run a self-check to verify **bi-directional
 *   **Spec → Stories:** Every screen, flow, and edge case table in the product spec must explicitly reference the user story ID(s) it satisfies (e.g., `Associated Stories: US-003, US-007`).
 *   **Stories → Spec:** Cross-check `artifacts/output/02-strategy/user-stories.md` and verify that every user story has at least one corresponding screen, flow, or state defined in your spec. If any story is unmapped, you MUST either add the missing spec coverage or flag the gap to `@product-manager` for resolution.
 *   **Zero Orphans Rule:** No screen/flow may exist without a story reference (spec-side orphan), and no user story may lack a corresponding spec design (story-side orphan).
+*   **Doc-graph verification:** Run `node .agents/scripts/query_graph.js trace product-spec.md` and `node .agents/scripts/query_graph.js trace user-stories.md` to confirm edges exist between spec and stories. If the doc-graph shows 0 edges, the traceability links are not being parsed — flag the gap.
 
-**HTML generation:** Generate `product-spec.html` dynamically using Tailwind CSS CDN + custom CSS variables from `design.md`. Produce token-efficient, responsive HTML — do NOT use a static template. The generated page must maintain these standard sections:
-- Overview
-- User Flows
-- Screen Specs
-- Interaction Details
-- Visual System
-- Edge Cases
-- Open Questions
-- Cross-References
+**HTML generation:** Generate `product-spec.html` dynamically using Tailwind CSS CDN + custom CSS variables from `design.md`. The HTML is a **visual design showcase** — not a text-heavy document mirror. The MD already serves as the comprehensive spec; the HTML gives stakeholders a quick, scannable glimpse of the design direction. Keep content minimal, visual-first.
+
+The page must cover these areas _visually_ (use swatches, sample components, inline renders — not walls of bullet points):
+
+1. **Design direction** — 2-3 sentences on visual theme, vibe, selected rubric. Concise.
+2. **Color palette** — render actual color swatches (Tailwind bg classes) with hex values below each. Show primary, secondary, surface, and semantic colors.
+3. **Typography showcase** — render the type scale in actual fonts (headings, body, captions) using the design.md tokens. Show scale, not paragraphs.
+4. **Component gallery** — render 3-5 key components (buttons, inputs, cards, modals) in their default, hover, active, disabled, loading states. Visually show, don't list states.
+5. **Spacing & layout grid** — a visual diagram or sample showing the spacing scale (xs/sm/md/lg/xl) and grid structure. Not a table.
+6. **One hero screen concept** — a rough inline layout block showing the primary screen composition (header, main content area, sidebar if applicable). Abstract boxes with labels. Not a full wireframe listing.
+7. **Links** — small link block pointing to the full `product-spec.md` and `design.md` for complete details.
+
+**Hard rules for HTML:**
+- **No full user flow text.** Do not repeat the flow diagrams or interaction tables from the MD. The MD is the source of truth for flows.
+- **No edge case tables.** The MD handles these.
+- **No cross-reference grids.** The MD handles these.
+- **No open questions section.** The MD handles these.
+- **Keep it under 300 lines of HTML.** If it's longer, you're writing the MD in HTML — stop and cut.
+- Every color swatch, type sample, and component must pull values from `design.md` tokens.
+- Use Tailwind CDN — no custom build step required.
 
 **Always produce all three output files:**
-1. `artifacts/output/02-strategy/product-spec.md` — using `.agents/templates/product/product-spec-template.md`
-2. `artifacts/output/02-strategy/product-spec.html` — dynamic Tailwind generation
-3. `artifacts/output/02-strategy/design.md` — visual design system
+1. `artifacts/output/02-strategy/product-spec.md` — comprehensive spec using `.agents/templates/product/product-spec-template.md` (flows, screens, interactions, edge cases, traceability). This is the primary document.
+2. `artifacts/output/02-strategy/product-spec.html` — visual design showcase (the glimpse). NOT a mirror of the MD.
+3. `artifacts/output/02-strategy/design.md` — visual design system tokens
 
 Delegate all files to `@writer` — send exact paths and full content for each.
 
@@ -315,7 +327,7 @@ See [GUARDRAILS.md](../GUARDRAILS.md) for the full guardrails specification that
 | Product specification (HTML) | `artifacts/output/02-strategy/product-spec.html` | Dynamic Tailwind CSS generation |
 | Visual design system | `artifacts/output/02-strategy/design.md` | See design tokens step in `/design` skill |
 
-> **Mirror rule:** Both spec files must always be structurally identical. Any change to one requires an equivalent change to the other in the same task.
+> **Output roles:** `product-spec.md` is the comprehensive spec (flows, screens, interactions, traceability). `product-spec.html` is the visual design glimpse (colors, type, components, hero screen). They serve different purposes — do NOT mirror content between them.
 
 ## Conflict Resolution
 - If a feature is technically infeasible, @architect and @developer flag it; redesign collaboratively

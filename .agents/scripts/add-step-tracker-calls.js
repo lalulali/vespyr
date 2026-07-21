@@ -47,7 +47,7 @@ stepFiles.forEach(filePath => {
   }
 
   const fmText = fmMatch[1];
-  const stepMatch = fmText.match(/^step:\s*(\d+)/m);
+  const stepMatch = fmText.match(/^step:\s*(\d+[a-z]?)/m);
   if (!stepMatch) {
     console.warn(`WARNING: No step number in ${path.relative(SKILLS_DIR, filePath)}`);
     return;

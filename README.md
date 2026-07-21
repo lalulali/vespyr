@@ -2,194 +2,135 @@
 
 > English | [中文](README_CN.md)
 
-A platform-agnostic, file-based multi-agent engine that installs a structured product development team directly into your repository. 21 specialized agent personas, 31 atomic skills, spec-kernel artifacts, shared persistent memory, and three architectural moats that no other framework combines.
+**A platform-agnostic, file-based multi-agent engine.** Install 21 specialized AI personas directly into your repository. They plan, design, build, review, test, and ship — with structured memory that persists across sessions and three architectural moats no other framework combines.
 
 [![Vespyr Version](https://img.shields.io/badge/version-2.0.0-blue)](https://github.com/lalulali/vespyr)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+📖 **[Full Documentation →](Guide/en/index.md)**
 
 ---
 
 ## 🏛️ Why Vespyr
 
-| Differentiator | What it means | Why it matters |
+| Differentiator | Cost Impact | Quality Impact |
 |---|---|---|
-| **Permission-denial I/O split** | Reasoning agents cannot touch files or run commands. All I/O goes through narrow sub-agents (`@reader`, `@writer`, `@executor`). | Context windows stay lean (~1,000 tokens vs 15,000+). 85-95% API cost savings. Sub-agents produce consistent, structured output. |
-| **Socratic methodology depth** | Every reasoning agent has a `## Socratic Stance` declaring what it challenges. `/grill-me` runs a 7+1-branch decision tree. | Catches hidden assumptions, architectural conflicts, and edge cases that consensus-seeking teams miss. Challenge is baked into the persona layer. |
-| **3-tier progressive memory** | Context loads in three tiers (core → agent-specific → task-relevant), with pattern pre-fetch that surfaces relevant past decisions proactively. | No context bloat from loading everything. No amnesia from loading nothing. Agents get exactly what they need, when they need it. |
+| **Permission-denial I/O split** — reasoning agents can't touch files or shell. All I/O goes through narrow sub-agents. | **85-95% API cost savings.** Context windows stay at ~1,000 tokens instead of 15,000+. | Sub-agents produce consistent, structured output — no ad-hoc diffs in the reasoning stream. |
+| **Socratic methodology depth** — every agent declares what it challenges. `/grill-me` runs a 7+1-branch decision tree. | Catches hidden assumptions *before* code is written — preventing expensive rewrites. | Architectural conflicts and edge cases surfaced by design, not caught in review. |
+| **3-tier progressive memory** — context loads in tiers (core → agent-specific → task-relevant), with proactive pattern pre-fetch. | No context bloat from loading everything. No amnesia from loading nothing. | Agents get relevant past decisions, patterns, and risks without context window flooding. |
 
 ---
 
 ## ⚡ Quick Start
 
 ```bash
+# Install globally
 npm install vespyr
 npx vespyr
 ```
 
-The interactive CLI wizard configures Vespyr for your IDE harness (OpenCode, Claude Code, Cursor, Windsurf, GitHub Copilot, Kiro) and bootstraps `artifacts/memory/` and `.agents/`.
-
 ```bash
-# Install with defaults, skip wizard
-npx vespyr --yes --target /path/to/my-project --harness opencode,claude
-
-# Or run the CLI directly from the repo
-node bin/cli.js --yes --target /path/to/my-project
+# Or install from cloned repo
+git clone https://github.com/lalulali/vespyr.git
+cd vespyr
+npm install
+node bin/cli.js --yes --target /path/to/my-project --harness opencode,claude
 ```
 
----
+The interactive CLI wizard configures Vespyr for your IDE harness and bootstraps your project.
 
-## 👥 The Team
+```bash
+# Non-interactive (skip wizard)
+npx vespyr --yes --target /path/to/my-project --harness opencode,claude
+```
 
-### Core Swarm (8 agents)
+Then run your first workflow:
 
-| Agent | Role | Channeled by |
-|---|---|---|
-| `@founder` 🧭 | Strategic concept stress-testing. GO/PIVOT/KILL verdict. | Paul Graham + Ben Horowitz |
-| `@product-manager` 📋 | PRD, user stories, kanban, success metrics. | Marty Cagan + Teresa Torres |
-| `@product-designer` 🎨 | UX/UI specs, screen states, wireframes, design system. | Don Norman + Julie Zhuo |
-| `@architect` 🏗️ | System architecture, ADRs, API contracts, data models. | Rich Hickey + John Carmack |
-| `@tech-lead` 📐 | Execution plans, task breakdown, estimation, parallel coordination. | Will Larson + Camille Fournier |
-| `@developer` 💻 | Test-driven feature implementation and refactoring. | Kent Beck + Robert C. Martin |
-| `@code-reviewer` 🔍 | Read-only code audits, pattern violations, systemic escalation. | Dave Cheney + John Regehr |
-| `@qa-engineer` 🧪 | Integration testing, regression validation, release certification. | James Bach + Michael Bolton |
+```
+/validate-idea   →   /explore-idea   →   /design   →   /develop   →   /launch
+```
 
-### Domain Experts (9 agents)
-
-| Agent | Role | Channeled by |
-|---|---|---|
-| `@researcher` 🔬 | Market analysis, competitive landscape, technology trends. | Clayton Christensen + Cindy Alvarez |
-| `@user-researcher` 👥 | User interviews, personas, jobs-to-be-done. | Steve Krug + Erika Hall |
-| `@ux-researcher` 🎭 | Usability evaluation, journey mapping, interaction patterns. | Don Norman + Jakob Nielsen |
-| `@data-analyst` 📊 | Telemetry, dashboards, funnel analysis, experiments. | Avinash Kaushik + Edward Tufte |
-| `@security-engineer` 🔒 | Threat models, vulnerability scans, findings. | Bruce Schneier + OWASP |
-| `@performance-engineer` ⚡ | Latency profiling, optimization, load testing. | Brendan Gregg + Aleksey Shipilëv |
-| `@ml-engineer` 🤖 | Model integration, prompt templates, eval harnesses. | Andrej Karpathy + François Chollet |
-| `@devops-engineer` 🚀 | CI/CD, cloud provisioning, monitoring, deployment. | Kelsey Hightower + Charity Majors |
-| `@technical-writer` ✍️ | User manuals, API specs, release notes, docs site. | Strunk + White |
-
-### I/O Sub-Agents (4 agents)
-
-| Agent | Role |
-|---|---|
-| `@reader` 📖 | Fast file queries, regex searches, structured summaries. |
-| `@writer` ✏️ | Precise file edits and writes. Zero reasoning overhead. |
-| `@executor` ⚙️ | Shell command execution with curated summaries. |
-| `@memory-controller` 🧠 | Context loading, memory validation, compaction, session continuity. |
+> **New to Vespyr?** Follow the step-by-step [Getting Started Guide](Guide/en/getting-started.md).
 
 ---
 
-## 📋 Workflow Phases
+## 👥 The Team (21 Agents)
 
-Vespyr organizes work into 11 sequential phases. The canonical phase table at `.agents/references/phase-table.md` is the single source of truth.
+### Core Swarm
 
-| Phase | Folder | Primary Skill | Gate |
-|---|---|---|---|
-| -1 | Validation | `/validate-idea` | GO/PIVOT/KILL |
-| 0-1 | Discovery & Research | `/explore-idea` | Quality gate |
-| 2-3 | Strategy & Architecture | `/design` | PRD + ADR approved |
-| 4 | Planning | `/plan` | Plan approved |
-| 5 | Execution | `/develop` | All tests green |
-| 6 | Launch | `/launch` | Production deploy |
-| 7 | Iteration | `/iterate` | Insights reviewed |
-| 8 | Documentation | (cross-cutting) | Docs current |
-| 9 | Retro | `/retro` | Action items filed |
+| `@founder` 🧭 | `@product-manager` 📋 | `@product-designer` 🎨 | `@architect` 🏗️ |
+| `@tech-lead` 📐 | `@developer` 💻 | `@code-reviewer` 🔍 | `@qa-engineer` 🧪 |
 
-**Key workflows:** `/shape-up` (idea structuring), `/help-me` (navigator), `/grill-me` (Socratic stress-test), `/squad` (team presets), `/memory` (archive search), `/customize` (agent overrides).
+### Domain Experts
+
+| `@researcher` 🔬 | `@user-researcher` 👥 | `@ux-researcher` 🎭 | `@data-analyst` 📊 |
+| `@security-engineer` 🔒 | `@performance-engineer` ⚡ | `@ml-engineer` 🤖 | `@devops-engineer` 🚀 |
+| `@technical-writer` ✍️ |
+
+### I/O Sub-Agents
+
+`@reader` 📖 · `@writer` ✏️ · `@executor` ⚙️ · `@memory-controller` 🧠
 
 ---
 
 ## 🛠 How It Works
 
 ```
-┌──────────────────────────────────────┐
-│           REASONING AGENTS           │
-│  founder, PM, architect, developer…  │
-│  (no file access, no shell — by      │
-│   design. Must delegate I/O.)        │
-└──────────────┬───────────────────────┘
+┌──────────────────────────────────────────┐
+│           REASONING AGENTS (17)           │
+│  founder, PM, architect, developer...     │
+│  (No file access, no shell — by design)   │
+└──────────────┬───────────────────────────┘
                │ delegates to
                ▼
-┌──────────────────────────────────────┐
-│           I/O SUB-AGENTS             │
-│  @reader  — reads & summarizes       │
-│  @writer  — writes & edits precisely │
-│  @executor — runs commands           │
-└──────────────┬───────────────────────┘
+┌──────────────────────────────────────────┐
+│           I/O SUB-AGENTS (3)             │
+│  @reader · @writer · @executor           │
+└──────────────┬───────────────────────────┘
                │ context via
                ▼
-┌──────────────────────────────────────┐
-│        @memory-controller            │
-│  3-tier progressive load + pattern   │
-│  pre-fetch + auto-compaction         │
-└──────────────────────────────────────┘
+┌──────────────────────────────────────────┐
+│        @memory-controller                │
+│  3-tier progressive load + pre-fetch     │
+└──────────────────────────────────────────┘
 ```
 
-**Delegation Protocol:** Reasoning agents follow `.agents/references/delegation-policy.md` — a task-to-sub-agent mapping with threshold rules (≤3 small files read directly, >3 delegated to @reader; ≤50 lines written directly, >50 delegated to @writer). Direct I/O outside these rules requires `[DIRECT-IO-JUSTIFIED: ...]`.
-
-**Memory System:** 5 persistent files (`project-context`, `active-decisions`, `patterns-and-conventions`, `lessons-learned`, `blockers-and-risks`) plus an archive with keyword+recency scoring. Pattern pre-fetch surfaces relevant past decisions before the full context load.
+**Reasoning agents think. Sub-agents execute.** This split isn't a limitation — it's the architecture. It keeps context windows lean, output structured, and every operation auditable. [How delegation works →](Guide/en/reference.md#delegation-policy)
 
 ---
 
-## 🧩 Atomic Skills & Artifacts
-
-### Skills
-
-Every skill is a folder with a `SKILL.md` router (≤ 60 lines) + `steps/` directory. Each step is a self-contained 30-80 line file with its own halt conditions and delegation contract.
-
-- **Tri-modal:** `validate-idea` and `design` have `steps-create/`, `steps-edit/`, `steps-validate/` subfolders. Mode detection is automatic — the skill checks for the artifact and routes accordingly.
-- **Context-detecting:** `shape-up` detects existing artifacts (validation brief, research, shaped brief) and adapts its 6-step flow — no mode selector. Works standalone (`shape-up → design`) or between any pipeline phases (`validate → explore → shape-up → design`).
-- **Resumable:** The `stepsCompleted` array in the output document's YAML frontmatter makes resumption deterministic. Re-activate `develop` with `stepsCompleted: [1,2,3,4,5]` and it jumps to step 6.
-- **Delegation contracts:** Every step file declares which sub-agents to use for reads, writes, and runs — step-specific, not generic.
-
-### Artifacts
-
-Long monolithic templates (14KB PRDs) are replaced by a **5-field spec kernel** + content-typed companions:
+## 📋 Pipeline at a Glance
 
 ```
-<artifact-folder>/
-├── SPEC.md                  # Why / Capabilities / Constraints / Non-goals / Success signal
-├── glossary.md              # term definitions
-├── acceptance-criteria.md   # Given/When/Then per AC
-├── user-journey.md          # journey map
-└── decision-log.md          # canonical memory for this spec
+validate → explore → design → plan → develop → launch → iterate → retro
 ```
 
-Capability IDs (`CAP-1`, `CAP-2`, ...) are stable — subsequent artifacts reference them for traceability. `design.md` defines the visual spec (colors, typography, component states, animations, breakpoints, spacing) as the engineering source of truth.
+11 phases from idea validation through post-launch iteration. `/help-me` always tells you what's next. The phase table at `.agents/references/phase-table.md` is the canonical source.
 
-### State & Pipeline Enforcement
-
-`sprint-status.yaml` is the human-readable source of truth. `orchestrator_state.js status`/`next` print ASCII dashboards by default (phase pipeline, artifact completeness, blockers). Pipeline enforcement rules ensure agents verify phase state at startup and log completion at shutdown — no out-of-order execution.
-
-### Agent Depth
-
-All 9 domain expert agents have ≥ 200 lines with decision trees (when to invoke/escalate), failure modes (5-7 domain-specific), and conflict resolution patterns. `@code-reviewer` includes a 15-item false-positive guard that stops LLM reviewers from pattern-matching against their training corpus.
+[Full pipeline guide →](Guide/en/skills-and-workflows.md)
 
 ---
 
-## 🎨 Customization
+## 🧩 Key Capabilities
 
-Agent overrides survive upgrades via 2-file TOML merge:
+- **31 slash commands** — from `/validate-idea` and `/design` to `/develop`, `/launch`, `/code-graph`, and `/grill-me`
+- **Structural graphs** — code-graph maps dependencies, doc-graph maps document traceability. Agents query them instead of grepping.
+- **Agent customization** — 2-file TOML merge. Your overrides survive upgrades.
+- **Multi-harness** — works with OpenCode, Claude Code, Cursor, Windsurf, Copilot, Kiro, Aider.
+- **11-phase pipeline** — with enforcement. No out-of-order execution.
 
-```
-.agents/agents/<name>/customize.toml   # factory defaults (regenerated)
-.agents/custom/<name>.toml              # your overrides (never touched)
-```
-
-Scalars override-wins, tables deep-merge, arrays keyed-merge. Edit `.agents/custom/developer.toml` to set `temperature = 0.5` — it sticks across `npx vespyr` updates.
+[Complete skills catalog →](Guide/en/skills-and-workflows.md) · [Graph configuration →](Guide/en/structural-graphs.md) · [Customization →](Guide/en/configuration.md)
 
 ---
 
-## 📚 References
+## 📚 Documentation
 
-| Document | Purpose |
-|---|---|
-| `AGENTS.md` | Full agent framework & behavioral guidelines |
-| `.agents/references/phase-table.md` | Canonical 11-phase pipeline |
-| `.agents/references/glossary.md` | Locked terminology (no synonyms) |
-| `.agents/references/agent-contracts.md` | Owns vs. does NOT own per agent |
-| `.agents/references/delegation-policy.md` | Task→sub-agent mapping + override protocol |
-| `.agents/delegation-pattern.md` | Cross-harness delegation concept |
-| `QUICK-REFERENCE.md` | One-page system overview |
+| Level | Resource |
+|-------|----------|
+| **Start here** | [Getting Started Guide](Guide/en/getting-started.md) — first project, invoking agents, basic pipeline |
+| **Comprehensive** | [Full Guide](Guide/en/index.md) — installation, configuration, skills, graphs, reference |
+| **Quick overview** | [QUICK-REFERENCE.md](QUICK-REFERENCE.md) — one-page system cheat sheet |
+| **Agent reference** | [AGENTS.md](AGENTS.md) — full agent framework & behavioral guidelines |
 
 ---
 

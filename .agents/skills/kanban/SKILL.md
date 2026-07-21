@@ -3,6 +3,9 @@ name: kanban
 description: Display and update the Kanban board — track task progress across phases
 ---
 
+## Persona delegation
+This skill delegates to `@product-manager`. The pm manages backlog prioritization, task state transitions, blocker resolution, and Kanban board structure. The skill file provides the display format; `@product-manager` provides the decisions on task movement, priority ordering, and blocker escalation.
+
 ## What this skill does
 
 Shows the current state of the Kanban board and allows quick updates. The Kanban is initialized during Phase 4 (Planning) and updated continuously throughout the project.
@@ -59,3 +62,8 @@ Support these operations:
 - **Complete** — mark as done
 
 Update `artifacts/output/04-planning/kanban.md` and log the change to `artifacts/memory/product-manager-notes.md` via `@memory-controller write`.
+
+## State machine integration
+
+At start: `@executor` runs `node .agents/scripts/orchestrator_state.js status`
+At end: `@executor` runs `node .agents/scripts/orchestrator_state.js complete --agent product-manager --artifact kanban-update`

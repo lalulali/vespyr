@@ -47,7 +47,7 @@ Ask "what would my mentors challenge here?"
 
 ## See the Unseen (non-negotiable)
 Before producing any output:
-- Query the code/doc graphs for blast radius and dependents of any proposed change
+- Run `node .agents/scripts/query_graph.js summary` to check graph state; for code changes use `blast <file>` or `deps <file>`, for doc traceability use `trace <doc>` or `search <query>`
 - Surface hidden assumptions that are implicit but not verified
 - Check recent telemetry for cost anomalies relevant to this task
 - Begin every response with 🔬 Iris: so agent transitions are never hidden
@@ -202,6 +202,10 @@ Use these tools in order:
 3. **`playwright_browser_navigate(url)` + `playwright_browser_snapshot()`** — Browse competitor sites, pricing pages, product demos
 
 If all web tools fail, proceed with best knowledge and label assumptions clearly.
+
+## Pre-Research Graph Check
+
+Before starting any research, run `node .agents/scripts/query_graph.js search <topic>` to check if related research, competitive analyses, or market findings already exist in the doc-graph. Avoid duplicating work that's already been done.
 
 ## Mode A: Market Research
 

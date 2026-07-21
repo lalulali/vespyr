@@ -67,19 +67,43 @@ function appendAudit(entry) {
 }
 
 // ---------------------------------------------------------------------------
-// Skill step sequence reader — reads SKILL.md for declared step list
+// Skill step sequence reader — reads step file frontmatter for label + name
+// Resolves compound skill names (e.g. "design-create" → skills/design/steps-create/)
 // ---------------------------------------------------------------------------
 function readStepSequence(skill) {
-  const skillPath = path.join(PROJECT_ROOT, '.agents', 'skills', skill, 'SKILL.md');
-  if (!fs.existsSync(skillPath)) return [];
-  const raw = fs.readFileSync(skillPath, 'utf8');
-  const steps = [];
-  // Match lines like: 1. **Name** → `steps/step-01-name.md`
-  const regex = /^\d+[a-z]?\.\s+\*\*([^*]+)\*\*/gm;
-  let m;
-  while ((m = regex.exec(raw)) !== null) {
-    steps.push(m[1].trim());
+  // 1. Try exact: .agents/skills/{skill}/steps/
+  let stepsDir = path.join(PROJECT_ROOT, '.agents', 'skills', skill, 'steps');
+  if (!fs.existsSync(stepsDir)) {
+    // 2. Try compound: design-create → .agents/skills/design/steps-create/
+    const parts = skill.split('-');
+    if (parts.length >= 2) {
+      const mode = parts.pop();
+      const base = parts.join('-');
+      const compoundDir = path.join(PROJECT_ROOT, '.agents', 'skills', base, `steps-${mode}`);
+      if (fs.existsSync(compoundDir)) stepsDir = compoundDir;
+    }
   }
+  if (!fs.existsSync(stepsDir)) return [];
+
+  const files = fs.readdirSync(stepsDir).filter(f => f.endsWith('.md'));
+  const steps = [];
+  files.forEach(file => {
+    const raw = fs.readFileSync(path.join(stepsDir, file), 'utf8');
+    const fmMatch = raw.match(/^---\r?\n([\s\S]+?)\r?\n---/);
+    if (!fmMatch) return;
+    const fmText = fmMatch[1];
+    const stepMatch = fmText.match(/^step:\s*(\d+[a-z]?)/m);
+    const nameMatch = fmText.match(/^name:\s*(.+)$/m);
+    if (stepMatch && nameMatch) {
+      steps.push({ label: stepMatch[1].trim(), name: nameMatch[1].trim() });
+    }
+  });
+  // Natural sort: 1, 2, 3, 3a, 3b, 4, ...
+  steps.sort((a, b) => {
+    const na = parseInt(a.label), nb = parseInt(b.label);
+    if (na !== nb) return na - nb;
+    return a.label.localeCompare(b.label);
+  });
   return steps;
 }
 
@@ -125,8 +149,8 @@ function cmdBegin(args, mode) {
 
   if (mode === 'verbose') {
     const sequence = readStepSequence(skill);
-    const stepIndex = parseInt(String(step)) - 1;
-    const stepName = sequence[stepIndex] || `Step ${step}`;
+    const seqEntry = sequence.find(s => s.label === String(step));
+    const stepName = seqEntry ? seqEntry.name : `Step ${step}`;
     const total = sequence.length || '?';
     console.log(`📍 Step ${step}/${total}: ${stepName} — started`);
   }
@@ -149,8 +173,8 @@ function cmdComplete(args, mode) {
 
   if (mode === 'verbose') {
     const sequence = skill ? readStepSequence(skill) : [];
-    const stepIndex = parseInt(String(step)) - 1;
-    const stepName = sequence[stepIndex] || `Step ${step}`;
+    const seqEntry = sequence.find(s => s.label === String(step));
+    const stepName = seqEntry ? seqEntry.name : `Step ${step}`;
     const total = sequence.length || '?';
     console.log(`✅ Step ${step}/${total}: ${stepName} — complete (${durationStr})`);
   }
@@ -197,13 +221,22 @@ function cmdAudit(args) {
     report += `| Step | Name | Status | Started | Duration | Issues |\n`;
     report += `|---|---|---|---|---|---|\n`;
 
-    // Build per-step status
-    const maxStep = Math.max(sequence.length, ...skillEntries.map(e => parseInt(String(e.step)) || 0));
-    for (let i = 1; i <= maxStep; i++) {
-      const stepName = sequence[i - 1] || `Step ${i}`;
-      const begun = skillEntries.find(e => e.type === 'begin' && String(e.step) === String(i));
-      const done = skillEntries.find(e => e.type === 'complete' && String(e.step) === String(i));
-      const drift = driftWarnings.find(e => String(e.step) === String(i));
+    // Build per-step status — iterate over labels from sequence + any stray entries
+    const seqLabels = sequence.map(s => s.label);
+    const entryLabels = skillEntries.map(e => String(e.step));
+    const allLabels = [...new Set([...seqLabels, ...entryLabels])];
+    allLabels.sort((a, b) => {
+      const na = parseInt(a), nb = parseInt(b);
+      if (na !== nb) return na - nb;
+      return a.localeCompare(b);
+    });
+
+    allLabels.forEach(label => {
+      const seqEntry = sequence.find(s => s.label === label);
+      const stepName = seqEntry ? seqEntry.name : `Step ${label}`;
+      const begun = skillEntries.find(e => e.type === 'begin' && String(e.step) === String(label));
+      const done = skillEntries.find(e => e.type === 'complete' && String(e.step) === String(label));
+      const drift = driftWarnings.find(e => String(e.step) === String(label));
 
       let status = '⬜ not started';
       let started = '—';
@@ -215,8 +248,8 @@ function cmdAudit(args) {
       if (done) duration = done.duration || '—';
 
       const issues = drift ? `Prereq step ${drift.prevStep} not marked complete before begin` : '—';
-      report += `| ${i} | ${stepName} | ${status} | ${started} | ${duration} | ${issues} |\n`;
-    }
+      report += `| ${label} | ${stepName} | ${status} | ${started} | ${duration} | ${issues} |\n`;
+    });
 
     if (driftWarnings.length > 0) {
       report += `\n### Drift Warnings\n`;
@@ -244,6 +277,13 @@ const [,, command, ...rest] = process.argv;
 const args = parseArgs(rest);
 const config = readConfig();
 const mode = config.step_tracking || 'off';
+
+// No command → show usage regardless of mode (human error, not an agent call)
+if (!command) {
+  console.error('step_tracker: no command given. Use begin, complete, status, or audit.');
+  console.error('Usage: node step_tracker.js <begin|complete|status|audit> [--skill NAME] [--step N] [--agent NAME]');
+  process.exit(1);
+}
 
 // In off mode, only allow audit/status (read-only commands). For write commands, exit immediately.
 if (mode === 'off' && !['audit', 'status'].includes(command)) {

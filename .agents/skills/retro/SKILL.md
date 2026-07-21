@@ -7,6 +7,11 @@ description: Post-cycle review — extract lessons, calibrate estimates, improve
 
 This skill runs in sequential steps. Each step is a self-contained file with its own halt conditions. Load one at a time.
 
+## Harness adherence (non-negotiable)
+- Follow the step sequence exactly. Do NOT skip steps or reorder them.
+- Memory compaction runs automatically at step 5 — the swarm does NOT block on human input.
+- Each step file is a contract. Read it fully before executing.
+
 ## When to invoke
 - After completing a development cycle or shipping a launch
 - After resolving an incident
@@ -36,8 +41,8 @@ This skill runs in sequential steps. Each step is a self-contained file with its
 - Compaction would archive entries younger than 7 days (skip compaction, report)
 
 ## State machine integration
-At start: `node .agents/scripts/orchestrator_state.js status`
-At end: `node .agents/scripts/orchestrator_state.js complete --agent memory-controller --artifact 09-retro/retro-digest.md`
+At start: `@executor` runs `node .agents/scripts/orchestrator_state.js status`
+At end: `@executor` runs `node .agents/scripts/orchestrator_state.js complete --agent memory-controller --artifact 09-retro/retro-digest.md`
 
 ## Done when
 - All steps in `stepsCompleted`

@@ -54,7 +54,7 @@ Invoke `@product-designer` to design improvements:
 - Document design rationale linking back to data signals
 
 **Input:** `artifacts/output/07-iteration/iteration-backlog.md`
-**Output:** `artifacts/output/07-iteration/iteration-spec.md` (Use template: `.agents/templates/product/product-spec-template.md`)
+**Output:** `artifacts/output/07-iteration/iteration-spec.md` (Use template: `.agents/templates/product/product-spec-template.md` — see `## Cross-References` section for expected structure)
 
 #### Step 3b: Architecture Impact Assessment ⟨parallel⟩
 Invoke `@architect` to assess:

@@ -1,0 +1,142 @@
+# 4. 技能与工作流
+
+> [← 返回指南](index.md) | [上一章：配置](configuration.md) | [下一章：结构图谱 →](structural-graphs.md)
+
+## 所有斜杠命令
+
+Vespyr 将复杂操作组织为原子化技能。每个技能是一个文件夹，包含 `SKILL.md` 路由器 + `steps/` 目录。
+
+### 核心工作流（生命周期）
+
+| 命令 | 阶段 | 描述 |
+|---------|-------|-------------|
+| `/validate-idea` | -1 | 在研究前对产品概念进行压力测试 |
+| `/validate-game-idea` | -1 | 在制作前对游戏概念进行压力测试 |
+| `/explore-idea` | 0-1 | 市场、竞品和用户调研 |
+| `/explore-game-idea` | 0-1 | 游戏品类市场和玩家调研 |
+| `/unpack-problem` | 0-1 | 在解决方案构思前先探索问题 |
+| `/design` | 2-3 | PRD 和界面规格创建 |
+| `/develop` | 5 | MVP 开发周期 |
+| `/launch` | 6 | 发布准备和部署 |
+| `/iterate` | 7 | 发布后的行为改进 |
+| `/retro` | 9 | 周期回顾和记忆压缩 |
+
+### 设计思维与发现
+
+| 命令 | 描述 |
+|---------|-------------|
+| `/research-plan` | 研究目标、方法论和访谈指南 |
+| `/empathy-map` | 用户共情四象限画布（说/想/做/感） |
+| `/journey-map` | 用户触点与情绪状态旅程图 |
+| `/jtbd` | Jobs-to-be-Done 声明 + How Might We 机会问题 |
+| `/discovery-report` | 将设计思维输出编译为统一报告 |
+| `/root-cause` | 苏格拉底式 5-Whys 和鱼骨图根因分析 |
+| `/validation-patterns` | 从 30 种验证方法目录中选择 |
+
+### 创意塑造与头脑风暴
+
+| 命令 | 描述 |
+|---------|-------------|
+| `/shape-up` | 将半成品创意结构化并压力测试为设计就绪简报 |
+| `/brainstorming` | 从 60 种头脑风暴方法中选择（SCAMPER、六顶思考帽等） |
+| `/grill-me` | 严苛的苏格拉底式对齐和压力测试访谈 |
+
+### 操作
+
+| 命令 | 描述 |
+|---------|-------------|
+| `/help-me` | 对话式项目导航助手 |
+| `/status` | 当前项目状态快照 |
+| `/phase` | 显示/切换阶段 |
+| `/squad` | 显示可用团队并切换活跃团队 |
+| `/plan` | 独立执行计划 |
+| `/review` | 独立代码审查 |
+| `/test` | 运行测试，汇总失败信息 |
+| `/kanban` | 显示并更新看板 |
+| `/memory` | 搜索归档项目上下文 |
+
+### 智能
+
+| 命令 | 描述 |
+|---------|-------------|
+| `/code-graph` | 生成/扫描依赖关系图 |
+| `/doc-graph` | 生成/扫描文档链接和追溯覆盖 |
+| `/humanize` | AI 写作风格检测器和规范化工具 |
+
+### 其他
+
+| 命令 | 描述 |
+|---------|-------------|
+| `/customize` | 引导式智能体自定义 |
+| `/incident` | 生产事故响应 |
+
+## 流水线阶段表
+
+Vespyr 的 11 阶段流水线。`.agents/references/phase-table.md` 是权威来源。
+
+| 阶段 | ID | 目录 | 主要技能 |
+|-------|-----|------|------|
+| 验证 | -1 | `00-discovery/` | `/validate-idea` |
+| 发现 | 0 | `00-discovery/` | `/unpack-problem` |
+| 调研 | 1 | `01-research/` | `/explore-idea` |
+| 战略 | 2 | `02-strategy/` | `/design` |
+| 架构 | 3 | `03-architecture/` | Architecture ADRs |
+| 规划 | 4 | `04-planning/` | `/plan` |
+| 实现 | 5 | `05-implementation/` | `/develop` |
+| 发布 | 6 | `06-launch/` | `/launch` |
+| 迭代 | 7 | `07-iteration/` | `/iterate` |
+| 文档 | 8 | （贯穿） | 技术文档撰写 |
+| 回顾 | 9 | `09-retro/` | `/retro` |
+
+## 技能工作原理
+
+每个技能遵循相同的架构：
+
+```
+.agents/skills/<skill-name>/
+├── SKILL.md              # 路由器：≤60 行，定义何时/如何使用
+└── steps/                # 操作步骤（每步 30-80 行）
+    ├── step-01-read.md
+    ├── step-02-plan.md
+    └── ...
+```
+
+每个步骤文件声明：
+- **停止条件** — 在继续前必须满足的条件
+- **委托契约** — 由哪些子代理处理读取、写入和运行
+- **输出规格** — 产出什么制品
+
+### 多模式技能
+
+部分技能根据已有制品自动检测模式：
+
+```
+.agents/skills/design/
+├── SKILL.md
+└── steps-create/      # 当 PRD/规格不存在时运行
+└── steps-edit/        # 当 PRD/规格存在且需要修改时运行
+└── steps-validate/    # 当验证现有设计时运行
+```
+
+### 可恢复执行
+
+输出文档的 YAML 前置元数据中包含 `stepsCompleted` 数组：
+
+```yaml
+stepsCompleted: [1, 2, 3]
+```
+
+重新调用技能时自动从步骤 4 恢复。无需在智能体上下文中维护状态。
+
+## 委托协议
+
+所有推理智能体根据 `.agents/references/delegation-policy.md` 将 I/O 委托给子代理：
+
+| 任务 | 子代理 | 阈值 |
+|------|-----------|-----------|
+| 读取文件 | `@reader` | >3 个文件委托 |
+| 写入文件 | `@writer` | >50 行委托 |
+| 运行命令 | `@executor` | 始终委托（推理智能体没有 Shell 访问权限） |
+| 记忆操作 | `@memory-controller` | 始终委托 |
+
+超出此规则的直接 I/O 需要响应中的 `[DIRECT-IO-JUSTIFIED: ...]` 声明。

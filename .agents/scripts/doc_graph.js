@@ -1,19 +1,59 @@
 #!/usr/bin/env node
 /**
  * Doc Graph — Multi-Agent Document Traceability and Relationship Mapper
- * 
- * Crawls artifacts/memory/ and artifacts/output/ for Markdown files.
- * Parses headers, relative/file links, and specific ID references (REQ-XXX, US-XXX)
- * to build a unified semantic relationship graph.
- * 
+ *
+ * Crawls configured directories for Markdown files, extracts headers, links,
+ * and document IDs (US-XXX, REQ-XXX, or custom patterns from .agents/config.yaml).
+ *
  * Usage:
- *   node doc_graph.js --out artifacts/memory/structural/doc-graph.json
+ *   node doc_graph.js [--out <path>] [--root <path>] [--docs <dirs>] [--ids <patterns>]
  */
 
 const fs = require('fs');
 const path = require('path');
 
-// Determine document type based on its directory path
+// --- config loading ---------------------------------------------------------
+
+function loadConfig(projectRoot) {
+  const configPath = path.join(projectRoot, '.agents', 'config.yaml');
+  if (!fs.existsSync(configPath)) return { docs: [], ids: [] };
+
+  const content = fs.readFileSync(configPath, 'utf8');
+
+  // Parse docs list: array items under graph.doc.docs
+  const docsMatch = content.match(/graph:\s*\n\s+doc:\s*\n\s+docs:\s*([\s\S]*?)(?=\n\s{2}\w|\n\w|\n\s+ids:|\Z)/);
+  const docs = [];
+  if (docsMatch) {
+    const items = docsMatch[1].match(/\s*-\s+(.+)/g);
+    if (items) docs.push(...items.map(i => i.replace(/^\s*-\s+/, '').trim()));
+  }
+  if (docs.length === 0) {
+    docs.push('artifacts/input/', 'artifacts/memory/', 'artifacts/output/');
+  }
+
+  // Parse ids list: array items under graph.doc.ids
+  const idsMatch = content.match(/ids:\s*([\s\S]*?)(?=\n\w|\n\s\w|\Z)/);
+  const ids = [];
+  if (idsMatch) {
+    const items = idsMatch[1].match(/\s*-\s+(.+)/g);
+    if (items) ids.push(...items.map(i => i.replace(/^\s*-\s+/, '').trim()));
+  }
+  if (ids.length === 0) {
+    ids.push('US-\\d+', 'REQ-\\d+');
+  }
+
+  return { docs, ids };
+}
+
+function decodeListFlag(flagValue) {
+  // Support both comma-separated and multiple --flag calls.
+  // For simplicity the caller joins repeated values.
+  if (!flagValue) return [];
+  return flagValue.split(',').map(s => s.trim()).filter(Boolean);
+}
+
+// --- document parsing -------------------------------------------------------
+
 function getDocType(relPath) {
   if (relPath.includes('01-discovery')) return 'discovery';
   if (relPath.includes('02-research')) return 'research';
@@ -36,180 +76,183 @@ function extractH1(content) {
 
 function extractHeaders(content) {
   const headers = [];
-  const lines = content.split('\n');
-  for (const line of lines) {
-    const match = line.match(/^(##|###)\s+(.+)$/);
-    if (match) {
-      headers.push(match[2].trim());
-    }
+  for (const line of content.split('\n')) {
+    const m = line.match(/^(##|###)\s+(.+)$/);
+    if (m) headers.push(m[2].trim());
   }
   return headers;
 }
 
 function resolveLink(linkPath, sourceFile, projectRoot) {
-  // Clean up any anchor/hash parts (e.g., file.md#US-001)
   const cleanLink = linkPath.split('#')[0];
   if (!cleanLink) return null;
-
-  // Handle absolute/file links
   if (cleanLink.startsWith('file:///')) {
-    const absPath = cleanLink.replace('file://', '');
-    const rel = path.relative(projectRoot, absPath);
+    const rel = path.relative(projectRoot, cleanLink.replace('file://', ''));
     return rel.startsWith('..') ? null : rel;
   }
-
-  // Handle standard relative links
   const sourceDir = path.dirname(path.resolve(projectRoot, sourceFile));
-  const resolved = path.resolve(sourceDir, cleanLink);
-  const rel = path.relative(projectRoot, resolved);
+  const rel = path.relative(projectRoot, path.resolve(sourceDir, cleanLink));
   return rel.startsWith('..') ? null : rel;
 }
 
 function extractMarkdownLinks(content, sourceFile, projectRoot) {
   const links = new Set();
-  const linkPattern = /\[.+?\]\((.+?)\)/g;
-  let match;
-  while ((match = linkPattern.exec(content)) !== null) {
-    const linkPath = match[1].trim();
+  const re = /\[.+?\]\((.+?)\)/g;
+  let m;
+  while ((m = re.exec(content)) !== null) {
+    const linkPath = m[1].trim();
     if (!linkPath.startsWith('http') && !linkPath.startsWith('#')) {
-      const resolved = resolveLink(linkPath, sourceFile, projectRoot);
-      if (resolved) links.add(resolved);
+      const r = resolveLink(linkPath, sourceFile, projectRoot);
+      if (r) links.add(r);
     }
   }
   return Array.from(links);
 }
 
-function extractRequirementIDs(content) {
-  const matches = content.match(/REQ-\d+/g);
-  return matches ? Array.from(new Set(matches)) : [];
-}
-
-function extractUserStoryIDs(content) {
-  const matches = content.match(/US-\d+/g);
-  return matches ? Array.from(new Set(matches)) : [];
+function extractIDs(content, patterns) {
+  const ids = [];
+  for (const p of patterns) {
+    const re = new RegExp(p, 'g');
+    let m;
+    while ((m = re.exec(content)) !== null) {
+      ids.push(m[0]);
+    }
+  }
+  return Array.from(new Set(ids));
 }
 
 function extractCodeFilePaths(content, projectRoot) {
   const paths = new Set();
-  // Find strings like "src/utils/crypto.js" or "src/routes/api.js"
-  const pathPattern = /(?:^|\s|`|file:\/\/\/)(src|lib|app)\/([a-zA-Z0-9_\-\.\/]+)(?:\s|`|\n|$)/g;
-  let match;
-  while ((match = pathPattern.exec(content)) !== null) {
-    const cleanPath = (match[1] + '/' + match[2]).replace(/[`'"]/g, '').trim();
-    // Verify file actually exists
-    if (fs.existsSync(path.resolve(projectRoot, cleanPath))) {
-      paths.add(cleanPath);
-    }
+  const re = /(?:^|\s|`|file:\/\/\/)(src|lib|app|components|pages|utils|services|hooks|middleware|config|types|styles|public|tests)\/([a-zA-Z0-9_\-\.\/]+)(?:\s|`|\n|$)/g;
+  let m;
+  while ((m = re.exec(content)) !== null) {
+    const cleanPath = (m[1] + '/' + m[2]).replace(/[`'"]/g, '').trim();
+    if (fs.existsSync(path.resolve(projectRoot, cleanPath))) paths.add(cleanPath);
   }
   return Array.from(paths);
 }
 
-function scanDirectory(dir, projectRoot, nodes = []) {
-  if (!fs.existsSync(dir)) return nodes;
+// --- scanning ---------------------------------------------------------------
 
-  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-    const fullPath = path.join(dir, entry.name);
-    const relPath = path.relative(projectRoot, fullPath);
+const IGNORE_DIRS = new Set(['node_modules', '.git', 'archive', 'telemetry', '.agents']);
 
-    if (entry.isDirectory()) {
-      // Skip ignorable folders
-      if (['node_modules', '.git', 'archive', 'telemetry', '.agents'].includes(entry.name)) {
-        continue;
-      }
-      scanDirectory(fullPath, projectRoot, nodes);
-    } else if (entry.isFile() && entry.name.endsWith('.md')) {
-      const content = fs.readFileSync(fullPath, 'utf8');
-      const title = extractH1(content) || entry.name;
-      const type = getDocType(relPath);
+function scanPath(entry, projectRoot, idPatterns, nodes) {
+  const abs = path.resolve(projectRoot, entry);
+  if (!fs.existsSync(abs)) return;
 
-      nodes.push({
-        path: relPath,
-        type,
-        title,
-        sections: extractHeaders(content),
-        links: extractMarkdownLinks(content, relPath, projectRoot),
-        requirements: extractRequirementIDs(content),
-        user_stories: extractUserStoryIDs(content),
-        code_files: extractCodeFilePaths(content, projectRoot)
-      });
-    }
+  const stat = fs.statSync(abs);
+  if (stat.isFile()) {
+    if (!entry.endsWith('.md')) return;
+    parseFile(abs, projectRoot, idPatterns, nodes);
+  } else if (stat.isDirectory()) {
+    scanDir(abs, projectRoot, idPatterns, nodes);
   }
-
-  return nodes;
 }
 
-function buildGraph(projectRoot) {
-  const rawNodes = [];
-  
-  // Scan input, output and memory directories
-  scanDirectory(path.resolve(projectRoot, 'artifacts/input'), projectRoot, rawNodes);
-  scanDirectory(path.resolve(projectRoot, 'artifacts/output'), projectRoot, rawNodes);
-  scanDirectory(path.resolve(projectRoot, 'artifacts/memory'), projectRoot, rawNodes);
+function scanDir(dir, projectRoot, idPatterns, nodes) {
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    if (IGNORE_DIRS.has(entry.name)) continue;
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      scanDir(full, projectRoot, idPatterns, nodes);
+    } else if (entry.isFile() && entry.name.endsWith('.md')) {
+      parseFile(full, projectRoot, idPatterns, nodes);
+    }
+  }
+}
 
-  // Filter nodes to keep only files that actually exist (sanity check)
+function parseFile(fullPath, projectRoot, idPatterns, nodes) {
+  const content = fs.readFileSync(fullPath, 'utf8');
+  const relPath = path.relative(projectRoot, fullPath);
+  const title = extractH1(content) || path.basename(fullPath);
+  const matchedIDs = extractIDs(content, idPatterns);
+
+  nodes.push({
+    path: relPath,
+    type: getDocType(relPath),
+    title,
+    sections: extractHeaders(content),
+    links: extractMarkdownLinks(content, relPath, projectRoot),
+    ids: matchedIDs,
+    requirements: matchedIDs,     // backward compat
+    user_stories: matchedIDs,     // backward compat
+    code_files: extractCodeFilePaths(content, projectRoot)
+  });
+}
+
+// --- graph building ---------------------------------------------------------
+
+function buildGraph(projectRoot, docsRoots, idPatterns) {
+  const rawNodes = [];
+  for (const entry of docsRoots) {
+    scanPath(entry, projectRoot, idPatterns, rawNodes);
+  }
+
   const nodes = rawNodes.filter(n => fs.existsSync(path.resolve(projectRoot, n.path)));
-  
-  // Create a fast lookup map for document nodes
   const nodeLookup = new Set(nodes.map(n => n.path));
-  
+
   const edges = [];
   const codeNodePaths = new Set();
 
+  const idIndex = new Map();
   for (const node of nodes) {
-    // 1. Process Markdown relative links
-    for (const target of node.links) {
-      if (nodeLookup.has(target)) {
-        // Document-to-Document reference
-        let edgeType = 'references';
-        if (node.path.includes('requirements') && target.includes('user-stories')) {
-          edgeType = 'defines';
-        } else if (node.path.includes('user-stories') && target.includes('requirements')) {
-          edgeType = 'traces_to';
-        } else if (node.path.includes('adr') && target.includes('requirements')) {
-          edgeType = 'aligns_with';
-        } else if (!node.path.includes('artifacts/input') && target.includes('artifacts/input')) {
-          edgeType = 'derived_from';
-        }
-
-        edges.push({
-          source: node.path,
-          target,
-          type: edgeType
-        });
-      }
-    }
-
-    // 2. Process Code file references
-    for (const codePath of node.code_files) {
-      codeNodePaths.add(codePath);
-      
-      let edgeType = 'maps_to';
-      if (node.path.includes('user-stories')) {
-        edgeType = 'implements';
-      } else if (node.path.includes('adr')) {
-        edgeType = 'constrains';
-      }
-
-      edges.push({
-        source: node.path,
-        target: codePath,
-        type: edgeType
-      });
+    for (const id of (node.ids || [])) {
+      if (!idIndex.has(id)) idIndex.set(id, []);
+      idIndex.get(id).push(node.path);
     }
   }
 
-  // Add virtual nodes for codebase reference paths so the graph joins cleanly
+  for (const node of nodes) {
+    // 1. Markdown links
+    for (const target of node.links) {
+      if (nodeLookup.has(target)) {
+        let edgeType = 'references';
+        if (node.path.includes('requirements') && target.includes('user-stories')) edgeType = 'defines';
+        else if (node.path.includes('user-stories') && target.includes('requirements')) edgeType = 'traces_to';
+        else if (node.path.includes('adr') && target.includes('requirements')) edgeType = 'aligns_with';
+        else if (!node.path.includes('artifacts/input') && target.includes('artifacts/input')) edgeType = 'derived_from';
+        edges.push({ source: node.path, target, type: edgeType });
+      }
+    }
+
+    // 2. Code references
+    for (const codePath of node.code_files) {
+      codeNodePaths.add(codePath);
+      let edgeType = 'maps_to';
+      if (node.path.includes('user-stories')) edgeType = 'implements';
+      else if (node.path.includes('adr')) edgeType = 'constrains';
+      edges.push({ source: node.path, target: codePath, type: edgeType });
+    }
+
+    // 3. Shared IDs
+    const nodeIds = node.ids || [];
+    for (const id of nodeIds) {
+      const peers = idIndex.get(id) || [];
+      for (const peerPath of peers) {
+        if (peerPath === node.path) continue;
+        let edgeType = 'traces_to';
+        if (node.path.includes('requirements') && peerPath.includes('user-stories')) edgeType = 'defines';
+        else if (node.path.includes('user-stories') && peerPath.includes('product-spec')) edgeType = 'specifies';
+        else if (node.path.includes('product-spec') && peerPath.includes('user-stories')) edgeType = 'traces_to';
+        else if (node.path.includes('adr') && peerPath.includes('requirements')) edgeType = 'aligns_with';
+        edges.push({ source: node.path, target: peerPath, type: edgeType, via: id });
+      }
+    }
+  }
+
+  const edgeSeen = new Set();
+  const dedupedEdges = edges.filter(e => {
+    const key = `${e.source}|${e.target}|${e.type}`;
+    if (edgeSeen.has(key)) return false;
+    edgeSeen.add(key);
+    return true;
+  });
+
   const finalNodes = [...nodes];
   for (const codePath of codeNodePaths) {
     finalNodes.push({
-      path: codePath,
-      type: 'code',
-      title: path.basename(codePath),
-      sections: [],
-      links: [],
-      requirements: [],
-      user_stories: [],
-      code_files: []
+      path: codePath, type: 'code', title: path.basename(codePath),
+      sections: [], links: [], ids: [], requirements: [], user_stories: [], code_files: []
     });
   }
 
@@ -217,27 +260,36 @@ function buildGraph(projectRoot) {
     generated_at: new Date().toISOString(),
     file_count: finalNodes.length,
     nodes: finalNodes,
-    edges
+    edges: dedupedEdges
   };
 }
+
+// --- main -------------------------------------------------------------------
 
 function main() {
   const args = process.argv.slice(2);
   let out = 'artifacts/memory/structural/doc-graph.json';
+  let projectRoot = process.cwd();
+  let docsFlag = null;
+  let idsFlag = null;
 
   for (let i = 0; i < args.length; i++) {
-    if (args[i] === '--out') out = args[i + 1];
+    if (args[i] === '--out') { out = args[i + 1]; i++; }
+    else if (args[i] === '--root') { projectRoot = args[i + 1]; i++; }
+    else if (args[i] === '--docs') { docsFlag = args[i + 1]; i++; }
+    else if (args[i] === '--ids') { idsFlag = args[i + 1]; i++; }
   }
 
-  const projectRoot = process.cwd();
-  const graph = buildGraph(projectRoot);
+  const config = loadConfig(projectRoot);
+  const docsRoots = docsFlag ? decodeListFlag(docsFlag) : config.docs;
+  const idPatterns = idsFlag ? decodeListFlag(idsFlag) : config.ids;
+
+  const graph = buildGraph(projectRoot, docsRoots, idPatterns);
 
   const outDir = path.dirname(out);
-  if (!fs.existsSync(outDir)) {
-    fs.mkdirSync(outDir, { recursive: true });
-  }
-
+  if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
   fs.writeFileSync(out, JSON.stringify(graph, null, 2), 'utf8');
+
   console.log(JSON.stringify({
     success: true,
     documents_scanned: graph.nodes.filter(n => n.type !== 'code').length,

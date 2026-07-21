@@ -5,6 +5,11 @@ description: Stress-test product concepts before research. Supports create/edit/
 
 # Validate Idea
 
+## Harness adherence (non-negotiable)
+- Follow the step sequence for the selected mode exactly. Do NOT skip steps or reorder them.
+- Each step file is a contract. Read it fully before executing. Step files override general guidelines.
+- Mode detection is automatic. The router decides create/edit/validate. Do NOT ask the user which mode unless the intent is genuinely ambiguous.
+
 ## Mode selection
 First, detect the user's intent:
 - **Create mode** → no `artifacts/output/01-discovery/idea-brief.md` exists
@@ -22,6 +27,7 @@ If unclear, ask: "Are you starting a new idea, refining an existing brief, or st
 - Create mode: none (this is the entry point)
 - Edit mode: `artifacts/output/01-discovery/idea-brief.md` exists
 - Validate mode: `artifacts/output/01-discovery/idea-brief.md` exists
+- Problem-first entry: `artifacts/output/01-research/problem-space-brief.md` from `/unpack-problem` is accepted as equivalent to `idea-brief.md` for create mode — the problem brief becomes the idea to validate
 
 ## Halt conditions
 - @founder issues KILL verdict (create mode)
@@ -29,8 +35,8 @@ If unclear, ask: "Are you starting a new idea, refining an existing brief, or st
 - 2 edit cycles without convergence (edit mode)
 
 ## State machine integration
-At start: `node .agents/scripts/orchestrator_state.js status`
-At end: `node .agents/scripts/orchestrator_state.js complete --agent founder --artifact 01-discovery/idea-brief.md`
+At start: `@executor` runs `node .agents/scripts/orchestrator_state.js status`
+At end: `@executor` runs `node .agents/scripts/orchestrator_state.js complete --agent founder --artifact 01-discovery/idea-brief.md`
 
 ## Done when
 - Brief written to `artifacts/output/01-discovery/idea-brief.md`

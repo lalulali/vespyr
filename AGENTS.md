@@ -90,9 +90,18 @@ Vespyr organizes complex, multi-agent operations into highly structured **skills
 ### Curated Workflows
 *   `/validate-idea` — Stress-test product concepts before research
 *   `/validate-game-idea` — Stress-test game concepts before production
+*   `/unpack-problem` — Problem-first exploration before solution ideation (guided, automated, or combination)
+*   `/root-cause` — Socratic 5-Whys and Fishbone root cause analysis
+*   `/research-plan` — Research goals, methodology, and 2-part interview guide
+*   `/empathy-map` — User empathy quadrant canvas (Says/Thinks/Does/Feels)
+*   `/journey-map` — User touchpoint and emotional state journey mapping
+*   `/jtbd` — Jobs-to-be-Done statements + How Might We opportunity questions
+*   `/discovery-report` — Compile design thinking outputs into unified research/usability report
 *   `/explore-idea` — Market, competitor, and user research
 *   `/explore-game-idea` — Genre market and player research
 *   `/shape-up` — Structure and stress-test semi-cooked ideas into design-ready briefs
+*   `/brainstorming` — Select and apply brainstorming methods from a 60-method catalog
+*   `/validation-patterns` — Apply validation methods (smoke tests, concierge MVPs, etc.)
 *   `/design` — PRD and screen specs creation
 *   `/develop` — MVP development cycle
 *   `/launch` — Release readiness and deployment
@@ -200,6 +209,32 @@ Vespyr is defined by three differentiators that no other multi-agent framework c
 **What it is:** Memory loads in three tiers: Tier 1 (core context, ~200 tokens), Tier 2 (agent-specific patterns, ~300 tokens), Tier 3 (task-relevant results, ~500 tokens). Plus a pattern pre-fetch step that promotes relevant Tier 2 patterns to the front of the context window before the full load.
 
 **Why it matters:** Most frameworks either load everything (context bloat) or nothing (no continuity). Vespyr's progressive loading gives the agent exactly what it needs — relevant past decisions, patterns, and risks — without flooding the context window.
+
+---
+
+## 📚 Documentation Update Protocol
+
+When you make changes to Vespyr — new features, changed behaviors, new skills, updated scripts, or modified workflows — **ASK THE USER before updating any documentation file**:
+
+1. **Check if docs need updating.** Determine whether `README.md`, `README_CN.md`, or any file under `Guide/en/` and `Guide/cn/` needs to reflect the change.
+
+2. **Ask for permission.** Present the user with:
+   > *"This change affects Vespyr documentation. Update the following?*"
+   > - *[ ] README.md*
+   > - *[ ] README_CN.md*
+   > - *[ ] Guide/en/ (specific file)*
+   > - *[ ] Guide/cn/ (specific file)*
+
+3. **Do NOT update without explicit confirmation.** Never silently edit documentation files — even if the change seems obvious. The user owns the README and Guide content.
+
+4. **When approved:**
+   - Update `README.md` and `README_CN.md` — keep them high-level (selling/overview). Move detailed how-to content into `Guide/`.
+   - Update the relevant `Guide/en/` and `Guide/cn/` files — these contain the comprehensive step-by-step documentation.
+   - Keep English and Chinese versions synchronized — any change to one must be mirrored in the other.
+
+5. **Guide file conventions:**
+   - `Guide/en/index.md` and `Guide/cn/index.md` are the organizer/entry-point files. If you add a new guide chapter, link it from the index.
+   - Each guide file includes breadcrumb navigation at the top: `> [← Back to Guide](index.md) | [Previous: ...](...) | [Next: ... →](...)`
 
 ---
 

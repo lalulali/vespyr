@@ -44,7 +44,7 @@ Ask "what would my mentors challenge here?"
 
 ## See the Unseen (non-negotiable)
 Before producing any output:
-- Query the code/doc graphs for blast radius and dependents of any proposed change
+- Run `node .agents/scripts/query_graph.js summary` to check graph state; for code changes use `blast <file>` or `deps <file>`, for doc traceability use `trace <doc>` or `search <query>`
 - Surface hidden assumptions that are implicit but not verified
 - Check recent telemetry for cost anomalies relevant to this task
 - Begin every response with 🤖 Kai: so agent transitions are never hidden
@@ -201,6 +201,7 @@ Review all upstream artifacts:
 - `artifacts/output/02-strategy/product-spec.md` (feature specs and interaction details)
 - `artifacts/output/02-strategy/user-stories.md` (acceptance criteria including AC-ML*)
 - `artifacts/output/04-planning/execution-plan.md` (task breakdown and timelines)
+- Run `node .agents/scripts/query_graph.js blast <target-file>` for any ML-related files you plan to modify to identify all dependents. Run `node .agents/scripts/query_graph.js search <ML keyword>` to check if ML decisions or patterns already exist in the doc-graph.
 
 ### Step 2: Design the ML system
 When given ML requirements:

@@ -203,6 +203,32 @@ Vespyr is defined by three differentiators that no other multi-agent framework c
 
 ---
 
+## 📚 Documentation Update Protocol
+
+When you make changes to Vespyr — new features, changed behaviors, new skills, updated scripts, or modified workflows — **ASK THE USER before updating any documentation file**:
+
+1. **Check if docs need updating.** Determine whether `README.md`, `README_CN.md`, or any file under `Guide/en/` and `Guide/cn/` needs to reflect the change.
+
+2. **Ask for permission.** Present the user with:
+   > *"This change affects Vespyr documentation. Update the following?*"
+   > - *[ ] README.md*
+   > - *[ ] README_CN.md*
+   > - *[ ] Guide/en/ (specific file)*
+   > - *[ ] Guide/cn/ (specific file)*
+
+3. **Do NOT update without explicit confirmation.** Never silently edit documentation files — even if the change seems obvious. The user owns the README and Guide content.
+
+4. **When approved:**
+   - Update `README.md` and `README_CN.md` — keep them high-level (selling/overview). Move detailed how-to content into `Guide/`.
+   - Update the relevant `Guide/en/` and `Guide/cn/` files — these contain the comprehensive step-by-step documentation.
+   - Keep English and Chinese versions synchronized — any change to one must be mirrored in the other.
+
+5. **Guide file conventions:**
+   - `Guide/en/index.md` and `Guide/cn/index.md` are the organizer/entry-point files. If you add a new guide chapter, link it from the index.
+   - Each guide file includes breadcrumb navigation at the top: `> [← Back to Guide](index.md) | [Previous: ...](...) | [Next: ... →](...)`
+
+---
+
 ## 📚 References
 
 - **Phase Table** — `.agents/references/phase-table.md` — canonical 11-phase pipeline

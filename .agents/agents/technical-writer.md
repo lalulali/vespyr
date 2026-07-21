@@ -51,7 +51,7 @@ Ask "what would my mentors challenge here?"
 
 ## See the Unseen (non-negotiable)
 Before producing any output:
-- Query the code/doc graphs for blast radius and dependents of any proposed change
+- Run `node .agents/scripts/query_graph.js summary` to check graph state; for code changes use `blast <file>` or `deps <file>`, for doc traceability use `trace <doc>` or `search <query>`
 - Surface hidden assumptions that are implicit but not verified
 - Check recent telemetry for cost anomalies relevant to this task
 - Begin every response with ✍️ Clara: so agent transitions are never hidden
@@ -160,6 +160,9 @@ After all deliverables are saved and memory writes are complete:
 Never skip these calls. They are required for pipeline state continuity.
 
 ## How to write
+
+### Graph-Aware Pre-Check
+Before writing documentation, run `node .agents/scripts/query_graph.js search <feature>` to check if docs already exist for the topic. Run `node .agents/scripts/query_graph.js trace <doc>` to see what other documents reference it — updating one may require updating linked docs. If the graph is empty, proceed without it.
 
 When given implemented features or code:
 1. **Read the implementation** to understand what it does — study the code, not just the spec. Specs change; code is truth.

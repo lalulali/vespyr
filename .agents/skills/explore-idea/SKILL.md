@@ -28,6 +28,12 @@ Before starting, check for a validation brief:
 - Skip Phase 1 (Synthesize) entirely. Go straight to Phase 2 research.
 - After research completes, recommend re-running `shape-up` to incorporate findings before proceeding to `design`.
 
+**Path D — Has problem-space brief (problem-first entry):**
+- [ ] `artifacts/output/01-research/problem-space-brief.md` exists (from `unpack-problem`)
+- The problem brief's **selected solution concept** becomes the idea to research. The **root cause**, **JTBD**, and **HMW questions** become the focused research agenda — research agents validate whether the selected concept addresses the root cause and fulfills the identified jobs.
+- Skip Phase 1 (Synthesize) entirely. Go straight to Phase 2 research.
+- After research completes, recommend running `shape-up` to consolidate findings before proceeding to `design`.
+
 ## Workflow steps
 
 ### Phase 1: Synthesize (skip if validation brief exists)

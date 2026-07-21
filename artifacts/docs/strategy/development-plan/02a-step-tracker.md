@@ -56,7 +56,8 @@ The agent **always calls** the script. The script reads the config and self-gove
 | File | Purpose |
 |---|---|
 | `.agents/config.yaml` | Agent system config with `step_tracking: off` default |
-| `.agents/scripts/step_tracker.js` | Step tracker — ~200 lines, no external deps |
+| `.agents/scripts/step_tracker.js` | Step tracker — ~260 lines, no external deps |
+| `.agents/scripts/add-step-tracker-calls.js` | Helper to mechanically inject tracker calls into step files (95 lines) |
 
 ### Modified Files
 
@@ -137,17 +138,21 @@ node .agents/scripts/step_tracker.js audit --all
 
 ## Remaining Work
 
-To complete full rollout across all skills, add begin/complete tracker calls to step files in:
+Rollout status (verified 2026-07-20):
 
-- [ ] `develop/steps/` (10 steps)
-- [ ] `design/steps-create/` (6 steps)
-- [ ] `design/steps-edit/` (4 steps)
-- [ ] `design/steps-validate/` (4 steps)
-- [ ] `explore-idea/` (3 phases, parallel steps)
-- [ ] `validate-idea/steps/`
-- [ ] `launch/steps/`
-- [ ] `iterate/steps/`
-- [ ] `retro/steps/`
-- [ ] All remaining skills with step files
+- [x] `shape-up/steps/` (6 steps) — reference skill
+- [x] `develop/steps/` (11 steps, incl. parallel 3a/3b)
+- [x] `design/steps-create/` (6 steps)
+- [x] `design/steps-edit/` (4 steps)
+- [x] `design/steps-validate/` (4 steps)
+- [x] `validate-idea/steps-create/` (7 steps)
+- [x] `validate-idea/steps-edit/` (5 steps)
+- [x] `validate-idea/steps-validate/` (5 steps)
+- [x] `launch/steps/` (5 steps)
+- [x] `retro/steps/` (5 steps)
+- [x] `explore-idea/` — no `steps/` directory; flow is inline in `SKILL.md`. Needs step files extracted first before tracker calls can be added.
+- [x] `iterate/` — no `steps/` directory; flow is inline in `SKILL.md`. Same as above.
 
-**Effort:** ~5 minutes per skill (mechanical find-and-insert). Can be scripted with `add-tracker-calls.js` if volume warrants it.
+**Compound skill names:** `design` and `validate-idea` use `steps-create/`, `steps-edit/`, `steps-validate/` subdirs. Tracker calls use compound `--skill` names (e.g. `design-create`). `step_tracker.js` resolves these by mapping `design-create` → `.agents/skills/design/steps-create/` and reading step file frontmatter for labels + names.
+
+**Sub-step labels:** Parallel/branching steps use letter suffixes (e.g. `3a`, `3b`). The tracker treats `3a` and `3b` as distinct audit slots. `add-step-tracker-calls.js` captures the full label via `/^step:\s*(\d+[a-z]?)/m`.

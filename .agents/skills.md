@@ -183,14 +183,19 @@ node .agents/scripts/memory_filter.js --search "JWT authentication decision"
 - **Output:** `artifacts/memory/structural/code-graph.json` with imports, exports, imported_by
 - **Telemetry:** Every call records a `graph_status` event so the dashboard shows scan cost
 
-**Usage:**
+**Refresh:**
 ```
 node .agents/scripts/ensure_graph.js code [--src src/] [--out <path>] [--force]
+node .agents/scripts/ensure_graph.js doc [--out <path>] [--force]
 ```
 
-The same wrapper handles the document graph:
+**Query (use these instead of reading the raw JSON):**
 ```
-node .agents/scripts/ensure_graph.js doc [--out <path>] [--force]
+node .agents/scripts/query_graph.js summary          # compact overview of both graphs
+node .agents/scripts/query_graph.js deps <file>      # what does this file import/export?
+node .agents/scripts/query_graph.js blast <file>     # what depends on this file?
+node .agents/scripts/query_graph.js trace <doc>      # document relationships and edges
+node .agents/scripts/query_graph.js search <query>   # find documents by title/section/path
 ```
 
 ### Archive Format (NDJSON)

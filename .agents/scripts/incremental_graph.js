@@ -334,20 +334,22 @@ function main() {
   if (args.length === 0) {
     console.log(`Usage:
   node incremental_graph.js --src src/ --out artifacts/memory/structural/code-graph.json
-  node incremental_graph.js --src src/,lib/,app/ --out artifacts/memory/structural/code-graph.json`);
+  node incremental_graph.js --src src/,lib/,app/ --out artifacts/memory/structural/code-graph.json
+  node incremental_graph.js --src src/ --out <path> --root <project-root>`);
     process.exit(0);
   }
 
   let src = 'src/';
   let out = 'artifacts/memory/structural/code-graph.json';
+  let projectRoot = process.cwd();
 
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--src') src = args[i + 1];
-    if (args[i] === '--out') out = args[i + 1];
+    else if (args[i] === '--out') out = args[i + 1];
+    else if (args[i] === '--root') projectRoot = args[i + 1];
   }
 
   const srcDirs = src.split(',').map(s => s.trim());
-  const projectRoot = process.cwd();
 
   // Load existing graph if present
   let existingGraph = null;

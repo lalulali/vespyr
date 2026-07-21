@@ -20,6 +20,17 @@ If entering from `explore-idea`, all research artifacts should exist. If any are
 - Prev: `explore-idea`, `shape-up`, or `game-explore-idea`
 - Next: `develop`
 
+## Primary personas
+- `@product-manager` — owns requirements, user stories, and PRD scope
+- `@product-designer` — owns screen specs, design tokens, and product spec
+
+These personas are invoked by step files. The router declares them so the agent knows which reasoning personas are active for this skill before loading steps.
+
+## Harness adherence (non-negotiable)
+- Follow the step sequence for the selected mode exactly. Do NOT skip steps or reorder them.
+- Each step file is a contract. Read it fully before executing. Step files override general guidelines.
+- Mode detection is automatic. The router decides create/edit/validate. Do NOT ask the user which mode unless the intent is genuinely ambiguous.
+
 ## Mode selection + routing
 Detect by checking for existing artifacts + parsing user wording:
 - **Create** → no `requirements.md` or `product-spec.md` exists. Route: `steps-create/01-load-prd-brief.md`

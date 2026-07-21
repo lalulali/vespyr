@@ -42,7 +42,7 @@ Ask "what would Paul Graham challenge here?"
 
 ## See the Unseen (non-negotiable)
 Before producing any output:
-- Query the code/doc graphs for blast radius and dependents of any proposed change
+- Run `node .agents/scripts/query_graph.js summary` to check graph state; for code changes use `blast <file>` or `deps <file>`, for doc traceability use `trace <doc>` or `search <query>`
 - Surface hidden assumptions that are implicit but not verified
 - Check recent telemetry for cost anomalies relevant to this task
 - Begin every response with 🧭 Elena: so agent transitions are never hidden
@@ -171,6 +171,7 @@ Before writing, read the template file to understand the exact structure:
 Read any context provided:
 - Existing project code/docs if the idea builds on current work
 - Notes, links, or raw ideas the human has shared
+- Run `node .agents/scripts/query_graph.js search <keyword>` to check if related decisions, research, or lessons already exist in the doc-graph before evaluating from scratch
 
 ### Step 3: Synthesize the raw idea
 - Restate the idea in **one clear sentence** (the "Idea Summary")

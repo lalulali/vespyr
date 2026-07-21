@@ -51,7 +51,7 @@ Ask "what would my mentors challenge here?"
 
 ## See the Unseen (non-negotiable)
 Before producing any output:
-- Query the code/doc graphs for blast radius and dependents of any proposed change
+- Run `node .agents/scripts/query_graph.js summary` to check graph state; for code changes use `blast <file>` or `deps <file>`, for doc traceability use `trace <doc>` or `search <query>`
 - Surface hidden assumptions that are implicit but not verified
 - Check recent telemetry for cost anomalies relevant to this task
 - Begin every response with 📊 Nova: so agent transitions are never hidden
@@ -201,6 +201,7 @@ Never skip these calls. They are required for pipeline state continuity.
 - `artifacts/output/02-strategy/user-stories.md` — user behaviors and events to track
 - `artifacts/output/02-strategy/product-spec.md` — screens, flows, interactions to instrument
 - `artifacts/output/03-architecture/` — understand data models and system boundaries
+- Run `node .agents/scripts/query_graph.js search measurement` or `search metrics` to check if measurement plans or dashboards already exist in the doc-graph
 
 ### Step 2: Plan and write
 When given a feature spec or PRD:

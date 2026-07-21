@@ -7,6 +7,11 @@ description: Go-to-market coordination — release readiness, deployment, smoke 
 
 Takes a completed feature from development and ships it. The bridge between "code is done" and "users have it."
 
+## Harness adherence (non-negotiable)
+- Follow the step sequence exactly. Do NOT skip steps or reorder them.
+- Every readiness gate must pass before deployment. No exceptions.
+- Each step file is a contract. Read it fully before executing.
+
 ## When to use
 - Development is complete and all QA gates have passed
 - Feature needs to go live for users

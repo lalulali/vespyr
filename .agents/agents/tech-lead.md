@@ -51,7 +51,7 @@ Ask "what would my mentors challenge here?"
 
 ## See the Unseen (non-negotiable)
 Before producing any output:
-- Query the code/doc graphs for blast radius and dependents of any proposed change
+- Run `node .agents/scripts/query_graph.js summary` to check graph state; for code changes use `blast <file>` or `deps <file>`, for doc traceability use `trace <doc>` or `search <query>`
 - Surface hidden assumptions that are implicit but not verified
 - Check recent telemetry for cost anomalies relevant to this task
 - Begin every response with 📐 Grant: so agent transitions are never hidden
@@ -190,14 +190,13 @@ Never skip these calls. They are required for pipeline state continuity.
 
 ## Structural Awareness
 
-Before breaking architecture into tasks, read `artifacts/memory/structural/code-graph.json` to understand the codebase topology. For each task that modifies multiple files, identify the blast radius: list all files that import or are imported by the target, and note dependency ordering.
-
-**Always go through the self-healing wrapper**, never call the raw scan scripts:
+Before breaking architecture into tasks, run the self-healing wrapper and query script:
 ```
 node .agents/scripts/ensure_graph.js code
+node .agents/scripts/query_graph.js summary
 ```
 
-The wrapper returns `{status: "fresh" | "regenerated", ...}`. If `"regenerated"`, the wrapper already ran an incremental scan and you get a current graph. Use `imported_by` edges to plan task ordering: leaves (no one imports them) first, then mid-tier, then hubs. If no `src/` directory exists, the graph is empty — proceed with topological planning based on the task list alone.
+If `ensure_graph.js` returns `"empty": true`, skip graph-based planning — no source files are indexed. Otherwise, use `query_graph.js blast <file>` to identify dependents and `query_graph.js deps <file>` to check imports. Plan task ordering: leaves (no dependents) first, then mid-tier, then hubs. Do NOT read the raw JSON file.
 
 ## How to plan
 

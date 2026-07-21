@@ -26,6 +26,13 @@ This skill runs in sequential steps. Each step is a self-contained file with its
 3. Load `steps/step-{NN}-*.md`.
 4. Execute. On completion, append NN to `stepsCompleted` and re-invoke loader.
 
+## Harness adherence (non-negotiable)
+- Follow the step sequence exactly. Do NOT skip steps or reorder them.
+- Quality gates are not optional. QA runs automatically at step 7 — do NOT ask the user whether to run tests.
+- Security and performance gates are auto-decided based on spec content — do NOT ask the user which gates apply.
+- Each step file is a contract. Read it fully before executing. Step files override general guidelines.
+- If a step halts (test failure, security finding, 2+ review cycles), stop and escalate to `@tech-lead`. Do NOT proceed past a halt condition.
+
 ## Step sequence
 1. **Spec Alignment & Read Check** → `steps/step-01-spec-alignment.md`
 2. **Architecture** (conditional: if ArchitectPhase: true) → `steps/step-02-architecture.md`

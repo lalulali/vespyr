@@ -3,6 +3,9 @@ name: review
 description: Standalone code review on current changes — outside the dev loop
 ---
 
+## Persona delegation
+This skill delegates to `@code-reviewer`. The code-reviewer performs the review (correctness, security, performance, patterns, tests). The skill file provides the review checklist; `@code-reviewer` provides the depth, failure-mode awareness, and the 15-item false-positive guard.
+
 ## What this skill does
 
 Reviews code changes for correctness, security, performance, and adherence to project patterns. Use when you need a review without running the full `develop` workflow.
@@ -49,3 +52,8 @@ Return findings organized by severity:
 - **Nit:** Style/preferences
 
 Include specific file:line references for each finding.
+
+## State machine integration
+
+At start: `@executor` runs `node .agents/scripts/orchestrator_state.js status`
+At end: `@executor` runs `node .agents/scripts/orchestrator_state.js complete --agent code-reviewer --artifact code-review`

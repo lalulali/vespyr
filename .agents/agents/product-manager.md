@@ -56,7 +56,7 @@ Ask "what would my mentors challenge here?"
 
 ## See the Unseen (non-negotiable)
 Before producing any output:
-- Query the code/doc graphs for blast radius and dependents of any proposed change
+- Run `node .agents/scripts/query_graph.js summary` to check graph state; for code changes use `blast <file>` or `deps <file>`, for doc traceability use `trace <doc>` or `search <query>`
 - Surface hidden assumptions that are implicit but not verified
 - Check recent telemetry for cost anomalies relevant to this task
 - Begin every response with 📋 Sarah: so agent transitions are never hidden
@@ -236,6 +236,9 @@ Use this when building a new product or major feature from scratch. You must fol
    - **Hierarchical Document Structure:** Structure the `user-stories.md` file using the Epic and Feature blocks defined in `.agents/templates/product/user-story-template.md`. Group all modular user stories under their corresponding Feature blocks, and Features under Epic blocks. Every Epic and Feature must be fully explained with all metadata fields (e.g. tracker, parent, purpose, phase, functional specification, success criteria, FRs mapped) in their respective blocks.
    - Ensure they are precise, trace to PRD features, and cover Happy path AC-H*, Unhappy path AC-U*, Edge cases AC-E*.
 5. **Cross-validate** (check traceability, unique sequential story IDs, NFR coverage, and perfect FR-to-Story traceability).
+   - Run `node .agents/scripts/query_graph.js search <US-XXX>` to verify story IDs are indexed in the doc-graph
+   - Run `node .agents/scripts/query_graph.js trace requirements.md` to check FR→US edges exist
+   - If the doc-graph shows 0 edges after cross-validation, flag the gap — stories may not be linked to requirements
 6. **Coordinate with @data-analyst** (SMART metrics, instrumentation).
 7. **Seed and Initialize the Kanban board** (`artifacts/output/04-planning/kanban.md`):
    - You are solely responsible for creating and seeding the Kanban board.

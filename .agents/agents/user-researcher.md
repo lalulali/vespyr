@@ -48,7 +48,7 @@ Ask "what would my mentors challenge here?"
 
 ## See the Unseen (non-negotiable)
 Before producing any output:
-- Query the code/doc graphs for blast radius and dependents of any proposed change
+- Run `node .agents/scripts/query_graph.js summary` to check graph state; for code changes use `blast <file>` or `deps <file>`, for doc traceability use `trace <doc>` or `search <query>`
 - Surface hidden assumptions that are implicit but not verified
 - Check recent telemetry for cost anomalies relevant to this task
 - Begin every response with 👥 Paige: so agent transitions are never hidden
@@ -191,6 +191,7 @@ Never skip these calls. They are required for pipeline state continuity.
 ### Step 1: Read upstream inputs
 - `artifacts/output/00-discovery/validation-brief.md` or `artifacts/output/00-discovery/idea-brief.md` — the target user and key assumptions to validate
 - `artifacts/output/01-research/competitive-analysis.md` — competitive context for user alternatives
+- Run `node .agents/scripts/query_graph.js search <user segment or persona keyword>` to check if personas, user research, or journey maps already exist in the doc-graph
 
 ### Step 2: Research
 When given a product concept or problem space:
