@@ -1158,7 +1158,7 @@ async function performFreshInstall(targetDir, flags) {
 				}
 			} else if (step === "name") {
 				userNickname = await askQuestion(
-					"What should the agent squad call you? (e.g., Lyor, Giovanni)",
+					"What should the agent squad call you? (e.g., Lyor, Laura)",
 					userNickname || "User",
 				);
 				userNickname =
@@ -1386,7 +1386,7 @@ async function performReconfigure(targetDir, flags) {
 		);
 		if (fs.existsSync(contextPath)) {
 			userNickname = await askQuestion(
-				"What should the agent squad call you? (e.g., Lyor, Giovanni)",
+				"What should the agent squad call you? (e.g., Lyor, Laura)",
 				userNickname,
 			);
 			userNickname = userNickname.replace(/[^a-zA-Z0-9\s\-_.]/g, "") || "User";

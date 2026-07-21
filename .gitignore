@@ -18,6 +18,7 @@ artifacts/memory/
 *.log
 
 # IDE
+.obsidian/
 .vscode/
 .idea/
 *.swp

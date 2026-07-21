@@ -3,7 +3,8 @@
 > **Release:** v2.1
 > **Calendar:** Week 5
 > **Themes:** T4 (Harness contracts), T5 (Self-improvement)
-> **Goal:** Vespyr enforces policy at the harness layer (hooks), exposes primitives externally (MCP), tracks its own work (self-learning), has delegation audited (not just documented), and makes QA a hard gate.
+> **Goal:** Vespyr enforces policy at the harness layer (hooks), tracks its own work (self-learning), has delegation audited (not just documented), and makes QA a hard gate.
+> **MCP (external tools):** Specified in `03a-mcp-integration-plan.md` — 10 first-party tools (5 wrappers + 5 capability) + 4 third-party servers, all free and local-first.
 
 ## What changed from the original
 
@@ -11,6 +12,7 @@
 |---|---|---|---|
 | F2.19 (delegation policy + contract blocks) | Phase 2 only | **Split:** policy + blocks in Phase 0 T7.1; audit script + invocation logging in Phase 2 | T7 promotes the policy to Phase 0 (the moat ships first). Phase 2 ships the enforcement tooling. |
 | Pre-Phase 0 (Hermes/OpenClaw) | v2.0 | **Deferred to v2.1+** | See `07-harness-integration.md` |
+| F2.6-F2.10 (MCP tool surface) | Phase 2 | **Moved to `03a-mcp-integration-plan.md`** | Centralized all MCP development (1st-party + 3rd-party) in one plan. |
 
 ## F2.1-F2.5 — Lifecycle hooks (12 hooks with stable IDs)
 
@@ -53,65 +55,7 @@
   - `strict`: all 12 + block on warnings (not just errors)
 - [ ] F2.5 — Create `.agents/hooks/README.md`: list all 12 IDs, document env vars, document per-harness adapter
 
-## F2.6-F2.10 — MCP tool surface (10 tools)
 
-**Source:** Adoption §3.6 | **Theme:** T4
-
-**Problem:** `opencode.json` registers exactly one MCP plugin: `opencode-websearch-cited@1.2.0`. No first-party vespyr MCP. External tools cannot call our primitives.
-
-**Target:** Ship an `@vespyr/mcp` package that exposes the core primitives as MCP tools. The package is a thin Node.js server (stdio transport, JSON-RPC) that wraps the existing scripts.
-
-**Full MCP tool signatures:**
-
-```typescript
-// mcp__vespyr__memory_load — wraps memory_filter.js
-mcp__vespyr__memory_load({
-  agent: "developer",
-  task: "implement auth login flow",
-  tier: "balanced"  // "core" | "balanced" | "full"
-}) → { context: string, tokens: number, sources: string[] }
-
-// mcp__vespyr__memory_write — wraps the dedupe-validate + append flow
-mcp__vespyr__memory_write({
-  file: "patterns-and-conventions.md",
-  entry: "### [CODE] ..."
-}) → { ok: boolean, deduped: boolean, id: string }
-
-// mcp__vespyr__pipeline_status — wraps orchestrator_state.js status
-mcp__vespyr__pipeline_status() → { phase: string, next: string, missing: string[] }
-
-// mcp__vespyr__pipeline_next
-mcp__vespyr__pipeline_next() → { action: "advance-phase" | "generate-artifacts", required: string[] }
-
-// mcp__vespyr__code_graph_scan
-mcp__vespyr__code_graph_scan({ path: "src/" }) → { nodes: number, edges: number, hotspots: string[] }
-
-// mcp__vespyr__code_graph_query
-mcp__vespyr__code_graph_query({ symbol: "auth.login" }) → { callers: string[], callees: string[] }
-
-// mcp__vespyr__elicitation_methods
-mcp__vespyr__elicitation_methods({ count: 5, context: "PRD section" })
-  → { methods: [{ name, description, output_pattern }] }
-
-// mcp__vespyr__squad_list
-mcp__vespyr__squad_list() → { squads: [{ name, agents, description }] }
-
-// mcp__vespyr__squad_switch
-mcp__vespyr__squad_switch({ squad: "build" }) → { ok: boolean, active: string }
-
-// mcp__vespyr__agent_resolve
-mcp__vespyr__agent_resolve({ query: "who reviews PRs" }) → { agent: "code-reviewer", confidence: number }
-```
-
-**Rule:** MCP tools are *wrappers* around existing scripts. The script is the truth. MCP never owns state.
-
-**Why we don't adopt Ruflo's 314-tool scale.** Our 10 tools cover the 90% of useful operations. Adding more is a 1-day script per tool.
-
-- [ ] F2.6 — Create `packages/mcp/` monorepo path (`package.json`, `tsconfig.json`, `src/server.ts`, `src/tools/`, `src/transport.ts`, `README.md`)
-- [ ] F2.7 — Implement MCP server (`src/server.ts`, ~300 lines): JSON-RPC over stdio, tool registration, per-tool error handling
-- [ ] F2.8 — Implement 10 tools (each ~60 lines, thin wrapper around existing scripts)
-- [ ] F2.9 — Update `opencode.json` to register MCP server by default
-- [ ] F2.10 — Add `mcp start` / `mcp list-tools` / `mcp test <tool>` subcommands to `bin/cli.js`
 
 ## F2.11-F2.15 — Self-learning (3-tier episode → pattern → instinct)
 
@@ -276,8 +220,6 @@ The orchestrator reads this file's existence as the gate token to advance from d
 ## Done when
 
 - [ ] 12 hooks registered, env-var-disablable, documented
-- [ ] `mcp__vespyr__memory_load` returns valid context (test from Claude Code or OpenCode)
-- [ ] `npx vespyr mcp start` works
 - [ ] `/self-learning` runs end-to-end on a real project, producing a digest
 - [ ] `node .agents/scripts/witness.js check` exits 0 on a clean project
 - [ ] `node .agents/scripts/delegation_audit.js` shows ≥ 5 sub-agent invocations after a typical `/develop` cycle
@@ -290,7 +232,6 @@ The orchestrator reads this file's existence as the gate token to advance from d
 ## Risks
 
 - **Hooks break in different harnesses.** Per-harness adapter; CI runs against all 3. Safety hooks `exit 0` by default; `exit 2` only for explicit safety events.
-- **MCP tools become a second source of truth.** MCP tools are wrappers around existing scripts. The script is the truth. MCP never owns state.
 - **`witness.js` false positives.** Re-sign on every `@memory-controller write`. Witness is a history, not a lock. First warning is informational.
 - **Self-learning promotes false patterns.** 3+ occurrences, 2+ agents, 7+ day span — all required. Every promotion is human-in-the-loop.
 - **Delegation audit reveals low rate.** This is the audit's job; don't game the metric.
@@ -300,14 +241,13 @@ The orchestrator reads this file's existence as the gate token to advance from d
 
 If Phase 2 breaks:
 - **Hooks:** `VESPYR_DISABLED_HOOKS=*` disables all hooks. Or delete `.agents/hooks/hooks.json` — hooks are opt-in per harness.
-- **MCP server:** remove the MCP registration from `opencode.json`. The underlying scripts still work via CLI.
 - **Self-learning:** delete `instincts.md` — the system falls back to the 2-tier memory (project-context + patterns). No data is lost; episodes and patterns remain.
 - **QA hard gate:** if `qa-signoff.md` blocks a legitimate release, create a manual signoff with `Release recommendation: CONDITIONAL` and a note explaining the bypass.
 
 ## Handoff to Phase 3
 
 - 12 hooks live, with stable IDs and env-var disable.
-- 10 MCP tools callable from external harnesses.
+- 10 MCP tools callable from external harnesses — 5 wrappers + 5 capability tools (see `03a-mcp-integration-plan.md`).
 - `instincts.md` is the first thing loaded in every session.
 - `witness.json` tracks every critical artifact's hash.
 - Delegation is enforced at the harness layer (hooks block direct I/O) and auditable (audit script).
