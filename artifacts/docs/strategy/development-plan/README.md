@@ -62,7 +62,7 @@ Every file in the plan maps to exactly one theme. Themes are capability-shaped, 
 |---|---|---|---|---|
 | **0** | v2.0 | T1, T3, T7 | Frontmatter v2, IDENTITY block, customization TOML, thin skills ≥80 lines, entry-point consolidation, phase table, glossary, agent contracts, **+ T7: worktree delegation enforcement + tooling (T7.1b), memory auto-loading, Socratic minimum bar, identity docs** | `01-phase-0-foundation.md` |
 | **1** | v2.0 | T2, T3 | 5 long skills → folder + steps (develop, validate-idea, retro, design, launch); tri-modal flows; spec-kernel PRD; sprint-status.yaml; ASCII CLI dashboards; 9 domain experts ≥200 lines; code-reviewer 15-item false-positive guard; Ivy design.md + dynamic HTML | `02-phase-1-skills.md` |
-| **2** | v2.1 | T4, T5 | 12 lifecycle hooks; MCP server (10 tools); self-learning (episode→pattern→instinct); SHA-256 witness; delegation enforcement; QA as hard gate | `03-phase-2-enablement.md` |
+| **2** | v2.1 | T4, T5 | 12 lifecycle hooks; MCP server (10 tools); self-learning (episode→pattern→instinct); SHA-256 witness; delegation enforcement; QA as hard gate; **multi-agent orchestration (solo/parallel modes, CLI orchestrator, structured output)** | `03-phase-2-enablement.md`, `03a-mcp-integration-plan.md`, `03b-multi-agent-orchestration.md` |
 | **3** | v2.1 | T3, T4 | Graph auto-build at 5 lifecycle moments; graph query API; telemetry surface; catalog parity test; "See the Unseen" on all 21 agents; data analyst CLI tools | `04-phase-3-observability.md` |
 | **4** | v2.1 | T6 | install-modules (7 modules); rules/common + per-language; agent-builder/skill-builder/workflow-builder; worked example project; README/AGENTS/QUICK-REFERENCE/CHANGELOG rewrite | `05-phase-4-modularity.md` |
 | **5** | v2.2 | T1, T2 | Deeper Bench: T1 (14 personas + 14 skills + 3 squads), T2 (7 personas + 4 skills), T3 (1 persona) | `06-phase-5-deeper-bench.md` |
@@ -253,6 +253,8 @@ The "1-day ECC repackage" pattern is insufficient. Personas that don't clear eit
 | `01-phase-0-foundation.md` | Phase 0: full templates (phase table, glossary, agent contracts, grill-me, delegation-policy, IDENTITY block, frontmatter v2) + T7 identity work | 954 |
 | `02-phase-1-skills.md` | Phase 1: full templates (spec-kernel, spec-law, sprint-status.yaml, Ivy rubric, 15-item false-positive guard, step-file architecture) | 898 |
 | `03-phase-2-enablement.md` | Phase 2: full hooks table, MCP tool signatures, self-learning 3-tier spec, QA hard gate wording, delegation-policy content | 286 |
+| `03a-mcp-integration-plan.md` | MCP Integration: first-party + 3rd-party MCP servers, 10 tools, context truncation, error handling | 289 |
+| `03b-multi-agent-orchestration.md` | Multi-Agent Orchestration: solo/parallel mode, CLI orchestrator, structured output, quality guardrails, harness capability detection | ~420 |
 | `04-phase-3-observability.md` | Phase 3: graph query contracts per agent, See the Unseen directives, telemetry protocol, build-wiki spec | 240 |
 | `05-phase-4-modularity.md` | Phase 4: full install-modules.json, rules/ directory structure, builder flows, example project file list | 249 |
 | `06-phase-5-deeper-bench.md` | Phase 5: FULL persona charters (channeled mentor, charter, permissions, squad, complements) for all 22 new personas + 18 new skills | 682 |

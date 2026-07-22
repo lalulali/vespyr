@@ -49,11 +49,12 @@
 
 ### Opt-in (documented, not enabled by default)
 
-| Server | Cost | Use case |
-|---|---|---|
-| **Shadcn MCP** | Free/MIT | UI component registry for projects using shadcn/ui |
-| **GitHub MCP** | Free tier (PAT) | CI log retrieval, PR review integration |
-| **Figma MCP** | Free tier | Design token extraction, SVG export |
+| Server | Cost | Personas | Use case |
+|---|---|---|---|
+| **Shadcn MCP** | Free/MIT | `@product-designer`, `@developer` | UI component registry for projects using shadcn/ui |
+| **GitHub MCP** | Free tier (PAT) | `@developer`, `@code-reviewer` | CI log retrieval, PR review integration |
+| **Figma MCP** | Free tier | `@product-designer` | Design token extraction, SVG export |
+| **Reddit MCP Buddy** (`karanb192/reddit-mcp-buddy`) | Free / Reddit API | `@researcher`, `@user-researcher` | Organic market sentiment analysis, competitor pain point mining, community discussion scraping, and trend validation |
 
 ### Rejected
 
@@ -269,6 +270,7 @@ No manual MCP configuration required. The installer (`bin/cli.js`) writes the `m
 npx vespyr install-module shadcn-mcp
 npx vespyr install-module github-mcp
 npx vespyr install-module figma-mcp
+npx vespyr install-module reddit-mcp
 ```
 
 ---

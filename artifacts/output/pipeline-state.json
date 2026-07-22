@@ -1,0 +1,70 @@
+{
+  "project": {
+    "name": "vespyr",
+    "type": "startup",
+    "squad": "full-team"
+  },
+  "created_at": "2026-07-22T07:24:13.006Z",
+  "last_updated": "2026-07-22T07:24:13.011Z",
+  "current_phase": "validation",
+  "phases": {
+    "validation": {
+      "status": "pending",
+      "started_at": null,
+      "completed_at": null,
+      "agents": [
+        "founder"
+      ]
+    },
+    "exploration": {
+      "status": "pending",
+      "started_at": null,
+      "completed_at": null,
+      "agents": [
+        "researcher",
+        "user-researcher"
+      ]
+    },
+    "design": {
+      "status": "pending",
+      "started_at": null,
+      "completed_at": null,
+      "agents": [
+        "product-manager",
+        "product-designer"
+      ]
+    },
+    "development": {
+      "status": "pending",
+      "started_at": null,
+      "completed_at": null,
+      "agents": [
+        "tech-lead",
+        "developer",
+        "code-reviewer",
+        "qa-engineer"
+      ]
+    }
+  },
+  "artifacts": {
+    "artifacts/output/01-research/multi-agent-harness-research.md": {
+      "agent": "researcher",
+      "completed_at": "2026-07-22T07:24:13.011Z",
+      "version": null,
+      "phase": "validation"
+    }
+  },
+  "change_requests": [],
+  "blockers": [],
+  "history": [
+    {
+      "action": "artifact-complete",
+      "agent": "researcher",
+      "artifact": "artifacts/output/01-research/multi-agent-harness-research.md",
+      "version": null,
+      "tokens": 0,
+      "duration_ms": null,
+      "timestamp": "2026-07-22T07:24:13.011Z"
+    }
+  ]
+}

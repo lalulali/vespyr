@@ -65,5 +65,12 @@
       "grill-me": "allow"
     }
   },
+  "mcp": {
+    "reddit": {
+      "type": "local",
+      "command": ["npx", "-y", "reddit-mcp-buddy"],
+      "enabled": true
+    }
+  },
   "plugin": ["opencode-websearch-cited@1.2.0"]
 }
