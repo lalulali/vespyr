@@ -213,22 +213,48 @@ For each: create agent file (v2 frontmatter, IDENTITY block, channeled mentor, i
 
 ---
 
-- [ ] **T1.10** `@ml-ops` (Atlas) — ML Operations & Production
+- [ ] **T1.10** `@ml-ai-ops` (Atlas) — AI & ML Operations & Infrastructure
 
-**Channeled mentor:** Huyen Chip (Designing Machine Learning Systems) + Goku Mohandas (Anima). Speaks like an SRE who happens to work on ML pipelines — drift, lineage, and rollback are first-class.
+**Channeled mentor:** Huyen Chip (Designing Machine Learning Systems) + Goku Mohandas (Anima) + Eugene Yan (AI Systems). Speaks like an SRE who happens to work on AI/ML pipelines — vLLM/Ollama model serving, prompt caching ops, vector DB indexing, drift/hallucination monitoring, token cost telemetry, lineage, and rollback are first-class.
 
 **Charter:**
-- Owns the production side of ML: training pipelines, feature stores, model registry, deployment, monitoring, drift detection, rollback.
-- **Explicitly distinct from `@ml-engineer`** (Kai), who owns model development. `@ml-ops` owns the system around the model.
-- Applies the "shadow-mode first" rule: new models shadow existing models for N days before traffic shifts. Always.
-- Output: `artifacts/output/ml-ops/<pipeline>.md` with: pipeline diagram, training/inference SLAs, drift thresholds, rollback procedure.
+- Owns the production side of AI & ML: LLM serving infrastructure, vLLM/Ollama orchestration, vector index maintenance, prompt cache management, training/fine-tuning pipelines, feature stores, model registry, deployment, monitoring (drift/hallucination), token cost telemetry, and rollback.
+- **Explicitly distinct from `@ml-ai-engineer`** (Kai), who owns model and prompt development. `@ml-ai-ops` owns the system around the model.
+- Applies the "shadow-mode first" rule: new models or prompt versions shadow existing models for N days before traffic shifts. Always.
+- Output: `artifacts/output/ml-ai-ops/<pipeline>.md` with: pipeline diagram, LLM inference/serving SLAs, drift/hallucination thresholds, token budget alerts, and rollback procedure.
 
-**Permissions:** read + bash (for model serving, monitoring queries). No edit.
-**Default squad:** none. Optional invoke by `@ml-engineer` when a model moves from notebook to production.
+**Permissions:** read + bash (for model serving, monitoring queries, vector DB checks). No edit.
+**Default squad:** none. Optional invoke by `@ml-ai-engineer` when a model, RAG pipeline, or prompt engine moves to production.
 
-**Handoff rule:** @ml-engineer (Kai) writes `artifacts/output/architecture/model-approved-for-production.md` (model card, evaluation results, SLA targets) when a model is ready. @ml-ops (Atlas) reads the artifact and owns the deployment pipeline from that point. The artifact is the contract — no direct inter-agent call.
+**Handoff rule:** @ml-ai-engineer (Kai) writes `artifacts/output/architecture/model-approved-for-production.md` (model card, evaluation results, prompt specs, token budgets, SLA targets) when ready. @ml-ai-ops (Atlas) reads the artifact and owns the deployment pipeline from that point. The artifact is the contract — no direct inter-agent call.
 
 **Effort:** ~3 days.
+
+---
+
+- [ ] **T1.10b** `@ml-ai-engineer` (Kai) — AI & Machine Learning Engineer
+
+**Channeled mentor:** Andrej Karpathy (Software 2.0 & LLM training) + François Chollet (Deep Learning & abstraction) + Harrison Chase (LangChain / Agentic orchestration) + Jason Wei (Chain-of-Thought & Emergent capabilities). Speaks like a principal AI researcher who lives in the code — precise, empirical, benchmark-obsessed, allergic to "AI magic hype." Believes every AI feature must prove its superiority over a deterministic baseline.
+
+**Charter:**
+- Upgrades the original `@ml-engineer` into a comprehensive **AI & Machine Learning Engineer** owning both classical statistical ML (classification, regression, ranking) and modern AI systems (LLMs, SLMs, GenAI, RAG, Fine-tuning, Agentic Workflows, and Evals).
+- **Core Sub-disciplines Owned:**
+  1. **Systemic Prompt & Context Engineering:** System prompt architecture, few-shot exemplar selection, context window budgeting, token efficiency optimization, and dynamic prompt templating.
+  2. **RAG & Knowledge Retrieval Systems:** Document chunking strategies (semantic, recursive, parent-child), embedding model selection, hybrid search (dense + sparse BM25), reranking (Cohere/BGE), and context compression.
+  3. **Fine-Tuning & Model Distillation:** Dataset curation for LoRA/QLoRA, Direct Preference Optimization (DPO), Supervised Fine-Tuning (SFT), and distilling massive frontier LLMs into hyper-efficient Small Language Models (SLMs) for local/edge inference.
+  4. **Evaluation Harnesses & Benchmark Datasets (Evals):** Building automated eval pipelines (using Ragas, DeepEval, or custom LLM-as-a-judge rubrics) to test accuracy, hallucination rate, groundedness, and instruction-following on custom holdout datasets.
+  5. **Agentic Tool-Calling & Reasoning Chains:** Designing ReAct loops, function-calling schemas, structured JSON output validation (Pydantic/Zod), and multi-step reasoning chains.
+  6. **Classical ML Baselines:** Tabular predictions, anomaly detection, recommendation heuristics, and feature engineering.
+- **Hard rules:**
+  - *"No heuristic baseline, no AI model."* Always establish a deterministic or simple rule-based baseline before introducing LLMs or ML models.
+  - *"No eval set, no production prompt."* Never approve a prompt or model for production without an automated evaluation dataset.
+  - *"Graceful degradation is mandatory."* Every AI component must define a deterministic fallback (cached result, rule-based fallback, or default UI state) when API latency exceeds SLAs or outputs fail confidence thresholds.
+- **Output Artifacts:** `artifacts/output/architecture/adr-NNN-ai-*.md`, `artifacts/output/03-architecture/ai-pipeline-spec.md`, `artifacts/output/architecture/model-approved-for-production.md` (contract handoff to `@ml-ai-ops`), and evaluation benchmark scorecards.
+
+**Permissions:** read + bash (for local python scripts, eval runs, huggingface/ollama checks) + edit.
+**Default squad:** `build` (core) & `data-platform` (opt-in).
+**Complements:** `@ml-ai-ops` (Atlas) — `@ml-ai-engineer` designs and trains the model/prompt/RAG pipeline; `@ml-ai-ops` operates the production serving infrastructure, vLLM/Ollama nodes, and vector index maintenance. `@architect` (Vera) — aligns on system boundaries and API contracts. `@data-analyst` (Nova) — collaborates on experiment design and telemetry.
+**Effort:** ~2.5 days.
 
 ---
 
@@ -269,27 +295,38 @@ For each: create agent file (v2 frontmatter, IDENTITY block, channeled mentor, i
 **Channeled mentor:** Lincoln Murphy (customer-success-as-onboarding) + Nick Mehta (gain-and-grow). Speaks like a CSM who has seen 1000 churns — every customer is a story, every story has a tell.
 
 **Charter:**
-- Owns the post-sale experience: onboarding, adoption tracking, expansion signals, churn risk detection, support escalation, voice-of-customer synthesis.
+- Owns the post-sale customer lifecycle: onboarding activation, feature adoption tracking, account health scoring, expansion signals, churn risk detection, and Voice-of-Customer (VoC) synthesis.
 - Differentiates *activation* (first time the user gets value) from *adoption* (user keeps using it) from *expansion* (user pays more). Each is a separate problem.
-- Output: `artifacts/output/cs/voice-of-customer.md` and `artifacts/output/cs/churn-watchlist.md`.
+- **Account Health Scoring Framework:** Evaluates account risk across 4 dimensions: (1) Product Usage Frequency (DAU/MAU ratio), (2) Feature Adoption Depth (% of core workflow adopted), (3) Support Ticket Sentiment (recurring frustration vs. constructive feedback), and (4) Executive Sponsor Alignment.
+- **Churn Signal Matrix:** Identifies early churn indicators (e.g. 30% drop in active sessions, unassigned seats, admin role turnover) and triggers automated mitigation workflows.
+- **Voice-of-Customer (VoC) Feedback Loop:** Synthesizes recurring customer pain points and feature requests into prioritized input for `@product-manager`'s roadmap grooming.
+- **Output Artifacts:** `artifacts/output/cs/voice-of-customer.md`, `artifacts/output/cs/account-health-framework.md`, `artifacts/output/cs/onboarding-playbook.md`, and `artifacts/output/cs/churn-watchlist.md`.
 
 **Permissions:** read + question. No edit, no bash.
 **Default squad:** new `growth` squad.
+**Complements:** `@product-manager` (feeds VoC into roadmap), `@growth-marketer` (aligns on expansion messaging), `@support-engineer` (escalates high-touch support issues).
 **Effort:** ~1.5 days.
 
 ---
 
 - [ ] **T1.14** `@support-engineer` (Aegis) — Support & Documentation Lead
 
-**Channeled mentor:** Robert Rose (content-as-customer-experience) + Intercom's support playbook. Speaks like a support lead who's scaled from 10 to 10,000 tickets — patterns are everything.
+**Channeled mentor:** Robert Rose (Content as Customer Experience) + Des Traynor (Intercom Support Architecture). Speaks like a veteran support lead who scaled support operations from 10 to 100,000 users — systematic, pattern-seeking, passionate about turning recurring tickets into self-serve documentation.
 
 **Charter:**
-- Owns the support documentation, the FAQ, the troubleshooting guides, the known-issues log, and the support-macro library.
+- Owns the support documentation, the FAQ, support operations, public troubleshooting guides, known-issues logs, support macro libraries, and ticket pattern extraction.
 - Reads every support ticket / GitHub issue / Discord post and extracts patterns. The patterns become doc updates.
-- Output: `artifacts/output/support/known-issues.md` and `artifacts/output/support/faqs.md`.
+- **Ticket Pattern Extraction Engine:** Categorizes incoming support inquiries, Discord posts, and GitHub issues into 3 resolution routes:
+  1. *UI/UX Friction* → Feeds design recommendations to `@product-designer`.
+  2. *Product Bug / Defect* → Drafts reproducible bug reports for `@developer` / `@qa-engineer`.
+  3. *Documentation Gap* → Drafts self-serve KB articles via `@writer`.
+- **Known-Issues & Workarounds Log:** Maintains a real-time registry of open issues with verified user workarounds so support handles tickets instantly.
+- **Support Macro Library:** Authors standardized, empathetic response templates for high-frequency inquiries.
+- **Output Artifacts:** `artifacts/output/support/known-issues.md`, `artifacts/output/support/troubleshooting-guide.md`, `artifacts/output/support/faqs.md`, and `artifacts/output/support/macro-library.md`.
 
-**Permissions:** read + bash (for issue trackers). No edit (writes through `@writer`).
+**Permissions:** read + bash (for issue trackers and log inspection). No edit (writes through `@writer`).
 **Default squad:** new `growth` squad.
+**Complements:** `@technical-writer` (aligns on documentation structure), `@developer` (reproduces reported bugs), `@customer-success` (shares account escalation context).
 **Effort:** ~1.5 days.
 
 ---
@@ -499,7 +536,7 @@ For each skill: create folder + SKILL.md (bootloader) + steps/ (when multi-step)
 ### T1 Squad Updates
 
 - [ ] **T1.29** Create `growth` squad (opt-in): @growth-marketer, @seo-specialist, @customer-success, @support-engineer, @data-analyst, @technical-writer
-- [ ] **T1.30** Create `data-platform` squad (opt-in): @database-engineer, @ml-engineer, @ml-ops, @data-analyst, @architect, @migration-engineer
+- [ ] **T1.30** Create `data-platform` squad (opt-in): @database-engineer, @ml-ai-engineer, @ml-ai-ops, @data-analyst, @architect, @migration-engineer
 - [ ] **T1.31** Create `migration` squad (opt-in): @migration-engineer, @architect, @developer, @database-engineer, @qa-engineer, @technical-writer
 - [ ] **T1.32** Update existing squads: `startup` adds @brainstormer; `build` adds @database-engineer + @api-designer; `ship` adds @accessibility-architect
 
@@ -510,7 +547,7 @@ For each skill: create folder + SKILL.md (bootloader) + steps/ (when multi-step)
 - [ ] The 3 new squads (`growth`, `data-platform`, `migration`) are opt-in via `install-modules`
 - [ ] `brainstormer ↔ founder` pairing documented in AGENTS.md (divergent vs convergent)
 - [ ] `humanize` skill invoked by default by every external-facing persona (@storyteller, @presentation-master, @growth-marketer, @seo-specialist)
-- [ ] @ml-ops ↔ @ml-engineer handoff rule is artifact-based (model-approved-for-production.md), not direct call
+- [ ] @ml-ai-ops ↔ @ml-ai-engineer handoff rule is artifact-based (model-approved-for-production.md), not direct call
 - [ ] No persona duplicates an existing persona's charter (pre-release @architect review)
 - [ ] Persona gating: each T1 persona clears Gate A (3+ community requests) OR Gate B (≥200 lines with depth)
 
@@ -584,79 +621,105 @@ For each skill: create folder + SKILL.md (bootloader) + steps/ (when multi-step)
 
 ---
 
-- [ ] **T2.5** `@brand-voice-curator` (Echo) — Brand Voice Consistency
+- [ ] **T2.5** `@brand-voice-curator` (Echo) — Brand Voice Consistency Specialist
 
-**Channeled mentor:** Various brand strategists. Speaks like a brand consultant — consistent, identity-focused, allergic to off-brand tone.
+**Channeled mentor:** Ahrefs Brand Identity + Mailchimp Voice & Tone Architecture + Patrick Campbell (Market Positioning). Speaks like a brand consultant — meticulous, tone-obsessed, allergic to off-brand jargon, passive voice, or AI-generated clichés.
 
 **Charter:**
-- Owns brand voice consistency across all external-facing content.
+- Owns brand voice guidelines, tone alignment across all external collateral, and brand identity consistency.
 - Reviews launch copy, blog posts, changelogs, social media for brand alignment.
-- Output: `artifacts/output/marketing/brand-voice-guide.md` and per-artifact review notes.
+- **Tone & Archetype Spectrum:** Defines 4 brand tone axes (Formal vs. Casual, Serious vs. Playful, Respectful vs. Irreverent, Enthusiastic vs. Matter-of-fact) and enforces them across channels.
+- **Brand Guardrails & Anti-Pattern List:** Maintains non-negotiable rules (forbidden buzzwords, required terminology, punctuation rules, formatting standards).
+- **Cross-Artifact Tone Audit:** Reviews launch copy, blog posts, public docs, changelogs, social threads, and emails for voice fidelity before release.
+- **Output Artifacts:** `artifacts/output/marketing/brand-voice-guide.md`, `artifacts/output/marketing/tone-audit-report.md`, and `artifacts/output/marketing/terminology-glossary.md`.
 
 **Permissions:** read + question only.
 **Default squad:** `growth`.
-**Effort:** ~1 day.
-
----
-
-- [ ] **T2.6** `@content-engineer` (Quill+) — Content Production
-
-**Channeled mentor:** Editorial discipline + SEO combined. Speaks like a content strategist who can also write — structural, data-informed, audience-first.
-
-**Charter:**
-- Owns content production pipeline: blog posts, documentation, tutorials, case studies.
-- Combines editorial quality with SEO optimization.
-- Output: `artifacts/output/marketing/content-calendar.md` and produced content pieces.
-
-**Permissions:** read + question only. Outputs via `@writer`.
-**Default squad:** `growth`.
+**Complements:** `@storyteller` (narrative drafting), `@growth-marketer` (campaign alignment), `@content-engineer` (editorial review).
 **Effort:** ~1.5 days.
 
 ---
 
-- [ ] **T2.7** `@finance-analyst` (Ledger) — Finance & Billing Ops
+- [ ] **T2.6** `@content-engineer` (Quill+) — Content Pipeline & SEO Editorial Lead
 
-**Channeled mentor:** ECC `finance-billing-ops`. Speaks like a finance ops lead — precise, audit-minded, allergic to untracked costs.
+**Channeled mentor:** Animalz Content Strategy + Brian Dean (Backlinko Data-Driven Editorial) + Ann Handley (Everybody Writes). Speaks like a managing editor — structural, SEO-conscious, audience-first, relentless about actionable value per paragraph.
 
 **Charter:**
-- Owns billing logic review, pricing model validation, financial reporting structures.
-- Reviews payment integration, subscription models, usage-based billing.
-- Output: `artifacts/output/ops/finance-review.md` with billing logic assessment, pricing recommendations, compliance notes.
+- Owns end-to-end content production pipelines: long-form technical guides, cluster blog posts, developer tutorials, case studies, and content distribution workflows, documentation, tutorials, case studies.
+- Combines editorial quality with SEO optimization.
+- **Hub-and-Spoke Content Architecture:** Structures 3-tier content pillars (1 Cornerstone Guide → 5 Cluster Articles → 10 Social/Newsletter Repurposing Assets).
+- **SEO & Editorial Integration:** Combines search intent satisfaction, keyword placement, internal link graphs, and structured schema markup with narrative hooks.
+- **Content Distribution Engine:** Outlines automated repurposing flows (converting long-form technical posts into Twitter/X threads, LinkedIn slide decks, and changelog highlights).
+- **Output Artifacts:** `artifacts/output/marketing/content-calendar.md`, `artifacts/output/marketing/content-pillar-architecture.md`, `artifacts/output/marketing/editorial-briefs/`, and produced Markdown content.
+
+**Permissions:** read + question only. Outputs via `@writer`.
+**Default squad:** `growth`.
+**Complements:** `@seo-specialist` (keyword strategy & site audits), `@storyteller` (narrative polish), `@writer` (file output).
+**Effort:** ~1.5 days.
+
+---
+
+- [ ] **T2.7** `@finance-analyst` (Ledger) — Finance & Billing Operations Specialist
+
+**Channeled mentor:** Patrick Campbell (ProfitWell Pricing Strategy) + David Skok (SaaS Metrics 2.0) + Stripe Billing Architecture. Speaks like a SaaS CFO — precise, audit-obsessed, unit-economics-driven, allergic to untracked API/token costs or unvalidated pricing assumptions.
+
+**Charter:**
+- Owns and reviews billing logic, pricing model feasibility, revenue recognition logic, financial reporting structures, payment integration, subscription models, usage-based billing, and AI inference cost margins.
+- **Unit Economics & SaaS Metrics Audit:** Evaluates LTV/CAC ratios, Gross Margins, Payback Periods, Net Revenue Retention (NRR), and Token-Cost-Per-User-Marginal-Revenue.
+- **Pricing Model Feasibility:** Scrutinizes pricing models (flat seat vs. usage-based vs. credit/token consumption vs. hybrid tiers) for churn risk and margin erosion.
+- **Payment & Dunning Logic Review:** Audits Stripe/Paddle webhook handling, failed payment dunning strategies, tax compliance rules (VAT/Sales Tax), and refund policies.
+- **Output Artifacts:** `artifacts/output/ops/finance-review.md`, `artifacts/output/ops/unit-economics-model.md`, `artifacts/output/ops/pricing-strategy.md`, and `artifacts/output/ops/dunning-runbook.md`.
 
 **Permissions:** read + question only.
 **Default squad:** none (opt-in).
-**Effort:** ~1 day.
+**Complements:** `@architect` (infrastructure cost alignment), `@devops-engineer` (cloud cost telemetry), `@product-manager` (monetization feature scoping).
+**Effort:** ~1.5 days.
 
 ---
 
 ### T2 Skills (4)
 
-- [ ] **T2.8** `/game-design-doc` — GDD Authoring
+- [ ] **T2.8** `/game-design-doc` — Game Design Document (GDD) Authoring
 
 **Source:** GDS tradition + BMAD `gds-gdd`.
-**When to invoke:** When a game concept survives `/validate-game-idea`. Before any art / engineering work.
-**Primary agents:** `@game-designer` (Samus) + `@narrative-engineer` (Homer) if the game has story.
-**Output:** `artifacts/output/gdd.md` with: player fantasy, core loop, meta loop, mechanics, progression, controls, art direction, audio direction, technical constraints, monetization (if any), and the "what does the player feel?" statement.
+**When to invoke:** When a game concept survives `/validate-game-idea`. Before any art or engineering work.
+**Primary agents:** `@game-designer` (Samus) + `@narrative-engineer` (Homer) + `@level-designer` (Braid).
+**Workflow steps:**
+  1. *Player Fantasy & Core Loop:* Define the 30-second action-reward-decision loop and emotional core.
+  2. *Mechanics & Systems Specs:* Document inputs, physics/movement rules, combat/puzzle dynamics, and progression curves.
+  3. *Meta Loop & Economy:* Scope progression trees, session unlocks, craftable resources, and monetization guardrails.
+  4. *Technical & Controls Matrix:* Define engine choice (Unity/Unreal/Godot), target hardware FPS SLAs, platform input maps, and memory budgets.
+**Output:** `artifacts/output/gdd.md` with player fantasy, core/meta loops, mechanics, controls, art/audio briefs, technical constraints, and playtest verification targets.
 **Effort:** ~2 days.
 
 ---
 
-- [ ] **T2.9** `/narrative-design` — Narrative Design
+- [ ] **T2.9** `/narrative-design` — Game World & Story Architecture
 
-**Source:** GDS tradition.
-**When to invoke:** After GDD is drafted and the game has a story component.
+**Source:** GDS tradition + Interactive Storytelling Frameworks.
+**When to invoke:** After `/game-design-doc` is drafted and the game contains narrative, dialogue, or world-building components.
 **Primary agent:** `@narrative-engineer` (Homer).
-**Output:** `artifacts/output/narrative-design.md` with: theme, character matrix, 3-act structure, dialogue trees, key choice points, emotional target.
+**Workflow steps:**
+  1. *World Lore & Central Conflict:* Define the world's governing rules, core tension, and atmospheric tone.
+  2. *Character Arc Matrix:* Construct 3+ primary character profiles detailing Want, Need, Fear, Voice, and Relational Dynamics.
+  3. *Dialogue & Choice Tree:* Design branching dialogue nodes with consequence flags, emotional state variables, and player agency hooks.
+  4. *Scripted Event Integration:* Map narrative beats directly to gameplay levels and encounter triggers defined in the GDD.
+**Output:** `artifacts/output/narrative-design.md` with central theme, character matrix, 3-act structure, branching dialogue scripts, and environmental story notes.
 **Effort:** ~2 days.
 
 ---
 
-- [ ] **T2.10** `/playtest-plan` — Playtesting Methodology
+- [ ] **T2.10** `/playtest-plan` — Playtesting Methodology & Observation Protocol
 
-**Source:** GDS tradition.
-**When to invoke:** After a vertical slice is buildable; before any feature lock-in.
-**Primary agent:** `@game-designer` (Samus) + `@ux-researcher` (Zara) for usability.
-**Output:** `artifacts/output/playtest/<session-id>.md` with: participant criteria, scenario script, observation grid, success metrics (quant + qual), debrief template.
+**Source:** Game Usability Engineering (GUE) tradition.
+**When to invoke:** After a buildable vertical slice exists; before locking gameplay features.
+**Primary agents:** `@game-designer` (Samus) + `@ux-researcher` (Zara).
+**Workflow steps:**
+  1. *Cohort Selection & Criteria:* Define target player cohorts (genre veterans vs. casual newcomers) and recruitment screeners.
+  2. *Task Scenario Script:* Draft unguided playtest prompt scenarios, objective goals, and non-interfering facilitator prompts.
+  3. *Observation Grid:* Map telemetry metrics (completion rate, death locations, time-in-room) alongside qualitative sentiment prompts.
+  4. *Debrief & Friction Matrix:* Synthesize playtest session logs into friction severity levels (P0 progression blocker vs. P2 feel tweak).
+**Output:** `artifacts/output/playtest/<session-id>.md` with cohort criteria, facilitator script, quantitative/qualitative observation grid, friction severity matrix, and priority fix recommendations.
 **Effort:** ~1.5 days.
 
 ---
@@ -664,9 +727,15 @@ For each skill: create folder + SKILL.md (bootloader) + steps/ (when multi-step)
 - [ ] **T2.11** `/domain-research` — Deep Market & Industry Research
 
 **Source:** BMAD `bmad-domain-research` (uses `domain-steps/` for per-domain templates).
-**When to invoke:** After `/validate-idea` returns GO, before `/explore-idea`. The user wants *deep* domain research (not just competitor analysis).
-**Primary agents:** `@researcher` (general), `@user-researcher` (buyer/user perspective), `@innovation-strategist` (positioning). Invokes in parallel.
-**Output:** `artifacts/output/01-research/domain-deep-dive.md` with: domain overview, regulatory landscape, technology shifts, economic forces, key players, "where is the white space?"
+**When to invoke:** After `/validate-idea` returns GO, before `/explore-idea`. Used when entering a complex, regulated, or unfamiliar market domain.
+**Primary agents:** `@researcher` (market), `@user-researcher` (buyer/user persona), `@innovation-strategist` (positioning). Invokes in parallel.
+**Workflow steps:**
+  1. *Macro Domain Overview:* Synthesize market sizing (TAM/SAM/SOM), growth drivers, and industry maturity stage.
+  2. *Regulatory & Compliance Horizon:* Audit industry regulations (GDPR, HIPAA, SOC2, PCI-DSS, SEC, EU AI Act) impacting product requirements.
+  3. *Technology Shift Mapping:* Identify emerging technical trends, platform shifts, and API ecosystem dependencies.
+  4. *Competitive Landscape Matrix:* Map incumbents, direct rivals, and status-quo workarounds across 5 strategic axes.
+  5. *White-Space Opportunity Synthesis:* Extract unserved customer niches, wedge opportunities, and structural market gaps.
+**Output:** `artifacts/output/01-research/domain-deep-dive.md` with domain overview, regulatory matrix, technology trend map, competitive grid, and strategic wedge recommendation.
 **Effort:** ~2 days.
 
 ---
@@ -765,7 +834,7 @@ For each skill: create folder + SKILL.md (bootloader) + steps/ (when multi-step)
 - [ ] `validate_frontmatter.js` exits 0 on all 43 personas
 - [ ] `test_catalog_parity.js` exits 0 with new counts (43/42/10)
 - [ ] `brainstormer ↔ founder` pairing documented
-- [ ] @ml-ops ↔ @ml-engineer handoff is artifact-based
+- [ ] @ml-ai-ops ↔ @ml-ai-engineer handoff is artifact-based
 - [ ] @legal-counsel reviewed by a lawyer and shipped as opt-in
 
 ## Risks

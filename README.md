@@ -77,9 +77,9 @@ Then run your first workflow:
 
 ```
 ┌──────────────────────────────────────────┐
-│           REASONING AGENTS (17)           │
-│  founder, PM, architect, developer...     │
-│  (No file access, no shell — by design)   │
+│           REASONING AGENTS (17)          │
+│  founder, PM, architect, developer...    │
+│  (No file access, no shell — by design)  │
 └──────────────┬───────────────────────────┘
                │ delegates to
                ▼

@@ -32,6 +32,7 @@
 | F1.30 | Phase 1 / T2 | User requirement (problem-first pipeline gap) |
 | F1.31 | Phase 1 / T2 | User requirement (modular design thinking toolkit) |
 | F1.32 | Phase 1 / T1, T2 | User requirement (delegation gaps + auto-gates + harness adherence) |
+| F1.33 | Phase 1 / T1, T3 | User requirement (Sarah AI-PM upgrade: see 02a-ai-product-manager.md) |
 
 ---
 
@@ -1422,6 +1423,31 @@ These personas are invoked by step files. The router declares them so the agent 
 - [x] F1.32.4 — Add `## Persona delegation` to `plan/SKILL.md` (@tech-lead), `review/SKILL.md` (@code-reviewer), `test/SKILL.md` (@qa-engineer), `kanban/SKILL.md` (@product-manager)
 - [x] F1.32.5 — Add `## Primary personas` to `design/SKILL.md` router (@product-manager, @product-designer)
 - [x] Run content audit: verify all 7 changed files have the intended additions
+
+---
+
+## F1.33 — `@product-manager` (Sarah) Upgrade: AI Product Manager (AI-PM)
+
+**Source:** User requirement (Sarah AI PM upgrade) | **Theme:** T1, T3
+
+### Problem
+
+Traditional product management focuses on deterministic software logic. When building AI-native products, LLM features, RAG systems, or multi-agent workflows, classical PRDs fail to capture probabilistic behaviors, model evaluation metrics, context budgets, streaming UX states, or non-deterministic acceptance criteria.
+
+### Target
+
+Upgrade `@product-manager` (Sarah) to operate as a full **AI Product Manager (AI-PM)**. Detailed in companion document [02a-ai-product-manager.md](file:///Users/christianhadianto/Documents/TechSmith/vespyr/artifacts/docs/strategy/development-plan/02a-ai-product-manager.md).
+
+### Key Upgrades
+1. **AI PRD & Non-Deterministic ACs (`AC-AI-*`)**: Scope accuracy thresholds, fallback heuristics, system prompt expectations, and evaluation rubrics.
+2. **AI UX Standards**: Require streaming UI, human-in-the-loop (HITL) edit/undo mechanics, and citation/groundedness anchors in `product-spec.md`.
+3. **AI Metrics & Evals**: Track Hallucination Rate, Citation Accuracy, Semantic Relevance, and Edit Distance alongside standard product conversion/retention metrics.
+4. **Token Economics & Latency SLAs**: Cost-per-generation and streaming TTFT / completion latency budgets defined in PRD §9.
+
+### Checklist
+
+- [x] F1.33.1 — Draft companion specification `02a-ai-product-manager.md` detailing AI-PM pillars, skill integrations, and evaluation frameworks.
+- [x] F1.33.2 — Update `@product-manager` (Sarah) persona definition (`.agents/agents/product-manager.md`) to include AI-PM capabilities, non-deterministic AC generation, and AI eval metrics.
 
 ---
 
