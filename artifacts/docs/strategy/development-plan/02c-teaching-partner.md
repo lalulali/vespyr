@@ -5,15 +5,15 @@
 **Depends on:** Phase 0 (agent personas, frontmatter v2, delegation contracts)
 **Theme:** T1 (Agent depth), T2 (Skill atomicity)
 **Release:** v2.0
-**Priority:** High — needed before Phase 5 deeper bench. Fills an immediate user need (PM knowledge sharing).
+**Priority:** High — needed before Phase 5 deeper bench. Fills an immediate user need (general knowledge sharing and education across domains).
 
 ---
 
 ## 1. Problem Statement
 
-Product managers and knowledge workers regularly need to:
-1. **Learn** a topic quickly and at the right depth
-2. **Teach** that topic to stakeholders, teams, or public audiences
+Users of all roles—including developers, architects, product managers, and educators—regularly need to:
+1. **Learn** a new topic quickly and at the right depth (ranging from fundamental programming concepts, mathematics, and history, to advanced software architecture, product management, or domain-specific specialties).
+2. **Teach** that topic to stakeholders, teams, or public audiences.
 
 Vespyr has no persona or skill for this. The closest agents are:
 - `@technical-writer` (Clara) — writes developer docs, API refs, READMEs. Not learner-facing.
@@ -23,9 +23,7 @@ Vespyr has no persona or skill for this. The closest agents are:
 None of these think about **cognitive load**, **learning objectives**, **assessment design**, or **pedagogical scaffolding**. Teaching is a distinct expertise.
 
 **What this plan adds:**
-1. A new agent persona (`@shifu`) with pedagogical principles and 3 explanation styles
-2. A personal learning skill (`/teach-me`) for quick, explain, or deep-dive learning
-3. A material creation skill (`/craft-lesson`) that transforms knowledge into 6 output formats
+1. A new agent persona (`@shifu`) with pedagogical principles and 3 explanation styles, designed as a universal learning partner across all domains of knowledge (technical, business, scientific, or general humanities).
 4. A personalization layer (`teaching-style.md`) that persists the user's teaching preferences
 
 ---
@@ -34,7 +32,7 @@ None of these think about **cognitive load**, **learning objectives**, **assessm
 
 | Consideration | Phase 5 (Deeper Bench) | Phase 1 (This plan) |
 |---|---|---|
-| **Urgency** | Batch release with 22 other personas in v2.2 | Needed now — PM workflow gap |
+| **Urgency** | Batch release with 22 other personas in v2.2 | Needed now — knowledge transfer workflow gap |
 | **Dependencies** | Critic infrastructure (F0.25-F0.28) gates T1 critics | No infrastructure dependencies — uses existing delegation, memory, and skill patterns |
 | **Gate qualification** | Gate A (3+ community requests) or Gate B (≥200 lines depth) | Clears Gate B — full persona with decision trees, failure modes, escalation |
 | **Persona depth** | Many Phase 5 personas are "1-day ECC repackage" risk | `@shifu` has 3 explanation styles, 5 pedagogical principles, Socratic stance, Bloom's taxonomy integration |
@@ -100,16 +98,17 @@ tools:
   write: true
 ```
 
-**Upstream dependencies:** `@researcher` (topic research), `@product-manager` (stakeholder context)
+**Upstream dependencies:** `@researcher` (topic research), or any domain-expert agent (for domain-specific knowledge and stakeholder context)
 **Downstream consumers:** `@writer` (file output), `@technical-writer` (doc integration)
 
-**5 Core Pedagogical Principles (non-negotiable):**
+**6 Core Pedagogical Principles (non-negotiable):**
 
 1. **First Principles Explanation** — If you can't explain it simply, you don't understand it well enough. Every concept must pass the "explain to someone with zero context" test before inclusion.
 2. **Cognitive Load Theory** — Chunk information into digestible pieces. Never exceed 3-5 new concepts per section. If a section has more, split it.
 3. **Bloom's Taxonomy** — Structure learning objectives across the hierarchy: Remember → Understand → Apply → Analyze → Evaluate → Create. Tag each objective.
 4. **Spaced Repetition** — Key takeaways repeat across formats in varied forms. The same core insight appears as a syllabus objective, a handbook section, a cheatsheet entry, and a quiz question.
 5. **Active Recall** — Sections end with a question or exercise, not a passive summary. The learner's brain should be working, not just reading.
+6. **Verifiable Citations & Footnotes** — Learning must be grounded in real-world truth, not speculative AI fabrications. Whenever explaining concepts, historical data, code APIs, or domain facts, `@shifu` must research the topic via internet/webfetch or `@researcher`, embed inline footnotes `[N]`, and list full citations (link, author/org, date) at the end of the lesson/note.
 
 **3 Explanation Styles** (selected at intake, applies to ALL output formats):
 
@@ -145,7 +144,7 @@ The style dimension is **independent** of the output format dimension. Any style
 
 ### F1b.4-F1b.7 — Skill A: `/teach-me` (Personal Learning)
 
-**Problem:** When a PM needs to learn something quickly, there's no Vespyr workflow for it. They either ask the LLM directly (no pedagogical structure) or use `/explore-idea` (research-focused, not learning-focused).
+**Problem:** When a user or domain expert needs to learn a new topic quickly, there's no Vespyr workflow for it. They either ask the LLM directly (no pedagogical structure) or use `/explore-idea` (research-focused, not learning-focused).
 
 **Target:** A lightweight skill where Vespyr acts as a personal teacher. The user provides a topic, selects a scope and style, and gets a structured explanation.
 
@@ -203,7 +202,7 @@ When no `teaching-style.md` exists, prompt the user with a brief calibration:
 
 ### F1b.8-F1b.18 — Skill B: `/craft-lesson` (Create Materials for Others)
 
-**Problem:** When a PM needs to teach stakeholders, they manually create slides, handouts, and quizzes from scratch. There's no workflow that transforms knowledge into multiple educational formats from a single knowledge map.
+**Problem:** When a user or domain expert needs to teach stakeholders, they manually create slides, handouts, and quizzes from scratch. There's no workflow that transforms knowledge into multiple educational formats from a single knowledge map.
 
 **Target:** A structured multi-phase skill that takes a topic or draft material and produces up to 6 educational formats, all derived from a master knowledge map.
 

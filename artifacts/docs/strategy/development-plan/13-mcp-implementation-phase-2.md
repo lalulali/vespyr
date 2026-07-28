@@ -144,12 +144,22 @@ npx vespyr install-mcp-phase2
 
 ## 8. Verification
 
-| Check | Method |
-|---|---|
-| `audit_dependencies` returns structured CVE data | Run against project with known vulnerabilities, verify severity + fix_version |
-| `scan_secrets` finds a committed `.env` with AWS key | Plant test secret file, verify detection |
-| `query_data` imports CSV + runs GROUP BY | Import 100-row CSV, run aggregation, verify row count |
-| Lighthouse returns LCP/CLS scores | Run against sample project, verify JSON output contains `lighthouseResult` |
-| Axe-core finds WCAG violations | Run against page with missing alt text, verify violation list |
-| `check_docs` finds broken internal link | Create dead link in sample doc, verify detection |
-| `analyze_bundle` returns chunk sizes | Run against sample webpack stats, verify top 10 modules |
+- [ ] Verify `audit_dependencies` returns structured CVE data by running against a project with known vulnerabilities.
+- [ ] Verify `scan_secrets` finds a committed `.env` with AWS key by planting a test secret file.
+- [ ] Verify `query_data` imports CSV + runs GROUP BY by importing a 100-row CSV and running aggregation.
+- [ ] Verify Lighthouse returns LCP/CLS scores by running against sample project.
+- [ ] Verify Axe-core finds WCAG violations by running against a page with missing alt text.
+- [ ] Verify `check_docs` finds broken internal link by creating a dead link in a sample doc.
+- [ ] Verify `analyze_bundle` returns chunk sizes by running against sample webpack stats.
+
+---
+
+## Implementation Checklist
+
+- [ ] Implement `audit_dependencies` P0 tool wrapper
+- [ ] Implement `scan_secrets` P0 tool wrapper
+- [ ] Implement `query_data` P1 tool script
+- [ ] Register & configure Lighthouse MCP P1 server
+- [ ] Implement `check_docs` P2 tool wrapper
+- [ ] Register & configure Axe-core / Accessibility MCP P2 server
+- [ ] Implement `analyze_bundle` P3 tool wrapper
