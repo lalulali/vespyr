@@ -1,6 +1,6 @@
 # Customization Overrides
 
-Override files let you customize any Vespyr agent **without editing the agent file directly.** Your changes survive `npx vespyr` upgrades because they live in `.agents/custom/`, not in the agent source.
+Override files let you customize any Vespyr agent **without editing the agent file directly.** Your changes survive `npx vespyr` upgrades because they live in `.agents/custom/`, not in the agent source. You can use the `/customize-skill` workflow for guided override authoring.
 
 ## How it works
 

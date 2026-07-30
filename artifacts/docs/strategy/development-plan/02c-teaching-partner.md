@@ -1,4 +1,4 @@
-# Plan 02b — Teaching Partner (@shifu + /teach-me + /craft-lesson)
+# Plan 02c — Teaching Partner (@shifu + /teach-me + /craft-lesson)
 
 **Status:** Planned
 **Date:** 2026-07-24
@@ -108,7 +108,7 @@ tools:
 3. **Bloom's Taxonomy** — Structure learning objectives across the hierarchy: Remember → Understand → Apply → Analyze → Evaluate → Create. Tag each objective.
 4. **Spaced Repetition** — Key takeaways repeat across formats in varied forms. The same core insight appears as a syllabus objective, a handbook section, a cheatsheet entry, and a quiz question.
 5. **Active Recall** — Sections end with a question or exercise, not a passive summary. The learner's brain should be working, not just reading.
-6. **Verifiable Citations & Footnotes** — Learning must be grounded in real-world truth, not speculative AI fabrications. Whenever explaining concepts, historical data, code APIs, or domain facts, `@shifu` must research the topic via internet/webfetch or `@researcher`, embed inline footnotes `[N]`, and list full citations (link, author/org, date) at the end of the lesson/note.
+6. **Verifiable Citations & Footnotes** — Learning must be grounded in real-world truth, not speculative AI fabrications. Whenever explaining concepts, historical data, code APIs, or domain facts, `@shifu` must research the topic via internet/webfetch or `@researcher`, embed inline footnotes `[N]`, and list full citations (link, author/org, date) at the end of the lesson/note. **Exception:** `/teach-me` Quick scope (≤100 words) is exempt from citation requirements — use sensible defaults and flag any uncertainty inline (e.g., "verify this with your framework's official docs") instead of a full citation trail.
 
 **3 Explanation Styles** (selected at intake, applies to ALL output formats):
 
@@ -182,8 +182,8 @@ When no `teaching-style.md` exists, prompt the user with a brief calibration:
 **Subsequent invocations:** Use saved defaults. Ask: "Using your default style (Intermediate, Explain). Override? [yes/no]"
 
 #### Step 3: Generate Response
-- **Explain:** `@shifu` generates inline response. No file output. No delegation needed.
-- **Breakdown:** `@shifu` generates structured explanation. Optionally save to `artifacts/output/teaching/notes/` via `@writer`.
+- **Quick:** `@shifu` generates inline response. No file output. No delegation needed.
+- **Explain:** `@shifu` generates structured explanation. Optionally save to `artifacts/output/teaching/notes/` via `@writer`.
 - **Deep Dive:** `@shifu` delegates topic research to `@researcher` if needed, then produces comprehensive explanation. Save to `artifacts/output/teaching/notes/` via `@writer`.
 
 #### Step 4: Follow-up
@@ -192,8 +192,8 @@ When no `teaching-style.md` exists, prompt the user with a brief calibration:
 - "Want to turn this into materials for others? → `/craft-lesson`"
 
 - [ ] **F1b.4** — Create `.agents/skills/teach-me/SKILL.md` (~200 lines): bootloader with prerequisites, input/output spec, workflow steps 1-4, delegation table, guided onboarding flow, cross-references to `/craft-lesson` and `teaching-style.md`.
-- [ ] **F1b.5** — Create `artifacts/memory/teaching-style.md` (~30 lines): personalization preferences file. Initial structure with sections for defaults, section patterns, tone, format-specific preferences, and audience defaults. Co-authored on first `/teach-me` or `/craft-lesson` invocation.
-- [ ] **F1b.6** — Wire `teaching-style.md` into `@memory-controller`: add to the list of loadable memory files. Loaded when `@shifu` is the invoking agent or when `/teach-me`/`/craft-lesson` skills are active.
+- [ ] **F1b.5** — *(Merged into **F1b.19**)* — `teaching-style.md` file creation is handled by the personalization layer; `/teach-me` bootloader cross-references it via `@memory-controller load`.
+- [ ] **F1b.6** — *(Merged into **F1b.20**)* — `@memory-controller` wiring for `teaching-style.md` is handled by the personalization layer; no separate wiring step needed here.
 - [ ] **F1b.7** — Test (manual): invoke `/teach-me` with topic "JTBD framework" at all 3 scopes × 3 styles. Verify: (a) Quick is ≤5 sentences, (b) Explain uses analogies at Beginner style and terminology at Expert style, (c) Deep Dive saves to file, (d) first-run prompts for preferences.
 
 **Estimate:** 2-3 hours
@@ -438,7 +438,7 @@ Each step file contains:
 | Cheatsheet does NOT have "If Nothing Else" | Unless explicitly opted in via `teaching-style.md` |
 | Style × Format independence | Beginner-style + Expert-style produce same-format cheatsheet with different explanation depth |
 | `@shifu` delegates I/O | No direct file writes — all via `@writer` |
-| All 6 format step files exist | `ls .agents/skills/craft-lesson/steps/step-*.md` returns 8 files (6 formats + research/synthesize/structure/review = 10 total... 6 format + 4 workflow) |
+| All 6 format step files exist | `ls .agents/skills/craft-lesson/steps/step-*.md` returns 10 files (6 format steps: syllabus, handbook, cheatsheet, presentation, class, video-script + 4 workflow steps: research, synthesize, structure, review) |
 
 ---
 

@@ -113,7 +113,7 @@ validate → explore → design → plan → develop → launch → iterate → 
 
 ## 🧩 核心功能
 
-- **31 个斜杠命令** — 从 `/validate-idea`、`/design` 到 `/develop`、`/launch`、`/code-graph`、`/grill-me`
+- **39 个斜杠命令** — 从 `/validate-idea`、`/design` 到 `/develop`、`/launch`、`/code-graph`、`/customize-skill` 和 `/create-skill`
 - **结构图谱** — 代码图谱映射依赖，文档图谱映射可追溯性。智能体直接查询而无需 grep。
 - **智能体自定义** — 双文件 TOML 合并。升级时你的覆盖配置保持不变。
 - **多平台支持** — 兼容 OpenCode、Claude Code、Cursor、Windsurf、Copilot、Kiro、Aider。

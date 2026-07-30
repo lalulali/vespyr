@@ -67,7 +67,8 @@ Vespyr organizes complex operations into atomic skills. Each skill is a folder w
 
 | Command | Description |
 |---------|-------------|
-| `/customize` | Guided agent customization |
+| `/customize-skill` | Guided agent customization authoring flow |
+| `/create-skill` | Create, modify, and test skills with evals |
 | `/incident` | Production incident response |
 
 ## Pipeline Phase Table
