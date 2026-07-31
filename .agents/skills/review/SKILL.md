@@ -57,3 +57,13 @@ Include specific file:line references for each finding.
 
 At start: `@executor` runs `node .agents/scripts/orchestrator_state.js status`
 At end: `@executor` runs `node .agents/scripts/orchestrator_state.js complete --agent code-reviewer --artifact code-review`
+
+**At completion:** Write session summary — mandatory:
+```
+@memory-controller session-write [agent: @code-reviewer]
+Worked on: Standalone code review — {files or feature reviewed}
+Decisions: {blocking findings count}, {non-blocking findings count}. Key issues: {1-2 sentence summary}
+Next step: {fix blocking issues then re-review, or merge if clear}
+Blockers: {any blocking findings or "none"}
+```
+

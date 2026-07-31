@@ -181,6 +181,23 @@ The controller returns filtered context (~1,000 tokens). Do NOT read memory file
 **Status:** active
 ```
 
+See `.agents/templates/memory/memory-entry-template.md` for the full entry format.
+
+**Enforcement:** Memory writes are REQUIRED, not suggested. Skipping them means your work will be lost when your context window closes. The orchestrator will check for memory artifacts during completion.
+
+## Session Continuity (Mandatory)
+
+After completing your work, you MUST write a session summary:
+
+```
+@memory-controller session-write [agent: @researcher]
+Worked on: {1-2 sentences describing what was accomplished}
+Decisions: {bullet list of key decisions made, max 5}
+Next step: {what should happen next}
+Blockers: {any blockers encountered, or "none"}
+```
+
+This creates cross-session continuity. Without it, the next agent has no idea what happened. This is NOT optional.
 
 ### Pipeline Bookkeeping (NON-NEGOTIABLE)
 

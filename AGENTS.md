@@ -180,6 +180,16 @@ To maximize reliability, reduce over-engineering, and enforce high-fidelity exec
 *   **Startup Phase Validation**: Before executing any task, check `artifacts/output/sprint-status.yaml` (or `pipeline-state.json`) to verify phase prerequisites are met. If the current project phase has not reached the required phase for the task, halt and report the phase mismatch. Do not execute work out of phase order.
 *   **Shutdown Completion Logging**: After saving deliverables, execute (or request `@executor` to execute) `node .agents/scripts/orchestrator_state.js complete --agent <name> --artifact <relative-path>` to update the state file and advance the pipeline.
 
+### 5. Memory Persistence (Mandatory)
+
+Every agent session MUST end with a `@memory-controller session-write`. Agents that produce architecture decisions, code patterns, or lessons MUST write them via `@memory-controller write` before the session ends.
+
+The two canonical paths for persistence:
+- **Via subagent (preferred):** `@memory-controller session-write [agent: @{agent-name}]` — delegates to the memory controller subagent for full validation + dedup.
+- **Via script (direct):** `node .agents/scripts/orchestrator_state.js session-write --agent {agent-name} --worked-on "..." --decisions "..." --next-step "..."` — writes directly to `session-summaries/latest.md` and `pipeline-state.json`.
+
+The orchestrator will emit a warning when `--check-memory` is set and no session-write has been recorded. Repeated warnings will escalate to phase blockers.
+
 ---
 
 ## 🛡️ Guardrails

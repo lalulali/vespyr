@@ -173,7 +173,7 @@ The `@tech-lead` assumes direct leadership during Phase 4 sprint setup and plann
 
 ### Worktree setup protocol
 
-Before developers start, `@tech-lead` sets up the worktrees:
+Before developers start, `@tech-lead` sets up the worktrees via `worktree.js`:
 
 ```bash
 # 1. Check if git worktrees are supported
@@ -181,15 +181,15 @@ git worktree list 2>/dev/null && echo "WORKTREE_SUPPORTED" || echo "WORKTREE_NOT
 
 # 2. Create worktrees for each developer (from the main working branch)
 BRANCH=$(git branch --show-current)
-git worktree add ~/.local/share/agents/worktree/worktree-dev-1 -b feat/${BRANCH}/task-1
-git worktree add ~/.local/share/agents/worktree/worktree-dev-2 -b feat/${BRANCH}/task-2
+node .agents/scripts/worktree.js create feat/${BRANCH}/task-1
+node .agents/scripts/worktree.js create feat/${BRANCH}/task-2
 # ... one per developer
 
 # 3. List active worktrees
-git worktree list
+node .agents/scripts/worktree.js list
 ```
 
-**Worktree location:** `~/.local/share/agents/worktree/worktree-dev-N` — isolates worktrees within the allowed sandboxed path.
+**Worktree location:** `.agents/worktrees/feat/{base-branch}/task-{N}` — isolated within the project sandbox, tracked in `.agents/state/loop-state.json`.
 **Branch naming:** `feat/{base-branch}/task-{N}` — tracks which base branch and task.
 
 ### Task assignment
@@ -200,10 +200,10 @@ git worktree list
 ## Task Assignment
 
 | Developer | Worktree | Branch | Role | Tasks | Files touched |
-|---|---|---|---|---|---|
-| @developer-1 | ~/.local/share/agents/worktree/worktree-dev-1 | feat/main/task-1 | FE | Auth flow, login page | src/auth/*, src/pages/login.* |
-| @developer-2 | ~/.local/share/agents/worktree/worktree-dev-2 | feat/main/task-2 | BE | Dashboard API, charts | src/api/dashboard.*, src/components/chart.* |
-| @developer-3 | ~/.local/share/agents/worktree/worktree-dev-3 | feat/main/task-3 | Full-Stack | Notification system | src/notifications/*, src/services/notify.* |
+|---|---|---|---|---|---|---|
+| @developer-1 | .agents/worktrees/feat/main/task-1 | feat/main/task-1 | FE | Auth flow, login page | src/auth/*, src/pages/login.* |
+| @developer-2 | .agents/worktrees/feat/main/task-2 | feat/main/task-2 | BE | Dashboard API, charts | src/api/dashboard.*, src/components/chart.* |
+| @developer-3 | .agents/worktrees/feat/main/task-3 | feat/main/task-3 | Full-Stack | Notification system | src/notifications/*, src/services/notify.* |
 ```
 
 **Role tags** determine the developer's communication permissions:
@@ -244,12 +244,7 @@ git merge feat/${BRANCH}/task-3 --no-ff -m "feat: notification system"
 npm test  # or equivalent
 
 # 4. Clean up worktrees
-git worktree remove ~/.local/share/agents/worktree/worktree-dev-1
-git worktree remove ~/.local/share/agents/worktree/worktree-dev-2
-git worktree remove ~/.local/share/agents/worktree/worktree-dev-3
-
-# 5. Clean up branches
-git branch -d feat/${BRANCH}/task-1 feat/${BRANCH}/task-2 feat/${BRANCH}/task-3
+node .agents/scripts/worktree.js clean-all
 ```
 
 ### Conflict resolution

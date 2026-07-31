@@ -64,4 +64,14 @@ If unclear, ask: "Are you designing from scratch, refining existing specs, or re
 ## State & memory integration
 At start, via `@executor`: `node .agents/scripts/orchestrator_state.js status` then `next`. Also: `@memory-controller load product-manager [design — {feature}]`
 At each step end: record per-artifact via `node .agents/scripts/orchestrator_state.js complete --agent {agent} --artifact {path}` (see step files for agent-specific calls). After all: `node .agents/scripts/ensure_graph.js doc`.
+
+**After PRD + user stories (create step 3 / edit step 3):** Write key product decisions:
+```
+@memory-controller write active-decisions.md
+### [PRODUCT] {feature} design decisions [date: YYYY-MM-DD] [agent: @product-manager]
+{key decisions: scope boundaries, prioritized stories, deferred items}
+**Status:** active
+```
+
 **Memory:** Final step in each mode closes with `@memory-controller session-write` — mandatory per GUARDRAILS §Session Continuity.
+

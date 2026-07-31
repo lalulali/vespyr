@@ -38,7 +38,30 @@ If unclear, ask: "Are you starting a new idea, refining an existing brief, or st
 At start: `@executor` runs `node .agents/scripts/orchestrator_state.js status`
 At end: `@executor` runs `node .agents/scripts/orchestrator_state.js complete --agent founder --artifact 01-discovery/idea-brief.md`
 
+## Memory integration
+**At start:** Load founder context before any Socratic analysis:
+```
+@memory-controller load founder [validate-idea — {idea name}]
+```
+
+**At completion:** Write verdict and rationale to memory, then session summary — mandatory:
+```
+@memory-controller write active-decisions.md
+### [PRODUCT] Idea validation verdict — {idea name} [date: YYYY-MM-DD] [agent: @founder]
+Verdict: GO / PIVOT / KILL
+Rationale: {1-2 sentences on why}
+Key assumptions validated: {list}
+**Status:** active
+
+@memory-controller session-write [agent: @founder]
+Worked on: Idea validation — {idea name}
+Decisions: Verdict: {GO/PIVOT/KILL}. {key rationale}
+Next step: {explore-idea if GO, pivot brief if PIVOT, stop if KILL}
+Blockers: {unresolved assumptions or "none"}
+```
+
 ## Done when
 - Brief written to `artifacts/output/01-discovery/idea-brief.md`
 - Verdict recorded (GO / PIVOT / KILL)
 - Handoff to next phase is unambiguous
+

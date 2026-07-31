@@ -53,5 +53,12 @@ None. This is a flexible entry point.
 
 ## State & memory integration
 At start, via `@executor`: `node .agents/scripts/orchestrator_state.js status`
+
+**At start:** Load context before context scan (step-01):
+```
+@memory-controller load founder [shape-up — {idea or feature name}]
+```
+
 At end: `node .agents/scripts/orchestrator_state.js complete --agent founder --artifact 01-discovery/shaped-brief.md`
 **Memory:** Final step closes with `@memory-controller session-write` — mandatory per GUARDRAILS §Session Continuity.
+

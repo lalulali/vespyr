@@ -15,6 +15,10 @@ output_contract:
 
 Collect quantitative data. Invoke telemetry and operational metrics to surface the top 3 hot paths from the last 30 days.
 
+Load full session context before collecting data:
+```
+@memory-controller load product-manager [retro: hot paths data collection]
+```
 
 > **Tracker:** `node .agents/scripts/step_tracker.js begin --skill retro --step 1`
 ## Goal

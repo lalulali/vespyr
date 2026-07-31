@@ -15,6 +15,11 @@ output_contract:
 
 Extract the core problem from the user without letting them jump to solutions. This step enforces zero-solution framing.
 
+Load project context before intake:
+```
+@memory-controller load product-manager [unpack-problem: {brief description from user}]
+```
+
 ## Workflow
 
 ### 1a. Intake

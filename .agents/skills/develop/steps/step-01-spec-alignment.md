@@ -23,7 +23,9 @@ Load and cross-check every strategy artifact against the user stories. Confirm a
 ## Agent invocation
 - `@product-manager` confirms specs match the PRD requirements and priorities
 - `@product-designer` reviews user flows, interaction specs, and visual direction
-- `@developer` loads and fully digests `product-spec.md` and `user-stories.md` — cannot start coding until this is done
+- `@developer` loads session context and fully digests `product-spec.md` and `user-stories.md` — cannot start coding until this is done:
+  1. `@memory-controller load developer [develop: spec alignment for {feature}]`
+  2. Read `product-spec.md` and `user-stories.md` in full
 
 ## Inputs
 - `artifacts/output/02-strategy/SPEC.md` — spec kernel (5 fields: Why, Capabilities, Constraints, Non-goals, Success signal). **This is the primary agent contract — all agents must read this.**

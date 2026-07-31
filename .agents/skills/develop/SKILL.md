@@ -10,7 +10,7 @@ This skill runs in sequential steps. Each step is a self-contained file with its
 ## When to invoke
 - Phase ≥ 4 (planning complete)
 - `@tech-lead` has approved `artifacts/output/04-planning/execution-plan.md`
-- Worktree allocated (multi-developer mode) OR on `main` (single-developer mode)
+- Worktrees allocated (multi-developer mode, via step 3b) OR single-developer mode
 
 ## Prerequisites
 - Spec-kernel exists at `artifacts/output/02-strategy/` (see spec-kernel-template.md)
@@ -40,7 +40,7 @@ This skill runs in sequential steps. Each step is a self-contained file with its
 3b. **Backlog Prep** → `steps/step-03b-backlog-prep.md`
 4. **Kanban Activation** → `steps/step-04-kanban-activation.md`
 5. **Spike** (optional) → `steps/step-05-spike.md`
-6. **Dev Loop** (multi-worktree OR single-developer) → `steps/step-06-dev-loop.md`
+6. **Dev Loop** (worktrees from step 3b, multi-developer OR single) → `steps/step-06-dev-loop.md`
 7. **Quality Gates** (QA hard gate → security conditional → performance conditional) → `steps/step-07-quality-gates.md`
 8. **PM Verification** → `steps/step-08-pm-verification.md`
 9. **Documentation** → `steps/step-09-documentation.md`
@@ -57,7 +57,31 @@ At start: `node .agents/scripts/orchestrator_state.js status`
 At each step end: `node .agents/scripts/orchestrator_state.js step --name {step-name} --status {done/blocked}`
 At end: `node .agents/scripts/orchestrator_state.js complete --agent developer --artifact 05-execution/{feature}.md`
 
+## Memory integration
+**At start (step-01):** Load context before reading any specs:
+```
+@memory-controller load developer [develop — {feature name}]
+```
+
+**After step-06 (dev loop complete):** Write key implementation decisions:
+```
+@memory-controller write active-decisions.md
+### [CODE] {feature} implementation decisions [date: YYYY-MM-DD] [agent: @developer]
+{key decisions: patterns chosen, libraries used, tradeoffs made}
+**Status:** active
+```
+
+**At completion (step-10):** Write session summary — mandatory:
+```
+@memory-controller session-write [agent: @developer]
+Worked on: {feature name} implementation — steps 01–10 complete
+Decisions: {bullet list of key decisions, max 5}
+Next step: {launch, iterate, or retro}
+Blockers: {any unresolved issues or "none"}
+```
+
 ## Done when
 - All steps in `stepsCompleted`
 - `qa-signoff.md` exists with GO/CONDITIONAL
 - Phase advanced to quality
+

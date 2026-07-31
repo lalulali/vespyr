@@ -35,5 +35,20 @@ Takes a completed feature from development and ships it. The bridge between "cod
 
 ## State & memory integration
 At start: `node .agents/scripts/orchestrator_state.js status`. If uninitialized, run `squad` first, then `next`.
+
+**At start:** Load context before readiness check:
+```
+@memory-controller load product-manager [launch — {feature or release name}]
+```
+
+**At step-05 (launch log):** Write launch decisions to memory:
+```
+@memory-controller write active-decisions.md
+### [OPS] Launch decisions — {release name} [date: YYYY-MM-DD] [agent: @devops-engineer]
+{key decisions: deployment target, rollback plan, monitoring thresholds, feature flags}
+**Status:** active
+```
+
 At end: `node .agents/scripts/orchestrator_state.js complete --agent product-manager --artifact 06-launch/launch-log.md`
 **Memory:** Step 05 closes with `@memory-controller session-write` — mandatory per GUARDRAILS §Session Continuity.
+

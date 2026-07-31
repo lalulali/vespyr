@@ -7,7 +7,7 @@ prerequisites:
 delegation:
   reads: "@reader (specs + codebase; per delegation-policy.md multi-file + large files)"
   writes: "@writer (source code, test files; per delegation-policy.md multi-file output)"
-  runs: "@executor (worktree setup, npm test, npm run lint, git merge; per delegation-policy.md all bash)"
+  runs: "@executor (worktree validation, npm test, npm run lint, git merge; per delegation-policy.md all bash)"
   direct_justified: []
 output_contract:
   citations: not-required
@@ -22,7 +22,7 @@ The core implementation step. Write code, run tests, get reviewed, merge.
 ## Mode selection
 
 **Multi-developer mode** — if the execution plan has 2+ independent tasks:
-1. `@tech-lead` creates worktrees, assigns tasks with non-overlapping files
+1. `@tech-lead` verifies worktrees from step 3b (re-allocates if spike changed the plan), assigns tasks with non-overlapping files
 2. `@developer-N` (each in own worktree, parallel): load specs → implement → test → commit
 3. `@code-reviewer` (per branch): review for correctness, security, patterns
 4. `@tech-lead` merges approved branches → integration test → cleanup
@@ -37,9 +37,19 @@ The core implementation step. Write code, run tests, get reviewed, merge.
 
 ## Multi-developer sub-steps
 
-### 6.1 Setup (`@tech-lead`)
-- Create worktrees: `git worktree add ~/.local/share/agents/worktree/worktree-dev-N -b feat/{branch}/task-N`
-- Assign tasks via the Task Assignment table (non-overlapping files)
+### 6.1 Setup (worktrees must already exist from step 3b)
+
+**The harness MUST NOT proceed to 6.2 unless worktrees are confirmed to exist.**
+
+Verify worktrees created in step 3b:
+```bash
+node .agents/scripts/worktree.js list
+```
+
+Gate logic:
+- **If `worktree.js list` shows worktrees** → compare the worktree count to the number of parallel task slots in the execution plan. If they match → proceed. `@tech-lead` loads the Task Assignment table from `execution-plan.md` and assigns tasks via the Kanban board. If the counts differ → **HALT** (spike changed the plan after worktree creation). Escalate to `@tech-lead` for re-allocation.
+- **If no worktrees exist AND the execution plan has 2+ independent tasks** → **HALT**. Escalate to `@tech-lead`. Either step 3b worktree creation failed, or spike findings (step 5) changed the plan and invalidated the worktree allocation. `@tech-lead` must re-create or re-allocate worktrees before continuing.
+- **If no worktrees exist AND the execution plan is single-developer** → proceed in single-developer mode. No worktrees needed.
 
 ### 6.2 Implement (`@developer-N`, parallel)
 - `@memory-controller load developer [implement {task name}]` — seed context before coding
@@ -92,15 +102,13 @@ npm run lint
   - Re-merge after fix
 
 ### 6.6 Cleanup (`@tech-lead`)
-```bash
-# Remove worktrees
-git worktree remove ~/.local/share/agents/worktree/worktree-dev-1
-git worktree remove ~/.local/share/agents/worktree/worktree-dev-2
-git worktree remove ~/.local/share/agents/worktree/worktree-dev-3
 
-# Delete feature branches
-git branch -d feat/${BRANCH}/task-1 feat/${BRANCH}/task-2 feat/${BRANCH}/task-3
+Delegate to `@executor`:
+```bash
+node .agents/scripts/worktree.js clean-all
 ```
+
+This removes all worktrees and deletes their feature branches, with state tracked in `.agents/state/loop-state.json`. The `--force` flag handles uncommitted changes gracefully.
 
 ### 6.7 Update Kanban (`artifacts/output/04-planning/kanban.md`)
 
@@ -133,7 +141,7 @@ Merged code on the working branch, updated kanban board.
 ## Delegation
 - **Reads:** @reader for specs, user stories, and codebase files
 - **Writes:** @writer for source code, test files, commit messages
-- **Runs:** @executor for worktree setup, npm test, npm run lint, git merge
+- **Runs:** @executor for worktree validation, npm test, npm run lint, git merge
 - **Memory:** @memory-controller for developer notes
 
 > **Tracker:** `node .agents/scripts/step_tracker.js complete --skill develop --step 6`

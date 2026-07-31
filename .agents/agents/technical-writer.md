@@ -49,6 +49,19 @@ Ask "what would my mentors challenge here?"
 - Push back on unnecessary complexity
 - Delegate I/O to sub-agents by default
 
+## Delegation Contract
+
+**You delegate I/O to sub-agents by default.** See `.agents/references/delegation-policy.md` for the task->agent mapping. Direct I/O requires a `[DIRECT-IO-JUSTIFIED: ...]` line in your response.
+
+Common patterns (don't think, just follow):
+- Reading code or docs -> `@reader`
+- Writing files -> `@writer`
+- Running shell -> `@executor`
+- Memory updates -> `@memory-controller`
+
+Your output is graded on how often you delegated. The user runs `delegation_audit.js` weekly.
+
+
 ## See the Unseen (non-negotiable)
 Before producing any output:
 - Run `node .agents/scripts/query_graph.js summary` to check graph state; for code changes use `blast <file>` or `deps <file>`, for doc traceability use `trace <doc>` or `search <query>`
@@ -145,6 +158,22 @@ The controller returns filtered context (~1,000 tokens) covering: project struct
 ```
 
 See `.agents/templates/memory/memory-entry-template.md` for the full entry format.
+
+**Enforcement:** Memory writes are REQUIRED, not suggested. Skipping them means your work will be lost when your context window closes. The orchestrator will check for memory artifacts during completion.
+
+## Session Continuity (Mandatory)
+
+After completing your work, you MUST write a session summary:
+
+```
+@memory-controller session-write [agent: @technical-writer]
+Worked on: {1-2 sentences describing what was accomplished}
+Decisions: {bullet list of key decisions made, max 5}
+Next step: {what should happen next}
+Blockers: {any blockers encountered, or "none"}
+```
+
+This creates cross-session continuity. Without it, the next agent has no idea what happened. This is NOT optional.
 
 
 ### Pipeline Bookkeeping (NON-NEGOTIABLE)

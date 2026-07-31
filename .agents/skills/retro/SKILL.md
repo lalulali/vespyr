@@ -44,7 +44,23 @@ This skill runs in sequential steps. Each step is a self-contained file with its
 At start: `@executor` runs `node .agents/scripts/orchestrator_state.js status`
 At end: `@executor` runs `node .agents/scripts/orchestrator_state.js complete --agent memory-controller --artifact 09-retro/retro-digest.md`
 
+## Memory integration
+**At start (step-01):** Load full memory context before hot-path scan:
+```
+@memory-controller load memory-controller [retro — post-cycle review]
+```
+
+**At completion (step-05):** Write session summary — mandatory:
+```
+@memory-controller session-write [agent: @memory-controller]
+Worked on: Post-cycle retro — {cycle or sprint description}
+Decisions: {key process improvements, estimate calibrations, compacted entries}
+Next step: {next development cycle, or launch if shipping}
+Blockers: {unresolved patterns or "none"}
+```
+
 ## Done when
 - All steps in `stepsCompleted`
 - `retro-digest.md` written to `artifacts/output/09-retro/`
 - Memory compacted (or skip recorded)
+

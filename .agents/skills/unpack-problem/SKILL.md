@@ -52,7 +52,23 @@ If unclear, present the three modes and ask.
 At start: `@executor` runs `node .agents/scripts/orchestrator_state.js status`
 At end: `@executor` runs `node .agents/scripts/orchestrator_state.js complete --agent product-manager --artifact 01-research/problem-space-brief.md`
 
+## Memory integration
+**At start:** Load context before problem intake:
+```
+@memory-controller load product-manager [unpack-problem — {problem description}]
+```
+
+**At step-04 (brief generation):** Write session summary — mandatory:
+```
+@memory-controller session-write [agent: @product-manager]
+Worked on: Problem space exploration — {problem description}
+Decisions: {key problem framing decisions, root causes identified, candidate solutions mapped}
+Next step: {validate-idea / shape-up / explore-idea — whichever handoff routing applies}
+Blockers: {unresolved problem areas or "none"}
+```
+
 ## Handoff routing
 - Solution concept ready to test → load `/validate-idea`
 - Structured brief ready for specs → load `/shape-up`
 - Need market/competitor context → load `/explore-idea`
+

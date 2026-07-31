@@ -47,6 +47,14 @@ Record completion:
 node .agents/scripts/orchestrator_state.js complete --agent product-manager --artifact 02-strategy/user-stories.md
 ```
 
+Write story architecture decisions to memory:
+```
+@memory-controller write active-decisions.md
+### [PRODUCT] User Story Map for {feature} [date: YYYY-MM-DD] [agent: @product-manager]
+{story count, key architectural decisions encoded in ACs, any planned deferrals}
+**Status:** active
+```
+
 ## Delegation
 - **Reads:** direct — personas + spec-kernel (< 3 files, < 500 lines)
 - **Writes:** @writer for user-stories.md

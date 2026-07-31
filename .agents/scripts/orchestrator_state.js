@@ -18,6 +18,8 @@
  *   node orchestrator_state.js status
  *   node orchestrator_state.js next
  *   node orchestrator_state.js complete --agent founder --artifact idea-brief.md
+ *   node orchestrator_state.js complete --agent founder --artifact idea-brief.md --check-memory
+ *   node orchestrator_state.js session-write --agent developer
  *   node orchestrator_state.js file-cr --from developer --to product-manager --target user-stories.md --issue "..."
  *   node orchestrator_state.js validate --phase design
  */
@@ -550,11 +552,13 @@ function main() {
       let artifact = null;
       let tokens = null;
       let durationMs = null;
+      let checkMemory = false;
       for (let i = 1; i < args.length; i += 2) {
         if (args[i] === '--agent') agent = args[i + 1];
         if (args[i] === '--artifact') artifact = args[i + 1];
         if (args[i] === '--tokens') tokens = parseInt(args[i + 1], 10) || null;
         if (args[i] === '--duration-ms') durationMs = parseInt(args[i + 1], 10) || null;
+        if (args[i] === '--check-memory') { checkMemory = true; i -= 1; } // flag, no value
       }
       if (!agent || !artifact) {
         console.error('Missing --agent or --artifact');
@@ -601,6 +605,18 @@ function main() {
       state.last_updated = new Date().toISOString();
       writeState(state);
 
+      // Memory enforcement check: warn if no session-write was recorded for this agent.
+      if (checkMemory) {
+        const lsw = state.last_session_write;
+        if (!lsw || lsw.agent !== agent) {
+          console.error(
+            `Warning: No session-write detected for @${agent}. ` +
+            `Run: @memory-controller session-write [agent: @${agent}] OR ` +
+            `node .agents/scripts/orchestrator_state.js session-write --agent ${agent}`
+          );
+        }
+      }
+
       // Always record an agent_invoke telemetry event. Use provided duration_ms or 0.
       recordTelemetry('agent_invoke', {
         agent,
@@ -619,7 +635,81 @@ function main() {
       console.log(JSON.stringify({ success: true, agent, artifact, version, tokens, duration_ms: durationMs }));
     }
 
+    if (cmd === 'session-write') {
+      let agent = null;
+      let workedOn = '';
+      let decisions = '';
+      let nextStep = '';
+      let blockers = 'none';
+      for (let i = 1; i < args.length; i += 2) {
+        if (args[i] === '--agent') agent = args[i + 1];
+        if (args[i] === '--worked-on') workedOn = args[i + 1];
+        if (args[i] === '--decisions') decisions = args[i + 1];
+        if (args[i] === '--next-step') nextStep = args[i + 1];
+        if (args[i] === '--blockers') blockers = args[i + 1];
+      }
+      if (!agent) {
+        console.error('Missing --agent');
+        process.exit(1);
+      }
+
+      const state = readState();
+      if (!state) {
+        console.log(JSON.stringify({ error: 'No pipeline state found.' }));
+        process.exit(1);
+      }
+
+      // Record in pipeline state
+      state.last_session_write = {
+        agent,
+        timestamp: new Date().toISOString(),
+        worked_on: workedOn,
+        decisions,
+        next_step: nextStep,
+        blockers
+      };
+      state.last_updated = new Date().toISOString();
+      writeState(state);
+
+      // Append to session-summaries/latest.md (overwrite) and history.md (append)
+      const sessionDir = path.join(process.cwd(), 'artifacts', 'memory', 'session-summaries');
+      if (!fs.existsSync(sessionDir)) fs.mkdirSync(sessionDir, { recursive: true });
+
+      const date = new Date().toISOString().split('T')[0];
+      const latestContent = [
+        `# Session Summary (latest)`,
+        ``,
+        `## Last Session`,
+        `- **Date:** ${date}`,
+        `- **Agent:** @${agent}`,
+        `- **Worked on:** ${workedOn || '(not specified)'}`,
+        `- **Decisions:** ${decisions || 'none'}`,
+        `- **Next step:** ${nextStep || '(not specified)'}`,
+        `- **Blockers:** ${blockers}`,
+        ``
+      ].join('\n');
+
+      const historyEntry = [
+        ``,
+        `## [${date}] Agent: @${agent}`,
+        `- Worked on: ${workedOn || '(not specified)'}`,
+        `- Decisions: ${decisions || 'none'}`,
+        `- Next step: ${nextStep || '(not specified)'}`,
+        `- Blockers: ${blockers}`,
+      ].join('\n');
+
+      try {
+        fs.writeFileSync(path.join(sessionDir, 'latest.md'), latestContent, 'utf8');
+        fs.appendFileSync(path.join(sessionDir, 'history.md'), historyEntry + '\n', 'utf8');
+      } catch (e) {
+        console.error('Warning: Could not write session summary files: ' + e.message);
+      }
+
+      console.log(JSON.stringify({ success: true, agent, date, message: 'Session summary written.' }));
+    }
+
     if (cmd === 'file-cr') {
+
       let from = null, to = null, target = null, issue = null, proposedFix = null, impact = null;
       for (let i = 1; i < args.length; i += 2) {
         if (args[i] === '--from') from = args[i + 1];

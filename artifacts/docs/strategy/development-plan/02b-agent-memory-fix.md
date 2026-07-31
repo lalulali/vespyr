@@ -1,8 +1,48 @@
 # Plan 02b: Fix Agent Memory Persistence
 
-**Status:** Ready for review
-**Date:** 2026-07-29
+**Status:** Complete (All Phases Done — Phase 4 skills integrated 2026-07-31)
+**Date:** 2026-07-29 (Updated: 2026-07-31)
 **Problem:** When agents are invoked individually or through round table, they never update the memory folder.
+
+---
+
+## 📊 Implementation Status Checklist
+
+- [x] **Phase 1: Infrastructure (Fix the foundation)**
+  - [x] 1.1 Create `session-summaries/` directory and seed files (`latest.md`, `history.md`)
+  - [x] 1.2 Create missing `blockers-and-risks.md`
+  - [x] 1.3 Auto-create guard in `memory_filter.js` — `ensureSessionSummaryFiles()` runs at the top of every `filterMemory()` call; silently re-creates `session-summaries/`, `latest.md`, and `history.md` if missing (fresh clone, deletion, or init that skips Phase 1 are all covered)
+- [x] **Phase 2: Agent Persona Fixes (All 21 agents)**
+  - [x] 2.1 Add `## Session Continuity (Mandatory)` section to all 17 reasoning agents
+  - [x] 2.2 Strengthen `## Shared Memory` sections with bold enforcement warnings in 17 reasoning agents
+  - [x] 2.3 Fix missing `## Delegation Contract` headers (`founder`, `technical-writer`, `user-researcher`, `ux-researcher`)
+  - [x] 2.4 Agent file manifest (17 reasoning agents updated, 3 I/O sub-agents skipped by design, 1 memory controller verified)
+- [x] **Phase 3: Round Table Memory Integration**
+  - [x] 3.1 Add memory context pre-load (`memory_filter.js`) at round table start
+  - [x] 3.2 Add decision write (`active-decisions.md`) + `session-write` at round table exit
+  - [x] 3.3 Add `## Project Context (from memory)` block to subagent prompt template
+  - [x] 3.4 Update frontmatter `allowed-tools` to include `Bash`
+- [x] **Phase 4: Skill Memory Integration**
+  - [x] 4.1 High-priority skills:
+    - [x] `develop` — Added load at step-01, `active-decisions` write after step-06, session-write at step-10
+    - [x] `design` — Added `active-decisions` write after step-03 (PRD + user stories); load + session-write already existed
+    - [x] `validate-idea` — Added load at start, verdict write to `active-decisions`, session-write at completion
+    - [x] `shape-up` — Added load at start; session-write + decisions output already existed
+    - [x] `launch` — Added load at start, `active-decisions` write at step-05; session-write already existed
+  - [x] 4.2 Medium-priority skills:
+    - [x] `explore-game-idea` — session-write at handoff already existed; load already in Phase 1; no changes needed
+    - [x] `unpack-problem` — Added load at start + session-write at step-04
+    - [x] `research-plan` — Added load at start + session-write at completion
+    - [x] `incident` — Added load at start; Step 6 memory writes + session-write already existed
+    - [x] `retro` — Added load at step-01 + session-write at step-05 completion
+    - [x] `review` — Added session-write at completion; load at Step 1 already existed
+  - [N/A] 4.3 Low-priority / utility skills (`kanban`, `squad`, `phase`, `status`, etc.) — *Skipped by design: these are stateless operational utilities that query or display state but do not produce decisions or lessons worth persisting*
+
+- [x] **Phase 5: Auto-Enforcement & Policy**
+  - [x] 5.1 & 5.2 Add `session-write` command and `--check-memory` warning flag to `orchestrator_state.js`
+  - [x] 5.3 Add **5. Memory Persistence (Mandatory)** rule to `AGENTS.md` Core Behavioral Guidelines
+- [x] **Phase 6: Delegate Memory Write Script**
+  - [x] 6.2 & 6.3 Implement `.agents/scripts/memory_write.js` (unified script handling validation, dedup, append, and compaction checks in 1 bash call)
 
 ---
 

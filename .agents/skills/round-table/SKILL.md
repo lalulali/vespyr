@@ -8,6 +8,7 @@ allowed-tools:
   - Edit
   - Grep
   - Glob
+  - Bash
   - AskUserQuestion
 ---
 
@@ -36,7 +37,12 @@ The roundtable skill accepts optional arguments:
    node .agents/scripts/resolve_agents.js
    ```
 3. **Determine current phase/stage** — read `artifacts/memory/project-context.md` or check `artifacts/output/pipeline-state.json` if available.
-4. **Welcome the user** — briefly introduce the roundtable mode (and if solo mode is active). Show the recommended stage-based agent roster. Ask what topic or issue they would like to discuss.
+4. **Load shared memory context** — before the discussion starts, load context so agents have project awareness:
+   ```bash
+   node .agents/scripts/memory_filter.js --agent founder --task "round table discussion: {user's topic}"
+   ```
+   Store the returned context to inject into each subagent prompt.
+5. **Welcome the user** — briefly introduce the roundtable mode (and if solo mode is active). Show the recommended stage-based agent roster. Ask what topic or issue they would like to discuss.
 
 ## Stage-Aware Agent Selection
 
@@ -79,6 +85,9 @@ Current Development Phase: {current_phase}
 
 {Relevant sections of project-context.md if applicable}
 
+## Project Context (from memory)
+{Loaded memory context from memory_filter.js — core project info, active decisions, recent lessons}
+
 ## What Other Agents Said This Round
 {Include other agents' responses if this is a cross-talk/reaction round, otherwise omit}
 
@@ -111,6 +120,30 @@ Common patterns:
 - **Reaction requests** ("Winston, what do you think about what Sally said?"): Spawn that single agent with the target response in their context.
 - **Roster expansion** ("Bring in Amelia"): Spawn the new agent with the discussion summary.
 
+### 4. Persist Round Table Outcomes
+
+After the discussion ends, write key outcomes to memory:
+
+1. **Write decisions to `active-decisions.md`:**
+   ```
+   @memory-controller write active-decisions.md
+   ### [ROUND TABLE] {topic} — {date} [agent: @round-table]
+   Decisions from the round table discussion on {topic}.
+   {bullet list of key decisions reached}
+   **Status:** active
+   ```
+
+2. **Write session summary:**
+   ```
+   @memory-controller session-write [agent: @round-table]
+   Worked on: Round table discussion on {topic} with {agent names}
+   Decisions: {key decisions reached}
+   Next step: {agreed next action}
+   Blockers: {unresolved disagreements or "none"}
+   ```
+
+3. Optionally write to agent-notes for key contributing agents if they surfaced domain insights.
+
 ## Exit
 
-When the user indicates they are finished (e.g., "thanks", "done", "exit"), provide a brief wrap-up of the key takeaways and return to normal operation.
+When the user indicates they are finished (e.g., "thanks", "done", "exit"), persist outcomes (step 4 above), provide a brief wrap-up of the key takeaways, and return to normal operation.

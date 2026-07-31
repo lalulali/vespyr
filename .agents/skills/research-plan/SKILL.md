@@ -86,3 +86,19 @@ Delegate to `@writer` for `artifacts/output/01-research/research-plan.md`:
 ## State machine integration
 At start: `@executor` runs `node .agents/scripts/orchestrator_state.js status`
 At end: `@executor` runs `node .agents/scripts/orchestrator_state.js complete --agent user-researcher --artifact 01-research/research-plan.md`
+
+## Memory integration
+**At start:** Load context before defining research goals:
+```
+@memory-controller load user-researcher [research-plan — {research topic}]
+```
+
+**At completion:** Write session summary — mandatory:
+```
+@memory-controller session-write [agent: @user-researcher]
+Worked on: Research plan — {topic}
+Decisions: Methodology: {chosen method}. Cohort: {target segment, N={size}}. Goals: {1-3 falsifiable goals}
+Next step: Conduct research sessions, then load /explore-idea or /unpack-problem with findings
+Blockers: {recruitment blockers or "none"}
+```
+

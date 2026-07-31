@@ -1,70 +1,61 @@
 {
   "project": {
     "name": "vespyr",
-    "type": "startup",
+    "type": "",
     "squad": "full-team"
   },
-  "created_at": "2026-07-22T07:24:13.006Z",
-  "last_updated": "2026-07-22T07:24:13.011Z",
+  "created_at": "2026-07-22",
+  "last_updated": "2026-07-31T03:39:53.325Z",
   "current_phase": "validation",
   "phases": {
     "validation": {
       "status": "pending",
       "started_at": null,
       "completed_at": null,
-      "agents": [
-        "founder"
-      ]
+      "agents": []
     },
     "exploration": {
       "status": "pending",
       "started_at": null,
       "completed_at": null,
-      "agents": [
-        "researcher",
-        "user-researcher"
-      ]
+      "agents": []
     },
     "design": {
       "status": "pending",
       "started_at": null,
       "completed_at": null,
-      "agents": [
-        "product-manager",
-        "product-designer"
-      ]
+      "agents": []
     },
     "development": {
       "status": "pending",
       "started_at": null,
       "completed_at": null,
-      "agents": [
-        "tech-lead",
-        "developer",
-        "code-reviewer",
-        "qa-engineer"
-      ]
+      "agents": []
     }
   },
   "artifacts": {
-    "artifacts/output/01-research/multi-agent-harness-research.md": {
-      "agent": "researcher",
-      "completed_at": "2026-07-22T07:24:13.011Z",
+    "test.md": {
+      "agent": "developer",
+      "completed_at": "2026-07-31T03:39:53.324Z",
       "version": null,
       "phase": "validation"
     }
   },
   "change_requests": [],
   "blockers": [],
+  "stories": {},
   "history": [
     {
       "action": "artifact-complete",
-      "agent": "researcher",
-      "artifact": "artifacts/output/01-research/multi-agent-harness-research.md",
+      "agent": "developer",
+      "artifact": "test.md",
       "version": null,
       "tokens": 0,
       "duration_ms": null,
-      "timestamp": "2026-07-22T07:24:13.011Z"
+      "timestamp": "2026-07-31T03:39:53.325Z"
     }
-  ]
+  ],
+  "name": "vespyr",
+  "squad": "full-team",
+  "phase": "validation"
 }

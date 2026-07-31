@@ -16,6 +16,61 @@ const path = require('path');
 
 const MEMORY_DIR = path.join(process.cwd(), 'artifacts', 'memory');
 const ARCHIVE_DIR = path.join(MEMORY_DIR, 'archive');
+const SESSION_DIR = path.join(MEMORY_DIR, 'session-summaries');
+
+/**
+ * Phase 1.3 — Auto-create guard.
+ * Guarantees session-summaries/ and its seed files exist before any
+ * memory load or session-write operation. Runs on every filterMemory()
+ * call so fresh clones, accidental deletions, and future inits are
+ * all covered without manual setup steps.
+ * This is intentionally silent (no stdout) — it must never pollute
+ * the JSON output that callers parse.
+ */
+function ensureSessionSummaryFiles() {
+  if (!fs.existsSync(SESSION_DIR)) {
+    try { fs.mkdirSync(SESSION_DIR, { recursive: true }); } catch (e) { return; }
+  }
+
+  const latestPath = path.join(SESSION_DIR, 'latest.md');
+  if (!fs.existsSync(latestPath)) {
+    try {
+      fs.writeFileSync(latestPath, [
+        '# Session Summary (latest)',
+        '',
+        '## Last Session',
+        '- **Date:** none',
+        '- **Worked on:** No sessions recorded yet.',
+        '- **Decisions:** none',
+        '- **Next step:** Initialize project memory.',
+        '',
+        '## Active Blockers',
+        'None',
+        ''
+      ].join('\n'), 'utf8');
+    } catch (e) { /* non-blocking */ }
+  }
+
+  const historyPath = path.join(SESSION_DIR, 'history.md');
+  if (!fs.existsSync(historyPath)) {
+    try {
+      fs.writeFileSync(historyPath, [
+        '# Session History',
+        '',
+        '<!-- Each entry is appended by @memory-controller session-write. Format:',
+        '## [YYYY-MM-DD] Agent: @{agent} — {topic}',
+        '- Worked on: ...',
+        '- Decisions: ...',
+        '- Next step: ...',
+        '- Blockers: ...',
+        '-->',
+        '',
+        '(No sessions recorded yet.)',
+        ''
+      ].join('\n'), 'utf8');
+    } catch (e) { /* non-blocking */ }
+  }
+}
 
 // Agent profiles: which files to check + domain keywords
 const AGENT_PROFILES = {
@@ -234,6 +289,9 @@ function scoreSection(section, keywords, now) {
 }
 
 function filterMemory(agent, task, maxResults) {
+  // Phase 1.3 guard: guarantee session-summaries/ exists before any load.
+  ensureSessionSummaryFiles();
+
   const profile = AGENT_PROFILES[agent];
   if (!profile) {
     return { error: `Unknown agent: ${agent}. Available: ${Object.keys(AGENT_PROFILES).join(', ')}` };

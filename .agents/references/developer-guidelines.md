@@ -10,15 +10,15 @@ When working in multi-developer mode (assigned a Developer ID like `@developer-N
 
 1.  **Identify Assignment:** Inspect the `Backlog` / `To Do` lists in `artifacts/output/04-planning/kanban.md` to identify your assigned Developer ID, worktree path, feature branch, and files.
 2.  **Work in Assigned Worktree:** All file writes, modifications, and command executions MUST happen in your assigned worktree directory:
-    *   *Path Example:* `~/.local/share/agents/worktree/worktree-dev-N`
+    *   *Path format:* `.agents/worktrees/feat/{base}/task-N` (e.g., `.agents/worktrees/feat/main/task-1`). Use `node .agents/scripts/worktree.js list` to find your exact path.
 3.  **Read Shared Repository Context:** You may read the Kanban board, architecture ADRs, product specs, user stories, and shared memory from the main repository directory (read-only access).
 4.  **Isolate Commit Boundaries:** Only perform commits and file modifications inside your worktree's designated feature branch (e.g., `feat/{base}/task-N`). Do NOT modify files assigned to other developers.
 5.  **Declare Dependencies:** If you require a modification in a file assigned to another developer, log the dependency in shared memory (`blockers-and-risks.md`) and coordinate before proceeding.
 6.  **Log Progress with Developer ID:** When writing to shared memory or logging status, always prefix entries with `[dev-N]` so other developers and downstream agents have clear status tracking.
 7.  **Command Verification:** Run the following commands to confirm your worktree context:
     ```bash
-    git worktree list
-    pwd # Should point to worktree-dev-N
+    node .agents/scripts/worktree.js list
+    pwd # Should point to .agents/worktrees/feat/{base}/task-N
     git branch --show-current # Should point to feat/{base}/task-N
     ```
 
