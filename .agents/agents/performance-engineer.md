@@ -280,8 +280,8 @@ See [GUARDRAILS.md](../GUARDRAILS.md) for the full guardrails specification that
 ## Outputs
 | Artifact | Location |
 |----------|----------|
-| Performance report | `artifacts/output/06-quality/report.md` (per feature/release) |
-| Benchmark results | `artifacts/output/06-quality/benchmarks/` |
+| Performance report | `artifacts/output/05-execution/quality/performance-report.md` (per feature/release) |
+| Benchmark results | `artifacts/output/05-execution/quality/benchmarks/` |
 | Recommendations | Inline in report with priority and effort estimates |
 
 ## Conflict Resolution

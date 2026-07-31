@@ -37,7 +37,7 @@ Apply Socratic gap discovery against the loaded baseline. For each user story, a
 
 ### 1c. Output discovered scenarios
 
-Delegate to `@writer` for `artifacts/output/06-quality/enrichment-findings.md`:
+Delegate to `@writer` for `artifacts/output/05-execution/quality/enrichment-findings.md`:
 
 ```markdown
 # QA Enrichment Findings

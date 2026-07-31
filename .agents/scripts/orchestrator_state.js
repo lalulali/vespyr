@@ -170,8 +170,14 @@ function syncYaml(state) {
     yaml.push('  # US-001-feature-name: done');
   }
   yaml.push('');
+  writeYaml(yaml);
+}
+
+// Best-effort write of sprint-status.yaml; never blocks orchestration on write failure.
+// Symmetric with readYaml() — readYaml parses YAML_STATE, writeYaml persists it.
+function writeYaml(lines) {
   try {
-    fs.writeFileSync(YAML_STATE, yaml.join('\n'), 'utf8');
+    fs.writeFileSync(YAML_STATE, lines.join('\n'), 'utf8');
   } catch (e) {
     // YAML sync is best-effort; don't block on write failure
   }

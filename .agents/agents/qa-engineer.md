@@ -290,7 +290,7 @@ Update `artifacts/output/04-planning/kanban.md` via `@writer` at each QA milesto
 | Coverage report | CI pipeline (automated) |
 | Bug reports (with reproduction steps) | Issue tracker |
 | Spec gap report | Comment on user stories or PR |
-| Release readiness report | `artifacts/output/06-quality/release-readiness.md` |
+| Release readiness report | `artifacts/output/05-execution/quality/release-readiness.md` |
 
 ## Quality Gates for Release
 - [ ] All AC-H* criteria pass

@@ -28,6 +28,10 @@ From `user-stories.md` and `product-spec.md`, identify complete user journeys sp
 - **Recovery journey:** What happens when mid-journey failure occurs (e.g., payment fails → retry → success)
 - **Session journey:** What happens across sessions (e.g., logout → login → state preserved)
 - **Concurrent journey:** What happens when multiple actions overlap (e.g., two tabs, same session)
+- **ML journey (if ML integration present):** Prediction endpoints, fallback behavior on model failure, model-version handling across the journey
+
+### 2b.1.1 Journey coverage gate
+Every primary journey MUST have at least one E2E test. Every recovery journey MUST be tested. The concurrent-journey matrix (N users × N actions) MUST be complete before this step's exit gate.
 
 ### 2b.2 Write/run E2E tests
 
@@ -43,12 +47,17 @@ npm run test:e2e  # or project equivalent
 - **API contract integrity:** Requests and responses match schema
 - **Data consistency:** Database state matches expected post-journey state
 - **Race conditions:** Concurrent operations produce correct results
-- **Timeout handling:** Long-running operations degrade gracefully
+- **Timeout handling:** Long-running operations degrade gracefully (behavior assertion only — SLA benchmark analysis is owned by `@performance-engineer`)
 - **State preservation:** Session state survives page refreshes and navigation
 
 ### 2b.4 Analyze results
 
-Delegate to `@writer` for `artifacts/output/06-quality/fullcycle-test-results.md`:
+`@qa-engineer` analyzes:
+- Pass/fail counts by journey
+- Flaky E2E detection (E2E is the flakiest track — must be tracked explicitly)
+- Regression detection (previously passing journeys that now fail)
+
+Delegate to `@writer` for `artifacts/output/05-execution/quality/fullcycle-test-results.md`:
 
 ```markdown
 # Full-Cycle Test Results
@@ -70,12 +79,22 @@ Delegate to `@writer` for `artifacts/output/06-quality/fullcycle-test-results.md
 ## Recovery Validation
 | Scenario | Recovery Time | Data Loss? | Pass? |
 |----------|--------------|-----------|-------|
+
+## Flaky E2E Tests
+| Test | Retry Rate | Last Pass Run | Quarantine? |
+|------|-----------|--------------|------------|
 ```
 
-## Loop limit
-Max 2 fix-test cycles per integration failure. If a failure persists after 2 fix attempts, escalate to `@tech-lead`.
+## Test Quality Gates
+Tests written in this step MUST be:
+- Independent and idempotent — runnable in any order, repeated runs produce same results
+- Fast — integration tests < 10s each
+- One logical assertion per test
+- Behavior-named (e.g., `it('should preserve session across page refresh')` — not `it('should pass journey test 3')`)
+- Behavior-driven (assert on what, not how)
 
-## Delegation
-- **Reads:** @reader for integration configs and API specs
-- **Writes:** @writer for E2E test files and fullcycle-test-results.md
-- **Runs:** @executor for E2E/integration test commands
+## Loop limit
+Max 2 fix-test cycles per failure. If a failure persists after 2 fix attempts, escalate as follows:
+- Design-flaw blocker → `@tech-lead`
+- Spec-gap-driven failure → file a CR to `@product-manager`
+- Auth/secrecy-driven failure → `@security-engineer`

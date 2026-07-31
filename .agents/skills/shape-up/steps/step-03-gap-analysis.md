@@ -16,9 +16,6 @@ output_contract:
 
 Systematic gap detection on the structured draft. Find what's missing, weak, or assumed without evidence.
 
-## Goal
-Produce a gap report that tells the user exactly what needs attention before this idea is design-ready.
-
 ## Process
 > **Tracker:** `node .agents/scripts/step_tracker.js begin --skill shape-up --step 3`
 
@@ -36,10 +33,7 @@ Flag any missing element as a blocker-severity gap.
 For each assumption in the structured draft:
 1. Classify: **verified** (evidence exists), **plausible** (reasonable but unproven), **unverified** (no evidence)
 2. If `hasResearch`: cross-reference against research findings
-   - Did market analysis confirm the market size assumption?
-   - Did competitive analysis validate the positioning assumption?
-   - Did user research confirm the target persona and pain point?
-   - Flag any assumption that research contradicts
+   - Did market analysis confirm market size, competitive analysis validate positioning, and user research confirm persona/pain point? Flag any contradiction.
 3. Rate risk: what happens if this assumption is wrong?
 
 ### Dependency scan
@@ -61,10 +55,5 @@ For each assumption in the structured draft:
 
 ## Output
 Gap report presented to user. Each gap has: description, severity, and suggested resolution path.
-
-## Delegation
-- **Reads:** @reader if research artifacts exist (3+ files, potentially > 500 lines total); direct for small files
-- **Writes:** none
-- **Direct:** gap reasoning is pure analysis
 
 > **Tracker:** `node .agents/scripts/step_tracker.js complete --skill shape-up --step 3`

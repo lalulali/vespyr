@@ -333,9 +333,9 @@ A release **CANNOT** ship without @security-engineer sign-off. Required sign-off
 ## Outputs
 | Artifact | Location |
 |----------|----------|
-| Security findings report | `artifacts/output/06-quality/findings-report.md` (per audit) |
-| Threat model | `artifacts/output/06-quality/threat-model.md` |
-| Dependency vulnerability scan | `artifacts/output/06-quality/dependency-scan.md` |
+| Security findings report | `artifacts/output/05-execution/quality/findings-report.md` (per audit) |
+| Threat model | `artifacts/output/05-execution/quality/threat-model.md` |
+| Dependency vulnerability scan | `artifacts/output/05-execution/quality/dependency-scan.md` |
 
 ## Conflict Resolution
 - Critical/High security findings are **non-negotiable blocking issues** — they cannot be deferred by @product-manager or @founder without documented risk acceptance signed by all parties

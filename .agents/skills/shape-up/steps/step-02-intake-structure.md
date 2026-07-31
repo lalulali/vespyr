@@ -16,9 +16,6 @@ output_contract:
 
 Parse the user's raw input into a structured format — a document, notes, a verbal pitch, a URL, or a conversation summary.
 
-## Goal
-Produce a structured draft that captures the idea's core elements in a consistent form, regardless of input format.
-
 ## Process
 > **Tracker:** `node .agents/scripts/step_tracker.js begin --skill shape-up --step 2`
 
@@ -59,11 +56,5 @@ The draft is internal (not yet the final artifact). It captures:
 
 ## Output
 Structured draft presented to user for confirmation before proceeding to gap analysis.
-
-## Delegation
-- **Reads:** direct — user input + optional brief/research (< 200 lines each)
-- **Writes:** none (draft is in-conversation, not yet written to file)
-- **Memory:** @memory-controller note — log structured-draft synthesis for resume continuity
-- **Direct:** @founder synthesis is pure reasoning
 
 > **Tracker:** `node .agents/scripts/step_tracker.js complete --skill shape-up --step 2`

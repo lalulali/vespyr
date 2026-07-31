@@ -8,10 +8,8 @@ description: |
   inflated symbolism, promotional language, superficial -ing analyses, vague
   attributions, em dash overuse, rule of three, AI vocabulary words, passive
   voice, negative parallelisms, and filler phrases.
-source: https://github.com/blader/humanizer
 source_file: https://github.com/blader/humanizer/blob/main/SKILL.md
 license: MIT
-compatibility: claude-code opencode
 allowed-tools:
   - Read
   - Write

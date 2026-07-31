@@ -155,6 +155,43 @@ function validateAgent(filePath) {
   return true;
 }
 
+// F1.24.b.3 verification helper — every step file declares delegation + output_contract.citations
+function validateStep(filePath) {
+  const content = fs.readFileSync(filePath, 'utf-8');
+  const rel = path.relative(path.resolve(__dirname, '..'), filePath);
+  const fm = parseFrontmatter(content);
+  const errors = [];
+
+  if (!fm) {
+    console.error(`FAIL: ${rel} — no frontmatter found (step file)`);
+    return false;
+  }
+
+  if (!fm.includes('delegation:')) {
+    errors.push(`missing delegation: frontmatter field (F1.24.b.3)`);
+  }
+
+  if (!fm.includes('output_contract:')) {
+    errors.push(`missing output_contract: frontmatter field (F1.24.b.3)`);
+  } else {
+    const citationsMatch = fm.match(/^\s*citations:\s*(.+)$/m);
+    if (!citationsMatch) {
+      errors.push(`output_contract declares no citations field`);
+    } else {
+      const val = citationsMatch[1].trim();
+      if (val !== 'required' && val !== 'not-required') {
+        errors.push(`output_contract.citations "${val}" must be "required" or "not-required"`);
+      }
+    }
+  }
+
+  if (errors.length > 0) {
+    console.error(`FAIL: ${rel} — ${errors.join('; ')}`);
+    return false;
+  }
+  return true;
+}
+
 function main() {
   if (!fs.existsSync(AGENTS_DIR)) {
     console.error(`Agents directory not found: ${AGENTS_DIR}`);
@@ -183,7 +220,31 @@ function main() {
     process.exit(1);
   }
 
-  console.log('All agents valid.');
+  // F1.24.b.3 + CR-002 Row 7: validate step files declare delegation + output_contract.citations
+  const SKILLS_DIR = path.resolve(__dirname, '..', 'skills');
+  const stepFiles = [];
+  if (fs.existsSync(SKILLS_DIR)) {
+    for (const skillDir of fs.readdirSync(SKILLS_DIR)) {
+      for (const sub of ['steps', 'steps-create', 'steps-edit', 'steps-validate']) {
+        const subPath = path.join(SKILLS_DIR, skillDir, sub);
+        if (fs.existsSync(subPath) && fs.statSync(subPath).isDirectory()) {
+          for (const f of fs.readdirSync(subPath)) {
+            if (f.endsWith('.md')) stepFiles.push(path.join(subPath, f));
+          }
+        }
+      }
+    }
+  }
+  const stepResults = stepFiles.map((fp) => ({ file: path.relative(path.resolve(__dirname, '..'), fp), valid: validateStep(fp) }));
+  const stepFailed = stepResults.filter((r) => !r.valid);
+  console.log(`${stepResults.length - stepFailed.length} passed, ${stepFailed.length} failed out of ${stepResults.length} step files.`);
+  if (stepFailed.length > 0) {
+    console.error(`\nFailed step files:`);
+    for (const r of stepFailed) console.error(`  - ${r.file}`);
+    process.exit(1);
+  }
+
+  console.log('All agents and step files valid.');
   process.exit(0);
 }
 

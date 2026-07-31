@@ -45,6 +45,11 @@ For each user story in `user-stories.md`, ensure:
 - Each component renders correctly in isolation
 - State transitions work (default, hover, active, disabled, loading, error)
 - Accessibility: keyboard nav, screen reader, focus management
+- Visual regression: screenshot-diff each state against `design.md`; assert color/spacing/typography tokens match the design system
+
+**Component-level integration:**
+- Integration with mocked downstream boundaries is tested here (component-level only)
+- Cross-service integration is deferred to step 02b
 
 ### 2a.3 Run feature tests
 
@@ -62,7 +67,7 @@ npm test -- --coverage  # or project equivalent
 - Flaky test detection (tests that fail intermittently)
 - Regression detection (previously passing tests that now fail)
 
-Delegate to `@writer` for `artifacts/output/06-quality/feature-test-results.md`:
+Delegate to `@writer` for `artifacts/output/05-execution/quality/feature-test-results.md`:
 
 ```markdown
 # Feature Test Results
@@ -86,10 +91,16 @@ Delegate to `@writer` for `artifacts/output/06-quality/feature-test-results.md`:
 |------|-------------|---------|
 ```
 
-## Loop limit
-Max 2 fix-test cycles per failure. If a failure persists after 2 fix attempts, escalate to `@tech-lead`.
+## Test Quality Gates
+Tests written in this step MUST be:
+- Independent and idempotent — runnable in any order, repeated runs produce same results
+- Fast — unit tests < 1s each
+- One logical assertion per test
+- Behavior-named (e.g., `it('should reject invalid email format')` — not `it('should fail validation test 3')`)
+- Behavior-driven (assert on what, not how)
 
-## Delegation
-- **Reads:** @reader for source files and test patterns
-- **Writes:** @writer for test files and feature-test-results.md
-- **Runs:** @executor for npm test and coverage commands
+## Loop limit
+Max 2 fix-test cycles per failure. If a failure persists after 2 fix attempts, escalate as follows:
+- Design-flaw blocker → `@tech-lead`
+- Spec-gap-driven failure → file a CR to `@product-manager`
+- Auth/secrecy-driven failure → `@security-engineer`

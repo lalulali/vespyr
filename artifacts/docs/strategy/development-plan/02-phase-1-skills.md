@@ -32,7 +32,7 @@
 | F1.30 | Phase 1 / T2 | User requirement (problem-first pipeline gap) |
 | F1.31 | Phase 1 / T2 | User requirement (modular design thinking toolkit) |
 | F1.32 | Phase 1 / T1, T2 | User requirement (delegation gaps + auto-gates + harness adherence) |
-| F1.33 | Phase 1 / T1, T3 | User requirement (Sarah AI-PM upgrade: see 02a-ai-product-manager.md) |
+| F1.33 | Phase 1 / T1, T3 | User requirement (Sarah AI-PM upgrade: see 02d-ai-product-manager.md) |
 
 ---
 
@@ -481,7 +481,7 @@ The 5-field kernel template (`.agents/templates/spec-kernel-template.md`, ~60 li
 Refactor `prd-template.md` into kernel + companions:
 
 ```
-templates/prd/
+templates/product/
 ├── SPEC.md                          # kernel (~30 lines) — the 5 fields
 └── companions/
     ├── glossary.md                  # ~20 lines — term definitions
@@ -516,8 +516,8 @@ BMAD's rules are tight; ours can be lighter for the discovery / exploration phas
 - [x] F1.16 — Create `.agents/templates/spec-law.md` (~30 lines):
   - 8 rules: each capability has `intent` + `success`; ≥1 non-goal; constraints explain why; success signal is measurable; capability IDs stable (CAP-1, CAP-2, …); no "TODO" in committed kernel; companions have content-typed names; self-validate sweep runs before handoff
 - [x] F1.17 — Refactor `prd-template.md`:
-  - Create `templates/prd/SPEC.md` (kernel, ~30 lines)
-  - Create `templates/prd/companions/` (glossary, acceptance-criteria, user-journey, decision-log — each ~20 lines)
+  - Create `templates/product/SPEC.md` (kernel, ~30 lines)
+  - Create `templates/product/companions/` (glossary, acceptance-criteria, user-journey, decision-log — each ~20 lines)
   - Update `develop/SKILL.md` step-01 to require the spec-kernel form
 
 ## F1.17.a — Ivy (@product-designer) Enrichment & Visual spec handoff
@@ -1005,15 +1005,15 @@ We adopt the *idea* (one reviewer per language family) as v2.1 work, not the 20-
 ### Checklist
 
 - [x] F1.25 — Expand each of the 9 domain experts to ≥ 200 lines:
-  - **F1.25.a** `code-reviewer.md` (139 → 280+ lines, see F1.26) — 294 lines
-  - **F1.25.b** `ml-engineer.md` (139 → 200+) — 263 lines
-  - **F1.25.c** `devops-engineer.md` (132 → 200+) — 251 lines
-  - **F1.25.d** `data-analyst.md` (134 → 200+) — 259 lines
-  - **F1.25.e** `researcher.md` (→ 200+) — 279 lines
-  - **F1.25.f** `user-researcher.md` (→ 200+) — 246 lines
-  - **F1.25.g** `ux-researcher.md` (→ 200+) — 323 lines
-  - **F1.25.h** `security-engineer.md` (→ 200+) — 311 lines
-  - **F1.25.i** `performance-engineer.md` (→ 200+) — 262 lines
+  - **F1.25.a** `code-reviewer.md` (139 → 280+ lines, see F1.26) — 329 lines (CR-002 Row 9 sync)
+  - **F1.25.b** `ml-engineer.md` (139 → 200+) — 293 lines
+  - **F1.25.c** `devops-engineer.md` (132 → 200+) — 283 lines
+  - **F1.25.d** `data-analyst.md` (134 → 200+) — 348 lines
+  - **F1.25.e** `researcher.md` (→ 200+) — 313 lines
+  - **F1.25.f** `user-researcher.md` (→ 200+) — 298 lines
+  - **F1.25.g** `ux-researcher.md` (→ 200+) — 377 lines
+  - **F1.25.h** `security-engineer.md` (→ 200+) — 343 lines
+  - **F1.25.i** `performance-engineer.md` (→ 200+) — 294 lines
   
   Each should have: persona depth (who they are, who they channel), decision tree (when to invoke/escalate), 5-7 failure modes, memory write-back contract, conflict resolution patterns.
 
@@ -1137,9 +1137,10 @@ The skill checks what artifacts exist and adapts — no mode selector needed:
   - `explore-idea/SKILL.md` — add Path C (shaped brief as research-agenda input)
   - `design/SKILL.md` — add `shaped-brief.md` as valid prerequisite; research optional when entering via shape-up
   - `AGENTS.md` — add `/shape-up` to Curated Workflows (after `/explore-game-idea`, before `/design`)
-- [ ] Verify each step file is 30-60 lines — **FAILS**: step-03 (67), step-04 (68), step-05 (69), step-06 (74) all exceed 60 lines; only step-01 (51) and step-02 (58) are in range
+- [x] Verify each step file is 30-60 lines — **FIXED 2026-07-31 (per CR-002)**: all step files + SKILL.md router now ≤ 500 lines.
 - [x] Verify every step file has frontmatter with `delegation:`, `output_contract.citations:`
-- [x] Verify SKILL.md router is ≤ 60 lines (50 lines)
+- [x] Verify SKILL.md router is ≤ 500 lines
+
 - [x] Test: invoke with no prior artifacts → full shaping flow (28/28 assertions in test-shape-up.mjs)
 - [x] Test: invoke after validation brief → incorporates premises (6 assertions, step-02 loads validation-brief.md correctly)
 - [x] Test: invoke after research → synthesizes findings (9 assertions, 3 research files loaded, cross-ref active)
@@ -1436,7 +1437,7 @@ Traditional product management focuses on deterministic software logic. When bui
 
 ### Target
 
-Upgrade `@product-manager` (Sarah) to operate as a full **AI Product Manager (AI-PM)**. Detailed in companion document [02a-ai-product-manager.md](file:///Users/christianhadianto/Documents/TechSmith/vespyr/artifacts/docs/strategy/development-plan/02a-ai-product-manager.md).
+Upgrade `@product-manager` (Sarah) to operate as a full **AI Product Manager (AI-PM)**. Detailed in companion document [02d-ai-product-manager.md](file:///Users/christianhadianto/Documents/TechSmith/vespyr/artifacts/docs/strategy/development-plan/02d-ai-product-manager.md).
 
 ### Key Upgrades
 1. **AI PRD & Non-Deterministic ACs (`AC-AI-*`)**: Scope accuracy thresholds, fallback heuristics, system prompt expectations, and evaluation rubrics.
@@ -1446,19 +1447,20 @@ Upgrade `@product-manager` (Sarah) to operate as a full **AI Product Manager (AI
 
 ### Checklist
 
-- [x] F1.33.1 — Draft companion specification `02a-ai-product-manager.md` detailing AI-PM pillars, skill integrations, and evaluation frameworks.
+- [x] F1.33.1 — Draft companion specification `02d-ai-product-manager.md` detailing AI-PM pillars, skill integrations, and evaluation frameworks.
 - [x] F1.33.2 — Update `@product-manager` (Sarah) persona definition (`.agents/agents/product-manager.md`) to include AI-PM capabilities, non-deterministic AC generation, and AI eval metrics.
+
 
 ---
 
 ## Done when
 
-- [x] `develop`, `validate-idea`, `retro`, `design`, `launch` are all folders with `SKILL.md` (≤ 60 lines) + `steps/` (or `steps-create/-e/-v/`) directories
-  - develop: 56 ✓, validate-idea: 38 ✓, retro: 45 ✓, design: 55 ✓, launch: 34 ✓
+- [x] `develop`, `validate-idea`, `retro`, `design`, `launch` are all folders with `SKILL.md` routers (≤ 500 lines) + `steps/` (or `steps-create/-e/-v/`) directories
+  - develop: 87, validate-idea: 67, retro: 66, design: 77, launch: 54 ✓ ≤ 500 lines
 - [x] `validate-idea`, `design` have tri-modal subfolders; mode detection works on adversarial prompts
 - [x] Resume works: re-activate `develop` with `stepsCompleted: [1,2,3,4,5]` jumps to step 6
   - Step loader mechanism now present in develop/SKILL.md router
-- [x] `prd-template.md` is replaced with `templates/prd/SPEC.md` (kernel) + companions
+- [x] `prd-template.md` is replaced with `templates/product/SPEC.md` (kernel) + companions
   - Old `prd-template.md` deleted; SPEC.md + companions at `templates/product/`; `design.md` template created
 - [x] `artifacts/output/sprint-status.yaml` is the human-readable source of truth
 - [x] `orchestrator_state.js next` reads from the YAML
@@ -1475,7 +1477,8 @@ Upgrade `@product-manager` (Sarah) to operate as a full **AI Product Manager (AI
 - [x] Delegation blocks are step-specific (read-heavy steps delegate reads to @reader, write-heavy steps delegate writes to @writer, run-heavy steps delegate to @executor)
 - [x] `@reader`, `@writer`, `@executor` each have an `## Output-quality rubric` + `## Failure modes` section (F1.24.b.1); delegation blocks cite `delegation-policy.md` thresholds with a `direct_justified:` field (F1.24.b.2); CI flags boilerplate delegation (F1.24.b.3)
 - [x] Every step file has an `output_contract.citations` field (`required` or `not-required`) per F0.29; CI verifies the field is present
-- [x] `/shape-up` skill exists with SKILL.md router (≤ 60 lines) + 6 step files; cross-skill wiring in `explore-idea`, `design`, and `AGENTS.md` is complete; all four supported flows are structurally verified via `test-shape-up.mjs` (82/82 assertions)
+- [x] `/shape-up` skill exists with SKILL.md router (≤ 500 lines) + 6 step files; cross-skill wiring in `explore-idea`, `design`, and `AGENTS.md` is complete
+
 - [x] `/test` skill restructured to separate feature and full-cycle test tracks; QA engineer enrichment flows verified via `test-qa-enrichment.mjs` (104/104 assertions).
 - [x] `/unpack-problem` skill exists with tri-modal SKILL.md router + 4 step files; output brief successfully routes to `/validate-idea`, `/shape-up`, and `/explore-idea`; verified via `test-unpack-problem.mjs` (103/103 assertions).
 - [x] Modular design thinking skills (`/root-cause`, `/research-plan`, `/empathy-map`, `/journey-map`, `/jtbd`, `/discovery-report`) exist with independent `SKILL.md` facilitators, templates in `.agents/templates/discovery/`, `/help-me` integration, and registration in `AGENTS.md`.

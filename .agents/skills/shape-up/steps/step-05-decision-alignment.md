@@ -16,9 +16,6 @@ output_contract:
 
 Resolve open questions and lock decisions. Every gap and stress-test finding becomes either a resolved decision or an explicit deferral.
 
-## Goal
-Close the loop on every open item. No silent assumptions survive this step — everything is either decided or explicitly deferred with rationale.
-
 ## Process
 > **Tracker:** `node .agents/scripts/step_tracker.js begin --skill shape-up --step 5`
 
@@ -50,11 +47,11 @@ For each resolved decision, append to `artifacts/memory/active-decisions.md`:
 ```
 
 ### Deferral handling
-Deferred items are NOT silent omissions. Each deferral gets:
-- A clear statement of what's deferred
-- Why it's deferred (not enough info, not blocking v1, needs research)
-- What would unblock it (specific action or information needed)
-- Where it's tracked (open questions in the shaped brief)
+Deferred items are NOT silent omissions. Each gets: 
+(a) what's deferred, 
+(b) why (info missing / not v1-blocking / needs research), 
+(c) what would unblock it (specific action or information needed), 
+(d) where it's tracked (open questions in the shaped brief).
 
 ## Halt condition
 If 3+ blocker-severity items are deferred without a clear unblock path, pause and ask:
@@ -62,11 +59,5 @@ If 3+ blocker-severity items are deferred without a clear unblock path, pause an
 
 ## Output
 All open items resolved or explicitly deferred. Decision log written to memory.
-
-## Delegation
-- **Reads:** none
-- **Writes:** @writer for `active-decisions.md`
-- **Memory:** @memory-controller for decision log entries
-- **Direct:** decision reasoning is pure analysis
 
 > **Tracker:** `node .agents/scripts/step_tracker.js complete --skill shape-up --step 5`

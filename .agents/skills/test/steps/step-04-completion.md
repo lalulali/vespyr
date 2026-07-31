@@ -21,7 +21,7 @@ Produce the final test report and close the QA cycle.
 
 ### 4a. Compile test report
 
-`@qa-engineer` synthesizes all findings into a single report. Delegate to `@writer` for `artifacts/output/06-quality/test-report.md`:
+`@qa-engineer` synthesizes all findings into a single report. Delegate to `@writer` for `artifacts/output/05-execution/quality/test-report.md`:
 
 ```markdown
 # Test Report
@@ -71,7 +71,7 @@ Blockers: {any blocking defects, or "none"}
 
 Delegate to `@executor`:
 ```bash
-node .agents/scripts/orchestrator_state.js complete --agent qa-engineer --artifact 06-quality/test-report.md
+node .agents/scripts/orchestrator_state.js complete --agent qa-engineer --artifact 05-execution/quality/test-report.md
 ```
 
 ## Delegation

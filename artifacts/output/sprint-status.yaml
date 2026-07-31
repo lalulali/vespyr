@@ -9,10 +9,16 @@ phase: validation
 
 # Phase-level status
 phases:
-  validation: pending
-  exploration: pending
-  design: pending
-  development: pending
+  discovery: pending
+  research: pending
+  strategy: pending
+  architecture: pending
+  planning: pending
+  execution: pending
+  launch: pending
+  iteration: pending
+  documentation: pending
+  retro: pending
 
 # Story-level status (when in development)
 stories:

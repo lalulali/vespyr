@@ -191,7 +191,7 @@ mode: subagent                     # existing
 temperature: 0.1                   # existing
 permission: { ... }                # existing
 tools: { write: true, ... }        # existing
-model: opencode-go/claude-sonnet-4 # NEW: model hint
+model: - # optional — set to "-" if per-call routing chooses (harness default applies); see CR-002 Row 11
 capabilities:                      # NEW: enumerated capability list
   - code-generation
   - refactoring

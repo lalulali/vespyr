@@ -47,10 +47,6 @@ None. This is a flexible entry point.
 - `artifacts/output/01-discovery/shaped-brief.md`
 - `artifacts/memory/active-decisions.md` (appended)
 
-## Skill chain
-- Prev: `validate-idea`, `explore-idea`, or direct entry (none)
-- Next: `design` (if assumptions verified) or `explore-idea` (if assumptions need research)
-
 ## State & memory integration
 At start, via `@executor`: `node .agents/scripts/orchestrator_state.js status`
 

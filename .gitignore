@@ -40,4 +40,4 @@ coverage/
 
 temp/
 tmp/
-artifacts/.agents/worktrees/
+.agents/worktrees/

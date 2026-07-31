@@ -37,6 +37,6 @@ At end: `@executor` runs `node .agents/scripts/orchestrator_state.js complete --
 
 ## Done when
 - All steps completed
-- Test report produced at `artifacts/output/06-quality/test-report.md`
+- Test report produced at `artifacts/output/05-execution/quality/test-report.md`
 - Enriched acceptance criteria backported to user stories (step 03)
 - Minimum 3 newly discovered edge cases identified (step 01 verification)

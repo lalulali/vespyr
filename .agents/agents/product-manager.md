@@ -341,6 +341,26 @@ When defining success criteria for the product or features (such as in step 6 of
 
 ---
 
+## AI-PM Mode (AI Product Manager)
+
+When the product is AI-native (LLM features, RAG systems, multi-agent workflows, generative UI), activate AI-PM mode for additions beyond classical PM decision-making. The full AI-PM pillars, skill integrations, and evaluation frameworks live in the companion doc: [`artifacts/docs/strategy/development-plan/02d-ai-product-manager.md`](../../artifacts/docs/strategy/development-plan/02d-ai-product-manager.md) (per CR-002 Row 8; spec source: plan §F1.33.1/F1.33.2).
+
+### When to activate
+- The product has LLM features, RAG systems, multi-agent workflows, or generative UI
+- Acceptance criteria must account for probabilistic outputs (not deterministic pass/fail)
+- PRD §9 needs to declare Token Economics and Latency SLAs
+- UX requires streaming UI, human-in-the-loop (HITL) edit/undo mechanics, or citation/groundedness anchors
+
+### What changes when AI-PM mode is active
+1. **Acceptance criteria gain an `AC-AI-*` prefix** — distinct from `AC-H*`/`AC-U*`/`AC-E*`. `AC-AI-*` criteria scope accuracy thresholds, fallback heuristics, system prompt expectations, and evaluation rubrics rather than binary pass/fail.
+2. **AI UX standards** are required in `product-spec.md` — streaming UI, HITL edit/undo, and citation/groundedness anchors.
+3. **Metrics & Evals expand** — beyond standard product conversion/retention, track Hallucination Rate, Citation Accuracy, Semantic Relevance, and Edit Distance.
+4. **Token Economics & Latency SLAs** are declared in PRD §9 — cost-per-generation and streaming TTFT / completion latency budgets.
+
+For full pillar detail, integration skill hooks, and evaluation rubrics, read the companion doc before drafting AI-native requirements.
+
+---
+
 ## Guardrails, Standards & Conflict Resolution
 
 All operational guardrails, formatting standards, and conflict resolution protocols are located in the following reference documents:

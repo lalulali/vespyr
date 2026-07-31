@@ -5,57 +5,84 @@
     "squad": "full-team"
   },
   "created_at": "2026-07-22",
-  "last_updated": "2026-07-31T03:39:53.325Z",
+  "last_updated": "2026-07-31T06:04:02.345Z",
   "current_phase": "validation",
   "phases": {
-    "validation": {
+    "discovery": {
       "status": "pending",
       "started_at": null,
       "completed_at": null,
       "agents": []
     },
-    "exploration": {
+    "research": {
       "status": "pending",
       "started_at": null,
       "completed_at": null,
       "agents": []
     },
-    "design": {
+    "strategy": {
       "status": "pending",
       "started_at": null,
       "completed_at": null,
       "agents": []
     },
-    "development": {
+    "architecture": {
+      "status": "pending",
+      "started_at": null,
+      "completed_at": null,
+      "agents": []
+    },
+    "planning": {
+      "status": "pending",
+      "started_at": null,
+      "completed_at": null,
+      "agents": []
+    },
+    "execution": {
+      "status": "pending",
+      "started_at": null,
+      "completed_at": null,
+      "agents": []
+    },
+    "launch": {
+      "status": "pending",
+      "started_at": null,
+      "completed_at": null,
+      "agents": []
+    },
+    "iteration": {
+      "status": "pending",
+      "started_at": null,
+      "completed_at": null,
+      "agents": []
+    },
+    "documentation": {
+      "status": "pending",
+      "started_at": null,
+      "completed_at": null,
+      "agents": []
+    },
+    "retro": {
       "status": "pending",
       "started_at": null,
       "completed_at": null,
       "agents": []
     }
   },
-  "artifacts": {
-    "test.md": {
-      "agent": "developer",
-      "completed_at": "2026-07-31T03:39:53.324Z",
-      "version": null,
-      "phase": "validation"
-    }
-  },
+  "artifacts": {},
   "change_requests": [],
   "blockers": [],
   "stories": {},
-  "history": [
-    {
-      "action": "artifact-complete",
-      "agent": "developer",
-      "artifact": "test.md",
-      "version": null,
-      "tokens": 0,
-      "duration_ms": null,
-      "timestamp": "2026-07-31T03:39:53.325Z"
-    }
-  ],
+  "history": [],
   "name": "vespyr",
   "squad": "full-team",
-  "phase": "validation"
+  "phase": "validation",
+  "last_session_write": {
+    "agent": "qa-engineer",
+    "timestamp": "2026-07-31T06:04:02.344Z",
+    "worked_on": "CR-001 + CR-002 resolution — both CRs closed using documented default recommendations; 21 distinct file edits + 2 new files + 1 symlink re-establishment (portback into canonical) + 1 validator extension across .agents/scripts",
+    "decisions": "Default-selection-only route per user confirmation. CR-001 D1=quality/ subfolder, D2 QA→qa-report.md & Perf→performance-report.md (security-engineer didn't actually write report.md), D3 immediate, D4 refs-only (06-quality dir never existed physically), D5 both scope-paneled (Execution qa-release-readiness vs Launch deploy-readiness). CR-002 Rows 1-2-4-5-6-7-8-11 decisions all per default rec; symlinks re-established with portback of discovery/validation skill lists, Memory Persistence section, Doc Update Protocol section. CLAUDE.md .claude/ substitutions NOT ported (canonical stays harness-agnostic).",
+    "next_step": "DEFERRED: manual /test skill end-to-end smoke check on a test project (CR-001 v-check 5). Optional followup: tech-debt file canonical replacement of 06-quality/ paths in artifacts/docs/strategy/ historical plan docs (out-of-scope per Surgical Actions principle).",
+    "blockers": "none"
+  }
 }

@@ -25,8 +25,6 @@ Focused Socratic stress-test for plan viability. Lighter than full `/grill-me` �
 - **Behavior over intent.** "People would want this" doesn't count. "People currently do X as a workaround" counts.
 - **The narrowest version wins.** Push toward the smallest thing that delivers value.
 
-## Focus areas
-
 ### F1: Viability
 **Ask:** "Given the constraints you listed, is this actually buildable in the timeframe you're imagining? What's the hardest technical bet?"
 
@@ -55,18 +53,7 @@ Push for: switching cost awareness. The status quo is the real competitor.
 ## Escape hatch
 After **3+ questions**, the user can say "enough" or "move on." Remaining concerns are logged as open questions in the brief — they don't disappear, they become explicit deferrals.
 
-## How this differs from /grill-me
-- No 7+1 branch tree — 5 focused areas instead of 8 exhaustive branches
-- No mandatory branch exhaustion — escape hatch after 3 questions
-- Goal is viability confirmation, not exhaustive decision documentation
-- If the user needs the full treatment, recommend `/grill-me` explicitly
-
 ## Output
 Stress-test findings: confirmed strengths, identified weaknesses, and open questions for step 5.
-
-## Delegation
-- **Reads:** direct — structured draft (< 200 lines)
-- **Writes:** none
-- **Direct:** pure Socratic reasoning
 
 > **Tracker:** `node .agents/scripts/step_tracker.js complete --skill shape-up --step 4`

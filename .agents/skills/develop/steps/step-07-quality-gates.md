@@ -30,12 +30,12 @@ QA is a hard gate. Security and performance are conditional gates. They can run 
 
 **Loop limit:** Max 2 QA-dev cycles per bug. If same bug resurfaces after 2 fix attempts, escalate to `@tech-lead`.
 
-**Output:** `artifacts/output/06-quality/report.md`
+**Output:** `artifacts/output/05-execution/quality/qa-report.md`
 Structure: `Test Run Summary, Pass/Fail by Suite, Open Defects, Release Recommendation`
 
 Record completion:
 ```bash
-node .agents/scripts/orchestrator_state.js complete --agent qa-engineer --artifact 06-quality/report.md
+node .agents/scripts/orchestrator_state.js complete --agent qa-engineer --artifact 05-execution/quality/qa-report.md
 ```
 
 ## 7b. Security Audit (conditional)
@@ -47,12 +47,12 @@ Invoke `@security-engineer` when the feature touches:
 - Sensitive data (PII, payments, health records)
 - External APIs or third-party integrations
 
-**Output:** `artifacts/output/06-quality/findings-report.md`
+**Output:** `artifacts/output/05-execution/quality/findings-report.md`
 Structure: `Severity, File:Line, Issue, Suggested Fix, Blocker?`
 
 Record completion:
 ```bash
-node .agents/scripts/orchestrator_state.js complete --agent security-engineer --artifact 06-quality/findings-report.md
+node .agents/scripts/orchestrator_state.js complete --agent security-engineer --artifact 05-execution/quality/findings-report.md
 ```
 
 If any Critical or High findings:
@@ -72,7 +72,7 @@ Invoke `@performance-engineer` when the feature:
 - Handles large data sets or high traffic
 - Has defined performance SLAs in the spec
 
-**Output:** `artifacts/output/06-quality/report.md`
+**Output:** `artifacts/output/05-execution/quality/performance-report.md`
 
 ## Halt condition
 - QA finds a bug that can't be reproduced locally

@@ -22,9 +22,9 @@ Append newly discovered scenarios and test findings back to the project's accept
 ### 3a. Consolidate findings
 
 `@qa-engineer` reviews all outputs:
-- `artifacts/output/06-quality/enrichment-findings.md` (step 01)
-- `artifacts/output/06-quality/feature-test-results.md` (step 02a)
-- `artifacts/output/06-quality/fullcycle-test-results.md` (step 02b)
+- `artifacts/output/05-execution/quality/enrichment-findings.md` (step 01)
+- `artifacts/output/05-execution/quality/feature-test-results.md` (step 02a)
+- `artifacts/output/05-execution/quality/fullcycle-test-results.md` (step 02b)
 
 Identify scenarios that belong in the acceptance criteria:
 - Edge cases not covered by existing AC-H/AC-U/AC-E

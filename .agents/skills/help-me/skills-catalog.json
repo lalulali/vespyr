@@ -469,7 +469,7 @@
     "description": "Run tests, analyze failures, enrich acceptance criteria, and produce structured QA reports — supports feature and full-cycle testing",
     "prerequisites": [],
     "outputs": [
-      "artifacts/output/06-quality/test-report.md"
+      "artifacts/output/05-execution/quality/test-report.md"
     ],
     "key_agents": [
       "@qa-engineer"
