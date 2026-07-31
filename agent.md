@@ -221,6 +221,7 @@ When you make changes to Vespyr — new features, changed behaviors, new skills,
 4. **When approved:**
    - Update `README.md` and `README_CN.md` — keep them high-level (selling/overview). Move detailed how-to content into `Guide/`.
    - Update the relevant `Guide/en/` and `Guide/cn/` files — these contain the comprehensive step-by-step documentation.
+   - Update the relevant `.agents/workflow.md` files — these contain the workflow documentation.
    - Keep English and Chinese versions synchronized — any change to one must be mirrored in the other.
 
 5. **Guide file conventions:**

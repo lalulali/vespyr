@@ -6,7 +6,7 @@
 
 Vespyr organizes complex operations into atomic skills. Each skill is a folder with a `SKILL.md` router + `steps/` directory.
 
-### Curated Workflows (Lifecycle)
+### Curated Workflows (Lifecycle & Shaping)
 
 | Command | Phase | Description |
 |---------|-------|-------------|
@@ -15,7 +15,9 @@ Vespyr organizes complex operations into atomic skills. Each skill is a folder w
 | `/explore-idea` | 0-1 | Market, competitor, and user research |
 | `/explore-game-idea` | 0-1 | Genre market and player research |
 | `/unpack-problem` | 0-1 | Problem-first exploration before solution ideation |
+| `/shape-up` | 1-2 | Bridge semi-cooked ideas into design-ready specs (standalone or lifecycle) |
 | `/design` | 2-3 | PRD and screen specs creation |
+| `/plan` | 4 | Standalone or sprint execution planning |
 | `/develop` | 5 | MVP development cycle |
 | `/launch` | 6 | Release readiness and deployment |
 | `/iterate` | 7 | Post-launch behavior improvements |
@@ -33,7 +35,7 @@ Vespyr organizes complex operations into atomic skills. Each skill is a folder w
 | `/root-cause` | Socratic 5-Whys and Fishbone root cause analysis |
 | `/validation-patterns` | Apply validation from 30-method catalog |
 
-### Idea Shaping & Brainstorming
+### Ideation & Socratic Alignment
 
 | Command | Description |
 |---------|-------------|
@@ -41,12 +43,19 @@ Vespyr organizes complex operations into atomic skills. Each skill is a folder w
 | `/brainstorming` | Select from 60 brainstorming methods (SCAMPER, Six Hats, etc.) |
 | `/grill-me` | Relentless Socratic alignment and stress-testing interview |
 
+### Data & Analytics
+
+| Command | Description |
+|---------|-------------|
+| `/analyze-data` | Data analysis companion — EDA, visualization, metric co-piloting |
+
 ### Operations
 
 | Command | Description |
 |---------|-------------|
 | `/help-me` | Conversational project navigator and co-pilot |
 | `/status` | Quick snapshot of current project state |
+| `/sprint-status` | Display pipeline status as an interactive Kanban table |
 | `/phase` | Show/switch phases |
 | `/squad` | Show available agent squads and switch active squad |
 | `/plan` | Standalone execution planning |
@@ -54,6 +63,7 @@ Vespyr organizes complex operations into atomic skills. Each skill is a folder w
 | `/test` | Run tests, summarize failures |
 | `/kanban` | Display and update Kanban board |
 | `/memory` | Search archived project context |
+| `/delegate` | One-shot I/O offload to `@reader`, `@writer`, or `@executor` |
 
 ### Intelligence
 
@@ -62,8 +72,10 @@ Vespyr organizes complex operations into atomic skills. Each skill is a folder w
 | `/code-graph` | Generate/scan dependency graphs |
 | `/doc-graph` | Generate/scan documentation links and trace coverage |
 | `/humanize` | AI-writing style detector and normalizer |
+| `/elicitation` | 69 structured methods to push LLM to refine output |
+| `/round-table` | Multi-agent stage-based roundtable discussions |
 
-### Other
+### Other & Customization
 
 | Command | Description |
 |---------|-------------|
@@ -80,6 +92,7 @@ Vespyr's 11-phase pipeline. `.agents/references/phase-table.md` is the canonical
 | Validation | -1 | `00-discovery/` | `/validate-idea` |
 | Discovery | 0 | `00-discovery/` | `/unpack-problem` |
 | Research | 1 | `01-research/` | `/explore-idea` |
+| Shaping Bridge | 1-2 | `01-discovery/` | `/shape-up` |
 | Strategy | 2 | `02-strategy/` | `/design` |
 | Architecture | 3 | `03-architecture/` | Architecture ADRs |
 | Planning | 4 | `04-planning/` | `/plan` |

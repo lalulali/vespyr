@@ -503,21 +503,87 @@ Optional agents add time to the schedule. Planning guidance:
 
 ## 8. Workflows & Skills
 
-| Skill | Phase | Primary Agents | Key Output |
-|-------|-------|----------------|------------|
+Vespyr organizes complex product building operations into 40 specialized skills. Skills can function as **structured lifecycle workflow steps** that advance the 11-phase pipeline, or as **flexible standalone entry points** invoked on demand.
+
+### 8.1 Lifecycle Workflows & Idea Shaping Bridges
+
+These skills form the backbone of the product and game development lifecycle. Skills like `shape-up` and `unpack-problem` act both as lifecycle bridges between exploration and design (Phase 1→2) and as standalone entry points.
+
+| Skill | Phase | Primary Agents | Key Output / Description |
+|-------|-------|----------------|--------------------------|
 | `validate-idea` | -1 | @founder | Validation brief with GO/PIVOT/KILL verdict |
 | `validate-game-idea` | -1 | @founder | Game validation brief with GO/PIVOT/KILL verdict |
+| `unpack-problem` | 0-1 | @product-manager, @user-researcher | Problem-first exploration before solution ideation (guided, automated, or combo) |
 | `explore-idea` | 0-1 | @founder, @researcher, @user-researcher | Validated idea brief, market analysis, personas |
 | `explore-game-idea` | 0-1 | @founder, @researcher, @user-researcher | Validated game brief, genre analysis, player personas |
-| `design` | 2 | @product-manager, @product-designer | PRD, user stories, product spec |
-| `develop` | 3-5 | @architect, @tech-lead, @developer, @qa-engineer | Working, tested feature |
-| `launch` | 7 | @product-manager, @devops-engineer | Shipped feature in production |
-| `iterate` | 8 | @data-analyst, @product-manager, @developer | Measured improvement |
-| `incident` | Any | @devops-engineer, @developer | Mitigated incident, RCA, prevention |
-| `retro` | 9 | @product-manager, @tech-lead, @architect | Action items for improvement |
+| `shape-up` | 1-2 | @founder, @product-manager | Structures semi-cooked ideas into design-ready briefs. Dual: standalone or Phase 1→2 bridge |
+| `design` | 2-3 | @product-manager, @product-designer | PRD, user stories, screen specifications |
+| `plan` | 4 | @tech-lead, @product-manager | Granular task breakdown, estimation (1-4h), and worktree setup |
+| `develop` | 5 | @architect, @tech-lead, @developer, @qa-engineer | Working, tested feature MVP cycle |
+| `launch` | 6 | @product-manager, @devops-engineer | Release readiness, deployment, smoke testing, post-launch monitoring |
+| `iterate` | 7 | @data-analyst, @product-manager, @developer | Measured post-launch feature improvements |
+| `retro` | 9 | @product-manager, @tech-lead, @architect | Post-cycle review, action items, and memory compaction |
 
+### 8.2 Design Thinking & Discovery
+
+| Skill | Phase | Primary Agents | Key Output / Description |
+|-------|-------|----------------|--------------------------|
+| `research-plan` | 0-1 | @user-researcher, @researcher | Research goals, methodology, and 2-part interview guide |
+| `empathy-map` | 0-1 | @user-researcher | User empathy quadrant canvas (Says/Thinks/Does/Feels) |
+| `journey-map` | 0-1 | @ux-researcher, @user-researcher | User touchpoint and emotional state journey mapping |
+| `jtbd` | 0-1 | @product-manager, @user-researcher | Jobs-to-be-Done statements + How Might We opportunity questions |
+| `discovery-report` | 0-1 | @user-researcher, @ux-researcher | Unified research and usability report with dynamic scoring |
+| `root-cause` | Any | @tech-lead, @architect | Socratic 5-Whys and Fishbone root cause analysis |
+| `validation-patterns` | -1-1 | @founder, @researcher | Selection and execution of validation methods from 30-method catalog |
+
+### 8.3 Ideation & Socratic Alignment
+
+| Skill | Phase | Primary Agents | Key Output / Description |
+|-------|-------|----------------|--------------------------|
+| `brainstorming` | Any | @founder, @product-designer | 60-method ideation catalog (SCAMPER, Six Hats, Starbursting, etc.) |
+| `grill-me` | Pre-design | Harness / Any | Relentless 7+1 branch Socratic alignment and stress-testing interview |
+
+### 8.4 Data & Analytics
+
+| Skill | Phase | Primary Agents | Key Output / Description |
+|-------|-------|----------------|--------------------------|
+| `analyze-data` | 7-8 / Any | @data-analyst | Data analysis companion — EDA, visualization mapping, metric co-piloting |
+
+### 8.5 Intelligence & Graph Tools
+
+| Skill | Phase | Primary Agents | Key Output / Description |
+|-------|-------|----------------|--------------------------|
+| `code-graph` | Any | @architect, @tech-lead | Codebase structural dependency scanner (`code-graph.json`) and query engine |
+| `doc-graph` | Any | @product-manager, @technical-writer | Documentation link and requirement-to-code traceability graph mapper |
+| `humanize` | Any | @technical-writer, @writer | AI-writing tell detector and natural language style normalizer |
+| `elicitation` | Any | Harness / Any | 69 structured methods to push LLM to reconsider, refine, and improve output |
+| `round-table` | Any | Harness / Any | Multi-agent stage-based roundtable discussions with independent agent perspectives |
+
+### 8.6 Operations & Navigation
+
+| Skill | Phase | Primary Agents | Key Output / Description |
+|-------|-------|----------------|--------------------------|
+| `help-me` | Any | Harness (Direct) | Dynamic project navigator, phase readiness check, and command recommendations |
+| `status` | Any | @product-manager | Quick snapshot of project state, active phase, blockers, memory health |
+| `sprint-status` | Any | @product-manager, @tech-lead | Visualizes `sprint-status.yaml` pipeline state as an interactive Kanban table |
+| `phase` | Any | @product-manager | Display current phase, switch active phase, list phase artifacts |
+| `squad` | Any | Harness / Any | Display available agent squads, switch active squad, initialize team preset |
+| `review` | Any | @code-reviewer | Standalone code review on current changes outside full development loop |
+| `test` | Any | @qa-engineer | Run test suite, summarize failures, enrich acceptance criteria, QA report |
+| `kanban` | Any | @product-manager | Interactive Kanban board display and status updates |
+| `memory` | Any | @memory-controller | Search archived project context and compacted memory entries |
+| `delegate` | Any | Any reasoning agent | One-shot I/O offload to @reader, @writer, or @executor |
+
+### 8.7 Customization & Incident Management
+
+| Skill | Phase | Primary Agents | Key Output / Description |
+|-------|-------|----------------|--------------------------|
+| `customize-skill` | Any | Harness / Any | Guided TOML authoring flow for agent settings, permissions, and models |
+| `create-skill` | Any | Harness / Any | Author new skills, modify existing workflows, build lightweight skill evals |
+| `incident` | Any | @devops-engineer, @developer | Production incident triage, mitigation, root cause analysis, and post-mortem |
 
 ---
+
 
 ## 9. Shared Memory & Context
 
