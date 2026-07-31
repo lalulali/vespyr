@@ -1,7 +1,7 @@
 ---
 description: Defines agent execution order, handoff contracts, and conflict resolution
 version: "3.0"
-last_updated: 2026-05-16
+last_updated: 2026-07-31
 ---
 
 # Workflow Orchestration
@@ -24,8 +24,8 @@ PHASE -1: VALIDATION
   │           │
   │           ├── GO ──────────▼
   │           │          PHASE 0: DISCOVERY (explore-idea skill)
-  │           │            └── @founder — synthesizes validated concept (or uses validation brief directly)
-  │           │                  │         produces: artifacts/output/00-discovery/idea-brief.md (only if no validation brief)
+  │           │            └── @researcher, @user-researcher — market analysis, user research, competitive landscape
+  │           │                  │         produces: artifacts/output/00-discovery/idea-brief.md
   │           │                  ▼
   │           ├── PIVOT ──▶ Re-run Phase -1 with revised framing
   │           │
@@ -39,8 +39,8 @@ PHASE -1: VALIDATION
               │
               ├── GO ──────────▼
               │          PHASE 0: DISCOVERY (explore-game-idea skill)
-              │            └── @founder — synthesizes validated concept (or uses validation brief directly)
-              │                  │         produces: artifacts/output/00-discovery/idea-brief.md (only if no validation brief)
+              │            └── @researcher, @user-researcher — genre market analysis, player research, competitive landscape
+              │                  │         produces: artifacts/output/00-discovery/idea-brief.md
               │                  ▼
               ├── PIVOT ──▶ Re-run Phase -1 with revised framing
               │
@@ -64,7 +64,7 @@ Set the operation mode in `artifacts/memory/project-context.md`. Default is **se
 | Phase | Primary Skill | Autonomous | Semi-autonomous | Manual |
 |-------|---------------|------------|----------------|--------|
 | **-1: Validation** | `validate-idea` / `validate-game-idea` | Auto-generate validation brief from context. Auto-decide GO/PIVOT/KILL based on available evidence. | Run diagnostic questions interactively. **Pause for GO/PIVOT/KILL verdict.** | Full Socratic session. Every question interactive. Human confirms each answer before next. |
-| **0: Discovery** | `validate-idea` / `validate-game-idea` | @founder auto-synthesizes, no review. | @founder synthesizes. **Pause for human review of idea brief before research.** | @founder drafts, human refines iteratively. |
+| **0: Discovery** | `explore-idea` / `explore-game-idea` | @founder auto-synthesizes, no review. | @founder synthesizes. **Pause for human review of idea brief before research.** | @founder drafts, human refines iteratively. |
 | **1: Research** | `explore-idea` / `explore-game-idea` | All research agents run in parallel, auto-complete. | Research runs autonomously. Human reviews at Phase 1→2 gate. | Human reviews each research output before the next agent starts. |
 | **2: Strategy** | `design` | Auto-generate PRD, specs, user stories. | Draft features. **Pause for human selection & feedback.** Finalize PRD/user stories. **Pause for human spec approval.** | Human co-writes requirements and specs with agents. |
 | **3: Architecture (Optional)** | `develop` / `design` | Auto-generate ADRs if enabled. | **Optional Phase.** Pause to ask user: run `@architect` first or bypass directly to `@tech-lead`/`@developer`? | Human collaborates on ADRs if executed. |
@@ -98,10 +98,10 @@ Default: semi-autonomous
 
 ### Phase Overrides
 - Validation: manual
-- Exploration: semi-autonomous
-- Design: semi-autonomous
-- Development: autonomous
-- Quality: semi-autonomous
+- Research: semi-autonomous
+- Strategy: semi-autonomous
+- Execution: autonomous
+- Quality Gates: semi-autonomous
 - Launch: manual
 ```
 
@@ -132,8 +132,8 @@ Two ways to change the mode. Both work at any time, including mid-workflow.
 |---|---|
 | "switch to manual" / "go manual" / "I want to drive" | Current phase → manual |
 | "let the agents handle it" / "go autonomous" / "run it yourself" | Current phase → autonomous |
-| "make development autonomous" / "dev phase should be autonomous" | Development override → autonomous |
-| "I want manual validation but autonomous development" | Sets both overrides |
+| "make execution autonomous" / "execution phase should be autonomous" | Execution override → autonomous |
+| "I want manual validation but autonomous execution" | Sets both overrides |
 | "back to semi-auto" / "default mode" | Resets current phase to semi-autonomous |
 | "bypass feature review" / "automate feature design" | Sets `FeatureDesignInteraction` override to `false` |
 | "enable interactive feature design" / "review features" | Resets `FeatureDesignInteraction` to `true` |
@@ -456,6 +456,7 @@ Some agents are not required for every project. They are **summoned on demand**.
 | @ux-researcher | When complex multi-step workflows, novel interaction patterns, accessibility-critical features, or @product-designer requests validation | @founder (in idea brief) or @product-designer |
 | @data-analyst | When the feature set requires measurement instrumentation or A/B testing | @founder (in idea brief) or @product-manager |
 | @performance-engineer | Before major releases or when performance SLAs exist (e.g., <200ms p95) | @founder (in idea brief) or @tech-lead |
+| @shifu | Learning & Teaching — when the product requires educational content (tutorials, syllabi, cheatsheets, video scripts) or users need multi-format learning materials | @founder (in idea brief) or @product-manager |
 | @technical-writer | For any release that introduces public-facing API changes or user-facing features | @founder (in idea brief) or @tech-lead |
 
 When an optional agent is summoned, its template artifacts are created as usual. When not summoned, downstream agents simply skip its outputs.
@@ -492,17 +493,18 @@ Optional agents add time to the schedule. Planning guidance:
 | @ml-engineer | +2-4 weeks (data + training + validation) | Start data collection in Phase 1; training in Phase 5 |
 | @performance-engineer | +1 week (pre-release audit) | Runs in parallel with QA phase |
 | @data-analyst | +1 week (instrumentation + dashboard) | Runs in parallel with development |
+| @shifu | +1 week (educational content) | Runs on demand; offline from main pipeline |
 | @technical-writer | +1 week (documentation) | Runs in parallel with QA |
 
 ---
 
 ## 8. Workflows & Skills
 
-Vespyr organizes complex product building operations into 40 specialized skills. Skills can function as **structured lifecycle workflow steps** that advance the 11-phase pipeline, or as **flexible standalone entry points** invoked on demand.
+Vespyr organizes complex product building operations into 42 specialized skills. Skills can function as **structured lifecycle workflow steps** that advance the 11-phase pipeline, or as **flexible standalone entry points** invoked on demand.
 
 ### 8.1 Lifecycle Workflows & Idea Shaping Bridges
 
-These skills form the backbone of the product and game development lifecycle. Skills like `shape-up` and `unpack-problem` act both as lifecycle bridges between exploration and design (Phase 1→2) and as standalone entry points.
+These skills form the backbone of the product and game development lifecycle. Skills like `shape-up` and `unpack-problem` act both as lifecycle bridges between research and strategy (Phase 1→2) and as standalone entry points.
 
 | Skill | Phase | Primary Agents | Key Output / Description |
 |-------|-------|----------------|--------------------------|
@@ -544,7 +546,14 @@ These skills form the backbone of the product and game development lifecycle. Sk
 |-------|-------|----------------|--------------------------|
 | `analyze-data` | 7-8 / Any | @data-analyst | Data analysis companion — EDA, visualization mapping, metric co-piloting |
 
-### 8.5 Intelligence & Graph Tools
+### 8.5 Learning & Teaching
+
+| Skill | Phase | Primary Agents | Key Output / Description |
+|-------|-------|----------------|--------------------------|
+| `teach-me` | Any | @shifu | Personal learning partner — Quick, Explain, or Deep Dive on any topic |
+| `craft-lesson` | Any | @shifu | Create multi-format educational materials (syllabus, handbook, cheatsheet, presentation, class, video script) |
+
+### 8.6 Intelligence & Graph Tools
 
 | Skill | Phase | Primary Agents | Key Output / Description |
 |-------|-------|----------------|--------------------------|
@@ -554,7 +563,7 @@ These skills form the backbone of the product and game development lifecycle. Sk
 | `elicitation` | Any | Harness / Any | 69 structured methods to push LLM to reconsider, refine, and improve output |
 | `round-table` | Any | Harness / Any | Multi-agent stage-based roundtable discussions with independent agent perspectives |
 
-### 8.6 Operations & Navigation
+### 8.7 Operations & Navigation
 
 | Skill | Phase | Primary Agents | Key Output / Description |
 |-------|-------|----------------|--------------------------|
@@ -569,7 +578,7 @@ These skills form the backbone of the product and game development lifecycle. Sk
 | `memory` | Any | @memory-controller | Search archived project context and compacted memory entries |
 | `delegate` | Any | Any reasoning agent | One-shot I/O offload to @reader, @writer, or @executor |
 
-### 8.7 Customization & Incident Management
+### 8.8 Customization & Incident Management
 
 | Skill | Phase | Primary Agents | Key Output / Description |
 |-------|-------|----------------|--------------------------|
@@ -681,7 +690,7 @@ The **pipeline state machine** (`node .agents/scripts/orchestrator_state.js`) is
 
 ### What the state machine tracks
 
-- **Current phase** (validation → exploration → design → development)
+- **Current phase** (discovery → research → strategy → architecture → planning → execution → launch → iteration → documentation → retro)
 - **Artifact versions** (which deliverables exist, who produced them, what version)
 - **Change requests** (open CRs that block phase advancement)
 - **Blockers** (active blockers with owners and ETAs)
@@ -715,7 +724,7 @@ The state machine is not just a state recorder. It auto-fires side effects that 
 
 If a skill produces an artifact without calling `complete`:
 - The artifact exists on disk but the state machine has no record
-- `next` cannot tell the user "validation is complete, move to exploration"
+- `next` cannot tell the user "discovery is complete, move to research"
 - Telemetry stays empty
 - The code-graph is never refreshed after code-modifying work
 - Subsequent skills have no way to know what was already done

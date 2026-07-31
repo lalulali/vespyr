@@ -2,7 +2,7 @@
 
 > English | [中文](README_CN.md)
 
-**A platform-agnostic, file-based multi-agent engine.** Install 21 specialized AI personas directly into your repository. They plan, design, build, review, test, and ship — with structured memory that persists across sessions and three architectural moats no other framework combines.
+**A platform-agnostic, file-based multi-agent engine.** Install 22 specialized AI personas directly into your repository. They plan, design, build, review, test, and ship — with structured memory that persists across sessions and three architectural moats no other framework combines.
 
 [![Vespyr Version](https://img.shields.io/badge/version-2.0.0-blue)](https://github.com/lalulali/vespyr)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -54,7 +54,7 @@ Then run your first workflow:
 
 ---
 
-## 👥 The Team (21 Agents)
+## 👥 The Team (22 Agents)
 
 ### Core Swarm
 
@@ -63,11 +63,11 @@ Then run your first workflow:
 
 ### Domain Experts
 
-| `@researcher` 🔬 | `@user-researcher` 👥 | `@ux-researcher` 🎭 | `@data-analyst` 📊 |
-| `@security-engineer` 🔒 | `@performance-engineer` ⚡ | `@ml-engineer` 🤖 | `@devops-engineer` 🚀 |
-| `@technical-writer` ✍️ |
+| `@researcher` 🔬 | `@user-researcher` 👥 | `@ux-researcher` 🎭 | `@shifu` 🎓 |
+| `@data-analyst` 📊 | `@security-engineer` 🔒 | `@performance-engineer` ⚡ | `@ml-engineer` 🤖 |
+| `@devops-engineer` 🚀 | `@technical-writer` ✍️ |
 
-### I/O Sub-Agents
+### I/O Sub-Agents (4)
 
 `@reader` 📖 · `@writer` ✏️ · `@executor` ⚙️ · `@memory-controller` 🧠
 
@@ -77,20 +77,16 @@ Then run your first workflow:
 
 ```
 ┌──────────────────────────────────────────┐
-│           REASONING AGENTS (17)          │
+│           REASONING AGENTS (18)          │
 │  founder, PM, architect, developer...    │
 │  (No file access, no shell — by design)  │
 └──────────────┬───────────────────────────┘
-               │ delegates to
-               ▼
+                │ delegates to
+                ▼
 ┌──────────────────────────────────────────┐
-│           I/O SUB-AGENTS (3)             │
+│           I/O SUB-AGENTS (4)             │
 │  @reader · @writer · @executor           │
-└──────────────┬───────────────────────────┘
-               │ context via
-               ▼
-┌──────────────────────────────────────────┐
-│        @memory-controller                │
+│  @memory-controller                      │
 │  3-tier progressive load + pre-fetch     │
 └──────────────────────────────────────────┘
 ```

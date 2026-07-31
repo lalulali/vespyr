@@ -2,7 +2,7 @@
 
 > [English](README.md) | 中文
 
-**一个平台无关、基于文件的多智能体引擎。** 将 21 个专业 AI 角色直接安装到你的仓库中。它们规划、设计、构建、审查、测试和交付——拥有跨会话持久化的结构化记忆，以及三大其他框架无法同时具备的架构护城河。
+**一个平台无关、基于文件的多智能体引擎。** 将 22 个专业 AI 角色直接安装到你的仓库中。它们规划、设计、构建、审查、测试和交付——拥有跨会话持久化的结构化记忆，以及三大其他框架无法同时具备的架构护城河。
 
 [![Vespyr Version](https://img.shields.io/badge/version-2.0.0-blue)](https://github.com/lalulali/vespyr)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -54,7 +54,7 @@ npx vespyr --yes --target /path/to/my-project --harness opencode,claude
 
 ---
 
-## 👥 团队（21 个智能体）
+## 👥 团队（22 个智能体）
 
 ### 核心群体
 
@@ -63,11 +63,11 @@ npx vespyr --yes --target /path/to/my-project --harness opencode,claude
 
 ### 领域专家
 
-| `@researcher` 🔬 | `@user-researcher` 👥 | `@ux-researcher` 🎭 | `@data-analyst` 📊 |
-| `@security-engineer` 🔒 | `@performance-engineer` ⚡ | `@ml-engineer` 🤖 | `@devops-engineer` 🚀 |
-| `@technical-writer` ✍️ |
+| `@researcher` 🔬 | `@user-researcher` 👥 | `@ux-researcher` 🎭 | `@shifu` 🎓 |
+| `@data-analyst` 📊 | `@security-engineer` 🔒 | `@performance-engineer` ⚡ | `@ml-engineer` 🤖 |
+| `@devops-engineer` 🚀 | `@technical-writer` ✍️ |
 
-### I/O 子代理
+### I/O 子代理 (4)
 
 `@reader` 📖 · `@writer` ✏️ · `@executor` ⚙️ · `@memory-controller` 🧠
 
@@ -77,20 +77,16 @@ npx vespyr --yes --target /path/to/my-project --harness opencode,claude
 
 ```
 ┌──────────────────────────────────────────┐
-│           推理智能体 (17)                 │
+│           推理智能体 (18)                 │
 │  founder、PM、architect、developer...    │
 │  （按设计无文件权限、无 Shell）           │
 └──────────────┬───────────────────────────┘
-               │ 委托至
-               ▼
+                │ 委托至
+                ▼
 ┌──────────────────────────────────────────┐
-│           I/O 子代理 (3)                 │
+│           I/O 子代理 (4)                 │
 │  @reader · @writer · @executor           │
-└──────────────┬───────────────────────────┘
-               │ 通过以下提供上下文
-               ▼
-┌──────────────────────────────────────────┐
-│        @memory-controller               │
+│  @memory-controller                      │
 │  三级渐进式加载 + 模式预取               │
 └──────────────────────────────────────────┘
 ```

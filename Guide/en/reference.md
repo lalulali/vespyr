@@ -4,29 +4,23 @@
 
 ## Agent Architecture
 
-Vespyr's 21 agents are organized into three layers:
+Vespyr's 22 agents are organized into three layers:
 
 ```
 ┌──────────────────────────────────────────────┐
-│          REASONING AGENTS (17)               │
+│          REASONING AGENTS (18)               │
 │  founder, PM, architect, developer, ...      │
 │  NO file access, NO shell — by design.       │
 │  Must delegate all I/O to sub-agents.        │
 └──────────────────┬───────────────────────────┘
-                   │ delegates to
-                   ▼
+                    │ delegates to
+                    ▼
 ┌──────────────────────────────────────────────┐
-│          I/O SUB-AGENTS (3)                  │
-│  @reader     — reads & summarizes            │
-│  @writer     — writes & edits precisely      │
-│  @executor   — runs shell commands           │
-└──────────────────┬───────────────────────────┘
-                   │ context via
-                   ▼
-┌──────────────────────────────────────────────┐
-│          @memory-controller (1)              │
-│  3-tier progressive load + pattern           │
-│  pre-fetch + auto-compaction                 │
+│          I/O SUB-AGENTS (4)                  │
+│  @reader              — reads & summarizes   │
+│  @writer              — writes & edits       │
+│  @executor            — runs shell commands  │
+│  @memory-controller   — 3-tier load + fetch  │
 └──────────────────────────────────────────────┘
 ```
 
@@ -73,6 +67,7 @@ Each agent has a defined scope. `.agents/references/agent-contracts.md` is the c
 | `@ml-engineer` | ML pipelines, model integration | Business metrics |
 | `@data-analyst` | Telemetry, dashboards, experiments | System performance |
 | `@devops-engineer` | CI/CD, infrastructure, deployment | Application code |
+| `@shifu` | Learning paths, educational content, adaptive explanation | Product strategy |
 | `@technical-writer` | Docs, API references, release notes | Product strategy |
 
 ## Glossary

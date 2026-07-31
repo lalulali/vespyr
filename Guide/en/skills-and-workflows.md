@@ -35,6 +35,13 @@ Vespyr organizes complex operations into atomic skills. Each skill is a folder w
 | `/root-cause` | Socratic 5-Whys and Fishbone root cause analysis |
 | `/validation-patterns` | Apply validation from 30-method catalog |
 
+### Learning & Teaching
+
+| Command | Description |
+|---------|-------------|
+| `/teach-me` | Personal learning partner — Quick, Explain, or Deep Dive on any topic |
+| `/craft-lesson` | Create multi-format educational materials (syllabus, handbook, cheatsheet, presentation, class, video script) |
+
 ### Ideation & Socratic Alignment
 
 | Command | Description |
