@@ -129,7 +129,7 @@ function validateAgent(filePath) {
     'architect', 'code-reviewer', 'data-analyst', 'developer',
     'devops-engineer', 'ml-engineer', 'performance-engineer',
     'product-designer', 'product-manager', 'qa-engineer',
-    'researcher', 'security-engineer', 'tech-lead',
+    'researcher', 'security-engineer', 'shifu', 'tech-lead',
   ];
   if (REASONING_AGENTS.includes(filename) && !content.includes('## Socratic Stance')) {
     console.warn('WARN: ' + filename + ' — missing Socratic Stance section (recommended, not required)');
@@ -140,7 +140,7 @@ function validateAgent(filePath) {
     'architect', 'code-reviewer', 'data-analyst', 'developer',
     'devops-engineer', 'founder', 'ml-engineer', 'performance-engineer',
     'product-designer', 'product-manager', 'qa-engineer',
-    'researcher', 'security-engineer', 'tech-lead', 'technical-writer',
+    'researcher', 'security-engineer', 'shifu', 'tech-lead', 'technical-writer',
     'user-researcher', 'ux-researcher',
   ];
   if (CITATION_AGENTS.includes(filename) && !content.includes('## Citation Protocol')) {

@@ -1,6 +1,6 @@
 # Vespyr — Multi-Agent Engine
 
-A platform-agnostic, file-based multi-agent system configured to streamline product development and engineering operations. This system consists of 21 specialized agent personas, structured workflows, and a shared persistent memory layer.
+A platform-agnostic, file-based multi-agent system configured to streamline product development and engineering operations. This system consists of 22 specialized agent personas, structured workflows, and a shared persistent memory layer.
 
 > [!IMPORTANT]
 > **Harness Directory**
@@ -37,9 +37,9 @@ Since agents are defined as plain Markdown personas, they can be loaded and exec
 
 ---
 
-## 👥 Core Agent Personas (21 specialized roles)
+## 👥 Core Agent Personas (22 specialized roles)
 
-The system features 21 highly tuned role profiles divided into three functional categories:
+The system features 22 highly tuned role profiles divided into three functional categories:
 
 ### 1. Core Swarm & Engineering Roles
 
@@ -61,6 +61,7 @@ The system features 21 highly tuned role profiles divided into three functional 
 | **`@researcher` (Iris)** | Conducts market, competitor, and genre research, synthesizing findings to back decisions. | `artifacts/output/01-research/` |
 | **`@user-researcher` (Paige)** | Structures user research plans, executes interviews, and maps persona segments. | `artifacts/output/01-research/user-research/` |
 | **`@ux-researcher` (Zara)** | Evaluates usability, designs user journey maps, and builds interaction paradigms. | `artifacts/output/01-research/ux/` |
+| **`@shifu` (Kong Qiu)** | Designs learning paths, synthesizes knowledge into multi-format educational content, adapts explanation depth to audience | `artifacts/output/teaching/` |
 | **`@data-analyst` (Nova)** | Sets up analytics instrumentation, synthesizes telemetry, and builds dashboards. | `artifacts/output/07-iteration/` |
 | **`@security-engineer` (Victor)** | Conducts security reviews, threat modeling, vulnerability scanning, and secure defaults. | `artifacts/output/03-architecture/security/` |
 | **`@performance-engineer` (Felix)** | Analyzes system latency, identifies performance bottlenecks, and runs optimization audits. | `artifacts/output/07-iteration/performance/` |
@@ -88,6 +89,8 @@ To maintain focus and avoid context bloat, the **`@product-manager`** and **`@pr
 Vespyr organizes complex, multi-agent operations into highly structured **skills** (located in `.agents/skills/`). Each skill is an end-to-end workflow designed for a specific product milestone, operational phase, or utility concern. They guide agents through sequence gates, coordinate parallel execution paths, and enforce quality control.
 
 ### Curated Workflows
+*   `/teach-me` — Personal learning partner: Quick, Explain, or Deep Dive on any topic
+*   `/craft-lesson` — Create multi-format educational materials (syllabus, handbook, cheatsheet, presentation, class, video script)
 *   `/validate-idea` — Stress-test product concepts before research
 *   `/validate-game-idea` — Stress-test game concepts before production
 *   `/unpack-problem` — Problem-first exploration before solution ideation (guided, automated, or combination)
