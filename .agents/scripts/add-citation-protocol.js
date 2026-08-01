@@ -38,7 +38,7 @@ const CITATION_EMPHASIS = {
   'user-researcher': '**Your emphasis:** Every interview quote gets a participant ID + date; survey results get source + sample size.',
   'data-analyst': '**Your emphasis:** Every metric, funnel number, and experiment result gets a telemetry source + date range.',
   architect: '**Your emphasis:** Every trade-off claim references the ADR or external paper that informs it.',
-  'ml-engineer': '**Your emphasis:** Every model benchmark references the paper, model card, or eval harness.',
+  'ml-ai-engineer': '**Your emphasis:** Every model benchmark references the paper, model card, or eval harness.',
   'security-engineer': '**Your emphasis:** Every vulnerability reference gets a CVE ID or OWASP reference.',
   'performance-engineer': '**Your emphasis:** Every latency benchmark references the measurement method + hardware.',
   'technical-writer': '**Your emphasis:** Every API claim references the source file:line or spec section.',
@@ -55,7 +55,7 @@ const CITATION_EMPHASIS = {
 
 const REASONING_AGENTS = [
   'architect', 'code-reviewer', 'data-analyst', 'developer',
-  'devops-engineer', 'founder', 'ml-engineer', 'performance-engineer',
+  'devops-engineer', 'founder', 'ml-ai-engineer', 'performance-engineer',
   'product-designer', 'product-manager', 'qa-engineer',
   'researcher', 'security-engineer', 'tech-lead', 'technical-writer',
   'user-researcher', 'ux-researcher',

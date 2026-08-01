@@ -112,7 +112,7 @@ If the verdict is "GO WITH CAUTION," what must be true before proceeding?
 
 ## 8. Implications for Downstream Agents
 Briefly note:
-- Any **ML/data** considerations for @ml-engineer and @data-analyst (e.g., "market success depends on recommendation algorithm accuracy")
+- Any **ML/data** considerations for @ml-ai-engineer and @data-analyst (e.g., "market success depends on recommendation algorithm accuracy")
 - Any **performance** considerations for @performance-engineer (e.g., "target market is mobile-first; must load in <3s on 3G")
 - Any **compliance** considerations for @security-engineer (e.g., "target market is EU; GDPR compliance is mandatory")
 

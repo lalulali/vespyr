@@ -7,7 +7,7 @@ const AGENTS_DIR = path.resolve(__dirname, '..', 'agents');
 
 const REASONING_AGENTS = [
   'architect', 'code-reviewer', 'data-analyst', 'developer',
-  'devops-engineer', 'ml-engineer', 'performance-engineer',
+  'devops-engineer', 'ml-ai-engineer', 'performance-engineer',
   'product-designer', 'product-manager', 'qa-engineer',
   'researcher', 'security-engineer', 'tech-lead',
 ];

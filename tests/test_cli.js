@@ -611,7 +611,7 @@ describe('Test 10: parseFlags()', () => {
   it('should handle no flags', () => {
     const result = parseFlags(['node', 'cli.js']);
     assert.deepStrictEqual(result, {
-      dryRun: false, yes: false, target: null, harnesses: [], version: false, help: false,
+      dryRun: false, yes: false, target: null, harnesses: [], version: false, help: false, syncDocs: false,
     });
   });
 
@@ -643,6 +643,11 @@ describe('Test 10: parseFlags()', () => {
   it('should handle --help / -h', () => {
     const result = parseFlags(['node', 'cli.js', '--help']);
     assert.strictEqual(result.help, true);
+  });
+
+  it('should handle --sync-docs', () => {
+    const result = parseFlags(['node', 'cli.js', '--sync-docs']);
+    assert.strictEqual(result.syncDocs, true);
   });
 
   it('should handle combined flags', () => {

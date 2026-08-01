@@ -4,11 +4,11 @@
 
 ## Agent Architecture
 
-Vespyr's 22 agents are organized into three layers:
+Vespyr's 23 agents are organized into three layers:
 
 ```
 ┌──────────────────────────────────────────────┐
-│          REASONING AGENTS (18)               │
+│          REASONING AGENTS (19)               │
 │  founder, PM, architect, developer, ...      │
 │  NO file access, NO shell — by design.       │
 │  Must delegate all I/O to sub-agents.        │
@@ -64,7 +64,8 @@ Each agent has a defined scope. `.agents/references/agent-contracts.md` is the c
 | `@ux-researcher` | Usability, interaction evaluation | Persona development |
 | `@security-engineer` | Threat models, vulnerability scans | Code fixes |
 | `@performance-engineer` | Profiling, bottleneck analysis | Making code changes |
-| `@ml-engineer` | ML pipelines, model integration | Business metrics |
+| `@ml-ai-engineer` | ML/AI models, prompts, RAG, evals | Data analysis, infrastructure, production serving |
+| `@ml-ai-ops` | Production serving, vector indexes, drift monitoring, rollback | Model/prompt development, AI architecture |
 | `@data-analyst` | Telemetry, dashboards, experiments | System performance |
 | `@devops-engineer` | CI/CD, infrastructure, deployment | Application code |
 | `@shifu` | Learning paths, educational content, adaptive explanation | Product strategy |

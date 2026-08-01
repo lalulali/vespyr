@@ -16,7 +16,7 @@ const SQUAD_FIXES = {
   'qa-engineer': 'build',
   'devops-engineer': 'build',
   'technical-writer': 'build',
-  'ml-engineer': 'build',
+  'ml-ai-engineer': 'build',
   'security-engineer': 'ship',
   'performance-engineer': 'ship',
   researcher: 'research',
@@ -45,7 +45,7 @@ for (const [name, squad] of Object.entries(SQUAD_FIXES)) {
   console.log(`OK: ${name}: ${oldSquadName} -> ${squad}`);
 }
 
-const mlPath = path.join(AGENTS_DIR, 'ml-engineer.md');
+const mlPath = path.join(AGENTS_DIR, 'ml-ai-engineer.md');
 let mlContent = fs.readFileSync(mlPath, 'utf-8');
 if (!mlContent.includes('version:')) {
   mlContent = mlContent.replace(
@@ -53,7 +53,7 @@ if (!mlContent.includes('version:')) {
     '$1version: "1.0"\nlast_updated: 2026-07-10\n',
   );
   fs.writeFileSync(mlPath, mlContent, 'utf-8');
-  console.log('OK: ml-engineer: added missing version field');
+  console.log('OK: ml-ai-engineer: added missing version field');
 } else {
-  console.log('SKIP: ml-engineer: already has version');
+  console.log('SKIP: ml-ai-engineer: already has version');
 }

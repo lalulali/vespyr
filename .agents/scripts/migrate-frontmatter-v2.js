@@ -91,7 +91,7 @@ const AGENT_DATA = {
     default_squad: 'build',
     channeled_mentor: 'Brendan Gregg + Aleksey Shipilëv',
   },
-  'ml-engineer': {
+  'ml-ai-engineer': {
     icon: '🤖',
     capabilities: ['ml-integration', 'prompt-engineering', 'model-evaluation'],
     default_squad: 'build',

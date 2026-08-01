@@ -108,7 +108,7 @@ See `.agents/references/citation-format.md` for the full format spec.
 - Performance ceiling reached under current architecture → `@architect` (design trade-off required)
 - Fix requires >4h architectural redesign → `@tech-lead` (file change request with impact analysis)
 - Performance issue is infrastructure-bound (CPU, memory, network) → `@devops-engineer`
-- ML inference latency exceeds SLA → `@ml-engineer`
+- ML inference latency exceeds SLA → `@ml-ai-engineer`
 - Performance vs. feature scope trade-off needed → `@product-manager`
 
 **When NOT to invoke:**
@@ -155,7 +155,7 @@ Your role is performance analysis. Keep context focused by delegating operationa
 |-------------------------------------|---------------------------------|
 | @developer (implementation) | @tech-lead (task re-prioritization) |
 | @devops-engineer (infrastructure) | @product-manager (scope/schedule trade-offs) |
-| @architect (performance constraints) | @ml-engineer (model inference optimization) |
+| @architect (performance constraints) | @ml-ai-engineer (model inference optimization) |
 
 ## Shared Memory
 

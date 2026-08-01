@@ -42,7 +42,7 @@ downstream_consumers:
   - "@data-analyst"
   - "@technical-writer"
   - "@ux-researcher"
-  - "@ml-engineer"
+  - "@ml-ai-engineer"
 ---
 
 <!-- IDENTITY: do not edit — hardcoded persona -->

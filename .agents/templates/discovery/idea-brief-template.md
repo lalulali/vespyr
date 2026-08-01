@@ -147,7 +147,7 @@ One sentence. What should happen immediately after this memo?
 
 Which specialized downstream agents should be activated?
 
-- [ ] @ml-engineer — concept depends on ML/AI as a core capability
+- [ ] @ml-ai-engineer — concept depends on ML/AI as a core capability
 - [ ] @performance-engineer — concept has strict performance SLAs
 - [ ] @security-engineer — concept handles sensitive data (payments, health, PII)
 - [ ] @ux-researcher — concept involves complex multi-step workflows, novel interactions, or accessibility-critical features

@@ -1,7 +1,7 @@
 # Measurement Plan Template
 
 > **Used by:** Nova (@data-analyst)
-> **Feeds into:** Rex (@developer), Nina (@qa-engineer), Felix (@performance-engineer), Kai (@ml-engineer)
+> **Feeds into:** Rex (@developer), Nina (@qa-engineer), Felix (@performance-engineer), Kai (@ml-ai-engineer)
 > **Save to:** `artifacts/output/02-strategy/measurement-plan.md`
 
 Use this template when defining analytics instrumentation and success metrics.
@@ -63,10 +63,10 @@ Metrics specific to ML model performance, tracked alongside business metrics.
 
 | Metric | Definition | Target | Monitoring Frequency | Owner |
 |--------|-----------|--------|---------------------|-------|
-| e.g., Prediction accuracy | % of correct predictions on holdout set | > 90% | Weekly | @ml-engineer |
+| e.g., Prediction accuracy | % of correct predictions on holdout set | > 90% | Weekly | @ml-ai-engineer |
 | e.g., Inference latency p95 | 95th percentile prediction time | < 100ms | Continuous | @performance-engineer |
-| e.g., Data drift score | Statistical distance between training and live distributions | < threshold | Daily | @ml-engineer |
-| e.g., Model staleness | Days since last retraining | < 7 days | Weekly | @ml-engineer |
+| e.g., Data drift score | Statistical distance between training and live distributions | < threshold | Daily | @ml-ai-engineer |
+| e.g., Model staleness | Days since last retraining | < 7 days | Weekly | @ml-ai-engineer |
 
 ---
 
@@ -160,7 +160,7 @@ Metrics that need immediate visibility:
 |--------|----------------|---------------|-------|
 | Error rate | > 0.5% | PagerDuty | On-call engineer |
 | Feature activation rate (hourly) | < 5% of expected | Slack #alerts | Data analyst |
-| Inference error rate (if ML) | > 1% | PagerDuty | @ml-engineer |
+| Inference error rate (if ML) | > 1% | PagerDuty | @ml-ai-engineer |
 
 ### 5.2 Daily Dashboard
 Metrics reviewed every day:

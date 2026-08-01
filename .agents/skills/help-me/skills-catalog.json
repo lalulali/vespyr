@@ -1,5 +1,20 @@
 [
   {
+    "name": "analyze-data",
+    "description": "General data analysis companion — EDA, dataset provision, visualization mapping, insight extraction, metric value evaluation, and PM metric co-piloting",
+    "prerequisites": [],
+    "outputs": [
+      "artifacts/output/02-strategy/requirements.md",
+      "artifacts/output/07-iteration/data-analysis-report.md",
+      "artifacts/output/02-strategy/measurement-plan.md"
+    ],
+    "key_agents": [
+      "@data-analyst",
+      "@product-manager",
+      "@developer"
+    ]
+  },
+  {
     "name": "brainstorming",
     "description": "Select and apply brainstorming methods from a 60-method catalog — SCAMPER, Six Thinking Hats, Starbursting, and more",
     "prerequisites": [],
@@ -17,18 +32,51 @@
     "outputs": [
       "artifacts/memory/structural/code-graph.json"
     ],
+    "key_agents": []
+  },
+  {
+    "name": "craft-lesson",
+    "description": "Create multi-format educational materials (syllabus, handbook, cheatsheet, presentation, class, video script) from topic or draft",
+    "prerequisites": [
+      "Input topic name OR existing text draft/transcript file.",
+      "@shifu persona configuration (.agents/agents/shifu.md).",
+      "Output directory artifacts/output/teaching/ accessible for file delivery."
+    ],
+    "outputs": [
+      "artifacts/output/teaching/",
+      "artifacts/output/teaching/syllabus.md",
+      "artifacts/output/teaching/handbook.md",
+      "artifacts/output/teaching/cheatsheet.md",
+      "artifacts/output/teaching/presentation.md",
+      "artifacts/output/teaching/class/",
+      "artifacts/output/teaching/video-script.md",
+      "artifacts/output/teaching/knowledge-map.md",
+      "artifacts/memory/teaching-style.md"
+    ],
     "key_agents": [
-      "@architect",
-      "@tech-lead"
+      "@shifu",
+      "@researcher"
     ]
   },
   {
-    "name": "customize",
-    "description": "Guided authoring flow for agent customization — describe your intent, map it to override fields, write the TOML, and verify it works",
+    "name": "create-skill",
+    "description": "Create new skills, modify and improve existing skills, and design lightweight skill evals. Make sure to use this skill whenever the user mentions creating a skill, adding a new skill, authoring workflow instructions, turning a conversation/workflow into a skill, building custom skill logic, or updating an existing skill definition.",
+    "prerequisites": [],
+    "outputs": [
+      "artifacts/memory/active-decisions.md"
+    ],
+    "key_agents": [
+      "@skill-name",
+      "@qa-engineer"
+    ]
+  },
+  {
+    "name": "customize-skill",
+    "description": "Guided authoring flow for agent customization — describe your intent, map it to override fields, write the TOML, and verify it works. Use this skill whenever you need to modify, customize, adjust, or override any Vespyr agent's settings, model, temperature, capabilities, permissions, or conventions without editing the agent file directly.",
     "prerequisites": [
       "The agent file exists under .agents/agents/<name>.md",
       "You know which agent you want to customize",
-      "If the agent has no customize.toml defaults yet, the merge will only apply your override"
+      "If the agent has no customize.toml defaults yet, the merge will apply your override cleanly"
     ],
     "outputs": [
       "artifacts/memory/active-decisions.md"
@@ -37,6 +85,7 @@
       "@developer",
       "@architect",
       "@qa-engineer",
+      "@tech-lead",
       "@testing-library"
     ]
   },
@@ -81,7 +130,8 @@
       "artifacts/output/05-execution/develop-state.md"
     ],
     "key_agents": [
-      "@tech-lead"
+      "@tech-lead",
+      "@developer"
     ]
   },
   {
@@ -165,11 +215,17 @@
       "  artifacts/output/01-discovery/shaped-brief.md exists (from shape-up)",
       "The shaped brief's **unverified assumptions** and **open questions** become the focused research agenda. Research agents prioritize validating/invalidating these specific items rather than running a broad-spectrum sweep.",
       "Skip Phase 1 (Synthesize) entirely. Go straight to Phase 2 research.",
-      "After research completes, recommend re-running shape-up to incorporate findings before proceeding to design."
+      "After research completes, recommend re-running shape-up to incorporate findings before proceeding to design.",
+      "*Path D — Has problem-space brief (problem-first entry):**",
+      "  artifacts/output/01-research/problem-space-brief.md exists (from unpack-problem)",
+      "The problem brief's **selected solution concept** becomes the idea to research. The **root cause**, **JTBD**, and **HMW questions** become the focused research agenda — research agents validate whether the selected concept addresses the root cause and fulfills the identified jobs.",
+      "Skip Phase 1 (Synthesize) entirely. Go straight to Phase 2 research.",
+      "After research completes, recommend running shape-up to consolidate findings before proceeding to design."
     ],
     "outputs": [
       "artifacts/output/01-discovery/validation-brief.md",
       "artifacts/output/01-discovery/shaped-brief.md",
+      "artifacts/output/01-research/problem-space-brief.md",
       "artifacts/output/01-discovery/idea-brief.md",
       "artifacts/output/02-research/market-analysis.md",
       "artifacts/output/02-research/competitive-analysis.md",
@@ -313,7 +369,9 @@
     "outputs": [
       "artifacts/output/04-planning/execution-plan.md"
     ],
-    "key_agents": []
+    "key_agents": [
+      "@devops-engineer"
+    ]
   },
   {
     "name": "memory",
@@ -416,9 +474,10 @@
       "@code-reviewer",
       "@security-engineer",
       "@performance-engineer",
-      "@ml-engineer",
+      "@ml-ai-engineer",
       "@data-analyst",
-      "@technical-writer"
+      "@technical-writer",
+      "@round-table"
     ]
   },
   {
@@ -463,6 +522,23 @@
       "artifacts/memory/session-summaries/latest.md"
     ],
     "key_agents": []
+  },
+  {
+    "name": "teach-me",
+    "description": "Personal learning partner: Quick, Explain, or Deep Dive on any topic",
+    "prerequisites": [
+      "Topic or concept specified by user (e.g. /teach-me \"Database Sharding\").",
+      "@shifu persona configuration (.agents/agents/shifu.md).",
+      "Memory layer accessible via @memory-controller (artifacts/memory/teaching-style.md)."
+    ],
+    "outputs": [
+      "artifacts/memory/teaching-style.md",
+      "artifacts/output/teaching/notes/"
+    ],
+    "key_agents": [
+      "@shifu",
+      "@researcher"
+    ]
   },
   {
     "name": "test",

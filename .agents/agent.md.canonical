@@ -1,6 +1,6 @@
 # Vespyr — Multi-Agent Engine
 
-A platform-agnostic, file-based multi-agent system configured to streamline product development and engineering operations. This system consists of 22 specialized agent personas, structured workflows, and a shared persistent memory layer.
+A platform-agnostic, file-based multi-agent system configured to streamline product development and engineering operations. This system consists of 23 specialized agent personas, structured workflows, and a shared persistent memory layer.
 
 > [!IMPORTANT]
 > **Harness Directory**
@@ -39,7 +39,7 @@ Since agents are defined as plain Markdown personas, they can be loaded and exec
 
 ## 👥 Core Agent Personas (22 specialized roles)
 
-The system features 22 highly tuned role profiles divided into three functional categories:
+The system features 23 highly tuned role profiles divided into three functional categories:
 
 ### 1. Core Swarm & Engineering Roles
 
@@ -65,7 +65,8 @@ The system features 22 highly tuned role profiles divided into three functional 
 | **`@data-analyst` (Nova)** | Sets up analytics instrumentation, synthesizes telemetry, and builds dashboards. | `artifacts/output/07-iteration/` |
 | **`@security-engineer` (Victor)** | Conducts security reviews, threat modeling, vulnerability scanning, and secure defaults. | `artifacts/output/03-architecture/security/` |
 | **`@performance-engineer` (Felix)** | Analyzes system latency, identifies performance bottlenecks, and runs optimization audits. | `artifacts/output/07-iteration/performance/` |
-| **`@ml-engineer` (Kai)** | Standardizes AI logic, validates model integrations, and drafts prompt templates. | `artifacts/output/03-architecture/ml/` |
+| **`@ml-ai-engineer` (Kai)** | Designs, builds, and evaluates AI & ML systems (LLMs, RAG, agentic workflows) and ML baselines. | `artifacts/output/03-architecture/ml/` |
+| **`@ml-ai-ops` (Atlas)** | Operates production AI & ML infrastructure, model serving, vector indexes, drift monitoring, and rollback. | `artifacts/output/ml-ai-ops/` |
 | **`@devops-engineer` (Axel)** | Designs CI/CD automation pipelines, provisions cloud infrastructure, and configures environments. | `.github/workflows/`, Terraform files |
 | **`@technical-writer` (Clara)** | Formulates user manuals, maintains API specifications, and drafts release documentation. | `docs/`, `api-reference.md` |
 

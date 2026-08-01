@@ -118,7 +118,7 @@ A qualitative 2x2 prioritization matrix used to classify initiatives for quick r
 Before prioritizing features, dependencies must be identified and mapped to ensure efficient sequencing:
 
 1.  **Logical Dependencies:** Feature B cannot exist without Feature A (e.g., checking out requires a cart).
-2.  **Resource Dependencies:** A feature requires specialized skills (e.g., an ML model requires the `@ml-engineer`).
+2.  **Resource Dependencies:** A feature requires specialized skills (e.g., an ML model requires the `@ml-ai-engineer`).
 3.  **External Dependencies:** Blocked by third-party APIs, compliance audits, or platform store approvals.
 4.  **Sequencing Rules:**
     *   Always schedule foundation work (APIs, data schemas) one sprint prior to consumer UI development.

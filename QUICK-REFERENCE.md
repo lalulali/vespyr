@@ -52,9 +52,11 @@ Infrastructure @devops-engineer      CI/CD + infra + deployment
                 @performance-engineer Profiling + load testing
                 @security-engineer    OWASP + CVE audit
 
-Optional       @ml-engineer          ML/AI models + pipelines
+Optional       @ml-ai-engineer       AI & ML models, RAG, prompt engineering, evals
+                @ml-ai-ops            Production AI serving, vector indexes, drift ops
                 @ux-researcher        Usability validation
                 @data-analyst         Metrics + instrumentation
+                @shifu                Educational content + learning paths
                 @technical-writer     API docs + guides
 
 ──────────────────────────────────────────────────
@@ -63,17 +65,18 @@ SUBAGENTS — invoke by @mention
 ──────────────────────────────────────────────────
 @architect       Full access  — System design, ADRs, tech stack
 @code-reviewer   Read-only    — Code quality gate (no edits)
-@competitor-an.  Read-only    — Competitive analysis
 @data-analyst    Full access  — Measurement + analytics
 @developer       Full access  — Production code
 @devops-engineer Full access  — Infrastructure, CI/CD
 @founder         Read-only    — Strategic ideation
-@market-researcher Read-only  — Market sizing, trends
-@ml-engineer     Full access  — ML models, pipelines, serving
+@ml-ai-engineer  Full access  — AI & ML models, RAG, prompts, evals
+@ml-ai-ops       Full access  — Production AI serving, drift ops, rollback
 @product-designer Full access — UX/UI specs, design tokens
 @product-manager Full access  — PRD, user stories
 @qa-engineer     Full access  — Testing, validation
+@researcher      Read-only    — Market research, competitive analysis
 @security-engineer Read-only  — Security audit (no edits)
+@shifu           Full access  — Learning paths, educational content
 @tech-lead       Full access  — Planning, task breakdown
 @technical-writer Full access — Documentation
 @user-researcher Read-only    — User research, personas
@@ -90,7 +93,7 @@ QUALITY GATES (in order)
 4. PM sign-off              — @product-manager
 5. Security audit           — @security-engineer (Critical/High = block)
 6. Performance audit        — @performance-engineer
-7. ML validation (optional) — @ml-engineer
+7. ML/AI validation (opt)   — @ml-ai-engineer / @ml-ai-ops
 
 ──────────────────────────────────────────────────
 

@@ -297,7 +297,7 @@ Based on the concept, decide which downstream agents will be needed:
 | Agent | Summon when... | Adds to timeline |
 |-------|---------------|-------------------|
 | @ux-researcher | Complex multi-step workflows, novel interaction patterns, accessibility-critical features, or when design validation would reduce development rework | +1-2 weeks (runs parallel with late planning / early execution) |
-| @ml-engineer | ML/AI is core to the concept (model training, inference pipelines, feature engineering) | +2-4 weeks |
+| @ml-ai-engineer | ML/AI is core to the concept (model training, inference pipelines, feature engineering) | +2-4 weeks |
 | @performance-engineer | Performance SLAs exist or the concept is infrastructure-heavy | +1 week |
 | @security-engineer | Concept handles sensitive data (payments, PII, health) | +1 week |
 | @technical-writer | Public-facing API changes or user-facing features requiring documentation | +1 week |

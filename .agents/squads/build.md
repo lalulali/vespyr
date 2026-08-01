@@ -3,6 +3,7 @@ name: build
 description: You have a spec, you need to build it
 agents:
   - architect
+  - ml-ai-engineer
   - tech-lead
   - developer
   - code-reviewer

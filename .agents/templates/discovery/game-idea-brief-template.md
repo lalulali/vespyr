@@ -142,7 +142,7 @@ One sentence. What should happen immediately after this memo?
 
 Which specialized downstream agents should be activated?
 
-- [ ] @ml-engineer — concept depends on ML/AI (procedural generation, NPC behavior, matchmaking)
+- [ ] @ml-ai-engineer — concept depends on ML/AI (procedural generation, NPC behavior, matchmaking)
 - [ ] @performance-engineer — concept has strict performance targets (e.g., 60fps on mid-tier hardware)
 - [ ] @security-engineer — concept handles sensitive data (payments, player PII, anti-cheat)
 - [ ] @ux-researcher — concept involves complex controls, novel interactions, or accessibility-critical features

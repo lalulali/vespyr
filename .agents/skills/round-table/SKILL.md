@@ -61,7 +61,7 @@ Select 2-4 agents whose expertise matches the user's topic or the current stage 
 - If the topic is cross-cutting, you can suggest relevant experts:
   - Security-critical / PII: Summon `@security-engineer`
   - High performance SLAs: Summon `@performance-engineer`
-  - ML/AI heavy logic: Summon `@ml-engineer`
+  - ML/AI heavy logic: Summon `@ml-ai-engineer`
   - Telemetry and instrumentation: Summon `@data-analyst`
   - Public APIs or documentation: Summon `@technical-writer`
 

@@ -1,7 +1,7 @@
 # Execution Plan Template
 
 > **Used by:** Grant (@tech-lead)
-> **Feeds into:** Rex (@developer), Nova (@data-analyst), Kai (@ml-engineer)
+> **Feeds into:** Rex (@developer), Nova (@data-analyst), Kai (@ml-ai-engineer)
 > **Save to:** `artifacts/output/04-planning/execution-plan.md`
 
 **Version:** 1
@@ -44,7 +44,7 @@ Which tasks can run in parallel? Who owns what?
 ### 1.4 Optional Agent Activation
 Based on `idea-brief.md`, which optional agents are engaged?
 
-- [ ] @ml-engineer — ML-specific tasks (see §X)
+- [ ] @ml-ai-engineer — ML-specific tasks (see §X)
 - [ ] @data-analyst — instrumentation plan (will deliver during Phase 1)
 - [ ] @performance-engineer — performance audit before release
 
@@ -113,7 +113,7 @@ src/
 **Story IDs:** US-XXX (maps to user stories that require ML)
 **Priority:** Must-have / Should-have
 **Effort:** Small / Medium / Large
-**Assigned:** @ml-engineer
+**Assigned:** @ml-ai-engineer
 **Dependencies:** T-XXX (data pipeline must be ready), T-YYY (API contract defined)
 
 #### Definition of Done
@@ -205,7 +205,7 @@ Rules:
 |----------|-------|--------|
 | Monitor production errors | @devops-engineer | Continuous |
 | Track business metrics vs. targets | @data-analyst | Daily / Weekly |
-| Monitor model performance (if ML) | @ml-engineer | Continuous |
+| Monitor model performance (if ML) | @ml-ai-engineer | Continuous |
 | Collect user feedback | @user-researcher | Within 2 weeks |
 | Retrospective | @tech-lead | Within 1 week |
 
@@ -216,4 +216,4 @@ Rules:
 - Author: @tech-lead
 - Date: ...
 - Inputs: `artifacts/output/02-strategy/product-spec.md` + `artifacts/output/02-strategy/user-stories.md` + `artifacts/output/03-architecture/`
-- Optional agent inputs: @ml-engineer (if activated)
+- Optional agent inputs: @ml-ai-engineer (if activated)

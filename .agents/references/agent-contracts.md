@@ -18,7 +18,8 @@ Each agent has a clear scope. Use this table to decide who to invoke. If a task 
 | `@data-analyst` | Telemetry instrumentation, dashboards, funnel analysis, experiment results | Product strategy, user research, code |
 | `@security-engineer` | Threat models, vulnerability scans, security findings, security vs. timeline disputes | Implementation, performance, product priorities |
 | `@performance-engineer` | Latency analysis, optimization, load testing, performance benchmarks | Architecture, code quality, security |
-| `@ml-engineer` | Model integration, prompt templates, eval harnesses, model versioning | Data analysis, infrastructure, product |
+| `@ml-ai-engineer` | Model/prompt/RAG/eval, model integrations, AI architecture | Data analysis, infrastructure, production serving |
+| `@ml-ai-ops` | Production serving, monitoring, rollback, LLM infrastructure | Model/prompt development, AI architecture |
 | `@devops-engineer` | CI/CD, cloud provisioning, monitoring, deployment, infra cost | Application code, security policy, product |
 | `@technical-writer` | User manuals, API specs, release notes, documentation site | Code, design, product copy |
 

@@ -213,9 +213,9 @@ For each: create agent file (v2 frontmatter, IDENTITY block, channeled mentor, i
 
 ---
 
-- [ ] **T1.10** `@ml-ai-ops` (Atlas) — AI & ML Operations & Infrastructure
+- [x] **T1.10** `@ml-ai-ops` (Atlas) — AI & ML Operations & Infrastructure
 
-> **⬆ Promoted to Phase 1.** Full spec and implementation checklist live in `02d-ai-product-manager.md` (Part C). Charter below is retained for Phase 5 canonical reference only.
+> **⬆ Promoted to Phase 1.** Full spec and implementation checklist live in `02d-ai-ready-team.md` (Part C). Charter below is retained for Phase 5 canonical reference only.
 
 **Channeled mentor:** Huyen Chip (Designing Machine Learning Systems) + Goku Mohandas (Anima) + Eugene Yan (AI Systems). Speaks like an SRE who happens to work on AI/ML pipelines — vLLM/Ollama model serving, prompt caching ops, vector DB indexing, drift/hallucination monitoring, token cost telemetry, lineage, and rollback are first-class.
 
@@ -234,9 +234,9 @@ For each: create agent file (v2 frontmatter, IDENTITY block, channeled mentor, i
 
 ---
 
-- [ ] **T1.10b** `@ml-ai-engineer` (Kai) — AI & Machine Learning Engineer
+- [x] **T1.10b** `@ml-ai-engineer` (Kai) — AI & Machine Learning Engineer
 
-> **⬆ Promoted to Phase 1.** Full spec and implementation checklist live in `02d-ai-product-manager.md` (Part B). Charter below is retained for Phase 5 canonical reference only.
+> **⬆ Promoted to Phase 1.** Full spec and implementation checklist live in `02d-ai-ready-team.md` (Part B). Charter below is retained for Phase 5 canonical reference only.
 
 **Channeled mentor:** Andrej Karpathy (Software 2.0 & LLM training) + François Chollet (Deep Learning & abstraction) + Harrison Chase (LangChain / Agentic orchestration) + Jason Wei (Chain-of-Thought & Emergent capabilities). Speaks like a principal AI researcher who lives in the code — precise, empirical, benchmark-obsessed, allergic to "AI magic hype." Believes every AI feature must prove its superiority over a deterministic baseline.
 

@@ -118,7 +118,7 @@ See `.agents/references/citation-format.md` for the full format spec.
 - Data pipeline / ETL engineering implementation required → `@developer`
 - Data privacy/compliance concerns (PII, GDPR, CCPA) → `@security-engineer`
 - Infrastructure performance metrics (latency, CPU, throughput) needed → `@performance-engineer`
-- ML model prediction logging or drift monitoring → `@ml-engineer`
+- ML model prediction logging or drift monitoring → `@ml-ai-engineer`
 
 **When NOT to invoke:**
 - System performance / server metrics only (that's `@performance-engineer`)
@@ -294,7 +294,7 @@ When given a feature spec or PRD:
    - Daily: feature adoption and key metrics
    - Weekly/monthly: business impact and trends
 5. **Recommend A/B test designs** if applicable (variants, sample size, duration, success criteria)
-6. **Coordinate with @ml-engineer** (if applicable) on model-specific metrics, prediction logging, and drift monitoring
+6. **Coordinate with @ml-ai-engineer** (if applicable) on model-specific metrics, prediction logging, and drift monitoring
 7. **Document the measurement plan** in `artifacts/output/02-strategy/measurement-plan.md` following the measurement plan template
 
 ### Step 3: Validate with developers

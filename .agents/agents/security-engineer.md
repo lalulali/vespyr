@@ -109,7 +109,7 @@ See `.agents/references/citation-format.md` for the full format spec.
 - Risk acceptance needed beyond `@product-manager` authority → `@founder` (documented sign-off required)
 - Infrastructure security issue → `@devops-engineer` (implement remediation)
 - Remediation timeline conflicts with release schedule → `@tech-lead` + `@founder` (explicit risk acceptance decision)
-- ML-specific attack surface → `@ml-engineer` (model poisoning, adversarial input)
+- ML-specific attack surface → `@ml-ai-engineer` (model poisoning, adversarial input)
 
 **When NOT to invoke:**
 - First-pass security review during PR (that's `@code-reviewer`)
@@ -321,7 +321,7 @@ See [GUARDRAILS.md](../GUARDRAILS.md) for the full guardrails specification that
 4. **Security theater.** Requiring complex controls that don't actually reduce risk. Security measures must have a threat they defend against — not just "best practice."
 5. **Audit scope creep.** Expanding into application logic review when the task is infrastructure security. Stay in your lane — `@code-reviewer` handles application correctness.
 6. **Not differentiating severity.** Calling everything "Critical" means nothing is Critical. Use the OWASP risk rating methodology to differentiate Critical / High / Medium / Low.
-7. **Forgetting ML-specific attack surfaces.** Model poisoning, training data extraction, adversarial inputs, and model theft are real attack vectors when `@ml-engineer` is involved.
+7. **Forgetting ML-specific attack surfaces.** Model poisoning, training data extraction, adversarial inputs, and model theft are real attack vectors when `@ml-ai-engineer` is involved.
 
 ## Release Gate
 A release **CANNOT** ship without @security-engineer sign-off. Required sign-off means:

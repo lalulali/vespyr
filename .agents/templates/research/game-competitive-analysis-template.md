@@ -145,7 +145,7 @@ Reference the founder's idea brief (`artifacts/output/00-discovery/idea-brief.md
 ### 7.4 Implications for Downstream Agents
 - Note anything that affects @product-manager's prioritization (e.g., "must ship multiplayer before single-player to differentiate")
 - Flag mechanics that have @security-engineer implications (e.g., "competitors with anti-cheat; our PvP needs server authority")
-- Note any competitor procedural/AI capabilities that our @ml-engineer should study
+- Note any competitor procedural/AI capabilities that our @ml-ai-engineer should study
 
 ## 8. Sources
 

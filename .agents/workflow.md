@@ -349,7 +349,7 @@ If the user opts to bypass Phase 3 (Architecture), the Strategy artifacts feed d
 | @tech-lead | @developer | `artifacts/output/02-strategy/product-spec.md`, `artifacts/output/02-strategy/user-stories.md` | Must contain task breakdown with DoD, dependencies, and acceptance criteria mapping from Kanban; developer MUST explicitly load and read both strategy documents prior to starting coding |
 | @tech-lead | @developer | `artifacts/output/01-research/ux-research-report.md` (if available) | @developer must be aware of validated interaction patterns |
 | @tech-lead | @data-analyst | `artifacts/output/02-strategy/requirements.md` | Must contain success metrics from business goals |
-| @tech-lead | @ml-engineer | `artifacts/output/03-architecture/` | Must contain ML-specific tasks and data requirements |
+| @tech-lead | @ml-ai-engineer | `artifacts/output/03-architecture/` | Must contain ML-specific tasks and data requirements |
 
 ### Execution → Quality Gates
 
@@ -452,7 +452,8 @@ Some agents are not required for every project. They are **summoned on demand**.
 
 | Agent | When to Summon | Summoned By |
 |-------|---------------|-------------|
-| @ml-engineer | When `idea-brief.md` identifies ML/AI as a core capability (model training, inference pipelines, data drift, feature engineering) | @founder (in idea brief) |
+| @ml-ai-engineer | When `idea-brief.md` identifies ML/AI as a core capability (model training, inference pipelines, data drift, feature engineering) | @founder (in idea brief) |
+| @ml-ai-ops | When `@ml-ai-engineer` produces `model-approved-for-production.md` or a model/RAG pipeline needs production deployment, scaling, or monitoring | @ml-ai-engineer or @architect |
 | @ux-researcher | When complex multi-step workflows, novel interaction patterns, accessibility-critical features, or @product-designer requests validation | @founder (in idea brief) or @product-designer |
 | @data-analyst | When the feature set requires measurement instrumentation or A/B testing | @founder (in idea brief) or @product-manager |
 | @performance-engineer | Before major releases or when performance SLAs exist (e.g., <200ms p95) | @founder (in idea brief) or @tech-lead |
@@ -490,7 +491,8 @@ Optional agents add time to the schedule. Planning guidance:
 | Agent | Additional Time | Recommendation |
 |-------|----------------|----------------|
 | @ux-researcher | +1-2 weeks (before dev handoff) | Parallel with late architecture / early planning phase |
-| @ml-engineer | +2-4 weeks (data + training + validation) | Start data collection in Phase 1; training in Phase 5 |
+| @ml-ai-engineer | +2-4 weeks (data + training + validation) | Start data collection in Phase 1; training in Phase 5 |
+| @ml-ai-ops | +1-2 weeks (serving infra + vector indexing + drift telemetry) | Runs in parallel with development & pre-release deployment |
 | @performance-engineer | +1 week (pre-release audit) | Runs in parallel with QA phase |
 | @data-analyst | +1 week (instrumentation + dashboard) | Runs in parallel with development |
 | @shifu | +1 week (educational content) | Runs on demand; offline from main pipeline |

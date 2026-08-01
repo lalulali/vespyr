@@ -39,7 +39,7 @@ Games follow the same phases but use **game-specific skills** that speak in play
 | @architect | **deny** | **deny** | allow | yes | Premium (default) | Writes ADRs via @writer |
 | @tech-lead | allow | allow | allow | yes | Premium (default) | Writes execution plans, runs git worktrees |
 | @developer | allow | allow | allow | yes | Premium (default) | Writes production code and tests. Delegation: required/optional/none per task. |
-| @ml-engineer | allow | allow | allow | yes | Premium (default) | Writes ML pipelines, models, serving code |
+| @ml-ai-engineer | allow | allow | allow | yes | Premium (default) | Writes ML pipelines, models, serving code |
 | @data-analyst | **deny** | **deny** | allow | yes | Premium (default) | Writes measurement plans, instrument code via @writer |
 | @code-reviewer | allow | **deny** | allow | no | Premium (default) | Read code, report findings — no edits |
 | @qa-engineer | allow | allow | allow | yes | Premium (default) | Writes tests, validates behavior |
@@ -110,7 +110,7 @@ Validation is optional but recommended — you can skip to Exploration if the id
 
 | Agent | Permission | Summon When |
 |-------|-----------|-------------|
-| @ml-engineer | Full access | ML/AI is core to the concept |
+| @ml-ai-engineer | Full access | ML/AI is core to the concept |
 | @ux-researcher | Full access | Complex workflows, novel interactions, accessibility-critical |
 | @data-analyst | Full access | Feature needs measurement or A/B testing |
 | @performance-engineer | Read + bash (no edit) | Performance SLAs exist or before major release |

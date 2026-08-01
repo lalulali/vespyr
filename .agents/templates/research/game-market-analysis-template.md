@@ -139,7 +139,7 @@ If the verdict is "GO WITH CAUTION," what must be true before proceeding?
 
 ## 10. Implications for Downstream Agents
 Briefly note:
-- Any **procedural generation/ML** considerations for @ml-engineer (e.g., "market success depends on infinite replayability via procedural maps")
+- Any **procedural generation/ML** considerations for @ml-ai-engineer (e.g., "market success depends on infinite replayability via procedural maps")
 - Any **performance** considerations for @performance-engineer (e.g., "target market plays on mid-tier laptops; must maintain 60fps on GTX 1060")
 - Any **anti-cheat/multiplayer** considerations for @security-engineer (e.g., "PvP trading requires server-authoritative architecture")
 

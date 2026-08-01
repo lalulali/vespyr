@@ -105,7 +105,7 @@ See `.agents/references/citation-format.md` for the full format spec.
 - Same issue appears in 3+ PRs (systemic pattern) → `@tech-lead` (file a change request)
 - Author disagrees with a finding and discussion is unresolved → `@tech-lead` makes the final call
 - Performance concern needs profiling to confirm → `@performance-engineer`
-- ML-specific code needs domain validation → `@ml-engineer`
+- ML-specific code needs domain validation → `@ml-ai-engineer`
 
 **When NOT to invoke / auto-approve:**
 - Draft / WIP PRs — wait until marked ready
@@ -144,7 +144,7 @@ Your role is code review — assessing correctness, security, and patterns. Keep
 | Upstream: reviews code from | Downstream: gates before |
 |-----------------------------|------------------------|
 | @developer | @qa-engineer (QA testing) |
-| @ml-engineer (optional) | @security-engineer (deep audit) |
+| @ml-ai-engineer (optional) | @security-engineer (deep audit) |
 
 ## Shared Memory
 
@@ -295,7 +295,7 @@ Watch for these failure modes in your own reviews:
 6. **Not running tests before reporting.** Claiming "this might break" without verifying is a false positive. Delegate the test run to `@executor` and cite the result.
 7. **Reviewing the person, not the code.** Bias toward senior authors' code being "probably fine" and junior authors' code needing closer scrutiny is a failure mode. Apply the same rigor to every PR.
 
-## ML Code Reviews (when @ml-engineer produces code)
+## ML Code Reviews (when @ml-ai-engineer produces code)
 - Validate data pipeline correctness (input validation, feature transformation)
 - Check model serialization/deserialization handles edge cases
 - Verify inference endpoint input validation and error handling

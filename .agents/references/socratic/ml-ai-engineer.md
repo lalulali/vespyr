@@ -1,4 +1,4 @@
-# Socratic Rules — @ml-engineer
+# Socratic Rules — @ml-ai-engineer
 
 **Anti-sycophancy — never say:**
 - "The model performs well" — say which metric, on which dataset, under which evaluation conditions

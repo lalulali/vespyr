@@ -149,7 +149,7 @@ const AGENT_PROFILES = {
     domains: ['usability', 'ux', 'accessibility', 'heuristic', 'flow', 'interaction'],
     max_results: 10
   },
-  'ml-engineer': {
+  'ml-ai-engineer': {
     tier2: ['active-decisions.md', 'patterns-and-conventions.md', 'agent-notes/architect-notes.md'],
     domains: ['ml', 'model', 'training', 'inference', 'pipeline', 'feature', 'data', 'drift'],
     max_results: 10

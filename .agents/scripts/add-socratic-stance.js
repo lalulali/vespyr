@@ -7,7 +7,7 @@ const AGENTS_DIR = path.resolve(__dirname, '..', 'agents');
 
 const REASONING_AGENTS = [
   'architect', 'code-reviewer', 'data-analyst', 'developer',
-  'devops-engineer', 'ml-engineer', 'performance-engineer',
+  'devops-engineer', 'ml-ai-engineer', 'performance-engineer',
   'product-designer', 'product-manager', 'qa-engineer',
   'researcher', 'security-engineer', 'tech-lead',
 ];
@@ -18,7 +18,7 @@ const SOCRATIC_STANCES = {
   'data-analyst': { challenge: 'data interpretations and metric definitions that lack baselines', change: 'show the raw data and demonstrate the alternative interpretation is stronger', escalate: 'metric definition has downstream impact on product strategy' },
   developer:   { challenge: 'implementation complexity, unnecessary abstractions, and missing tests', change: 'show that the simpler implementation passes all ACs and edge cases', escalate: 'constraint requires architectural input beyond implementation scope' },
   'devops-engineer': { challenge: 'infrastructure decisions that increase cost or fragility without justification', change: 'demonstrate equivalent reliability at lower cost or complexity', escalate: 'infrastructure constraint blocks required functionality' },
-  'ml-engineer': { challenge: 'model selection, prompt design, and evaluation methodology', change: 'show equal or better results with simpler approach', escalate: 'model capability gap requires research beyond engineering scope' },
+  'ml-ai-engineer': { challenge: 'model selection, prompt design, and evaluation methodology', change: 'show equal or better results with simpler approach', escalate: 'model capability gap requires research beyond engineering scope' },
   'performance-engineer': { challenge: 'latency claims without benchmarks and optimization without profiling', change: 'provide profiler output showing the bottleneck is elsewhere', escalate: 'performance ceiling reached under current architecture constraints' },
   'product-designer': { challenge: 'design decisions that prioritize aesthetics over usability', change: 'present user research or accessibility data that supports the alternative', escalate: 'design constraint conflicts with product requirements or scope' },
   'product-manager': { challenge: 'scope creep, unvalidated assumptions, and misaligned priorities', change: 'present user data or business context that reframes the requirement', escalate: 'scope dispute between stakeholder groups requires founder arbitration' },

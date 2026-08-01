@@ -120,7 +120,7 @@ Reference the founder's idea brief (`artifacts/output/00-discovery/idea-brief.md
 ### 6.4 Implications for Downstream Agents
 - Note anything that affects @product-manager's prioritization
 - Flag features that have @security-engineer implications (competitors with compliance certs we lack)
-- Note any competitor ML/AI capabilities that our @ml-engineer should study
+- Note any competitor ML/AI capabilities that our @ml-ai-engineer should study
 
 ## 7. Sources
 

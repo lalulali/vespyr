@@ -66,7 +66,7 @@ function validateAgent(filePath) {
   }
 
   const squadMatch = fm.match(/^default_squad: (.+)$/m);
-  if (squadMatch && !KNOWN_SQUADS.includes(squadMatch[1])) {
+  if (squadMatch && squadMatch[1] !== "none" && !KNOWN_SQUADS.includes(squadMatch[1])) {
     errors.push(`default_squad "${squadMatch[1]}" not in known squads: ${KNOWN_SQUADS.join(', ')}`);
   }
 
@@ -78,8 +78,8 @@ function validateAgent(filePath) {
   const mentorMatch = fm.match(/^channeled_mentor: (.+)$/m);
   if (mentorMatch) {
     const mentors = mentorMatch[1].split('+').map(s => s.trim()).filter(Boolean);
-    if (mentors.length < 1 || mentors.length > 2) {
-      errors.push(`channeled_mentor must have 1-2 references, got ${mentors.length}`);
+    if (mentors.length < 1 || mentors.length > 5) {
+      errors.push(`channeled_mentor must have 1-5 references, got ${mentors.length}`);
     }
     if (mentorMatch[1].trim().length < 3) {
       errors.push(`channeled_mentor value too short`);
@@ -127,7 +127,7 @@ function validateAgent(filePath) {
   // Socratic stance check: warn only, not a hard fail
   const REASONING_AGENTS = [
     'architect', 'code-reviewer', 'data-analyst', 'developer',
-    'devops-engineer', 'ml-engineer', 'performance-engineer',
+    'devops-engineer', 'ml-ai-engineer', 'performance-engineer',
     'product-designer', 'product-manager', 'qa-engineer',
     'researcher', 'security-engineer', 'shifu', 'tech-lead',
   ];
@@ -138,7 +138,7 @@ function validateAgent(filePath) {
   // Citation Protocol check: warn only for all 17 reasoning agents
   const CITATION_AGENTS = [
     'architect', 'code-reviewer', 'data-analyst', 'developer',
-    'devops-engineer', 'founder', 'ml-engineer', 'performance-engineer',
+    'devops-engineer', 'founder', 'ml-ai-engineer', 'performance-engineer',
     'product-designer', 'product-manager', 'qa-engineer',
     'researcher', 'security-engineer', 'shifu', 'tech-lead', 'technical-writer',
     'user-researcher', 'ux-researcher',

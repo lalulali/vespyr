@@ -84,6 +84,7 @@ function parseFlags(argv) {
 		harnesses: [],
 		version: false,
 		help: false,
+		syncDocs: false,
 	};
 
 	for (let i = 0; i < args.length; i++) {
@@ -104,6 +105,8 @@ function parseFlags(argv) {
 			flags.version = true;
 		} else if (arg === "--help" || arg === "-h") {
 			flags.help = true;
+		} else if (arg === "--sync-docs") {
+			flags.syncDocs = true;
 		} else {
 			console.error(`Unknown flag: ${arg}`);
 			process.exit(1);
@@ -336,10 +339,12 @@ function scaffoldArtifacts(targetDir, projectName, userNickname = "User") {
 	}
 
 	const agentsDir = path.join(targetDir, ".agents", "agents");
+	let agentCount = 23;
 	if (fs.existsSync(agentsDir)) {
 		const agentFiles = fs
 			.readdirSync(agentsDir)
 			.filter((f) => f.endsWith(".md"));
+		agentCount = agentFiles.length || 23;
 		const pendingDir = path.join(artifactsDir, "memory", "pending-questions");
 		fs.mkdirSync(pendingDir, { recursive: true });
 		for (const agentFile of agentFiles) {
@@ -369,7 +374,7 @@ function scaffoldArtifacts(targetDir, projectName, userNickname = "User") {
 ## Team
 - **Squad**: full-team
 - **Operation Mode**: semi-autonomous
-- **Active Agents**: 21 (full-team preset)
+- **Active Agents**: ${agentCount} (full-team preset)
 
 ## Memory
 - **Lessons Learned**: None yet
@@ -483,13 +488,18 @@ function updatePathsInDir(dir) {
 }
 
 function printSummary(targetDir, selections) {
+	const agentsDir = path.join(targetDir, ".agents", "agents");
+	const count = fs.existsSync(agentsDir)
+		? fs.readdirSync(agentsDir).filter((f) => f.endsWith(".md")).length
+		: 23;
+
 	const lines = [
 		`\n============================================================`,
 		`   VESPYR v${VERSION} — Installation Complete`,
 		`============================================================`,
 		``,
 		`  Target:       ${targetDir}`,
-		`  Squad:        full-team (21 agents)`,
+		`  Squad:        full-team (${count} agents)`,
 		`  Harnesses:    ${selections.harnesses.join(", ") || "core only"}`,
 		``,
 		`  Created:`,
@@ -508,9 +518,9 @@ function printSummary(targetDir, selections) {
 		);
 	}
 	if (selections.harnesses.includes("cursor"))
-		lines.push(`    ✓ .cursor/rules/*.mdc             (21 Cursor rules)`);
+		lines.push(`    ✓ .cursor/rules/*.mdc             (${count} Cursor rules)`);
 	if (selections.harnesses.includes("github"))
-		lines.push(`    ✓ .github/agents/*.yml            (21 Copilot agents)`);
+		lines.push(`    ✓ .github/agents/*.yml            (${count} Copilot agents)`);
 	if (selections.harnesses.includes("windsurf")) {
 		lines.push(`    ✓ .windsurf/workflows -> skills   (Windsurf workflows)`);
 		lines.push(`    ✓ .windsurfrules -> GUARDRAILS    (Windsurf rules)`);
@@ -740,7 +750,7 @@ function askQuestion(question, defaultVal = "") {
 		printWizardSummary();
 
 		const display = defaultVal ? `${question} [${defaultVal}]` : question;
-		process.stdout.write(`\n  ${display}: `);
+		const promptStr = `\n  ${display}: `;
 
 		const rl = readline.createInterface({
 			input: process.stdin,
@@ -748,9 +758,9 @@ function askQuestion(question, defaultVal = "") {
 			terminal: true,
 		});
 
-		rl.on("line", (line) => {
+		rl.question(promptStr, (answer) => {
 			rl.close();
-			const result = line.trim() || defaultVal;
+			const result = answer.trim() || defaultVal;
 			resolve(result);
 		});
 	});
@@ -1921,6 +1931,7 @@ Options:
   --harness <names>    Pre-select harness(es), comma-separated
   --version, -v        Print version and exit
   --help, -h           Print usage and exit
+  --sync-docs          Sync documentation entry points
 
 Examples:
   npx vespyr                          Interactive install
@@ -1929,6 +1940,12 @@ Examples:
   npx vespyr --target ./my-project    Install to specific directory
   npx vespyr --dry-run                Preview actions
 `);
+		process.exit(0);
+	}
+
+	if (flags.syncDocs) {
+		let targetDir = flags.target ? path.resolve(flags.target) : process.cwd();
+		performSyncDocs(targetDir);
 		process.exit(0);
 	}
 

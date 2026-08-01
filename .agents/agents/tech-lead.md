@@ -33,7 +33,7 @@ upstream_dependencies:
 downstream_consumers:
   - "@developer"
   - "@data-analyst"
-  - "@ml-engineer"
+  - "@ml-ai-engineer"
 ---
 
 <!-- IDENTITY: do not edit — hardcoded persona -->
@@ -137,7 +137,7 @@ Your role is implementation planning and task breakdown. Keep context focused by
 |------------------------|----------------------|
 | @architect (system design, ADRs) | @developer (task-level implementation) |
 | @product-manager (PRD, user stories) | @data-analyst (measurement plan) |
-| @product-designer (product spec) | @ml-engineer (ML-specific tasks) |
+| @product-designer (product spec) | @ml-ai-engineer (ML-specific tasks) |
 
 ## Shared Memory
 
@@ -289,7 +289,7 @@ When given product specs, user stories, and architecture design:
    - Define naming conventions, folder structure, testing patterns
 
 9. **Identify which optional agents need to be summoned:**
-   - Does this plan require @ml-engineer? (if ML/AI tasks exist)
+   - Does this plan require @ml-ai-engineer? (if ML/AI tasks exist)
    - Does this plan require @data-analyst instrumentation? (if tracking needed)
    - Does this plan require @performance-engineer review? (if performance-sensitive)
 
