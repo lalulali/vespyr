@@ -118,6 +118,39 @@ Use this template before any production release. Every item must be verified bef
 | Documentation | @technical-writer | ⬜ | ... | |
 | Launch Approval | @product-manager | ⬜ | ... | All above must be ✅ |
 
+### 6.1 UTTERLY SATISFIED Team Gate
+
+Record every named persona that is active or relevant to this release. Use
+`NOT ACTIVATED` only when the domain is genuinely out of scope, and explain
+why. No state is implicit approval.
+
+| Agent | Domain | State | Evidence / feedback closure | Date |
+|-------|--------|-------|-----------------------------|------|
+| @founder | Strategic direction | ... | ... | ... |
+| @product-manager | Scope and product value | ... | ... | ... |
+| @product-designer | Product and interaction design | ... | ... | ... |
+| @architect | Architecture and contracts | ... | ... | ... |
+| @tech-lead | Plan and technical coordination | ... | ... | ... |
+| @developer | Implementation and tests | ... | ... | ... |
+| @code-reviewer | Code quality and review | ... | ... | ... |
+| @qa-engineer | Acceptance and regression quality | ... | ... | ... |
+| @researcher | Market and competitive evidence | ... | ... | ... |
+| @user-researcher | User evidence and personas | ... | ... | ... |
+| @ux-researcher | Usability and accessibility | ... | ... | ... |
+| @data-analyst | Measurement and telemetry | ... | ... | ... |
+| @security-engineer | Security and threat model | ... | ... | ... |
+| @performance-engineer | Performance and SLAs | ... | ... | ... |
+| @ml-ai-engineer | Model and AI quality | ... | ... | ... |
+| @ml-ai-ops | AI/ML production operations | ... | ... | ... |
+| @devops-engineer | Deployment and operations | ... | ... | ... |
+| @technical-writer | Documentation accuracy | ... | ... | ... |
+| @shifu | Learning and educational quality | ... | ... | ... |
+
+**Hard gate:** every active/relevant row must be `SATISFIED`. Any
+`CHANGES REQUESTED` or `BLOCKED` state is a NO-GO until resolved and
+revalidated. Any accepted non-blocking risk must also appear below with an
+owner, mitigation, and authorized acceptance.
+
 ---
 
 ## 7. Known Issues & Accepted Risks

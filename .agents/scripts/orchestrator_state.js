@@ -9,9 +9,10 @@
  * is the state machine.
  *
  * State hierarchy:
- *   Source of truth: artifacts/output/sprint-status.yaml (human-readable)
- *   Derived cache:   artifacts/output/pipeline-state.json (backward compat)
- *   readState() tries YAML first, falls back to JSON.
+ *   Source of truth: artifacts/output/pipeline-state.json (full state: phases,
+ *     artifacts, history, change_requests, last_session_write, blockers)
+ *   Display mirror:  artifacts/output/sprint-status.yaml (human-readable subset)
+ *   readState() prefers JSON; YAML is only a fallback when JSON is absent.
  *
  * Usage:
  *   node orchestrator_state.js init --name "My Project" --type startup
@@ -21,7 +22,8 @@
  *   node orchestrator_state.js complete --agent founder --artifact idea-brief.md --check-memory
  *   node orchestrator_state.js session-write --agent developer
  *   node orchestrator_state.js file-cr --from developer --to product-manager --target user-stories.md --issue "..."
- *   node orchestrator_state.js validate --phase design
+ *   node orchestrator_state.js validate --phase planning
+ *   node orchestrator_state.js --help | usage | -h
  */
 
 const fs = require('fs');
@@ -31,6 +33,13 @@ const STATE_FILE = path.join(process.cwd(), 'artifacts', 'output', 'pipeline-sta
 const OUTPUT_DIR = path.join(process.cwd(), 'artifacts', 'output');
 const TELEMETRY_DIR = path.join(process.cwd(), 'artifacts', 'telemetry');
 const PROJECT_ROOT = process.cwd();
+
+// Canonical phase order — single source of truth: .agents/references/phase-table.md.
+// 11 phases: Validation (Phase -1, pre-phase gate, no folder) + folder phases 0-9.
+const PHASE_ORDER = [
+  'validation', 'discovery', 'research', 'strategy', 'architecture',
+  'planning', 'execution', 'launch', 'iteration', 'documentation', 'retro'
+];
 
 function ensureDir() {
   if (!fs.existsSync(OUTPUT_DIR)) fs.mkdirSync(OUTPUT_DIR, { recursive: true });
@@ -96,7 +105,17 @@ function readYaml() {
 }
 
 function readState() {
-  // Source of truth: YAML. Fallback: JSON.
+  // Source of truth: pipeline-state.json (full state). The YAML mirror is
+  // lossy (no artifacts/history/change_requests), so it must never be the
+  // primary read source — otherwise every writeState() round-trip would
+  // wipe data written by `complete` and `session-write`.
+  if (fs.existsSync(STATE_FILE)) {
+    try {
+      return JSON.parse(fs.readFileSync(STATE_FILE, 'utf8'));
+    } catch (e) {
+      // Corrupt JSON: fall through to YAML mirror, then auto-init.
+    }
+  }
   const yamlState = readYaml();
   if (yamlState) return yamlState;
   if (!fs.existsSync(STATE_FILE)) {
@@ -113,7 +132,7 @@ function readState() {
       }
       const projectContextFile = path.join(memoryDir, 'project-context.md');
       if (!fs.existsSync(projectContextFile)) {
-        const content = `# Project Context\n\n## Identity\nUser Nickname: User\n\n## CORE\nProject: ${name} (startup)\nStack: None\nPhase: ${state.current_phase}\nSprint: none\nBlockers: 0\nSquad: full-team\n`;
+        const content = `# Project Context\n\n## [CORE]\nProject: ${name} (startup)\nStack: None\nPhase: ${state.current_phase}\nSprint: none\nBlockers: 0\nSquad: full-team\n\n## [IDENTITY]\nUser Nickname: User\n`;
         fs.writeFileSync(projectContextFile, content, 'utf8');
       }
       return state;
@@ -139,7 +158,7 @@ const YAML_STATE = path.join(OUTPUT_DIR, 'sprint-status.yaml');
 
 function syncYaml(state) {
   const name = (state.project && state.project.name) || state.name || '';
-  const phase = state.current_phase || state.phase || 'discovery';
+  const phase = state.current_phase || state.phase || PHASE_ORDER[0];
   const squad = (state.project && state.project.squad) || state.squad || 'full-team';
   const yaml = [
     '# artifacts/output/sprint-status.yaml',
@@ -187,7 +206,7 @@ function writeYaml(lines) {
 function printDashboard(state) {
   const icon = (s) => s === 'done' ? '✅' : s === 'in-progress' ? '▶️ ' : s === 'pending' ? '  ' : '  ';
   const name = (state.project && state.project.name) || state.name || 'unnamed';
-  const phase = state.current_phase || state.phase || 'unknown';
+  const phase = resolveCurrentPhase(state);
   const squad = (state.project && state.project.squad) || state.squad || 'full-team';
   console.log(`\n╔══════════════════════════════════════════╗`);
   console.log(`║  Project: ${name.padEnd(28)} ║`);
@@ -209,17 +228,18 @@ function printDashboard(state) {
 // ASCII dashboard for 'next' command
 function printNextDashboard(state, action) {
   printDashboard(state);
-  if (action.phase) {
-    console.log(`Current phase:  ${action.phase}`);
-    console.log(`Phase status:   ${action.status || 'unknown'}`);
-  }
-  if (action.action === 'generate-artifacts' && action.artifacts) {
+  const current = resolveCurrentPhase(state);
+  const phaseObj = state.phases[current];
+  const status = phaseObj ? (typeof phaseObj === 'string' ? phaseObj : (phaseObj.status || 'pending')) : 'pending';
+  console.log(`Current phase:  ${current}`);
+  console.log(`Phase status:   ${status}`);
+  if (action.action === 'generate-artifacts' && (action.artifacts || action.missing)) {
     console.log(`Action needed:  generate artifacts`);
-    for (const a of action.artifacts) {
+    for (const a of (action.artifacts || action.missing)) {
       console.log(`  - ${a}`);
     }
   } else if (action.action === 'advance-phase') {
-    console.log(`Next phase:     ${action.next_phase || 'unknown'}`);
+    console.log(`Next phase:     ${action.to || 'unknown'}`);
   }
   if (action.recommendations) {
     console.log(`\nRecommendations:`);
@@ -296,9 +316,16 @@ function createInitialState(name, type, squadName = 'full-team') {
 
   const defaultPhases = {
     validation: { status: 'pending', started_at: null, completed_at: null, agents: ['founder'] },
-    exploration: { status: 'pending', started_at: null, completed_at: null, agents: ['researcher', 'user-researcher'] },
-    design: { status: 'pending', started_at: null, completed_at: null, agents: ['product-manager', 'product-designer'] },
-    development: { status: 'pending', started_at: null, completed_at: null, agents: ['tech-lead', 'developer', 'code-reviewer', 'qa-engineer'] }
+    discovery: { status: 'pending', started_at: null, completed_at: null, agents: ['researcher', 'user-researcher'] },
+    research: { status: 'pending', started_at: null, completed_at: null, agents: ['researcher', 'user-researcher'] },
+    strategy: { status: 'pending', started_at: null, completed_at: null, agents: ['product-manager', 'product-designer'] },
+    architecture: { status: 'pending', started_at: null, completed_at: null, agents: ['architect'] },
+    planning: { status: 'pending', started_at: null, completed_at: null, agents: ['tech-lead'] },
+    execution: { status: 'pending', started_at: null, completed_at: null, agents: ['developer', 'code-reviewer', 'qa-engineer'] },
+    launch: { status: 'pending', started_at: null, completed_at: null, agents: ['devops-engineer', 'product-manager'] },
+    iteration: { status: 'pending', started_at: null, completed_at: null, agents: ['product-manager', 'data-analyst'] },
+    documentation: { status: 'pending', started_at: null, completed_at: null, agents: ['technical-writer'] },
+    retro: { status: 'pending', started_at: null, completed_at: null, agents: ['product-manager'] }
   };
 
   if (squadName !== 'full-team') {
@@ -311,9 +338,8 @@ function createInitialState(name, type, squadName = 'full-team') {
     }
   }
 
-  let startPhase = 'validation';
-  const phaseOrder = ['validation', 'exploration', 'design', 'development'];
-  for (const phaseKey of phaseOrder) {
+  let startPhase = PHASE_ORDER[0];
+  for (const phaseKey of PHASE_ORDER) {
     if (defaultPhases[phaseKey].status !== 'complete') {
       startPhase = phaseKey;
       break;
@@ -334,46 +360,113 @@ function createInitialState(name, type, squadName = 'full-team') {
 }
 
 function getPhaseArtifacts(phase) {
+  // Canonical artifact maps sourced from .agents/references/phase-table.md and
+  // .agents/workflow.md §2 Handoff Contracts. Phases without a canonical map
+  // (execution, documentation) are intentionally omitted so validatePhaseArtifacts
+  // warns instead of vacuously passing — see validatePhaseArtifacts().
   const artifactMap = {
     validation: [
-      { name: 'idea-brief.md', path: '01-discovery/idea-brief.md', required: true, fallbackPath: '01-discovery/validation-brief.md', fallbackName: 'validation-brief.md' }
+      { name: 'idea-brief.md', path: '00-discovery/idea-brief.md', required: true, fallbackPath: '00-discovery/validation-brief.md', fallbackName: 'validation-brief.md' }
     ],
-    exploration: [
-      { name: 'market-analysis.md', path: '02-research/market-analysis.md', required: true },
-      { name: 'competitive-analysis.md', path: '02-research/competitive-analysis.md', required: true },
-      { name: 'user-personas.md', path: '02-research/user-personas.md', required: true }
+    discovery: [
+      { name: 'idea-brief.md', path: '00-discovery/idea-brief.md', required: true, fallbackPath: '00-discovery/validation-brief.md', fallbackName: 'validation-brief.md' }
     ],
-    design: [
-      { name: 'requirements.md', path: '03-strategy/requirements.md', required: true },
-      { name: 'user-stories.md', path: '03-strategy/user-stories.md', required: true },
-      { name: 'product-spec.md', path: '03-strategy/product-spec.md', required: true }
+    research: [
+      { name: 'market-analysis.md', path: '01-research/market-analysis.md', required: true },
+      { name: 'competitive-analysis.md', path: '01-research/competitive-analysis.md', required: true },
+      { name: 'user-personas.md', path: '01-research/user-personas.md', required: true }
     ],
-    development: [
-      { name: 'execution-plan.md', path: '05-planning/execution-plan.md', required: true },
-      { name: 'change-requests.md', path: '05-planning/change-requests.md', required: false }
+    strategy: [
+      { name: 'requirements.md', path: '02-strategy/requirements.md', required: true },
+      { name: 'user-stories.md', path: '02-strategy/user-stories.md', required: true },
+      { name: 'product-spec.md', path: '02-strategy/product-spec.md', required: true }
+    ],
+    // workflow.md §2: @architect → @tech-lead requires ADRs in 03-architecture/
+    // ("Must contain data model, API contracts, and tech stack decision").
+    // ADRs are numbered (adr-NNN-short-name.md) — check the directory glob.
+    architecture: [
+      { name: 'adr-*.md', dir: '03-architecture', glob: /^adr-.*\.md$/, required: true }
+    ],
+    planning: [
+      { name: 'execution-plan.md', path: '04-planning/execution-plan.md', required: true },
+      { name: 'change-requests.md', path: '04-planning/change-requests.md', required: false }
+    ],
+    // execution: gate is "all tests green" (workflow.md §2 Quality Gates → Launch);
+    // code/tests live in src/ — no canonical artifact file, validated via warning.
+    launch: [
+      { name: 'go-nogo-decision.md', path: '06-launch/go-nogo-decision.md', required: true },
+      { name: 'post-launch-report.md', path: '06-launch/post-launch-report.md', required: true }
+    ],
+    iteration: [
+      { name: 'iteration-results.md', path: '07-iteration/iteration-results.md', required: true }
+    ],
+    // documentation: cross-cutting (phase-table.md Phase 8, "Docs current") —
+    // no canonical artifact path, validated via warning.
+    retro: [
+      { name: 'action-items.md', path: '09-retro/action-items.md', required: true }
     ]
   };
   return artifactMap[phase] || [];
 }
 
 function validatePhaseArtifacts(phase) {
+  // Phases outside the canonical 11-phase model (e.g., legacy 4-phase names)
+  // must never green-light. Report the phase as invalid.
+  if (!PHASE_ORDER.includes(phase)) {
+    return {
+      allPresent: false,
+      checked: 0,
+      artifacts: [],
+      warning: `'${phase}' is not a canonical phase. Valid phases: ${PHASE_ORDER.join(', ')}`
+    };
+  }
+
   const artifacts = getPhaseArtifacts(phase);
+
+  // Canonical phase without a sourced artifact map: warn instead of a
+  // vacuous green pass. checked: 0 tells callers nothing was validated.
+  if (artifacts.length === 0) {
+    return {
+      allPresent: false,
+      checked: 0,
+      artifacts: [],
+      warning: `No canonical artifact map for phase '${phase}' (see .agents/references/phase-table.md). Validation skipped — not a green pass.`
+    };
+  }
+
   const results = [];
   let allPresent = true;
 
   for (const art of artifacts) {
-    let fullPath = path.join(OUTPUT_DIR, art.path);
-    let exists = fs.existsSync(fullPath);
+    let fullPath = null;
+    let exists = false;
     let name = art.name;
-    let actualPath = art.path;
+    let actualPath = art.path || (art.dir ? `${art.dir}/${art.name}` : null);
 
-    if (!exists && art.fallbackPath) {
-      const fallbackFullPath = path.join(OUTPUT_DIR, art.fallbackPath);
-      if (fs.existsSync(fallbackFullPath)) {
-        fullPath = fallbackFullPath;
-        exists = true;
-        name = art.fallbackName;
-        actualPath = art.fallbackPath;
+    if (art.glob) {
+      // Directory-level canonical artifact (e.g., ADRs in 03-architecture/):
+      // at least one file matching the glob must exist.
+      const dir = path.join(OUTPUT_DIR, art.dir || '');
+      if (fs.existsSync(dir)) {
+        const matches = fs.readdirSync(dir).filter(f => art.glob.test(f));
+        if (matches.length > 0) {
+          fullPath = path.join(dir, matches[0]);
+          exists = true;
+          actualPath = `${art.dir}/${matches[0]}`;
+        }
+      }
+    } else {
+      fullPath = path.join(OUTPUT_DIR, art.path);
+      exists = fs.existsSync(fullPath);
+
+      if (!exists && art.fallbackPath) {
+        const fallbackFullPath = path.join(OUTPUT_DIR, art.fallbackPath);
+        if (fs.existsSync(fallbackFullPath)) {
+          fullPath = fallbackFullPath;
+          exists = true;
+          name = art.fallbackName;
+          actualPath = art.fallbackPath;
+        }
       }
     }
 
@@ -395,13 +488,42 @@ function validatePhaseArtifacts(phase) {
     });
   }
 
-  return { allPresent, artifacts: results };
+  return { allPresent, checked: results.length, artifacts: results };
+}
+
+// Resolve the effective current phase. `state.current_phase` may be absent or
+// reference a phase that is not a key in `state.phases` (e.g., a legacy
+// 4-phase name against the canonical 11-phase map). When that happens, derive
+// the current phase from the phases map: first canonical phase that is not
+// pending, else the first canonical phase present in the map.
+function resolveCurrentPhase(state) {
+  const explicit = state.current_phase || state.phase || '';
+  const phaseKeys = Object.keys(state.phases || {});
+  if (explicit && phaseKeys.includes(explicit)) return explicit;
+  if (explicit && PHASE_ORDER.includes(explicit)) return explicit;
+  // Prefer the first phase that is actually in progress: a completed phase must
+  // never shadow an in-progress phase when current_phase is absent/stale.
+  for (const p of PHASE_ORDER) {
+    const v = state.phases[p];
+    const status = typeof v === 'string' ? v : (v ? v.status : '');
+    if (status === 'in-progress' || status === 'active') return p;
+  }
+  for (const p of PHASE_ORDER) {
+    const v = state.phases[p];
+    const status = typeof v === 'string' ? v : (v ? v.status : '');
+    if (status && status !== 'pending') return p;
+  }
+  for (const p of PHASE_ORDER) {
+    const v = state.phases[p];
+    const status = typeof v === 'string' ? v : (v ? v.status : '');
+    if (!status || status === 'pending') return p;
+  }
+  return PHASE_ORDER[0];
 }
 
 function determineNextAction(state) {
-  const phaseOrder = ['validation', 'exploration', 'design', 'development'];
-  const currentPhase = state.current_phase;
-  const phaseIdx = phaseOrder.indexOf(currentPhase);
+  const currentPhase = resolveCurrentPhase(state);
+  const phaseIdx = PHASE_ORDER.indexOf(currentPhase);
 
   // Check for open change requests first
   const openCRs = state.change_requests.filter(cr => cr.status === 'OPEN');
@@ -422,9 +544,11 @@ function determineNextAction(state) {
     };
   }
 
-  // Validate current phase artifacts
+  // Validate current phase artifacts. Phases without a canonical artifact map
+  // (checked === 0) cannot be validated here — fall through to the phase-status
+  // guard below instead of blocking on a vacuous generate-artifacts action.
   const validation = validatePhaseArtifacts(currentPhase);
-  if (!validation.allPresent) {
+  if (validation.checked > 0 && !validation.allPresent) {
     const missing = validation.artifacts.filter(a => a.required && !a.exists);
     return {
       action: 'generate-artifacts',
@@ -434,13 +558,28 @@ function determineNextAction(state) {
     };
   }
 
+  // Only advance when the current phase is actually complete. A phase still
+  // in-progress — e.g. an unmapped phase like execution, which has no artifact
+  // gate and would otherwise fall through to advance — must not be skipped.
+  // (Mapped phases are already gated by the generate-artifacts check above.)
+  const phaseObj = state.phases[currentPhase];
+  const currentStatus = typeof phaseObj === 'string' ? phaseObj : (phaseObj ? phaseObj.status : 'pending');
+  if (currentStatus !== 'complete' && currentStatus !== 'done') {
+    return {
+      action: 'continue-phase',
+      phase: currentPhase,
+      reason: `${currentPhase} phase is ${currentStatus || 'unknown'}, not complete — continue work before advancing`
+    };
+  }
+
   // Current phase complete, advance to next non-complete phase
-  if (phaseIdx < phaseOrder.length - 1) {
+  if (phaseIdx >= 0 && phaseIdx < PHASE_ORDER.length - 1) {
     let nextPhaseIdx = phaseIdx + 1;
-    while (nextPhaseIdx < phaseOrder.length) {
-      const nextPhase = phaseOrder[nextPhaseIdx];
+    while (nextPhaseIdx < PHASE_ORDER.length) {
+      const nextPhase = PHASE_ORDER[nextPhaseIdx];
       const phaseObj = state.phases[nextPhase];
-      if (phaseObj && phaseObj.status !== 'complete') {
+      const status = typeof phaseObj === 'string' ? phaseObj : (phaseObj ? phaseObj.status : 'pending');
+      if (status !== 'complete') {
         return {
           action: 'advance-phase',
           from: currentPhase,
@@ -459,18 +598,21 @@ function determineNextAction(state) {
 }
 
 // CLI
-function main() {
-  const args = process.argv.slice(2);
-  if (args.length === 0) {
-    console.log(`Usage:
+const USAGE = `Usage:
   node orchestrator_state.js init --name "Project" --type startup
   node orchestrator_state.js status
   node orchestrator_state.js next
   node orchestrator_state.js complete --agent founder --artifact idea-brief.md
   node orchestrator_state.js file-cr --from developer --to product-manager --target user-stories.md --issue "..."
-  node orchestrator_state.js set-phase --phase design
+  node orchestrator_state.js set-phase --phase planning
   node orchestrator_state.js ensure-graph <code|doc>
-  node orchestrator_state.js validate --phase design`);
+  node orchestrator_state.js validate --phase planning
+  node orchestrator_state.js --help | usage | -h`;
+
+function main() {
+  const args = process.argv.slice(2);
+  if (args.length === 0 || args[0] === '--help' || args[0] === '-h' || args[0] === 'usage') {
+    console.log(USAGE);
     process.exit(0);
   }
 
@@ -505,7 +647,7 @@ function main() {
       const memoryDir = path.join(process.cwd(), 'artifacts', 'memory');
       const projectContextFile = path.join(memoryDir, 'project-context.md');
       if (fs.existsSync(memoryDir)) {
-        let content = `# Project Context\n\n## [CORE]\nProject: ${name} (${type})\nStack: None\nPhase: ${state.current_phase}\nSprint: none\nBlockers: 0\nSquad: ${squad}\n`;
+        let content = `# Project Context\n\n## [CORE]\nProject: ${name} (${type})\nStack: None\nPhase: ${state.current_phase}\nSprint: none\nBlockers: 0\nSquad: ${squad}\n\n## [IDENTITY]\nUser Nickname: User\n`;
         fs.writeFileSync(projectContextFile, content, 'utf8');
       }
 
@@ -595,7 +737,7 @@ function main() {
         agent,
         completed_at: new Date().toISOString(),
         version,
-        phase: state.current_phase
+        phase: resolveCurrentPhase(state)
       };
 
       state.history.push({
@@ -626,7 +768,7 @@ function main() {
       // Always record an agent_invoke telemetry event. Use provided duration_ms or 0.
       recordTelemetry('agent_invoke', {
         agent,
-        phase: state.current_phase,
+        phase: resolveCurrentPhase(state),
         data: { tokens, duration_ms: durationMs, artifact, version }
       });
 
@@ -767,16 +909,21 @@ function main() {
         process.exit(1);
       }
 
-      const phaseOrder = ['validation', 'exploration', 'design', 'development'];
-      if (!phaseOrder.includes(phase)) {
-        console.error(JSON.stringify({ error: `Invalid phase: ${phase}. Must be one of ${phaseOrder.join(', ')}` }));
+      if (!PHASE_ORDER.includes(phase)) {
+        console.error(JSON.stringify({ error: `Invalid phase: ${phase}. Must be one of ${PHASE_ORDER.join(', ')}` }));
         process.exit(1);
       }
 
-      const oldPhase = state.current_phase;
+      const oldPhase = resolveCurrentPhase(state);
       state.current_phase = phase;
 
-      if (state.phases[phase] && state.phases[phase].status === 'pending') {
+      // Ensure the phase key exists in the map so next/status stay consistent
+      // even when the phase list was created under a different phase model.
+      if (!state.phases[phase]) {
+        state.phases[phase] = { status: 'pending', started_at: null, completed_at: null, agents: [] };
+      }
+
+      if (state.phases[phase].status === 'pending') {
         state.phases[phase].status = 'in-progress';
         state.phases[phase].started_at = new Date().toISOString();
       }
@@ -823,6 +970,11 @@ function main() {
       }
       const result = validatePhaseArtifacts(phase);
       console.log(JSON.stringify(result, null, 2));
+      // Never green-light an unchecked or non-canonical phase: warn + non-zero exit.
+      if (result.checked === 0) {
+        console.error(`Warning: ${result.warning}`);
+        process.exit(1);
+      }
     }
   } catch (e) {
     console.error(JSON.stringify({ success: false, error: e.message }));

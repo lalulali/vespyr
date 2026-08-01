@@ -114,13 +114,11 @@ Rule: Never read memory files directly. Use @memory-controller.
 LOAD:    @memory-controller load [agent-type] [task-description]
 WRITE:   @memory-controller write [file] [entry]
 FIND:    @memory-controller search [query]
-ARCHIVE: @memory-controller load-archive [entry-id]
+ARCHIVE: node .agents/scripts/memory_filter.js --search "<distinct phrase>"
 FULL:    @memory-controller load-full [filename]
 BLOCKERS:@memory-controller load blockers
 SESSION: @memory-controller session-write [content]
 STATUS:  @memory-controller status
-EXPLAIN: @memory-controller explain [chunk-title]
-TUNE:    @memory-controller tune [agent-type] [feedback]
 
 Progressive loading: ~1,000 tokens vs ~15,000 tokens raw (85-95% savings)
 Hybrid scoring: keyword pre-filter (Stage 1) + semantic refinement (Stage 2)

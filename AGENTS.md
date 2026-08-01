@@ -37,7 +37,7 @@ Since agents are defined as plain Markdown personas, they can be loaded and exec
 
 ---
 
-## 👥 Core Agent Personas (22 specialized roles)
+## 👥 Core Agent Personas (23 specialized roles)
 
 The system features 23 highly tuned role profiles divided into three functional categories:
 
@@ -126,6 +126,12 @@ Vespyr organizes complex, multi-agent operations into highly structured **skills
 *   `/kanban` — Display and update Kanban board
 *   `/code-graph` — Generate/scan dependency graphs
 *   `/doc-graph` — Generate/scan documentation links and trace coverage
+*   `/analyze-data` — General data analysis companion — EDA, dataset provision, visualization mapping, insight extraction, and PM metric co-piloting
+*   `/create-skill` — Create new skills, modify and improve existing skills, and design lightweight skill evals
+*   `/customize-skill` — Guided authoring flow for agent customization — describe intent, map to override fields, write TOML, and verify it works
+*   `/elicitation` — Push the LLM to reconsider, refine, and improve its recent output (Socratic, first principles, pre-mortem, red team)
+*   `/round-table` — Orchestrate group discussions between Vespyr agents — real subagents with independent thinking
+*   `/sprint-status` — Display and update the sprint-status.yaml pipeline state as a Kanban table
 
 ---
 
@@ -148,7 +154,7 @@ To ensure seamless collaboration across different agent steps and avoid context 
 
 ### 👤 User Identity
 
-Before responding to the user for the first time in any session, **always read `artifacts/memory/project-context.md`** and extract the `User Nickname` field from the `## Identity` section. Address the user by their preferred name throughout the conversation. If the file or field is missing, default to `"User"`.
+Before responding to the user for the first time in any session, **always read `artifacts/memory/project-context.md`** and extract the `User Nickname` field from the `## [IDENTITY]` section. Address the user by their preferred name throughout the conversation. If the file or field is missing, default to `"User"`.
 
 ---
 
@@ -192,7 +198,13 @@ The two canonical paths for persistence:
 - **Via subagent (preferred):** `@memory-controller session-write [agent: @{agent-name}]` — delegates to the memory controller subagent for full validation + dedup.
 - **Via script (direct):** `node .agents/scripts/orchestrator_state.js session-write --agent {agent-name} --worked-on "..." --decisions "..." --next-step "..."` — writes directly to `session-summaries/latest.md` and `pipeline-state.json`.
 
-The orchestrator will emit a warning when `--check-memory` is set and no session-write has been recorded. Repeated warnings will escalate to phase blockers.
+The orchestrator emits a warning when `--check-memory` is set and no session-write has been recorded for the agent. Agents must treat this warning as a prompt to persist their session before completing.
+
+---
+
+## 🤝 UTTERLY SATISFIED Working Culture
+
+All participating product, design, research, engineering, operations, and quality agents work as one team. They follow `.agents/references/utter-satisfaction.md`, collaborate across handoffs, resolve feedback with evidence, and continue iterating until every active, relevant agent can honestly record `SATISFIED`. Unresolved `CHANGES REQUESTED` or `BLOCKED` states must be fixed or escalated; they cannot be silently waived. The launch readiness record must contain the UTTERLY SATISFIED team gate before anything ships to the user.
 
 ---
 
@@ -208,7 +220,7 @@ Vespyr is defined by three differentiators that no other multi-agent framework c
 
 ### 1. Permission-denial reasoning/I/O split
 
-**What it is:** Reasoning agents (developer, architect, etc.) are denied direct I/O permissions. They must delegate to narrow sub-agents (`@reader`, `@writer`, `@executor`, `@memory-controller`) for all file and shell operations.
+**What it is:** Reasoning agents are separated from direct I/O. Some reasoning agents (e.g., @founder, @architect, @product-manager, @product-designer, @data-analyst, @researcher, @user-researcher, @ux-researcher, @shifu) are denied `bash`/`edit` permissions in their frontmatter and must delegate to narrow sub-agents (`@reader`, `@writer`, `@executor`, `@memory-controller`) for file and shell operations. Others (e.g., @developer, @tech-lead, @qa-engineer) retain full I/O permissions; for them, delegation is a recommended cost optimization, not a physical restriction.
 
 **Why it matters:** This keeps reasoning agents' context windows lean (~1,000 tokens instead of 15,000+), saving 85-95% on API costs. It also forces structured output — sub-agents produce consistent formatting, not ad-hoc diffs.
 

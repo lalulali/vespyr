@@ -1,6 +1,6 @@
 # Workflows & Skills
 
-Four phases for product building. Each phase has a primary agent with scoped permissions.
+The canonical pipeline has 11 phases (Phase -1…9, see [phase-table.md](./references/phase-table.md)); the four phases below are high-level groupings for quick orientation. Each phase has a primary agent with scoped permissions.
 
 | Phase | Primary Agent | Permission | When to use |
 |-------|---------------|------------|-------------|
@@ -67,7 +67,8 @@ Thinking Agent
 
 The model tier doesn't matter as much as the architecture: even if all agents used the same model, the separation is valuable because each sub-agent's context stays narrow and focused.
 
-**Enforced delegation (bash + edit denied):** @developer, @founder, @architect, @product-manager, @product-designer, @data-analyst, @researcher, @user-researcher, @ux-researcher.
+**Enforced delegation (bash + edit denied):** @founder, @researcher, @user-researcher, @product-manager, @product-designer, @architect, @data-analyst, @ux-researcher, @shifu, @memory-controller.
+**Recommended pattern (full I/O, delegation optional):** @developer, @tech-lead, @qa-engineer, @devops-engineer, @ml-ai-engineer — they delegate for cost efficiency, not because they are restricted.
 **Partially enforced (bash denied, edit allowed):** @technical-writer (writes directly, but never runs commands).
 
 ## Flow
@@ -102,7 +103,7 @@ Validation is optional but recommended — you can skip to Exploration if the id
 | **humanize** | @writer | Any text needs to sound less like AI — email, docs, specs, comments, PR descriptions | Say "humanize this" or "use the humanize skill" |
 | **help-me** | Harness (Direct) | Unsure of next steps, phase readiness check, or need a navigation report with recommended commands | Say `help me`, `/help-me`, or `/help-me [query]` |
 | **grill-me** | Harness (Direct) | Stress-test a plan, spec, idea, or design before committing to it — Socratic Q&A, one question at a time | Say "grill me", "run grill-me", or `/grill-me` |
-| **elicitation** | Harness (Direct) | Push the LLM/agent to reconsider, refine, and improve its recent output using 69 structured methods | Say "elicitation", "run elicitation", or `/elicitation` |
+| **elicitation** | Harness (Direct) | Push the LLM/agent to reconsider, refine, and improve its recent output using 98 structured methods | Say "elicitation", "run elicitation", or `/elicitation` |
 | **round-table** | Harness (Direct) | Multi-agent roundtable discussions based on their perspective and stage of development | Say "round-table", "run roundtable", or `/round-table` |
 
 
@@ -221,9 +222,9 @@ The archive index uses newline-delimited JSON for append-only writes:
 
 Without the controller, loading all memory files costs ~10,000–20,000 tokens per agent invocation. The controller reduces this by 85–95%.
 
-### Automatic Compaction
+### Compaction Guard
 
-`@memory-controller` compacts memory files automatically when they exceed their word thresholds:
+`compaction_guard.js` detects memory files that exceed their word thresholds and flags them (exit code 2); it does not modify files. `@memory-controller` then performs the manual compaction flow — archiving `resolved`/`stale` entries via `archive_manager.js` and rewriting the source file via `@writer`:
 
 | File | Threshold |
 |------|-----------|

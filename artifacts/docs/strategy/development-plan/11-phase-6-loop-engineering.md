@@ -2,8 +2,8 @@
 
 > **Release:** v2.1
 > **Calendar:** Week 6 (after Phase 2, parallel with Phase 3)
-> **Themes:** T4 (Harness contracts), T7 (Vespyr identity)
-> **Goal:** Vespyr runs itself on a loop. The user designs the loop, not the prompts. After this phase, Vespyr has a `/goal` primitive (run-until-verifiable-condition with a separate verifier model), a heartbeat (scheduled automations that discover and triage work), and on-disk loop state (so tomorrow's run picks up where today stopped). The maker/checker split — already a Vespyr differentiator — is applied to the stop condition itself.
+> **Themes:** T4 (Harness contracts), T7 (Vespyr identity), T8 (UTTERLY SATISFIED culture)
+> **Goal:** Vespyr runs itself on a loop. The user designs the loop, not the prompts. After this phase, Vespyr has a `/goal` primitive (run-until-verifiable-condition with a separate verifier model), a heartbeat (scheduled automations that discover and triage work), and on-disk loop state (so tomorrow's run picks up where today stopped). The maker/checker split — already a Vespyr differentiator — is applied to the stop condition itself, while T8 prevents loops from mistaking a passing command for a satisfied release.
 
 **Source:** Addy Osmani, "Loop Engineering" (June 7, 2026). The article identifies 6 primitives for a self-running agent loop. 4 already exist in Vespyr (skills, sub-agents, state/memory, squads). This phase ships the missing 2: automations (the heartbeat) and `/goal` (run-until-done with verifier). Worktree isolation — the 6th primitive — ships in Phase 0 T7.1b (the loop's foundation).
 
@@ -103,6 +103,28 @@ The model forgets between runs. The repo doesn't. Loop state lives on disk so to
 
 ---
 
+## F6.11-F6.12 — Satisfaction-aware loops
+
+**Source:** `14-utter-satisfaction-dna.md` | **Theme:** T8
+
+Loops must distinguish "the verification command passed" from "the shared
+outcome is ready to hand off or ship." The separate verifier validates the
+technical condition; active domain agents validate the broader result.
+
+- [ ] **F6.11** — Extend `/goal` state with `satisfaction_state`,
+  `evidence_refs`, `feedback_cycles`, `blocking_issues`, and
+  `revalidation_required`. A release-affecting goal reaches `DONE` only when
+  `@goal-verifier` returns `DONE` and the T8 gate is `SATISFIED`.
+- [ ] **F6.12** — Extend automation output with an owner, affected agents,
+  evidence, and next review state. Automations may discover and triage work but
+  may never mark a release `SATISFIED`, auto-merge code, or close a blocker.
+
+The loop still has a hard iteration limit. If the goal passes technically but a
+domain agent returns `CHANGES REQUESTED` or `BLOCKED`, the loop records the
+disagreement and routes it to the owner or escalation authority.
+
+---
+
 ## Done when
 
 - [ ] **PoC complete:** `loop-engineering-poc.md` filed with results from 3 manual `/goal` runs and 1 manual automation run
@@ -116,6 +138,7 @@ The model forgets between runs. The repo doesn't. Loop state lives on disk so to
 - [ ] The starter automation (CI-failure triage) runs and produces a triage file
 - [ ] `loop-state.json` persists goal + automation state across sessions
 - [ ] `memory-controller` surfaces paused goals and overdue automations on session start
+- [ ] Release-affecting goals require both verifier `DONE` and T8 `SATISFIED`; automation output cannot fabricate approval
 
 ## Risks
 
@@ -125,6 +148,7 @@ The model forgets between runs. The repo doesn't. Loop state lives on disk so to
 - **Cognitive surrender.** "The loop runs itself" is tempting. The user stops having opinions. Mitigation: `/goal` requires a verifiable condition (forces the user to define "done" upfront). Automations require a human review gate before any code modification. The loop is a tool, not an autopilot.
 - **Worktree sprawl.** Orphaned worktrees accumulate. Mitigation: `worktree.js clean-all` (Phase 0 T7.1b) + `stop:session-end` hook (Phase 2 F2.2) can auto-clean stale worktrees. `loop-state.json` tracks active worktrees.
 - **Automations run all 21 agents.** This is the expensive failure mode. Mitigation: each automation invokes ONE skill or ONE agent. No automation spawns the full swarm. The starter automation uses @reader + @writer only.
+- **A passing command is mistaken for team satisfaction.** Keep technical verification and domain sign-off separate; require the T8 state/evidence record before any release-affecting loop can finish.
 
 ### Rollback plan
 
@@ -140,6 +164,7 @@ If Phase 6 breaks:
 - Loop state is on disk, resumable across sessions and machines.
 - The maker/checker split now applies to: (a) code review (existing), (b) QA gate (Phase 2), (c) stop-condition verification (this phase).
 - The loop surfaces work for human review. It does not replace the human. This is the article's own conclusion, and Vespyr's existing "Think Before Acting" guardrail.
+- Release-affecting loops also preserve the T8 team gate and cannot auto-approve unresolved domain feedback.
 
 ## What this phase does NOT do
 

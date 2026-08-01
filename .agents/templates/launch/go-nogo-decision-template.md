@@ -29,10 +29,23 @@ Use this template to formally document the launch decision. This is the gate bet
 | Performance Review | ✅/🟡/❌ | | @performance-engineer |
 | Documentation | ✅/🟡/❌ | | @technical-writer |
 | Deployment Readiness | ✅/🟡/❌ | | @devops-engineer |
+| UTTERLY SATISFIED Team Gate | ✅/🟡/❌ | | All active agents |
 
 **Any ❌ blocks the release. All 🟡 must have documented acceptance.**
 
-### 1.2 Overall Assessment
+### 1.2 UTTERLY SATISFIED Team Gate
+
+The full agent matrix is recorded in `release-readiness.md`. Before this
+decision is eligible for GO:
+
+- Every active, relevant agent is explicitly marked `SATISFIED` with evidence.
+- Every `NOT ACTIVATED` agent has a specific out-of-scope reason.
+- No active agent is `CHANGES REQUESTED` or `BLOCKED`.
+- Any material change after sign-off has been revalidated by affected agents.
+
+**Gate result:** SATISFIED / NOT SATISFIED
+
+### 1.3 Overall Assessment
 
 - **Quality:** Ready / Not Ready / Conditionally Ready
 - **Risk Level:** Low / Medium / High

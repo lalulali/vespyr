@@ -10,6 +10,7 @@ Takes a completed feature from development and ships it. The bridge between "cod
 ## Harness adherence (non-negotiable)
 - Follow the step sequence exactly. Do NOT skip steps or reorder them.
 - Every readiness gate must pass before deployment. No exceptions.
+- The UTTERLY SATISFIED team gate must pass before deployment. Every active, relevant agent must be `SATISFIED`; unresolved `CHANGES REQUESTED` or `BLOCKED` states are a hard NO-GO.
 - Each step file is a contract. Read it fully before executing.
 
 ## When to use
@@ -25,6 +26,7 @@ Takes a completed feature from development and ships it. The bridge between "cod
 - All tasks in `artifacts/output/04-planning/execution-plan.md` are complete
 - Code review passed, QA validated, PM signed off
 - `qa-signoff.md` exists with GO/CONDITIONAL
+- `artifacts/output/06-launch/release-readiness.md` contains the completed UTTERLY SATISFIED team gate
 
 ## Step sequence
 1. **Readiness Check** — verify all pre-launch gates → `steps/step-01-readiness-check.md`
@@ -51,4 +53,3 @@ At start: `node .agents/scripts/orchestrator_state.js status`. If uninitialized,
 
 At end: `node .agents/scripts/orchestrator_state.js complete --agent product-manager --artifact 06-launch/launch-log.md`
 **Memory:** Step 05 closes with `@memory-controller session-write` — mandatory per GUARDRAILS §Session Continuity.
-

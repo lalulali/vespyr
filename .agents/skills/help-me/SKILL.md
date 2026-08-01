@@ -57,7 +57,7 @@ Load memory context:
 
 Read `artifacts/memory/project-context.md` and `artifacts/output/pipeline-state.json` to determine:
 - Project Name, Type, and Active Squad
-- Current Phase (Validation / Exploration / Design / Development)
+- Current Phase (Validation / Discovery / Research / Strategy / Architecture / Planning / Execution / Launch / Iteration / Documentation / Retro)
 - Operation Mode (`autonomous` or `semi-autonomous`)
 - Active Blockers & Open Change Requests (CRs)
 
@@ -80,6 +80,7 @@ Query the pipeline state engine via the CLI to find the exact next task and stat
    - **`resolve-blocker`**: List the active blockers and the assigned owners.
    - **`generate-artifacts`**: Identify precisely which required artifacts are missing for the current phase, cross-referencing against the skill catalog's prerequisites, and recommend the exact skill to run.
    - **`advance-phase`**: Suggest the exact command to transition the pipeline to the next phase.
+   - **`continue-phase`**: The current phase is in progress but not complete — identify what remains (missing artifacts, open CRs, blockers) and recommend the next action within the current phase.
 
 ### Step 4: Optional — Structural Graph Check
 

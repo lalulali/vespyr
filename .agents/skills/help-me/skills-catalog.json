@@ -19,7 +19,7 @@
     "description": "Select and apply brainstorming methods from a 60-method catalog — SCAMPER, Six Thinking Hats, Starbursting, and more",
     "prerequisites": [],
     "outputs": [
-      "artifacts/memory/agent-notes/founder-notes.md"
+      "artifacts/memory/active-decisions.md"
     ],
     "key_agents": [
       "@founder"
@@ -350,7 +350,7 @@
     "prerequisites": [],
     "outputs": [
       "artifacts/output/04-planning/kanban.md",
-      "artifacts/memory/product-manager-notes.md"
+      "artifacts/memory/agent-notes/product-manager-notes.md"
     ],
     "key_agents": [
       "@product-manager",
@@ -599,7 +599,7 @@
     "description": "Apply validation methods from a 30-method catalog — smoke tests, concierge MVPs, five-second tests, and more",
     "prerequisites": [],
     "outputs": [
-      "artifacts/memory/agent-notes/founder-notes.md",
+      "artifacts/memory/active-decisions.md",
       "artifacts/output/01-research/validation-results.md"
     ],
     "key_agents": [

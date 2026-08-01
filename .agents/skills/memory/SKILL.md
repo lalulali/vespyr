@@ -20,8 +20,8 @@ Searches the archive index for historical context. Use when you need to find a p
 
 ## When NOT to use
 
-- For current project context (read `project-context.md` directly)
-- For active decisions (read `active-decisions.md` directly)
+- For current project context (use `@memory-controller load [agent] [task]` instead — memory files are never read directly)
+- For active decisions (use `@memory-controller load [agent] [task]` instead)
 
 ## The 5 memory files
 
@@ -45,13 +45,25 @@ Write for systemic patterns only, not single-instance events:
 
 | Tag | Use for | Example |
 |---|---|---|
-| `[DOMAIN]` | Business domain knowledge | Auth flow requires email verification |
-| `[CODE]` | Codebase patterns | All React components use named exports |
-| `[PROCESS]` | Workflow improvements | CI runs integration tests before deployment |
-| `[ARCH]` | Architecture decisions | Chose PostgreSQL over MongoDB for ACID compliance |
+| `[AUTH]` | Authentication, authorization, sessions, tokens | Auth flow requires email verification |
+| `[API]` | API contracts, endpoints, versioning, error codes | Payment API returns 402 on declined card |
+| `[DATA]` | Data models, schemas, migrations, storage | User table migrated to UUID primary keys |
+| `[ARCH]` | System architecture, component design, boundaries | Chose PostgreSQL over MongoDB for ACID compliance |
+| `[INFRA]` | Infrastructure, CI/CD, deployment, environments | CI runs integration tests before deployment |
+| `[SECURITY]` | Security decisions, vulnerabilities, threat model | Rate limiting not implemented on login endpoint |
+| `[PERF]` | Performance, caching, query optimization, load | Query planner change cut report time by 60% |
+| `[PRODUCT]` | Product decisions, scope, features, priorities | Dropped offline mode from MVP scope |
+| `[PROCESS]` | Team process, workflow, handoffs, conventions | Feature branch review requires 2 approvals |
+| `[CODE]` | Coding patterns, conventions, standards | All React components use named exports |
+| `[TEST]` | Testing strategy, coverage, QA decisions | E2E suite runs nightly on staging |
+| `[ML]` | Machine learning, models, pipelines, data | Embedding model upgraded to v3 |
+| `[UX]` | UX decisions, flows, accessibility, interactions | Onboarding reduced from 5 steps to 3 |
+| `[MARKET]` | Market research, competitive intelligence | Competitor added free tier |
+| `[RISK]` | Known risks, blockers, mitigations, dependencies | Third-party API rate limits could block launch |
 | `[LESSON]` | Bugs, gotchas, fixes | Race condition in websocket handler |
-| `[RISK]` | Known risks, blockers | Rate limiting not implemented |
 | `[DECISION]` | Resolved decisions with rationale | Monorepo with Nx — unified tooling |
+
+These are the canonical 17 domain tags (see `.agents/templates/memory/memory-entry-template.md`). Entries with any other tag are rejected.
 
 ## Workflow
 
@@ -63,9 +75,13 @@ Write for systemic patterns only, not single-instance events:
 
 ### Step 2: Load specific entries (optional)
 
+Archived entries are retrieved by **keyword query**, not by ID — there is no `load-archive [entry-id]` command. To pull a specific entry, pass a distinctive phrase from it:
+
 ```
-@memory-controller load-archive [entry-id]
+node .agents/scripts/memory_filter.js --search "<distinct phrase from the entry>" --max 5
 ```
+
+This is what `@memory-controller search [query]` delegates to; it scans `archive/index.ndjson`.
 
 ### Step 3: Report
 
@@ -79,11 +95,18 @@ Return results with title, domain tag, relevance score, summary, source, and dat
 
 ## Compaction triggers
 
-- `active-decisions.md` > 500 lines → oldest archived
-- `lessons-learned.md` > 300 lines → oldest archived
-- `patterns-and-conventions.md` > 200 lines → oldest archived
+Compaction is **word-based**, matching `.agents/scripts/compaction_guard.js` (the executable source of truth) and `@memory-controller`'s Operation 4 thresholds:
 
-Archived entries remain searchable via `@memory-controller search`.
+| File | Word threshold |
+|------|----------------|
+| `active-decisions.md` | 1,800 |
+| `patterns-and-conventions.md` | 1,500 |
+| `lessons-learned.md` | 1,300 |
+| `blockers-and-risks.md` | 900 |
+| `session-summaries/latest.md` | 600 |
+| `agent-notes/*.md` (each) | 1,100 |
+
+`project-context.md` is never compacted (static file). When a file exceeds its threshold, the oldest `resolved`/`stale` entries are archived. Archived entries remain searchable via `@memory-controller search`.
 
 ## State machine integration
 

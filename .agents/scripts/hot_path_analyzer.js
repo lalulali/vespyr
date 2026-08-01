@@ -170,7 +170,9 @@ function printReport(analysis) {
   }
 
   console.log('4. PHASE COST SUMMARY:');
-  const phaseOrder = ['validation', 'exploration', 'design', 'development'];
+  // Canonical 11-phase order (single source of truth: .agents/references/phase-table.md)
+  const phaseOrder = ['validation', 'discovery', 'research', 'strategy', 'architecture',
+    'planning', 'execution', 'launch', 'iteration', 'documentation', 'retro'];
   for (const phase of phaseOrder) {
     const cost = phaseCosts[phase];
     if (cost) {

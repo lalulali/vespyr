@@ -92,16 +92,16 @@ Permissions:
 
 1. Define sub-agents in `opencode.json` with `"mode": "subagent"` and a lightweight model
 2. Create `.md` files in `.agents/agents/` with detailed prompts
-3. Restrict thinking agents: `"permission": { "bash": "deny", "edit": "deny" }`
+3. Restrict the reasoning agents whose frontmatter denies I/O (e.g., `@founder`, `@architect`, `@product-manager`): `"permission": { "bash": "deny", "edit": "deny" }`. Agents with `allow`/`allow` frontmatter (e.g., `@developer`, `@tech-lead`) delegate as a recommended pattern, not a hard restriction.
 4. Instruct prompts: "Delegate to @writer for writes, @executor for commands"
 
 ```json
 {
   "model": "opencode-go/kimi-k2.6",
-  "agent": {
-    "developer": {
-      "permission": { "bash": "deny", "edit": "deny" }
-    },
+    "agent": {
+      "architect": {
+        "permission": { "bash": "deny", "edit": "deny" }
+      },
     "executor": {
       "model": "opencode-go/deepseek-v4-flash",
       "mode": "subagent"
@@ -110,7 +110,7 @@ Permissions:
 }
 ```
 
-**Enforcement:** Permission denial (`bash: deny`, `edit: deny`) physically prevents the agent from performing those actions, forcing it to delegate. This is more reliable than asking politely.
+**Enforcement:** For agents whose frontmatter denies `bash`/`edit` (e.g., `@architect`, `@product-manager`, `@founder`), permission denial physically prevents those actions, forcing delegation. For agents with `allow`/`allow` frontmatter (e.g., `@developer`, `@tech-lead`), delegation is a recommended cost optimization, not a physical restriction.
 
 ### Cursor
 
@@ -199,13 +199,13 @@ class AgentRouter:
 
 | Harness | How to enforce delegation |
 |---------|--------------------------|
-| **opencode** | Permission denial (`bash: deny`, `edit: deny`) — model physically can't do it |
+| **opencode** | Permission denial in frontmatter (`bash: deny`, `edit: deny`) — physically prevents I/O for agents configured with deny; agents with allow/allow delegate by convention |
 | **Cursor** | `.cursorrules` + per-agent model assignment + `.mdc` rules |
 | **Claude Code** | Hook scripts that intercept mentions and route to lightweight model API |
 | **Windsurf** | Cascade agent definitions with per-agent model |
 | **Custom API** | Separate API calls — route read/write/exec to lightweight model endpoint |
 
-The most reliable enforcement is **permission denial**: if the reasoning agent cannot physically write files or run commands, it must delegate. Permission denial works regardless of whether the model is well-behaved.
+The most reliable enforcement is **permission denial** in the agent's frontmatter: if the reasoning agent cannot physically write files or run commands, it must delegate. In Vespyr's current config this applies to `@founder`, `@architect`, `@product-manager`, `@product-designer`, `@data-analyst`, `@researcher`, `@user-researcher`, `@ux-researcher`, `@shifu`, and `@memory-controller`. Reasoning agents with full I/O access (e.g., `@developer`, `@tech-lead`, `@qa-engineer`) delegate as a recommended pattern, not a physical requirement.
 
 ---
 

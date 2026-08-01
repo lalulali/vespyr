@@ -235,11 +235,32 @@ function recordBaseline() {
         };
       }
     }
-    // Archive index
-    const archiveIndex = path.join(memoryDir, 'archive', 'index.json');
-    if (fs.existsSync(archiveIndex)) {
+    // Archive index: canonical format is NDJSON (index.ndjson, written by
+    // archive_manager.js append-ndjson) — a schema header line followed by one
+    // JSON entry object per line. Legacy fallback: index.json with an `entries`
+    // array. Mirrors memory_filter.js searchArchive().
+    const archiveIndexNdjson = path.join(memoryDir, 'archive', 'index.ndjson');
+    const archiveIndexJson = path.join(memoryDir, 'archive', 'index.json');
+    if (fs.existsSync(archiveIndexNdjson)) {
       try {
-        const idx = JSON.parse(fs.readFileSync(archiveIndex, 'utf8'));
+        const lines = fs.readFileSync(archiveIndexNdjson, 'utf8').split('\n');
+        let count = 0;
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed || trimmed.startsWith('#')) continue;
+          try {
+            const entry = JSON.parse(trimmed);
+            // Schema header line has no `id` — only count real entries.
+            if (entry && typeof entry === 'object' && entry.id) count++;
+          } catch (e) {
+            // Skip corrupt lines
+          }
+        }
+        baseline.data.archive_entries = count;
+      } catch (e) {}
+    } else if (fs.existsSync(archiveIndexJson)) {
+      try {
+        const idx = JSON.parse(fs.readFileSync(archiveIndexJson, 'utf8'));
         baseline.data.archive_entries = (idx.entries || []).length;
       } catch (e) {}
     }

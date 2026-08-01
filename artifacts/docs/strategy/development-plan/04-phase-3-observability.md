@@ -2,8 +2,8 @@
 
 > **Release:** v2.1
 > **Calendar:** Week 6
-> **Themes:** T3 (Artifact rigor), T4 (Harness contracts)
-> **Goal:** Make the graph a first-class tool (auto-build, query API), make telemetry a first-class surface (LLM-consumable digests), prove catalog consistency, and give all agents "See the Unseen" observability directives.
+> **Themes:** T3 (Artifact rigor), T4 (Harness contracts), T8 (UTTERLY SATISFIED culture)
+> **Goal:** Make the graph a first-class tool (auto-build, query API), make telemetry a first-class surface (LLM-consumable digests), prove catalog consistency, give all agents "See the Unseen" observability directives, and make satisfaction health visible without turning it into a vanity score.
 
 ## What changed from the original
 
@@ -208,6 +208,28 @@ Moved from Phase 1 because it depends on doc-graph (Phase 3 work).
 
 ---
 
+## F3.19-F3.20 — UTTERLY SATISFIED observability
+
+**Source:** `14-utter-satisfaction-dna.md` | **Theme:** T8
+
+The system must expose where collaboration is healthy, blocked, stale, or
+being skipped. It must measure evidence and revalidation, not agent enthusiasm
+or the number of approvals.
+
+- [ ] **F3.19** — Extend `swarm_telemetry.js` with `satisfaction_state`,
+  `feedback_requested`, `feedback_resolved`, `escalation`, and
+  `revalidation_required` events. Include `{release, skill, phase, agent,
+  state, evidence_count, blocker_count, cycle}`.
+- [ ] **F3.20** — Extend `telemetry_surface.js` and `/status` with a compact
+  satisfaction section: active coverage, evidence completeness, unresolved
+  blockers, stale sign-offs, feedback resolution time, and escalation count.
+  Never expose a single "agent quality score" as a proxy for satisfaction.
+
+**Acceptance:** A release with a missing, stale, or blocked satisfaction row is
+visible in status before launch and is linked to the blocking artifact.
+
+---
+
 ## Done when
 
 - [ ] `auto_graph.js check` returns status in < 500ms; modifying any file in `src/` or `artifacts/output/` flips `[OK]` → `[STALE]`
@@ -222,6 +244,7 @@ Moved from Phase 1 because it depends on doc-graph (Phase 3 work).
 - [ ] All 21 agents have "See the Unseen" directive + response identity formatting
 - [ ] `@data-analyst` has access to `data_analyzer.js` and `dashboard_generator.js`
 - [ ] `build-wiki` compiles `artifacts/` into styled wiki with backlinks and doc-graph alignment
+- [ ] T8 satisfaction events are emitted and `/status` identifies missing evidence, blocked rows, and stale sign-offs without subjective scoring
 
 ## Risks
 
@@ -229,6 +252,7 @@ Moved from Phase 1 because it depends on doc-graph (Phase 3 work).
 - **Catalog parity test fails on first run.** Expected — counts are already off. The test outputs the diff; v2.0 release is the fix.
 - **Graph query returns too much data.** Each query is sized for LLM consumption; `summary` returns top 5, `blast-radius` returns just names.
 - **Telemetry surface overwhelms context.** Cap at 20 lines for `session`, 15 for `hot-paths`. Never raw event data.
+- **Satisfaction telemetry becomes a popularity contest.** Report coverage, evidence, blockers, revalidation, and resolution time; never rank agents by approval count or speed.
 
 ### Rollback plan
 
@@ -245,3 +269,4 @@ If Phase 3 breaks:
 - Telemetry is a first-class surface; cost visible to every agent.
 - Catalog counts tested on every CI run.
 - All 21 agents have observability directives.
+- Satisfaction health is observable, evidence-linked, and independent of subjective agent scoring.

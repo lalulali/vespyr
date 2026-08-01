@@ -2,6 +2,7 @@
 
 > **Status:** Both deferred to v2.1+ (was Pre-Phase 0 in v2.0 — scope creep)
 > **Priority:** OpenClaw FIRST (can enforce permissions), Hermes SECOND (degraded mode)
+> **T8 requirement:** Both adapters must preserve the UTTERLY SATISFIED state contract and release gate; degraded mode is never implicit approval.
 
 ---
 
@@ -85,6 +86,8 @@ Or invoke directly in chat: "Run @founder on this idea: [describe]"
 4. Produce verdict: GO, PIVOT, or KILL
 5. Write `validation-brief.md` to `artifacts/output/00-discovery/`
 6. Update `artifacts/memory/active-decisions.md`
+7. Return the T8 satisfaction state, evidence, unresolved blockers, and
+   revalidation trigger before handing off to the next agent
 
 ## OpenClaw Tool Mapping
 
@@ -428,6 +431,13 @@ If Hermes adds per-tool model selection, map:
 - [ ] Per-harness adapter in `bin/install.js` (writes correct hook config per harness) — v2.1 Phase 2 F2.3
 - [ ] Smoke-test plan: "does this install work?" check for each harness
 - [ ] Document harness-specific limitations in `QUICK-REFERENCE.md` (a "Known Limitations" section per harness)
+- [ ] Port `.agents/references/utter-satisfaction.md` and its state vocabulary
+  unchanged; harness-specific prompts may compress wording but may not weaken
+  the collaboration loop or release gate
+- [ ] Verify M1/M2/M3/M4 behavior: a missing, blocked, stale, or evidence-free
+  satisfaction record is never treated as approval
+- [ ] Add launch smoke test: all active roles satisfied -> GO; one active role
+  blocked -> NO-GO; inactive role without a reason -> NO-GO
 
 ---
 

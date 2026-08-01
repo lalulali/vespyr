@@ -6,9 +6,29 @@
 
 > **Release:** v2.0
 > **Personas Covered:** `@product-manager` (Sarah), `@ml-ai-engineer` (Kai), `@ml-ai-ops` (Atlas), `@architect` (Vera), `@qa-engineer` (Nina)
-> **Themes:** T1 (Agent depth), T3 (Artifact rigor & AI-native product strategy)
-> **Goal:** Evolve Vespyr's core team from a **pure traditional engineering team** into a **Hybrid AI + Traditional Team**. This is NOT a replacement of the existing team—every agent retains 100% of their traditional capabilities while gaining structured AI literacy, AI-specific workflows, and clear ownership boundaries for AI-native features. The shift is additive, not disruptive.
+> **Themes:** T1 (Agent depth), T3 (Artifact rigor & AI-native product strategy), T8 (UTTERLY SATISFIED culture)
+> **Goal:** Evolve Vespyr's core team from a **pure traditional engineering team** into a **Hybrid AI + Traditional Team**. This is NOT a replacement of the existing team—every agent retains 100% of their traditional capabilities while gaining structured AI literacy, AI-specific workflows, and clear ownership boundaries for AI-native features. The shift is additive, not disruptive, and every AI handoff preserves the UTTERLY SATISFIED gate.
 > **Agent count impact:** Current baseline = 21 agents. This plan adds 1 net new agent (`@ml-ai-ops`) and renames 1 (`@ml-engineer` → `@ml-ai-engineer`). Combined with 02c (`@shifu`), v2.0 target = **23 agents**.
+
+---
+
+## T8 integration for AI-native work
+
+AI adds probabilistic behavior, so satisfaction cannot be inferred from a
+successful request or a single benchmark. Every AI feature must carry:
+
+- An evidence-backed state from PM, architecture, ML, QA, security, performance,
+  data, and operations agents when those domains are active.
+- Evaluation results, fallback behavior, safety findings, cost/latency evidence,
+  and unresolved risks in the handoff record.
+- Revalidation after model, prompt, dataset, retrieval, policy, or deployment
+  changes.
+- A `NO-GO` result when an active specialist returns `CHANGES REQUESTED` or
+  `BLOCKED`, even if the model's primary metric improves.
+
+The state vocabulary and release rules come from
+[`14-utter-satisfaction-dna.md`](14-utter-satisfaction-dna.md), not from an
+AI-specific replacement protocol.
 
 ---
 
@@ -639,6 +659,7 @@ Sarah (PM)          Vera (Arch)         Kai (ML Eng)        Atlas (MLOps)       
 ### AGENTS.md & Cross-System Updates
 - [ ] F1.38.1 — Update `.agents/AGENTS.md`: update `@ml-engineer` row to `@ml-ai-engineer`, add `@ml-ai-ops` row, update agent count.
 - [ ] F1.38.2 — Update `06-phase-5-deeper-bench.md`: mark T1.10 and T1.10b as `[MOVED to 02d]`.
+- [ ] F1.38.3 — Add T8 evidence, revalidation, and release-gate requirements to the AI handoff artifacts and validators.
 
 ---
 
@@ -671,6 +692,7 @@ Sarah (PM)          Vera (Arch)         Kai (ML Eng)        Atlas (MLOps)       
 | 9 | All `@ml-engineer` references removed | `grep -r "@ml-engineer" .agents/` returns 0 results (only `@ml-ai-engineer` remains) |
 | 10 | `validate_frontmatter.js` passes | All 5 modified/new persona files pass frontmatter validation |
 | 11 | Session Continuity present | All 5 persona files have `## Session Continuity (Mandatory)` section |
+| 12 | T8 AI release gate | Change a prompt/model/eval result after sign-off → affected rows require revalidation; any blocked active specialist produces NO-GO |
 
 ---
 

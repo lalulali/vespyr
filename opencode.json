@@ -62,7 +62,27 @@
       "kanban": "allow",
       "squad": "allow",
       "help-me": "allow",
-      "grill-me": "allow"
+      "grill-me": "allow",
+      "analyze-data": "allow",
+      "brainstorming": "allow",
+      "code-graph": "allow",
+      "craft-lesson": "allow",
+      "create-skill": "allow",
+      "customize-skill": "allow",
+      "discovery-report": "allow",
+      "doc-graph": "allow",
+      "elicitation": "allow",
+      "empathy-map": "allow",
+      "journey-map": "allow",
+      "jtbd": "allow",
+      "research-plan": "allow",
+      "root-cause": "allow",
+      "round-table": "allow",
+      "shape-up": "allow",
+      "sprint-status": "allow",
+      "teach-me": "allow",
+      "unpack-problem": "allow",
+      "validation-patterns": "allow"
     }
   },
   "mcp": {

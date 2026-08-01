@@ -43,7 +43,7 @@ num,category,method_name,description,output_pattern
 42,creative,Morphological Analysis,List independent parameters of a problem - enumerate options for each - then systematically combine — ensures you don't miss non-obvious configurations,parameters → options grid → combinations → evaluation
 43,framing,Abstraction Laddering,"Move up (""why?"") for strategic clarity or down (""how?"") for tactical detail — ensures you're solving at the right altitude",concrete ↔ abstract → right level
 44,framing,Reframe the Question,Challenge whether the stated problem is the real problem — often the question itself is wrong and a better framing unlocks an easy answer,stated problem → reframe → true problem → solution
-45: ,framing,Stakeholder Lens Rotation,Serially adopt each stakeholder's world-view to see the same situation differently — reveals whose needs are being overlooked,perspective A → B → C → gaps found
+45,framing,Stakeholder Lens Rotation,Serially adopt each stakeholder's world-view to see the same situation differently — reveals whose needs are being overlooked,perspective A → B → C → gaps found
 46,learning,Feynman Technique,Explain complex concepts simply as if teaching a child - the ultimate test of true understanding,complex → simple → gaps → mastery
 47,learning,Active Recall Testing,Test understanding without references to verify true knowledge - essential for identifying gaps,test → gaps → reinforcement
 48,learning,Deliberate Practice Loop,Identify a specific sub-skill - drill it with immediate feedback - adjust - repeat — targeted improvement beats general repetition,isolate → drill → feedback → adjust → repeat

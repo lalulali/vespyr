@@ -78,7 +78,7 @@ Auto-protect rules (NEVER archived):
 
 The controller will:
 1. Move resolved/stale entries (> 90 days, no protected status) to `artifacts/memory/archive/YYYY-QN/`
-2. Update `artifacts/memory/archive/index.json` with searchable metadata
+2. Append searchable metadata for each archived entry to `artifacts/memory/archive/index.ndjson` (append-only, one JSON object per line)
 3. Rewrite each file with only active entries
 4. Report: entries kept, entries archived, new file size
 
@@ -106,7 +106,7 @@ Blockers: {any new blockers, or "none"}
 
 ## Outputs
 - Updated memory files (patterns, lessons, decisions, blockers)
-- `artifacts/memory/archive/index.json` updated
+- `artifacts/memory/archive/index.ndjson` appended (searchable archive index)
 - Doc-graph refreshed
 - Session summary written
 

@@ -70,10 +70,11 @@ Set the operation mode in `artifacts/memory/project-context.md`. Default is **se
 | **3: Architecture (Optional)** | `develop` / `design` | Auto-generate ADRs if enabled. | **Optional Phase.** Pause to ask user: run `@architect` first or bypass directly to `@tech-lead`/`@developer`? | Human collaborates on ADRs if executed. |
 | **4: Planning & Kanban** | `plan` / `kanban` | `@product-manager` auto-seeds Kanban board. `@tech-lead` auto-generates `execution-plan.md` task breakdown and estimates. | **Kanban & Planning.** `@product-manager` seeds the Kanban board. `@tech-lead` breaks down user stories into developer-centric tasks (1-4h, dependencies). **Pause for human approval of the execution plan.** | Human collaborates on task slicing, estimates, and reviews the Kanban board. |
 | **5: Execution** | `develop` | Write code, auto-commit per task. | Write code autonomously. **Pause before destructive operations** (delete, migrate, refactor >100 lines). | Human reviews each task output before next task. |
-| **5.5: Design Validation** | `design` | Auto-run usability review. | Auto-run. **Pause if critical usability issues found.** | Human participates in usability review. |
-| **6: Quality Gates** | `review` / `test` | Auto-run all checks. Auto-fix low/medium issues. | Auto-run checks. **Pause on critical/high severity findings.** | Human reviews each quality report. |
-| **7: Launch** | `launch` | **NEVER auto-deploy.** Always pauses for GO/NO-GO. | **Pause for human GO/NO-GO on deployment.** | Human drives launch sequence. |
-| **8: Iteration** | `iterate` | Auto-prioritize and implement improvements. | Auto-implement. **Pause for prioritization review.** | Human reviews each iteration proposal. |
+| **Design Validation** | `design` | Auto-run usability review. | Auto-run. **Pause if critical usability issues found.** | Human participates in usability review. |
+| **Quality Gates** | `review` / `test` | Auto-run all checks. Auto-fix low/medium issues. | Auto-run checks. **Pause on critical/high severity findings.** | Human reviews each quality report. |
+| **6: Launch** | `launch` | **NEVER auto-deploy.** Always pauses for GO/NO-GO. | **Pause for human GO/NO-GO on deployment.** | Human drives launch sequence. |
+| **7: Iteration** | `iterate` | Auto-prioritize and implement improvements. | Auto-implement. **Pause for prioritization review.** | Human reviews each iteration proposal. |
+| **8: Documentation** | (cross-cutting) | Auto-update docs from code changes. | Auto-generate. **Pause for human review of user-facing docs.** | Human reviews documentation with agent support. |
 | **9: Retrospective** | `retro` | Auto-generate retrospective report. | Auto-generate. **Pause for human review of action items.** | Human leads retrospective with agent support. |
 | **Incident Response** | `incident` | Auto-mitigate (rollback, scale). **Pause before data-affecting fixes.** | **Pause for human triage decision.** Auto-mitigate after approval. | Human directs every remediation step. |
 
@@ -81,7 +82,7 @@ Set the operation mode in `artifacts/memory/project-context.md`. Default is **se
 
 These actions **always require human approval**, even in autonomous mode:
 
-1. **Deployment to production** — Phase 7 GO/NO-GO is never autonomous
+1. **Deployment to production** — Phase 6 GO/NO-GO is never autonomous
 2. **Data deletion or migration** — any operation that destroys or moves user data
 3. **Security-critical changes** — auth flows, encryption, API key handling
 4. **External API integrations** — connecting to third-party services
@@ -286,6 +287,15 @@ When writing to shared memory, prefix entries with the developer ID:
 
 Each handoff specifies what the upstream agent MUST produce before the downstream agent can begin.
 
+### 2.0 UTTERLY SATISFIED handoff contract
+
+Every participating agent follows `.agents/references/utter-satisfaction.md`.
+An artifact is ready for handoff only when its active, relevant reviewers have
+returned `SATISFIED` with evidence, or when an unresolved issue has been
+escalated to the binding decision authority. `CHANGES REQUESTED` and `BLOCKED`
+states stop the handoff. After a material change, affected sign-offs must be
+revalidated.
+
 ### Validation → Discovery
 
 | From | To | Required Artifacts | Contract |
@@ -368,7 +378,7 @@ If the user opts to bypass Phase 3 (Architecture), the Strategy artifacts feed d
 | @code-reviewer | @product-manager | Code review summary | No blocking issues; non-blocking issues documented |
 | @security-engineer | @product-manager | Security audit report | No critical/high findings; medium/low findings documented |
 | @performance-engineer | @product-manager | Performance report | All SLAs met or exceptions documented |
-| @product-manager | @devops-engineer | `artifacts/output/06-launch/go-nogo-decision.md` | All release readiness criteria met; go/no-go decided |
+| @product-manager | @devops-engineer | `artifacts/output/06-launch/go-nogo-decision.md` | All release readiness criteria met; UTTERLY SATISFIED team gate is complete; every active agent is `SATISFIED`; go/no-go decided |
 
 ### Launch → Iteration
 
@@ -562,7 +572,7 @@ These skills form the backbone of the product and game development lifecycle. Sk
 | `code-graph` | Any | @architect, @tech-lead | Codebase structural dependency scanner (`code-graph.json`) and query engine |
 | `doc-graph` | Any | @product-manager, @technical-writer | Documentation link and requirement-to-code traceability graph mapper |
 | `humanize` | Any | @technical-writer, @writer | AI-writing tell detector and natural language style normalizer |
-| `elicitation` | Any | Harness / Any | 69 structured methods to push LLM to reconsider, refine, and improve output |
+| `elicitation` | Any | Harness / Any | 98 structured methods to push LLM to reconsider, refine, and improve output |
 | `round-table` | Any | Harness / Any | Multi-agent stage-based roundtable discussions with independent agent perspectives |
 
 ### 8.7 Operations & Navigation
@@ -609,12 +619,15 @@ artifacts/memory/
 │   ├── developer-notes.md
 │   ├── designer-notes.md
 │   ├── tech-lead-notes.md
-│   └── qa-notes.md
+│   ├── qa-notes.md
+│   ├── ml-ai-notes.md
+│   ├── performance-notes.md
+│   └── product-manager-notes.md
 ├── session-summaries/           # Cross-session continuity
 │   ├── latest.md                # Most recent session (~100 tokens, Tier 1)
 │   └── history.md               # Full session log (append-only, never loaded directly)
 └── archive/                     # Compacted historical entries
-    ├── index.json               # Searchable index (auto-created on first compaction)
+    ├── index.ndjson             # Searchable index (auto-created on first compaction)
     └── YYYY-QN/                 # Quarterly archive folders
 ```
 
@@ -630,7 +643,7 @@ artifacts/memory/
 The controller returns ~1,000 tokens of filtered context across three tiers:
 - **Tier 1** (~200 tokens): project name, stack, phase, sprint, blocker count, last session summary
 - **Tier 2** (~300 tokens): files specific to the agent's role
-- **Tier 3** (~500 tokens): chunks from any file scoring ≥ 4 against the task keywords
+- **Tier 3** (~500 tokens): chunks from any file scoring ≥ 2 against the task keywords
 
 **After completing work, every agent MUST:**
 ```
@@ -659,7 +672,7 @@ Use the format in `.agents/templates/memory/session-summary-template.md`. This w
 | `@memory-controller load [agent] [task]` | Progressive 3-tier context load |
 | `@memory-controller load blockers` | Load only active blockers in full |
 | `@memory-controller load-full [file]` | Load a complete file without filtering |
-| `@memory-controller load-archive [id]` | Load a specific archived entry by ID |
+| `node .agents/scripts/memory_filter.js --search [query]` | Retrieve specific archived entries by keyword (delegated by `@memory-controller search`; there is no per-ID load command) |
 | `@memory-controller write [file] [content]` | Validate and persist a memory entry |
 | `@memory-controller search [query]` | Search the archive index by keywords |
 | `@memory-controller compact [file]` | Compact a file and archive resolved entries |
@@ -677,6 +690,9 @@ Use the format in `.agents/templates/memory/session-summary-template.md`. This w
 | @qa-engineer finds flaky test | Test name, failure pattern, frequency | `qa-notes.md` |
 | @product-designer evolves design system | Component change, version, reason | `designer-notes.md` |
 | @tech-lead estimates task | Estimated vs actual, variance reason | `tech-lead-notes.md` |
+| @ml-ai-engineer tunes model/prompt | Prompt template change, eval result, fallback behavior | `artifacts/memory/agent-notes/ml-ai-notes.md` |
+| @performance-engineer finds regression | Metric, threshold, optimization applied | `artifacts/memory/agent-notes/performance-notes.md` |
+| @product-manager records product insight | Requirement change, prioritization rationale, user impact | `artifacts/memory/agent-notes/product-manager-notes.md` |
 | @product-manager updates Kanban | Item column, status, activity log | `artifacts/output/04-planning/kanban.md` |
 | @product-manager re-prioritizes | Priority changes, scope additions/removals | `artifacts/output/04-planning/kanban.md` + `active-decisions.md` |
 | @data-analyst observes metric shift | Metric, threshold, context | `active-decisions.md` |

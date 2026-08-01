@@ -74,6 +74,21 @@ Invoke `@performance-engineer` when the feature:
 
 **Output:** `artifacts/output/05-execution/quality/performance-report.md`
 
+## 7d. UTTERLY SATISFIED collaboration gate
+
+Before leaving quality gates, identify every active agent whose domain is
+affected by the release and collect a satisfaction state using
+`.agents/references/utter-satisfaction.md`.
+
+- `SATISFIED` requires evidence and resolved feedback.
+- `CHANGES REQUESTED` or `BLOCKED` sends the work back to the responsible owner.
+- `NOT ACTIVATED` requires a specific out-of-scope reason.
+- After two unsuccessful feedback cycles on the same issue, escalate through
+  the workflow ladder; do not mark the issue satisfied to preserve schedule.
+
+The team cannot proceed to PM verification or launch readiness until all active
+agents are `SATISFIED`.
+
 ## Halt condition
 - QA finds a bug that can't be reproduced locally
 - Security finding rated Critical or High

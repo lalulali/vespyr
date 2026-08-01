@@ -2,8 +2,8 @@
 
 > **Release:** v2.1
 > **Calendar:** Week 5
-> **Themes:** T4 (Harness contracts), T5 (Self-improvement)
-> **Goal:** Vespyr enforces policy at the harness layer (hooks), tracks its own work (self-learning), has delegation audited (not just documented), and makes QA a hard gate.
+> **Themes:** T4 (Harness contracts), T5 (Self-improvement), T8 (UTTERLY SATISFIED culture)
+> **Goal:** Vespyr enforces policy at the harness layer (hooks), tracks its own work (self-learning), has delegation audited (not just documented), makes QA a hard gate, and begins runtime enforcement of the UTTERLY SATISFIED release contract.
 > **MCP (external tools):** Specified in `03a-mcp-integration-plan.md` — 10 first-party tools (5 wrappers + 5 capability) + 4 third-party servers, all free and local-first.
 
 ## What changed from the original
@@ -41,6 +41,11 @@
 | `SubagentStop` | `subagent:stop:telemetry` | Emit a telemetry event to `artifacts/telemetry/`. |
 
 **Why this matters:** Enforcement at the harness layer. GUARDRAILS.md is documentation today. Hooks turn it into a runtime contract. `rm -rf /` is blocked even if `@developer` somehow tries it. Less cognitive load on agents — the agent doesn't need to remember to format, dedupe, or save state. The hooks do it.
+
+The T8 gate uses the same principle. Hook and state-machine integrations may
+warn during ordinary work, but release-affecting handoffs must validate the
+machine-readable satisfaction record. A harness must never turn a missing
+record into implicit approval.
 
 **Why we don't adopt Ruflo's 27 hooks + 12 background workers.** That's the Ruflo ceiling. Vespyr's hook graph should be 10–14 hooks. Adding more is easy later; the cost of removing or rewriting a hook grows.
 
@@ -209,11 +214,20 @@ After 7a (and optionally 7b/7c), write artifacts/output/06-quality/qa-signoff.md
 The orchestrator reads this file's existence as the gate token to advance from development.
 ```
 
+#### Step 7e: UTTERLY SATISFIED Team Gate
+
+After the domain gates, collect the active-agent matrix defined in
+`14-utter-satisfaction-dna.md`. The gate requires evidence-backed
+`SATISFIED` states, explicit `NOT ACTIVATED` reasons for out-of-scope domains,
+and no unresolved `CHANGES REQUESTED` or `BLOCKED` state. A material change
+after sign-off invalidates affected rows.
+
 - [ ] F2.23 — Update `orchestrator_state.js`: before allowing `next` out of `development`, check for `qa-signoff.md`. If missing: block with reason. If present: regex-check for `Release recommendation:\s*(GO|CONDITIONAL)`
 - [ ] F2.24 — Rewrite `develop/SKILL.md` Step 7 as sequential, blocking (text above)
 - [ ] F2.25 — Update `qa-engineer.md`: add `## Mandatory Invocation Contract` block (read ACs, write+run tests, produce qa-report.md + qa-signoff.md with GO/NO-GO/CONDITIONAL, record telemetry. If cannot run tests: emit NO-GO with clear reason — do NOT silently pass.)
 - [ ] F2.26 — Create `.agents/scripts/qa_check.js` (~60 lines). **Implementation code:** See `10-implementation-specs.md` §11
 - [ ] F2.27 — Document the gate token (artifact produced by @qa-engineer, no file to create)
+- [ ] F2.28 — Create `.agents/scripts/validate_satisfaction.js` and update `orchestrator_state.js next` to reject incomplete T8 records. **Implementation spec:** `10-implementation-specs.md` §15
 
 ---
 
@@ -228,6 +242,7 @@ The orchestrator reads this file's existence as the gate token to advance from d
 - [ ] `VESPYR_HOOK_PROFILE=minimal` strips the format/quality hooks
 - [ ] **Delegation enforcement:** `pre:bash:delegation` and `pre:edit:delegation` hooks block direct I/O from reasoning agents unless `[DIRECT-IO-JUSTIFIED: ...]` is present
 - [ ] **Self-learning metrics:** instinct hit tracking, stale pattern reporting, and token cost tracking all functional
+- [ ] **T8 runtime gate:** an incomplete, blocked, or evidence-free satisfaction record prevents release advancement and reports every failing row
 
 ## Risks
 
@@ -236,13 +251,14 @@ The orchestrator reads this file's existence as the gate token to advance from d
 - **Self-learning promotes false patterns.** 3+ occurrences, 2+ agents, 7+ day span — all required. Every promotion is human-in-the-loop.
 - **Delegation audit reveals low rate.** This is the audit's job; don't game the metric.
 - **Delegation hooks block legitimate direct I/O.** The `[DIRECT-IO-JUSTIFIED: ...]` protocol is the escape hatch. If the hook blocks too aggressively, users can disable it via `VESPYR_DISABLED_HOOKS=pre:bash:delegation,pre:edit:delegation`. The hook checks for the justification string in the agent's response — if present, it passes.
+- **Satisfaction becomes rubber-stamping.** Require evidence, revalidation fingerprints, and explicit escalation after two feedback cycles. Do not optimize for zero blocking states.
 
 ### Rollback plan
 
 If Phase 2 breaks:
 - **Hooks:** `VESPYR_DISABLED_HOOKS=*` disables all hooks. Or delete `.agents/hooks/hooks.json` — hooks are opt-in per harness.
 - **Self-learning:** delete `instincts.md` — the system falls back to the 2-tier memory (project-context + patterns). No data is lost; episodes and patterns remain.
-- **QA hard gate:** if `qa-signoff.md` blocks a legitimate release, create a manual signoff with `Release recommendation: CONDITIONAL` and a note explaining the bypass.
+- **QA hard gate:** if `qa-signoff.md` blocks a legitimate release, fix the gate or its evidence. A manual `CONDITIONAL` sign-off does not bypass the T8 release gate and is not shippable until conditions are satisfied.
 
 ## Handoff to Phase 3
 
@@ -250,5 +266,6 @@ If Phase 2 breaks:
 - 10 MCP tools callable from external harnesses — 5 wrappers + 5 capability tools (see `03a-mcp-integration-plan.md`).
 - `instincts.md` is the first thing loaded in every session.
 - `witness.json` tracks every critical artifact's hash.
+- The UTTERLY SATISFIED state contract is machine-validated for release-affecting handoffs.
 - Delegation is enforced at the harness layer (hooks block direct I/O) and auditable (audit script).
 - QA is a hard gate.

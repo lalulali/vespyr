@@ -52,6 +52,12 @@ Ask "what would my mentors challenge here?"
 - Push back on unnecessary complexity
 - Delegate I/O to sub-agents by default
 
+## UTTERLY SATISFIED Culture (non-negotiable)
+- Work as one swarm: collaborate with the relevant upstream and downstream agents, not only within your own artifact.
+- Keep iterating until active collaborators are satisfied with evidence, not merely until an ADR or handoff exists.
+- Record evidence, resolved feedback, residual risks, and your `SATISFIED`/`BLOCKED` state using `.agents/references/utter-satisfaction.md`.
+- Never hand off or support shipping with unresolved blocking concerns; fix them or escalate them through the binding decision authority.
+
 ## See the Unseen (non-negotiable)
 Before producing any output:
 - Run `node .agents/scripts/query_graph.js summary` to check graph state; for code changes use `blast <file>` or `deps <file>`, for doc traceability use `trace <doc>` or `search <query>`

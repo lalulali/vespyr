@@ -12,6 +12,10 @@ Phase 1 gives every agent a baseline: structured memory, code graphs, web resear
 
 **Rule:** Only add an MCP server if at least 2 agents need it AND `@executor` can't provide the same capability with a one-liner.
 
+**T8 rule:** MCP tools may provide evidence and validation, but no MCP server
+or tool may convert `BLOCKED`, `CHANGES REQUESTED`, stale sign-off, or missing
+evidence into approval. The canonical validator remains the source of truth.
+
 ---
 
 ## 2. Gap Analysis Per Agent
@@ -64,6 +68,7 @@ Based on the gap analysis, 6 new capabilities are needed. Two are new MCP server
 | 13 | `check_docs` | `markdownlint`, `lychee` (link checker) | `@technical-writer`, `@code-reviewer` | `path` (directory) | `{ broken_links[{ file, url, status }], lint_issues[{ file, line, rule }], word_count, readability }` |
 | 14 | `analyze_bundle` | `webpack-bundle-analyzer` / `source-map-explorer` | `@developer`, `@performance-engineer` | `stats_file` (path to stats.json) | `{ total_size, chunks[{ name, size, modules[] }], largest_modules, duplicates[], tree_shaking_loss }` |
 | 15 | `query_data` | SQLite in-memory + CSV/JSON import | `@data-analyst` | `files[]` (CSV/JSON paths), `query` (SQL) | `{ columns[], rows[][], row_count, execution_ms }` |
+| 16 | `validate_satisfaction` | `validate_satisfaction.js` | All release participants | `record`, `strict?` | `{ valid, gate, failures[], evidence_complete, revalidation_required }` |
 
 ### 3c. Rationale Per Tool
 
@@ -83,14 +88,14 @@ Based on the gap analysis, 6 new capabilities are needed. Two are new MCP server
 
 | Priority | Server / Tool | Effort | Justification |
 |---|---|---|---|
-| **P0** | `audit_dependencies` + `scan_secrets` | 3-4 hours (2 thin wrappers) | Security gap is highest risk. `@security-engineer` is ineffective without tooling. Both are one-liner wrappers around existing CLIs. |
+| **P0** | `audit_dependencies` + `scan_secrets` + `validate_satisfaction` | 4-6 hours (3 thin wrappers) | Security and release gates are highest risk. Tools return structured evidence and cannot silently pass a blocked record. |
 | **P1** | `query_data` | 4-5 hours (new script) | `@data-analyst` has zero tooling today. SQLite wrapper unlocks the entire persona. |
 | **P1** | Lighthouse MCP | 2-3 hours (registration) | `@performance-engineer` has no tooling. Lighthouse is a well-established MCP server — just register and configure. |
 | **P2** | `check_docs` | 3-4 hours (1 wrapper) | `@technical-writer` currently relies on manual review. Link checker catches drift early. |
 | **P2** | Axe-core / Accessibility MCP | 2-3 hours (registration) | Three agents need it but Playwright already owns the browser — axe-core injects into the same session. |
 | **P3** | `analyze_bundle` | 3-4 hours (1 wrapper) | Useful but project-specific. Only active when `webpack-bundle-analyzer` stats exist. |
 
-**Total Phase 2 estimate:** 17–23 hours
+**Total Phase 2 estimate:** 18–25 hours
 
 ---
 
@@ -127,7 +132,7 @@ npx vespyr install
 # Phase 2 additions — installer registers:
 # - Lighthouse MCP
 # - Axe-core MCP  
-# - 5 new @vespyr/mcp tools (audit_dependencies, scan_secrets, check_docs, analyze_bundle, query_data)
+# - 6 new @vespyr/mcp tools (audit_dependencies, scan_secrets, check_docs, analyze_bundle, query_data, validate_satisfaction)
 npx vespyr install-mcp-phase2
 ```
 
@@ -139,6 +144,7 @@ npx vespyr install-mcp-phase2
 - **`scan_secrets` false positives.** Gitleaks flags test fixtures, example files, and documentation. Mitigation: `@vespyr/mcp` filters by file type and ignores `.gitignore`d paths.
 - **`query_data` performance.** Large CSVs (>100MB) in memory may OOM. Mitigation: cap at 50MB, stream-read with LIMIT.
 - **`analyze_bundle` only works for webpack projects.** Mitigation: detect bundler type, skip gracefully if no stats file found.
+- **`validate_satisfaction` drifts from the canonical script.** Keep the MCP tool as a thin wrapper around `validate_satisfaction.js`; add parity tests for every failure state and GO path.
 
 ---
 
@@ -151,6 +157,7 @@ npx vespyr install-mcp-phase2
 - [ ] Verify Axe-core finds WCAG violations by running against a page with missing alt text.
 - [ ] Verify `check_docs` finds broken internal link by creating a dead link in a sample doc.
 - [ ] Verify `analyze_bundle` returns chunk sizes by running against sample webpack stats.
+- [ ] Verify `validate_satisfaction` returns NO-GO for missing evidence, blocked rows, stale rows, and inactive rows without reasons; returns GO only for a complete active matrix.
 
 ---
 
@@ -163,3 +170,4 @@ npx vespyr install-mcp-phase2
 - [ ] Implement `check_docs` P2 tool wrapper
 - [ ] Register & configure Axe-core / Accessibility MCP P2 server
 - [ ] Implement `analyze_bundle` P3 tool wrapper
+- [ ] Implement `validate_satisfaction` P0 tool wrapper without duplicating the canonical validator rules

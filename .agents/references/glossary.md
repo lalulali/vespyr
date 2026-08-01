@@ -6,11 +6,11 @@
 - **Phase** — A numbered stage in the development pipeline (Phase -1 through Phase 9). See `phase-table.md`.
 - **Step** — A sub-stage within a skill. Loaded sequentially in step-file architecture.
 - **Skill** — A multi-step workflow defined in `.agents/skills/<name>/SKILL.md`.
-- **Squad** — A named bundle of agents that activate together. See `references/squads.md`.
+- **Squad** — A named bundle of agents that activate together. See `.agents/squads/*.md` (manage via `/squad`).
 - **Sub-agent** — A small, single-purpose agent (reader, writer, executor, memory-controller) that reasoning agents delegate to.
 
 ## Agent terms
-- **Reasoning agent** — A persona that thinks and decides but cannot perform I/O directly (denied `bash`/`edit` permissions).
+- **Reasoning agent** — A persona that thinks and decides. Some reasoning agents (e.g. @founder, @architect, @product-manager) are denied `bash`/`edit` permissions in frontmatter and must delegate I/O; others (e.g. @developer, @tech-lead, @qa-engineer) keep full I/O access and delegate as a recommended pattern. See `skills.md` §Subagent Permissions.
 - **I/O sub-agent** — A small, fast sub-agent that performs a single type of I/O (read, write, execute, memory).
 - **Channeled mentor** — A real-world expert whose principles inform the agent's persona. See agent frontmatter.
 - **Persona** — The full character definition of an agent, including role, principles, voice, and decision tree.

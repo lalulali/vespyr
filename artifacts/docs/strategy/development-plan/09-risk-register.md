@@ -1,7 +1,7 @@
 # Risk Register — Consolidated
 
 > **Source:** Consolidated from master roadmap Part 5 (13 rows), enrichment plan §8 (15 rows), each phase file's risks, and 3 new risks identified during review.
-> **Total:** 41 risks — 14 high-impact, 21 medium-impact, 6 low-impact.
+> **Total:** 45 risks — 17 high-impact, 22 medium-impact, 6 low-impact.
 
 ---
 
@@ -113,3 +113,7 @@
 | R38 | Session-start latency exceeds 1 second | Medium | Medium | Latency budget defined in README §13 (total < 1000ms). Operations 4-6 are non-blocking with timeouts. CI test (`test_session_latency.js`) enforces the budget. |
 | R39 | Self-learning accumulates noise without measuring value | Medium | Medium | 3 outcome metrics (Phase 2 F2.15.a-c): instinct hit rate (>50% target), pattern freshness (flag >90 days stale), token cost tracking (cap at 200 tokens). |
 | R40 | No validation that the full pipeline works end-to-end | High | High | Dogfood project (Phase 4 F4.16) exercises `/validate-idea` → `/iterate` on a real project before shipping. Integration bugs filed as GitHub issues. |
+| R41 | UTTERLY SATISFIED becomes performative sign-off theater | High | High | Require evidence, explicit state vocabulary, revalidation fingerprints, and a machine-readable launch gate. Do not optimize for zero blocks or fastest approval. |
+| R42 | Feedback loops run forever or agents stop without resolving the issue | Medium | High | Keep the two-cycle limit, then escalate to the binding authority. Record the decision and residual risk; never fabricate `SATISFIED`. |
+| R43 | Harness, module, MCP, or token-effective mode drifts from the DNA contract | Medium | High | Treat `.agents/references/utter-satisfaction.md` as the canonical source; add adapter parity tests and a failing test for attempted gate bypass. |
+| R44 | Satisfaction telemetry incentivizes rubber-stamping or agent popularity | Medium | Medium | Measure evidence completeness, blockers, revalidation, resolution time, and escalations. Never rank agents by approval count or satisfaction speed. |

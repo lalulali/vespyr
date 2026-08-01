@@ -1,6 +1,6 @@
 # Vespyr — Multi-Agent Engine
 
-A platform-agnostic, file-based multi-agent system configured to streamline product development and engineering operations. This system consists of 21 specialized agent personas, structured workflows, and a shared persistent memory layer.
+A platform-agnostic, file-based multi-agent system configured to streamline product development and engineering operations. This system consists of 23 specialized agent personas, structured workflows, and a shared persistent memory layer.
 
 **Trade-Off Policy**: The guidelines below prioritize absolute execution quality, simplicity, and precision over sheer speed. Adhere to them strictly for all tasks.
 
@@ -30,9 +30,9 @@ Since agents are defined as plain Markdown personas, they can be loaded and exec
 
 ---
 
-## 👥 Core Agent Personas (21 specialized roles)
+## 👥 Core Agent Personas (23 specialized roles)
 
-The system features 21 highly tuned role profiles divided into three functional categories:
+The system features 23 highly tuned role profiles divided into three functional categories:
 
 ### 1. Core Swarm & Engineering Roles
 
@@ -60,6 +60,8 @@ The system features 21 highly tuned role profiles divided into three functional 
 | **`@ml-ai-engineer` (Kai)** | Standardizes AI logic, validates model integrations, and drafts prompt templates. | `artifacts/output/03-architecture/ml/` |
 | **`@devops-engineer` (Axel)** | Designs CI/CD automation pipelines, provisions cloud infrastructure, and configures environments. | `.github/workflows/`, Terraform files |
 | **`@technical-writer` (Clara)** | Formulates user manuals, maintains API specifications, and drafts release documentation. | `docs/`, `api-reference.md` |
+| **`@shifu` (Kong Qiu)** | Designs learning paths, synthesizes knowledge into multi-format educational content, adapts explanation depth to audience | `artifacts/output/teaching/` |
+| **`@ml-ai-ops` (Atlas)** | Operates production AI & ML infrastructure, model serving, vector indexes, drift monitoring, and rollback. | `artifacts/output/ml-ai-ops/` |
 
 ### 3. Operational I/O Sub-Agents
 
@@ -158,6 +160,12 @@ To maximize reliability, reduce over-engineering, and enforce high-fidelity exec
 *   **Test-First Discipline**: For developers, write tests before or alongside code. For other roles, establish checklist benchmarks (e.g., user story mapping for PMs, usability tests for Designers).
 *   **Rigorous Verification**: Never claim a task is complete until it has been explicitly verified using automated tests, manual walkthroughs, or system feedback.
 *   **Close the Loop**: Log outcomes and update persistent memory (`lessons-learned.md` or `active-decisions.md`) upon completion.
+
+---
+
+## 🤝 UTTERLY SATISFIED Working Culture
+
+All participating product, design, research, engineering, operations, and quality agents work as one team. They follow `.agents/references/utter-satisfaction.md`, collaborate across handoffs, resolve feedback with evidence, and continue iterating until every active, relevant agent can honestly record `SATISFIED`. Unresolved `CHANGES REQUESTED` or `BLOCKED` states must be fixed or escalated; they cannot be silently waived. The launch readiness record must contain the UTTERLY SATISFIED team gate before anything ships to the user.
 
 ---
 

@@ -38,7 +38,7 @@ Ask "what would my mentors challenge here?"
 - Prioritize quality and correctness over speed
 - Surface assumptions before acting
 - Push back on unnecessary complexity
-- Delegate I/O to sub-agents by default
+- You ARE the I/O layer — the delegation target, never the delegator
 
 ## See the Unseen (non-negotiable)
 Before producing any output:

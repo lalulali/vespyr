@@ -125,7 +125,7 @@ Common issues and how to resolve them when running the agent system.
 
 **Problem:** Developer and architect keep bouncing the same issue back and forth. Or QA rejects, developer fixes, QA rejects again — endlessly.
 
-**Fix:** The system now enforces a **maximum 2 feedback cycles** on the same issue between any two agents (see `workflow.md` §4.2). After 2 cycles, the issue automatically escalates to the next level in the escalation ladder (§3.2). The mediator must choose within 24h: fix it, defer it as documented tech debt, or descope it.
+**Fix:** The system now enforces a **maximum 2 feedback cycles** on the same issue between any two agents (see `GUARDRAILS.md` §Feedback Loop Limits). After 2 cycles, the issue automatically escalates to the next level in the escalation ladder (`workflow.md` §3.2). The mediator must choose within 24h: fix it, defer it as documented tech debt, or descope it.
 
 **Prevention:** This is now a system-level rule. All agents should track cycle count when feeding back on the same issue.
 
@@ -135,7 +135,7 @@ Common issues and how to resolve them when running the agent system.
 
 **Problem:** An agent produces low-quality output because it didn't read all the upstream artifacts, or it hallucinated details from an artifact it only partially read.
 
-**Fix:** The system now defines a **context budget protocol** (see `workflow.md` §11). Agents prioritize reading in three tiers: (1) current task + agent notes + primary upstream artifact in full, (2) other upstream summaries + memory, (3) templates and historical files only when needed.
+**Fix:** The system now defines a **context budget protocol** (see `GUARDRAILS.md` §Context Budget and `workflow.md` §9). Agents prioritize reading in three tiers: (1) current task + agent notes + primary upstream artifact in full, (2) other upstream summaries + memory, (3) templates and historical files only when needed.
 
 **Prevention:** When writing artifacts, always include an **executive summary** at the top so downstream agents can triage before deep-reading. Keep artifacts under 3,000 words when possible.
 
@@ -145,7 +145,7 @@ Common issues and how to resolve them when running the agent system.
 
 **Problem:** `active-decisions.md` or `lessons-learned.md` has grown to 5,000+ words with many resolved/historical items that waste context and confuse agents.
 
-**Fix:** Run `@memory-controller compact [filename]` explicitly, or it triggers automatically when a write pushes a file past its threshold. Compaction moves `resolved` and `stale` entries to `artifacts/memory/archive/YYYY-QN/` and updates the searchable index at `artifacts/memory/archive/index.json`.
+**Fix:** Run `@memory-controller compact [filename]` explicitly, or it triggers automatically when a write pushes a file past its threshold. Compaction moves `resolved` and `stale` entries to `artifacts/memory/archive/YYYY-QN/` and updates the searchable index at `artifacts/memory/archive/index.ndjson`.
 
 **Prevention:** The retrospective skill (Step 5) calls `@memory-controller compact` on all files as a mandatory step. Track when the last compaction occurred in `artifacts/memory/session-summaries/latest.md`.
 
@@ -158,14 +158,14 @@ Common issues and how to resolve them when running the agent system.
 **Structure:**
 ```
 artifacts/memory/archive/
-├── index.json          # Searchable index of all archived entries (auto-created)
+├── index.ndjson        # Searchable index of all archived entries (auto-created)
 └── YYYY-QN/            # Quarterly folders, e.g. 2026-Q2/
     ├── active-decisions.md
     ├── blockers-and-risks.md
     └── lessons-learned.md
 ```
 
-**`index.json`** is created automatically the first time compaction runs. It contains metadata (title, keywords, date, summary, file location) for every archived entry so agents can search without loading full archive files.
+**`index.ndjson`** is created automatically the first time compaction runs. It contains metadata (title, keywords, date, summary, file location) for every archived entry so agents can search without loading full archive files.
 
 **Nothing is ever deleted.** Archived entries are always retrievable via `@memory-controller search [query]`.
 
@@ -191,16 +191,7 @@ The controller uses hybrid scoring (keyword + semantic) and returns the top matc
 
 **Problem:** The memory controller is including chunks that don't seem related to the current task.
 
-**Fix:** Use the explain operation to see the scoring:
-```
-@memory-controller explain "{section title}"
-```
-This shows the Stage 1 keyword score, Stage 2 semantic score, and the reasoning. If the chunk is genuinely irrelevant, the semantic score should be low — if it's high, the controller found a connection you may not have noticed.
-
-If the chunk is consistently irrelevant for your agent type, tune the profile:
-```
-@memory-controller tune developer "skip lessons-learned entries about market research"
-```
+**Fix:** Re-run `@memory-controller load [agent-type]` with a more specific task description. Tier 3 chunks are selected by Stage 1 keyword matching followed by Stage 2 semantic scoring against your task description — vague descriptions (e.g. "work on auth") pull in broad, unrelated chunks. If the chunk came from a compacted entry, use `@memory-controller search [query]` to retrieve it from the archive instead.
 
 **Prevention:** Write more specific task descriptions when calling `@memory-controller load`. "implement OAuth2 login with Google" gives much better Tier 3 results than "work on auth".
 
@@ -222,29 +213,6 @@ If the chunk is in the archive (was compacted), use search instead:
 ```
 
 **Prevention:** Use domain tags consistently when writing entries (`[AUTH]`, `[CODE]`, etc.) — the domain tag match gives +2 points in Stage 1 scoring.
-
----
-
-## Agent profile loads too much / too little context
-
-**Problem:** A specific agent type consistently gets too much noise or misses important context.
-
-**Fix:** Tune the profile:
-```
-@memory-controller tune architect "always include security-engineer notes"
-@memory-controller tune developer "weight recent entries higher"
-@memory-controller tune product-manager "skip agent-notes, too technical"
-```
-
-Profile adjustments are stored in `artifacts/memory/archive/profiles.json` and apply to all future loads for that agent type.
-
-To see current profile adjustments:
-```
-@memory-controller status
-```
-The status report includes active profile adjustments per agent.
-
-**Prevention:** Tune profiles early in a project when you notice patterns. A well-tuned profile saves tokens on every subsequent agent invocation.
 
 ---
 

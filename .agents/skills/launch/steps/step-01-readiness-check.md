@@ -25,6 +25,7 @@ Verify all pre-launch gates have passed. Any red item blocks launch.
 - Code review passed with no blocking issues
 - QA validated all acceptance criteria pass
 - PM signed off on feature completeness
+- UTTERLY SATISFIED team gate is complete: every active, relevant agent is `SATISFIED` with evidence; `NOT ACTIVATED` rows have a specific out-of-scope reason
 - Security review completed (if applicable — see `@security-engineer`)
 - Performance benchmarks within thresholds (if applicable — see `@performance-engineer`)
 - Documentation is updated (`@technical-writer`)
@@ -43,13 +44,14 @@ Verify all pre-launch gates have passed. Any red item blocks launch.
 - Confirm stakeholder notification plan
 
 **Gate:** PM must confirm GO. If NO-GO, document the blocking issue and resolve before retrying. Both `@product-manager` and `@tech-lead` must agree.
+The PM must not confirm GO while any active agent is `CHANGES REQUESTED` or `BLOCKED`, or while the UTTERLY SATISFIED team gate is incomplete.
 
 ## Outputs
 - `artifacts/output/06-launch/release-readiness.md` — use template `.agents/templates/launch/release-readiness-template.md`
 - `artifacts/output/06-launch/go-nogo-decision.md` — use template `.agents/templates/launch/go-nogo-decision-template.md`
 
 ## Halt condition
-Any red item on the readiness checklist. Resolve before proceeding. Max 2 readiness cycles.
+Any red item on the readiness checklist, an incomplete UTTERLY SATISFIED team gate, or an active agent that is not `SATISFIED`. Resolve before proceeding. Max 2 readiness cycles; escalate unresolved issues rather than silently waiving them.
 
 ## Delegation
 - **Reads:** @reader for QA signoff, security audit, and performance review reports

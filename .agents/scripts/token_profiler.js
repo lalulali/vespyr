@@ -8,7 +8,7 @@
  * Usage:
  *   node token_profiler.js
  *   node token_profiler.js --verbose
- *   node token_profiler.js --phase exploration
+ *   node token_profiler.js --phase execution
  */
 
 const fs = require('fs');
@@ -159,11 +159,20 @@ function profileScripts(verbose = false) {
 }
 
 function estimatePhaseContext(phase, agents) {
+  // Canonical 11-phase model (source: .agents/references/phase-table.md) with
+  // per-phase primary agents matching orchestrator_state.js createInitialState().
   const phaseAgents = {
     validation: ['founder'],
-    exploration: ['researcher', 'user-researcher'],
-    design: ['product-manager', 'product-designer'],
-    development: ['tech-lead', 'developer', 'code-reviewer', 'qa-engineer']
+    discovery: ['researcher', 'user-researcher'],
+    research: ['researcher', 'user-researcher'],
+    strategy: ['product-manager', 'product-designer'],
+    architecture: ['architect'],
+    planning: ['tech-lead'],
+    execution: ['developer', 'code-reviewer', 'qa-engineer'],
+    launch: ['devops-engineer', 'product-manager'],
+    iteration: ['product-manager', 'data-analyst'],
+    documentation: ['technical-writer'],
+    retro: ['product-manager']
   };
 
   const agentMap = {};
@@ -197,7 +206,9 @@ function estimatePhaseContext(phase, agents) {
 }
 
 function profilePhases(agents, verbose = false) {
-  const phases = ['validation', 'exploration', 'design', 'development'];
+  // Canonical 11-phase order (single source of truth: .agents/references/phase-table.md)
+  const phases = ['validation', 'discovery', 'research', 'strategy', 'architecture',
+    'planning', 'execution', 'launch', 'iteration', 'documentation', 'retro'];
   const results = [];
 
   for (const phase of phases) {

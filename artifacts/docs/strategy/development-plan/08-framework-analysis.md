@@ -25,7 +25,7 @@ Four AI agent frameworks occupy four distinct positions:
 1. **Permission-denial reasoning/I/O split** — the only framework using OS-level permissions, not prompt instructions. **This is the moat. Protect it.**
 2. **Socratic methodology** — anti-sycophancy rules, per-agent socratic files, `grill-me` skill, `pending-questions/` for cross-session continuity.
 3. **3-tier progressive memory** — keyword+recency scoring, dedup, compaction. More thoughtful than ECC's session persistence, lighter than Ruflo's HNSW.
-4. **Quality gates with named decision authorities** — who arbitrates scope disputes, who blocks timelines on security.
+4. **UTTERLY SATISFIED quality gates with named decision authorities** — agents collaborate through evidence-backed feedback loops, while named authorities arbitrate scope disputes and block unsafe releases.
 5. **Squad presets** — 7 named teams that activate curated agent subsets.
 
 ### ECC
@@ -82,12 +82,13 @@ Four AI agent frameworks occupy four distinct positions:
 | Tri-modal workflows (create/edit/validate) | — | — | **unique** | — |
 | Default-deny MCP policy | — | — | — | **unique** |
 | Selectable squads (named teams) | **unique** | — | — | — |
+| Evidence-backed satisfaction release gate | **unique** | — | — | — |
 | 3-tier progressive memory | **unique** | sessions | progress | HNSW |
 | Code reviewer false-positive guard | — | **unique** | — | — |
 
 ### Where each has the only answer
 
-- **Vespyr:** Permission-denial I/O split; squad presets; 3-tier progressive memory; Socratic depth.
+- **Vespyr:** Permission-denial I/O split; squad presets; 3-tier progressive memory; Socratic depth; UTTERLY SATISFIED collaboration and release gating.
 - **ECC:** Multi-harness by design; selective install; code-reviewer false-positive guard; AURA threat model.
 - **BMAD:** Step-file architecture; persona-channeled mentors; tri-modal workflows; locked terminology.
 - **Ruflo:** HNSW vector memory; witness system; default-deny MCP; mTLS federation; calibrated honesty.

@@ -96,6 +96,83 @@ function createEmptyIndex() {
   };
 }
 
+// Auto-detect index format and return { format, data }.
+//   NDJSON (canonical): a schema header line + one JSON entry object per line
+//   Legacy JSON:        a single object with an `entries` array
+function readIndex(filePath) {
+  if (!fs.existsSync(filePath)) {
+    return { format: 'json', data: createEmptyIndex() };
+  }
+  const content = fs.readFileSync(filePath, 'utf8').trim();
+  if (!content) {
+    return { format: 'json', data: createEmptyIndex() };
+  }
+
+  // NDJSON detection: every non-empty line parses as a JSON object, and at
+  // least one line carries an `id` (an entry, not just the schema header).
+  const lines = content.split('\n');
+  let ndjsonOk = true;
+  let entryLines = 0;
+  for (const l of lines) {
+    const s = l.trim();
+    if (!s) continue;
+    try {
+      const obj = JSON.parse(s);
+      if (!obj || typeof obj !== 'object' || Array.isArray(obj)) {
+        ndjsonOk = false;
+        break;
+      }
+      if (obj.id) entryLines++;
+    } catch (e) {
+      ndjsonOk = false;
+      break;
+    }
+  }
+
+  if (ndjsonOk && entryLines > 0) {
+    const entries = [];
+    let header = null;
+    for (const l of lines) {
+      const s = l.trim();
+      if (!s) continue;
+      const obj = JSON.parse(s);
+      if (obj.id) {
+        entries.push(obj);
+      } else if (!header) {
+        header = obj; // schema header line (no `id`)
+      }
+    }
+    return {
+      format: 'ndjson',
+      data: {
+        schema_version: (header && header.schema_version) || SCHEMA_VERSION,
+        created: header && header.created,
+        last_updated: header && header.last_updated,
+        entries
+      }
+    };
+  }
+
+  // Legacy JSON: single object. A header-only NDJSON index (schema object,
+  // zero entries) lands here too — normalize it to an empty index.
+  let data;
+  try {
+    data = JSON.parse(content);
+  } catch (e) {
+    throw new Error(`Invalid JSON in ${filePath}: ${e.message}`);
+  }
+  if (!data || typeof data !== 'object' || Array.isArray(data)) {
+    throw new Error(`Invalid index in ${filePath}: root must be an object`);
+  }
+  // A schema-only object (no `entries` array) is the NDJSON empty-archive
+  // case written by appendNdjson; legacy JSON indexes always carry `entries`.
+  if (!Array.isArray(data.entries) && typeof data.schema_version === 'string') {
+    data.entries = [];
+    return { format: 'ndjson', data };
+  }
+  return { format: 'json', data };
+}
+
 function appendEntry(filePath, entry) {
   let data = readJson(filePath);
   if (!data) {
@@ -134,14 +211,20 @@ function appendEntry(filePath, entry) {
 }
 
 function mergeIndexes(oursPath, theirsPath, outPath) {
-  const ours = readJson(oursPath) || createEmptyIndex();
-  const theirs = readJson(theirsPath) || createEmptyIndex();
+  const ours = readIndex(oursPath);
+  const theirs = readIndex(theirsPath);
+
+  // Output format: NDJSON when either input is NDJSON (canonical format),
+  // legacy JSON only when both inputs are legacy JSON.
+  const outFormat = (ours.format === 'ndjson' || theirs.format === 'ndjson') ? 'ndjson' : 'json';
 
   const merged = createEmptyIndex();
-  merged.created = ours.created < theirs.created ? ours.created : theirs.created;
+  const createdA = ours.data.created || merged.created;
+  const createdB = theirs.data.created || merged.created;
+  merged.created = createdA < createdB ? createdA : createdB;
 
   const seen = new Set();
-  for (const entry of [...ours.entries, ...theirs.entries]) {
+  for (const entry of [...ours.data.entries, ...theirs.data.entries]) {
     if (!seen.has(entry.id)) {
       seen.add(entry.id);
       merged.entries.push(entry);
@@ -152,11 +235,26 @@ function mergeIndexes(oursPath, theirsPath, outPath) {
   merged.entries.sort((a, b) => a.date.localeCompare(b.date));
   merged.last_updated = new Date().toISOString().split('T')[0];
 
-  writeJsonAtomic(outPath, merged);
+  if (outFormat === 'ndjson') {
+    ensureDir(outPath);
+    const header = JSON.stringify({
+      schema_version: SCHEMA_VERSION,
+      created: merged.created,
+      last_updated: merged.last_updated
+    });
+    fs.writeFileSync(outPath, header + '\n', 'utf8');
+    for (const entry of merged.entries) {
+      fs.appendFileSync(outPath, JSON.stringify(entry) + '\n', 'utf8');
+    }
+  } else {
+    writeJsonAtomic(outPath, merged);
+  }
+
   return {
     success: true,
+    format: outFormat,
     entries: merged.entries.length,
-    duplicates_removed: (ours.entries.length + theirs.entries.length) - merged.entries.length
+    duplicates_removed: (ours.data.entries.length + theirs.data.entries.length) - merged.entries.length
   };
 }
 
@@ -191,6 +289,11 @@ function appendNdjson(filePath, entry) {
     if (!(key in entry)) {
       throw new Error(`Entry missing required field: ${key}`);
     }
+  }
+
+  // Keywords must be an array (same check as validateSchema/appendEntry)
+  if (!Array.isArray(entry.keywords)) {
+    throw new Error('Entry keywords must be an array');
   }
 
   // Auto-populate optional fields
@@ -298,12 +401,13 @@ function main() {
       const fileIdx = args.indexOf('--file');
       const filePath = fileIdx >= 0 ? args[fileIdx + 1] : null;
       if (!filePath) { console.error('Missing --file'); process.exit(1); }
-      const data = readJson(filePath);
-      if (!data) {
+      if (!fs.existsSync(filePath)) {
         console.log(JSON.stringify({ valid: false, error: 'File not found' }));
         process.exit(1);
       }
+      const { format, data } = readIndex(filePath);
       const result = validateSchema(data);
+      result.format = format;
       console.log(JSON.stringify(result));
     }
 

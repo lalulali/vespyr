@@ -119,7 +119,11 @@ This ships as a v2.0 skill improvement alongside Phase 1's restructured skills. 
     - *Beginner:* Non-technical, zero jargon, analogies-first, story driven.
     - *Intermediate:* Cross-functional teams, balanced, defined jargon inline.
     - *Expert:* Senior specialists, dense precise terminology, edge cases, trade-offs.
-  - [x] Detail Socratic Stance, Failure Modes, Escalation Patterns, and Delegation Contract (`@reader`, `@writer`, `@researcher`, `@executor`, `@memory-controller`).
+   - [x] Detail Socratic Stance, Failure Modes, Escalation Patterns, and Delegation Contract (`@reader`, `@writer`, `@researcher`, `@executor`, `@memory-controller`).
+   - [x] Embed the UTTERLY SATISFIED contract: define learner-facing evidence,
+     collaborate with `@researcher`, `@technical-writer`, and `@product-manager`,
+     and never mark educational output complete while a blocking quality concern
+     remains.
 - [x] **F1b.2 — Pre-register Agent in `.agents/AGENTS.md`**
   - [x] Add `@shifu (Kong Qiu)` to "Specialized Domain Experts" table.
 - [x] **F1b.3 — Schema Validation & Frontmatter Check**
@@ -298,6 +302,7 @@ This ships as a v2.0 skill improvement alongside Phase 1's restructured skills. 
 | Style × Format independence | Beginner-style + Expert-style produce same-format cheatsheet with different explanation depth | ✅ Passed |
 | `@shifu` delegates I/O | No direct file writes — all via `@writer` | ✅ Passed |
 | All format step files exist | `ls .agents/skills/craft-lesson/steps/step-*.md` returns all workflow & format steps | ✅ Passed (89/89 steps) |
+| T8 satisfaction behavior | `@shifu` records evidence, resolves feedback, and preserves the release/handoff state vocabulary | ✅ Integrated |
 
 ---
 

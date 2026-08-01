@@ -1,6 +1,6 @@
 # {DOC_LABEL}Vespyr — Multi-Agent Engine
 
-A platform-agnostic, file-based multi-agent system configured to streamline product development and engineering operations. This system consists of 21 specialized agent personas, structured workflows, and a shared persistent memory layer.
+A platform-agnostic, file-based multi-agent system configured to streamline product development and engineering operations. This system consists of 23 specialized agent personas, structured workflows, and a shared persistent memory layer.
 
 <!-- BEGIN: ROOT_ONLY -->
 > [!IMPORTANT]
@@ -41,9 +41,9 @@ Since agents are defined as plain Markdown personas, they can be loaded and exec
 
 ---
 
-## 👥 Core Agent Personas (21 specialized roles)
+## 👥 Core Agent Personas (23 specialized roles)
 
-The system features 21 highly tuned role profiles divided into three functional categories:
+The system features 23 highly tuned role profiles divided into three functional categories:
 
 ### 1. Core Swarm & Engineering Roles
 
@@ -71,6 +71,8 @@ The system features 21 highly tuned role profiles divided into three functional 
 | **`@ml-ai-engineer` (Kai)** | Standardizes AI logic, validates model integrations, and drafts prompt templates. | `artifacts/output/03-architecture/ml/` |
 | **`@devops-engineer` (Axel)** | Designs CI/CD automation pipelines, provisions cloud infrastructure, and configures environments. | `.github/workflows/`, Terraform files |
 | **`@technical-writer` (Clara)** | Formulates user manuals, maintains API specifications, and drafts release documentation. | `docs/`, `api-reference.md` |
+| **`@shifu` (Kong Qiu)** | Designs learning paths, synthesizes knowledge into multi-format educational content, adapts explanation depth to audience | `artifacts/output/teaching/` |
+| **`@ml-ai-ops` (Atlas)** | Operates production AI & ML infrastructure, model serving, vector indexes, drift monitoring, and rollback. | `artifacts/output/ml-ai-ops/` |
 
 ### 3. Operational I/O Sub-Agents
 
@@ -92,10 +94,22 @@ To maintain focus and avoid context bloat, the **`@product-manager`** and **`@pr
 Vespyr organizes complex, multi-agent operations into highly structured **skills** (located in `[.harness-folder]/skills/`). Each skill is an end-to-end workflow designed for a specific product milestone, operational phase, or utility concern. They guide agents through sequence gates, coordinate parallel execution paths, and enforce quality control.
 
 ### Curated Workflows
+*   `/teach-me` — Personal learning partner: Quick, Explain, or Deep Dive on any topic
+*   `/craft-lesson` — Create multi-format educational materials (syllabus, handbook, cheatsheet, presentation, class, video script)
 *   `/validate-idea` — Stress-test product concepts before research
 *   `/validate-game-idea` — Stress-test game concepts before production
+*   `/unpack-problem` — Problem-first exploration before solution ideation (guided, automated, or combination)
+*   `/root-cause` — Socratic 5-Whys and Fishbone root cause analysis
+*   `/research-plan` — Research goals, methodology, and 2-part interview guide
+*   `/empathy-map` — User empathy quadrant canvas (Says/Thinks/Does/Feels)
+*   `/journey-map` — User touchpoint and emotional state journey mapping
+*   `/jtbd` — Jobs-to-be-Done statements + How Might We opportunity questions
+*   `/discovery-report` — Compile design thinking outputs into unified research/usability report
 *   `/explore-idea` — Market, competitor, and user research
 *   `/explore-game-idea` — Genre market and player research
+*   `/shape-up` — Structure and stress-test semi-cooked ideas into design-ready briefs
+*   `/brainstorming` — Select and apply brainstorming methods from a 60-method catalog
+*   `/validation-patterns` — Apply validation methods (smoke tests, concierge MVPs, etc.)
 *   `/design` — PRD and screen specs creation
 *   `/develop` — MVP development cycle
 *   `/launch` — Release readiness and deployment
@@ -116,6 +130,12 @@ Vespyr organizes complex, multi-agent operations into highly structured **skills
 *   `/kanban` — Display and update Kanban board
 *   `/code-graph` — Generate/scan dependency graphs
 *   `/doc-graph` — Generate/scan documentation links and trace coverage
+*   `/analyze-data` — General data analysis companion — EDA, dataset provision, visualization mapping, insight extraction, and PM metric co-piloting
+*   `/create-skill` — Create new skills, modify and improve existing skills, and design lightweight skill evals
+*   `/customize-skill` — Guided authoring flow for agent customization — describe intent, map to override fields, write TOML, and verify it works
+*   `/elicitation` — Push the LLM to reconsider, refine, and improve its recent output (Socratic, first principles, pre-mortem, red team)
+*   `/round-table` — Orchestrate group discussions between Vespyr agents — real subagents with independent thinking
+*   `/sprint-status` — Display and update the sprint-status.yaml pipeline state as a Kanban table
 
 ---
 
@@ -138,7 +158,7 @@ To ensure seamless collaboration across different agent steps and avoid context 
 
 ### 👤 User Identity
 
-Before responding to the user for the first time in any session, **always read `artifacts/memory/project-context.md`** and extract the `User Nickname` field from the `## Identity` section. Address the user by their preferred name throughout the conversation. If the file or field is missing, default to `"User"`.
+Before responding to the user for the first time in any session, **always read `artifacts/memory/project-context.md`** and extract the `User Nickname` field from the `## [IDENTITY]` section. Address the user by their preferred name throughout the conversation. If the file or field is missing, default to `"User"`.
 
 ---
 
@@ -171,6 +191,12 @@ To maximize reliability, reduce over-engineering, and enforce high-fidelity exec
 *   **Test-First Discipline**: For developers, write tests before or alongside code. For other roles, establish checklist benchmarks (e.g., user story mapping for PMs, usability tests for Designers).
 *   **Rigorous Verification**: Never claim a task is complete until it has been explicitly verified using automated tests, manual walkthroughs, or system feedback.
 *   **Close the Loop**: Log outcomes and update persistent memory (`lessons-learned.md` or `active-decisions.md`) upon completion.
+
+---
+
+## 🤝 UTTERLY SATISFIED Working Culture
+
+All participating product, design, research, engineering, operations, and quality agents work as one team. They follow `[.harness-folder]/references/utter-satisfaction.md`, collaborate across handoffs, resolve feedback with evidence, and continue iterating until every active, relevant agent can honestly record `SATISFIED`. Unresolved `CHANGES REQUESTED` or `BLOCKED` states must be fixed or escalated; they cannot be silently waived. The launch readiness record must contain the UTTERLY SATISFIED team gate before anything ships to the user.
 
 ---
 

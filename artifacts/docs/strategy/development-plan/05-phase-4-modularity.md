@@ -2,8 +2,8 @@
 
 > **Release:** v2.1
 > **Calendar:** Weeks 7-8
-> **Theme:** T6 (Modularity)
-> **Goal:** Core stays lean. Domain extras ship as install-modules. Language-specific rules layer. Builder skills let users create new agents/skills/workflows. Example project ships. Docs are rewritten. After this phase, Vespyr is "modular."
+> **Themes:** T6 (Modularity), T8 (UTTERLY SATISFIED culture)
+> **Goal:** Core stays lean. Domain extras ship as install-modules. Language-specific rules layer. Builder skills let users create new agents/skills/workflows. Example project ships. Docs are rewritten. After this phase, Vespyr is "modular" without allowing modularity to weaken the UTTERLY SATISFIED release gate.
 
 ## What changed from the original
 
@@ -65,6 +65,12 @@
   "default": ["core", "research", "design", "architecture", "memory", "orchestration"]
 }
 ```
+
+The `core` module always includes the T8 protocol, release templates, and
+validator contract. A module may add domain reviewers, but it cannot remove or
+override the core satisfaction states, escalation rules, or launch gate. The
+manifest validator must reject a module that declares a conflicting state
+vocabulary or a release path without a satisfaction check.
 
 - [ ] F4.1 — Create `.agents/manifests/install-modules.json` (~180 lines, structure above)
 - [ ] F4.2 — Create `.agents/scripts/install-modules.js` (~100 lines): `list`, `install <module-list>`, `remove <module-list>`, `--dry-run`. Reads manifest, resolves dependency closure, copies files, writes `install-state.json` for safe uninstall.
@@ -157,6 +163,14 @@ Step 6: Pick the squad(s) that own the workflow
 ```
 Output: a workflow file consumed by `bin/cli.js workflow`.
 
+Every builder also emits the T8 extension contract:
+
+- New agents declare collaborators, domain evidence, blockers, and escalation.
+- New skills declare the handoff state and revalidation trigger.
+- New workflows declare the active release participants and the hard gate.
+- Generated output references `14-utter-satisfaction-dna.md` and passes the
+  satisfaction validator before it is considered complete.
+
 - [ ] F4.6 — Create `.agents/skills/agent-builder/SKILL.md` (~220 lines, 5-step flow above)
 - [ ] F4.7 — Create `.agents/skills/skill-builder/SKILL.md` (~220 lines, 4-step flow above)
 - [ ] F4.8 — Create `.agents/skills/workflow-builder/SKILL.md` (~240 lines, 6-step flow above)
@@ -234,6 +248,8 @@ The example is a deliberately trivial project ("a CLI todo list") — the point 
 8. Exercise at least 3 different squads (startup, build, ship)
 9. Trigger self-learning (produce episodes, promote at least 1 pattern)
 10. Run at least 1 `/goal` loop and 1 automation
+11. Complete one release with the UTTERLY SATISFIED team matrix: at least one
+    feedback loop, one escalation, one revalidation, and an all-satisfied GO.
 
 **Suggested project:** A small web app (e.g., a personal knowledge base or a team standup bot) — complex enough to need architecture, simple enough to finish in 1-2 weeks. The output artifacts live in `artifacts/output/dogfood/` and serve as both validation evidence and a second worked example.
 
@@ -258,6 +274,7 @@ These are quantitative pass/fail criteria. The dogfood project is NOT complete u
 | M8 | **Latency budget** | All 6 session-start operations under budget (≤1000ms total per README §13) | `test_session_latency.js` exit 0 |
 | M9 | **Bug discovery** | ≥5 integration bugs filed as GitHub issues | GitHub Issues count, label `dogfood` |
 | M10 | **Time-to-completion** | Informational baseline — no target, just measured | Wall clock: `validate-idea` start → `/iterate` end |
+| M11 | **UTTERLY SATISFIED gate** | 100% of active rows have evidence-backed `SATISFIED` before dogfood GO | `release-readiness.md` + machine-readable satisfaction record |
 
 ### Human-in-the-loop validation gate
 
@@ -270,6 +287,7 @@ After the automated pipeline runs, Chris (maintainer) must manually review the d
 - [ ] **Integration bugs filed**: every blocker and rough edge is a GitHub issue. No "I'll remember this" bugs.
 - [ ] **Self-learning sample**: the promoted pattern is reviewed, edited if needed, and confirmed as a pattern worth reusing.
 - [ ] **Go/No-Go on metrics**: for each metric M1-M10, confirm PASS or FAIL with a 1-line note why. Failures are bugs, not excuses to lower the target.
+- [ ] **UTTERLY SATISFIED review**: every active agent row has evidence; inactive rows have reasons; feedback, escalation, and revalidation records are present; no blocker was silently waived.
 
 Write the validation sign-off to `artifacts/output/dogfood/validation-signoff.md`:
 ```markdown
@@ -350,6 +368,7 @@ Only after sign-off with **GO** or **CONDITIONAL** (with conditions satisfied) i
 - [ ] `AGENTS.md` (canonical) surfaces all new contracts
 - [ ] `ROADMAP.md` no longer has the 35-harness table
 - [ ] **Dogfood:** full pipeline exercised end-to-end on a real project; all 10 metrics (M1-M10) measured; integration bugs filed as GitHub issues; **human-in-the-loop validation sign-off** completed in `validation-signoff.md`
+- [ ] **T8 dogfood:** M11 passes and the release record contains the UTTERLY SATISFIED team gate with an honest GO.
 - [ ] **Onboarding:** web guide published; `npx vespyr doctor` runs health check; README has "Last verified" dates
 
 ## Risks
@@ -358,6 +377,7 @@ Only after sign-off with **GO** or **CONDITIONAL** (with conditions satisfied) i
 - **Rules merge order is non-obvious.** Document specificity rule in `rules/README.md`; add `validate_rules.js` test.
 - **Example project becomes maintenance burden.** It's an example, not a real product. Update only when schema changes.
 - **Builders produce inconsistent output.** Each builder uses `@writer` with a hardcoded template; output is byte-identical to hand-written.
+- **Modules or builders bypass the satisfaction gate.** Keep the protocol in `core`, validate generated manifests/workflows, and test an attempted `BLOCKED` to GO transition.
 
 ### Rollback plan
 
@@ -368,6 +388,6 @@ If Phase 4 breaks:
 
 ## Handoff to v2.1 Ship
 
-When Phase 4 is done, all v2.1 DoD criteria (9-14 from README.md §4) should pass. Ship v2.1.
+When Phase 4 is done, all v2.1 DoD criteria (9-14 and T8 criteria 23-25 from README.md §4) should pass. Ship v2.1 only after the UTTERLY SATISFIED team gate is GO.
 
 Then begin Phase 5 (`06-phase-5-deeper-bench.md`) for the v2.2 enrichment.

@@ -2,8 +2,8 @@
 
 > **Release:** v2.2 (T1 ships with v2.1 alongside Phase 2-4; T2+T3 ship in v2.2)
 > **Calendar:** Weeks 9-14
-> **Themes:** T1 (Agent depth), T2 (Skill atomicity)
-> **Goal:** Enrich the 21-persona bench to 43 personas and the 24-skill library to 42 skills. Add 3 new opt-in squads. Fill the gaps between v1.7's engineering core and broader product-team needs.
+> **Themes:** T1 (Agent depth), T2 (Skill atomicity), T8 (UTTERLY SATISFIED culture)
+> **Goal:** Enrich the 21-persona bench to 43 personas and the 24-skill library to 42 skills. Add 3 new opt-in squads. Fill the gaps between v1.7's engineering core and broader product-team needs without fragmenting the shared satisfaction culture.
 
 ## What changed from the original
 
@@ -54,6 +54,15 @@ These items were originally planned for Phase 0 (v2.0) but deferred because no c
 Each new persona must clear **one of two gates** before shipping:
 - **Gate A — Demand:** 3+ community requests with named use cases
 - **Gate B — Depth:** ≥ 200 lines with persona depth, decision tree, failure modes, escalation patterns, memory write-back contracts
+
+Every new persona also has a mandatory T8 contract, regardless of whether it
+clears Gate A or Gate B:
+
+- Reference `.agents/references/utter-satisfaction.md`.
+- Define collaborators, domain evidence, blocking conditions, and escalation.
+- Return `SATISFIED`, `CHANGES REQUESTED`, `BLOCKED`, or `NOT ACTIVATED` honestly.
+- Include the persona in release matrices when its domain affects shipping.
+- Pass the satisfaction-contract validation before it enters a module or squad.
 
 The "1-day ECC repackage" pattern is insufficient. Personas that don't clear either gate move to the backlog.
 
@@ -554,6 +563,7 @@ For each skill: create folder + SKILL.md (bootloader) + steps/ (when multi-step)
 - [ ] @ml-ai-ops ↔ @ml-ai-engineer handoff rule is artifact-based (model-approved-for-production.md), not direct call
 - [ ] No persona duplicates an existing persona's charter (pre-release @architect review)
 - [ ] Persona gating: each T1 persona clears Gate A (3+ community requests) OR Gate B (≥200 lines with depth)
+- [ ] Every T1 persona and skill preserves the T8 contract and has a domain-specific evidence/review definition
 
 ---
 
@@ -814,6 +824,7 @@ For each skill: create folder + SKILL.md (bootloader) + steps/ (when multi-step)
 - [ ] @legal-counsel has v2 frontmatter, read-only permissions, charter
 - [ ] Persona reviewed by an actual lawyer before shipping
 - [ ] Ships as opt-in only
+- [ ] @legal-counsel preserves the T8 state vocabulary and cannot convert a legal blocker into approval
 
 ---
 
@@ -825,6 +836,7 @@ For each skill: create folder + SKILL.md (bootloader) + steps/ (when multi-step)
 - [ ] **T5.63** `skills.md` quick-reference updates with 19 new skills
 - [ ] **T5.64** `AGENTS.md` updates agent count from 21 → 44
 - [ ] **T5.65** `ROADMAP.md` updates with v2.2 entry
+- [ ] **T5.66** Builder and catalog validation checks every new persona/skill for the T8 contract
 
 ---
 
@@ -840,6 +852,7 @@ For each skill: create folder + SKILL.md (bootloader) + steps/ (when multi-step)
 - [ ] `brainstormer ↔ founder` pairing documented
 - [ ] @ml-ai-ops ↔ @ml-ai-engineer handoff is artifact-based
 - [ ] @legal-counsel reviewed by a lawyer and shipped as opt-in
+- [ ] All new personas, skills, squads, and modules pass the UTTERLY SATISFIED extension checklist; no new release path bypasses the team gate
 
 ## Risks
 
@@ -849,6 +862,7 @@ For each skill: create folder + SKILL.md (bootloader) + steps/ (when multi-step)
 - **Game-studio squad can't find a real project.** T2 ship-block: a working game project exercises every game persona. If none found, defer to separate minor release.
 - **New personas all want `read + bash`, breaking the reasoning/I/O split.** Hard rule: any persona with `bash` is "thinking + execution" (developer-tier). Every bash command goes through `@executor`. The split is preserved.
 - **humanize skill too long (565 lines) to be default for many personas.** Cache patterns as `humanize-checklist.md`, invoked by all external-facing personas.
+- **New bench fragments the culture.** Keep T8 in the core module and require every persona/skill builder to declare collaborators, evidence, and escalation before registration.
 
 ### Rollback plan
 

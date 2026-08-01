@@ -21,14 +21,16 @@ Phase Pipeline
 ┌──────────────┬─────────────┐
 │ Phase        │ Status      │
 ├──────────────┼─────────────┤
+│ validation   │ ✅ done     │
 │ discovery    │ ✅ done     │
-│ exploration  │ ✅ done     │
+│ research     │ ✅ done     │
 │ strategy     │ ▶️ in-progress │
 │ architecture │    backlog  │
-│ development  │    backlog  │
-│ quality      │    backlog  │
+│ planning     │    backlog  │
+│ execution    │    backlog  │
 │ launch       │    backlog  │
-│ iterate      │    backlog  │
+│ iteration    │    backlog  │
+│ documentation│    backlog  │
 │ retro        │    backlog  │
 └──────────────┴─────────────┘
 

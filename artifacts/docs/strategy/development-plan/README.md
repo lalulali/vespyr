@@ -30,17 +30,19 @@ Three releases. Each is independently shippable. If a release slips, the previou
 
 | Release | Scope | Calendar | Themes |
 |---|---|---|---|
-| **v2.0** | Phase 0 + Phase 1 — foundation, identity, skill restructure, artifact rigor, worktree tooling | ~5 weeks | T1, T2, T3, T7 |
-| **v2.1** | Phase 2 + 3 + 4 + 6 — hooks, MCP, self-learning, graph, telemetry, modularity, loop engineering | ~6 weeks | T3, T4, T5, T6, T7 |
-| **v2.2** | Phase 5 — Deeper Bench (T1 + T2 + T3 personas) | ~6 weeks | T1, T2 |
+| **v2.0** | Phase 0 + Phase 1 — foundation, identity, skill restructure, artifact rigor, worktree tooling | ~5 weeks | T1, T2, T3, T7, T8 |
+| **v2.1** | Phase 2 + 3 + 4 + 6 — hooks, MCP, self-learning, graph, telemetry, modularity, loop engineering | ~6 weeks | T3, T4, T5, T6, T7, T8 |
+| **v2.2** | Phase 5 — Deeper Bench (T1 + T2 + T3 personas) | ~6 weeks | T1, T2, T8 |
 
-**v2.0 ships the differentiators.** The original plan buried Vespyr's 3 unique moats (permission-denial I/O split, Socratic depth, 3-tier memory) in a "T7 Backlog" while spending 138h importing BMAD/Ruflo/ECC patterns. This plan promotes T7 to Phase 0. The differentiators ship first, not last.
+**v2.0 ships the differentiators.** The original plan buried Vespyr's 3 unique moats (permission-denial I/O split, Socratic depth, 3-tier memory) in a "T7 Backlog" while spending 138h importing BMAD/Ruflo/ECC patterns. This plan promotes T7 to Phase 0. The differentiators ship first, not last. T8, the UTTERLY SATISFIED working culture, is cross-cutting and applies to every release rather than being deferred to a later phase.
 
 ---
 
-## 2. The 7 Themes
+## 2. The 8 Themes
 
-Every file in the plan maps to exactly one theme. Themes are capability-shaped, not implementation-shaped.
+Every phase file in the plan maps to its primary capability themes. T8 is the
+intentional exception: it is a cross-cutting DNA contract applied to every
+theme. Themes are capability-shaped, not implementation-shaped.
 
 | # | Theme | One-line statement | Ships in |
 |---|---|---|---|
@@ -51,8 +53,13 @@ Every file in the plan maps to exactly one theme. Themes are capability-shaped, 
 | **T5** | Self-improvement | Sessions leave patterns → patterns promote to conventions → conventions promote to instincts → instincts auto-load | v2.1 |
 | **T6** | Modularity | Core stays lean. Domain extras ship as installable modules | v2.1 |
 | **T7** | Vespyr identity | The 3 differentiators (permission-denial, Socratic depth, 3-tier memory) are explicitly advanced, not just preserved | v2.0 (NEW — promoted from backlog) |
+| **T8** | UTTERLY SATISFIED culture | Active agents collaborate through evidence-backed feedback loops and no release ships with unresolved blocking concerns | Every release (cross-cutting) |
 
 **T7 is new.** The original plan had it buried in "Backlog (no timeline)." This plan promotes it to Phase 0 because the differentiators are the moat. Without T7, v2.0 is "BMAD v6.8 with different file names" — the exact failure mode the original plan warned against.
+
+**T8 is permanent.** Unlike a feature theme, the UTTERLY SATISFIED culture is
+part of how every theme is developed, reviewed, and shipped. It cannot be
+deferred, disabled by a harness, or removed by a module.
 
 ---
 
@@ -60,19 +67,21 @@ Every file in the plan maps to exactly one theme. Themes are capability-shaped, 
 
 | Phase | Release | Themes | What ships | File |
 |---|---|---|---|---|
-| **0** | v2.0 | T1, T3, T7 | Frontmatter v2, IDENTITY block, customization TOML, thin skills ≥80 lines, entry-point consolidation, phase table, glossary, agent contracts, **+ T7: worktree delegation enforcement + tooling (T7.1b), memory auto-loading, Socratic minimum bar, identity docs** | `01-phase-0-foundation.md` |
-| **1** | v2.0 | T1, T2, T3 | 5 long skills → folder + steps (develop, validate-idea, retro, design, launch); tri-modal flows; spec-kernel PRD; sprint-status.yaml; ASCII CLI dashboards; 9 domain experts ≥200 lines; code-reviewer 15-item false-positive guard; Ivy design.md + dynamic HTML; **Teaching Partner: @shifu (Kong Qiu) agent + /teach-me + /craft-lesson skills** | `02-phase-1-skills.md`, `02b-teaching-partner.md` |
-| **2** | v2.1 | T4, T5 | 12 lifecycle hooks; MCP server (10 tools); self-learning (episode→pattern→instinct); SHA-256 witness; delegation enforcement; QA as hard gate; **multi-agent orchestration (solo/parallel modes, CLI orchestrator, structured output)** | `03-phase-2-enablement.md`, `03a-mcp-integration-plan.md`, `03b-multi-agent-orchestration.md` |
-| **3** | v2.1 | T3, T4 | Graph auto-build at 5 lifecycle moments; graph query API; telemetry surface; catalog parity test; "See the Unseen" on all 21 agents; data analyst CLI tools | `04-phase-3-observability.md` |
-| **4** | v2.1 | T6 | install-modules (7 modules); rules/common + per-language; agent-builder/skill-builder/workflow-builder; worked example project; README/AGENTS/QUICK-REFERENCE/CHANGELOG rewrite | `05-phase-4-modularity.md` |
-| **5** | v2.2 | T1, T2 | Deeper Bench: T1 (14 personas + 14 skills + 3 squads), T2 (7 personas + 4 skills), T3 (1 persona) | `06-phase-5-deeper-bench.md` |
-| **6** | v2.1 | T4, T7 | Loop Engineering: `/goal` primitive (run-until-verifiable-condition with separate verifier), automations/heartbeat (scheduled task execution, starts with 1 CI-failure triage), loop state on disk | `11-phase-6-loop-engineering.md` |
+| **0** | v2.0 | T1, T3, T7, T8 | Frontmatter v2, IDENTITY block, customization TOML, thin skills ≥80 lines, entry-point consolidation, phase table, glossary, agent contracts, **+ T7: worktree delegation enforcement + tooling (T7.1b), memory auto-loading, Socratic minimum bar, identity docs; + T8: shared satisfaction contract** | `01-phase-0-foundation.md` |
+| **1** | v2.0 | T1, T2, T3, T8 | 5 long skills → folder + steps (develop, validate-idea, retro, design, launch); tri-modal flows; spec-kernel PRD; sprint-status.yaml; ASCII CLI dashboards; 9 domain experts ≥200 lines; code-reviewer 15-item false-positive guard; Ivy design.md + dynamic HTML; **Teaching Partner: @shifu (Kong Qiu) agent + /teach-me + /craft-lesson skills; T8 handoff states** | `02-phase-1-skills.md`, `02b-teaching-partner.md` |
+| **2** | v2.1 | T4, T5, T8 | 12 lifecycle hooks; MCP server (10 tools); self-learning (episode→pattern→instinct); SHA-256 witness; delegation enforcement; QA as hard gate; **multi-agent orchestration (solo/parallel modes, CLI orchestrator, structured output, T8 runtime validation)** | `03-phase-2-enablement.md`, `03a-mcp-integration-plan.md`, `03b-multi-agent-orchestration.md` |
+| **3** | v2.1 | T3, T4, T8 | Graph auto-build at 5 lifecycle moments; graph query API; telemetry surface; catalog parity test; "See the Unseen" on all 21 agents; data analyst CLI tools; **satisfaction health telemetry** | `04-phase-3-observability.md` |
+| **4** | v2.1 | T6, T8 | install-modules (7 modules); rules/common + per-language; agent-builder/skill-builder/workflow-builder; worked example project; README/AGENTS/QUICK-REFERENCE/CHANGELOG rewrite; **core T8 inheritance and dogfood gate** | `05-phase-4-modularity.md` |
+| **5** | v2.2 | T1, T2, T8 | Deeper Bench: T1 (14 personas + 14 skills + 3 squads), T2 (7 personas + 4 skills), T3 (1 persona); **new-surface T8 validation** | `06-phase-5-deeper-bench.md` |
+| **6** | v2.1 | T4, T7, T8 | Loop Engineering: `/goal` primitive (run-until-verifiable-condition with separate verifier), automations/heartbeat (scheduled task execution, starts with 1 CI-failure triage), loop state on disk; **satisfaction-aware completion** | `11-phase-6-loop-engineering.md` |
 
 **Total: 3 releases.**
 
+**T8 applies to every phase.** Read [14-utter-satisfaction-dna.md](14-utter-satisfaction-dna.md) before implementing any phase, skill, agent, module, harness adapter, MCP tool, or loop. Phase files may add domain-specific checks, but none may weaken the T8 contract.
+
 ---
 
-## 4. Definition of Done (Canonical — 21 Criteria)
+## 4. Definition of Done (Canonical — 25 Criteria)
 
 This is the single DoD list.
 
@@ -110,11 +119,18 @@ This is the single DoD list.
 20. **Onboarding:** web guide published covering getting started, concepts, tutorials, and reference. `npx vespyr doctor` runs a health check. README has "Last verified" dates per section.
 21. **See the Unseen DNA:** all 21 agents have "See the Unseen" in their IDENTITY block (non-negotiable, not customizable). `validate_frontmatter.js` checks for the section.
 
+### T8 DoD (criteria 22-25; applies across releases)
+
+22. **UTTERLY SATISFIED contract:** `.agents/references/utter-satisfaction.md`, global guardrails, canonical entry points, and all participating persona definitions agree on the state vocabulary and collaboration loop.
+23. **Handoff enforcement:** every release-affecting workflow records active-agent satisfaction states, evidence, residual risks, and revalidation triggers; `CHANGES REQUESTED` and `BLOCKED` stop advancement.
+24. **Launch enforcement:** `release-readiness.md` and `go-nogo-decision.md` contain the team gate; every active agent is `SATISFIED`, every inactive optional domain has a reason, and no unresolved blocker can ship.
+25. **Future-surface inheritance:** builders, modules, harness adapters, MCP tools, Flint/solo modes, automations, and loop primitives preserve T8 and have a failing test for an attempted bypass.
+
 ### Release candidates
 
 - **v2.0-rc1:** DoD 1, 2, 8 (frontmatter, skill folders, T7 identity) — minimum structural rigor
 - **v2.0-rc2:** + DoD 3, 4, 19 (spec-kernel, sprint-status, migration path) — upgrade-safe
-- **v2.0-rc3:** + DoD 5, 6, 7, 8b, 21 (false-positive guard, Ivy, ASCII dashboards, citation protocol, See the Unseen DNA) — release-ready
+- **v2.0-rc3:** + DoD 5, 6, 7, 8b, 21, 22, 23, 24 (false-positive guard, Ivy, ASCII dashboards, citation protocol, See the Unseen DNA, UTTERLY SATISFIED baseline and release gate) — release-ready
 
 ---
 
@@ -260,24 +276,26 @@ The "1-day ECC repackage" pattern is insufficient. Personas that don't clear eit
 | `06-phase-5-deeper-bench.md` | Phase 5: FULL persona charters (channeled mentor, charter, permissions, squad, complements) for all 22 new personas + 18 new skills | 682 |
 | `07-harness-integration.md` | Hermes + OpenClaw: full directory structures, SKILL.md templates, sandbox configs, invocation patterns, memory protocols | 445 |
 | `08-framework-analysis.md` | Condensed 4-framework comparison (insights only) | 101 |
-| `09-risk-register.md` | Consolidated risk register (41 risks, single source) | 103 |
-| `10-implementation-specs.md` | Full JS code for 14 scripts: sync-entry-points, validate_frontmatter, merge_customization, memory prefetch, auto_graph, graph_query, telemetry_surface, witness, self_learn, delegation_audit, qa_check, worktree, goal_check, automation | 1078 |
+| `09-risk-register.md` | Consolidated risk register (45 risks, single source) | 119 |
+| `10-implementation-specs.md` | Full JS code for 15 scripts: sync-entry-points, validate_frontmatter, merge_customization, memory prefetch, auto_graph, graph_query, telemetry_surface, witness, self_learn, delegation_audit, qa_check, worktree, goal_check, automation, validate_satisfaction | ~1277 |
 | `11-phase-6-loop-engineering.md` | Loop Engineering: `/goal` primitive + automations + loop state (v2.1) | 130 |
 | `02a-step-tracker.md` | Step Tracker — debug-mode step enforcement audit breadcrumbs | 153 |
 | `12-token-effective-mode.md` | Quick Mode — token-effective discussion mode (ponytail-inspired) | ~170 |
 | `13-mcp-integration-plan.md` | Model Context Protocol (MCP) Integration Plan — Playwright, design system, standards linters | ~120 |
+| `14-utter-satisfaction-dna.md` | Cross-cutting culture contract, state model, collaboration loop, runtime enforcement, telemetry, and future-surface checklists | ~300 |
 
 ---
 
 ## 9. How to Use This Folder
 
-1. **Pick a phase.** Open the matching `01-phase-0-foundation.md` … `06-phase-5-deeper-bench.md`.
-2. **Read the "Source mapping" table.** Each micro-task cites the original F-number and source.
-3. **Work in order.** Phases are linearly dependent (0 → 1 → 2 → 3 → 4 → 5). Within a phase, F-items can be parallelized unless noted.
-4. **Tick the checkbox.** Each micro-task ends with `- [ ]`. The "Done when" block at the end of each phase is the gate to the next.
-5. **If a phase slips**, ship the previous phase's release as a valid intermediate. Phases 0, 1, 2 are independently shippable.
-6. **For implementation code**, see `10-implementation-specs.md` — it has the full JS specs for every new script.
-7. **For harness work**, see `07-harness-integration.md` — it has the honest assessments for Hermes and OpenClaw.
+1. **Read the DNA contract.** Open `14-utter-satisfaction-dna.md` first. It applies to every future change.
+2. **Pick a phase.** Open the matching `01-phase-0-foundation.md` … `06-phase-5-deeper-bench.md`.
+3. **Read the "Source mapping" table.** Each micro-task cites the original F-number and source.
+4. **Work in order.** Phases are linearly dependent (0 → 1 → 2 → 3 → 4 → 5). Within a phase, F-items can be parallelized unless noted.
+5. **Tick the checkbox.** Each micro-task ends with `- [ ]`. The "Done when" block at the end of each phase is the gate to the next.
+6. **If a phase slips**, ship the previous phase's release as a valid intermediate. Phases 0, 1, 2 are independently shippable, but each still requires the T8 gate.
+7. **For implementation code**, see `10-implementation-specs.md` — it has the full JS specs for every new script.
+8. **For harness work**, see `07-harness-integration.md` — it has the honest assessments for Hermes and OpenClaw.
 
 ---
 
@@ -315,7 +333,7 @@ When a phase is mid-execution and a new constraint emerges (e.g., a phase overru
 
 - Use the `feature-request` label
 - Each request must include: what problem it solves, which agent/skill it touches, and a concrete use case
-- Requests that map to an existing theme (T1-T7) get prioritized; requests outside all themes go to v3.0 backlog
+- Requests that map to an existing theme (T1-T8) get prioritized; requests outside all themes go to v3.0 backlog
 
 **Bug reports:**
 
@@ -346,3 +364,21 @@ When a phase is mid-execution and a new constraint emerges (e.g., a phase overru
 - Operations 4-6 are non-blocking: if they exceed their budget, they're skipped with a `[SKIPPED: timeout]` marker
 - Graph rebuild (if `[STALE]`) runs in the background, not at session start — it's triggered by the first agent that needs the graph
 - The latency budget is tested in CI: `npm test` includes a `test_session_latency.js` that measures the full session-start sequence
+
+---
+
+## 14. UTTERLY SATISFIED DNA
+
+T8 is the behavioral DNA of Vespyr. It is not a team slogan or a post-launch
+review ritual. It is the contract that connects Vespyr's role depth, artifact
+rigor, orchestration, observability, modularity, harness adapters, and loops.
+
+The detailed implementation contract lives in
+[14-utter-satisfaction-dna.md](14-utter-satisfaction-dna.md). The short rule is:
+
+> Work until every active, relevant agent is satisfied with evidence. Resolve
+> or escalate every blocking concern. Do not ship until the team gate is GO.
+
+Future work must update the DNA plan when it introduces a new agent, skill,
+phase, module, harness, MCP tool, automation, or release path. A feature that
+cannot preserve T8 is not ready for inclusion in the roadmap.

@@ -323,6 +323,25 @@ Create `.agents/scripts/memory_write.js` that:
 
 ---
 
+## T8 memory continuity
+
+The satisfaction culture depends on honest continuity across sessions. Memory
+must preserve unresolved collaboration state, not only completed work:
+
+- Session summaries include active satisfaction state, unresolved feedback,
+  escalation owner, and next revalidation trigger when applicable.
+- `blockers-and-risks.md` stores `CHANGES REQUESTED` and `BLOCKED` issues until
+  a responsible agent closes or escalates them.
+- `active-decisions.md` records the binding authority's resolution when agents
+  disagree after the feedback limit.
+- Compaction may summarize evidence, but must not erase an unresolved blocker
+  or turn a non-satisfied state into approval.
+
+See [`14-utter-satisfaction-dna.md`](14-utter-satisfaction-dna.md) for the
+state vocabulary and release implications.
+
+---
+
 ## Execution Order
 
 | Phase | Description | Dependencies | Estimated time |
@@ -350,3 +369,4 @@ After all phases are complete, verify with:
 3. **Run the develop skill** → check that each step writes to memory and a session summary is produced
 4. **Check that `@memory-controller load developer "any task"`** returns Tier 1 context with the last session summary populated
 5. **Verify `orchestrator_state.js complete --check-memory`** warns when memory is missing
+6. **Verify satisfaction continuity** — a session containing `BLOCKED` or `CHANGES REQUESTED` reloads that state and its owner in the next session; compaction does not erase it

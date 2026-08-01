@@ -47,8 +47,9 @@ const MAX_WORDS = 500;
 
 // Allowed domain tags
 const VALID_DOMAINS = new Set([
-  'ARCH', 'CODE', 'LESSON', 'PRODUCT', 'RISK', 'SECURITY',
-  'PERF', 'ML', 'UX', 'DATA', 'OPS', 'ROUND TABLE', 'NOTE'
+  'AUTH', 'API', 'DATA', 'ARCH', 'INFRA', 'SECURITY', 'PERF',
+  'PRODUCT', 'PROCESS', 'CODE', 'TEST', 'ML', 'UX', 'MARKET',
+  'RISK', 'LESSON', 'DECISION'
 ]);
 
 // Allowed memory files
@@ -62,6 +63,10 @@ const ALLOWED_FILES = new Set([
   'agent-notes/architect-notes.md',
   'agent-notes/tech-lead-notes.md',
   'agent-notes/product-manager-notes.md',
+  'agent-notes/qa-notes.md',
+  'agent-notes/designer-notes.md',
+  'agent-notes/ml-ai-notes.md',
+  'agent-notes/performance-notes.md',
 ]);
 
 function countWords(text) {
@@ -83,7 +88,7 @@ function runDedupeValidator(filePath, title) {
   const script = path.join(SCRIPTS_DIR, 'dedupe_validator.js');
   if (!fs.existsSync(script)) return { duplicate: false };
   try {
-    const out = execFileSync('node', [script, '--file', filePath, '--title', title], {
+    const out = execFileSync('node', [script, '--target', filePath, '--title', title], {
       encoding: 'utf8',
       cwd: process.cwd()
     });
@@ -157,6 +162,12 @@ Allowed domains: ${[...VALID_DOMAINS].join(', ')}`);
     process.exit(1);
   }
 
+  // Target file must be in the canonical allow-list
+  if (!ALLOWED_FILES.has(file)) {
+    console.error(`Invalid --file "${file}". Allowed: ${[...ALLOWED_FILES].join(', ')}`);
+    process.exit(1);
+  }
+
   // Word count check
   const wordCount = countWords(content);
   if (wordCount > MAX_WORDS) {
@@ -173,7 +184,7 @@ Allowed domains: ${[...VALID_DOMAINS].join(', ')}`);
 
   // --- Deduplicate ---
   const dedupeResult = runDedupeValidator(filePath, title);
-  if (dedupeResult.duplicate) {
+  if (dedupeResult && (dedupeResult.duplicate === true || dedupeResult.status === 'duplicate')) {
     console.error(
       `Duplicate entry detected: "${title}" already exists in ${file}.\n` +
       'Use a different title or update the existing entry manually.'

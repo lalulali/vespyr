@@ -40,12 +40,11 @@ function ensureSessionSummaryFiles() {
         '',
         '## Last Session',
         '- **Date:** none',
+        '- **Agent:** @none',
         '- **Worked on:** No sessions recorded yet.',
         '- **Decisions:** none',
         '- **Next step:** Initialize project memory.',
-        '',
-        '## Active Blockers',
-        'None',
+        '- **Blockers:** none',
         ''
       ].join('\n'), 'utf8');
     } catch (e) { /* non-blocking */ }
@@ -158,6 +157,16 @@ const AGENT_PROFILES = {
     tier2: ['patterns-and-conventions.md', 'active-decisions.md', 'blockers-and-risks.md'],
     domains: ['test', 'bug', 'regression', 'coverage', 'acceptance', 'quality', 'validation', 'pattern', 'anti-pattern'],
     max_results: 5
+  },
+  shifu: {
+    tier2: ['teaching-style.md', 'active-decisions.md', 'patterns-and-conventions.md'],
+    domains: ['teaching', 'learning', 'lesson', 'pedagogy', 'curriculum', 'explanation', 'content', 'study'],
+    max_results: 5
+  },
+  'ml-ai-ops': {
+    tier2: ['active-decisions.md', 'lessons-learned.md'],
+    domains: ['ml', 'model', 'deploy', 'inference', 'serving', 'vector', 'drift', 'monitoring', 'rollback'],
+    max_results: 10
   }
 };
 
@@ -183,18 +192,18 @@ const STOP_WORDS = new Set([
   'add', 'create', 'build', 'fix', 'update', 'change', 'make', 'work', 'need', 'want'
 ]);
 
-const AGENT_NAMES = new Set([
-  'developer', 'architect', 'founder', 'product', 'manager', 'engineer',
-  'researcher', 'analyst', 'writer', 'reviewer', 'tech', 'lead', 'qa',
-  'security', 'devops', 'performance', 'data', 'technical', 'ux', 'ml'
-]);
-
-function extractKeywords(task) {
+function extractKeywords(task, agentName) {
   const words = task.toLowerCase().replace(/[^a-z0-9\s/.-]/g, ' ').split(/\s+/).filter(Boolean);
   const expanded = new Set();
+  // Only the requesting agent's identity token is excluded from keyword
+  // scoring — the persona name is implicit context. Task keywords must never
+  // be stripped, even when they collide with an agent-name token (e.g.
+  // "engineer", "data", "lead", "qa").
+  const identityToken = agentName ? agentName.toLowerCase() : null;
 
   for (const word of words) {
-    if (STOP_WORDS.has(word) || AGENT_NAMES.has(word) || word.length < 2) continue;
+    if (STOP_WORDS.has(word) || word.length < 2) continue;
+    if (identityToken && word === identityToken) continue;
     expanded.add(word);
     // Synonym expansion
     for (const [key, synonyms] of Object.entries(SYNONYMS)) {
@@ -225,16 +234,13 @@ function parseSections(content, filename) {
       const statusMatch = header.match(/\[date:\s*(\d{4}-\d{2}-\d{2})\]/);
       const date = statusMatch ? statusMatch[1] : null;
       const isCritical = header.includes('[CRITICAL]');
-      const isResolved = content.substring(content.indexOf(line)).includes('**Status:** resolved') ||
-                         content.substring(content.indexOf(line)).includes('**Status:** superseded') ||
-                         content.substring(content.indexOf(line)).includes('**Status:** archived');
 
       currentSection = {
         header,
         file: filename,
         date,
         isCritical,
-        isResolved,
+        isResolved: false,
         lines: [],
         body: ''
       };
@@ -247,6 +253,16 @@ function parseSections(content, filename) {
   if (currentSection) {
     currentSection.body = currentLines.join('\n');
     sections.push(currentSection);
+  }
+
+  // Status is per-section: only the current section's own lines decide whether
+  // it is resolved/superseded/archived. Scanning from the section's start to
+  // EOF would mark every earlier section resolved when a later entry resolves.
+  for (const section of sections) {
+    section.isResolved =
+      section.body.includes('**Status:** resolved') ||
+      section.body.includes('**Status:** superseded') ||
+      section.body.includes('**Status:** archived');
   }
 
   return sections;
@@ -299,9 +315,15 @@ function filterMemory(agent, task, maxResults) {
 
   // Use profile-specific max if not explicitly provided
   const max = maxResults || profile.max_results || 10;
-  const keywords = extractKeywords(task);
+  const keywords = extractKeywords(task, agent);
   const now = new Date();
   const allSections = [];
+  let sectionsScanned = 0;
+
+  // Tier 2: the profile's agent-specific file set. Sections from these files
+  // are preferred (score boost) and surfaced to the caller so the tier-2 set
+  // is actually used, while the tier-3 scan below still covers every file.
+  const tier2Set = new Set(profile.tier2 || []);
 
   // Read all memory files (not just tier2 — tier3 scans everything)
   const memoryFiles = [];
@@ -327,10 +349,13 @@ function filterMemory(agent, task, maxResults) {
     try {
       const content = fs.readFileSync(filePath, 'utf8');
       const sections = parseSections(content, file);
+      const isTier2 = tier2Set.has(file);
       for (const section of sections) {
+        sectionsScanned++;
         const score = scoreSection(section, keywords, now);
         if (score !== null && score >= 2) {
-          allSections.push({ ...section, score });
+          // Tier-2 files rank higher among keyword matches (post-threshold boost)
+          allSections.push({ ...section, score: score + (isTier2 ? 2 : 0), tier2: isTier2 });
         }
       }
     } catch (e) {
@@ -351,6 +376,7 @@ function filterMemory(agent, task, maxResults) {
     score: s.score,
     date: s.date,
     isCritical: s.isCritical,
+    tier2: s.tier2 || false,
     // Truncate body to first 3 sentences
     preview: s.body.split(/(?<=[.!?])\s+/).slice(0, 3).join(' ')
   }));
@@ -359,28 +385,60 @@ function filterMemory(agent, task, maxResults) {
     agent,
     task,
     keywords,
-    total_sections_scanned: allSections.length + (allSections.length > 0 ? 0 : 0),
+    tier2_files: profile.tier2 || [],
+    total_sections_scanned: sectionsScanned,
     results_returned: results.length,
     results
   };
 }
 
+// Search the archive index. Canonical format is NDJSON (index.ndjson, written
+// by archive_manager.js append-ndjson): a schema header line followed by one
+// JSON entry object per line. Legacy format is index.json: a single JSON
+// object with an `entries` array. NDJSON is preferred; JSON is the fallback.
 function searchArchive(query, maxResults = 5) {
-  const indexFile = path.join(ARCHIVE_DIR, 'index.json');
-  if (!fs.existsSync(indexFile)) {
+  const ndjsonFile = path.join(ARCHIVE_DIR, 'index.ndjson');
+  const jsonFile = path.join(ARCHIVE_DIR, 'index.json');
+
+  if (!fs.existsSync(ndjsonFile) && !fs.existsSync(jsonFile)) {
     return { error: 'Archive is empty — no entries have been compacted yet.' };
   }
 
   const keywords = extractKeywords(query);
-  let data;
-  try {
-    const content = fs.readFileSync(indexFile, 'utf8');
-    data = JSON.parse(content);
-  } catch (e) {
-    return { error: `Invalid archive index: ${e.message}` };
+  let entries = [];
+  let source = null;
+
+  if (fs.existsSync(ndjsonFile)) {
+    source = 'ndjson';
+    try {
+      const lines = fs.readFileSync(ndjsonFile, 'utf8').split('\n');
+      // Skip header/comment lines; every other line is one JSON entry object.
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (!line || line.startsWith('#')) continue;
+        try {
+          const entry = JSON.parse(line);
+          // The schema header line (first line) has no `id` — skip it.
+          if (entry && typeof entry === 'object' && entry.id) {
+            entries.push(entry);
+          }
+        } catch (e) {
+          // Skip corrupt lines
+        }
+      }
+    } catch (e) {
+      return { error: `Invalid archive index: ${e.message}` };
+    }
+  } else {
+    source = 'json';
+    try {
+      const data = JSON.parse(fs.readFileSync(jsonFile, 'utf8'));
+      entries = data.entries || [];
+    } catch (e) {
+      return { error: `Invalid archive index: ${e.message}` };
+    }
   }
 
-  const entries = data.entries || [];
   const scored = [];
 
   for (const entry of entries) {
@@ -415,7 +473,7 @@ function searchArchive(query, maxResults = 5) {
     location: e.location
   }));
 
-  return { query, keywords, results_returned: results.length, results };
+  return { query, keywords, source, results_returned: results.length, results };
 }
 
 // CLI

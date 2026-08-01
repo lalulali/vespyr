@@ -1,6 +1,6 @@
 # Implementation Specs — JS Code Reference
 
-> **Source:** Extracted from `2. vespyr_evolution_plan.md` (superseded). This file is the canonical home for implementation code. Phase files reference this by section number.
+> **Source:** Extracted from `2. vespyr_evolution_plan.md` (superseded), with the T8 runtime contract added from `14-utter-satisfaction-dna.md`. This file is the canonical home for implementation code. Phase files reference this by section number.
 > **Rule:** When implementing a script, copy the code from here. When updating a script, update it here first, then update the phase file's checklist.
 
 ---
@@ -1199,3 +1199,79 @@ if (cmd === 'create') {
   process.exit(1);
 }
 ```
+
+---
+
+## §15 - validate_satisfaction.js (Phase 2, F2.28, ~140 lines)
+
+**Path:** `.agents/scripts/validate_satisfaction.js`
+
+**Purpose:** Validate the machine-readable UTTERLY SATISFIED team record before
+handoffs and release. This is a gate, not a scoring system. It must return a
+non-zero exit code for an incomplete or dishonest record.
+
+**Usage:**
+
+```bash
+node .agents/scripts/validate_satisfaction.js validate \
+  artifacts/output/06-launch/utter-satisfaction.json
+node .agents/scripts/validate_satisfaction.js status \
+  artifacts/output/06-launch/utter-satisfaction.json
+```
+
+**Required schema:**
+
+```json
+{
+  "schema": "vespyr/utter-satisfaction@1.0",
+  "release": "feature-or-version",
+  "updated_at": "YYYY-MM-DDTHH:mm:ssZ",
+  "agents": [
+    {
+      "name": "qa-engineer",
+      "scope": "active",
+      "state": "SATISFIED",
+      "evidence_refs": ["artifacts/output/05-execution/quality/qa-report.md"],
+      "feedback_resolved": [],
+      "residual_risks": [],
+      "updated_at": "YYYY-MM-DDTHH:mm:ssZ"
+    }
+  ],
+  "gate": "GO",
+  "revalidation_required": false
+}
+```
+
+**Validation rules:**
+
+1. File exists, parses as JSON, and declares the supported schema.
+2. Agent names are unique and use the canonical persona names.
+3. `active` rows have `SATISFIED`, `CHANGES REQUESTED`, or `BLOCKED` state.
+4. `SATISFIED` rows contain at least one evidence reference and no unresolved
+   blocking risk.
+5. `NOT ACTIVATED` rows require `scope: "inactive"` and a non-empty reason.
+6. `CHANGES REQUESTED`, `BLOCKED`, or `revalidation_required: true` returns a
+   failed release gate.
+7. Evidence references must exist when `--strict` is used.
+8. `gate: "GO"` is valid only when every active row is `SATISFIED`, all inactive
+   rows have reasons, and the record is not stale.
+9. A material artifact fingerprint change invalidates affected rows.
+
+**Output:** JSON summary with `valid`, `gate`, `failures[]`, `active_count`,
+`satisfied_count`, `inactive_count`, `evidence_complete`, and
+`revalidation_required`. Human-readable mode prints the first blocking reason
+followed by all remaining failures.
+
+**Integration points:**
+
+- `orchestrator_state.js next` calls `validate` before release-affecting phase
+  advancement.
+- `/launch` Step 1 calls `validate --strict`.
+- `format_agent_output.js` validates each agent's state fields.
+- Harness adapters and `@vespyr/mcp` expose the same command/result rather than
+  reimplementing the rules.
+
+**Failure behavior:** Never downgrade a failed gate to a warning on a release
+path. Do not provide a `--skip` flag. A maintainer resolves the evidence or
+uses the documented escalation path; the validator does not decide whether a
+risk is acceptable.

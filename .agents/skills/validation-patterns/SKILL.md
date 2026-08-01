@@ -51,7 +51,7 @@ Load the selected method from `methods.csv`. Design the validation:
 Guide the user through execution. Record results:
 
 ```
-@memory-controller write agent-notes/founder-notes.md
+@memory-controller write active-decisions.md
 ### [VALIDATION] {method name} — {hypothesis} [date: YYYY-MM-DD] [agent: @founder]
 {method used, test design, results, verdict}
 **Status:** active
@@ -59,7 +59,7 @@ Guide the user through execution. Record results:
 
 ## Output artifacts
 
-- Validation design and results written to `artifacts/memory/agent-notes/founder-notes.md`
+- Validation design and results written to `artifacts/memory/active-decisions.md`
 - If the validation produces a structured output (survey results, A/B data), delegate to `@writer` for `artifacts/output/01-research/validation-results.md`
 
 ## State machine integration

@@ -2,8 +2,8 @@
 
 > **Release:** v2.0
 > **Calendar:** Weeks 3-4
-> **Themes:** T2 (Skill atomicity), T3 (Artifact rigor)
-> **Goal:** Skills become atomic + tri-modal. Artifacts become kernel + companions. State is dual-format (JSON + YAML). After this phase, Vespyr is "atomic" — skills resume, skills have phases, skills are first-class tools; artifacts are rigorous.
+> **Themes:** T2 (Skill atomicity), T3 (Artifact rigor), T8 (UTTERLY SATISFIED culture)
+> **Goal:** Skills become atomic + tri-modal. Artifacts become kernel + companions. State is dual-format (JSON + YAML). After this phase, Vespyr is "atomic" — skills resume, skills have phases, skills are first-class tools; artifacts are rigorous; and every handoff carries an explicit satisfaction state.
 
 ## What changed from the original plan
 
@@ -123,6 +123,7 @@ This skill runs in sequential steps. Each step is a self-contained file with its
 - Test failure that doesn't reproduce locally
 - Security finding rated Critical or High
 - 2 review loops exceeded (escalate to `@tech-lead`)
+- Active agent is `CHANGES REQUESTED` or `BLOCKED` at a required handoff
 
 ## State machine integration
 At start: `node .agents/scripts/orchestrator_state.js status`
@@ -396,6 +397,10 @@ Same folder + step-file architecture. SKILL.md becomes a ~50-line router; 5 step
 - `step-03-smoke-test.md` — run smoke tests against production
 - `step-04-monitor.md` — monitor for errors, latency, traffic anomalies
 - `step-05-launch-log.md` — write `launch-log.md`, record completion
+
+The readiness step must also load the T8 team matrix. Deployment is blocked
+until every active, relevant agent is `SATISFIED` with evidence and every
+`NOT ACTIVATED` row has a specific reason.
 
 ### Checklist
 
@@ -1423,6 +1428,7 @@ These personas are invoked by step files. The router declares them so the agent 
 - [x] F1.32.3 — Update `develop/SKILL.md`: add harness adherence block (non-negotiable step sequence, QA auto-execution)
 - [x] F1.32.4 — Add `## Persona delegation` to `plan/SKILL.md` (@tech-lead), `review/SKILL.md` (@code-reviewer), `test/SKILL.md` (@qa-engineer), `kanban/SKILL.md` (@product-manager)
 - [x] F1.32.5 — Add `## Primary personas` to `design/SKILL.md` router (@product-manager, @product-designer)
+- [x] F1.32.6 — Add the UTTERLY SATISFIED handoff contract to quality and launch steps; unresolved `CHANGES REQUESTED` and `BLOCKED` states stop progression
 - [x] Run content audit: verify all 7 changed files have the intended additions
 
 ---
@@ -1483,6 +1489,8 @@ Upgrade `@product-manager` (Sarah) to operate as a full **AI Product Manager (AI
 - [x] `/unpack-problem` skill exists with tri-modal SKILL.md router + 4 step files; output brief successfully routes to `/validate-idea`, `/shape-up`, and `/explore-idea`; verified via `test-unpack-problem.mjs` (103/103 assertions).
 - [x] Modular design thinking skills (`/root-cause`, `/research-plan`, `/empathy-map`, `/journey-map`, `/jtbd`, `/discovery-report`) exist with independent `SKILL.md` facilitators, templates in `.agents/templates/discovery/`, `/help-me` integration, and registration in `AGENTS.md`.
 
+- [x] **T8 handoff contract:** launch readiness and workflow steps carry explicit satisfaction states, evidence, and revalidation requirements; runtime validation remains a Phase 2 deliverable.
+
 ## Risks
 
 - **Step-file split loses content.** Run a content-audit script before/after the split.
@@ -1509,6 +1517,7 @@ Once Phase 1 is done, every new file in Phase 2+ can assume:
 - Every step file carries an explicit delegation contract in its frontmatter.
 - Artifacts are kernel + companions.
 - State is dual-format (YAML for humans, JSON for cache).
+- Every release-affecting step carries the UTTERLY SATISFIED handoff contract from `14-utter-satisfaction-dna.md`.
 - Domain experts have ≥ 200 lines of depth.
 - 100+ elicitation methods, 60+ brainstorming methods, 30+ validation patterns.
 - Ivy produces `design.md` + dynamic HTML.

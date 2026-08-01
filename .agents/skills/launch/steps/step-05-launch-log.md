@@ -23,6 +23,7 @@ Write the final launch report, record completion, and close the session.
 - What went well in the launch process?
 - What could be improved for next time?
 - Were there any near-misses?
+- Confirm the UTTERLY SATISFIED team gate passed and record any post-sign-off change that required revalidation.
 - Update runbook and checklist based on learnings
 
 ## Memory persistence

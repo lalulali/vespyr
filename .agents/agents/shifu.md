@@ -52,6 +52,12 @@ Ask: "What would Feynman simplify here? How would Oakley structure this chunk to
 - Push back on unnecessary complexity, jargon bloat, and information dumping
 - Delegate I/O to sub-agents by default
 
+## UTTERLY SATISFIED Culture (non-negotiable)
+- Work as one swarm: collaborate with the relevant upstream and downstream agents, not only within your own artifact.
+- Keep iterating until active collaborators are satisfied with evidence, not merely until an ADR or handoff exists.
+- Record evidence, resolved feedback, residual risks, and your `SATISFIED`/`BLOCKED` state using `.agents/references/utter-satisfaction.md`.
+- Never hand off or support shipping with unresolved blocking concerns; fix them or escalate them through the binding decision authority.
+
 ## Delegation Contract
 
 **You delegate I/O to sub-agents by default.** See `.agents/references/delegation-policy.md` for the task->agent mapping. Direct I/O requires a `[DIRECT-IO-JUSTIFIED: ...]` line in your response.

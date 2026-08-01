@@ -12,6 +12,7 @@
 2. **Curation over coverage.** 5 default servers. Each must directly serve at least one of Vespyr's 21 personas. Add a server only when multiple personas need it and `@executor` can't provide the same capability cleanly.
 3. **MCP complements sub-agents, not replaces them.** `@executor` still owns shell I/O. MCP servers provide structured data that shell commands can't return cleanly (DOM trees, typed diffs, LSP diagnostics).
 4. **Hard context caps.** Every MCP response is truncated to 2,000 tokens max before entering the LLM context.
+5. **UTTERLY SATISFIED is preserved.** MCP tools may return evidence and validation results, but they cannot infer approval, erase blockers, or bypass the canonical satisfaction and release gate.
 
 ---
 

@@ -63,7 +63,7 @@ Before loading Vespyr machinery, stop at the first rung that holds:
 1. Just answer?         → yes: respond directly from current context (0 load)
 2. Need to read code?   → yes: direct file read, no @reader delegation
 3. Need memory?         → yes: load Tier 1 only (project-context.md, ~200 tokens)
-4. Need a skill?        → yes: stay in Flint Mode, load skill but skip Socratic/citations
+4. Need a skill?        → yes: stay in Flint Mode, load skill; keep T8, safety, evidence, and release rules
 5. Only then:           → full Vespyr (all tiers, delegation, Socratic, citations)
 ```
 
@@ -179,6 +179,8 @@ To get maximum value from both modes, follow this phased workflow:
 | Skills | all | all (stripped Socratic) | all (stripped Socratic) | none |
 | Socratic stance | yes | no | no | no |
 | Citations | yes | no | no | no |
+| UTTERLY SATISFIED state/evidence | yes | yes | yes | yes |
+| Release gate and revalidation | yes | yes | yes | yes |
 | Output compression | none | ~30% | ~55% | ~70% |
 | Response preamble | yes | no | no | no |
 | Step tracking | yes | yes | no | no |
@@ -200,6 +202,7 @@ To get maximum value from both modes, follow this phased workflow:
 | Context budget tracking | ❌ no | Minimal context by default |
 | Session continuity | ❌ no (ultra) / ✅ yes (lite/full) | Ultra = ephemeral |
 | Delegation sub-agents | ❌ no | Direct I/O saves ~200 tokens/hop |
+| **UTTERLY SATISFIED culture** | ✅ yes | The DNA cannot be disabled; release records still require evidence and revalidation |
 
 ---
 
@@ -244,6 +247,7 @@ To get maximum value from both modes, follow this phased workflow:
 | `.agents/config.yaml` | Add `mode: standard` and `flint_level: full` defaults |
 | `AGENTS.md` | Add "Flint Mode" section (~12 lines) — when to use, how to toggle, what's stripped |
 | `.agents/GUARDRAILS.md` | Add: "In Flint Mode, only §Bash Safety, §Deletion Approval, §Scope Restriction, and §Honesty apply." |
+| `.agents/rules/flint-mode.md` | Explicitly preserve T8 state vocabulary, evidence, escalation, and release/revalidation gates at every compression level |
 
 **No new scripts. No new dependencies.** The mode switch is a behavior change — agents read different persona/rule files. No runtime operation.
 
@@ -273,6 +277,7 @@ To get maximum value from both modes, follow this phased workflow:
 - [ ] Test: verify `flint full` loads ~800 tokens, standard mode unchanged
 - [ ] Test: verify speech compression applies correctly at each level
 - [ ] Test: verify mid-session activation overwrites active agent style
+- [ ] Test: verify Flint, including `ultra`, cannot advance an incomplete or blocked T8 release gate
 
 **Effort:** ~3 hours. No new scripts. No changes to existing scripts.
 
@@ -280,13 +285,15 @@ To get maximum value from both modes, follow this phased workflow:
 
 ## Relationship to Existing Plan
 
-Standalone feature — not part of any phase. Ships independently at any time. Can be activated mid-sprint.
+Standalone feature — not part of any phase, but still governed by T8. Ships
+independently at any time and can be activated mid-sprint without weakening the
+shared satisfaction or release contract.
 
 | Plan item | Relationship |
 |---|---|
-| Phase 0 (T7 identity) | Independent — Flint Mode strips T7 features (delegation, memory tiers, Socratic) but doesn't conflict; they coexist |
-| Phase 2 (hooks) | Independent — Flint Mode skips hooks, but hooks still exist for standard mode |
-| `12-step-tracker.md` | Independent — `flint ultra` forces step_tracking off; tracker still exists for standard and lite/full |
+| Phase 0 (T7 identity) | T8-compatible modifier — Flint may compress context and prose, but cannot strip the shared satisfaction DNA or release gate |
+| Phase 2 (hooks) | Flint may reduce non-critical context hooks, but safety and satisfaction/release enforcement remain active |
+| `12-step-tracker.md` | Step tracking may be off at `ultra`; satisfaction state tracking and release evidence remain mandatory |
 | Session-start latency budget (README §13) | Flint Mode has its own budget: <50ms (no memory, no graph, no telemetry) |
 | @developer / @qa agents | Primary beneficiaries — high message-count, high output-volume agents gain the most from `flint full`/`ultra` |
 

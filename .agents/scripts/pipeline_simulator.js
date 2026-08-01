@@ -2,8 +2,9 @@
 /**
  * Pipeline Simulator — Generates Realistic Telemetry Data for Vespyr
  *
- * Simulates a full pipeline run (validation → exploration → design → development)
- * and records telemetry events for profiling and optimization analysis.
+ * Simulates a full pipeline run (validation → discovery → research → strategy →
+ * architecture → planning → execution → launch → iteration → documentation →
+ * retro) and records telemetry events for profiling and optimization analysis.
  *
  * Usage:
  *   node pipeline_simulator.js
@@ -16,31 +17,70 @@ const path = require('path');
 
 const TELEMETRY_SCRIPT = path.join(__dirname, 'swarm_telemetry.js');
 
-// Realistic token estimates based on actual agent prompt sizes + memory load
+// Realistic token estimates based on actual agent prompt sizes + memory load.
+// Phase order mirrors .agents/references/phase-table.md (11-phase model) and
+// orchestrator_state.js createInitialState() agent assignments.
 const PHASE_CONFIG = {
   validation: {
     agents: [
       { name: 'founder', base_tokens: 2107, memory_load: 800, template_tokens: 1370, duration_ms: 45000 }
     ]
   },
-  exploration: {
+  discovery: {
     agents: [
       { name: 'researcher', base_tokens: 906, memory_load: 1000, template_tokens: 1192, duration_ms: 60000 },
       { name: 'user-researcher', base_tokens: 1044, memory_load: 1000, template_tokens: 1720, duration_ms: 55000 }
     ]
   },
-  design: {
+  research: {
+    agents: [
+      { name: 'researcher', base_tokens: 906, memory_load: 1000, template_tokens: 1192, duration_ms: 60000 },
+      { name: 'user-researcher', base_tokens: 1044, memory_load: 1000, template_tokens: 1720, duration_ms: 55000 }
+    ]
+  },
+  strategy: {
     agents: [
       { name: 'product-manager', base_tokens: 2542, memory_load: 1200, template_tokens: 1066, duration_ms: 70000 },
       { name: 'product-designer', base_tokens: 1255, memory_load: 1000, template_tokens: 3045, duration_ms: 65000 }
     ]
   },
-  development: {
+  architecture: {
     agents: [
-      { name: 'tech-lead', base_tokens: 1719, memory_load: 1000, template_tokens: 1606, duration_ms: 50000 },
+      { name: 'architect', base_tokens: 1988, memory_load: 1200, template_tokens: 1606, duration_ms: 65000 }
+    ]
+  },
+  planning: {
+    agents: [
+      { name: 'tech-lead', base_tokens: 1719, memory_load: 1000, template_tokens: 1606, duration_ms: 50000 }
+    ]
+  },
+  execution: {
+    agents: [
       { name: 'developer', base_tokens: 1988, memory_load: 1200, template_tokens: 0, duration_ms: 120000 },
       { name: 'code-reviewer', base_tokens: 1026, memory_load: 800, template_tokens: 0, duration_ms: 40000 },
       { name: 'qa-engineer', base_tokens: 1270, memory_load: 800, template_tokens: 0, duration_ms: 35000 }
+    ]
+  },
+  launch: {
+    agents: [
+      { name: 'devops-engineer', base_tokens: 1270, memory_load: 800, template_tokens: 0, duration_ms: 40000 },
+      { name: 'product-manager', base_tokens: 2542, memory_load: 1200, template_tokens: 1066, duration_ms: 50000 }
+    ]
+  },
+  iteration: {
+    agents: [
+      { name: 'product-manager', base_tokens: 2542, memory_load: 1200, template_tokens: 1066, duration_ms: 55000 },
+      { name: 'data-analyst', base_tokens: 1026, memory_load: 800, template_tokens: 0, duration_ms: 35000 }
+    ]
+  },
+  documentation: {
+    agents: [
+      { name: 'technical-writer', base_tokens: 1270, memory_load: 800, template_tokens: 0, duration_ms: 45000 }
+    ]
+  },
+  retro: {
+    agents: [
+      { name: 'product-manager', base_tokens: 2542, memory_load: 1200, template_tokens: 1066, duration_ms: 40000 }
     ]
   }
 };

@@ -51,7 +51,7 @@ Load the selected method from `methods.csv`. Apply it step-by-step:
 Record outputs to memory:
 
 ```
-@memory-controller write agent-notes/founder-notes.md
+@memory-controller write active-decisions.md
 ### [BRAINSTORM] {method name} — {topic} [date: YYYY-MM-DD] [agent: @founder]
 {synthesized outputs, key ideas, decisions, open questions}
 **Status:** active
@@ -59,7 +59,7 @@ Record outputs to memory:
 
 ## Output artifacts
 
-- Ideas and decisions written to `artifacts/memory/agent-notes/founder-notes.md`
+- Ideas and decisions written to `artifacts/memory/active-decisions.md`
 - No standalone output file — brainstorming feeds into subsequent skills (`/validate-idea`, `/shape-up`, `/design`)
 
 ## State machine integration

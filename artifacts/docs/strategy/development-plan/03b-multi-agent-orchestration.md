@@ -3,7 +3,7 @@
 **Status:** Planned
 **Date:** 2026-07-22
 **Depends on:** Phase 0 (agent personas, delegation-pattern.md), Phase 2 hooks F2.1-F2.5 (lifecycle hooks for enforcement), Plan 03a (§3a MCP server for tool exposure)
-**Theme:** T4 (Harness contracts)
+**Themes:** T4 (Harness contracts), T8 (UTTERLY SATISFIED culture)
 **Release:** v2.1
 
 ---
@@ -72,6 +72,28 @@ This means **Vespyr's #1 differentiator (permission-denial I/O split) delivers z
 │  All produce: Structured output (unified schema)              │
 └──────────────────────────────────────────────────────────────┘
 ```
+
+### 2.1 Satisfaction control plane
+
+The orchestration layer is also the control plane for Vespyr's behavioral DNA.
+Native adapters, MCP calls, CLI processes, and solo fallback must all return
+the same satisfaction state vocabulary defined in
+`14-utter-satisfaction-dna.md`.
+
+- A participating agent returns a state, evidence references, feedback closure,
+  and residual risks, not only a free-text verdict.
+- The orchestrator routes `CHANGES REQUESTED` back to the responsible owner and
+  routes `BLOCKED` to the binding decision authority.
+- `SATISFIED` is never inferred from a zero exit code, a successful tool call,
+  or a majority vote.
+- Solo mode is an honest degraded mode. It cannot create fake multi-agent
+  satisfaction and remains blocked from release-affecting development/QA paths
+  unless the explicit release gate still passes.
+- A material artifact or scope change sets affected rows to
+  `revalidation_required` until reviewed again.
+
+The orchestration adapter is successful only when it preserves this control
+plane across harnesses, not merely when it can spawn a process.
 
 ---
 
@@ -408,6 +430,7 @@ When a skill invokes multiple reasoning agents (@founder, @architect, @qa-engine
 **Solo mode restrictions:**
 - Solo mode is **blocked from development and QA phases** unless explicitly allowed via `VESPYR_ALLOW_SOLO_DEV=1`. The orchestrator state machine refuses to advance out of `development` with solo-mode outputs.
 - Solo-mode `qa-signoff.md` (from Phase 2 F2.23-F2.27) is marked `INVALID — solo mode` and cannot pass the QA hard gate.
+- `VESPYR_ALLOW_SOLO_DEV=1` is an experimentation override only. It never bypasses the T8 satisfaction validator or permits a release.
 
 - [ ] **F3b.25** — Create `.agents/references/solo-mode-protocol.md` (~150 lines): the complete solo-mode specification with separate sections for I/O delegation behavior and multi-agent reasoning behavior. Documents all 5 guardrails, activation pattern, output format, and restrictions.
 - [ ] **F3b.26** — Update solo-mode activation in all 9 pipeline skills: replace any ad-hoc solo mode descriptions with a reference to `solo-mode-protocol.md`. Every skill must distinguish between I/O delegation solo (Pattern A) and multi-agent reasoning solo (Pattern B) when activating.
@@ -442,6 +465,13 @@ When a skill invokes multiple reasoning agents (@founder, @architect, @qa-engine
     "blind_spots": ["No accessibility review", "No i18n review"],
     "solo_mode_penalty_applied": false
   },
+  "satisfaction": {
+    "state": "SATISFIED",
+    "evidence_refs": ["artifacts/output/05-execution/quality/qa-report.md"],
+    "feedback_resolved": ["CR-001"],
+    "blocking_issues": [],
+    "revalidation_required": false
+  },
   "agents": [
     {
       "name": "qa-engineer",
@@ -449,6 +479,9 @@ When a skill invokes multiple reasoning agents (@founder, @architect, @qa-engine
       "type": "reasoning",
       "verdict": "CONDITIONAL",
       "confidence": "medium",
+      "satisfaction_state": "CHANGES REQUESTED",
+      "evidence_refs": ["artifacts/output/05-execution/quality/qa-report.md"],
+      "feedback_resolved": [],
       "summary": "42/45 tests pass. 3 failures in edge cases.",
       "full_response": "**Nina (🛡️):** ...",
       "caveats": ["3 test failures in rate-limit edge cases"],
@@ -469,7 +502,8 @@ When a skill invokes multiple reasoning agents (@founder, @architect, @qa-engine
     "applicable": true,
     "verdict": "CONDITIONAL",
     "blocking_issues": ["3 test failures", "API key exposure"],
-    "recommended_next_step": "Fix blocking issues, re-run QA gate"
+    "recommended_next_step": "Fix blocking issues, re-run QA gate",
+    "satisfaction_gate": "NO-GO"
   }
 }
 ```
@@ -489,7 +523,7 @@ When a skill invokes multiple reasoning agents (@founder, @architect, @qa-engine
 - [ ] **F3b.29** — Create `.agents/references/multi-agent-output-schema.md` (~100 lines): full schema specification with field descriptions, allowed values, examples for each agent type and each orchestration mode.
 - [ ] **F3b.30** — Create `.agents/scripts/format_agent_output.js` (~100 lines): takes raw agent responses + mode + metadata, validates required fields, produces unified JSON. Warns on missing disagreement in solo mode.
 - [ ] **F3b.31** — Wire structured output into `orchestrator_state.js`: `check-verdict` subcommand reads structured output and extracts the consensus verdict. Used by `next` to gate phase advances. `qa-signoff.md` generation (Phase 2 F2.23-F2.27) includes a hash of the structured output.
-- [ ] **F3b.32** — Add output format enforcement to all 9 pipeline skills: every multi-agent operation must produce a `multi-agent-output.json` artifact alongside any human-readable output. This artifact is the machine-readable source of truth.
+- [ ] **F3b.32** — Add output format enforcement to all 9 pipeline skills: every multi-agent operation must produce a `multi-agent-output.json` artifact alongside any human-readable output. This artifact is the machine-readable source of truth and must include the T8 satisfaction state, evidence references, feedback closure, blockers, and revalidation flag.
 
 **Estimate:** 3-4 hours
 
@@ -561,12 +595,14 @@ Read harness-capabilities.json
 | `opencode.json` | No structural changes needed — adapter handles this | None |
 | Plan 03a MCP server | Add `vespyr_spawn_agent` tool to `@vespyr/mcp` server (see F3b.13-F3b.18) | Medium — extends existing plan |
 | `phase-table.md` | Add "Minimum Orchestration Mode" column per phase | Low |
+| `14-utter-satisfaction-dna.md` | Define the shared state vocabulary, evidence contract, and release gate consumed by every mode | Low |
 | `bin/cli.js` | Add `detect`, `sync-agents`, `agent-run` subcommands | Medium |
 
 - [ ] **F3b.37** — Update `workflow.md`: add §1.7 "Multi-Agent Orchestration Modes" (~100 lines) with the M1-M4 mechanism tiers, per-phase mode requirements table, mode selection decision tree, I/O delegation in non-M1 harnesses, solo mode limitations, and the rule that development/QA outputs from solo mode block phase advance.
 - [ ] **F3b.38** — Update `delegation-pattern.md`: rewrite per-harness implementation guides. Replace "create custom hook scripts" with concrete instructions: for Claude Code → `npx vespyr sync-agents --harness claude-code`, for VS Code → `npx vespyr sync-agents --harness vscode`, for shell-only harnesses → `npx vespyr agent-run --agent executor --prompt "..."`. Wire hook enforcement (Phase 2 `pre:bash:delegation`) to recommend `npx vespyr agent-run --agent executor` instead of blocking outright.
 - [ ] **F3b.39** — Update `round-table/SKILL.md`: add `--mode native|mcp|cli|solo` flag (backward compatible — `--solo` is alias for `--mode solo`). Add MCP agent invocation as Step 1.5 (when M2 is available, spawn agents as parallel MCP tool calls). Reference `solo-mode-protocol.md` and `multi-agent-output-schema.md`.
 - [ ] **F3b.40** — Update `AGENTS.md` and `agent.md.canonical`: add "Multi-Agent Orchestration" section documenting the 4 mechanism tiers, per-harness setup, and mode selection behavior.
+- [ ] **F3b.41** — Test T8 preservation across M1/M2/M3/M4: no adapter may infer `SATISFIED`, drop evidence, hide `BLOCKED`, or let a stale sign-off reach launch.
 
 **Estimate:** 6-8 hours
 
@@ -604,7 +640,7 @@ This covers the two most capable subagent systems outside OpenCode.
 | Structured Output Format | F3b.29-F3b.32 | 3-4 |
 | Mode Selection & Telemetry | F3b.33-F3b.36 | 4-5 |
 | Integration & Documentation | F3b.37-F3b.40 | 6-8 |
-| **Total** | **40 items** | **43-55 hours** |
+| **Total** | **41 items** | **43-55 hours** |
 
 **Calendar:** ~3 weeks (can run in parallel with Plan 03a MCP integration; they share the `@vespyr/mcp` server but touch different tool surfaces).
 
@@ -627,6 +663,7 @@ This covers the two most capable subagent systems outside OpenCode.
 | **Model provider auto-detection fails** | Medium | Low | Fallback chain: harness config → env var → `models.json` default → hardcoded. Documents how to set `VESPYR_PROVIDER`. |
 | **Windsurf/Devin rebranding causes detection failure** | Low | Low | Detection is mechanism-based, not harness-name-based. Rebranding doesn't break detection. |
 | **Cursor adds native subagent support mid-development** | Low | Positive | Detection picks up new capabilities. Adapter can be added as a fast-follow. |
+| **Adapter or solo mode fabricates satisfaction** | Medium | High | Validate the structured satisfaction object, require evidence, watermark degraded modes, and keep release advancement blocked on incomplete or stale rows. |
 
 ---
 
@@ -647,6 +684,7 @@ This covers the two most capable subagent systems outside OpenCode.
 | Round-table works in all modes | Manual test: `/round-table --mode native`, `--mode mcp`, `--mode cli`, `--mode solo` |
 | No regression on existing OpenCode path | Run `/develop` on test project in OpenCode — all existing behavior preserved |
 | VS Code adapter produces valid format | Generated `.github/agents/*.agent.md` loads correctly in VS Code Copilot |
+| T8 state preservation | Run the same blocked, revalidation, and all-satisfied scenarios through M1/M2/M3/M4; only the final scenario can reach GO |
 
 ---
 
@@ -659,6 +697,7 @@ If Plan 03b breaks:
 - **Solo mode guardrails:** Set `VESPYR_SOLO_MIN_DISAGREEMENT=0` to disable mandatory disagreement. `VESPYR_ALLOW_SOLO_DEV=1` to bypass dev/QA block.
 - **Mode selection:** Set `VESPYR_MODE=solo` globally to bypass all detection and force the simplest path.
 - **State machine:** `orchestrator_state.js next` with `--skip-mode-check` bypasses mode-aware gating.
+- **T8 exception:** rollback or mode flags never bypass `validate_satisfaction.js`; a release still requires the complete team gate.
 
 ---
 
@@ -672,6 +711,7 @@ If Plan 03b breaks:
 - All multi-agent operations produce structured output consumed by the state machine.
 - Mode telemetry feeds into self-learning metrics.
 - Per-skill mode requirements are enforced in `orchestrator_state.js`.
+- Every orchestration mode emits the T8 state/evidence contract; degraded modes cannot bypass the release gate.
 
 ---
 

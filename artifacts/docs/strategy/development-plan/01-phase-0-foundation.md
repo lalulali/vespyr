@@ -2,8 +2,8 @@
 
 > **Release:** v2.0
 > **Calendar:** Week 1-2
-> **Themes:** T1 (Agent depth), T3 (Artifact rigor), T7 (Vespyr identity)
-> **Goal:** Establish the contracts that everything else builds on AND advance Vespyr's 3 differentiators. After this phase, Vespyr is "rigorous" and "identity-locked" — agents are locked, customization works, entry points consolidated, terminology fixed, and the 3 moats (permission-denial, Socratic depth, 3-tier memory) are explicitly strengthened.
+> **Themes:** T1 (Agent depth), T3 (Artifact rigor), T7 (Vespyr identity), T8 (UTTERLY SATISFIED culture)
+> **Goal:** Establish the contracts that everything else builds on AND advance Vespyr's 3 differentiators. After this phase, Vespyr is "rigorous" and "identity-locked" — agents are locked, customization works, entry points consolidated, terminology fixed, the 3 moats (permission-denial, Socratic depth, 3-tier memory) are explicitly strengthened, and every participating agent inherits the UTTERLY SATISFIED contract.
 
 ## What changed from the original plan
 
@@ -29,6 +29,29 @@
 | F0.23-F0.28 | **Removed** | Deferred to v2.3+ (critic infrastructure) |
 | T7.1-T7.4 | **New** (was backlog) | ROADMAP §T7 — promoted to Phase 0 |
 | F0.29 | **New** | User request — citation & footnote protocol for information integrity |
+
+---
+
+## T8 — UTTERLY SATISFIED DNA baseline
+
+**Source:** User requirement | **Theme:** T8 (cross-cutting)
+
+Phase 0 establishes the behavioral contract that later hooks, skills,
+orchestration modes, modules, and harness adapters must preserve.
+
+- [x] Create `.agents/references/utter-satisfaction.md` as the canonical state,
+  collaboration, evidence, escalation, and release-gate contract.
+- [x] Add the culture to the global guardrails and canonical entry points.
+- [x] Add the contract to all 19 participating persona definitions.
+- [x] Add the handoff rule to `workflow.md` and the team matrix to launch
+  readiness templates.
+- [ ] Add machine validation in Phase 2; the Phase 0 baseline remains valid
+  without claiming runtime enforcement that does not yet exist.
+
+**Foundation rule:** a new persona, skill, or harness adapter cannot be
+considered complete unless it references and preserves the T8 contract. The
+full future implementation is in
+[`14-utter-satisfaction-dna.md`](14-utter-satisfaction-dna.md).
 
 ---
 
@@ -279,6 +302,7 @@ In the agent file, hardcode the core identity at the top with a clear `<!-- IDEN
 You are a {role} with {depth}.
 ## Persona voice
 ## Persona principles (non-negotiable)
+## UTTERLY SATISFIED Culture (non-negotiable)
 ## See the Unseen (non-negotiable)
 Before producing any output:
 - Query the code/doc graphs for blast radius and dependents of any proposed change
@@ -474,6 +498,8 @@ Each agent has a clear scope. Use this table to decide who to invoke. If a task 
 2. **The "owns" column is non-negotiable.** An agent that tries to do work outside their column is overstepping. File a CR or escalate to `@founder`.
 
 3. **The "does NOT own" column lists who to delegate TO.** Use the table to find the right agent, not to find reasons to refuse work.
+
+4. **UTTERLY SATISFIED is shared ownership.** Every active agent involved in a handoff reviews its domain, records evidence-backed satisfaction, and fixes or escalates concerns before the handoff advances. `NOT ACTIVATED` requires an explicit out-of-scope reason.
 ```
 
 ### Why this matters
@@ -1088,6 +1114,7 @@ See `development-plan/README.md` §Deferred items and `development-plan/06-phase
 - [x] **T7:** `AGENTS.md` and `README.md` have the "Vespyr Identity" section stating the 3 differentiators
 - [x] **See the Unseen:** IDENTITY block includes the "See the Unseen" section as non-negotiable DNA for all agents; validator enforces it
 - [x] **F0.29:** All 17 reasoning agents have `## Citation Protocol` section; `citation-format.md` exists; `validate_frontmatter.js` warns on missing protocol; `citations:` in step-file output contract deferred to Phase 1 (F1.24.a)
+- [x] **T8:** UTTERLY SATISFIED protocol, 19 persona contracts, global guardrail, workflow handoff rule, and launch team matrix are present; runtime validator deferred to Phase 2
 
 ## Risks
 
@@ -1096,6 +1123,7 @@ See `development-plan/README.md` §Deferred items and `development-plan/06-phase
 - **Channeled mentor overload**: hard rule = 1-2 references per agent. Reject 3+.
 - **Glossary becomes a bikeshed magnet**: lock it at end of phase; future changes require explicit review.
 - **T7.1 delegation contract blocks** add boilerplate to 13 agents. Keep each block ≤ 8 lines. The policy lives in `delegation-pattern.md`, not in each agent.
+- **T8 becomes performative if it is prompt-only.** Keep the Phase 0 contract concise, then add machine validation, state telemetry, and release blocking in Phases 2-3.
 
 ### Rollback plan
 
@@ -1118,3 +1146,4 @@ Once Phase 0 is done, every new file in Phase 1+ can assume:
 - Every reasoning agent has a Socratic stance.
 - Every reasoning agent has a Citation Protocol (facts from real sources get inline `[N]` citations + footnotes).
 - AGENTS.md states the 3 differentiators explicitly.
+- Every participating agent inherits the UTTERLY SATISFIED contract; future runtime enforcement is explicitly owned by Phase 2.

@@ -10,7 +10,7 @@ The `@memory-controller` validates this format before persisting any write.
 ```markdown
 ### [{DOMAIN}] {Short descriptive title} [date: YYYY-MM-DD] [agent: @agent-name]
 
-{Content — max 300 words. Be specific and factual. No filler.}
+{Content — max 500 words. Be specific and factual. No filler.}
 
 **Status:** active
 **References:** {ADR-NNN, US-NNN, or artifact path — omit if none}
@@ -40,6 +40,9 @@ Use one of these domain tags to enable keyword-based filtering:
 | `MARKET` | Market research, competitive intelligence |
 | `RISK` | Risks, blockers, mitigations, dependencies |
 | `LESSON` | Lessons learned, retrospective insights |
+| `DECISION` | Resolved decisions with rationale |
+
+The canonical tag list is exactly these 17 tags: `AUTH`, `API`, `DATA`, `ARCH`, `INFRA`, `SECURITY`, `PERF`, `PRODUCT`, `PROCESS`, `CODE`, `TEST`, `ML`, `UX`, `MARKET`, `RISK`, `LESSON`, `DECISION`. Entries with any other domain tag are rejected.
 
 ---
 

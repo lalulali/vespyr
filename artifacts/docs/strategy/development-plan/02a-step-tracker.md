@@ -47,6 +47,10 @@ step_tracking: off    # off | silent | verbose
 
 The agent **always calls** the script. The script reads the config and self-governs. No conditional logic in step files.
 
+**Boundary with T8:** Step tracking remains a soft audit breadcrumb. It must
+not be used as the release gate or as a substitute for the hard
+UTTERLY SATISFIED validation defined in `14-utter-satisfaction-dna.md`.
+
 ---
 
 ## Files Delivered

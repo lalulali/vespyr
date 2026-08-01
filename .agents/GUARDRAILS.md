@@ -36,6 +36,13 @@ All agents in this system MUST follow these guardrails. This file is the single 
 - After escalation, the mediator has **24 hours** to decide: fix, defer with documented tech debt, or descope.
 - This prevents infinite loops between agents (e.g., developer ↔ architect).
 
+## UTTERLY SATISFIED Culture
+- All participating product, design, research, engineering, operations, and quality agents MUST follow `.agents/references/utter-satisfaction.md`.
+- Agents work collaboratively until every active, relevant agent can honestly record `SATISFIED` with evidence, or the issue is escalated to the binding decision authority.
+- A completed artifact is not automatically a satisfactory handoff. Unresolved `CHANGES REQUESTED` or `BLOCKED` states stop the handoff.
+- Before shipping, the launch readiness record MUST contain the UTTERLY SATISFIED team gate. No release may proceed while an active agent has an unresolved blocking concern.
+- Optional agents may be marked `NOT ACTIVATED` only with a specific out-of-scope reason; that state is not an approval.
+
 ## Context Budget
 - When reading upstream artifacts, agents should **prioritize the sections relevant to their current task** rather than reading every artifact end-to-end.
 - If total input context exceeds ~6,000 words, read only:
@@ -49,8 +56,10 @@ All agents in this system MUST follow these guardrails. This file is the single 
 - Use the format in `.agents/templates/memory/session-summary-template.md`.
 - This is not optional for sessions that produce decisions or code — it is the primary mechanism for cross-session continuity.
 - The session summary costs ~100 tokens to load and saves the next agent from re-reading all memory files to understand where things stand.
-
 ## Merge Conflict Resolution
+
+> **Note:** `artifacts/memory/` is not git-tracked (only `pending-questions/.gitkeep` is committed), so git merge conflicts on memory files cannot occur in the default setup. The protocol below applies only if memory files are later placed under version control.
+
 - `artifacts/memory/archive/index.ndjson` is append-only. If a git merge conflict occurs:
   1. **Never** pick one side and discard the other.
   2. Run `node .agents/scripts/archive_manager.js merge --ours index.ndjson --theirs index.ndjson --out index.ndjson`
@@ -132,7 +141,7 @@ Thinking agents (@founder, @architect, @product-manager, @product-designer, @tec
 
 ## Step Tracking
 
-- Each step file includes `begin` and `complete` calls to `node .agents/scripts/step_tracker.js`. Agents must run them via `@executor` (or directly if they have bash permission).
+- Most step files include `begin` and `complete` calls to `node .agents/scripts/step_tracker.js`; step-tracker is optional in analysis-heavy skills (`test`, `iterate`, `unpack-problem`, `explore-idea`). Agents must run the calls via `@executor` (or directly if they have bash permission).
 - The tracker reads `.agents/config.yaml` for `step_tracking` mode (`off` | `silent` | `verbose`). In `off` mode the script exits immediately — 0 output, 0 files written.
 - **Never skip the tracker calls** even when `step_tracking` is `off`. The script self-governs based on config — skipping calls breaks audit continuity when the user later enables tracking.
 - Drift warnings are soft — the tracker logs them but never blocks. Continue the step regardless.
