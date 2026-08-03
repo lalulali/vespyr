@@ -411,9 +411,9 @@ describe('Test 5: detectState()', () => {
     assert.strictEqual(detectState(tmpDir), 'installed');
   });
 
-  it('should detect fresh if .agents folder exists but has no .vespyr-version file', () => {
+  it('should detect repair if .agents folder exists but has no .vespyr-version file', () => {
     fs.mkdirSync(path.join(tmpDir, '.agents'));
-    assert.strictEqual(detectState(tmpDir), 'fresh');
+    assert.strictEqual(detectState(tmpDir), 'repair');
   });
 });
 

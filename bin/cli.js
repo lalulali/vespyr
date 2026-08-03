@@ -7,6 +7,7 @@ const readline = require("readline");
 
 const VERSION = "2.0.0";
 const AGENTS_SRC = path.join(__dirname, "..", ".agents");
+const IS_TTY = Boolean(process.stdout && process.stdout.isTTY);
 
 const ASCII_ART = `
  __  __                                         
@@ -94,9 +95,18 @@ function parseFlags(argv) {
 		} else if (arg === "--yes" || arg === "-y") {
 			flags.yes = true;
 		} else if (arg === "--target") {
-			flags.target = args[++i] || null;
+			const val = args[++i];
+			if (val === undefined || val.startsWith("-")) {
+				console.error("Missing value for flag: --target");
+				process.exit(1);
+			}
+			flags.target = val;
 		} else if (arg === "--harness") {
-			const val = args[++i] || "";
+			const val = args[++i];
+			if (val === undefined || val.startsWith("-")) {
+				console.error("Missing value for flag: --harness");
+				process.exit(1);
+			}
 			flags.harnesses = val
 				.split(",")
 				.map((s) => s.trim())
@@ -122,10 +132,14 @@ function detectState(targetDir) {
 	const versionPath = path.join(agentsPath, ".vespyr-version");
 
 	const opencodeExists = fs.existsSync(opencodePath);
-	const agentsExists = fs.existsSync(agentsPath) && fs.existsSync(versionPath);
+	const agentsExists = fs.existsSync(agentsPath);
+
+	if (agentsExists && fs.existsSync(versionPath)) {
+		return "installed";
+	}
 
 	if (agentsExists) {
-		return "installed";
+		return "repair";
 	}
 
 	if (opencodeExists) {
@@ -221,6 +235,21 @@ function createLinkOrCopy(target, linkPath, type = "dir", method = "symlink") {
 	}
 }
 
+function yamlQuote(value) {
+	const s = String(value);
+	if (/[\r\n]/.test(s)) {
+		const lines = s.split(/\r?\n/).map((l) => `  ${l}`);
+		return `|\n${lines.join("\n")}`;
+	}
+	const escaped = s
+		.replace(/\\/g, "\\\\")
+		.replace(/"/g, '\\"')
+		.replace(/[\u0000-\u001f\u007f]/g, (c) =>
+			`\\u${c.charCodeAt(0).toString(16).padStart(4, "0")}`,
+		);
+	return `"${escaped}"`;
+}
+
 function transpileCopilotYAML(agentsDir, outputDir) {
 	const agentFiles = fs.readdirSync(agentsDir).filter((f) => f.endsWith(".md"));
 	if (dryRun) {
@@ -241,11 +270,11 @@ function transpileCopilotYAML(agentsDir, outputDir) {
 		}
 
 		const name = path.basename(file, ".md");
-		const desc = (data.description || "").replace(/"/g, '\\"');
+		const desc = yamlQuote(data.description || "");
 
 		const yml = [
 			`name: ${name}`,
-			`description: "${desc}"`,
+			`description: ${desc}`,
 			`instructions: |`,
 			...body.split("\n").map((line) => `  ${line}`),
 			"",
@@ -275,7 +304,10 @@ function transpileCursorMDC(agentsDir, outputDir) {
 		}
 
 		const name = path.basename(file, ".md");
-		const desc = (data.description || "").replace(/"/g, '\\"');
+		const desc = (data.description || "")
+			.replace(/\s+/g, " ")
+			.trim()
+			.replace(/"/g, '\\"');
 
 		const mdc = [
 			"---",
@@ -475,8 +507,10 @@ function updatePathsInDir(dir) {
 	const files = walkSync(dir);
 	for (const file of files) {
 		if (!file.endsWith(".md") && !file.endsWith(".js")) continue;
+		const relParts = path.relative(dir, file).split(path.sep);
+		if (relParts.includes("node_modules") || relParts.includes(".git")) continue;
 		let content = fs.readFileSync(file, "utf8");
-		const updated = content.replace(/\.opencode\//g, ".agents/");
+		const updated = content.replace(/\.opencode(?=\/|\b)/g, ".agents");
 		if (updated !== content) {
 			if (dryRun) {
 				logDry(`Would update paths in: ${file}`);
@@ -571,7 +605,7 @@ function setupSignalHandler(targetDir) {
 const wizardState = {};
 
 function clearScreen() {
-	process.stdout.write("\x1b[2J\x1b[H");
+	if (IS_TTY) process.stdout.write("\x1b[2J\x1b[H");
 }
 
 function printWizardSummary() {
@@ -923,7 +957,7 @@ function handleConflict(linkPath, name, targetDir, method = "symlink") {
 		}
 	} catch (e) {
 		if (e.code !== "ENOENT") {
-			// ignore
+			throw e;
 		}
 	}
 }
@@ -938,10 +972,7 @@ function getGlobalPath(harness) {
 		agents: path.join(home, ".agents"),
 		kiro: path.join(home, ".kiro"),
 		windsurf: path.join(home, ".windsurf"),
-		github:
-			platform === "win32"
-				? path.join(home, ".config", "github-copilot")
-				: path.join(home, ".config", "github-copilot"),
+		github: path.join(home, ".config", "github-copilot"),
 		cursor:
 			platform === "darwin"
 				? path.join(
@@ -952,12 +983,116 @@ function getGlobalPath(harness) {
 						"User",
 						"globalRules",
 					)
-				: platform === "linux"
-					? path.join(home, ".config", "Cursor", "User", "globalRules")
-					: path.join(home, ".config", "Cursor", "User", "globalRules"),
+				: path.join(home, ".config", "Cursor", "User", "globalRules"),
 	};
 
 	return paths[harness] || null;
+}
+
+function detectInstalledHarnesses(targetDir, isGlobal) {
+	const getPath = (harness, localRel) =>
+		isGlobal ? getGlobalPath(harness) : path.join(targetDir, localRel);
+	const out = [];
+	if (fs.existsSync(getPath("opencode", ".opencode"))) out.push("opencode");
+	if (fs.existsSync(getPath("claude", ".claude"))) out.push("claude");
+	if (fs.existsSync(path.join(getPath("cursor", ".cursor"), "rules")))
+		out.push("cursor");
+	if (fs.existsSync(path.join(getPath("github", ".github"), "agents")))
+		out.push("github");
+	if (fs.existsSync(path.join(getPath("windsurf", ".windsurf"), "workflows")))
+		out.push("windsurf");
+	if (fs.existsSync(path.join(getPath("kiro", ".kiro"), "steering")))
+		out.push("kiro");
+	return out;
+}
+
+function detectMethod(targetDir, isGlobal) {
+	const getPath = (harness, localRel) =>
+		isGlobal ? getGlobalPath(harness) : path.join(targetDir, localRel);
+	const opencodePath = getPath("opencode", ".opencode");
+	const claudePath = getPath("claude", ".claude");
+	try {
+		if (fs.existsSync(opencodePath)) {
+			const stat = fs.lstatSync(opencodePath);
+			if (!stat.isSymbolicLink()) return "copy";
+		} else if (fs.existsSync(claudePath)) {
+			const stat = fs.lstatSync(claudePath);
+			if (!stat.isSymbolicLink()) return "copy";
+		}
+	} catch (e) {}
+	return "symlink";
+}
+
+const MANIFEST_EXCLUDE = new Set([
+	".DS_Store",
+	".vespyr-version",
+	".vespyr-manifest.json",
+]);
+
+function buildSourceManifest(srcDir) {
+	const manifest = [];
+	function walk(d, rel) {
+		let entries;
+		try {
+			entries = fs.readdirSync(d, { withFileTypes: true });
+		} catch (e) {
+			return;
+		}
+		for (const entry of entries) {
+			if (MANIFEST_EXCLUDE.has(entry.name)) continue;
+			if (entry.name === ".git" || entry.name === "node_modules") continue;
+			const relPath = rel ? `${rel}/${entry.name}` : entry.name;
+			if (entry.isDirectory()) {
+				walk(path.join(d, entry.name), relPath);
+			} else {
+				manifest.push(relPath);
+			}
+		}
+	}
+	walk(srcDir, "");
+	return manifest;
+}
+
+function writeManifest(targetDir) {
+	if (dryRun) {
+		logDry(`Would write manifest file in ${path.join(targetDir, ".agents")}`);
+		return;
+	}
+	const manifest = buildSourceManifest(AGENTS_SRC);
+	fs.writeFileSync(
+		path.join(targetDir, ".agents", ".vespyr-manifest.json"),
+		JSON.stringify(manifest),
+	);
+}
+
+function removeStaleManifestFiles(targetDir) {
+	const agentsTarget = path.join(targetDir, ".agents");
+	const manifestPath = path.join(agentsTarget, ".vespyr-manifest.json");
+	if (!fs.existsSync(manifestPath)) return;
+
+	let prev;
+	try {
+		prev = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+	} catch (e) {
+		return;
+	}
+	if (!Array.isArray(prev)) return;
+
+	const next = buildSourceManifest(AGENTS_SRC);
+	const nextSet = new Set(next);
+
+	for (const rel of prev) {
+		if (nextSet.has(rel)) continue;
+		const target = path.resolve(agentsTarget, rel);
+		if (!target.startsWith(agentsTarget + path.sep)) continue;
+		if (fs.existsSync(target)) {
+			try {
+				fs.rmSync(target, { recursive: true, force: true });
+			} catch (e) {
+				// ignore
+			}
+		}
+	}
 }
 
 async function performGlobalInstall(selections, method, userNickname) {
@@ -989,6 +1124,7 @@ async function performGlobalInstall(selections, method, userNickname) {
 		global: true,
 	};
 	fs.writeFileSync(versionPath, JSON.stringify(data, null, 2));
+	writeManifest(globalAgentsDir);
 
 	if (!selections.includes("opencode")) {
 		const globalCommands = path.join(globalAgentsDir, "commands");
@@ -1231,6 +1367,7 @@ async function performFreshInstall(targetDir, flags) {
 	}
 
 	writeVersionFile(targetDir);
+	writeManifest(targetDir);
 
 	const projectName = path.basename(targetDir);
 	scaffoldArtifacts(targetDir, projectName, userNickname);
@@ -1259,38 +1396,15 @@ async function performUpdate(targetDir, flags) {
 	if (!fs.existsSync(agentsTarget)) {
 		fs.mkdirSync(agentsTarget, { recursive: true });
 	}
+
+	removeStaleManifestFiles(targetDir);
 	fs.cpSync(AGENTS_SRC, agentsTarget, { recursive: true });
 
 	writeVersionFile(targetDir);
+	writeManifest(targetDir);
 
-	const versionFile = path.join(targetDir, ".agents", ".vespyr-version");
-	let installedHarnesses = [];
-	if (fs.existsSync(path.join(targetDir, ".opencode")))
-		installedHarnesses.push("opencode");
-	if (fs.existsSync(path.join(targetDir, ".claude")))
-		installedHarnesses.push("claude");
-	if (fs.existsSync(path.join(targetDir, ".cursor", "rules")))
-		installedHarnesses.push("cursor");
-	if (fs.existsSync(path.join(targetDir, ".github", "agents")))
-		installedHarnesses.push("github");
-	if (fs.existsSync(path.join(targetDir, ".windsurf", "workflows")))
-		installedHarnesses.push("windsurf");
-	if (fs.existsSync(path.join(targetDir, ".kiro", "steering")))
-		installedHarnesses.push("kiro");
-
-	// Detect method from existing installation
-	let method = "symlink";
-	const opencodePath = path.join(targetDir, ".opencode");
-	const claudePath = path.join(targetDir, ".claude");
-	try {
-		if (fs.existsSync(opencodePath)) {
-			const stat = fs.lstatSync(opencodePath);
-			if (!stat.isSymbolicLink()) method = "copy";
-		} else if (fs.existsSync(claudePath)) {
-			const stat = fs.lstatSync(claudePath);
-			if (!stat.isSymbolicLink()) method = "copy";
-		}
-	} catch (e) {}
+	let installedHarnesses = detectInstalledHarnesses(targetDir, false);
+	let method = detectMethod(targetDir, false);
 
 	await installHarnesses(targetDir, installedHarnesses, method);
 
@@ -1356,26 +1470,8 @@ async function performReconfigure(targetDir, flags) {
 		isGlobal = true;
 	}
 
-	const getPath = (harness, localRel) => {
-		if (isGlobal) {
-			return getGlobalPath(harness);
-		}
-		return path.join(targetDir, localRel);
-	};
-
 	// Detect previously installed harnesses
-	let prevHarnesses = [];
-	if (fs.existsSync(getPath("opencode", ".opencode")))
-		prevHarnesses.push("opencode");
-	if (fs.existsSync(getPath("claude", ".claude"))) prevHarnesses.push("claude");
-	if (fs.existsSync(path.join(getPath("cursor", ".cursor"), "rules")))
-		prevHarnesses.push("cursor");
-	if (fs.existsSync(path.join(getPath("github", ".github"), "agents")))
-		prevHarnesses.push("github");
-	if (fs.existsSync(path.join(getPath("windsurf", ".windsurf"), "workflows")))
-		prevHarnesses.push("windsurf");
-	if (fs.existsSync(path.join(getPath("kiro", ".kiro"), "steering")))
-		prevHarnesses.push("kiro");
+	let prevHarnesses = detectInstalledHarnesses(targetDir, isGlobal);
 
 	let selections = flags.harnesses.length > 0 ? flags.harnesses : [];
 	let userNickname = getExistingUserNickname(targetDir);
@@ -1405,18 +1501,7 @@ async function performReconfigure(targetDir, flags) {
 	}
 
 	// Detect method from existing installation
-	let method = "symlink";
-	const opencodePath = getPath("opencode", ".opencode");
-	const claudePath = getPath("claude", ".claude");
-	try {
-		if (fs.existsSync(opencodePath)) {
-			const stat = fs.lstatSync(opencodePath);
-			if (!stat.isSymbolicLink()) method = "copy";
-		} else if (fs.existsSync(claudePath)) {
-			const stat = fs.lstatSync(claudePath);
-			if (!stat.isSymbolicLink()) method = "copy";
-		}
-	} catch (e) {}
+	let method = detectMethod(targetDir, isGlobal);
 
 	// Uninstall deselected harnesses
 	const removedHarnesses = prevHarnesses.filter((h) => !selections.includes(h));
@@ -1519,6 +1604,7 @@ function surgicallyCleanupAgentsDir(agentsTarget) {
 		"skills.md",
 		"workflow.md",
 		".vespyr-version",
+		".vespyr-manifest.json",
 		".gitignore",
 		".DS_Store",
 	];
@@ -1837,6 +1923,11 @@ async function executeMigration(targetDir) {
 }
 
 function performSyncDocs(targetDir) {
+	if (dryRun) {
+		logDry(`Would sync documentation entry points in ${targetDir}`);
+		return;
+	}
+
 	const syncScript = path.join(
 		targetDir,
 		".agents",
@@ -1949,7 +2040,7 @@ Examples:
 		process.exit(0);
 	}
 
-	log(ASCII_ART);
+	if (IS_TTY) log(ASCII_ART);
 
 	let targetDir = flags.target ? path.resolve(flags.target) : process.cwd();
 
@@ -1960,6 +2051,13 @@ Examples:
 			await showActionMenu(targetDir, flags);
 		} else if (state === "migrate") {
 			await performMigration(targetDir, flags);
+		} else if (state === "repair") {
+			log(`\n============================================================`);
+			log(`   VESPYR v${VERSION} — Repairing Installation`);
+			log(`============================================================`);
+			log(`An existing .agents/ directory was found but the version marker`);
+			log(`is missing. Syncing the latest files to repair it.\n`);
+			await performUpdate(targetDir, flags);
 		} else {
 			log(`\n============================================================`);
 			log(`   VESPYR v${VERSION} — AI Agent Team Installer`);
@@ -1999,6 +2097,12 @@ Examples:
 			}
 		}
 
+		try {
+			process.stdin.setRawMode(false);
+		} catch (e) {
+			/* ignore */
+		}
+
 		process.exit(1);
 	}
 }
@@ -2032,6 +2136,12 @@ module.exports = {
 	uninstallHarnesses,
 	performReconfigure,
 	performUpdate,
+	detectInstalledHarnesses,
+	detectMethod,
+	buildSourceManifest,
+	writeManifest,
+	removeStaleManifestFiles,
+	yamlQuote,
 	ASCII_ART,
 	VERSION,
 	HARNESS_OPTIONS,
