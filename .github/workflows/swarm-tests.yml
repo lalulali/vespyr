@@ -30,8 +30,8 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Run swarm test harness
-        run: node .agents/tests/test_swarm.js --verbose
+      - name: Run test suite
+        run: npm test
 
       - name: Verify scripts are executable
         run: |
