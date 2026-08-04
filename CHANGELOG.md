@@ -5,6 +5,9 @@ All notable changes to the Vespyr project will be documented in this file.
 ---
 
 ## [2.0.1] - 2026-08-03
+### Added
+- `/motion` skill — orchestrates motion research, motion specification, and an explicit implementation handoff for animation-significant products. Adds the `motion-design` capability to `@product-designer`, `motion-implementation` to `@developer`, and `motion-research` to `@researcher`/`@ux-researcher`. Domain knowledge lives on-demand in `.agents/references/motion/` (loaded only when motion is in scope, keeping agent initiation tokens low), with artifacts produced via `motion-spec.md` and `motion-handoff.md`. Includes a simulation harness (`test-motion.mjs`, 73 assertions) and evals.
+
 ### Changed
 - Enforced detailed student textbook creation for `@shifu` during handbook generation (`handbook.md`), strictly preventing condensed cheatsheet-style summaries.
 - Updated `@shifu` persona principles, standards, failure mode mitigations (`shifu.md`), `craft-lesson` step instructions (`step-handbook.md`, `SKILL.md`), and Phase 5 review quality checks (`step-review.md`).

@@ -107,6 +107,7 @@ Vespyr organizes complex, multi-agent operations into highly structured **skills
 *   `/brainstorming` — Select and apply brainstorming methods from a 60-method catalog
 *   `/validation-patterns` — Apply validation methods (smoke tests, concierge MVPs, etc.)
 *   `/design` — PRD and screen specs creation
+*   `/motion` — Motion research, motion spec, and implementation handoff
 *   `/develop` — MVP development cycle
 *   `/launch` — Release readiness and deployment
 *   `/iterate` — Post-launch behavior improvements

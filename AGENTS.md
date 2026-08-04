@@ -107,6 +107,7 @@ Vespyr organizes complex, multi-agent operations into highly structured **skills
 *   `/brainstorming` — Select and apply brainstorming methods from a 60-method catalog
 *   `/validation-patterns` — Apply validation methods (smoke tests, concierge MVPs, etc.)
 *   `/design` — PRD and screen specs creation
+*   `/motion` — Motion research, motion spec, and implementation handoff
 *   `/develop` — MVP development cycle
 *   `/launch` — Release readiness and deployment
 *   `/iterate` — Post-launch behavior improvements
@@ -244,17 +245,20 @@ Vespyr is defined by three differentiators that no other multi-agent framework c
 
 When you make changes to Vespyr — new features, changed behaviors, new skills, updated scripts, or modified workflows — **ASK THE USER before updating any documentation file**:
 
-1. **Check if docs need updating.** Determine whether `README.md`, `README_CN.md`, or any file under `Guide/en/` and `Guide/cn/` needs to reflect the change.
+1. **Check if docs need updating.** Determine whether `README.md`, `README_CN.md`, `.agents/workflow.md`, `CHANGELOG.md`, or any file under `Guide/en/` and `Guide/cn/` needs to reflect the change.
 2. **Ask for permission.** Present the user with:
    > *"This change affects Vespyr documentation. Update the following?"*
    > - *[ ] README.md*
    > - *[ ] README_CN.md*
    > - *[ ] Guide/en/ (specific file)*
    > - *[ ] Guide/cn/ (specific file)*
+   > - *[ ] .agents/workflow.md (specific file)*
+   > - *[ ] CHANGELOG.md*
 3. **Do NOT update without explicit confirmation.** Never silently edit documentation files — even if the change seems obvious. The user owns the README and Guide content.
 4. **When approved:**
    - Update `README.md` and `README_CN.md` — keep them high-level (selling/overview). Move detailed how-to content into `Guide/`.
    - Update the relevant `Guide/en/` and `Guide/cn/` files — these contain the comprehensive step-by-step documentation.
+   - Update `CHANGELOG.md` — add a new entry for the change.
    - Update the relevant `.agents/workflow.md` files — these contain the workflow documentation.
    - Keep English and Chinese versions synchronized — any change to one must be mirrored in the other.
 5. **Guide file conventions:**

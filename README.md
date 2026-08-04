@@ -109,7 +109,7 @@ validate → explore → design → plan → develop → launch → iterate → 
 
 ## 🧩 Key Capabilities
 
-- **39 slash commands** — from `/validate-idea` and `/design` to `/develop`, `/launch`, `/code-graph`, `/customize-skill`, and `/create-skill`
+- **40 slash commands** — from `/validate-idea` and `/design` to `/motion`, `/develop`, `/launch`, `/code-graph`, `/customize-skill`, and `/create-skill`
 - **Structural graphs** — code-graph maps dependencies, doc-graph maps document traceability. Agents query them instead of grepping.
 - **Agent customization** — 2-file TOML merge. Your overrides survive upgrades.
 - **Multi-harness** — works with OpenCode, Claude Code, Cursor, Windsurf, Copilot, Kiro, Aider.
