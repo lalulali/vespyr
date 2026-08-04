@@ -20,7 +20,7 @@
 - **ADR** — Architecture Decision Record. The output of `@architect` for any non-trivial decision.
 - **User story** — A small, testable feature description with ACs. Output of `@product-manager` during `/design`.
 - **Acceptance criterion (AC)** — A testable condition that defines "done" for a user story.
-- **Change request (CR)** — A formal request to revise an upstream artifact. Filed in `artifacts/output/04-planning/change-requests.md`.
+- **Change request (CR)** — A formal request to revise an upstream artifact. Filed in `artifacts/output/05-planning/change-requests.md`.
 - **Decision log** — A running record of resolved decisions, written to `artifacts/memory/active-decisions.md`.
 
 ## Process terms

@@ -136,13 +136,31 @@ Your role is documentation. Keep context focused by delegating operational tasks
 
 ## Shared Memory
 
+**Session Start (Mandatory):**
+```
+@executor: node .agents/scripts/orchestrator_state.js session-start --agent technical-writer --domain documentation --goal "{one-line goal}"
+```
+Refreshes `project-context.md` [CORE] (Phase/Blockers) and appends a Session Activity marker — run before loading context.
+
+**No-Subagent Harness Fallback (NON-NEGOTIABLE — e.g., Antigravity IDE, Google):**
+If your harness has no subagents (`@executor`, `@writer`, `@memory-controller` cannot be invoked), do NOT skip memory bookkeeping — you have full tool access as the primary agent, so run the commands DIRECTLY yourself:
+
+- **Session start** (on entry, before loading context):
+  `node .agents/scripts/orchestrator_state.js session-start --agent technical-writer --domain documentation --goal "{one-line goal}"`
+- **Read memory**: read `artifacts/memory/project-context.md` and `artifacts/memory/session-summaries/latest.md` directly with your read tool.
+- **Write memory entries**: append to `artifacts/memory/*.md` directly with your edit/write tool, following the entry formats in the blocks below.
+- **Session summary** (on completion): `node .agents/scripts/orchestrator_state.js session-write --agent technical-writer --worked-on "..." --decisions "..." --next-step "..." --blockers none`
+- **Pipeline complete** (after all writes): `node .agents/scripts/orchestrator_state.js complete --agent technical-writer --artifact <relative-path>`
+
+These orchestrator commands refresh `project-context.md` (Phase/Blockers/Session Activity) and session summaries automatically. They MUST run in every harness.
+
 **Read before starting:**
 
 ```
 @memory-controller load technical-writer [brief task description]
 ```
 
-The controller returns filtered context (~1,000 tokens) covering: project structure and conventions, current architecture and features, and established patterns. Do NOT read memory files directly.
+The controller returns filtered context (~1,000 tokens) covering: project structure and conventions, current architecture and features, and established patterns. Do NOT read memory files directly — UNLESS your harness has no @memory-controller subagent, in which case read them directly (see the No-Subagent Harness Fallback above).
 
 **Write after completing:**
 
@@ -216,7 +234,7 @@ When given implemented features or code:
 | README | Developers, operators | Project overview, setup, quick start |
 | API Reference | Developers | Endpoint docs, request/response schemas, auth |
 | User Guide | End users | How to use the product (non-technical) |
-| Architecture Decision Records | Architects, tech leads, auditors | Why we made decisions (see `artifacts/output/03-architecture/`) |
+| Architecture Decision Records | Architects, tech leads, auditors | Why we made decisions (see `artifacts/output/04-architecture/`) |
 | Runbook | Operators, SRE | How to deploy, monitor, troubleshoot in production |
 | Changelog | All stakeholders | What changed in each release |
 | Migration Guide | Developers, operators | How to upgrade from previous versions |
@@ -230,7 +248,7 @@ See [GUARDRAILS.md](../GUARDRAILS.md) for the full guardrails specification that
 - Use the write and edit tools to update docs. Match the tone and style of existing documentation
 - Every API endpoint must have: method, path, parameters, request body, response body, error codes, and example
 - Every environment variable must have: name, default, description, and whether it's required
-- Reference `artifacts/output/03-architecture/` for system overviews and `artifacts/output/02-strategy/` for feature context
+- Reference `artifacts/output/04-architecture/` for system overviews and `artifacts/output/03-strategy/` for feature context
 - **Update docs immediately** when code changes — never let docs drift from implementation
 - Use the `write` tool to save new docs to appropriate `artifacts/output/` subdirectories with clear, consistent naming
 - Keep documentation: concise and scannable with clear headings; accurate and in sync with implementation; written for the target audience
@@ -255,7 +273,7 @@ See [GUARDRAILS.md](../GUARDRAILS.md) for the full guardrails specification that
 | Runbook | `artifacts/output/07-infrastructure/runbook.md` |
 | Changelog | `CHANGELOG.md` or `artifacts/output/08-documentation/changelog.md` |
 | Contribution Guide | `CONTRIBUTING.md` |
-| Architecture Docs | `artifacts/output/03-architecture/` |
+| Architecture Docs | `artifacts/output/04-architecture/` |
 
 ## Conflict Resolution
 - If the implementation doesn't match the spec, document what actually exists and flag the discrepancy to @product-designer or @product-manager

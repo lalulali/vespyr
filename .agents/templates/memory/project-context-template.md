@@ -22,6 +22,22 @@ Blockers: {integer count of active entries in blockers-and-risks.md — update w
 
 ---
 
+## [SESSION ACTIVITY] — Volatile, refreshed every session start
+
+> Managed by `@memory-controller session-start`. Keeps only the last 5 markers.
+> This section is NEVER compacted or archived — it is overwritten in place.
+
+```
+## Session Activity
+- {YYYY-MM-DD HH:MM} @{agent} — {domain}: {one-line goal}
+- {YYYY-MM-DD HH:MM} @{agent} — {domain}: {one-line goal}
+...
+```
+
+Every agent calls `@memory-controller session-start [domain] [goal]` on entry, before loading context. This keeps the source-of-truth file accurate no matter which agent is invoked ad-hoc (product dev → @founder, data → @data-analyst, teaching → @shifu, etc.).
+
+---
+
 ## 1. Project Basics
 
 | Field | Value |

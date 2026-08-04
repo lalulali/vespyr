@@ -2,7 +2,7 @@
 
 > **Used by:** `idea-validation` skill
 > **Feeds into:** `product-exploration`
-> **Save to:** `artifacts/output/00-discovery/validation-brief.md`
+> **Save to:** `artifacts/output/01-discovery/validation-brief.md`
 
 ---
 

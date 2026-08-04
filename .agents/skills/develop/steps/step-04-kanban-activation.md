@@ -31,11 +31,11 @@ PM confirms the prioritized backlog is correct and aligned with sprint deadlines
   - Assigns role tags per the execution plan
 
 ## Inputs
-- `artifacts/output/04-planning/kanban.md`
-- `artifacts/output/04-planning/execution-plan.md`
+- `artifacts/output/05-planning/kanban.md`
+- `artifacts/output/05-planning/execution-plan.md`
 
 ## Output
-Updated `artifacts/output/04-planning/kanban.md` with tasks in "To Do" — use template `.agents/templates/planning/kanban-template.md`
+Updated `artifacts/output/05-planning/kanban.md` with tasks in "To Do" — use template `.agents/templates/planning/kanban-template.md`
 
 ## Halt condition
 PM does not sign off. Re-scope with `@product-manager` before continuing.

@@ -2,7 +2,7 @@
 
 > **Used by:** Paige (@user-researcher)
 > **Feeds into:** Sarah (@product-manager), Ivy (@product-designer)
-> **Save to:** `artifacts/output/01-research/user-personas.md`
+> **Save to:** `artifacts/output/02-research/user-personas.md`
 
 Use this template when writing the player research report.
 
@@ -127,7 +127,7 @@ For the **primary persona**, map the end-to-end experience:
 
 ## 5. Player Research Validation Against Founder Assumptions
 
-Reference the founder's idea brief (`artifacts/output/00-discovery/idea-brief.md`). Did the founder understand the player?
+Reference the founder's idea brief (`artifacts/output/01-discovery/idea-brief.md`). Did the founder understand the player?
 
 | Founder Assumption | Research Finding | Match / Mismatch | Implication |
 |-------------------|------------------|------------------|-------------|
@@ -167,7 +167,7 @@ Turn the top 3-5 player needs into actionable opportunity statements for the gam
 
 ## 8. Competitive Player Alternatives
 
-What are players doing today with competitor games? (Cross-reference with `artifacts/output/01-research/competitive-analysis.md`)
+What are players doing today with competitor games? (Cross-reference with `artifacts/output/02-research/competitive-analysis.md`)
 
 | Game | Who Plays It for This | What They Love | What They Hate | Switching Difficulty |
 |------|---------------------|----------------|----------------|---------------------|
@@ -197,5 +197,5 @@ Rules:
 - Version: 1.0
 - Author: @user-researcher
 - Date: ...
-- Input: `artifacts/output/00-discovery/idea-brief.md` + `artifacts/output/01-research/competitive-analysis.md`
+- Input: `artifacts/output/01-discovery/idea-brief.md` + `artifacts/output/02-research/competitive-analysis.md`
 - Supersedes: v1.0 (initial)

@@ -7,7 +7,7 @@ last_updated: 2026-07-20
 
 # Discovery Report
 
-Compiles research and design thinking outputs into a single unified report. Dynamically includes or excludes the Usability Testing (UT) Score section based on available data. Outputs to `artifacts/output/01-research/`.
+Compiles research and design thinking outputs into a single unified report. Dynamically includes or excludes the Usability Testing (UT) Score section based on available data. Outputs to `artifacts/output/02-research/`.
 
 ## Persona delegation
 This skill delegates to `@product-manager`. The pm compiles and synthesizes findings. The skill provides the report structure; `@product-manager` provides the narrative synthesis and prioritization.
@@ -22,7 +22,7 @@ This skill delegates to `@product-manager`. The pm compiles and synthesizes find
 
 ### Step 1: Inventory available artifacts
 
-Check `artifacts/output/01-research/` for:
+Check `artifacts/output/02-research/` for:
 - `problem-space-brief.md`
 - `root-cause-analysis.md`
 - `research-plan.md`
@@ -97,4 +97,4 @@ Delegate to `@writer` for the appropriate output file.
 
 ## State machine integration
 At start: `@executor` runs `node .agents/scripts/orchestrator_state.js status`
-At end: `@executor` runs `node .agents/scripts/orchestrator_state.js complete --agent product-manager --artifact 01-research/{report-type}.md`
+At end: `@executor` runs `node .agents/scripts/orchestrator_state.js complete --agent product-manager --artifact 02-research/{report-type}.md`

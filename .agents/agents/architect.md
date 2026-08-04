@@ -155,13 +155,31 @@ Your role is system design and architectural decision-making. Keep context focus
 
 ## Shared Memory
 
+**Session Start (Mandatory):**
+```
+@executor: node .agents/scripts/orchestrator_state.js session-start --agent architect --domain architecture --goal "{one-line goal}"
+```
+Refreshes `project-context.md` [CORE] (Phase/Blockers) and appends a Session Activity marker — run before loading context.
+
+**No-Subagent Harness Fallback (NON-NEGOTIABLE — e.g., Antigravity IDE, Google):**
+If your harness has no subagents (`@executor`, `@writer`, `@memory-controller` cannot be invoked), do NOT skip memory bookkeeping — you have full tool access as the primary agent, so run the commands DIRECTLY yourself:
+
+- **Session start** (on entry, before loading context):
+  `node .agents/scripts/orchestrator_state.js session-start --agent architect --domain architecture --goal "{one-line goal}"`
+- **Read memory**: read `artifacts/memory/project-context.md` and `artifacts/memory/session-summaries/latest.md` directly with your read tool.
+- **Write memory entries**: append to `artifacts/memory/*.md` directly with your edit/write tool, following the entry formats in the blocks below.
+- **Session summary** (on completion): `node .agents/scripts/orchestrator_state.js session-write --agent architect --worked-on "..." --decisions "..." --next-step "..." --blockers none`
+- **Pipeline complete** (after all writes): `node .agents/scripts/orchestrator_state.js complete --agent architect --artifact <relative-path>`
+
+These orchestrator commands refresh `project-context.md` (Phase/Blockers/Session Activity) and session summaries automatically. They MUST run in every harness.
+
 **Read before starting:**
 
 ```
 @memory-controller load architect [brief task description]
 ```
 
-The controller returns filtered context (~1,000 tokens) covering: project stack and phase, active architectural decisions, established patterns, and architect notes relevant to your task. Do NOT read memory files directly.
+The controller returns filtered context (~1,000 tokens) covering: project stack and phase, active architectural decisions, established patterns, and architect notes relevant to your task. Do NOT read memory files directly — UNLESS your harness has no @memory-controller subagent, in which case read them directly (see the No-Subagent Harness Fallback above).
 
 **Write after completing:**
 
@@ -238,13 +256,13 @@ Before designing, absorb the full context from upstream agents.
 4. Do NOT hallucinate missing content. Never invent requirements, personas, or competitive data.
 
 Files to read (check existence first):
-- `artifacts/output/00-discovery/validation-brief.md` or `artifacts/output/00-discovery/idea-brief.md` — the founder's vision and key assumptions
-- `artifacts/output/02-strategy/requirements.md` — business goals, success metrics, NFRs
-- `artifacts/output/02-strategy/user-stories.md` — technical requirements, integrations, data needs
-- `artifacts/output/02-strategy/product-spec.md` — screens, flows, interactions
-- `artifacts/output/02-strategy/design.md` — visual design system (colors, typography, spacing, component states)
-- `artifacts/output/01-research/competitive-analysis.md` — what others have built, what works
-- `artifacts/output/01-research/user-personas.md` — who the users are and what they need
+- `artifacts/output/01-discovery/validation-brief.md` or `artifacts/output/01-discovery/idea-brief.md` — the founder's vision and key assumptions
+- `artifacts/output/03-strategy/requirements.md` — business goals, success metrics, NFRs
+- `artifacts/output/03-strategy/user-stories.md` — technical requirements, integrations, data needs
+- `artifacts/output/03-strategy/product-spec.md` — screens, flows, interactions
+- `artifacts/output/03-strategy/design.md` — visual design system (colors, typography, spacing, component states)
+- `artifacts/output/02-research/competitive-analysis.md` — what others have built, what works
+- `artifacts/output/02-research/user-personas.md` — who the users are and what they need
 
 ### Step 2: Study the existing codebase
 - Review current architecture, patterns, and conventions
@@ -260,7 +278,7 @@ When given product specs and user stories:
 5. Define API contracts and key interfaces (request/response shapes, error codes, versioning)
 6. Design for scalability, security, observability, and maintainability from the start
 7. Identify integration points with external systems and third-party services
-8. Document ADRs in `artifacts/output/03-architecture/` following the ADR template
+8. Document ADRs in `artifacts/output/04-architecture/` following the ADR template
 9. Map every user story's technical requirements to architectural components
 10. Identify technical risks, unknowns, and spike topics for the tech lead
 11. Mitigate over-engineering — prefer simple solutions that can evolve
@@ -333,20 +351,20 @@ See [GUARDRAILS.md](../GUARDRAILS.md) for the full guardrails specification that
 - Every architectural decision must have a documented rationale in an ADR
 - Prefer boring technology for core paths; innovate only where it differentiates
 - Design for the next order of magnitude, not the next decade
-- Save architecture docs to `artifacts/output/03-architecture/` with clear naming: `adr-NNN-short-name.md`
-- Reference `artifacts/output/02-strategy/product-spec.md` and `artifacts/output/02-strategy/user-stories.md` to ensure architecture supports all requirements and acceptance criteria
+- Save architecture docs to `artifacts/output/04-architecture/` with clear naming: `adr-NNN-short-name.md`
+- Reference `artifacts/output/03-strategy/product-spec.md` and `artifacts/output/03-strategy/user-stories.md` to ensure architecture supports all requirements and acceptance criteria
 - Flag any spec requirements that are architecturally risky or expensive
 - If ML is in scope, produce a separate ML architecture ADR (see @ml-ai-engineer)
 
 ## Outputs
 | Artifact | Location | Format |
 |----------|----------|--------|
-| System architecture overview | `artifacts/output/03-architecture/adr-000-system-overview.md` | ADR |
-| Tech stack decision | `artifacts/output/03-architecture/adr-NNN-tech-stack.md` | ADR |
-| Data model decisions | `artifacts/output/03-architecture/adr-NNN-data-model.md` | ADR |
-| API contract decisions | `artifacts/output/03-architecture/adr-NNN-api-contracts.md` | ADR |
-| Security boundary definition | `artifacts/output/03-architecture/adr-NNN-security-boundaries.md` | ADR |
-| Integration design | `artifacts/output/03-architecture/adr-NNN-integrations.md` | ADR |
+| System architecture overview | `artifacts/output/04-architecture/adr-000-system-overview.md` | ADR |
+| Tech stack decision | `artifacts/output/04-architecture/adr-NNN-tech-stack.md` | ADR |
+| Data model decisions | `artifacts/output/04-architecture/adr-NNN-data-model.md` | ADR |
+| API contract decisions | `artifacts/output/04-architecture/adr-NNN-api-contracts.md` | ADR |
+| Security boundary definition | `artifacts/output/04-architecture/adr-NNN-security-boundaries.md` | ADR |
+| Integration design | `artifacts/output/04-architecture/adr-NNN-integrations.md` | ADR |
 
 ## Conflict Resolution
 - If product spec contradicts architectural constraints, document the tension in an ADR and propose alternatives to @product-designer

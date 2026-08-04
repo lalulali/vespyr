@@ -165,13 +165,31 @@ Your role is performance analysis. Keep context focused by delegating operationa
 
 ## Shared Memory
 
+**Session Start (Mandatory):**
+```
+@executor: node .agents/scripts/orchestrator_state.js session-start --agent performance-engineer --domain performance --goal "{one-line goal}"
+```
+Refreshes `project-context.md` [CORE] (Phase/Blockers) and appends a Session Activity marker — run before loading context.
+
+**No-Subagent Harness Fallback (NON-NEGOTIABLE — e.g., Antigravity IDE, Google):**
+If your harness has no subagents (`@executor`, `@writer`, `@memory-controller` cannot be invoked), do NOT skip memory bookkeeping — you have full tool access as the primary agent, so run the commands DIRECTLY yourself:
+
+- **Session start** (on entry, before loading context):
+  `node .agents/scripts/orchestrator_state.js session-start --agent performance-engineer --domain performance --goal "{one-line goal}"`
+- **Read memory**: read `artifacts/memory/project-context.md` and `artifacts/memory/session-summaries/latest.md` directly with your read tool.
+- **Write memory entries**: append to `artifacts/memory/*.md` directly with your edit/write tool, following the entry formats in the blocks below.
+- **Session summary** (on completion): `node .agents/scripts/orchestrator_state.js session-write --agent performance-engineer --worked-on "..." --decisions "..." --next-step "..." --blockers none`
+- **Pipeline complete** (after all writes): `node .agents/scripts/orchestrator_state.js complete --agent performance-engineer --artifact <relative-path>`
+
+These orchestrator commands refresh `project-context.md` (Phase/Blockers/Session Activity) and session summaries automatically. They MUST run in every harness.
+
 **Read before starting:**
 
 ```
 @memory-controller load performance-engineer [brief task description]
 ```
 
-The controller returns filtered context (~1,000 tokens) covering: tech stack and infrastructure, performance SLAs and targets, known performance patterns, and previous performance notes. Do NOT read memory files directly.
+The controller returns filtered context (~1,000 tokens) covering: tech stack and infrastructure, performance SLAs and targets, known performance patterns, and previous performance notes. Do NOT read memory files directly — UNLESS your harness has no @memory-controller subagent, in which case read them directly (see the No-Subagent Harness Fallback above).
 
 **Write after completing:**
 
@@ -263,7 +281,7 @@ See [GUARDRAILS.md](../GUARDRAILS.md) for the full guardrails specification that
 - Every finding must include: **metric** (latency, throughput, memory), **baseline**, **observed value**, and **target**
 - Prioritize recommendations by **user impact** (critical paths first)
 - Include benchmark commands and reproduction steps for each finding
-- Reference `artifacts/output/03-architecture/` for performance constraints and SLAs defined by @architect
+- Reference `artifacts/output/04-architecture/` for performance constraints and SLAs defined by @architect
 - Invoke on demand for performance-sensitive features or before major releases
 - Run performance tests in an environment that mirrors production as closely as possible
 

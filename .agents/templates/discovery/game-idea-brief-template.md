@@ -2,7 +2,7 @@
 
 > **Used by:** Elena (@founder)
 > **Feeds into:** Iris (@researcher), Paige (@user-researcher)
-> **Save to:** `artifacts/output/00-discovery/idea-brief.md`
+> **Save to:** `artifacts/output/01-discovery/idea-brief.md`
 
 Use this template when writing the strategic game concept brief after ideation.
 

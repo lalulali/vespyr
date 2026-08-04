@@ -227,7 +227,7 @@ Upgrades the original `@ml-engineer` into a comprehensive **AI & Machine Learnin
 ### B.3 Output Artifacts
 
 - `artifacts/output/architecture/adr-NNN-ai-*.md`
-- `artifacts/output/03-architecture/ai-pipeline-spec.md`
+- `artifacts/output/04-architecture/ai-pipeline-spec.md`
 - `artifacts/output/architecture/model-approved-for-production.md` *(contract handoff to `@ml-ai-ops`)*
 - Evaluation benchmark scorecards
 

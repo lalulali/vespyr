@@ -2,7 +2,7 @@
 
 > **Used by:** Grant (@tech-lead)
 > **Feeds into:** Rex (@developer), Nova (@data-analyst), Kai (@ml-ai-engineer)
-> **Save to:** `artifacts/output/04-planning/execution-plan.md`
+> **Save to:** `artifacts/output/05-planning/execution-plan.md`
 
 **Version:** 1
 **Last changed:** YYYY-MM-DD
@@ -20,9 +20,9 @@ This document breaks the work into tasks that developers can pick up and complet
 ### 1.1 Scope
 What is being built in this plan? Reference the product spec and user stories.
 
-- Product spec: `artifacts/output/02-strategy/product-spec.md`
-- User stories: `artifacts/output/02-strategy/user-stories.md`
-- Architecture: `artifacts/output/03-architecture/`
+- Product spec: `artifacts/output/03-strategy/product-spec.md`
+- User stories: `artifacts/output/03-strategy/user-stories.md`
+- Architecture: `artifacts/output/04-architecture/`
 
 ### 1.2 Timeline
 | Phase | Duration | Target Date | Deliverable |
@@ -90,7 +90,7 @@ src/
 ```
 
 #### Key Implementation Details
-- What patterns from `artifacts/output/03-architecture/` should be followed?
+- What patterns from `artifacts/output/04-architecture/` should be followed?
 - What are the critical implementation choices?
 - What edge cases must be handled? (Reference user story AC-U* and AC-E*)
 - What is the API contract? (request/response shapes, error codes)
@@ -215,5 +215,5 @@ Rules:
 - Version: 2.0
 - Author: @tech-lead
 - Date: ...
-- Inputs: `artifacts/output/02-strategy/product-spec.md` + `artifacts/output/02-strategy/user-stories.md` + `artifacts/output/03-architecture/`
+- Inputs: `artifacts/output/03-strategy/product-spec.md` + `artifacts/output/03-strategy/user-stories.md` + `artifacts/output/04-architecture/`
 - Optional agent inputs: @ml-ai-engineer (if activated)

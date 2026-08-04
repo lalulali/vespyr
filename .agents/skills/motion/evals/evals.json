@@ -1,0 +1,62 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "MotionSkillEvals",
+  "skill_name": "motion",
+  "description": "Checks motion scope routing, research/spec handoff, and implementation ownership.",
+  "evals": [
+    {
+      "id": 1,
+      "name": "full-motion-preflow",
+      "prompt": "Add a motion system to an animation-heavy product with complex transitions, scroll choreography, and accessibility requirements.",
+      "expected_output": "Full motion research is completed, the motion spec is produced, and an explicit handoff is created for /develop without implementing runtime code inside /motion.",
+      "files": [
+        ".agents/skills/motion/SKILL.md",
+        ".agents/references/motion/motion-research-guide.md",
+        ".agents/templates/product/motion-spec-template.md",
+        ".agents/templates/planning/motion-handoff-template.md"
+      ],
+      "expectations": [
+        "@researcher owns the merged motion-research.md after both research tracks complete",
+        "@product-designer produces motion-spec.md with complete MO-### prompts and UX researcher accessibility sign-off",
+        "@tech-lead produces motion-handoff.md and adds tasks to execution-plan.md",
+        "/motion does not claim implementation or runtime QA completion",
+        "The handoff includes reduced-motion, keyboard/focus, non-motion-equivalent, pause/stop/hide, flash, performance, token, and SSR checks"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "lightweight-motion-routing",
+      "prompt": "Add a few button press and hover transitions to an otherwise static product.",
+      "expected_output": "The lightweight path skips dedicated research, but the motion spec records the evidence mode and why the research phase was not warranted.",
+      "files": [
+        ".agents/skills/motion/SKILL.md",
+        ".agents/references/motion/motion-design-guidelines.md"
+      ],
+      "expectations": [
+        "Phase 2 is not run for trivial micro-interactions",
+        "motion-spec.md records Evidence mode: lightweight",
+        "The spec still includes reduced-motion and accessibility behavior",
+        "Implementation proceeds through /develop rather than directly through /motion"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "motion-runtime-qa",
+      "prompt": "Implement the MO-001 through MO-004 motion prompts from an approved motion handoff.",
+      "expected_output": "Rex implements the prompts through /develop and QA records motion-specific runtime evidence before certification.",
+      "files": [
+        ".agents/references/motion/motion-implementation-guidelines.md",
+        ".agents/skills/develop/steps/step-07-quality-gates.md"
+      ],
+      "expectations": [
+        "Every MO-### maps to a prompt, user story, implementation reference, and QA assertion",
+        "Timing is checked against the numeric tolerance, defaulting to +/-16ms",
+        "Reduced-motion, keyboard/focus, informational fallback, and auto-moving-content controls are tested",
+        "Non-essential interaction-triggered animation has a verified disable path unless essential, per WCAG 2.3.3",
+        "Only transform and opacity are animated; layout properties, filters, and other animated properties are rejected",
+        "Flash thresholds, performance, motion tokens, and SSR/hydration are checked where applicable",
+        "Missing motion evidence blocks QA certification"
+      ]
+    }
+  ]
+}

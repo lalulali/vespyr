@@ -2,7 +2,7 @@
 
 > **Used by:** Zara (@ux-researcher)
 > **Feeds into:** Ivy (@product-designer), Rex (@developer), Sarah (@product-manager), Nina (@qa-engineer)
-> **Save to:** `artifacts/output/01-research/ux-research-report.md`
+> **Save to:** `artifacts/output/02-research/ux-research-report.md`
 
 Use this template when evaluating the usability, interaction design, information architecture, and accessibility of the product spec.
 
@@ -227,5 +227,5 @@ For each flow, verify the product spec defines ALL required states:
 - Version: 1.0
 - Author: @ux-researcher
 - Date: ...
-- Input: `artifacts/output/02-strategy/product-spec.md` + `artifacts/output/02-strategy/user-stories.md` + `artifacts/output/01-research/user-personas.md`
-- Companion documents: `artifacts/output/01-research/user-personas.md`, `artifacts/output/01-research/competitive-analysis.md`
+- Input: `artifacts/output/03-strategy/product-spec.md` + `artifacts/output/03-strategy/user-stories.md` + `artifacts/output/02-research/user-personas.md`
+- Companion documents: `artifacts/output/02-research/user-personas.md`, `artifacts/output/02-research/competitive-analysis.md`

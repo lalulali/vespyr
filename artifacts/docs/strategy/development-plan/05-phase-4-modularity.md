@@ -185,16 +185,16 @@ Every builder also emits the T8 extension contract:
 
 ```
 example-project/
-├── 00-discovery/idea-brief.md       (~80 lines, sample)
-├── 01-research/market-analysis.md   (~60 lines, sample)
-├── 02-strategy/prd.md               (~120 lines, sample — uses spec-kernel)
-├── 02-strategy/companions/
+├── 01-discovery/idea-brief.md       (~80 lines, sample)
+├── 02-research/market-analysis.md   (~60 lines, sample)
+├── 03-strategy/prd.md               (~120 lines, sample — uses spec-kernel)
+├── 03-strategy/companions/
 │   ├── glossary.md                   (~30 lines)
 │   ├── acceptance-criteria.md        (~30 lines)
 │   ├── user-journey.md               (~30 lines)
 │   └── decision-log.md               (~30 lines)
-├── 03-architecture/adr-001.md       (~40 lines, sample)
-├── 04-planning/execution-plan.md    (~50 lines, sample)
+├── 04-architecture/adr-001.md       (~40 lines, sample)
+├── 05-planning/execution-plan.md    (~50 lines, sample)
 ├── 05-execution/code-sample.ts      (~30 lines, real working code)
 ├── 06-quality/qa-report.md          (~40 lines, sample)
 ├── 07-infrastructure/launch-log.md  (~30 lines, sample)
@@ -270,7 +270,7 @@ These are quantitative pass/fail criteria. The dogfood project is NOT complete u
 | M4 | **Delegation rate** | ≥70% of I/O calls delegated to sub-agents | `delegation_audit.js --since 14d` |
 | M5 | **Self-learning output** | ≥1 pattern promoted from episodes | Episodes count in `self_learn scan` output; at least 1 promoted |
 | M6 | **QA hard gate exercised** | `qa-signoff.md` blocked advancement at least once | Orchestrator log shows a `BLOCKED` state before `qa-signoff.md` |
-| M7 | **Loop engineering** | `/goal` converged within ≤10 iterations; 1 automation produced a triage file | `loop-state.json` + `artifacts/output/00-discovery/triage/` |
+| M7 | **Loop engineering** | `/goal` converged within ≤10 iterations; 1 automation produced a triage file | `loop-state.json` + `artifacts/output/01-discovery/triage/` |
 | M8 | **Latency budget** | All 6 session-start operations under budget (≤1000ms total per README §13) | `test_session_latency.js` exit 0 |
 | M9 | **Bug discovery** | ≥5 integration bugs filed as GitHub issues | GitHub Issues count, label `dogfood` |
 | M10 | **Time-to-completion** | Informational baseline — no target, just measured | Wall clock: `validate-idea` start → `/iterate` end |

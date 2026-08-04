@@ -35,7 +35,7 @@ Theme combinations:
 - Vibrant Brand-First
 
 ## design.md content
-`artifacts/output/02-strategy/design.md`:
+`artifacts/output/03-strategy/design.md`:
 - **Custom variables** (CSS custom properties / design tokens)
 - **Colors** — primary, secondary, accent, semantic (with hex values)
 - **Typography** — font families, sizes, weights, line heights
@@ -48,7 +48,7 @@ Theme combinations:
 `@developer`, `@architect`, `@qa-engineer`, `@tech-lead` read `design.md` as their visual and styling guide.
 
 ## Output
-`artifacts/output/02-strategy/design.md`
+`artifacts/output/03-strategy/design.md`
 
 ## Delegation
 - **Reads:** direct — screen states (single reference in context)

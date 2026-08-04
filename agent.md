@@ -45,7 +45,7 @@ The system features 23 highly tuned role profiles divided into three functional 
 
 | Agent Persona | Focus Area & Primary Responsibilities | Core Outputs & Artifacts |
 | :--- | :--- | :--- |
-| **`@founder` (Elena)** | Strategic concept stress-testing. Challenges assumptions with a GO/PIVOT/KILL verdict. | `artifacts/output/00-discovery/` |
+| **`@founder` (Elena)** | Strategic concept stress-testing. Challenges assumptions with a GO/PIVOT/KILL verdict. | `artifacts/output/01-discovery/` |
 | **`@product-manager` (Sarah)** | Comprehensive requirements scoping, PRD generation, user story maps, and Kanban board maintenance. | `requirements.md`, `kanban.md` |
 | **`@product-designer` (Ivy)** | Low-to-high fidelity UX/UI design specifications, screen states, and wireframes. | `product-spec.md` & visual mockups |
 | **`@architect` (Vera)** | Technical system designs, architecture trade-offs, and ADR records. | `adr/*.md` (ADRs) |
@@ -58,14 +58,14 @@ The system features 23 highly tuned role profiles divided into three functional 
 
 | Agent Persona | Focus Area & Primary Responsibilities | Core Outputs & Artifacts |
 | :--- | :--- | :--- |
-| **`@researcher` (Iris)** | Conducts market, competitor, and genre research, synthesizing findings to back decisions. | `artifacts/output/01-research/` |
-| **`@user-researcher` (Paige)** | Structures user research plans, executes interviews, and maps persona segments. | `artifacts/output/01-research/user-research/` |
-| **`@ux-researcher` (Zara)** | Evaluates usability, designs user journey maps, and builds interaction paradigms. | `artifacts/output/01-research/ux/` |
+| **`@researcher` (Iris)** | Conducts market, competitor, and genre research, synthesizing findings to back decisions. | `artifacts/output/02-research/` |
+| **`@user-researcher` (Paige)** | Structures user research plans, executes interviews, and maps persona segments. | `artifacts/output/02-research/user-research/` |
+| **`@ux-researcher` (Zara)** | Evaluates usability, designs user journey maps, and builds interaction paradigms. | `artifacts/output/02-research/ux/` |
 | **`@shifu` (Kong Qiu)** | Designs learning paths, synthesizes knowledge into multi-format educational content, adapts explanation depth to audience | `artifacts/output/teaching/` |
 | **`@data-analyst` (Nova)** | Sets up analytics instrumentation, synthesizes telemetry, and builds dashboards. | `artifacts/output/07-iteration/` |
-| **`@security-engineer` (Victor)** | Conducts security reviews, threat modeling, vulnerability scanning, and secure defaults. | `artifacts/output/03-architecture/security/` |
+| **`@security-engineer` (Victor)** | Conducts security reviews, threat modeling, vulnerability scanning, and secure defaults. | `artifacts/output/04-architecture/security/` |
 | **`@performance-engineer` (Felix)** | Analyzes system latency, identifies performance bottlenecks, and runs optimization audits. | `artifacts/output/07-iteration/performance/` |
-| **`@ml-ai-engineer` (Kai)** | Designs, builds, and evaluates AI & ML systems (LLMs, RAG, agentic workflows) and ML baselines. | `artifacts/output/03-architecture/ml/` |
+| **`@ml-ai-engineer` (Kai)** | Designs, builds, and evaluates AI & ML systems (LLMs, RAG, agentic workflows) and ML baselines. | `artifacts/output/04-architecture/ml/` |
 | **`@ml-ai-ops` (Atlas)** | Operates production AI & ML infrastructure, model serving, vector indexes, drift monitoring, and rollback. | `artifacts/output/ml-ai-ops/` |
 | **`@devops-engineer` (Axel)** | Designs CI/CD automation pipelines, provisions cloud infrastructure, and configures environments. | `.github/workflows/`, Terraform files |
 | **`@technical-writer` (Clara)** | Formulates user manuals, maintains API specifications, and drafts release documentation. | `docs/`, `api-reference.md` |
@@ -181,6 +181,7 @@ To maximize reliability, reduce over-engineering, and enforce high-fidelity exec
 *   **No Side-Effect Cleanup**: Do not silently delete or "clean up" unrelated dead code, comments, or document sections. If you notice unrelated issues, document them in `lessons-learned.md` or mention them, but do not touch them.
 *   **Surgical Edits**: When editing files, use the most precise edit tools possible. Avoid rewriting whole files when changing a few lines.
 *   **Antigravity I/O Redirection Safeguard**: When using file creation or edit tools, always set `IsArtifact: false` for all standard workspace files (e.g. within `artifacts/`, `src/`, or `.agents/`). Set `IsArtifact: true` *only* for the IDE planning artifacts (`task.md`, `implementation_plan.md`, `walkthrough.md`). This ensures files write directly to the workspace instead of the IDE's internal app data folders.
+*   **On-Demand Output Folder Scaffolding**: All agents write deliverables to their designated path under `artifacts/output/<phase-or-topic>/`. File creation tools (`@writer` / `write`) and scripts automatically create destination folders on-demand. Do not pre-create or require pre-existing empty phase directories.
 
 ### 4. Goal-Driven Execution
 *   **Define Success Early**: Before starting any phase (Discovery, Design, Dev, QA, etc.), clearly define the deliverables and their exact verification criteria.
@@ -242,17 +243,20 @@ Vespyr is defined by three differentiators that no other multi-agent framework c
 
 When you make changes to Vespyr — new features, changed behaviors, new skills, updated scripts, or modified workflows — **ASK THE USER before updating any documentation file**:
 
-1. **Check if docs need updating.** Determine whether `README.md`, `README_CN.md`, or any file under `Guide/en/` and `Guide/cn/` needs to reflect the change.
+1. **Check if docs need updating.** Determine whether `README.md`, `README_CN.md`, `.agents/workflow.md`, `CHANGELOG.md`, or any file under `Guide/en/` and `Guide/cn/` needs to reflect the change.
 2. **Ask for permission.** Present the user with:
    > *"This change affects Vespyr documentation. Update the following?"*
    > - *[ ] README.md*
    > - *[ ] README_CN.md*
    > - *[ ] Guide/en/ (specific file)*
    > - *[ ] Guide/cn/ (specific file)*
+   > - *[ ] .agents/workflow.md (specific file)*
+   > - *[ ] CHANGELOG.md*
 3. **Do NOT update without explicit confirmation.** Never silently edit documentation files — even if the change seems obvious. The user owns the README and Guide content.
 4. **When approved:**
    - Update `README.md` and `README_CN.md` — keep them high-level (selling/overview). Move detailed how-to content into `Guide/`.
    - Update the relevant `Guide/en/` and `Guide/cn/` files — these contain the comprehensive step-by-step documentation.
+   - Update `CHANGELOG.md` — add a new entry for the change.
    - Update the relevant `.agents/workflow.md` files — these contain the workflow documentation.
    - Keep English and Chinese versions synchronized — any change to one must be mirrored in the other.
 5. **Guide file conventions:**

@@ -39,7 +39,7 @@
 - [ ] **PoC-2:** Manually run the CI-failure triage automation once. Document: what it found, token cost, whether the triage file was actionable.
 - [ ] **Go/no-go:** If PoC-1 shows the verifier rubber-stamps > 50% of the time, redesign the verifier separation before implementing. If PoC-2 shows token cost exceeds the value of findings, reconsider the automation scope.
 
-PoC results are filed as a short report in `artifacts/output/00-discovery/loop-engineering-poc.md` and inform any spec revisions before implementation begins.
+PoC results are filed as a short report in `artifacts/output/01-discovery/loop-engineering-poc.md` and inform any spec revisions before implementation begins.
 
 ---
 
@@ -69,8 +69,8 @@ An automation = prompt + cadence + skill + environment. Runs on a schedule, does
 - [ ] F6.5 — Create `.agents/skills/automation/SKILL.md` (~120 lines):
   - When to invoke: user wants a recurring task automated (triage, CI failure summary, commit briefing, bug hunt)
   - Automation definition: name, prompt, cadence (cron or interval), skill to invoke, environment (local checkout or background worktree)
-  - Triage inbox: findings land in `artifacts/output/00-discovery/triage/<automation-name>/`
-  - Archive: runs that find nothing are archived to `artifacts/output/00-discovery/triage/<automation-name>/archive/`
+  - Triage inbox: findings land in `artifacts/output/01-discovery/triage/<automation-name>/`
+  - Archive: runs that find nothing are archived to `artifacts/output/01-discovery/triage/<automation-name>/archive/`
   - Anti-patterns: automations that modify code without a human review gate, automations that run all 21 agents, no cadence limit
 - [ ] F6.6 — Create `.agents/scripts/automation.js` (~180 lines): `create`, `list`, `run <id>`, `run-all`, `archive <id>`. Stores definitions in `.agents/state/automations.json`. `run` executes the prompt + skill, writes findings to triage inbox. **Implementation code:** See `10-implementation-specs.md` §14
 - [ ] F6.7 — Create starter automation: daily CI-failure triage
@@ -134,7 +134,7 @@ disagreement and routes it to the owner or escalation authority.
 - [ ] `vespyr goal resume` continues a paused goal from loop-state.json
 - [ ] Max 10 iterations per `/goal` (configurable via `VESPYR_GOAL_MAX_ITERATIONS`) — hard stop, no infinite loops
 - [ ] `automation.js create` registers an automation in `automations.json`
-- [ ] `automation.js run <id>` executes the automation and writes findings to `artifacts/output/00-discovery/triage/`
+- [ ] `automation.js run <id>` executes the automation and writes findings to `artifacts/output/01-discovery/triage/`
 - [ ] The starter automation (CI-failure triage) runs and produces a triage file
 - [ ] `loop-state.json` persists goal + automation state across sessions
 - [ ] `memory-controller` surfaces paused goals and overdue automations on session start

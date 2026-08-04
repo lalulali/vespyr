@@ -2,7 +2,7 @@ you# Architecture Decision Record (ADR) Template
 
 > **Used by:** Vera (@architect)
 > **Feeds into:** Rex (@developer), Grant (@tech-lead), Victor (@security-engineer), Axel (@devops-engineer), Nina (@qa-engineer)
-> **Save to:** `artifacts/output/03-architecture/adr-NNN-short-name.md`
+> **Save to:** `artifacts/output/04-architecture/adr-NNN-short-name.md`
 
 Use this template when documenting significant architectural decisions. Each ADR is a permanent record of a decision and its rationale.
 
@@ -19,7 +19,7 @@ An ADR is **not** for trivial choices (e.g., "we used camelCase"). It is for dec
 **Status:** Proposed / Accepted / Deprecated / Superseded by ADR-XXX
 **Date:** ...
 **Deciders:** @architect, @tech-lead, [stakeholders]
-**Input:** `artifacts/output/02-strategy/product-spec.md` + `artifacts/output/02-strategy/user-stories.md`
+**Input:** `artifacts/output/03-strategy/product-spec.md` + `artifacts/output/03-strategy/user-stories.md`
 
 ---
 
@@ -49,9 +49,9 @@ How does this decision affect business outcomes?
 
 ### 1.4 Alignment with Upstream Decisions
 Ties this ADR back to strategy:
-- Referenced PRD section: `artifacts/output/02-strategy/requirements.md` §X.Y
+- Referenced PRD section: `artifacts/output/03-strategy/requirements.md` §X.Y
 - Referenced user stories: US-XXX, US-YYY
-- Referenced product spec section: `artifacts/output/02-strategy/product-spec.md` §Z
+- Referenced product spec section: `artifacts/output/03-strategy/product-spec.md` §Z
 
 ---
 
@@ -148,8 +148,8 @@ Every architectural decision should have a re-evaluation trigger:
 
 ## 6. References
 
-- Product spec: `artifacts/output/02-strategy/product-spec.md` (Section X.Y)
-- User stories: `artifacts/output/02-strategy/user-stories.md` (US-XXX)
+- Product spec: `artifacts/output/03-strategy/product-spec.md` (Section X.Y)
+- User stories: `artifacts/output/03-strategy/user-stories.md` (US-XXX)
 - Spike/prototype: [link if applicable]
 - External resources: [blog posts, papers, RFCs that informed the decision]
 

@@ -132,7 +132,7 @@ function scanSessionSummaries(now) {
     currentDate = null;
     currentLines = [];
     for (const line of content.split('\n')) {
-      const entryMatch = line.match(/^##\s+\[(\d{4}-\d{2}-\d{2})\]\s+Agent:\s*(@+[A-Za-z0-9_-]+)/);
+      const entryMatch = line.match(/^##\s+\[(\d{4}-\d{2}-\d{2})(?:\s+\d{2}:\d{2})?\]\s+Agent:\s*(@+[A-Za-z0-9_-]+)/);
       if (entryMatch) {
         flush();
         currentDate = entryMatch[1];

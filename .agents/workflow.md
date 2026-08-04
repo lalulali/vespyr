@@ -20,12 +20,12 @@ PHASE -1: VALIDATION
   │     └── @founder — Socratic diagnostic: stress-test the idea before investing research cycles
   │           │         Adapts by context: startup | company | personal
   │           │         Adapts by maturity: greenfield | brownfield
-  │           │         Produces: artifacts/output/00-discovery/validation-brief.md
+  │           │         Produces: artifacts/output/01-discovery/validation-brief.md
   │           │
   │           ├── GO ──────────▼
   │           │          PHASE 0: DISCOVERY (explore-idea skill)
   │           │            └── @researcher, @user-researcher — market analysis, user research, competitive landscape
-  │           │                  │         produces: artifacts/output/00-discovery/idea-brief.md
+  │           │                  │         produces: artifacts/output/01-discovery/idea-brief.md
   │           │                  ▼
   │           ├── PIVOT ──▶ Re-run Phase -1 with revised framing
   │           │
@@ -35,12 +35,12 @@ PHASE -1: VALIDATION
         └── @founder — Socratic diagnostic: stress-test the game concept before investing production cycles
               │         Adapts by context: startup | company | personal
               │         Adapts by maturity: greenfield | brownfield
-              │         Produces: artifacts/output/00-discovery/validation-brief.md
+              │         Produces: artifacts/output/01-discovery/validation-brief.md
               │
               ├── GO ──────────▼
               │          PHASE 0: DISCOVERY (explore-game-idea skill)
               │            └── @researcher, @user-researcher — genre market analysis, player research, competitive landscape
-              │                  │         produces: artifacts/output/00-discovery/idea-brief.md
+              │                  │         produces: artifacts/output/01-discovery/idea-brief.md
               │                  ▼
               ├── PIVOT ──▶ Re-run Phase -1 with revised framing
               │
@@ -219,7 +219,7 @@ node .agents/scripts/worktree.js list
 Each developer agent operates in its assigned worktree:
 
 1. **Navigate to worktree** — all file operations happen in the worktree directory
-2. **Read shared artifacts (NON-NEGOTIABLE Spec & Story Reading Mandate):** `@developer` MUST read and fully understand the validated Product Spec (`artifacts/output/02-strategy/product-spec.md`) and companion User Stories (`artifacts/output/02-strategy/user-stories.md`) in full prior to writing any code, ensuring 100% implementation alignment.
+2. **Read shared artifacts (NON-NEGOTIABLE Spec & Story Reading Mandate):** `@developer` MUST read and fully understand the validated Product Spec (`artifacts/output/03-strategy/product-spec.md`) and companion User Stories (`artifacts/output/03-strategy/user-stories.md`) in full prior to writing any code, ensuring 100% implementation alignment.
 3. **Clarify specifications (Ambiguities Guardrail):** If specifications or design layouts are unclear, follow the communication permissions defined by your assigned **Role tag** (FE/BE/Full-Stack) from the Task Assignment table:
    - **FE:** Focus strongly on visual excellence and accuracy. Explicitly permitted to converse with the **human user, `@product-designer`, or `@product-manager`** to clarify.
    - **BE:** Focus on robust logic and schema safety. Explicitly permitted to converse with the **human user or `@product-manager`** to clarify.
@@ -300,8 +300,8 @@ revalidated.
 
 | From | To | Required Artifacts | Contract |
 |------|-----|-------------------|----------|
-| @founder (validate-idea) | @founder (explore-idea) | `artifacts/output/00-discovery/validation-brief.md` | Must contain GO verdict, value proposition, target user, narrowest wedge, agreed premises, and open questions for exploration |
-| @founder (validate-game-idea) | @founder (explore-game-idea) | `artifacts/output/00-discovery/validation-brief.md` | Must contain GO verdict, value proposition, target player, core fun loop, agreed premises, and open questions for exploration |
+| @founder (validate-idea) | @founder (explore-idea) | `artifacts/output/01-discovery/validation-brief.md` | Must contain GO verdict, value proposition, target user, narrowest wedge, agreed premises, and open questions for exploration |
+| @founder (validate-game-idea) | @founder (explore-game-idea) | `artifacts/output/01-discovery/validation-brief.md` | Must contain GO verdict, value proposition, target player, core fun loop, agreed premises, and open questions for exploration |
 
 **Note:** If the validation brief exists with a GO verdict, Phase 0 (Discovery) can be skipped — the validation brief directly feeds into Phase 1 (Research). Research agents focus on the "Open questions for exploration" section.
 
@@ -317,28 +317,28 @@ revalidated.
 
 | From | To | Required Artifacts | Contract |
 |------|-----|-------------------|----------|
-| @researcher | @product-manager | `artifacts/output/01-research/market-analysis.md`, `competitive-analysis.md` | Must contain market sizing, competitive matrix, and GO/NO-GO verdict |
-| @user-researcher | @product-manager | `artifacts/output/01-research/user-personas.md` | Must contain primary persona and prioritized needs |
-| @user-researcher | @ux-researcher | `artifacts/output/01-research/user-personas.md` | Must contain persona details for usability test participant selection |
+| @researcher | @product-manager | `artifacts/output/02-research/market-analysis.md`, `competitive-analysis.md` | Must contain market sizing, competitive matrix, and GO/NO-GO verdict |
+| @user-researcher | @product-manager | `artifacts/output/02-research/user-personas.md` | Must contain primary persona and prioritized needs |
+| @user-researcher | @ux-researcher | `artifacts/output/02-research/user-personas.md` | Must contain persona details for usability test participant selection |
 
 ### Strategy → Architecture
 
 | From | To | Required Artifacts | Contract |
 |------|-----|-------------------|----------|
-| @product-manager | @product-designer | `artifacts/output/02-strategy/requirements.md`, `artifacts/output/02-strategy/user-stories.md` | Must pass cross-validation checklist (every feature has ≥1 story, every story traces to a feature, and all stories are prepared for bi-directional spec tracing and strictly follow requirements and product spec visual designs with zero divergences) |
-| @product-manager | @architect | `artifacts/output/02-strategy/requirements.md`, `artifacts/output/02-strategy/user-stories.md` | Must contain business goals with measurable targets |
-| @product-designer | @architect | `artifacts/output/02-strategy/product-spec.md` | Must contain defined flows, screens, and technical constraints |
-| @product-designer | @ux-researcher | `artifacts/output/02-strategy/product-spec.md` | Must contain complete flows with all states defined; ready for usability validation |
-| @product-designer | @developer | `artifacts/output/02-strategy/product-spec.md` (validated by @ux-researcher if applicable) | UI is usability-tested or @product-designer has documented rationale for skipping |
-| @ux-researcher | @product-designer | `artifacts/output/01-research/ux-research-report.md` | Must contain severity-rated findings; critical issues resolved before dev handoff |
+| @product-manager | @product-designer | `artifacts/output/03-strategy/requirements.md`, `artifacts/output/03-strategy/user-stories.md` | Must pass cross-validation checklist (every feature has ≥1 story, every story traces to a feature, and all stories are prepared for bi-directional spec tracing and strictly follow requirements and product spec visual designs with zero divergences) |
+| @product-manager | @architect | `artifacts/output/03-strategy/requirements.md`, `artifacts/output/03-strategy/user-stories.md` | Must contain business goals with measurable targets |
+| @product-designer | @architect | `artifacts/output/03-strategy/product-spec.md` | Must contain defined flows, screens, and technical constraints |
+| @product-designer | @ux-researcher | `artifacts/output/03-strategy/product-spec.md` | Must contain complete flows with all states defined; ready for usability validation |
+| @product-designer | @developer | `artifacts/output/03-strategy/product-spec.md` (validated by @ux-researcher if applicable) | UI is usability-tested or @product-designer has documented rationale for skipping |
+| @ux-researcher | @product-designer | `artifacts/output/02-research/ux-research-report.md` | Must contain severity-rated findings; critical issues resolved before dev handoff |
 
 
 ### Architecture → Planning (Only if Phase 3 is executed)
 
 | From | To | Required Artifacts | Contract |
 |------|-----|-------------------|----------|
-| @architect | @tech-lead | `artifacts/output/03-architecture/` (ADRs) | Must contain data model, API contracts, and tech stack decision |
-| @product-manager | @tech-lead | `artifacts/output/02-strategy/requirements.md` | Must contain priorities and business deadlines |
+| @architect | @tech-lead | `artifacts/output/04-architecture/` (ADRs) | Must contain data model, API contracts, and tech stack decision |
+| @product-manager | @tech-lead | `artifacts/output/03-strategy/requirements.md` | Must contain priorities and business deadlines |
 
 
 ### Strategy → Planning (Direct Handoff - Bypassing Optional Phase 3)
@@ -347,19 +347,19 @@ If the user opts to bypass Phase 3 (Architecture), the Strategy artifacts feed d
 
 | From | To | Required Artifacts | Contract |
 |------|-----|-------------------|----------|
-| @product-manager | @tech-lead | `artifacts/output/02-strategy/requirements.md`, `user-stories.md` | Tech Lead consumes strategic requirements directly for task breakdown |
-| @product-designer | @tech-lead | `artifacts/output/02-strategy/product-spec.md` | Tech Lead maps tasks directly to visual/interaction specifications |
-| @product-designer | @developer | `artifacts/output/02-strategy/product-spec.md` | Developer implements visual layouts and interaction specs directly |
+| @product-manager | @tech-lead | `artifacts/output/03-strategy/requirements.md`, `user-stories.md` | Tech Lead consumes strategic requirements directly for task breakdown |
+| @product-designer | @tech-lead | `artifacts/output/03-strategy/product-spec.md` | Tech Lead maps tasks directly to visual/interaction specifications |
+| @product-designer | @developer | `artifacts/output/03-strategy/product-spec.md` | Developer implements visual layouts and interaction specs directly |
 
 
 ### Planning → Execution
 
 | From | To | Required Artifacts | Contract |
 |------|-----|-------------------|----------|
-| @tech-lead | @developer | `artifacts/output/02-strategy/product-spec.md`, `artifacts/output/02-strategy/user-stories.md` | Must contain task breakdown with DoD, dependencies, and acceptance criteria mapping from Kanban; developer MUST explicitly load and read both strategy documents prior to starting coding |
-| @tech-lead | @developer | `artifacts/output/01-research/ux-research-report.md` (if available) | @developer must be aware of validated interaction patterns |
-| @tech-lead | @data-analyst | `artifacts/output/02-strategy/requirements.md` | Must contain success metrics from business goals |
-| @tech-lead | @ml-ai-engineer | `artifacts/output/03-architecture/` | Must contain ML-specific tasks and data requirements |
+| @tech-lead | @developer | `artifacts/output/03-strategy/product-spec.md`, `artifacts/output/03-strategy/user-stories.md` | Must contain task breakdown with DoD, dependencies, and acceptance criteria mapping from Kanban; developer MUST explicitly load and read both strategy documents prior to starting coding |
+| @tech-lead | @developer | `artifacts/output/02-research/ux-research-report.md` (if available) | @developer must be aware of validated interaction patterns |
+| @tech-lead | @data-analyst | `artifacts/output/03-strategy/requirements.md` | Must contain success metrics from business goals |
+| @tech-lead | @ml-ai-engineer | `artifacts/output/04-architecture/` | Must contain ML-specific tasks and data requirements |
 
 ### Execution → Quality Gates
 
@@ -367,7 +367,7 @@ If the user opts to bypass Phase 3 (Architecture), the Strategy artifacts feed d
 |------|-----|-------------------|----------|
 | @developer | @code-reviewer | Implemented code + PR | Must pass linting and type-checking |
 | @code-reviewer | @qa-engineer | Approved PR (zero blocking issues) | Code is stable enough for QA validation |
-| @architect | @security-engineer | `artifacts/output/03-architecture/` | Must define security boundaries and trust zones |
+| @architect | @security-engineer | `artifacts/output/04-architecture/` | Must define security boundaries and trust zones |
 | @developer | @security-engineer | Feature implementation | Must be feature-complete for meaningful audit |
 
 ### Quality Gates → Launch
@@ -448,7 +448,7 @@ Agents are not siloed. Downstream findings MUST flow upstream.
 | @technical-writer → @developer | Docs discover undocumented behavior | Developer documents; if systemic, add to Definition of Done |
 | @ux-researcher → @product-designer | Users struggle with designed interaction | Redesign before dev handoff; critical findings are blocking |
 | @ux-researcher → @product-manager | Core tasks fail usability testing | Re-scope or re-design feature; escalate to @founder if concept-level issue |
-| @product-manager → @all | Kanban board updated | Item moved, blocked, or milestone changed | `artifacts/output/04-planning/kanban.md` |
+| @product-manager → @all | Kanban board updated | Item moved, blocked, or milestone changed | `artifacts/output/05-planning/kanban.md` |
 | @founder → @all | Strategic pivot decision | All downstream artifacts must be re-validated against new direction |
 | incident skill → @tech-lead | Tasks blocked or timeline at risk | Escalate blocker to owner with 24h deadline; adjust plan based on resolution |
 | @data-analyst → @product-manager | Post-launch metrics differ from hypothesis | Flag for iteration backlog; adjust success criteria if needed |
@@ -512,7 +512,7 @@ Optional agents add time to the schedule. Planning guidance:
 
 ## 8. Workflows & Skills
 
-Vespyr organizes complex product building operations into 42 specialized skills. Skills can function as **structured lifecycle workflow steps** that advance the 11-phase pipeline, or as **flexible standalone entry points** invoked on demand.
+Vespyr organizes complex product building operations into 43 specialized skills. Skills can function as **structured lifecycle workflow steps** that advance the 11-phase pipeline, or as **flexible standalone entry points** invoked on demand.
 
 ### 8.1 Lifecycle Workflows & Idea Shaping Bridges
 
@@ -527,6 +527,7 @@ These skills form the backbone of the product and game development lifecycle. Sk
 | `explore-game-idea` | 0-1 | @founder, @researcher, @user-researcher | Validated game brief, genre analysis, player personas |
 | `shape-up` | 1-2 | @founder, @product-manager | Structures semi-cooked ideas into design-ready briefs. Dual: standalone or Phase 1→2 bridge |
 | `design` | 2-3 | @product-manager, @product-designer | PRD, user stories, screen specifications |
+| `motion` | 2-4 | @product-designer, @researcher, @ux-researcher, @tech-lead | On-demand motion research, motion spec, and explicit handoff to `/develop` |
 | `plan` | 4 | @tech-lead, @product-manager | Granular task breakdown, estimation (1-4h), and worktree setup |
 | `develop` | 5 | @architect, @tech-lead, @developer, @qa-engineer | Working, tested feature MVP cycle |
 | `launch` | 6 | @product-manager, @devops-engineer | Release readiness, deployment, smoke testing, post-launch monitoring |
@@ -631,7 +632,7 @@ artifacts/memory/
     └── YYYY-QN/                 # Quarterly archive folders
 ```
 
-**The Kanban board (`artifacts/output/04-planning/kanban.md`) is a persistent project artifact, not just a template.** It is initialized and seeded directly by `@product-manager` once Strategy requirements, product specs, and user stories are approved (in semi-autonomous/manual mode) or immediately (skipping all approval pauses in autonomous mode). It is updated continuously throughout the project lifecycle. Every cross-agent handoff, blocker resolution, and scope change must be reflected in the Kanban.
+**The Kanban board (`artifacts/output/05-planning/kanban.md`) is a persistent project artifact, not just a template.** It is initialized and seeded directly by `@product-manager` once Strategy requirements, product specs, and user stories are approved (in semi-autonomous/manual mode) or immediately (skipping all approval pauses in autonomous mode). It is updated continuously throughout the project lifecycle. Every cross-agent handoff, blocker resolution, and scope change must be reflected in the Kanban.
 
 
 ### Memory Protocol
@@ -693,8 +694,8 @@ Use the format in `.agents/templates/memory/session-summary-template.md`. This w
 | @ml-ai-engineer tunes model/prompt | Prompt template change, eval result, fallback behavior | `artifacts/memory/agent-notes/ml-ai-notes.md` |
 | @performance-engineer finds regression | Metric, threshold, optimization applied | `artifacts/memory/agent-notes/performance-notes.md` |
 | @product-manager records product insight | Requirement change, prioritization rationale, user impact | `artifacts/memory/agent-notes/product-manager-notes.md` |
-| @product-manager updates Kanban | Item column, status, activity log | `artifacts/output/04-planning/kanban.md` |
-| @product-manager re-prioritizes | Priority changes, scope additions/removals | `artifacts/output/04-planning/kanban.md` + `active-decisions.md` |
+| @product-manager updates Kanban | Item column, status, activity log | `artifacts/output/05-planning/kanban.md` |
+| @product-manager re-prioritizes | Priority changes, scope additions/removals | `artifacts/output/05-planning/kanban.md` + `active-decisions.md` |
 | @data-analyst observes metric shift | Metric, threshold, context | `active-decisions.md` |
 | Any agent hits blocker | Blocker description, owner, ETA | `blockers-and-risks.md` |
 | Any agent learns lesson | Phase, context, lesson, action item | `lessons-learned.md` |

@@ -38,6 +38,25 @@ Record completion:
 node .agents/scripts/orchestrator_state.js complete --agent qa-engineer --artifact 05-execution/quality/qa-report.md
 ```
 
+### 7a. Motion QA (conditional hard gate)
+
+Run this gate when `artifacts/output/03-strategy/motion-spec.md` or `artifacts/output/05-planning/motion-handoff.md` exists. Motion work cannot pass QA on generic component tests alone.
+
+`@qa-engineer` must add a `## Motion Verification` section to `qa-report.md` covering:
+- [ ] Every `MO-###` maps to one spec prompt, one user story, one implementation reference, and one QA assertion.
+- [ ] Timing is within the prompt's numeric tolerance, default `±16ms` unless the prompt documents another tolerance.
+- [ ] Trigger, keyboard focus, hover, and state-transition behavior are verified.
+- [ ] `prefers-reduced-motion: reduce` is tested with browser emulation and preserves state meaning.
+- [ ] Informational motion has a persistent non-motion equivalent.
+- [ ] Automatically moving content lasting more than five seconds alongside other content has pause/stop/hide control unless essential.
+- [ ] Flashing is checked against WCAG 2.3.1 thresholds.
+- [ ] Non-essential interaction-triggered animation can be disabled unless essential, per WCAG 2.3.3.
+- [ ] Only `transform` and `opacity` are animated; no layout properties, filters, or other animated properties are present.
+- [ ] Performance evidence shows the target framerate on a mid-range device.
+- [ ] Motion tokens match `design.md`; SSR/hydration behavior is covered where applicable.
+
+Any missing motion evidence is a QA failure and sends the task back to `@developer` or `@product-designer`.
+
 ## 7b. Security Audit (conditional)
 
 **Auto-decision rule (non-negotiable):** Determine whether this gate applies by checking the spec-kernel and user stories yourself. Do NOT ask the user. If the spec mentions auth, PII, payments, or external APIs → invoke `@security-engineer` automatically. If the spec contains none of these → skip this gate silently and note "Security gate skipped — no auth/sensitive-data/API surface detected."

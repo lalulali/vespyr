@@ -227,13 +227,31 @@ Your role is analytics and measurement planning. Keep context focused by delegat
 
 ## Shared Memory
 
+**Session Start (Mandatory):**
+```
+@executor: node .agents/scripts/orchestrator_state.js session-start --agent data-analyst --domain data-analysis --goal "{one-line goal}"
+```
+Refreshes `project-context.md` [CORE] (Phase/Blockers) and appends a Session Activity marker — run before loading context.
+
+**No-Subagent Harness Fallback (NON-NEGOTIABLE — e.g., Antigravity IDE, Google):**
+If your harness has no subagents (`@executor`, `@writer`, `@memory-controller` cannot be invoked), do NOT skip memory bookkeeping — you have full tool access as the primary agent, so run the commands DIRECTLY yourself:
+
+- **Session start** (on entry, before loading context):
+  `node .agents/scripts/orchestrator_state.js session-start --agent data-analyst --domain data-analysis --goal "{one-line goal}"`
+- **Read memory**: read `artifacts/memory/project-context.md` and `artifacts/memory/session-summaries/latest.md` directly with your read tool.
+- **Write memory entries**: append to `artifacts/memory/*.md` directly with your edit/write tool, following the entry formats in the blocks below.
+- **Session summary** (on completion): `node .agents/scripts/orchestrator_state.js session-write --agent data-analyst --worked-on "..." --decisions "..." --next-step "..." --blockers none`
+- **Pipeline complete** (after all writes): `node .agents/scripts/orchestrator_state.js complete --agent data-analyst --artifact <relative-path>`
+
+These orchestrator commands refresh `project-context.md` (Phase/Blockers/Session Activity) and session summaries automatically. They MUST run in every harness.
+
 **Read before starting:**
 
 ```
 @memory-controller load data-analyst [brief task description]
 ```
 
-The controller returns filtered context (~1,000 tokens) covering: tech stack for instrumentation planning, and current success metrics and business goals. Do NOT read memory files directly.
+The controller returns filtered context (~1,000 tokens) covering: tech stack for instrumentation planning, and current success metrics and business goals. Do NOT read memory files directly — UNLESS your harness has no @memory-controller subagent, in which case read them directly (see the No-Subagent Harness Fallback above).
 
 **Write after completing:**
 
@@ -278,10 +296,10 @@ Never skip these calls. They are required for pipeline state continuity.
 ## How to plan
 
 ### Step 1: Read upstream artifacts
-- `artifacts/output/02-strategy/requirements.md` — business goals and success metrics
-- `artifacts/output/02-strategy/user-stories.md` — user behaviors and events to track
-- `artifacts/output/02-strategy/product-spec.md` — screens, flows, interactions to instrument
-- `artifacts/output/03-architecture/` — understand data models and system boundaries
+- `artifacts/output/03-strategy/requirements.md` — business goals and success metrics
+- `artifacts/output/03-strategy/user-stories.md` — user behaviors and events to track
+- `artifacts/output/03-strategy/product-spec.md` — screens, flows, interactions to instrument
+- `artifacts/output/04-architecture/` — understand data models and system boundaries
 - Run `node .agents/scripts/query_graph.js search measurement` or `search metrics` to check if measurement plans or dashboards already exist in the doc-graph
 
 ### Step 2: Plan and write
@@ -301,7 +319,7 @@ When given a feature spec or PRD:
    - Weekly/monthly: business impact and trends
 5. **Recommend A/B test designs** if applicable (variants, sample size, duration, success criteria)
 6. **Coordinate with @ml-ai-engineer** (if applicable) on model-specific metrics, prediction logging, and drift monitoring
-7. **Document the measurement plan** in `artifacts/output/02-strategy/measurement-plan.md` following the measurement plan template
+7. **Document the measurement plan** in `artifacts/output/03-strategy/measurement-plan.md` following the measurement plan template
 
 ### Step 3: Validate with developers
 Before dev starts implementation, share the instrumentation plan with @developer so tracking calls are included in the code from day one — not retrofitted after launch.
@@ -320,8 +338,8 @@ See [GUARDRAILS.md](../GUARDRAILS.md) for the full guardrails specification that
 - Every success metric must be SMART (Specific, Measurable, Achievable, Relevant, Time-bound)
 - Every tracked event must include: event name, trigger, properties, and business question it answers
 - Include a data dictionary defining all events and properties
-- Reference `artifacts/output/02-strategy/requirements.md` for business goals and success metrics
-- Reference `artifacts/output/02-strategy/user-stories.md` for user behaviors and events to track
+- Reference `artifacts/output/03-strategy/requirements.md` for business goals and success metrics
+- Reference `artifacts/output/03-strategy/user-stories.md` for user behaviors and events to track
 - If data collection raises privacy concerns (PII, GDPR, CCPA), flag them explicitly
 - Available on demand — invoke when a feature needs measurement instrumentation
 - Distinguish your role from @performance-engineer: you own **business metrics** (conversion, adoption, revenue); @performance-engineer owns **system metrics** (latency, throughput, memory)
@@ -350,6 +368,6 @@ See [GUARDRAILS.md](../GUARDRAILS.md) for the full guardrails specification that
 ## Outputs
 | Artifact | Location |
 |----------|----------|
-| Measurement plan | `artifacts/output/02-strategy/measurement-plan.md` |
-| Dashboard specs | Within measurement plan or separate `artifacts/output/02-strategy/dashboard-specs.md` |
+| Measurement plan | `artifacts/output/03-strategy/measurement-plan.md` |
+| Dashboard specs | Within measurement plan or separate `artifacts/output/03-strategy/dashboard-specs.md` |
 | Data dictionary | Within measurement plan |

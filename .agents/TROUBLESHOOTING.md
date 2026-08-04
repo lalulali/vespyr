@@ -10,7 +10,7 @@ Common issues and how to resolve them when running the agent system.
 
 **Fix:** Invoke `@founder` first. Don't ask "is there a market for X?" when X isn't defined. The founder synthesizes raw ideas into a concrete concept with testable assumptions. Only after the idea brief exists should research begin.
 
-**Prevention:** Always check that `artifacts/output/00-discovery/idea-brief.md` exists and contains a one-sentence Idea Summary before starting Phase 1 research.
+**Prevention:** Always check that `artifacts/output/01-discovery/idea-brief.md` exists and contains a one-sentence Idea Summary before starting Phase 1 research.
 
 ---
 
@@ -18,7 +18,7 @@ Common issues and how to resolve them when running the agent system.
 
 **Problem:** The market analysis is full of vague TAM numbers with no source, or it reads like a Wikipedia article about the industry.
 
-**Fix:** Check that `artifacts/output/00-discovery/idea-brief.md` was passed as input. The market researcher needs the founder's specific target user and assumptions to deliver focused research. If the idea brief is missing, go back to `@founder`.
+**Fix:** Check that `artifacts/output/01-discovery/idea-brief.md` was passed as input. The market researcher needs the founder's specific target user and assumptions to deliver focused research. If the idea brief is missing, go back to `@founder`.
 
 **Prevention:** The workflow handoff contract requires the idea brief before market research begins. Verify this in the orchestration step.
 

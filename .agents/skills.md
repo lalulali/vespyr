@@ -101,6 +101,7 @@ Validation is optional but recommended — you can skip to Exploration if the id
 | Skill | Loads Into | When to invoke | How to invoke |
 |-------|-----------|----------------|---------------|
 | **humanize** | @writer | Any text needs to sound less like AI — email, docs, specs, comments, PR descriptions | Say "humanize this" or "use the humanize skill" |
+| **motion** | @product-designer + @researcher + @ux-researcher + @tech-lead | Animation-significant products: motion research, complete motion spec, and explicit handoff to `/develop` | Say "add motion", "create a motion spec", or `/motion` |
 | **help-me** | Harness (Direct) | Unsure of next steps, phase readiness check, or need a navigation report with recommended commands | Say `help me`, `/help-me`, or `/help-me [query]` |
 | **grill-me** | Harness (Direct) | Stress-test a plan, spec, idea, or design before committing to it — Socratic Q&A, one question at a time | Say "grill me", "run grill-me", or `/grill-me` |
 | **elicitation** | Harness (Direct) | Push the LLM/agent to reconsider, refine, and improve its recent output using 98 structured methods | Say "elicitation", "run elicitation", or `/elicitation` |
@@ -135,7 +136,8 @@ All agents read from and write to `artifacts/memory/` through `@memory-controlle
 
 | File | Purpose | Read By | Written By |
 |------|---------|---------|------------|
-| `project-context.md` | Project basics, tech stack | All agents (via @memory-controller Tier 1) | @founder, @architect |
+| `project-context.md` | Project basics, tech stack | All agents (via @memory-controller Tier 1) | @founder, @architect; synced by any agent via `session-start` |
+| `session-checkpoints/checkpoint.md` | LIVE rolling cursor of in-progress session (Phase, current artifact, next action) | Tier 1 (first, fresher than latest.md) | Auto-emitted by orchestrator_state.js (complete, session-start, session-write, set-phase, file-cr, sync-context) |
 | `active-decisions.md` | Current decisions and rationale | All agents (filtered by relevance) | Any agent via @memory-controller write |
 | `patterns-and-conventions.md` | Discovered patterns | All agents (filtered by relevance) | @developer, @architect, @product-designer via @memory-controller write |
 | `lessons-learned.md` | Insights from each phase | All agents (filtered by relevance) | Any agent via @memory-controller write |
@@ -149,6 +151,7 @@ All agents read from and write to `artifacts/memory/` through `@memory-controlle
 - **Read:** Invoke `@memory-controller load [agent-type] [task-description]` before starting. Do NOT read memory files directly — the controller filters and compresses context for you.
 - **Write:** Invoke `@memory-controller write [file] [entry]` after completing. Use the format in `.agents/templates/memory/memory-entry-template.md`.
 - **End of session:** Invoke `@memory-controller session-write [content]` when wrapping up. Use the format in `.agents/templates/memory/session-summary-template.md`. This gives the next session ~100 tokens of recent context instead of re-reading everything.
+- **Mid-loop resume:** `session-checkpoints/checkpoint.md` is auto-written by every `orchestrator_state.js` invocation, so an in-progress multi-turn loop can always be resumed from its latest cursor even if no session has formally ended.
 
 ### Memory Entry Format
 

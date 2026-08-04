@@ -13,7 +13,7 @@ The session summary is the fastest path to cross-session continuity. It costs ~1
 
 ```markdown
 ## Last Session
-*Written: YYYY-MM-DD by @agent-name*
+*Written: YYYY-MM-DD HH:mm by @agent-name*
 
 **Worked on:** {1-2 sentences describing what was done this session}
 
@@ -36,7 +36,7 @@ Each session appends a dated entry:
 
 ```markdown
 ---
-### Session: YYYY-MM-DD — @agent-name
+### Session: YYYY-MM-DD HH:mm — @agent-name
 
 **Worked on:** {summary}
 

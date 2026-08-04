@@ -42,6 +42,16 @@ Delegate reading `artifacts/output/teaching/knowledge-map.md` to **`@reader` (Pa
 Delegate file creation to **`@writer` (Quill)**:
 - **Target File Path**: `artifacts/output/teaching/syllabus.md`
 
+### 4. Record Milestone (NON-NEGOTIABLE)
+
+After the user approves this deliverable, record it immediately via `@executor` (or directly if your harness has no subagents):
+
+```bash
+node .agents/scripts/orchestrator_state.js complete --agent shifu --artifact artifacts/output/teaching/syllabus.md --next "handbook"
+```
+
+This refreshes `project-context.md` (Session Activity, Phase/Blockers/Repository/Stack) and records the milestone. Do NOT defer recording to the end of the workflow — if the user stops after this format, context must already reflect it.
+
 > **Tracker:** `node .agents/scripts/step_tracker.js complete --skill craft-lesson --step syllabus`
 
 ## Delegation Summary

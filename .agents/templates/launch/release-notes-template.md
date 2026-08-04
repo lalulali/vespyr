@@ -119,4 +119,4 @@ If issues are discovered post-release:
 - Version: 1.0
 - Author: @technical-writer
 - Date: ...
-- Depends on: `artifacts/output/02-strategy/requirements.md`, `artifacts/output/02-strategy/user-stories.md`
+- Depends on: `artifacts/output/03-strategy/requirements.md`, `artifacts/output/03-strategy/user-stories.md`

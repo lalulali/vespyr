@@ -21,7 +21,7 @@ output_contract:
 
 ### 4a. Compile problem-space brief
 
-Delegate to `@writer` for `artifacts/output/01-research/problem-space-brief.md` using the template at `.agents/templates/discovery/problem-brief.md`:
+Delegate to `@writer` for `artifacts/output/02-research/problem-space-brief.md` using the template at `.agents/templates/discovery/problem-brief.md`:
 
 ```markdown
 # Problem Space Brief — {problem summary}
@@ -81,7 +81,7 @@ Next step: {recommended workflow}
 
 Delegate to `@executor`:
 ```bash
-node .agents/scripts/orchestrator_state.js complete --agent product-manager --artifact 01-research/problem-space-brief.md
+node .agents/scripts/orchestrator_state.js complete --agent product-manager --artifact 02-research/problem-space-brief.md
 ```
 
 ## Handoff

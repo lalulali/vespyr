@@ -67,7 +67,7 @@ full future implementation is in
 - [x] Update `README.md` "Workflow" section to link to this file
 
 ### Problem
-`phase` skill says Phase -1: validation, Phase 7: launch, Phase 8: iteration. Folders are `00-discovery`, `06-launch/`, `07-iteration/`. Workflow.md says Phase 9: retro. The phase numbering is inconsistent across three places.
+`phase` skill says Phase -1: validation, Phase 7: launch, Phase 8: iteration. Folders are `01-discovery`, `06-launch/`, `07-iteration/`. Workflow.md says Phase 9: retro. The phase numbering is inconsistent across three places.
 
 ### Target
 Single canonical phase table referenced from all docs.
@@ -82,11 +82,11 @@ Create `.agents/references/phase-table.md` with the following full content:
 | # | Folder | Phase Name | Primary Skill | Primary Agent | Gate |
 |---|--------|-----------|---------------|---------------|------|
 | -1 | (none) | Validation | `validate-idea` | `@founder` | GO/PIVOT/KILL |
-| 0 | `00-discovery/` | Discovery | `explore-idea` | `@researcher` + `@user-researcher` | Brief sign-off |
-| 1 | `01-research/` | Research | (sub-skill of explore-idea) | parallel researchers | Quality gate |
-| 2 | `02-strategy/` | Strategy | `design` (PRD) | `@product-manager` | PRD approval |
-| 3 | `03-architecture/` | Architecture | (sub-skill of design) | `@architect` | ADR sign-off |
-| 4 | `04-planning/` | Planning | `plan` (execution plan) | `@tech-lead` | Plan approval |
+| 0 | `01-discovery/` | Discovery | `explore-idea` | `@researcher` + `@user-researcher` | Brief sign-off |
+| 1 | `02-research/` | Research | (sub-skill of explore-idea) | parallel researchers | Quality gate |
+| 2 | `03-strategy/` | Strategy | `design` (PRD) | `@product-manager` | PRD approval |
+| 3 | `04-architecture/` | Architecture | (sub-skill of design) | `@architect` | ADR sign-off |
+| 4 | `05-planning/` | Planning | `plan` (execution plan) | `@tech-lead` | Plan approval |
 | 5 | `05-execution/` | Execution | `develop` | `@developer` (multi-worktree) | All tests green |
 | 6 | `06-launch/` | Launch | `launch` | `@devops-engineer` + `@product-manager` | Production deploy |
 | 7 | `07-iteration/` | Iteration | `iterate` | `@product-manager` + `@data-analyst` | Insights reviewed |
@@ -96,8 +96,8 @@ Create `.agents/references/phase-table.md` with the following full content:
 **Conventions:**
 - Folder names use 2-digit zero-padded numbers (00, 01, ..., 09)
 - Phase numbers are 0-indexed (Phase 0 = Discovery)
-- The folder name does not always equal the phase number when 2 phases share a folder (e.g., 02-strategy contains both Phase 2 and Phase 3 outputs)
-- Validation (Phase -1) has no folder by design — it is a pre-phase gate, not a phase. Its output is a GO/PIVOT/KILL decision that seeds `00-discovery/idea-brief.md`, not a folder of its own.
+- The folder name does not always equal the phase number when 2 phases share a folder (e.g., 03-strategy contains both Phase 2 and Phase 3 outputs)
+- Validation (Phase -1) has no folder by design — it is a pre-phase gate, not a phase. Its output is a GO/PIVOT/KILL decision that seeds `01-discovery/idea-brief.md`, not a folder of its own.
 
 **Known inconsistency:** Several agents (`security-engineer.md`, `qa-engineer.md`, `performance-engineer.md`) and `develop/SKILL.md` reference `06-quality/` for QA/security/performance artifacts. This folder is not in the canonical table. These references should be consolidated to `05-execution/` (QA happens during execution) during Phase 1.
 ```
@@ -343,7 +343,7 @@ Begin every response with `{icon} {Human Name}:` so the user always knows which 
 
 Example output:
 
-> 💻 **Rex:** I'll start by reading the spec at `artifacts/output/02-strategy/product-spec.md`...
+> 💻 **Rex:** I'll start by reading the spec at `artifacts/output/03-strategy/product-spec.md`...
 
 ### Why this matters
 This is a trivial change with outsized UX impact. BMAD does it, and once you see an icon-prefixed conversation you can't go back. Users always know which persona is in control. We approximate BMAD's full icon-as-character rule with a prefix line — the LLM is reliable at prefixing, less reliable at remembering to put the icon mid-response.
@@ -430,7 +430,7 @@ Create `.agents/references/glossary.md` with the following full content:
 - **ADR** — Architecture Decision Record. The output of `@architect` for any non-trivial decision.
 - **User story** — A small, testable feature description with ACs. Output of `@product-manager` during `/design`.
 - **Acceptance criterion (AC)** — A testable condition that defines "done" for a user story.
-- **Change request (CR)** — A formal request to revise an upstream artifact. Filed in `artifacts/output/04-planning/change-requests.md`.
+- **Change request (CR)** — A formal request to revise an upstream artifact. Filed in `artifacts/output/05-planning/change-requests.md`.
 - **Decision log** — A running record of resolved decisions, written to `artifacts/memory/active-decisions.md`.
 
 ## Process terms

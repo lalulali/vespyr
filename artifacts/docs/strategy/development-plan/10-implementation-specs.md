@@ -703,7 +703,7 @@ function loadPatterns() {
 }
 
 function countAdrRefs(pattern) {
-  const adrDir = path.join(__dirname, '..', '..', 'artifacts', 'output', '03-architecture');
+  const adrDir = path.join(__dirname, '..', '..', 'artifacts', 'output', '04-architecture');
   if (!fs.existsSync(adrDir)) return 0;
   let count = 0;
   for (const adrFile of fs.readdirSync(adrDir)) {
@@ -1083,7 +1083,7 @@ const { execSync } = require('child_process');
 
 const ROOT = process.cwd();
 const AUTOS = path.join(ROOT, '.agents', 'state', 'automations.json');
-const TRIAGE = path.join(ROOT, 'artifacts', 'output', '00-discovery', 'triage');
+const TRIAGE = path.join(ROOT, 'artifacts', 'output', '01-discovery', 'triage');
 
 function loadAutos() {
   if (!fs.existsSync(AUTOS)) return { automations: [] };

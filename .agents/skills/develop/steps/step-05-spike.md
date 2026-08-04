@@ -29,7 +29,7 @@ De-risk the execution plan by prototyping, benchmarking, or researching identifi
 - If solution is infeasible, flag immediately
 
 ## Output
-Spike findings in `artifacts/output/04-planning/spike-findings.md`:
+Spike findings in `artifacts/output/05-planning/spike-findings.md`:
 - What was investigated
 - Approach tried
 - Result (feasible / needs workaround / infeasible)

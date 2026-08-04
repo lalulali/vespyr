@@ -100,12 +100,13 @@ QUALITY GATES (in order)
 SHARED MEMORY (artifacts/memory/)
 ──────────────────────────────────────────────────
 project-context.md           Static: project basics, tech stack
+session-checkpoints/checkpoint.md  LIVE rolling cursor (in-progress loop state) — auto-emitted by orchestrator_state.js
 active-decisions.md          Dynamic: current decisions, rationale
 patterns-and-conventions.md  Dynamic: discovered patterns
 lessons-learned.md           Dynamic: insights from each phase
 blockers-and-risks.md        Dynamic: active blockers
 agent-notes/*.md             Per-agent accumulated knowledge
-session-summaries/latest.md  Most recent session context (~100 tokens)
+session-summaries/latest.md  Most recent ENDED session context (~100 tokens)
 session-summaries/history.md Full session log (never loaded directly)
 archive/                     Compacted historical entries (searchable)
 
@@ -113,6 +114,7 @@ Rule: Never read memory files directly. Use @memory-controller.
 
 LOAD:    @memory-controller load [agent-type] [task-description]
 WRITE:   @memory-controller write [file] [entry]
+SESSION: node .agents/scripts/orchestrator_state.js session-start --agent {agent} --domain {domain} --goal "..."   ← run on entry, refreshes project-context
 FIND:    @memory-controller search [query]
 ARCHIVE: node .agents/scripts/memory_filter.js --search "<distinct phrase>"
 FULL:    @memory-controller load-full [filename]

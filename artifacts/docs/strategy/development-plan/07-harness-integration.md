@@ -84,7 +84,7 @@ Or invoke directly in chat: "Run @founder on this idea: [describe]"
 2. Research market and competitors via web_search
 3. Apply Socratic diagnostic questions per validate-idea reference
 4. Produce verdict: GO, PIVOT, or KILL
-5. Write `validation-brief.md` to `artifacts/output/00-discovery/`
+5. Write `validation-brief.md` to `artifacts/output/01-discovery/`
 6. Update `artifacts/memory/active-decisions.md`
 7. Return the T8 satisfaction state, evidence, unresolved blockers, and
    revalidation trigger before handing off to the next agent
@@ -314,7 +314,7 @@ The @developer is the ONLY agent that should write code AND run commands. Use `d
 ```markdown
 # Architect delegates to @developer with ONLY the spec as context
 delegate_task(
-    goal="Implement the auth service per spec in artifacts/output/03-architecture/spec-auth.md",
+    goal="Implement the auth service per spec in artifacts/output/04-architecture/spec-auth.md",
     context="You are @developer (Rex). Implement ONLY what's in the spec. Do not add features.",
     toolsets=["terminal", "file"]  # No web, no browser — pure code
 )

@@ -2,7 +2,7 @@
 
 > **Used by:** Nova (@data-analyst)
 > **Feeds into:** Rex (@developer), Nina (@qa-engineer), Felix (@performance-engineer), Kai (@ml-ai-engineer)
-> **Save to:** `artifacts/output/02-strategy/measurement-plan.md`
+> **Save to:** `artifacts/output/03-strategy/measurement-plan.md`
 
 Use this template when defining analytics instrumentation and success metrics.
 
@@ -21,10 +21,10 @@ What business questions must this measurement plan answer?
 - Where are users dropping off?
 
 ### 1.2 Input Documents
-- PRD: `artifacts/output/02-strategy/requirements.md` (business goals, success metrics)
-- User stories: `artifacts/output/02-strategy/user-stories.md` (user behaviors to track)
-- Product spec: `artifacts/output/02-strategy/product-spec.md` (screens, flows, interactions)
-- Architecture: `artifacts/output/03-architecture/` (system constraints, data models)
+- PRD: `artifacts/output/03-strategy/requirements.md` (business goals, success metrics)
+- User stories: `artifacts/output/03-strategy/user-stories.md` (user behaviors to track)
+- Product spec: `artifacts/output/03-strategy/product-spec.md` (screens, flows, interactions)
+- Architecture: `artifacts/output/04-architecture/` (system constraints, data models)
 
 ---
 
@@ -289,5 +289,5 @@ What personally identifiable information is collected?
 - Version: 2.0
 - Author: @data-analyst
 - Date: ...
-- Inputs: `artifacts/output/02-strategy/requirements.md` + `artifacts/output/02-strategy/user-stories.md` + `artifacts/output/02-strategy/product-spec.md`
+- Inputs: `artifacts/output/03-strategy/requirements.md` + `artifacts/output/03-strategy/user-stories.md` + `artifacts/output/03-strategy/product-spec.md`
 - Supersedes: v1.0 (added ML tracking events, ML dashboard, model monitoring section)

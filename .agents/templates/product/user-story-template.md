@@ -2,7 +2,7 @@
 
 > **Used by:** Sarah (@product-manager)
 > **Feeds into:** Rex (@developer), Nina (@qa-engineer), Grant (@tech-lead), Nova (@data-analyst)
-> **Save to:** `artifacts/output/02-strategy/user-stories.md`
+> **Save to:** `artifacts/output/03-strategy/user-stories.md`
 
 **Version:** 2
 **Last changed:** 2026-05-20

@@ -8,8 +8,8 @@ import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..', '..', '..');
-const DISCOVERY = join(ROOT, 'artifacts', 'output', '00-discovery');
-const RESEARCH = join(ROOT, 'artifacts', 'output', '01-research');
+const DISCOVERY = join(ROOT, 'artifacts', 'output', '01-discovery');
+const RESEARCH = join(ROOT, 'artifacts', 'output', '02-research');
 
 let passed = 0;
 let failed = 0;

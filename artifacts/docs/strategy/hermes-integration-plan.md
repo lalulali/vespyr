@@ -150,11 +150,11 @@ and your persona definition above. Your task: [describe the idea to validate]
 2. Research market and competitors (tools: web_search)
 3. Apply Socratic diagnostic questions
 4. Produce verdict: GO, PIVOT, or KILL
-5. Output `validation-brief.md` to `artifacts/output/00-discovery/`
+5. Output `validation-brief.md` to `artifacts/output/01-discovery/`
 
 ## Outputs
 
-- `artifacts/output/00-discovery/validation-brief.md`
+- `artifacts/output/01-discovery/validation-brief.md`
 - `artifacts/memory/active-decisions.md` (verdict entry)
 
 ## Tools this agent uses
@@ -285,11 +285,11 @@ Use `delegate_task()` with restricted toolsets to create a constrained developer
 
 ```markdown
 # Architect produces a spec
-write_file("artifacts/output/03-architecture/spec-auth.md", "## Auth Service Spec\n...")
+write_file("artifacts/output/04-architecture/spec-auth.md", "## Auth Service Spec\n...")
 
 # Architect delegates to @developer with ONLY the spec as context
 delegate_task(
-    goal="Implement the auth service per spec in artifacts/output/03-architecture/spec-auth.md",
+    goal="Implement the auth service per spec in artifacts/output/04-architecture/spec-auth.md",
     context="You are @developer (Rex). Implement ONLY what's in the spec. Do not add features, do not refactor adjacent code, do not change architecture decisions. Write tests first.",
     toolsets=["terminal", "file"]  # No web, no browser — pure code
 )
@@ -470,11 +470,11 @@ description: "Stress-test a product idea before investing cycles — Socratic di
 2. Read the idea from user input
 3. `web_search()` → market sizing, competitor landscape
 4. Apply Socratic questions (from `references/validate-idea.md`)
-5. Produce verdict document → `write_file(artifacts/output/00-discovery/validation-brief.md)`
+5. Produce verdict document → `write_file(artifacts/output/01-discovery/validation-brief.md)`
 6. Update memory → `artifacts/memory/active-decisions.md`
 
 ## Output
-- `artifacts/output/00-discovery/validation-brief.md`
+- `artifacts/output/01-discovery/validation-brief.md`
 - Decision: GO (proceed to /explore-idea), PIVOT (revise and re-run), KILL (stop)
 ```
 

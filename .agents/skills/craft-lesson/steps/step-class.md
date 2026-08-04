@@ -52,6 +52,16 @@ Delegate writing all module and assessment files to **`@writer` (Quill)** across
 - `artifacts/output/teaching/class/assessments/quiz-01.md`
 - `artifacts/output/teaching/class/assessments/final-exam.md`
 
+### 4. Record Milestone (NON-NEGOTIABLE)
+
+After the user approves this deliverable, record it immediately via `@executor` (or directly if your harness has no subagents):
+
+```bash
+node .agents/scripts/orchestrator_state.js complete --agent shifu --artifact artifacts/output/teaching/class/ --next "video-script"
+```
+
+This refreshes `project-context.md` (Session Activity, Phase/Blockers/Repository/Stack) and records the milestone. Do NOT defer recording to the end of the workflow — if the user stops after this format, context must already reflect it.
+
 > **Tracker:** `node .agents/scripts/step_tracker.js complete --skill craft-lesson --step class`
 
 ## Delegation Summary

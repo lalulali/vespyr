@@ -9,12 +9,12 @@ This skill runs in sequential steps. Each step is a self-contained file with its
 
 ## When to invoke
 - Phase ≥ 4 (planning complete)
-- `@tech-lead` has approved `artifacts/output/04-planning/execution-plan.md`
+- `@tech-lead` has approved `artifacts/output/05-planning/execution-plan.md`
 - Worktrees allocated (multi-developer mode, via step 3b) OR single-developer mode
 
 ## Prerequisites
-- Spec-kernel exists at `artifacts/output/02-strategy/` (see spec-kernel-template.md)
-- User stories in `artifacts/output/02-strategy/user-stories.md`
+- Spec-kernel exists at `artifacts/output/03-strategy/` (see spec-kernel-template.md)
+- User stories in `artifacts/output/03-strategy/user-stories.md`
 
 ## Mode detection
 - Always "create" on first activation.

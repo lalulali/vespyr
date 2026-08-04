@@ -40,16 +40,9 @@ If a `.claude` folder is present, or if the user is using the Claude Code harnes
 
 ## Step 3: Initialize artifact tree
 
-Create these directories under `artifacts/output/`:
-- `01-discovery/`
-- `02-research/`
-- `03-strategy/`
-- `04-architecture/`
-- `05-planning/`
-- `06-launch/`
-- `07-iteration/`
-- `08-incidents/`
-- `09-retro/`
+Create `artifacts/output/` — base output directory.
+> [!NOTE]
+> **On-Demand Subdirectory Creation**: Do NOT pre-create empty phase subdirectories (`01-discovery/`, `02-research/`, `03-strategy/`, etc.). When agents produce deliverables, file creation tools (`@writer` / `write`) automatically create the designated phase folder on demand.
 
 Create `artifacts/telemetry/` — agent execution logs, token usage, and performance metrics.
 
@@ -113,6 +106,7 @@ Return a summary:
 - `/explore-idea` — Market, competitor, and user research
 - `/explore-game-idea` — Genre market and player research
 - `/design` — PRD, user stories, product specs
+- `/motion` — Motion research, motion spec, and implementation handoff
 - `/develop` — Architecture, planning, implementation, QA
 - `/launch` — Release readiness, deployment, monitoring
 - `/iterate` — Post-launch improvements from user data

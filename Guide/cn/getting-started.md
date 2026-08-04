@@ -104,12 +104,11 @@ artifacts/
 ├── memory/          # 持久化：项目上下文、决策、经验
 ├── input/           # 用户提供：原始想法、笔记、需求
 └── output/          # 智能体生成，按阶段组织：
-    ├── 00-discovery/
-    ├── 01-research/
-    ├── 02-strategy/
-    ├── 03-architecture/
-    ├── 04-planning/
-    ├── 05-implementation/
+    ├── 01-discovery/
+    ├── 02-research/
+    ├── 03-strategy/
+    ├── 04-architecture/
+    ├── 05-planning/
     ├── 06-launch/
     ├── 07-iteration/
     ├── 08-incidents/

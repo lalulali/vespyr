@@ -43,19 +43,19 @@ Final review, architect phase gate, Kanban seeding, and handoff to develop.
 Based on choice, set `ArchitectPhase` in `project-context.md`.
 
 ## Kanban seeding
-In semi-autonomous mode: pause for explicit spec approval, then `@product-manager` seeds the Kanban board (`artifacts/output/04-planning/kanban.md`).
+In semi-autonomous mode: pause for explicit spec approval, then `@product-manager` seeds the Kanban board (`artifacts/output/05-planning/kanban.md`).
 In autonomous mode: skip pauses, auto-finalize, seed Kanban.
 
 ## State machine
 ```bash
-node .agents/scripts/orchestrator_state.js complete --agent product-manager --artifact 02-strategy/requirements.md
-node .agents/scripts/orchestrator_state.js complete --agent product-manager --artifact 02-strategy/user-stories.md
-node .agents/scripts/orchestrator_state.js complete --agent product-designer --artifact 02-strategy/product-spec.md
+node .agents/scripts/orchestrator_state.js complete --agent product-manager --artifact 03-strategy/requirements.md
+node .agents/scripts/orchestrator_state.js complete --agent product-manager --artifact 03-strategy/user-stories.md
+node .agents/scripts/orchestrator_state.js complete --agent product-designer --artifact 03-strategy/product-spec.md
 ```
 
 If measurement plan exists:
 ```bash
-node .agents/scripts/orchestrator_state.js complete --agent data-analyst --artifact 02-strategy/measurement-plan.md
+node .agents/scripts/orchestrator_state.js complete --agent data-analyst --artifact 03-strategy/measurement-plan.md
 ```
 
 After all: `node .agents/scripts/ensure_graph.js doc`

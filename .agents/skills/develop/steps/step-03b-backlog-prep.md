@@ -22,24 +22,24 @@ output_contract:
 Produce the execution plan: task breakdown, estimates, dependencies, and parallelism decisions. This document gates all development work.
 
 ## Inputs
-- `artifacts/output/02-strategy/user-stories.md`
-- `artifacts/output/04-planning/kanban.md`
-- ADRs from `artifacts/output/03-architecture/` (if they exist)
+- `artifacts/output/03-strategy/user-stories.md`
+- `artifacts/output/05-planning/kanban.md`
+- ADRs from `artifacts/output/04-architecture/` (if they exist)
 
 ## Agent invocation
 `@tech-lead`:
-- Reviews user stories and the Kanban board (`artifacts/output/04-planning/kanban.md`)
+- Reviews user stories and the Kanban board (`artifacts/output/05-planning/kanban.md`)
 - Evaluates task dependencies and file isolation
 - Determines parallel developer count (1 to N) based on independent work streams
 - Plans implementation sequence and assigns role tags (FE / BE / Full-Stack)
 - Identifies technical unknowns or risky zones requiring spikes
 
 ## Output
-`artifacts/output/04-planning/execution-plan.md` — use template `.agents/templates/planning/execution-plan-template.md`
+`artifacts/output/05-planning/execution-plan.md` — use template `.agents/templates/planning/execution-plan-template.md`
 
 After writing the execution plan, record it:
 ```bash
-node .agents/scripts/orchestrator_state.js complete --agent tech-lead --artifact 04-planning/execution-plan.md
+node .agents/scripts/orchestrator_state.js complete --agent tech-lead --artifact 05-planning/execution-plan.md
 ```
 
 ## Worktree Creation (multi-developer mode only)
@@ -78,7 +78,7 @@ node .agents/scripts/worktree.js list
 
 ### Step 3: Update Kanban
 
-Update `artifacts/output/04-planning/kanban.md` with the Task Assignment table (worktree branches, role tags) from the execution plan. The worktree paths are available via `worktree.js list`.
+Update `artifacts/output/05-planning/kanban.md` with the Task Assignment table (worktree branches, role tags) from the execution plan. The worktree paths are available via `worktree.js list`.
 
 **Single-developer mode:** Skip worktree creation entirely.
 

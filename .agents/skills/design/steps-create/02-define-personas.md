@@ -51,8 +51,8 @@ If in `semi-autonomous` mode and `FeatureDesignInteraction` is not `false`:
 - Kernel self-validate: run the 8-rule check from `.agents/references/spec-law.md` against SPEC.md before handoff. Fix violations.
 
 ## Output
-- `artifacts/output/02-strategy/requirements.md` — use template `.agents/templates/product/prd-template.md` (full stakeholder PRD)
-- `artifacts/output/02-strategy/SPEC.md` — distill the full PRD into the 5-field spec kernel (`.agents/templates/product/SPEC.md`). This is the agent-facing contract — every downstream agent reads this instead of the full PRD.
+- `artifacts/output/03-strategy/requirements.md` — use template `.agents/templates/product/prd-template.md` (full stakeholder PRD)
+- `artifacts/output/03-strategy/SPEC.md` — distill the full PRD into the 5-field spec kernel (`.agents/templates/product/SPEC.md`). This is the agent-facing contract — every downstream agent reads this instead of the full PRD.
 - Persona definitions (integrated into PRD)
 
 ## Delegation

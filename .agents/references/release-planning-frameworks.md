@@ -92,7 +92,7 @@ Copy this table into PRD §9.1:
 | **Indifferent** | Users don't care either way | Cut or defer indefinitely |
 | **Reverse** | Actively disliked by some users | Investigate before building |
 
-**Source:** Use survey data or user interviews from `artifacts/output/01-research/user-personas.md`.
+**Source:** Use survey data or user interviews from `artifacts/output/02-research/user-personas.md`.
 
 ---
 

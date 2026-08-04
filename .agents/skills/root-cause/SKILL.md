@@ -7,7 +7,7 @@ last_updated: 2026-07-20
 
 # Root Cause Analysis
 
-Facilitates structured root cause discovery using Socratic techniques. Outputs to `artifacts/output/01-research/root-cause-analysis.md`.
+Facilitates structured root cause discovery using Socratic techniques. Outputs to `artifacts/output/02-research/root-cause-analysis.md`.
 
 ## Persona delegation
 This skill delegates to `@product-manager`. The pm facilitates the analysis using 5 Whys and Fishbone techniques. The skill provides structure; `@product-manager` provides the Socratic probing and synthesis.
@@ -34,7 +34,7 @@ If multiple causal factors are suspected, map them across categories: People, Pr
 
 ### Step 4: Output
 
-Delegate to `@writer` for `artifacts/output/01-research/root-cause-analysis.md`:
+Delegate to `@writer` for `artifacts/output/02-research/root-cause-analysis.md`:
 
 ```markdown
 # Root Cause Analysis — {problem}
@@ -65,4 +65,4 @@ Delegate to `@writer` for `artifacts/output/01-research/root-cause-analysis.md`:
 
 ## State machine integration
 At start: `@executor` runs `node .agents/scripts/orchestrator_state.js status`
-At end: `@executor` runs `node .agents/scripts/orchestrator_state.js complete --agent product-manager --artifact 01-research/root-cause-analysis.md`
+At end: `@executor` runs `node .agents/scripts/orchestrator_state.js complete --agent product-manager --artifact 02-research/root-cause-analysis.md`

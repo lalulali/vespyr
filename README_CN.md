@@ -4,7 +4,7 @@
 
 **一个平台无关、基于文件的多智能体引擎。** 将 23 个专业 AI 角色直接安装到你的仓库中。它们规划、设计、构建、审查、测试和交付——拥有跨会话持久化的结构化记忆，以及三大其他框架无法同时具备的架构护城河。
 
-[![Vespyr Version](https://img.shields.io/badge/version-2.0.0-blue)](https://github.com/lalulali/vespyr)
+[![Vespyr Version](https://img.shields.io/badge/version-2.0.1-blue)](https://github.com/lalulali/vespyr)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 📖 **[完整文档 →](Guide/cn/index.md)**

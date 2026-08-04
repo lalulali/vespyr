@@ -18,7 +18,7 @@ Takes a semi-cooked idea — a plan, pitch, doc, or set of notes — and shapes 
 No explicit modes. The skill checks what artifacts exist and adapts:
 - **Nothing exists** → full shaping from user input
 - **Validation brief exists** (`01-discovery/validation-brief.md`) → incorporates premises, skips re-framing
-- **Problem brief exists** (`01-research/problem-space-brief.md`) → uses problem definition as intake, shapes the selected solution concept
+- **Problem brief exists** (`02-research/problem-space-brief.md`) → uses problem definition as intake, shapes the selected solution concept
 - **Research artifacts exist** (`02-research/*.md`) → synthesizes findings into the brief
 - **Shaped brief already exists** (`01-discovery/shaped-brief.md`) → re-shape mode (post-research re-run)
 
@@ -57,4 +57,3 @@ At start, via `@executor`: `node .agents/scripts/orchestrator_state.js status`
 
 At end: `node .agents/scripts/orchestrator_state.js complete --agent founder --artifact 01-discovery/shaped-brief.md`
 **Memory:** Final step closes with `@memory-controller session-write` — mandatory per GUARDRAILS §Session Continuity.
-

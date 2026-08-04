@@ -109,7 +109,7 @@ This is the single DoD list.
 ### v2.1 DoD — Loop Engineering (criteria 15-17)
 
 15. `vespyr goal "<condition>"` runs iterations, invokes @goal-verifier, stops when the condition passes. @goal-verifier reads only the verification output (not the maker's code) and returns `DONE` or `NOT-DONE`.
-16. `automation.js create/list/run/archive` works. The starter automation (CI-failure triage) runs and produces a triage file in `artifacts/output/00-discovery/triage/`.
+16. `automation.js create/list/run/archive` works. The starter automation (CI-failure triage) runs and produces a triage file in `artifacts/output/01-discovery/triage/`.
 17. `loop-state.json` persists goal + automation state across sessions. `memory-controller` surfaces paused goals and overdue automations on session start.
 
 ### v2.1 DoD — Validation & Onboarding (criteria 18-21)

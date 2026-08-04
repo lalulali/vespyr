@@ -187,7 +187,7 @@ Steps 7a → 7b → 7c → 7d run sequentially (not in parallel). 7a (QA) is a h
 **You MUST invoke @qa-engineer here. Do not skip. Do not claim completion without an actual QA report file.**
 
 Invoke @qa-engineer to:
-1. Read the user story acceptance criteria from artifacts/output/02-strategy/user-stories.md
+1. Read the user story acceptance criteria from artifacts/output/03-strategy/user-stories.md
 2. Write and run comprehensive tests (unit, integration, e2e as appropriate)
 3. Produce artifacts/output/06-quality/qa-report.md with:
    - Test run summary (N passed, M failed)

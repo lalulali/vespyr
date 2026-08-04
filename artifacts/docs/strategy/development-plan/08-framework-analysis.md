@@ -63,7 +63,7 @@ Four AI agent frameworks occupy four distinct positions:
 8. Test coverage of the agent system itself is essentially zero.
 9. The "Game" pipeline is shallow — skills exist but no @game-designer, @narrative-engineer.
 10. Socratic tone can be alienating — no opt-out tone profile.
-11. Naming/phase-numbering inconsistencies (Phase -1 vs 00-discovery, Phase 7 vs 06-launch).
+11. Naming/phase-numbering inconsistencies (Phase -1 vs 01-discovery, Phase 7 vs 06-launch).
 12. `humanize` skill (565 lines) is third-party-sourced — will go stale without active maintenance.
 
 ---

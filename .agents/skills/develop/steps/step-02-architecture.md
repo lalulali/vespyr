@@ -6,7 +6,7 @@ prerequisites:
 conditional: ArchitectPhase
 delegation:
   reads: "@reader (project context + existing artifacts; per delegation-policy.md ≥4 files)"
-  writes: "@writer (ADR files in 03-architecture/; per delegation-policy.md multi-file output)"
+  writes: "@writer (ADR files in 04-architecture/; per delegation-policy.md multi-file output)"
   runs: none
   direct_justified: []
 output_contract:
@@ -30,11 +30,11 @@ Design system architecture, select the tech stack, define data models, and docum
 - System architecture and component interactions
 - Tech stack with trade-off rationale
 - Data models, schemas, and API contracts
-- ADRs in `artifacts/output/03-architecture/`
+- ADRs in `artifacts/output/04-architecture/`
 - Technical risks and mitigation strategies
 
 ## Outputs
-`artifacts/output/03-architecture/adr-NNN-*.md` — use template `.agents/templates/architecture/adr-template.md`
+`artifacts/output/04-architecture/adr-NNN-*.md` — use template `.agents/templates/architecture/adr-template.md`
 
 After each key decision, persist:
 ```
@@ -49,6 +49,6 @@ Architecture gap that breaks a user story's feasibility. Escalate to `@tech-lead
 
 ## Delegation
 - **Reads:** @reader for project context and existing artifacts
-- **Writes:** @writer for ADR files in 03-architecture/
+- **Writes:** @writer for ADR files in 04-architecture/
 
 > **Tracker:** `node .agents/scripts/step_tracker.js complete --skill develop --step 2`

@@ -27,7 +27,7 @@ Use this template before any production release. Every item must be verified bef
 
 ### 1.2 Testing
 
-- [ ] All acceptance criteria from user stories pass (`artifacts/output/02-strategy/user-stories.md`)
+- [ ] All acceptance criteria from user stories pass (`artifacts/output/03-strategy/user-stories.md`)
 - [ ] Unit test coverage meets threshold (target: >80%)
 - [ ] Integration tests pass for all API contracts
 - [ ] End-to-end tests pass for critical user flows
@@ -188,4 +188,4 @@ owner, mitigation, and authorized acceptance.
 - Author: @product-manager
 - Date: ...
 - Last updated: ...
-- Depends on: `artifacts/output/04-planning/execution-plan.md`, `artifacts/output/02-strategy/requirements.md`
+- Depends on: `artifacts/output/05-planning/execution-plan.md`, `artifacts/output/03-strategy/requirements.md`

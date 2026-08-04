@@ -7,7 +7,7 @@ last_updated: 2026-07-20
 
 # Jobs-to-be-Done + How Might We
 
-Formulates JTBD statements using the "When/I want to/so I can" template and maps HMW opportunity questions for each job. Outputs to `artifacts/output/01-research/jtbd-hmw.md`.
+Formulates JTBD statements using the "When/I want to/so I can" template and maps HMW opportunity questions for each job. Outputs to `artifacts/output/02-research/jtbd-hmw.md`.
 
 ## Persona delegation
 This skill delegates to `@product-manager`. The pm facilitates JTBD formulation and HMW mapping. The skill provides the template; `@product-manager` provides the product thinking and prioritization.
@@ -46,7 +46,7 @@ Example: JTBD "When I'm running late for a meeting, I want to find the fastest r
 
 ### Step 4: Output
 
-Delegate to `@writer` for `artifacts/output/01-research/jtbd-hmw.md`:
+Delegate to `@writer` for `artifacts/output/02-research/jtbd-hmw.md`:
 
 ```markdown
 # Jobs-to-be-Done + HMW Canvas — {product/feature}
@@ -71,4 +71,4 @@ Delegate to `@writer` for `artifacts/output/01-research/jtbd-hmw.md`:
 
 ## State machine integration
 At start: `@executor` runs `node .agents/scripts/orchestrator_state.js status`
-At end: `@executor` runs `node .agents/scripts/orchestrator_state.js complete --agent product-manager --artifact 01-research/jtbd-hmw.md`
+At end: `@executor` runs `node .agents/scripts/orchestrator_state.js complete --agent product-manager --artifact 02-research/jtbd-hmw.md`

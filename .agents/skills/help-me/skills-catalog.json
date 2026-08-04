@@ -4,9 +4,9 @@
     "description": "General data analysis companion — EDA, dataset provision, visualization mapping, insight extraction, metric value evaluation, and PM metric co-piloting",
     "prerequisites": [],
     "outputs": [
-      "artifacts/output/02-strategy/requirements.md",
+      "artifacts/output/03-strategy/requirements.md",
       "artifacts/output/07-iteration/data-analysis-report.md",
-      "artifacts/output/02-strategy/measurement-plan.md"
+      "artifacts/output/03-strategy/measurement-plan.md"
     ],
     "key_agents": [
       "@data-analyst",
@@ -120,13 +120,13 @@
     "name": "develop",
     "description": "Core MVP workflow — spec review, architecture, planning, implementation, QA, verification, and documentation",
     "prerequisites": [
-      "Spec-kernel exists at artifacts/output/02-strategy/ (see spec-kernel-template.md)",
-      "User stories in artifacts/output/02-strategy/user-stories.md"
+      "Spec-kernel exists at artifacts/output/03-strategy/ (see spec-kernel-template.md)",
+      "User stories in artifacts/output/03-strategy/user-stories.md"
     ],
     "outputs": [
-      "artifacts/output/04-planning/execution-plan.md",
-      "artifacts/output/02-strategy/",
-      "artifacts/output/02-strategy/user-stories.md",
+      "artifacts/output/05-planning/execution-plan.md",
+      "artifacts/output/03-strategy/",
+      "artifacts/output/03-strategy/user-stories.md",
       "artifacts/output/05-execution/develop-state.md"
     ],
     "key_agents": [
@@ -139,7 +139,7 @@
     "description": "Compile design thinking and research outputs into a unified report with dynamic usability testing scoring",
     "prerequisites": [],
     "outputs": [
-      "artifacts/output/01-research/"
+      "artifacts/output/02-research/"
     ],
     "key_agents": [
       "@product-manager"
@@ -171,7 +171,7 @@
     "description": "Map user feelings, thoughts, sayings, and doings from observation data into an empathy quadrant canvas",
     "prerequisites": [],
     "outputs": [
-      "artifacts/output/01-research/empathy-map.md"
+      "artifacts/output/02-research/empathy-map.md"
     ],
     "key_agents": [
       "@user-researcher"
@@ -217,7 +217,7 @@
       "Skip Phase 1 (Synthesize) entirely. Go straight to Phase 2 research.",
       "After research completes, recommend re-running shape-up to incorporate findings before proceeding to design.",
       "*Path D — Has problem-space brief (problem-first entry):**",
-      "  artifacts/output/01-research/problem-space-brief.md exists (from unpack-problem)",
+      "  artifacts/output/02-research/problem-space-brief.md exists (from unpack-problem)",
       "The problem brief's **selected solution concept** becomes the idea to research. The **root cause**, **JTBD**, and **HMW questions** become the focused research agenda — research agents validate whether the selected concept addresses the root cause and fulfills the identified jobs.",
       "Skip Phase 1 (Synthesize) entirely. Go straight to Phase 2 research.",
       "After research completes, recommend running shape-up to consolidate findings before proceeding to design."
@@ -225,7 +225,7 @@
     "outputs": [
       "artifacts/output/01-discovery/validation-brief.md",
       "artifacts/output/01-discovery/shaped-brief.md",
-      "artifacts/output/01-research/problem-space-brief.md",
+      "artifacts/output/02-research/problem-space-brief.md",
       "artifacts/output/01-discovery/idea-brief.md",
       "artifacts/output/02-research/market-analysis.md",
       "artifacts/output/02-research/competitive-analysis.md",
@@ -256,7 +256,9 @@
     "prerequisites": [],
     "outputs": [
       "artifacts/output/pipeline-state.json",
-      "artifacts/memory/project-context.md"
+      "artifacts/memory/project-context.md",
+      "artifacts/output/sprint-status.yaml",
+      "artifacts/memory/session-summaries/latest.md"
     ],
     "key_agents": [
       "@architect"
@@ -327,7 +329,7 @@
     "description": "Visualize user touchpoints, emotional state transitions, and friction points across current workflows",
     "prerequisites": [],
     "outputs": [
-      "artifacts/output/01-research/journey-map.md"
+      "artifacts/output/02-research/journey-map.md"
     ],
     "key_agents": [
       "@user-researcher"
@@ -338,7 +340,7 @@
     "description": "Formulate Jobs-to-be-Done statements and map How Might We opportunity questions in a single canvas",
     "prerequisites": [],
     "outputs": [
-      "artifacts/output/01-research/jtbd-hmw.md"
+      "artifacts/output/02-research/jtbd-hmw.md"
     ],
     "key_agents": [
       "@product-manager"
@@ -349,7 +351,7 @@
     "description": "Display and update the Kanban board — track task progress across phases",
     "prerequisites": [],
     "outputs": [
-      "artifacts/output/04-planning/kanban.md",
+      "artifacts/output/05-planning/kanban.md",
       "artifacts/memory/agent-notes/product-manager-notes.md"
     ],
     "key_agents": [
@@ -362,12 +364,14 @@
     "name": "launch",
     "description": "Go-to-market coordination — release readiness, deployment, smoke testing, post-launch monitoring, and completion",
     "prerequisites": [
-      "All tasks in artifacts/output/04-planning/execution-plan.md are complete",
+      "All tasks in artifacts/output/05-planning/execution-plan.md are complete",
       "Code review passed, QA validated, PM signed off",
-      "qa-signoff.md exists with GO/CONDITIONAL"
+      "qa-signoff.md exists with GO/CONDITIONAL",
+      "artifacts/output/06-launch/release-readiness.md contains the completed UTTERLY SATISFIED team gate"
     ],
     "outputs": [
-      "artifacts/output/04-planning/execution-plan.md"
+      "artifacts/output/05-planning/execution-plan.md",
+      "artifacts/output/06-launch/release-readiness.md"
     ],
     "key_agents": [
       "@devops-engineer"
@@ -379,6 +383,39 @@
     "prerequisites": [],
     "outputs": [],
     "key_agents": []
+  },
+  {
+    "name": "motion",
+    "description": "Orchestrates motion research, motion specification, and an explicit handoff to the standard development workflow for animation-significant products. Use this skill whenever the user mentions motion design, animation, transitions, micro-interactions, motion spec, motion prompts, animated UI, or an animation-heavy surface. Knowledge lives in .agents/references/motion/ and is loaded on demand, never inline.",
+    "prerequisites": [
+      "  artifacts/output/03-strategy/product-spec.md and design.md exist (from /design), OR the user provides the screens/features in scope.",
+      "  Agent references exist (they do — this is a curated skill):",
+      ".agents/references/motion/motion-design-guidelines.md (Ivy)",
+      ".agents/references/motion/motion-implementation-guidelines.md (Rex)",
+      ".agents/references/motion/motion-research-guide.md (researcher / ux-researcher)",
+      "  Template: .agents/templates/product/motion-spec-template.md",
+      "  Handoff template: .agents/templates/planning/motion-handoff-template.md"
+    ],
+    "outputs": [
+      "artifacts/output/03-strategy/product-spec.md",
+      "artifacts/output/02-research/motion-competitive.md",
+      "artifacts/output/02-research/motion-tech-landscape.md",
+      "artifacts/output/02-research/motion-usability.md",
+      "artifacts/output/02-research/motion-accessibility.md",
+      "artifacts/output/02-research/motion-patterns.md",
+      "artifacts/output/02-research/motion-research.md",
+      "artifacts/output/03-strategy/motion-spec.md",
+      "artifacts/output/03-strategy/design.md",
+      "artifacts/output/05-planning/motion-handoff.md"
+    ],
+    "key_agents": [
+      "@researcher",
+      "@developer",
+      "@ux-researcher",
+      "@product-designer",
+      "@tech-lead",
+      "@qa-engineer"
+    ]
   },
   {
     "name": "phase",
@@ -395,12 +432,12 @@
     "name": "plan",
     "description": "Create an execution plan from existing specs — standalone, outside the full develop cycle",
     "prerequisites": [
-      "artifacts/output/02-strategy/product-spec.md exists",
-      "Architecture decisions (ADRs) in 03-architecture/ (recommended)"
+      "artifacts/output/03-strategy/product-spec.md exists",
+      "Architecture decisions (ADRs) in 04-architecture/ (recommended)"
     ],
     "outputs": [
-      "artifacts/output/02-strategy/product-spec.md",
-      "artifacts/output/04-planning/execution-plan.md"
+      "artifacts/output/03-strategy/product-spec.md",
+      "artifacts/output/05-planning/execution-plan.md"
     ],
     "key_agents": [
       "@tech-lead"
@@ -411,7 +448,7 @@
     "description": "Construct comprehensive research plans with goals, hypotheses, cohort definitions, methodology, and a 2-part interview guide (Profile + Behavioral)",
     "prerequisites": [],
     "outputs": [
-      "artifacts/output/01-research/research-plan.md"
+      "artifacts/output/02-research/research-plan.md"
     ],
     "key_agents": [
       "@user-researcher"
@@ -446,7 +483,7 @@
     "description": "Guide root cause analysis using 5 Whys and Ishikawa/Fishbone diagrams. Use when you need to find why a problem exists before jumping to solutions.",
     "prerequisites": [],
     "outputs": [
-      "artifacts/output/01-research/root-cause-analysis.md"
+      "artifacts/output/02-research/root-cause-analysis.md"
     ],
     "key_agents": [
       "@product-manager"
@@ -556,11 +593,11 @@
     "description": "Problem-first exploration before solution ideation — supports guided, automated, and combination modes. Facilitated by @product-manager and @user-researcher.",
     "prerequisites": [],
     "outputs": [
-      "artifacts/output/01-research/problem-space-brief.md",
-      "artifacts/output/01-research/root-cause-analysis.md",
-      "artifacts/output/01-research/empathy-map.md",
-      "artifacts/output/01-research/journey-map.md",
-      "artifacts/output/01-research/jtbd-hmw.md"
+      "artifacts/output/02-research/problem-space-brief.md",
+      "artifacts/output/02-research/root-cause-analysis.md",
+      "artifacts/output/02-research/empathy-map.md",
+      "artifacts/output/02-research/journey-map.md",
+      "artifacts/output/02-research/jtbd-hmw.md"
     ],
     "key_agents": [
       "@product-manager",
@@ -584,11 +621,11 @@
     "prerequisites": [
       "Edit mode: artifacts/output/01-discovery/idea-brief.md exists",
       "Validate mode: artifacts/output/01-discovery/idea-brief.md exists",
-      "Problem-first entry: artifacts/output/01-research/problem-space-brief.md from /unpack-problem is accepted as equivalent to idea-brief.md for create mode — the problem brief becomes the idea to validate"
+      "Problem-first entry: artifacts/output/02-research/problem-space-brief.md from /unpack-problem is accepted as equivalent to idea-brief.md for create mode — the problem brief becomes the idea to validate"
     ],
     "outputs": [
       "artifacts/output/01-discovery/idea-brief.md",
-      "artifacts/output/01-research/problem-space-brief.md"
+      "artifacts/output/02-research/problem-space-brief.md"
     ],
     "key_agents": [
       "@founder"
@@ -600,7 +637,7 @@
     "prerequisites": [],
     "outputs": [
       "artifacts/memory/active-decisions.md",
-      "artifacts/output/01-research/validation-results.md"
+      "artifacts/output/02-research/validation-results.md"
     ],
     "key_agents": [
       "@founder"

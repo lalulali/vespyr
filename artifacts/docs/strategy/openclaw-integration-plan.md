@@ -130,7 +130,7 @@ Or invoke directly in chat: "Run @founder on this idea: [describe]"
 2. Research market and competitors via web_search
 3. Apply Socratic diagnostic questions per validate-idea reference
 4. Produce verdict: GO, PIVOT, or KILL
-5. Write `validation-brief.md` to `artifacts/output/00-discovery/`
+5. Write `validation-brief.md` to `artifacts/output/01-discovery/`
 6. Update `artifacts/memory/active-decisions.md`
 
 ## OpenClaw Tool Mapping

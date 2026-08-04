@@ -2,7 +2,7 @@
 
 > **Used by:** Paige (@user-researcher)
 > **Feeds into:** Sarah (@product-manager), Ivy (@product-designer)
-> **Save to:** `artifacts/output/01-research/user-personas.md`
+> **Save to:** `artifacts/output/02-research/user-personas.md`
 
 Use this template when writing the user research report.
 
@@ -124,7 +124,7 @@ For the **primary persona**, map the end-to-end experience:
 
 ## 5. User Research Validation Against Founder Assumptions
 
-Reference the founder's idea brief (`artifacts/output/00-discovery/idea-brief.md`). Did the founder understand the user?
+Reference the founder's idea brief (`artifacts/output/01-discovery/idea-brief.md`). Did the founder understand the user?
 
 | Founder Assumption | Research Finding | Match / Mismatch | Implication |
 |-------------------|------------------|------------------|-------------|
@@ -164,7 +164,7 @@ Turn the top 3-5 user needs into actionable opportunity statements for the produ
 
 ## 8. Competitive User Alternatives
 
-What are users doing today with competitor tools? (Cross-reference with `artifacts/output/01-research/competitive-analysis.md`)
+What are users doing today with competitor tools? (Cross-reference with `artifacts/output/02-research/competitive-analysis.md`)
 
 | Competitor / Tool | Who Uses It for This | What They Like | What They Hate | Switching Difficulty |
 |-------------------|---------------------|----------------|----------------|---------------------|
@@ -194,5 +194,5 @@ Rules:
 - Version: 2.0
 - Author: @user-researcher
 - Date: ...
-- Input: `artifacts/output/00-discovery/idea-brief.md` + `artifacts/output/01-research/competitive-analysis.md`
+- Input: `artifacts/output/01-discovery/idea-brief.md` + `artifacts/output/02-research/competitive-analysis.md`
 - Supersedes: v1.0 (added Participant Source, Technology Comfort including AI attitude, Competitive User Alternatives §8, Journey Map Notes)

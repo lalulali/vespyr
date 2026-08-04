@@ -13,7 +13,7 @@ Use this template to prioritize post-launch improvements based on analytics insi
 **Created:** ...
 **Owner:** @product-manager
 **Analytics Input:** `artifacts/output/07-iteration/analytics-insights.md`
-**Previous PRD:** `artifacts/output/02-strategy/requirements.md`
+**Previous PRD:** `artifacts/output/03-strategy/requirements.md`
 
 ---
 
@@ -112,4 +112,4 @@ What will make this iteration successful?
 - Version: 1.0
 - Author: @product-manager
 - Date: ...
-- Depends on: `artifacts/output/07-iteration/analytics-insights.md`, `artifacts/output/02-strategy/requirements.md`
+- Depends on: `artifacts/output/07-iteration/analytics-insights.md`, `artifacts/output/03-strategy/requirements.md`

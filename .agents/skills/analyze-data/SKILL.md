@@ -104,7 +104,7 @@ When auditing existing or proposed metrics to ensure they drive real value:
 Partner directly with `@product-manager` (and product squad) to define product metrics, driver trees, and telemetry tracking plans during product scoping.
 
 #### Step 1: Joint Metric Discovery
-- Load product requirements (`artifacts/output/02-strategy/requirements.md` or PRD).
+- Load product requirements (`artifacts/output/03-strategy/requirements.md` or PRD).
 - Apply **Avinash Kaushik's Digital Analytics Measurement Framework**:
   1. *Business Objective*: Core purpose of the feature/product.
   2. *Goals*: Specific strategies supporting the objective.
@@ -147,7 +147,7 @@ Delegate file creation to `@writer`:
 1. **For General Data Analysis & Insights**:
    - Location: `artifacts/output/07-iteration/data-analysis-report.md`
 2. **For PM Metric Strategy & Tracking Plans**:
-   - Location: `artifacts/output/02-strategy/measurement-plan.md`
+   - Location: `artifacts/output/03-strategy/measurement-plan.md`
 
 Save key measurement decisions to shared memory via `@memory-controller`:
 ```

@@ -2,10 +2,10 @@
 step: 1
 name: Spec Alignment & Read Check
 prerequisites:
-  - PR exists or design docs are in `artifacts/output/02-strategy/`
-  - User story is in `artifacts/output/02-strategy/user-stories.md`
+  - PR exists or design docs are in `artifacts/output/03-strategy/`
+  - User story is in `artifacts/output/03-strategy/user-stories.md`
 delegation:
-  reads: "@reader (5+ spec files across 02-strategy/ and 03-architecture/; per delegation-policy.md ≥4 files)"
+  reads: "@reader (5+ spec files across 03-strategy/ and 04-architecture/; per delegation-policy.md ≥4 files)"
   writes: "@writer (spec-alignment-check.md; per delegation-policy.md output file)"
   runs: none
   direct_justified: ["SPEC.md direct read — < 100 lines, agent contract"]
@@ -28,11 +28,11 @@ Load and cross-check every strategy artifact against the user stories. Confirm a
   2. Read `product-spec.md` and `user-stories.md` in full
 
 ## Inputs
-- `artifacts/output/02-strategy/SPEC.md` — spec kernel (5 fields: Why, Capabilities, Constraints, Non-goals, Success signal). **This is the primary agent contract — all agents must read this.**
-- `artifacts/output/02-strategy/product-spec.md`
-- `artifacts/output/02-strategy/requirements.md` (full stakeholder PRD — available for context, not mandatory reading for agents)
-- `artifacts/output/02-strategy/user-stories.md`
-- All files in `artifacts/output/03-architecture/` (if they exist)
+- `artifacts/output/03-strategy/SPEC.md` — spec kernel (5 fields: Why, Capabilities, Constraints, Non-goals, Success signal). **This is the primary agent contract — all agents must read this.**
+- `artifacts/output/03-strategy/product-spec.md`
+- `artifacts/output/03-strategy/requirements.md` (full stakeholder PRD — available for context, not mandatory reading for agents)
+- `artifacts/output/03-strategy/user-stories.md`
+- All files in `artifacts/output/04-architecture/` (if they exist)
 
 ## Process
 > **Tracker:** `node .agents/scripts/step_tracker.js begin --skill develop --step 1`
@@ -48,7 +48,7 @@ Load and cross-check every strategy artifact against the user stories. Confirm a
 Any spec gap unfilled after 2 CR cycles. Escalate to `@founder`.
 
 ## Delegation
-- **Reads:** @reader for spec files (5+ artifacts across 02-strategy/ and 03-architecture/)
+- **Reads:** @reader for spec files (5+ artifacts across 03-strategy/ and 04-architecture/)
 - **Writes:** @writer for spec-alignment-check.md
 - **Direct I/O:** reading SPEC.md directly permitted (< 100 lines, agent contract)
 

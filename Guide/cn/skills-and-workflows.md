@@ -17,6 +17,7 @@ Vespyr 将复杂操作组织为原子化技能。每个技能是一个文件夹�
 | `/unpack-problem` | 0-1 | 在解决方案构思前先探索问题 |
 | `/shape-up` | 1-2 | 将半成品创意塑形为设计就绪简报（独立使用或生命周期桥梁） |
 | `/design` | 2-3 | PRD 和界面规格创建 |
+| `/motion` | 2-4 | 动效调研、动效规格，以及移交 `/develop` 的明确流程 |
 | `/plan` | 4 | 独立或冲刺执行计划 |
 | `/develop` | 5 | MVP 开发周期 |
 | `/launch` | 6 | 发布准备和部署 |
@@ -40,7 +41,7 @@ Vespyr 将复杂操作组织为原子化技能。每个技能是一个文件夹�
 | 命令 | 描述 |
 |---------|-------------|
 | `/teach-me` | 个人学习伙伴——快速、解释或深度学习任何主题 |
-| `/craft-lesson` | 创建多种格式的教育材料（大纲、手册、速查表、演示、课堂、视频脚本） |
+| `/craft-lesson` | 创建多种格式的教育材料（大纲、详细手册、速查表、演示、课堂、视频脚本） |
 
 ### 创意塑造与苏格拉底对齐
 
@@ -96,18 +97,18 @@ Vespyr 的 11 阶段流水线。`.agents/references/phase-table.md` 是权威来
 
 | 阶段 | ID | 目录 | 主要技能 |
 |-------|-----|------|------|
-| 验证 | -1 | `00-discovery/` | `/validate-idea` |
-| 发现 | 0 | `00-discovery/` | `/unpack-problem` |
-| 调研 | 1 | `01-research/` | `/explore-idea` |
+| 验证 | 1 | `01-discovery/` | `/validate-idea` |
+| 发现 | 1 | `01-discovery/` | `/unpack-problem` |
+| 调研 | 2 | `02-research/` | `/explore-idea` |
 | 塑形桥梁 | 1-2 | `01-discovery/` | `/shape-up` |
-| 战略 | 2 | `02-strategy/` | `/design` |
-| 架构 | 3 | `03-architecture/` | Architecture ADRs |
-| 规划 | 4 | `04-planning/` | `/plan` |
-| 实现 | 5 | `05-implementation/` | `/develop` |
-| 发布 | 6 | `06-launch/` | `/launch` |
-| 迭代 | 7 | `07-iteration/` | `/iterate` |
-| 文档 | 8 | （贯穿） | 技术文档撰写 |
-| 回顾 | 9 | `09-retro/` | `/retro` |
+| 战略 | 3 | `03-strategy/` | `/design` |
+| 架构 | 4 | `04-architecture/` | Architecture ADRs |
+| 规划 | 5 | `05-planning/` | `/plan` |
+| 实现 | 6 | `root` | `/develop` |
+| 发布 | 7 | `06-launch/` | `/launch` |
+| 迭代 | 8 | `07-iteration/` | `/iterate` |
+| 文档 | 9 | （贯穿） | 技术文档撰写 |
+| 回顾 | 10 | `09-retro/` | `/retro` |
 
 ## 技能工作原理
 

@@ -40,11 +40,11 @@ Every PRD feature must have ≥1 user story. Every user story must have acceptan
 - Cross-validation checklist passes (PM agent Step 4)
 
 ## Output
-`artifacts/output/02-strategy/user-stories.md` — use template `.agents/templates/product/user-story-template.md`
+`artifacts/output/03-strategy/user-stories.md` — use template `.agents/templates/product/user-story-template.md`
 
 Record completion:
 ```bash
-node .agents/scripts/orchestrator_state.js complete --agent product-manager --artifact 02-strategy/user-stories.md
+node .agents/scripts/orchestrator_state.js complete --agent product-manager --artifact 03-strategy/user-stories.md
 ```
 
 Write story architecture decisions to memory:

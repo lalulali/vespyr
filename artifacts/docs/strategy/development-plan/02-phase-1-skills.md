@@ -88,12 +88,12 @@ This skill runs in sequential steps. Each step is a self-contained file with its
 
 ## When to invoke
 - Phase ≥ 4 (planning complete)
-- `@tech-lead` has approved `artifacts/output/04-planning/execution-plan.md`
+- `@tech-lead` has approved `artifacts/output/05-planning/execution-plan.md`
 - Worktree allocated (multi-developer mode) OR on `main` (single-developer mode)
 
 ## Prerequisites
-- Spec-kernel exists at `artifacts/output/02-strategy/` (see spec-kernel-template.md)
-- User stories in `artifacts/output/02-strategy/user-stories.md`
+- Spec-kernel exists at `artifacts/output/03-strategy/` (see spec-kernel-template.md)
+- User stories in `artifacts/output/03-strategy/user-stories.md`
 
 ## Mode detection
 - Always "create" on first activation.
@@ -145,12 +145,12 @@ Each step file is 30-80 lines, self-contained, with explicit halt conditions. Th
 step: 1
 name: Spec Alignment & Read Check
 prerequisites:
-  - PR exists or design docs are in `artifacts/output/02-strategy/`
-  - User story is in `artifacts/output/02-strategy/user-stories.md`
+  - PR exists or design docs are in `artifacts/output/03-strategy/`
+  - User story is in `artifacts/output/03-strategy/user-stories.md`
 ---
 ```
 
-- `step-01-spec-alignment.md` — read spec-kernel + user stories; align before coding. Lists every file in `artifacts/output/02-strategy/` and `artifacts/output/03-architecture/`, confirms read (or invokes `@reader` to summarize if > 1000 words), cross-checks ACs are achievable, files CRs for spec gaps. Output: `spec-alignment-check.md`. HALT if any spec gap is unfilled.
+- `step-01-spec-alignment.md` — read spec-kernel + user stories; align before coding. Lists every file in `artifacts/output/03-strategy/` and `artifacts/output/04-architecture/`, confirms read (or invokes `@reader` to summarize if > 1000 words), cross-checks ACs are achievable, files CRs for spec gaps. Output: `spec-alignment-check.md`. HALT if any spec gap is unfilled.
 - `step-02-architecture.md` — conditional (if `ArchitectPhase: true`); `@architect` produces ADRs. Skipped if architecture already exists.
 - `step-03a-arch-review.md` — `@tech-lead` reviews architecture for completeness and feasibility.
 - `step-03b-backlog-prep.md` — `@tech-lead` reviews stories; evaluates parallelism (which stories can run in separate worktrees).
@@ -225,7 +225,7 @@ description: Stress-test product concepts before research. Supports create/edit/
 
 ## Mode selection
 First, detect the user's intent:
-- **Create mode** → no `artifacts/output/00-discovery/idea-brief.md` exists
+- **Create mode** → no `artifacts/output/01-discovery/idea-brief.md` exists
 - **Edit mode** → brief exists, user wants to refine it
 - **Validate mode** → brief exists, user wants to stress-test it (this is the Socratic mode)
 
@@ -238,12 +238,12 @@ If unclear, ask: "Are you starting a new idea, refining an existing brief, or st
 
 ## Prerequisites
 - Create mode: none (this is the entry point)
-- Edit mode: `artifacts/output/00-discovery/idea-brief.md` exists
-- Validate mode: `artifacts/output/00-discovery/idea-brief.md` exists
+- Edit mode: `artifacts/output/01-discovery/idea-brief.md` exists
+- Validate mode: `artifacts/output/01-discovery/idea-brief.md` exists
 
 ## State machine integration
 At start: `node .agents/scripts/orchestrator_state.js status`
-At end: `node .agents/scripts/orchestrator_state.js complete --agent founder --artifact 00-discovery/idea-brief.md`
+At end: `node .agents/scripts/orchestrator_state.js complete --agent founder --artifact 01-discovery/idea-brief.md`
 ```
 
 #### steps-create/ (create mode, 7 step files)
@@ -396,7 +396,7 @@ Same folder + step-file architecture. SKILL.md becomes a ~50-line router; 5 step
 - `step-02-deploy.md` — `@devops-engineer` deploys to production
 - `step-03-smoke-test.md` — run smoke tests against production
 - `step-04-monitor.md` — monitor for errors, latency, traffic anomalies
-- `step-05-launch-log.md` — write `launch-log.md`, record completion
+- `step-06-launch-log.md` — write `launch-log.md`, record completion
 
 The readiness step must also load the T8 team matrix. Deployment is blocked
 until every active, relevant agent is `SATISFIED` with evidence and every
@@ -554,7 +554,7 @@ She must support and select styling options from these theme combinations:
 
 #### 2. Visual Specification Companion (`design.md`) — template structure
 
-Establish `artifacts/output/02-strategy/design.md` as the visual spec and styling source of truth. It defines:
+Establish `artifacts/output/03-strategy/design.md` as the visual spec and styling source of truth. It defines:
 
 - **Custom variables** (CSS custom properties / design tokens)
 - **Colors** (primary, secondary, accent, semantic — with hex values)
@@ -597,7 +597,7 @@ The 56KB template is a massive token consumer. Every time Ivy outputs a spec, sh
 
 - [x] Enrich `@product-designer` persona to analyze UX grids, layout hierarchy, user psychology
 - [x] Implement adaptive styling rubric: Rigid/Structured (dashboards/utility) vs. Out-of-the-Box/Creative (consumer apps/promotional), supporting theme combinations (Sleek Utility, Modern Glassmorphism, Minimalist Tech, Vibrant Brand-First)
-- [x] Create `artifacts/output/02-strategy/design.md` template: custom variables, colors, typography, component states, micro-animations, responsive breakpoints
+- [x] Create `artifacts/output/03-strategy/design.md` template: custom variables, colors, typography, component states, micro-animations, responsive breakpoints
 - [x] Core engineering agents (`@developer`, `@architect`, `@qa-engineer`, `@tech-lead`) instructed to read `design.md` as visual source of truth
 - [x] Transition `product-spec.html` output to dynamically generated (Tailwind CSS CDN + custom styled variables), deleting the 56KB static HTML template
 - [x] Ensure generated HTML matches standard spec section structure (Overview, User Flows, Screen Specs, Interaction Details, Visual System, Edge Cases, Open Questions, Cross-References)
@@ -794,8 +794,8 @@ Each step file's template already has a frontmatter block. Add `delegation:` as 
 step: 1
 name: Spec Alignment & Read Check
 prerequisites:
-  - PR exists or design docs are in `artifacts/output/02-strategy/`
-  - User story is in `artifacts/output/02-strategy/user-stories.md`
+  - PR exists or design docs are in `artifacts/output/03-strategy/`
+  - User story is in `artifacts/output/03-strategy/user-stories.md`
 delegation:
   reads: @reader (spec-kernel, user-stories, ADRs if > 100 lines)
   writes: @writer (spec-alignment-check.md)
@@ -1105,7 +1105,7 @@ The skill checks what artifacts exist and adapts — no mode selector needed:
 3. **Gap Analysis** — completeness check (who/what/why/how/what-not), assumption audit (verified/plausible/unverified), dependency scan, scope creep detector. Cross-references research findings if available. Outputs gap report with severity (blocker/should-fix/nice-to-know).
 4. **Stress-Test** — focused Socratic stress-test with 5 areas: viability, edge cases, scope vs. value, risk surface, competition with status quo. Lighter than `/grill-me` (no 7+1 branch tree, escape hatch after 3 questions). One question at a time.
 5. **Decision Alignment** — resolve every open gap/finding into a decision or explicit deferral. Each deferral has: reason, unblock condition, tracking location. Writes to `active-decisions.md`.
-6. **Handoff** — write `artifacts/output/00-discovery/shaped-brief.md`. Route: if all assumptions verified → `design`; if unverified assumptions need research → `explore-idea`; if fundamental viability concern → `validate-idea`.
+6. **Handoff** — write `artifacts/output/01-discovery/shaped-brief.md`. Route: if all assumptions verified → `design`; if unverified assumptions need research → `explore-idea`; if fundamental viability concern → `validate-idea`.
 
 #### Cross-skill wiring
 
@@ -1263,17 +1263,17 @@ Users who already have an established problem definition but want to perform spe
 
 Introduce six highly specialized, standalone modular skills that can be invoked independently or run as sub-steps of `/unpack-problem`:
 
-1. **`/root-cause`**: Guides Root Cause Analysis using Socratic techniques (e.g., 5 Whys, Ishikawa/Fishbone diagrams). Outputs `artifacts/output/01-research/root-cause-analysis.md`.
+1. **`/root-cause`**: Guides Root Cause Analysis using Socratic techniques (e.g., 5 Whys, Ishikawa/Fishbone diagrams). Outputs `artifacts/output/02-research/root-cause-analysis.md`.
 2. **`/research-plan`** *(Expanded from interview kit)*: Constructs comprehensive research plans containing research goals, hypotheses, target cohort definitions, methodology recommendations (e.g., qualitative interviews, surveys, usability testing, card sorting), and a 2-part interview guide:
    - *Part 1: User Profile Questions* (demographics, background, role, current tools).
    - *Part 2: Behavioral Questions* (past actions, specific event stories, "The Mom Test" rules to avoid future speculation bias).
-   Outputs `artifacts/output/01-research/research-plan.md`.
-3. **`/empathy-map`**: Facilitates mapping user feelings, thoughts, sayings, and doings from observation data. Outputs `artifacts/output/01-research/empathy-map.md`.
-4. **`/journey-map`**: Visualizes user touchpoints, emotional state transitions, and friction points across current workflows. Outputs `artifacts/output/01-research/journey-map.md`.
-5. **`/jtbd`**: Formulates core Customer Jobs using the Jobs-to-be-Done template (`When [context], I want to [action], so I can [outcome]`) **and directly maps How Might We (HMW) opportunity questions** for each job in a single canvas. Outputs `artifacts/output/01-research/jtbd-hmw.md`.
+   Outputs `artifacts/output/02-research/research-plan.md`.
+3. **`/empathy-map`**: Facilitates mapping user feelings, thoughts, sayings, and doings from observation data. Outputs `artifacts/output/02-research/empathy-map.md`.
+4. **`/journey-map`**: Visualizes user touchpoints, emotional state transitions, and friction points across current workflows. Outputs `artifacts/output/02-research/journey-map.md`.
+5. **`/jtbd`**: Formulates core Customer Jobs using the Jobs-to-be-Done template (`When [context], I want to [action], so I can [outcome]`) **and directly maps How Might We (HMW) opportunity questions** for each job in a single canvas. Outputs `artifacts/output/02-research/jtbd-hmw.md`.
 6. **`/discovery-report`**: Compiles design thinking and research outputs into a single unified report using `.agents/templates/discovery/discovery-report.md`. Dynamically includes or excludes the **Usability Testing (UT) Score** section based on whether usability testing data exists:
-   - If UT score is present -> outputs `artifacts/output/01-research/usability-report.md`.
-   - If UT score is omitted -> outputs `artifacts/output/01-research/user-research-report.md`.
+   - If UT score is present -> outputs `artifacts/output/02-research/usability-report.md`.
+   - If UT score is omitted -> outputs `artifacts/output/02-research/user-research-report.md`.
 
 ### Proposed content
 

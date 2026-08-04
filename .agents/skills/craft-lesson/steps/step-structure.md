@@ -51,8 +51,14 @@ Delegate file creation to **`@writer` (Quill)**:
 ```markdown
 # Master Knowledge Map: {Topic Name}
 
-## Overview & Target Style
-- **Explanation Style:** {Beginner | Intermediate | Expert}
+## Overview & Audience Profile Matrix
+- **Audience Scope:** {Internal (Roles & Familiarity) | External (Target Group & Background)}
+- **Baseline Explanation Style:** {Beginner | Intermediate | Expert}
+- **Format Audience Matrix:**
+  - `handbook`: {Target Audience & Depth, e.g. Junior/Mid Engineers - Intermediate}
+  - `cheatsheet`: {Target Audience & Depth, e.g. Architects & On-call Leads - Expert}
+  - `presentation`: {Target Audience & Deck Style, e.g. C-Suite - Executive Briefing / Course Learners - EdTech Masterclass}
+  - `syllabus`: {Target Audience & Depth, e.g. Course Instructors / Managers}
 - **Prerequisite Requirements:** {List}
 
 ## Module Breakdown

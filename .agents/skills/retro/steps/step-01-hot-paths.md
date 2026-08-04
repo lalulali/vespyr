@@ -34,7 +34,7 @@ Surfaces the top 3 most frequent agent paths, most common failure points, and hi
 `@product-manager` collects:
 
 **Kanban & execution:**
-- `artifacts/output/04-planning/kanban.md` — board state, completed stories, cycle times
+- `artifacts/output/05-planning/kanban.md` — board state, completed stories, cycle times
 - `@memory-controller load blockers` — active blockers and resolution times
 - Code review metrics — number of review cycles, blocking issues found per cycle
 

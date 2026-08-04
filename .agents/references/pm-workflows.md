@@ -10,10 +10,10 @@ Use this when building a new product or major feature from scratch.
 
 ### Step 1: Read all research artifacts
 Absorb everything before writing a single word:
-*   `artifacts/output/00-discovery/idea-brief.md` — the chosen concept and key assumptions.
-*   `artifacts/output/01-research/market-analysis.md` — market size, trends, segments.
-*   `artifacts/output/01-research/competitive-analysis.md` — competitor features, pricing, gaps.
-*   `artifacts/output/01-research/user-personas.md` — target users, pain points, journeys.
+*   `artifacts/output/01-discovery/idea-brief.md` — the chosen concept and key assumptions.
+*   `artifacts/output/02-research/market-analysis.md` — market size, trends, segments.
+*   `artifacts/output/02-research/competitive-analysis.md` — competitor features, pricing, gaps.
+*   `artifacts/output/02-research/user-personas.md` — target users, pain points, journeys.
 
 ### Step 2: Draft the PRD & Handle Human Validation (Interactive Gate)
 Follow the PRD template (`.agents/templates/product/prd-template.md`). For the agent-facing contract, also produce the spec kernel (`templates/product/SPEC.md` + companions). Key rules:
@@ -76,7 +76,7 @@ Before saving, run this checklist — every box must be checked:
 Ensure success metrics in the PRD are SMART and measurable. Share user stories so `@data-analyst` can plan instrumentation for feature adoption tracking.
 
 ### Step 6: Seed and Initialize the Kanban board
-Once PRD, product specs, and user stories are validated and approved (or immediately in autonomous mode, completely skipping all intermediate validation pauses), `@product-manager` must initialize and seed the project Kanban board (`artifacts/output/04-planning/kanban.md`):
+Once PRD, product specs, and user stories are validated and approved (or immediately in autonomous mode, completely skipping all intermediate validation pauses), `@product-manager` must initialize and seed the project Kanban board (`artifacts/output/05-planning/kanban.md`):
 *   Generate the Kanban board file directly.
 *   Populate the board with all user stories as separate cards in the **Backlog** column.
 *   For each card, set story ID, title, priority (Must-have/Should-have/Could-have) from MoSCoW classification, and sprint assignment.
@@ -90,7 +90,7 @@ Once PRD, product specs, and user stories are validated and approved (or immedia
 Use these when the team needs ongoing product management support. You can be invoked for any of the following activities at any time.
 
 ### B1. Roadmapping
-Create or update the product roadmap (`artifacts/output/02-strategy/roadmap.md`):
+Create or update the product roadmap (`artifacts/output/03-strategy/roadmap.md`):
 *   Define quarterly/yearly themes and objectives.
 *   Sequence initiatives based on dependencies, risk, and value.
 *   Balance new features, tech debt, and platform work.
@@ -102,11 +102,11 @@ Create or update the product roadmap (`artifacts/output/02-strategy/roadmap.md`)
 ### B2. Prioritization
 Run prioritization exercises and document the rationale:
 *   Use frameworks defined in `pm-frameworks.md` (RICE, MoSCoW, Kano, Value vs. Effort, Dependency analysis).
-*   Output: `artifacts/output/02-strategy/prioritization.md` or update existing kanban/roadmap.
+*   Output: `artifacts/output/03-strategy/prioritization.md` or update existing kanban/roadmap.
 *   **Always include:** The framework used and why, scoring/rationale for each item, explicit trade-offs, and what was de-prioritized.
 
 ### B3. Backlog Grooming
-Refine and maintain the backlog (`artifacts/output/04-planning/kanban.md`):
+Refine and maintain the backlog (`artifacts/output/05-planning/kanban.md`):
 *   Review items in Discovery and Upcoming columns.
 *   Split oversized stories or features.
 *   Clarify acceptance criteria for vague items.
@@ -130,7 +130,7 @@ Plan a release or milestone:
 *   Select scope from prioritized backlog.
 *   Identify risks and rollback plan.
 *   Coordinate with `@qa-engineer` on testing needs and `@data-analyst` on release metrics.
-*   Document in `artifacts/output/02-strategy/release-plan.md`.
+*   Document in `artifacts/output/03-strategy/release-plan.md`.
 
 ### B6. Stakeholder Communication
 Draft product updates for stakeholders:
@@ -138,11 +138,11 @@ Draft product updates for stakeholders:
 *   Executive summaries of roadmap shifts.
 *   User-facing feature announcements.
 *   Internal team updates on prioritization decisions.
-*   Output: Markdown documents in `artifacts/output/02-strategy/` or as requested.
+*   Output: Markdown documents in `artifacts/output/03-strategy/` or as requested.
 
 ### B7. Change Request Response
 When a Change Request (CR) is filed against your artifacts (PRD, user stories, roadmap):
-1.  Read **only the CR** from `artifacts/output/04-planning/change-requests.md`.
+1.  Read **only the CR** from `artifacts/output/05-planning/change-requests.md`.
 2.  Read **only the targeted section** of your artifact (not the entire document).
 3.  Respond to the CR with one of:
     *   **Accept** — apply the proposed fix, update the targeted section, bump version.

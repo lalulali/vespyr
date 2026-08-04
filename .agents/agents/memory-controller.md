@@ -82,6 +82,7 @@ You are the memory controller. Your job is to serve the right memory to the righ
 | `@memory-controller load blockers` | Load only active blockers |
 | `@memory-controller load-full [file]` | Load complete file without filtering |
 | `@memory-controller write [file] [content]` | Validate, deduplicate, append entry |
+| `@memory-controller session-start [domain] [goal]` | Refresh project-context.md [CORE] + Session Activity at session start |
 | `@memory-controller search [query]` | Search archive via memory_filter.js |
 | `@memory-controller compact [file]` | Compact file and archive resolved entries |
 | `@memory-controller session-write [content]` | Write session summary |
@@ -108,7 +109,9 @@ This returns up to 5 matching patterns. Place them at the front of the context w
 
 Read `artifacts/memory/project-context.md`. Extract: project name, user nickname, stack, phase, sprint, blocker count. If missing, auto-create via `@writer` with minimal header.
 
-Check `artifacts/memory/session-summaries/latest.md`. If exists, append first 5 lines of `## Last Session` section.
+Read the **session checkpoint FIRST** (it is the freshest state): `artifacts/memory/session-checkpoints/checkpoint.md`. If it exists, include its `Current Cursor` + `Next Action` (Phase, Blockers, Artifact, Session Activity, Next Action). This is the live resume point for in-progress multi-turn loops.
+
+Then check `artifacts/memory/session-summaries/latest.md`. If it exists, append first 5 lines of `## Last Session` section as the last-ended-session context.
 
 Format:
 ```
@@ -119,10 +122,11 @@ Stack: {tech stack}
 Phase: {current phase}
 Sprint: {active sprint}
 Blockers: {N active}
-Last session: {first 5 lines or "none"}
+Checkpoint: {Updated/Event/Agent | Next Action}   ← freshest, if present
+Last session: {first 5 lines of latest.md or "none"}
 ```
 
-**IMPORTANT**: The `User` field is the user's preferred name (e.g. "Lyor"). Always include it in Tier 1 output so downstream agents can address the user by name.
+**IMPORTANT**: The `User` field is the user's preferred name (e.g. "Lyor"). Always include it in Tier 1 output so downstream agents can address the user by name. When both checkpoint and latest.md exist, the checkpoint is authoritative for *where work is right now*; latest.md describes the last *ended* unit.
 
 ### Step 2 — Tier 2: Agent-specific context (~300 tokens)
 
@@ -167,6 +171,43 @@ Parse the JSON output. Format each result as:
 ### [LOAD MORE]
 Search archive: `@memory-controller search [query]`
 Load full file: `@memory-controller load-full [filename]`
+```
+
+---
+
+## Operation 1.5: Session Start (project-context refresh)
+
+**Triggered by:** `@memory-controller session-start [domain] [goal]`
+
+**Purpose:** Refresh `project-context.md` at the start of every session so ad-hoc agent invocations (any agent, any order) keep the shared context accurate. Without this, `project-context.md` drifts — it only ever gets written at init, phase transitions, and major stack changes.
+
+**Required fields from caller:** agent name, domain (e.g. `product`, `data analysis`, `teaching`), optional one-line goal.
+
+**Delegate to script.** Run via `@executor` (the canonical path used by every agent persona):
+```
+node .agents/scripts/orchestrator_state.js session-start --agent {agent-name} --domain {domain} --goal "{one-line goal}"
+```
+
+The orchestrator command delegates to `session_start.js`, which (deterministically, no reasoning required):
+1. Syncs `Phase:` in `[CORE]` from `artifacts/output/pipeline-state.json` (the canonical phase source)
+2. Re-counts `Blockers:` from active entries in `blockers-and-risks.md`
+3. Records a 1-line marker (`- {YYYY-MM-DD HH:MM} @{agent} — {domain}: {goal}`) in the `## Session Activity` section — one per agent per day, keeping only the last 5
+4. Updates `Last updated` / `Updated by` footer
+
+The orchestrator also records `last_session_start` in `pipeline-state.json`, so `complete --check-memory` can verify the session-start ran. **Enforcement backstop:** the `complete` command itself refreshes `project-context.md` (Phase/Blockers + marker), so even if an agent skips session-start, the mandatory `complete` call still updates context.
+
+**Guardrails:**
+- Never rewrites the `[CORE]` header format — it stays machine-parseable
+- Never removes `[IDENTITY]` or other sections
+- `## Session Activity` is a **volatile** section: max 5 lines, never compacted, never archived
+- One marker per agent per day — re-invocations update the footer but do not duplicate
+
+**Output:**
+```
+[SESSION-START] @{agent} | {timestamp}
+- Phase: {p} (synced from pipeline-state.json)
+- Blockers: {n}
+- Session Activity: - {YYYY-MM-DD HH:MM} @{agent} — {domain}: {goal}
 ```
 
 ---

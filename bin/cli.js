@@ -5,7 +5,7 @@ const path = require("path");
 const os = require("os");
 const readline = require("readline");
 
-const VERSION = "2.0.0";
+const VERSION = require(path.join(__dirname, "..", "package.json")).version;
 const AGENTS_SRC = path.join(__dirname, "..", ".agents");
 const IS_TTY = Boolean(process.stdout && process.stdout.isTTY);
 
@@ -76,6 +76,59 @@ function logWarn(msg) {
 	console.warn(`  ⚠ ${msg}`);
 }
 
+function detectRepository() {
+	const { execSync } = require("child_process");
+	try {
+		const inRepo = execSync("git rev-parse --is-inside-work-tree 2>/dev/null", {
+			encoding: "utf8",
+		}).trim();
+		if (inRepo !== "true") return "Not a git repository (local folder)";
+		const remote = execSync("git config --get remote.origin.url 2>/dev/null", {
+			encoding: "utf8",
+		}).trim();
+		return remote || "Local git repository (no remote)";
+	} catch {
+		return "Not a git repository (local folder)";
+	}
+}
+
+// post-push hook: refreshes project-context.md (Repository line + CORE fields)
+// right after `git push`, via the orchestrator's sync-context command.
+const POST_PUSH_HOOK = `#!/bin/sh
+# Vespyr: refresh project-context.md after a push.
+# Keeps the Repository line in artifacts/memory/project-context.md in sync
+# with the remote configured for this repository.
+node .agents/scripts/orchestrator_state.js sync-context >/dev/null 2>&1 || true
+`;
+
+function installGitHook(targetDir) {
+	const gitDir = path.join(targetDir, ".git");
+	if (!fs.existsSync(gitDir)) {
+		logWarn(
+			"No .git directory found — post-push hook not installed. Run \`git init\` then \`npx vespyr --install-git-hook --target .\` to enable it.",
+		);
+		return false;
+	}
+	if (dryRun) {
+		logDry(`Would install post-push git hook in ${path.join(gitDir, "hooks")}`);
+		return true;
+	}
+	const hooksDir = path.join(gitDir, "hooks");
+	if (!fs.existsSync(hooksDir)) {
+		fs.mkdirSync(hooksDir, { recursive: true });
+	}
+	const hookPath = path.join(hooksDir, "post-push");
+	const hasVespyrHook =
+		fs.existsSync(hookPath) && fs.readFileSync(hookPath, "utf8").includes("orchestrator_state.js sync-context");
+	if (fs.existsSync(hookPath) && !hasVespyrHook) {
+		logWarn("Existing post-push hook found — Vespyr hook NOT overwritten. Merge it manually.");
+		return false;
+	}
+	fs.writeFileSync(hookPath, POST_PUSH_HOOK, { mode: 0o755 });
+	log(`  ✓ post-push git hook installed (${path.relative(process.cwd(), hookPath)})`);
+	return true;
+}
+
 function parseFlags(argv) {
 	const args = argv.slice(2);
 	const flags = {
@@ -86,6 +139,7 @@ function parseFlags(argv) {
 		version: false,
 		help: false,
 		syncDocs: false,
+		installGitHook: false,
 	};
 
 	for (let i = 0; i < args.length; i++) {
@@ -117,6 +171,8 @@ function parseFlags(argv) {
 			flags.help = true;
 		} else if (arg === "--sync-docs") {
 			flags.syncDocs = true;
+		} else if (arg === "--install-git-hook") {
+			flags.installGitHook = true;
 		} else {
 			console.error(`Unknown flag: ${arg}`);
 			process.exit(1);
@@ -335,17 +391,7 @@ function scaffoldArtifacts(targetDir, projectName, userNickname = "User") {
 		return;
 	}
 
-	const outputDirs = [
-		"output/01-discovery",
-		"output/02-research",
-		"output/03-strategy",
-		"output/04-architecture",
-		"output/05-planning",
-		"output/06-launch",
-		"output/07-iteration",
-		"output/08-incidents",
-		"output/09-retro",
-	];
+	const outputDirs = ["output"];
 	const memoryDirs = [
 		"memory/agent-notes",
 		"memory/archive",
@@ -392,9 +438,23 @@ function scaffoldArtifacts(targetDir, projectName, userNickname = "User") {
 		path.join(memoryPath, "project-context.md"),
 		`# Project Context
 
+## [CORE]
+Project: ${projectName} (startup)
+Stack: None
+Phase: validation
+Sprint: none
+Blockers: 0
+Squad: full-team
+
+## [IDENTITY]
+User Nickname: ${userNickname}
+
+## Session Activity
+_(auto-populated on every session by @memory-controller / orchestrator_state.js)_
+
 ## Identity
 - **Project Name**: ${projectName}
-- **Repository**: None (not a git repository)
+- **Repository**: ${detectRepository()}
 - **User Nickname**: ${userNickname}
 - **Created**: ${isoDate}
 
@@ -1371,6 +1431,7 @@ async function performFreshInstall(targetDir, flags) {
 
 	const projectName = path.basename(targetDir);
 	scaffoldArtifacts(targetDir, projectName, userNickname);
+	installGitHook(targetDir);
 	bootstrapRootDocs(targetDir, projectName, selections);
 	performSyncDocs(targetDir);
 	await installHarnesses(targetDir, selections, method);
@@ -2023,6 +2084,7 @@ Options:
   --version, -v        Print version and exit
   --help, -h           Print usage and exit
   --sync-docs          Sync documentation entry points
+  --install-git-hook   Install post-push hook (refreshes project-context after git push)
 
 Examples:
   npx vespyr                          Interactive install
@@ -2038,6 +2100,12 @@ Examples:
 		let targetDir = flags.target ? path.resolve(flags.target) : process.cwd();
 		performSyncDocs(targetDir);
 		process.exit(0);
+	}
+
+	if (flags.installGitHook) {
+		let targetDir = flags.target ? path.resolve(flags.target) : process.cwd();
+		const ok = installGitHook(targetDir);
+		process.exit(ok ? 0 : 1);
 	}
 
 	if (IS_TTY) log(ASCII_ART);
@@ -2142,6 +2210,7 @@ module.exports = {
 	writeManifest,
 	removeStaleManifestFiles,
 	yamlQuote,
+	installGitHook,
 	ASCII_ART,
 	VERSION,
 	HARNESS_OPTIONS,

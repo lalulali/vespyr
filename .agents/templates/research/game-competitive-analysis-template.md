@@ -2,7 +2,7 @@
 
 > **Used by:** Iris (@researcher)
 > **Feeds into:** Sarah (@product-manager), Ivy (@product-designer)
-> **Save to:** `artifacts/output/01-research/competitive-analysis.md`
+> **Save to:** `artifacts/output/02-research/competitive-analysis.md`
 
 Use this template when writing the competitive landscape report.
 
@@ -117,7 +117,7 @@ White space: [Where is the gap? Which quadrant is underserved?]
 
 ## 6. Competitive Validation Against Founder Assumptions
 
-Reference the founder's idea brief (`artifacts/output/00-discovery/idea-brief.md`). Did the founder get the competitive landscape right?
+Reference the founder's idea brief (`artifacts/output/01-discovery/idea-brief.md`). Did the founder get the competitive landscape right?
 
 | Founder Assumption | Research Finding | Match / Mismatch | Implication |
 |-------------------|------------------|------------------|-------------|
@@ -164,5 +164,5 @@ Rules:
 - Version: 1.0
 - Author: @researcher
 - Date: ...
-- Input: `artifacts/output/00-discovery/idea-brief.md` + `artifacts/output/01-research/market-analysis.md`
+- Input: `artifacts/output/01-discovery/idea-brief.md` + `artifacts/output/02-research/market-analysis.md`
 - Supersedes: v1.0 (initial)

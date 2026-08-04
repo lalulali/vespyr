@@ -24,6 +24,7 @@ const {
   uninstallHarnesses,
   performReconfigure,
   performUpdate,
+  installGitHook,
   ASCII_ART,
   VERSION,
 } = require('../bin/cli.js');
@@ -472,8 +473,7 @@ describe('Test 7: scaffoldArtifacts()', () => {
   it('should create full directory tree on first run', () => {
     scaffoldArtifacts(tmpDir, 'test-project');
 
-    assert.ok(fs.existsSync(path.join(tmpDir, 'artifacts', 'output', '01-discovery')));
-    assert.ok(fs.existsSync(path.join(tmpDir, 'artifacts', 'output', '02-research')));
+    assert.ok(fs.existsSync(path.join(tmpDir, 'artifacts', 'output')));
     assert.ok(fs.existsSync(path.join(tmpDir, 'artifacts', 'memory')));
     assert.ok(fs.existsSync(path.join(tmpDir, 'artifacts', 'telemetry')));
     assert.ok(fs.existsSync(path.join(tmpDir, 'artifacts', 'directions')));
@@ -611,7 +611,7 @@ describe('Test 10: parseFlags()', () => {
   it('should handle no flags', () => {
     const result = parseFlags(['node', 'cli.js']);
     assert.deepStrictEqual(result, {
-      dryRun: false, yes: false, target: null, harnesses: [], version: false, help: false, syncDocs: false,
+      dryRun: false, yes: false, target: null, harnesses: [], version: false, help: false, syncDocs: false, installGitHook: false,
     });
   });
 
@@ -650,11 +650,48 @@ describe('Test 10: parseFlags()', () => {
     assert.strictEqual(result.syncDocs, true);
   });
 
+  it('should handle --install-git-hook', () => {
+    const result = parseFlags(['node', 'cli.js', '--install-git-hook']);
+    assert.strictEqual(result.installGitHook, true);
+  });
+
   it('should handle combined flags', () => {
     const result = parseFlags(['node', 'cli.js', '--dry-run', '--yes', '--target', './here']);
     assert.strictEqual(result.dryRun, true);
     assert.strictEqual(result.yes, true);
     assert.strictEqual(result.target, './here');
+  });
+});
+
+describe('Test 10b: installGitHook()', () => {
+  it('should install post-push hook when .git exists', () => {
+    const dir = makeTempDir();
+    fs.mkdirSync(path.join(dir, '.git', 'hooks'), { recursive: true });
+    const ok = installGitHook(dir);
+    assert.strictEqual(ok, true);
+    const hook = fs.readFileSync(path.join(dir, '.git', 'hooks', 'post-push'), 'utf8');
+    assert.ok(hook.includes('orchestrator_state.js sync-context'));
+    cleanTempDir(dir);
+  });
+
+  it('should return false and skip when no .git directory', () => {
+    const dir = makeTempDir();
+    const ok = installGitHook(dir);
+    assert.strictEqual(ok, false);
+    assert.ok(!fs.existsSync(path.join(dir, '.git', 'hooks', 'post-push')));
+    cleanTempDir(dir);
+  });
+
+  it('should not overwrite an existing non-Vespyr post-push hook', () => {
+    const dir = makeTempDir();
+    fs.mkdirSync(path.join(dir, '.git', 'hooks'), { recursive: true });
+    fs.writeFileSync(path.join(dir, '.git', 'hooks', 'post-push'), '#!/bin/sh\necho custom\n', { mode: 0o755 });
+    const ok = installGitHook(dir);
+    assert.strictEqual(ok, false);
+    const hook = fs.readFileSync(path.join(dir, '.git', 'hooks', 'post-push'), 'utf8');
+    assert.ok(hook.includes('custom'));
+    assert.ok(!hook.includes('orchestrator_state.js'));
+    cleanTempDir(dir);
   });
 });
 

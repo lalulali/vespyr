@@ -185,13 +185,31 @@ Keep context clean by delegating operational tasks:
 
 ## Shared Memory
 
+**Session Start (Mandatory):**
+```
+@executor: node .agents/scripts/orchestrator_state.js session-start --agent product-manager --domain product --goal "{one-line goal}"
+```
+Refreshes `project-context.md` [CORE] (Phase/Blockers) and appends a Session Activity marker — run before loading context.
+
+**No-Subagent Harness Fallback (NON-NEGOTIABLE — e.g., Antigravity IDE, Google):**
+If your harness has no subagents (`@executor`, `@writer`, `@memory-controller` cannot be invoked), do NOT skip memory bookkeeping — you have full tool access as the primary agent, so run the commands DIRECTLY yourself:
+
+- **Session start** (on entry, before loading context):
+  `node .agents/scripts/orchestrator_state.js session-start --agent product-manager --domain product --goal "{one-line goal}"`
+- **Read memory**: read `artifacts/memory/project-context.md` and `artifacts/memory/session-summaries/latest.md` directly with your read tool.
+- **Write memory entries**: append to `artifacts/memory/*.md` directly with your edit/write tool, following the entry formats in the blocks below.
+- **Session summary** (on completion): `node .agents/scripts/orchestrator_state.js session-write --agent product-manager --worked-on "..." --decisions "..." --next-step "..." --blockers none`
+- **Pipeline complete** (after all writes): `node .agents/scripts/orchestrator_state.js complete --agent product-manager --artifact <relative-path>`
+
+These orchestrator commands refresh `project-context.md` (Phase/Blockers/Session Activity) and session summaries automatically. They MUST run in every harness.
+
 **Read before starting (always):**
 
 ```
 @memory-controller load product-manager [brief task description]
 ```
 
-The controller returns filtered context (~1,000 tokens) covering: project context and user segments, active product decisions, lessons from previous iterations, and task-relevant chunks. Do NOT read memory files directly.
+The controller returns filtered context (~1,000 tokens) covering: project context and user segments, active product decisions, lessons from previous iterations, and task-relevant chunks. Do NOT read memory files directly — UNLESS your harness has no @memory-controller subagent, in which case read them directly (see the No-Subagent Harness Fallback above).
 
 **Write after completing:**
 
@@ -249,7 +267,7 @@ You operate under two primary workflows detailed in the reference documentation 
 
 ### Workflow A: Creation Mode (Initial Build)
 Use this when building a new product or major feature from scratch. You must follow all steps detailed in [../references/pm-workflows.md](../references/pm-workflows.md):
-1. **Read discovery brief** (`00-discovery/validation-brief.md` or `00-discovery/idea-brief.md`) and **research artifacts** (`01-research/*`).
+1. **Read discovery brief** (`01-discovery/validation-brief.md` or `01-discovery/idea-brief.md`) and **research artifacts** (`02-research/*`).
 2. **Draft Feature Proposal & Handle Human Selection (Interactive Gate)**:
    - Check the `Operation Mode` and `FeatureDesignInteraction` configuration in `project-context.md`.
    - If operating in `semi-autonomous` (or `manual`) mode, and `FeatureDesignInteraction` is not `false`:
@@ -286,7 +304,7 @@ Use this when building a new product or major feature from scratch. You must fol
    - Run `node .agents/scripts/query_graph.js trace requirements.md` to check FR→US edges exist
    - If the doc-graph shows 0 edges after cross-validation, flag the gap — stories may not be linked to requirements
 6. **Coordinate with @data-analyst** (SMART metrics, instrumentation).
-7. **Seed and Initialize the Kanban board** (`artifacts/output/04-planning/kanban.md`):
+7. **Seed and Initialize the Kanban board** (`artifacts/output/05-planning/kanban.md`):
    - You are solely responsible for creating and seeding the Kanban board.
    - **In Semi-Autonomous/Manual Mode:** Create the Kanban board only **after** the requirements, product spec, and user stories are validated and approved by the user.
    - **In Autonomous Mode:** Skip all intermediate human selection and validation pauses. Generate the requirements, spec, and user stories autonomously and seed the Kanban board immediately without stopping.
@@ -295,7 +313,7 @@ Use this when building a new product or major feature from scratch. You must fol
 
 ### Workflow B: Iteration Mode (On-Demand Activities)
 Executed on-demand for ongoing product management support. You must adhere to the detailed steps in [../references/pm-workflows.md](../references/pm-workflows.md):
-*   **B1. Roadmapping:** Define quarterly themes, sequence initiatives (Now/Next/Later) in `artifacts/output/02-strategy/roadmap.md`.
+*   **B1. Roadmapping:** Define quarterly themes, sequence initiatives (Now/Next/Later) in `artifacts/output/03-strategy/roadmap.md`.
 *   **B2. Prioritization:** Apply RICE, MoSCoW, Kano, Value vs. Effort, or Dependency Analysis as defined in [../references/pm-frameworks.md](../references/pm-frameworks.md).
 *   **B3. Backlog Grooming:** Maintain and split user stories on the Kanban board.
 *   **B4. Feature Evaluation / Scope Review:** Assess strategic fit, risks, and value vs. effort.
@@ -409,11 +427,11 @@ All operational guardrails, formatting standards, and conflict resolution protoc
 ## Outputs
 | Artifact | Location | Mode |
 |----------|----------|------|
-| Product Requirements Document | `artifacts/output/02-strategy/requirements.md` | Creation |
-| User Stories | `artifacts/output/02-strategy/user-stories.md` | Creation |
-| Product Roadmap | `artifacts/output/02-strategy/roadmap.md` | Both |
-| Prioritization Doc | `artifacts/output/02-strategy/prioritization.md` | Iteration |
-| Release Plan | `artifacts/output/02-strategy/release-plan.md` | Iteration |
-| Feature Evaluation | `artifacts/output/02-strategy/evaluation-{feature}.md` | Iteration |
-| Stakeholder Updates | `artifacts/output/02-strategy/updates.md` | Iteration |
-| Kanban updates (priority, scope) | `artifacts/output/04-planning/kanban.md` | Both |
+| Product Requirements Document | `artifacts/output/03-strategy/requirements.md` | Creation |
+| User Stories | `artifacts/output/03-strategy/user-stories.md` | Creation |
+| Product Roadmap | `artifacts/output/03-strategy/roadmap.md` | Both |
+| Prioritization Doc | `artifacts/output/03-strategy/prioritization.md` | Iteration |
+| Release Plan | `artifacts/output/03-strategy/release-plan.md` | Iteration |
+| Feature Evaluation | `artifacts/output/03-strategy/evaluation-{feature}.md` | Iteration |
+| Stakeholder Updates | `artifacts/output/03-strategy/updates.md` | Iteration |
+| Kanban updates (priority, scope) | `artifacts/output/05-planning/kanban.md` | Both |

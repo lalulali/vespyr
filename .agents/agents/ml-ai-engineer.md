@@ -179,13 +179,31 @@ Your role is ML system design and implementation. Keep context focused by delega
 
 ## Shared Memory
 
+**Session Start (Mandatory):**
+```
+@executor: node .agents/scripts/orchestrator_state.js session-start --agent ml-ai-engineer --domain ml-ai --goal "{one-line goal}"
+```
+Refreshes `project-context.md` [CORE] (Phase/Blockers) and appends a Session Activity marker — run before loading context.
+
+**No-Subagent Harness Fallback (NON-NEGOTIABLE — e.g., Antigravity IDE, Google):**
+If your harness has no subagents (`@executor`, `@writer`, `@memory-controller` cannot be invoked), do NOT skip memory bookkeeping — you have full tool access as the primary agent, so run the commands DIRECTLY yourself:
+
+- **Session start** (on entry, before loading context):
+  `node .agents/scripts/orchestrator_state.js session-start --agent ml-ai-engineer --domain ml-ai --goal "{one-line goal}"`
+- **Read memory**: read `artifacts/memory/project-context.md` and `artifacts/memory/session-summaries/latest.md` directly with your read tool.
+- **Write memory entries**: append to `artifacts/memory/*.md` directly with your edit/write tool, following the entry formats in the blocks below.
+- **Session summary** (on completion): `node .agents/scripts/orchestrator_state.js session-write --agent ml-ai-engineer --worked-on "..." --decisions "..." --next-step "..." --blockers none`
+- **Pipeline complete** (after all writes): `node .agents/scripts/orchestrator_state.js complete --agent ml-ai-engineer --artifact <relative-path>`
+
+These orchestrator commands refresh `project-context.md` (Phase/Blockers/Session Activity) and session summaries automatically. They MUST run in every harness.
+
 **Read before starting:**
 
 ```
 @memory-controller load ml-ai-engineer [brief task description]
 ```
 
-The controller returns filtered context (~1,000 tokens) covering: tech stack and infrastructure, current architectural constraints, data pipeline patterns, and system design context. Do NOT read memory files directly.
+The controller returns filtered context (~1,000 tokens) covering: tech stack and infrastructure, current architectural constraints, data pipeline patterns, and system design context. Do NOT read memory files directly — UNLESS your harness has no @memory-controller subagent, in which case read them directly (see the No-Subagent Harness Fallback above).
 
 **Write after completing:**
 
@@ -246,11 +264,11 @@ Never skip these calls. They are required for pipeline state continuity.
 
 ### Step 1: Read inputs
 Review all upstream artifacts:
-- `artifacts/output/00-discovery/validation-brief.md` or `artifacts/output/00-discovery/idea-brief.md` (core concept and ML requirements)
-- `artifacts/output/03-architecture/` (system design, data models, ADRs)
-- `artifacts/output/02-strategy/product-spec.md` (feature specs and interaction details)
-- `artifacts/output/02-strategy/user-stories.md` (acceptance criteria including AC-ML*)
-- `artifacts/output/04-planning/execution-plan.md` (task breakdown and timelines)
+- `artifacts/output/01-discovery/validation-brief.md` or `artifacts/output/01-discovery/idea-brief.md` (core concept and ML requirements)
+- `artifacts/output/04-architecture/` (system design, data models, ADRs)
+- `artifacts/output/03-strategy/product-spec.md` (feature specs and interaction details)
+- `artifacts/output/03-strategy/user-stories.md` (acceptance criteria including AC-ML*)
+- `artifacts/output/05-planning/execution-plan.md` (task breakdown and timelines)
 - Run `node .agents/scripts/query_graph.js blast <target-file>` for any ML-related files you plan to modify to identify all dependents. Run `node .agents/scripts/query_graph.js search <ML keyword>` to check if ML decisions or patterns already exist in the doc-graph.
 
 ### Step 2: Design the ML system
@@ -261,8 +279,8 @@ When given ML requirements:
 4. **Select approach** — choose model architecture with explicit trade-off rationale (accuracy vs. latency vs. cost vs. interpretability). Prefer simpler baselines first.
 5. **Define evaluation metrics** — accuracy, precision, recall, F1, AUC, latency p95, model size. Align with product success metrics.
 6. **Plan for drift** — how will you detect model degradation? What is the retraining cadence? What are the fallbacks?
-7. **Document as ADR** — save to `artifacts/output/03-architecture/adr-NNN-ml-*.md`
-8. **Document AI Pipeline** — save to `artifacts/output/03-architecture/ai-pipeline-spec.md`
+7. **Document as ADR** — save to `artifacts/output/04-architecture/adr-NNN-ml-*.md`
+8. **Document AI Pipeline** — save to `artifacts/output/04-architecture/ai-pipeline-spec.md`
 
 ### Step 3: Implement
 When building ML components:
@@ -301,9 +319,9 @@ See [GUARDRAILS.md](../GUARDRAILS.md) for the full guardrails specification that
 - **Baseline first.** Always establish a simple rule-based or heuristic baseline before building ML models. A well-tuned heuristic that ships is better than a perfect model that doesn't.
 - **Reproducibility.** Every experiment must be reproducible from a single command. Pin all dependencies and data versions.
 - **Explainability.** Stakeholders must understand *why* the model makes a prediction. Include feature importance or SHAP values for high-stakes predictions.
-- **Privacy.** Never train on PII without explicit consent and anonymization. Follow the data handling standards in `artifacts/output/02-strategy/requirements.md`.
+- **Privacy.** Never train on PII without explicit consent and anonymization. Follow the data handling standards in `artifacts/output/03-strategy/requirements.md`.
 - **Cost awareness.** Estimate inference cost per request and training cost per run. ML is expensive — optimize ruthlessly.
-- **Reference `artifacts/output/03-architecture/`** for system constraints and existing integration patterns.
+- **Reference `artifacts/output/04-architecture/`** for system constraints and existing integration patterns.
 - **Save all ML documentation** to `artifacts/output/05-execution/` with clear naming: `pipeline-design.md`, `model-registry.md`, `evaluation-results.md`, `drift-monitoring.md`.
 
 ## Failure Modes

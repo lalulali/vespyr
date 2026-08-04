@@ -4,6 +4,14 @@ All notable changes to the Vespyr project will be documented in this file.
 
 ---
 
+## [2.0.1] - 2026-08-03
+### Changed
+- Enforced detailed student textbook creation for `@shifu` during handbook generation (`handbook.md`), strictly preventing condensed cheatsheet-style summaries.
+- Updated `@shifu` persona principles, standards, failure mode mitigations (`shifu.md`), `craft-lesson` step instructions (`step-handbook.md`, `SKILL.md`), and Phase 5 review quality checks (`step-review.md`).
+- Bumped package version to 2.0.1.
+
+---
+
 ## [2.0.0] - 2026-07-13
 ### Added
 - Comprehensive Phase 0 foundation implementations and v2.0 upgrades.

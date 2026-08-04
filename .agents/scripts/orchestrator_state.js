@@ -29,6 +29,9 @@
 const fs = require('fs');
 const path = require('path');
 
+const { syncProjectContext } = require('./session_start.js');
+const { writeCheckpoint } = require('./session_checkpoint.js');
+
 const STATE_FILE = path.join(process.cwd(), 'artifacts', 'output', 'pipeline-state.json');
 const OUTPUT_DIR = path.join(process.cwd(), 'artifacts', 'output');
 const TELEMETRY_DIR = path.join(process.cwd(), 'artifacts', 'telemetry');
@@ -366,30 +369,30 @@ function getPhaseArtifacts(phase) {
   // warns instead of vacuously passing — see validatePhaseArtifacts().
   const artifactMap = {
     validation: [
-      { name: 'idea-brief.md', path: '00-discovery/idea-brief.md', required: true, fallbackPath: '00-discovery/validation-brief.md', fallbackName: 'validation-brief.md' }
+      { name: 'idea-brief.md', path: '01-discovery/idea-brief.md', required: true, fallbackPath: '01-discovery/validation-brief.md', fallbackName: 'validation-brief.md' }
     ],
     discovery: [
-      { name: 'idea-brief.md', path: '00-discovery/idea-brief.md', required: true, fallbackPath: '00-discovery/validation-brief.md', fallbackName: 'validation-brief.md' }
+      { name: 'idea-brief.md', path: '01-discovery/idea-brief.md', required: true, fallbackPath: '01-discovery/validation-brief.md', fallbackName: 'validation-brief.md' }
     ],
     research: [
-      { name: 'market-analysis.md', path: '01-research/market-analysis.md', required: true },
-      { name: 'competitive-analysis.md', path: '01-research/competitive-analysis.md', required: true },
-      { name: 'user-personas.md', path: '01-research/user-personas.md', required: true }
+      { name: 'market-analysis.md', path: '02-research/market-analysis.md', required: true },
+      { name: 'competitive-analysis.md', path: '02-research/competitive-analysis.md', required: true },
+      { name: 'user-personas.md', path: '02-research/user-personas.md', required: true }
     ],
     strategy: [
-      { name: 'requirements.md', path: '02-strategy/requirements.md', required: true },
-      { name: 'user-stories.md', path: '02-strategy/user-stories.md', required: true },
-      { name: 'product-spec.md', path: '02-strategy/product-spec.md', required: true }
+      { name: 'requirements.md', path: '03-strategy/requirements.md', required: true },
+      { name: 'user-stories.md', path: '03-strategy/user-stories.md', required: true },
+      { name: 'product-spec.md', path: '03-strategy/product-spec.md', required: true }
     ],
-    // workflow.md §2: @architect → @tech-lead requires ADRs in 03-architecture/
+    // workflow.md §2: @architect → @tech-lead requires ADRs in 04-architecture/
     // ("Must contain data model, API contracts, and tech stack decision").
     // ADRs are numbered (adr-NNN-short-name.md) — check the directory glob.
     architecture: [
-      { name: 'adr-*.md', dir: '03-architecture', glob: /^adr-.*\.md$/, required: true }
+      { name: 'adr-*.md', dir: '04-architecture', glob: /^adr-.*\.md$/, required: true }
     ],
     planning: [
-      { name: 'execution-plan.md', path: '04-planning/execution-plan.md', required: true },
-      { name: 'change-requests.md', path: '04-planning/change-requests.md', required: false }
+      { name: 'execution-plan.md', path: '05-planning/execution-plan.md', required: true },
+      { name: 'change-requests.md', path: '05-planning/change-requests.md', required: false }
     ],
     // execution: gate is "all tests green" (workflow.md §2 Quality Gates → Launch);
     // code/tests live in src/ — no canonical artifact file, validated via warning.
@@ -444,7 +447,7 @@ function validatePhaseArtifacts(phase) {
     let actualPath = art.path || (art.dir ? `${art.dir}/${art.name}` : null);
 
     if (art.glob) {
-      // Directory-level canonical artifact (e.g., ADRs in 03-architecture/):
+      // Directory-level canonical artifact (e.g., ADRs in 04-architecture/):
       // at least one file matching the glob must exist.
       const dir = path.join(OUTPUT_DIR, art.dir || '');
       if (fs.existsSync(dir)) {
@@ -701,11 +704,13 @@ function main() {
       let tokens = null;
       let durationMs = null;
       let checkMemory = false;
+      let nextStep = null;
       for (let i = 1; i < args.length; i += 2) {
         if (args[i] === '--agent') agent = args[i + 1];
         if (args[i] === '--artifact') artifact = args[i + 1];
         if (args[i] === '--tokens') tokens = parseInt(args[i + 1], 10) || null;
         if (args[i] === '--duration-ms') durationMs = parseInt(args[i + 1], 10) || null;
+        if (args[i] === '--next') nextStep = args[i + 1];
         if (args[i] === '--check-memory') { checkMemory = true; i -= 1; } // flag, no value
       }
       if (!agent || !artifact) {
@@ -753,6 +758,25 @@ function main() {
       state.last_updated = new Date().toISOString();
       writeState(state);
 
+      // Session Activity backstop: guarantee project-context.md is refreshed
+      // even when the agent skipped session-start. The complete call is
+      // non-negotiable for every agent, so this closes the enforcement gap.
+      try {
+        const lsw = state.last_session_write || null;
+        const workedOn = lsw && lsw.agent === agent ? lsw.worked_on : null;
+        const goal = workedOn && workedOn !== '(not specified)' ? workedOn.slice(0, 80) : null;
+        syncProjectContext({ agent, domain: 'session', goal, ensureMarker: true });
+      } catch (e) {
+        // project-context refresh is best-effort; never block completion on it
+      }
+
+      // Session checkpoint: rolling cursor of in-progress state.
+      try {
+        writeCheckpoint({ event: 'complete', agent, artifact, next: nextStep });
+      } catch (e) {
+        // checkpoint write is best-effort
+      }
+
       // Memory enforcement check: warn if no session-write was recorded for this agent.
       if (checkMemory) {
         const lsw = state.last_session_write;
@@ -781,6 +805,73 @@ function main() {
       }
 
       console.log(JSON.stringify({ success: true, agent, artifact, version, tokens, duration_ms: durationMs }));
+    }
+
+    if (cmd === 'session-start') {
+      let agent = null;
+      let domain = null;
+      let goal = null;
+      for (let i = 1; i < args.length; i += 2) {
+        if (args[i] === '--agent') agent = args[i + 1];
+        if (args[i] === '--domain') domain = args[i + 1];
+        if (args[i] === '--goal') goal = args[i + 1];
+      }
+      if (!agent) {
+        console.error('Missing --agent');
+        process.exit(1);
+      }
+
+      const state = readState();
+      if (!state) {
+        console.log(JSON.stringify({ error: 'No pipeline state found.' }));
+        process.exit(1);
+      }
+
+      // Record in pipeline state (for --check-memory enforcement at complete time)
+      state.last_session_start = {
+        agent,
+        domain,
+        goal,
+        timestamp: new Date().toISOString()
+      };
+      state.last_updated = new Date().toISOString();
+      writeState(state);
+
+      // Refresh project-context.md (Phase / Blockers / Session Activity / footer)
+      let result;
+      try {
+        result = syncProjectContext({ agent, domain, goal });
+      } catch (e) {
+        console.error(JSON.stringify({ success: false, error: e.message }));
+        process.exit(1);
+      }
+
+      recordTelemetry('session_start', {
+        agent,
+        phase: resolveCurrentPhase(state),
+        data: { domain, goal }
+      });
+
+      try {
+        writeCheckpoint({ event: 'session-start', agent, domain, next: goal });
+      } catch (e) {
+        // best-effort
+      }
+
+      console.log(JSON.stringify({ success: true, message: 'Session start recorded.', ...result }));
+    }
+
+    if (cmd === 'sync-context') {
+      // Refresh project-context.md without an agent session — used by the
+      // post-push git hook so the Repository line updates right after a push.
+      try {
+        const result = syncProjectContext({ agent: 'git', domain: 'repo-sync', goal: null, recordMarker: false });
+        writeCheckpoint({ event: 'sync-context', agent: 'git' });
+        console.log(JSON.stringify({ success: true, message: 'Project context refreshed.', ...result }));
+      } catch (e) {
+        console.error(JSON.stringify({ success: false, error: e.message }));
+        process.exit(1);
+      }
     }
 
     if (cmd === 'session-write') {
@@ -823,7 +914,9 @@ function main() {
       const sessionDir = path.join(process.cwd(), 'artifacts', 'memory', 'session-summaries');
       if (!fs.existsSync(sessionDir)) fs.mkdirSync(sessionDir, { recursive: true });
 
-      const date = new Date().toISOString().split('T')[0];
+      const ts = new Date();
+      const pad = (n) => String(n).padStart(2, '0');
+      const date = `${ts.getFullYear()}-${pad(ts.getMonth() + 1)}-${pad(ts.getDate())} ${pad(ts.getHours())}:${pad(ts.getMinutes())}`;
       const latestContent = [
         `# Session Summary (latest)`,
         ``,
@@ -853,7 +946,18 @@ function main() {
         console.error('Warning: Could not write session summary files: ' + e.message);
       }
 
-      console.log(JSON.stringify({ success: true, agent, date, message: 'Session summary written.' }));
+      // Refresh project-context.md (Phase / Blockers / Repository / Stack /
+      // Session Activity). session-write is part of the mandatory shutdown
+      // protocol for every agent, so this guarantees the shared context stays
+      // fresh even when session-start and complete are skipped.
+      try {
+        const goal = workedOn && workedOn !== '(not specified)' ? workedOn.slice(0, 80) : null;
+        const result = syncProjectContext({ agent, domain: 'session', goal });
+        writeCheckpoint({ event: 'session-write', agent, next: nextStep || null });
+        console.log(JSON.stringify({ success: true, agent, date, message: 'Session summary written.', ...result }));
+      } catch (e) {
+        console.log(JSON.stringify({ success: true, agent, date, message: 'Session summary written.' }));
+      }
     }
 
     if (cmd === 'file-cr') {
@@ -891,6 +995,13 @@ function main() {
       state.change_requests.push(cr);
       state.last_updated = new Date().toISOString();
       writeState(state);
+
+      try {
+        writeCheckpoint({ event: 'file-cr', agent: from, artifact: target, next: `Resolve ${crId} → @${to}` });
+      } catch (e) {
+        // best-effort
+      }
+
       console.log(JSON.stringify({ success: true, cr_id: crId, cr }));
     }
 
@@ -952,6 +1063,12 @@ function main() {
       }
 
       console.log(JSON.stringify({ success: true, from: oldPhase, to: phase }));
+
+      try {
+        writeCheckpoint({ event: 'set-phase', agent: 'orchestrator', next: `Advance phase: ${phase}` });
+      } catch (e) {
+        // best-effort
+      }
 
       recordTelemetry('phase_transition', {
         phase,

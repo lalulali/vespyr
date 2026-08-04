@@ -27,7 +27,7 @@ If unclear, ask: "Are you starting a new idea, refining an existing brief, or st
 - Create mode: none (this is the entry point)
 - Edit mode: `artifacts/output/01-discovery/idea-brief.md` exists
 - Validate mode: `artifacts/output/01-discovery/idea-brief.md` exists
-- Problem-first entry: `artifacts/output/01-research/problem-space-brief.md` from `/unpack-problem` is accepted as equivalent to `idea-brief.md` for create mode — the problem brief becomes the idea to validate
+- Problem-first entry: `artifacts/output/02-research/problem-space-brief.md` from `/unpack-problem` is accepted as equivalent to `idea-brief.md` for create mode — the problem brief becomes the idea to validate
 
 ## Halt conditions
 - @founder issues KILL verdict (create mode)
@@ -64,4 +64,3 @@ Blockers: {unresolved assumptions or "none"}
 - Brief written to `artifacts/output/01-discovery/idea-brief.md`
 - Verdict recorded (GO / PIVOT / KILL)
 - Handoff to next phase is unambiguous
-

@@ -84,7 +84,7 @@ Also update:
 2. **Ambiguous `report.md`** — both `security-engineer.md` and `performance-engineer.md` write `06-quality/report.md`. Rename during migration to `security-report.md` and `performance-report.md` (recommended) or keep colliding names?
 3. **Migration timing** — immediate (this iteration) vs. deferred to a scheduled doc-cleanup pass.
 4. **Read backward-compat** — do existing live-project artifacts (if any) at `artifacts/output/06-quality/*.md` need to be moved physically, or only update references going forward?
-5. **Scope of `06-launch/` collision** — `qa-engineer.md:293` writes `release-readiness.md`, and `06-launch/` Phase 6 also has a `release-readiness.md` (per `launch/steps/step-05-launch-log.md:55`). Decide which phase owns `release-readiness.md` — Execution (QA sign-off doc) or Launch (deploy-readiness doc). They may legitimately both exist with different scopes; clarify.
+5. **Scope of `06-launch/` collision** — `qa-engineer.md:293` writes `release-readiness.md`, and `06-launch/` Phase 6 also has a `release-readiness.md` (per `launch/steps/step-06-launch-log.md:55`). Decide which phase owns `release-readiness.md` — Execution (QA sign-off doc) or Launch (deploy-readiness doc). They may legitimately both exist with different scopes; clarify.
 
 ### Impact
 

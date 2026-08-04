@@ -55,9 +55,9 @@ This skill delegates pedagogical strategy, objective framing, content sequencing
 | Format Identifier | Target Deliverable Path | Description |
 |---|---|---|
 | `syllabus` | `artifacts/output/teaching/syllabus.md` | Course syllabus: learning objectives, module roadmap, timing, assessment plan. |
-| `handbook` | `artifacts/output/teaching/handbook.md` | Comprehensive textbook/handbook with "If Nothing Else, Remember This" callouts. |
+| `handbook` | `artifacts/output/teaching/handbook.md` | Comprehensive, detailed textbook/handbook (full narrative depth; not a cheatsheet). |
 | `cheatsheet` | `artifacts/output/teaching/cheatsheet.md` | Scannable quick reference, decision trees, cheat tables, key formulas. |
-| `presentation` | `artifacts/output/teaching/presentation.md` | Slide outline (1 key idea per slide) with detailed speaker notes & visual cues. |
+| `presentation` | `artifacts/output/teaching/presentation.md` | Slide outline (1 key idea per slide) with detailed speaker notes & visual cues. Supports 7 presentation styles (including EdTech Masterclass), 2-step audience profiling, and 6 opening hook archetypes. |
 | `class` | `artifacts/output/teaching/class/` | Online class package: module units, readings, hands-on exercises, quizzes. |
 | `video-script` | `artifacts/output/teaching/video-script.md` | Production video script with transcript, timecodes, camera/visual cues. |
 
@@ -89,15 +89,22 @@ This skill delegates pedagogical strategy, objective framing, content sequencing
 └──────────────────────────┬──────────────────────────────┘
                            ▼
 ┌─────────────────────────────────────────────────────────┐
-│ Phase 4: Format-Specific Generation                     │
-│ Execute step-syllabus, step-handbook, step-cheatsheet,  │
-│ step-presentation, step-class, step-video-script       │
+│ Phase 4: ONE format at a time + HUMAN VERIFY loop       │
+│  ┌──────────────────────────────────────────────────┐   │
+│  │ GENERATE → PRESENT → PAUSE → VERIFY              │   │
+│  │   ├── approved → RECORD (orchestrator complete)  │   │
+│  │   │            → next format (loop)              │   │
+│  │   └── changes  → revise, re-present, PAUSE again │   │
+│  └──────────────────────────────────────────────────┘   │
+│ Each approval triggers project-context + session sync.  │
+│ Loop until ALL selected formats are individually        │
+│ approved. Do NOT batch-produce formats.                 │
 └──────────────────────────┬──────────────────────────────┘
                            ▼
 ┌─────────────────────────────────────────────────────────┐
 │ Phase 5: Self-Review & Quality Certification            │
 │ Style audit, jargon check, pedagogical verification     │
-│ (via step-review.md)                                    │
+│ (via step-review.md) — runs AFTER all formats approved  │
 └─────────────────────────────────────────────────────────┘
 ```
 
@@ -111,10 +118,13 @@ This skill delegates pedagogical strategy, objective framing, content sequencing
 
 1. **Input Mode Detection**:
    - Determine whether the input is a **Topic-only string** or a **Draft/Transcript file/text**.
-2. **Audience & Style Calibration**:
+2. **Universal Upfront Audience & Style Calibration**:
+   - Establish the target audience profile upfront before doing ANY research or mapping.
+   - **Step 1: Audience Scope**: Internal (Company/Team roles & topic level) vs. External (Public/Course target group & background).
+   - **Step 2: Format-Specific Audience Mapping**: Determine if specific deliverable targets require audience differentiation (e.g., `handbook` for developers, `presentation` for executives, `cheatsheet` for architects).
    - Load `artifacts/memory/teaching-style.md` via `@memory-controller`.
    - If `teaching-style.md` does NOT exist, run Guided Onboarding:
-     - Prompt user for target audience style (`Beginner`, `Intermediate`, or `Expert`).
+     - Prompt user for target audience profile & depth style (`Beginner`, `Intermediate`, or `Expert`).
      - Prompt user for preferred section patterns and default format selections.
      - Delegate saving `teaching-style.md` to `@memory-controller`.
 3. **Format Selection Intake**:
@@ -126,6 +136,16 @@ This skill delegates pedagogical strategy, objective framing, content sequencing
      - `5. Online Class Modules`
      - `6. Video Script`
    - Default if unspecified: `syllabus` + `handbook` + `cheatsheet`.
+
+4. **Per-Format Mandatory Intake Gates (NON-NEGOTIABLE)**:
+   > [!IMPORTANT]
+   > Selecting a format — including via `--all` — does **NOT** waive its mandatory intake questions. `--all` only selects the formats; it never answers their audience/style/budget questions for you.
+   > If `presentation` is among the selected formats, `@shifu` **MUST ask the user the 4 Presentation Intake Questions** in this Phase 1, BEFORE any research, synthesis, or knowledge-map work:
+   > 1. **Audience Scope & Profile**: Internal (Company/Team roles & topic level) or External (Public/Course target group & background)?
+   > 2. **Presentation Style Archetype**: 🎓 *EdTech Masterclass*, 🎯 *Executive Briefing*, 🌟 *Keynote Narrative*, 🛠️ *Technical Deep-Dive*, 📚 *Educational Workshop*, 💼 *Product Pitch*, or ⚡ *Lightning Blitz*?
+   > 3. **Opening Hook Archetype**: ❓ *Socratic Question*, 💥 *Pain Point*, 📊 *Provocative Fact*, 📖 *Micro-Story*, 🎯 *Direct BLUF*, or ⚡ *Before vs. After Contrast*?
+   > 4. **Time & Slide Budget**: Target duration & slide count (e.g. 10 mins / 8 slides, 30 mins / 15 slides, 60 mins / 25 slides)? Calibrate to ~1.5–2 minutes per slide.
+   > Do NOT proceed to Phase 2 until all 4 are answered (unless the user explicitly supplied all 4 in their original prompt).
 
 > **Tracker:** `node .agents/scripts/step_tracker.js complete --skill craft-lesson --step 1`
 
@@ -160,9 +180,33 @@ Execute `step-structure.md` (`.agents/skills/craft-lesson/steps/step-structure.m
 
 ---
 
-### Phase 4: Format Generation (Execute Selected Steps)
+### Phase 4: Format Generation — ONE AT A TIME with Human Verification (NON-NEGOTIABLE)
 
-Execute only the step files corresponding to user-selected formats:
+> [!IMPORTANT]
+> **Generate one document, then stop and wait for human verification. Do NOT batch-produce all formats in a single turn.**
+> `@shifu` MUST process the selected formats sequentially: produce exactly ONE deliverable, present it for review, pause, and only continue to the next format after the user verifies/approves. This applies even when the user selected multiple formats or said `--all`.
+
+**The loop (repeat for each selected format, in this exact order):**
+
+```
+1. GENERATE  → produce ONE deliverable (the next unstarted format in the list)
+2. PRESENT   → show the user a summary of what was generated + where it is saved
+3. VERIFY    → PAUSE. Ask the user to review it and approve, or request changes
+   ├── APPROVED  → RECORD milestone (step 3b), mark format complete, next format (step 1)
+   └── CHANGES   → incorporate the requested changes, re-present, PAUSE again
+4. Only after the LAST selected format is approved → proceed to Phase 5
+```
+
+**3b. RECORD MILESTONE (after EVERY approval — NON-NEGOTIABLE):**
+After the user approves a deliverable, record it in the pipeline state AND refresh project-context/session activity via the orchestrator. Run (directly, or via `@executor` if available):
+
+```
+node .agents/scripts/orchestrator_state.js complete --agent shifu --artifact artifacts/output/teaching/{deliverable}.md --next "{next deliverable, or 'all done'}"
+```
+
+This is what updates `project-context.md` (`## Session Activity`, Phase/Blockers/Repository/Stack), writes the rolling session checkpoint (`session-checkpoints/checkpoint.md`), and records the artifact as completed. Do NOT defer all recording to the end of the workflow — each approved deliverable is a milestone boundary and MUST be recorded immediately. If the user stops after a single format, the context and checkpoint still reflect that milestone.
+
+**Format generation order** (generate in list order, skipping any the user did not select):
 
 1. **Syllabus Step**: `step-syllabus.md` $\rightarrow$ `artifacts/output/teaching/syllabus.md`
 2. **Handbook Step**: `step-handbook.md` $\rightarrow$ `artifacts/output/teaching/handbook.md`
@@ -173,9 +217,25 @@ Execute only the step files corresponding to user-selected formats:
 
 All output files MUST be written using operational sub-agent `@writer` (Quill).
 
+**Verification prompt format (use at every gate):**
+
+> ✅ **`{Format}` generated** → `{relative file path}`
+>
+> **What's in it:** {1–2 sentence summary}
+>
+> Please review it. Reply **"approved"** to continue to the next format, or tell me what to change and I'll revise it before continuing.
+
+**Rules:**
+- Do NOT generate the next format until the current one is explicitly approved.
+- Do NOT present multiple formats for review at once — one at a time, always.
+- Record each approved deliverable immediately (step 3b) — never batch the `complete` calls.
+- The Knowledge Map is the shared source for all formats; it is created once in Phase 3, not re-generated per format.
+
 ---
 
 ### Phase 5: Self-Review & Quality Certification
+
+**Run ONLY after every selected format has been individually approved in Phase 4.**
 
 Execute `step-review.md` (`.agents/skills/craft-lesson/steps/step-review.md`).
 `@shifu` performs an audit across 3 check vectors:
@@ -195,13 +255,14 @@ Execute `step-review.md` (`.agents/skills/craft-lesson/steps/step-review.md`).
 | **Phase 2a: Research** | `@shifu` | `@researcher` (Iris) | Raw domain research |
 | **Phase 2b: Synthesize** | `@shifu` | `@reader` (Page) | Parsed draft synthesis |
 | **Phase 3: Knowledge Map**| `@shifu` | `@writer` (Quill) | `artifacts/output/teaching/knowledge-map.md` |
-| **Phase 4: Formats** | `@shifu` | `@writer` (Quill) | Format markdown deliverables in `artifacts/output/teaching/` |
-| **Phase 5: Review** | `@shifu` | `@writer` (Quill) / User | Quality review & delivery log |
+| **Phase 4: Formats** | `@shifu` | `@writer` (Quill) | ONE format deliverable per loop iteration in `artifacts/output/teaching/`, each human-verified + recorded via `orchestrator_state.js complete` before the next |
+| **Phase 5: Review** | `@shifu` | `@writer` (Quill) / User | Quality review & delivery log (after all formats approved) |
 
 ---
 
 ## Anti-Patterns to Avoid
 
+- **Do NOT batch-produce all selected formats in one turn.** Generate one format, pause for human verification, and only continue after explicit approval. One at a time, always.
 - **Do NOT bypass Phase 3 Knowledge Map.** Formats MUST be generated from a single unified map, not ad-hoc per format.
 - **Do NOT mix explanation styles.** Maintain consistent style (Beginner vs Intermediate vs Expert) across all selected formats in a single run.
 - **Do NOT perform direct file writes from `@shifu`.** Always delegate file output to `@writer`.

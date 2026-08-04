@@ -104,12 +104,11 @@ artifacts/
 ├── memory/          # Persistent: project context, decisions, lessons
 ├── input/           # User-provided: raw ideas, notes, requirements
 └── output/          # Agent-generated, organized by phase:
-    ├── 00-discovery/
-    ├── 01-research/
-    ├── 02-strategy/
-    ├── 03-architecture/
-    ├── 04-planning/
-    ├── 05-implementation/
+    ├── 01-discovery/
+    ├── 02-research/
+    ├── 03-strategy/
+    ├── 04-architecture/
+    ├── 05-planning/
     ├── 06-launch/
     ├── 07-iteration/
     ├── 08-incidents/

@@ -159,13 +159,31 @@ Your role is quality validation. Keep context focused by delegating operational 
 
 ## Shared Memory
 
+**Session Start (Mandatory):**
+```
+@executor: node .agents/scripts/orchestrator_state.js session-start --agent qa-engineer --domain testing --goal "{one-line goal}"
+```
+Refreshes `project-context.md` [CORE] (Phase/Blockers) and appends a Session Activity marker — run before loading context.
+
+**No-Subagent Harness Fallback (NON-NEGOTIABLE — e.g., Antigravity IDE, Google):**
+If your harness has no subagents (`@executor`, `@writer`, `@memory-controller` cannot be invoked), do NOT skip memory bookkeeping — you have full tool access as the primary agent, so run the commands DIRECTLY yourself:
+
+- **Session start** (on entry, before loading context):
+  `node .agents/scripts/orchestrator_state.js session-start --agent qa-engineer --domain testing --goal "{one-line goal}"`
+- **Read memory**: read `artifacts/memory/project-context.md` and `artifacts/memory/session-summaries/latest.md` directly with your read tool.
+- **Write memory entries**: append to `artifacts/memory/*.md` directly with your edit/write tool, following the entry formats in the blocks below.
+- **Session summary** (on completion): `node .agents/scripts/orchestrator_state.js session-write --agent qa-engineer --worked-on "..." --decisions "..." --next-step "..." --blockers none`
+- **Pipeline complete** (after all writes): `node .agents/scripts/orchestrator_state.js complete --agent qa-engineer --artifact <relative-path>`
+
+These orchestrator commands refresh `project-context.md` (Phase/Blockers/Session Activity) and session summaries automatically. They MUST run in every harness.
+
 **Read before starting:**
 
 ```
 @memory-controller load qa-engineer [brief task description]
 ```
 
-The controller returns filtered context (~1,000 tokens) covering: testing framework and coverage targets, established testing patterns, QA notes on flaky tests and coverage gaps, and developer pitfalls. Do NOT read memory files directly.
+The controller returns filtered context (~1,000 tokens) covering: testing framework and coverage targets, established testing patterns, QA notes on flaky tests and coverage gaps, and developer pitfalls. Do NOT read memory files directly — UNLESS your harness has no @memory-controller subagent, in which case read them directly (see the No-Subagent Harness Fallback above).
 
 **Write after completing:**
 
@@ -240,7 +258,7 @@ The `/test` skill runs two parallel tracks:
 - **Full-Cycle Testing (step 02b):** Macro-level — end-to-end user journeys, cross-service integration, data consistency, system recovery
 
 When given implemented features:
-1. **Review the implementation** against acceptance criteria from `artifacts/output/02-strategy/user-stories.md`. This is the authoritative source for testable requirements.
+1. **Review the implementation** against acceptance criteria from `artifacts/output/03-strategy/user-stories.md`. This is the authoritative source for testable requirements.
 2. **Study existing test patterns** in the project to match conventions exactly.
 3. **Write tests** covering all three categories of acceptance criteria:
    - **Happy path** (AC-H*): Normal successful flow — every step from trigger to completion
@@ -280,15 +298,15 @@ See [GUARDRAILS.md](../GUARDRAILS.md) for the full guardrails specification that
 - Every acceptance criterion from user stories MUST have a corresponding test (happy, unhappy, and edge case)
 - Test names should read like requirements: `it('should reject invalid email format')` — not `it('should fail validation test 3')`
 - Report test results with: pass count, fail count, coverage percentage, and any flaky tests
-- Reference `artifacts/output/02-strategy/user-stories.md` as the primary source for acceptance criteria
-- Reference `artifacts/output/02-strategy/product-spec.md` for UX flows and interaction details
-- Reference `artifacts/output/02-strategy/design.md` for visual design system — verify colors, spacing, typography, and component states match the spec
+- Reference `artifacts/output/03-strategy/user-stories.md` as the primary source for acceptance criteria
+- Reference `artifacts/output/03-strategy/product-spec.md` for UX flows and interaction details
+- Reference `artifacts/output/03-strategy/design.md` for visual design system — verify colors, spacing, typography, and component states match the spec
 - If a spec requirement cannot be tested, flag it as a **spec gap** — this is a defect in the spec, not the code
 - **Do not approve a release** with unresolved blocking bugs or untested acceptance criteria
 
 ## Kanban Update Protocol (NON-NEGOTIABLE)
 
-Update `artifacts/output/04-planning/kanban.md` via `@writer` at each QA milestone.
+Update `artifacts/output/05-planning/kanban.md` via `@writer` at each QA milestone.
 
 | Event | Kanban action |
 |-------|---------------|

@@ -74,4 +74,3 @@ At each step end: record per-artifact via `node .agents/scripts/orchestrator_sta
 ```
 
 **Memory:** Final step in each mode closes with `@memory-controller session-write` — mandatory per GUARDRAILS §Session Continuity.
-

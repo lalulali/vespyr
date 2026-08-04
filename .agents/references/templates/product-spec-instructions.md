@@ -7,7 +7,7 @@ This reference document defines the complete structural specifications, requirem
 ## 1. Output Format Rules
 
 When generating the product design specification:
-*   **Machine-Readable (Markdown):** Populate and save the markdown spec to `artifacts/output/02-strategy/product-spec.md` using the compressed skeleton template.
+*   **Machine-Readable (Markdown):** Populate and save the markdown spec to `artifacts/output/03-strategy/product-spec.md` using the compressed skeleton template.
 *   **Human-Readable (HTML):** Write the same structural content into `.agents/templates/product/product-spec-template.html` and output the HTML version. Both files must match exactly in content and hierarchy.
 
 ---

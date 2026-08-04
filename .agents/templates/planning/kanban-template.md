@@ -2,7 +2,7 @@
 
 > **Used by:** Sarah (@product-manager)
 > **Feeds into:** status reports, stakeholder updates, retrospectives
-> **Save to:** `artifacts/output/04-planning/kanban.md`
+> **Save to:** `artifacts/output/05-planning/kanban.md`
 
 Use this template to track modular user stories and tasks through the delivery pipeline. Update it continuously at each handoff.
 
@@ -72,4 +72,4 @@ Use this template to track modular user stories and tasks through the delivery p
 **Document Info:**
 - Version: 3.0
 - Author: @product-manager
-- Depends on: `artifacts/output/02-strategy/user-stories.md`
+- Depends on: `artifacts/output/03-strategy/user-stories.md`

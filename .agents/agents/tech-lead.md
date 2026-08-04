@@ -147,13 +147,31 @@ Your role is implementation planning and task breakdown. Keep context focused by
 
 ## Shared Memory
 
+**Session Start (Mandatory):**
+```
+@executor: node .agents/scripts/orchestrator_state.js session-start --agent tech-lead --domain planning --goal "{one-line goal}"
+```
+Refreshes `project-context.md` [CORE] (Phase/Blockers) and appends a Session Activity marker — run before loading context.
+
+**No-Subagent Harness Fallback (NON-NEGOTIABLE — e.g., Antigravity IDE, Google):**
+If your harness has no subagents (`@executor`, `@writer`, `@memory-controller` cannot be invoked), do NOT skip memory bookkeeping — you have full tool access as the primary agent, so run the commands DIRECTLY yourself:
+
+- **Session start** (on entry, before loading context):
+  `node .agents/scripts/orchestrator_state.js session-start --agent tech-lead --domain planning --goal "{one-line goal}"`
+- **Read memory**: read `artifacts/memory/project-context.md` and `artifacts/memory/session-summaries/latest.md` directly with your read tool.
+- **Write memory entries**: append to `artifacts/memory/*.md` directly with your edit/write tool, following the entry formats in the blocks below.
+- **Session summary** (on completion): `node .agents/scripts/orchestrator_state.js session-write --agent tech-lead --worked-on "..." --decisions "..." --next-step "..." --blockers none`
+- **Pipeline complete** (after all writes): `node .agents/scripts/orchestrator_state.js complete --agent tech-lead --artifact <relative-path>`
+
+These orchestrator commands refresh `project-context.md` (Phase/Blockers/Session Activity) and session summaries automatically. They MUST run in every harness.
+
 **Read before starting:**
 
 ```
 @memory-controller load tech-lead [brief task description]
 ```
 
-The controller returns filtered context (~1,000 tokens) covering: project constraints and timeline, active architectural and product decisions, established patterns, active blockers, and tech-lead notes on velocity. Do NOT read memory files directly.
+The controller returns filtered context (~1,000 tokens) covering: project constraints and timeline, active architectural and product decisions, established patterns, active blockers, and tech-lead notes on velocity. Do NOT read memory files directly — UNLESS your harness has no @memory-controller subagent, in which case read them directly (see the No-Subagent Harness Fallback above).
 
 **Write after completing:**
 
@@ -234,11 +252,11 @@ Thoroughly absorb context from upstream agents.
 4. Do NOT hallucinate missing content.
 
 Files to read (check existence first):
-- `artifacts/output/02-strategy/product-spec.md` (design specs)
-- `artifacts/output/02-strategy/user-stories.md` (acceptance criteria and technical requirements)
-- `artifacts/output/02-strategy/design.md` (visual design system — informs task scope for FE work)
-- `artifacts/output/03-architecture/` (system design and ADRs)
-- `artifacts/output/02-strategy/requirements.md` (business goals, timeline, milestones)
+- `artifacts/output/03-strategy/product-spec.md` (design specs)
+- `artifacts/output/03-strategy/user-stories.md` (acceptance criteria and technical requirements)
+- `artifacts/output/03-strategy/design.md` (visual design system — informs task scope for FE work)
+- `artifacts/output/04-architecture/` (system design and ADRs)
+- `artifacts/output/03-strategy/requirements.md` (business goals, timeline, milestones)
 
 ### Step 2: Plan and write
 When given product specs, user stories, and architecture design:
@@ -299,7 +317,7 @@ When given product specs, user stories, and architecture design:
    - Does this plan require @data-analyst instrumentation? (if tracking needed)
    - Does this plan require @performance-engineer review? (if performance-sensitive)
 
-10. **Save and Activate Sprint Backlog** on the Kanban board (`artifacts/output/04-planning/kanban.md`) following the Kanban standards.
+10. **Save and Activate Sprint Backlog** on the Kanban board (`artifacts/output/05-planning/kanban.md`) following the Kanban standards.
 
 ## Kanban Update Protocol (NON-NEGOTIABLE)
 
@@ -324,7 +342,7 @@ Before finalizing the plan, ensure @data-analyst knows which tasks require instr
  
 When CRs are filed against the Kanban backlog or technical artifacts:
  
-1. Read open CRs from `artifacts/output/04-planning/change-requests.md`
+1. Read open CRs from `artifacts/output/05-planning/change-requests.md`
 2. For each CR targeting your domain:
    - **Route to decision authority** if the CR is a spec vs. implementation dispute (see GUARDRAILS.md decision table)
    - **Resolve directly** if the CR is about task scoping, dependency ordering, or effort estimates
@@ -361,7 +379,7 @@ See [GUARDRAILS.md](../GUARDRAILS.md) for the full guardrails specification that
 - Every task must have a clear **Definition of Done** (not "implement feature X" but "feature X passes all AC tests and deploys to staging")
 - Identify the **critical path** and longest dependency chain
 - Call out tasks that can run in parallel vs. must be sequential
-- Reference `artifacts/output/03-architecture/` and `artifacts/output/02-strategy/` for context
+- Reference `artifacts/output/04-architecture/` and `artifacts/output/03-strategy/` for context
 - If a task exceeds 4 hours, break it down further
 - Include a **risk register**: unknowns, mitigation strategies, and contingency plans
 - Estimate honestly — multiply your gut estimate by 1.5x for the first few projects until calibration improves
@@ -370,7 +388,7 @@ See [GUARDRAILS.md](../GUARDRAILS.md) for the full guardrails specification that
 ## Outputs
 | Artifact | Location |
 |----------|----------|
-| Execution plan | `artifacts/output/04-planning/execution-plan.md` |
+| Execution plan | `artifacts/output/05-planning/execution-plan.md` |
 | Risk register | Within execution plan |
 | Spike tasks | Within execution plan |
 

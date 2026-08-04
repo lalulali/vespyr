@@ -54,12 +54,12 @@ Gate logic:
 ### 6.2 Implement (`@developer-N`, parallel)
 - `@memory-controller load developer [implement {task name}]` — seed context before coding
 - `@memory-controller preflight developer [implement {task name}]` — validate high-risk domains
-- Move task from `### To Do` to `### In Progress` in `artifacts/output/04-planning/kanban.md` upon picking up work
+- Move task from `### To Do` to `### In Progress` in `artifacts/output/05-planning/kanban.md` upon picking up work
 - Load and digest `product-spec.md` and `user-stories.md` before coding
 - Write code + tests conforming 100% to verified specs
 - Run lints and unit tests locally
 - Commit to feature branch
-- Move task from `### In Progress` to `### Review` in `artifacts/output/04-planning/kanban.md` upon commit
+- Move task from `### In Progress` to `### Review` in `artifacts/output/05-planning/kanban.md` upon commit
 - Signal completion via `@memory-controller`:
   ```
   @memory-controller write agent-notes/developer-notes.md
@@ -110,7 +110,7 @@ node .agents/scripts/worktree.js clean-all
 
 This removes all worktrees and deletes their feature branches, with state tracked in `.agents/state/loop-state.json`. The `--force` flag handles uncommitted changes gracefully.
 
-### 6.7 Update Kanban (`artifacts/output/04-planning/kanban.md`)
+### 6.7 Update Kanban (`artifacts/output/05-planning/kanban.md`)
 
 Follow these explicit step-by-step state transitions for every task during the dev loop:
 

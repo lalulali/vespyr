@@ -21,11 +21,11 @@ Read the existing PRD, user stories, and product spec. Understand current state 
 
 ## Process
 > **Tracker:** `node .agents/scripts/step_tracker.js begin --skill design-edit --step 1`
-1. Read `artifacts/output/02-strategy/SPEC.md` (spec kernel — if PRD changes, kernel must be updated too)
-2. Read `artifacts/output/02-strategy/requirements.md`
-3. Read `artifacts/output/02-strategy/user-stories.md`
-4. Read `artifacts/output/02-strategy/product-spec.md`
-5. Read `artifacts/output/02-strategy/design.md` (if it exists)
+1. Read `artifacts/output/03-strategy/SPEC.md` (spec kernel — if PRD changes, kernel must be updated too)
+2. Read `artifacts/output/03-strategy/requirements.md`
+3. Read `artifacts/output/03-strategy/user-stories.md`
+4. Read `artifacts/output/03-strategy/product-spec.md`
+5. Read `artifacts/output/03-strategy/design.md` (if it exists)
 6. If any file > 1000 words, invoke `@reader` to summarize.
 7. Ask the user: **"What specifically do you want to refine? The PRD scope, user stories, screen designs, or design system?"**
 

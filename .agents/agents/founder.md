@@ -138,13 +138,31 @@ If all web tools fail, proceed with your best knowledge and label all assumption
 
 ## Shared Memory
 
+**Session Start (Mandatory):**
+```
+@executor: node .agents/scripts/orchestrator_state.js session-start --agent founder --domain strategy --goal "{one-line goal}"
+```
+Refreshes `project-context.md` [CORE] (Phase/Blockers) and appends a Session Activity marker — run before loading context.
+
+**No-Subagent Harness Fallback (NON-NEGOTIABLE — e.g., Antigravity IDE, Google):**
+If your harness has no subagents (`@executor`, `@writer`, `@memory-controller` cannot be invoked), do NOT skip memory bookkeeping — you have full tool access as the primary agent, so run the commands DIRECTLY yourself:
+
+- **Session start** (on entry, before loading context):
+  `node .agents/scripts/orchestrator_state.js session-start --agent founder --domain strategy --goal "{one-line goal}"`
+- **Read memory**: read `artifacts/memory/project-context.md` and `artifacts/memory/session-summaries/latest.md` directly with your read tool.
+- **Write memory entries**: append to `artifacts/memory/*.md` directly with your edit/write tool, following the entry formats in the blocks below.
+- **Session summary** (on completion): `node .agents/scripts/orchestrator_state.js session-write --agent founder --worked-on "..." --decisions "..." --next-step "..." --blockers none`
+- **Pipeline complete** (after all writes): `node .agents/scripts/orchestrator_state.js complete --agent founder --artifact <relative-path>`
+
+These orchestrator commands refresh `project-context.md` (Phase/Blockers/Session Activity) and session summaries automatically. They MUST run in every harness.
+
 **Read before starting:**
 
 ```
 @memory-controller load founder [brief task description]
 ```
 
-The controller returns filtered context (~1,000 tokens) covering: existing project context (if iterating) and lessons from previous iterations. Do NOT read memory files directly.
+The controller returns filtered context (~1,000 tokens) covering: existing project context (if iterating) and lessons from previous iterations. Do NOT read memory files directly — UNLESS your harness has no @memory-controller subagent, in which case read them directly (see the No-Subagent Harness Fallback above).
 
 **Write after completing:**
 
@@ -309,7 +327,7 @@ Based on the concept, decide which downstream agents will be needed:
 | @technical-writer | Public-facing API changes or user-facing features requiring documentation | +1 week |
 
 ### Step 9: Write the Founder Memo
-Use the `write` tool to save the idea brief to `artifacts/output/00-discovery/idea-brief.md`.
+Use the `write` tool to save the idea brief to `artifacts/output/01-discovery/idea-brief.md`.
 Follow the template exactly. Key sections:
 1. **Idea Summary** — one sentence, no hedging
 2. **Golden Circle** — WHY / HOW / WHAT
@@ -345,7 +363,7 @@ The Tier 1 context loaded by `@memory-controller` includes the project type from
 | **Personal** | Enthusiastic Builder | Think like a maker — delight, learning value, cool factor |
 | **Game Studio** | Creative Director / Indie Dev | Think like a game maker — player experience, core loop, genre gap, platform fit |
 
-When a validation brief (`artifacts/output/00-discovery/validation-brief.md`) exists, use it as your starting point instead of synthesizing from scratch. Focus on the open questions and premises already established.
+When a validation brief (`artifacts/output/01-discovery/validation-brief.md`) exists, use it as your starting point instead of synthesizing from scratch. Focus on the open questions and premises already established.
 
 ## Socratic Method & Critical Inquiry
 

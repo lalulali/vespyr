@@ -118,7 +118,7 @@ Append a summary block to `artifacts/output/{current-phase}/grill-me-decisions.m
 - Cross-branch contradictions found
 - Handoff recommendation (e.g., "ready for /design" or "needs /validate-idea first")
 
-> **Path note:** `{current-phase}` maps to the active phase directory under `artifacts/output/` (e.g., `02-strategy`, `03-architecture`, `04-planning`). If the active phase is unknown, use `artifacts/memory/grill-me-decisions.md` as fallback.
+> **Path note:** `{current-phase}` maps to the active phase directory under `artifacts/output/` (e.g., `03-strategy`, `04-architecture`, `05-planning`). If the active phase is unknown, use `artifacts/memory/grill-me-decisions.md` as fallback.
 
 ## Output artifacts
 

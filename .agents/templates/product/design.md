@@ -46,6 +46,17 @@ Select one:
 |-----------|---------|-------|-------|--------|----------|
 | | | | | | |
 
+## Motion
+| Token | Value | Use |
+|-------|-------|-----|
+| `--ease-standard` | | Default transitions |
+| `--ease-exit` | | Elements leaving |
+| `--ease-spring` | | Delight moments |
+| `--dur-fast` | | Hover, press, toggles |
+| `--dur-base` | | Panels, accordions, snackbars |
+| `--dur-slow` | | Page transitions, modals |
+| `--dur-epic` | | Cinematic entrances |
+
 ## Micro-animations
 | Name | Duration | Easing | Trigger |
 |------|----------|--------|---------|

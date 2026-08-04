@@ -5,7 +5,7 @@
     "squad": "full-team"
   },
   "created_at": "2026-07-22",
-  "last_updated": "2026-08-01T12:29:58.203Z",
+  "last_updated": "2026-08-04T01:39:27.178Z",
   "current_phase": "validation",
   "phases": {
     "discovery": {
@@ -75,6 +75,54 @@
       "completed_at": "2026-08-01T11:29:42.785Z",
       "version": null,
       "phase": "validation"
+    },
+    "artifacts/output/teaching/notes/test.md": {
+      "agent": "shifu",
+      "completed_at": "2026-08-03T09:59:07.668Z",
+      "version": null,
+      "phase": "validation"
+    },
+    "artifacts/output/teaching/notes/graph-theory.md": {
+      "agent": "shifu",
+      "completed_at": "2026-08-03T10:02:25.496Z",
+      "version": null,
+      "phase": "validation"
+    },
+    "artifacts/output/teaching/syllabus.md": {
+      "agent": "shifu",
+      "completed_at": "2026-08-03T16:03:10.825Z",
+      "version": null,
+      "phase": "validation"
+    },
+    "artifacts/output/teaching/handbook.md": {
+      "agent": "shifu",
+      "completed_at": "2026-08-03T16:03:10.943Z",
+      "version": null,
+      "phase": "validation"
+    },
+    "artifacts/output/teaching/cheatsheet.md": {
+      "agent": "shifu",
+      "completed_at": "2026-08-03T16:01:51.694Z",
+      "version": null,
+      "phase": "validation"
+    },
+    "artifacts/output/teaching/video-script.md": {
+      "agent": "shifu",
+      "completed_at": "2026-08-03T16:03:11.049Z",
+      "version": null,
+      "phase": "validation"
+    },
+    "artifacts/output/teaching/presentation.md": {
+      "agent": "shifu",
+      "completed_at": "2026-08-03T16:04:10.827Z",
+      "version": null,
+      "phase": "validation"
+    },
+    "artifacts/output/07-iteration/test-report.md": {
+      "agent": "qa-engineer",
+      "completed_at": "2026-08-03T23:23:13.766Z",
+      "version": null,
+      "phase": "validation"
     }
   },
   "change_requests": [],
@@ -89,6 +137,132 @@
       "tokens": 0,
       "duration_ms": null,
       "timestamp": "2026-08-01T11:29:42.786Z"
+    },
+    {
+      "action": "artifact-complete",
+      "agent": "shifu",
+      "artifact": "artifacts/output/teaching/notes/test.md",
+      "version": null,
+      "tokens": 0,
+      "duration_ms": null,
+      "timestamp": "2026-08-03T09:59:07.485Z"
+    },
+    {
+      "action": "artifact-complete",
+      "agent": "shifu",
+      "artifact": "artifacts/output/teaching/notes/test.md",
+      "version": null,
+      "tokens": 0,
+      "duration_ms": null,
+      "timestamp": "2026-08-03T09:59:07.669Z"
+    },
+    {
+      "action": "artifact-complete",
+      "agent": "shifu",
+      "artifact": "artifacts/output/teaching/notes/graph-theory.md",
+      "version": null,
+      "tokens": 0,
+      "duration_ms": null,
+      "timestamp": "2026-08-03T10:02:25.496Z"
+    },
+    {
+      "action": "artifact-complete",
+      "agent": "shifu",
+      "artifact": "artifacts/output/teaching/syllabus.md",
+      "version": null,
+      "tokens": 0,
+      "duration_ms": null,
+      "timestamp": "2026-08-03T15:15:34.185Z"
+    },
+    {
+      "action": "artifact-complete",
+      "agent": "shifu",
+      "artifact": "artifacts/output/teaching/handbook.md",
+      "version": null,
+      "tokens": 0,
+      "duration_ms": null,
+      "timestamp": "2026-08-03T16:01:44.080Z"
+    },
+    {
+      "action": "artifact-complete",
+      "agent": "shifu",
+      "artifact": "artifacts/output/teaching/syllabus.md",
+      "version": null,
+      "tokens": 0,
+      "duration_ms": null,
+      "timestamp": "2026-08-03T16:01:51.356Z"
+    },
+    {
+      "action": "artifact-complete",
+      "agent": "shifu",
+      "artifact": "artifacts/output/teaching/handbook.md",
+      "version": null,
+      "tokens": 0,
+      "duration_ms": null,
+      "timestamp": "2026-08-03T16:01:51.531Z"
+    },
+    {
+      "action": "artifact-complete",
+      "agent": "shifu",
+      "artifact": "artifacts/output/teaching/cheatsheet.md",
+      "version": null,
+      "tokens": 0,
+      "duration_ms": null,
+      "timestamp": "2026-08-03T16:01:51.695Z"
+    },
+    {
+      "action": "artifact-complete",
+      "agent": "shifu",
+      "artifact": "artifacts/output/teaching/syllabus.md",
+      "version": null,
+      "tokens": 0,
+      "duration_ms": null,
+      "timestamp": "2026-08-03T16:03:10.826Z"
+    },
+    {
+      "action": "artifact-complete",
+      "agent": "shifu",
+      "artifact": "artifacts/output/teaching/handbook.md",
+      "version": null,
+      "tokens": 0,
+      "duration_ms": null,
+      "timestamp": "2026-08-03T16:03:10.944Z"
+    },
+    {
+      "action": "artifact-complete",
+      "agent": "shifu",
+      "artifact": "artifacts/output/teaching/video-script.md",
+      "version": null,
+      "tokens": 0,
+      "duration_ms": null,
+      "timestamp": "2026-08-03T16:03:11.049Z"
+    },
+    {
+      "action": "artifact-complete",
+      "agent": "shifu",
+      "artifact": "artifacts/output/teaching/presentation.md",
+      "version": null,
+      "tokens": 0,
+      "duration_ms": null,
+      "timestamp": "2026-08-03T16:04:10.828Z"
+    },
+    {
+      "action": "artifact-complete",
+      "agent": "qa-engineer",
+      "artifact": "artifacts/output/07-iteration/test-report.md",
+      "version": null,
+      "tokens": 0,
+      "duration_ms": null,
+      "timestamp": "2026-08-03T16:12:18.802Z"
+    },
+    {
+      "action": "artifact-complete",
+      "agent": "qa-engineer",
+      "artifact": "artifacts/output/07-iteration/test-report.md",
+      "version": null,
+      "tokens": 0,
+      "duration_ms": null,
+      "timestamp": "2026-08-03T23:23:13.767Z"
     }
   ],
   "name": "vespyr",
@@ -96,10 +270,16 @@
   "phase": "validation",
   "last_session_write": {
     "agent": "opencode",
-    "timestamp": "2026-08-01T12:29:58.202Z",
-    "worked_on": "Integrated the UTTERLY SATISFIED culture as cross-cutting T8 DNA throughout artifacts/docs/strategy/development-plan. Added the canonical DNA plan, updated README DoD/release structure, and embedded phase-specific requirements across foundation, skills, orchestration, observability, modularity, deeper bench, harnesses, risks, implementation specs, loops, token-effective mode, MCP, memory, teaching, and AI plans.",
-    "decisions": "T8 is permanent across every release and cannot be disabled by a harness or module; active relevant agents need evidence-backed SATISFIED states; optional domains require explicit NOT ACTIVATED reasons; future runtime validation is owned by Phase 2 and telemetry by Phase 3; technical verifier success is separate from team satisfaction.",
-    "next_step": "Implement Phase 2 validate_satisfaction.js and orchestrator enforcement from development-plan/10-implementation-specs.md §15 when runtime work begins.",
+    "timestamp": "2026-08-04T01:39:27.177Z",
+    "worked_on": "Repaired and QA-certified the motion capability workflow: explicit research/spec preflow, tech-lead handoff, accessibility/runtime gates, canonical paths, indexes, and evals.",
+    "decisions": "Motion preflow ends at motion-handoff.md; /develop owns implementation and runtime QA. Full motion requires UX researcher accessibility sign-off. Runtime motion must verify WCAG 2.3.3 disableability and transform/opacity-only properties.",
+    "next_step": "Use /motion on a real product to generate motion research, motion-spec.md, motion-handoff.md, then continue through /develop and /test.",
     "blockers": "none"
+  },
+  "last_session_start": {
+    "agent": "shifu",
+    "domain": "teaching",
+    "goal": "test timestamp",
+    "timestamp": "2026-08-03T21:29:00.000Z"
   }
 }

@@ -5,6 +5,7 @@ capabilities:
   - market-analysis
   - competitor-research
   - technology-trends
+  - motion-research
 default_squad: research
 origin: core
 model: -
@@ -165,13 +166,31 @@ Do NOT use bash, python, MCP, or playwright tools for writing.
 
 ## Shared Memory
 
+**Session Start (Mandatory):**
+```
+@executor: node .agents/scripts/orchestrator_state.js session-start --agent researcher --domain research --goal "{one-line goal}"
+```
+Refreshes `project-context.md` [CORE] (Phase/Blockers) and appends a Session Activity marker — run before loading context.
+
+**No-Subagent Harness Fallback (NON-NEGOTIABLE — e.g., Antigravity IDE, Google):**
+If your harness has no subagents (`@executor`, `@writer`, `@memory-controller` cannot be invoked), do NOT skip memory bookkeeping — you have full tool access as the primary agent, so run the commands DIRECTLY yourself:
+
+- **Session start** (on entry, before loading context):
+  `node .agents/scripts/orchestrator_state.js session-start --agent researcher --domain research --goal "{one-line goal}"`
+- **Read memory**: read `artifacts/memory/project-context.md` and `artifacts/memory/session-summaries/latest.md` directly with your read tool.
+- **Write memory entries**: append to `artifacts/memory/*.md` directly with your edit/write tool, following the entry formats in the blocks below.
+- **Session summary** (on completion): `node .agents/scripts/orchestrator_state.js session-write --agent researcher --worked-on "..." --decisions "..." --next-step "..." --blockers none`
+- **Pipeline complete** (after all writes): `node .agents/scripts/orchestrator_state.js complete --agent researcher --artifact <relative-path>`
+
+These orchestrator commands refresh `project-context.md` (Phase/Blockers/Session Activity) and session summaries automatically. They MUST run in every harness.
+
 **Read before starting:**
 
 ```
 @memory-controller load researcher [brief task description]
 ```
 
-The controller returns filtered context (~1,000 tokens). Do NOT read memory files directly.
+The controller returns filtered context (~1,000 tokens). Do NOT read memory files directly — UNLESS your harness has no @memory-controller subagent, in which case read them directly (see the No-Subagent Harness Fallback above).
 
 **Write after completing:**
 
@@ -235,7 +254,7 @@ Before starting any research, run `node .agents/scripts/query_graph.js search <t
 **Triggered by:** `@researcher market [task description]`
 
 ### Step 1: Read upstream inputs
-- `artifacts/output/00-discovery/validation-brief.md` or `artifacts/output/00-discovery/idea-brief.md` — target user, core concept, and key assumptions
+- `artifacts/output/01-discovery/validation-brief.md` or `artifacts/output/01-discovery/idea-brief.md` — target user, core concept, and key assumptions
 
 ### Step 2: Research and write
 1. **Research market size** (TAM, SAM, SOM) — state methodology (top-down vs bottom-up), confidence levels
@@ -245,15 +264,15 @@ Before starting any research, run `node .agents/scripts/query_graph.js search <t
 5. **Identify risks** — regulatory, competitive, technological, timing
 
 ### Step 3: Save
-Write to `artifacts/output/01-research/market-analysis.md`
+Write to `artifacts/output/02-research/market-analysis.md`
 
 ## Mode B: Competitive Analysis
 
 **Triggered by:** `@researcher competitive [task description]`
 
 ### Step 1: Read upstream inputs
-- `artifacts/output/00-discovery/validation-brief.md` or `artifacts/output/00-discovery/idea-brief.md` — founder's concept and assumptions
-- `artifacts/output/01-research/market-analysis.md` — market context (if exists)
+- `artifacts/output/01-discovery/validation-brief.md` or `artifacts/output/01-discovery/idea-brief.md` — founder's concept and assumptions
+- `artifacts/output/02-research/market-analysis.md` — market context (if exists)
 
 ### Step 2: Research and write
 1. **Identify competitors** — 3-7 players minimum, direct and indirect
@@ -264,7 +283,11 @@ Write to `artifacts/output/01-research/market-analysis.md`
 6. **Find white-space** — where competitors are weak or absent
 
 ### Step 3: Save
-Write to `artifacts/output/01-research/competitive-analysis.md`
+Write to `artifacts/output/02-research/competitive-analysis.md`
+
+## Motion Research (on-demand)
+
+When delegated motion research (by `@product-designer` or `@developer` via the `/motion` skill), load `.agents/references/motion/motion-research-guide.md` first. You own the **market + technology track**: competitive motion language, white-space opportunities, animation library landscape, and performance evidence. Produce `artifacts/output/02-research/motion-competitive.md` and `artifacts/output/02-research/motion-tech-landscape.md`.
 
 ## Socratic Method & Critical Inquiry
 
@@ -315,5 +338,5 @@ See [GUARDRAILS.md](../GUARDRAILS.md) for the full guardrails specification.
 
 | Artifact | Location | Mode |
 |----------|----------|------|
-| Market analysis report | `artifacts/output/01-research/market-analysis.md` | Market |
-| Competitive analysis report | `artifacts/output/01-research/competitive-analysis.md` | Competitive |
+| Market analysis report | `artifacts/output/02-research/market-analysis.md` | Market |
+| Competitive analysis report | `artifacts/output/02-research/competitive-analysis.md` | Competitive |

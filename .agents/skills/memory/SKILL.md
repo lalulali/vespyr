@@ -23,15 +23,19 @@ Searches the archive index for historical context. Use when you need to find a p
 - For current project context (use `@memory-controller load [agent] [task]` instead — memory files are never read directly)
 - For active decisions (use `@memory-controller load [agent] [task]` instead)
 
-## The 5 memory files
+## The memory files
 
 | File | Purpose | When to write |
 |---|---|---|
-| `project-context.md` | Stack, constraints, architecture snapshot | Set during init, updated on major stack changes |
+| `project-context.md` | Stack, constraints, architecture snapshot | Set during init, synced at every session start (`session-start`), updated on major stack changes |
+| `session-checkpoints/checkpoint.md` | **Rolling live cursor** of an in-progress session (Phase, current artifact, next action) | Auto-emitted by `orchestrator_state.js` at every state-changing command (complete, session-start, session-write, set-phase, file-cr, sync-context) — overwrites in place |
+| `session-summaries/latest.md` | Post-hoc wrap-up of the last ENDED unit of work | At session shutdown (`session-write`) |
 | `active-decisions.md` | Running record of current-cycle decisions | After every resolved decision |
 | `lessons-learned.md` | Engineering insights, bugs, gotchas | After non-obvious fixes or discoveries |
 | `patterns-and-conventions.md` | Reusable patterns, coding conventions | When a pattern repeats across 3+ instances |
 | `blockers-and-risks.md` | Active blockers, known risks | When blocked; remove when resolved |
+
+**Checkpoint vs. summary:** the checkpoint answers *"where is work right now?"* (resume point for multi-turn loops); the summary answers *"what just ended?"*. On load, `@memory-controller` surfaces the checkpoint first (fresher) and demotes `latest.md` to last-session context.
 
 ## When to write to memory
 
@@ -66,6 +70,16 @@ Write for systemic patterns only, not single-instance events:
 These are the canonical 17 domain tags (see `.agents/templates/memory/memory-entry-template.md`). Entries with any other tag are rejected.
 
 ## Workflow
+
+### Step 0: Session start (project-context refresh)
+
+Every agent calls this on entry, before loading context — it keeps `project-context.md` accurate no matter which agent is invoked ad-hoc. Run via `@executor`:
+
+```
+node .agents/scripts/orchestrator_state.js session-start --agent {agent} --domain {domain} --goal "{one-line goal}"
+```
+
+The mandatory `complete` call also refreshes project-context as a backstop, so the context updates even if session-start is skipped.
 
 ### Step 1: Search archive
 

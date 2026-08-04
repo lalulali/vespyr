@@ -22,7 +22,7 @@ Persist updated design documents, record decisions, and hand off.
 
 ## Process
 > **Tracker:** `node .agents/scripts/step_tracker.js begin --skill design-edit --step 4`
-1. Write revised files back to `artifacts/output/02-strategy/`.
+1. Write revised files back to `artifacts/output/03-strategy/`.
 2. Update dates and revision notes.
 3. Re-run the design review gate from create mode step 06 to confirm all checks pass.
 
@@ -33,9 +33,9 @@ Persist updated design documents, record decisions, and hand off.
 
 ## State machine
 ```bash
-node .agents/scripts/orchestrator_state.js complete --agent product-manager --artifact 02-strategy/requirements.md
-node .agents/scripts/orchestrator_state.js complete --agent product-manager --artifact 02-strategy/user-stories.md
-node .agents/scripts/orchestrator_state.js complete --agent product-designer --artifact 02-strategy/product-spec.md
+node .agents/scripts/orchestrator_state.js complete --agent product-manager --artifact 03-strategy/requirements.md
+node .agents/scripts/orchestrator_state.js complete --agent product-manager --artifact 03-strategy/user-stories.md
+node .agents/scripts/orchestrator_state.js complete --agent product-designer --artifact 03-strategy/product-spec.md
 node .agents/scripts/ensure_graph.js doc
 ```
 

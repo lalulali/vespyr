@@ -7,7 +7,7 @@ last_updated: 2026-07-20
 
 # Journey Map
 
-Maps the current-state user journey with touchpoints, emotions, and friction. Outputs to `artifacts/output/01-research/journey-map.md`.
+Maps the current-state user journey with touchpoints, emotions, and friction. Outputs to `artifacts/output/02-research/journey-map.md`.
 
 ## Persona delegation
 This skill delegates to `@user-researcher`. The researcher maps the journey from user data. The skill provides the map structure; `@user-researcher` provides the journey analysis.
@@ -44,7 +44,7 @@ Walk through each stage of the journey:
 
 ### Step 4: Output
 
-Delegate to `@writer` for `artifacts/output/01-research/journey-map.md`:
+Delegate to `@writer` for `artifacts/output/02-research/journey-map.md`:
 
 ```markdown
 # Journey Map — {journey name}
@@ -75,4 +75,4 @@ Delegate to `@writer` for `artifacts/output/01-research/journey-map.md`:
 
 ## State machine integration
 At start: `@executor` runs `node .agents/scripts/orchestrator_state.js status`
-At end: `@executor` runs `node .agents/scripts/orchestrator_state.js complete --agent user-researcher --artifact 01-research/journey-map.md`
+At end: `@executor` runs `node .agents/scripts/orchestrator_state.js complete --agent user-researcher --artifact 02-research/journey-map.md`

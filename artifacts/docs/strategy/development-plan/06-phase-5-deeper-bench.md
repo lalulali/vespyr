@@ -262,7 +262,7 @@ For each: create agent file (v2 frontmatter, IDENTITY block, channeled mentor, i
   - *"No heuristic baseline, no AI model."* Always establish a deterministic or simple rule-based baseline before introducing LLMs or ML models.
   - *"No eval set, no production prompt."* Never approve a prompt or model for production without an automated evaluation dataset.
   - *"Graceful degradation is mandatory."* Every AI component must define a deterministic fallback (cached result, rule-based fallback, or default UI state) when API latency exceeds SLAs or outputs fail confidence thresholds.
-- **Output Artifacts:** `artifacts/output/architecture/adr-NNN-ai-*.md`, `artifacts/output/03-architecture/ai-pipeline-spec.md`, `artifacts/output/architecture/model-approved-for-production.md` (contract handoff to `@ml-ai-ops`), and evaluation benchmark scorecards.
+- **Output Artifacts:** `artifacts/output/architecture/adr-NNN-ai-*.md`, `artifacts/output/04-architecture/ai-pipeline-spec.md`, `artifacts/output/architecture/model-approved-for-production.md` (contract handoff to `@ml-ai-ops`), and evaluation benchmark scorecards.
 
 **Permissions:** read + bash (for local python scripts, eval runs, huggingface/ollama checks) + edit.
 **Default squad:** `build` (core) & `data-platform` (opt-in).
@@ -382,7 +382,7 @@ For each skill: create folder + SKILL.md (bootloader) + steps/ (when multi-step)
 **Source:** BMAD `bmad-brainstorming` (uses `brain-methods.csv`).
 **When to invoke:** User is stuck, brief is stale, `@founder` rejected 3+ framings, user explicitly says "I need more ideas."
 **Primary agent:** `@brainstormer` (Carson). May also invoke `@innovation-strategist` for a positioning check at the end.
-**Output:** `artifacts/output/00-discovery/brainstorm-output.md` with 5+ concepts (1 outlandish), each with: one-line description, why-it-might-work, why-it-might-fail, "the most interesting question about this."
+**Output:** `artifacts/output/01-discovery/brainstorm-output.md` with 5+ concepts (1 outlandish), each with: one-line description, why-it-might-work, why-it-might-fail, "the most interesting question about this."
 **Effort:** ~1 day.
 
 ---
@@ -392,7 +392,7 @@ For each skill: create folder + SKILL.md (bootloader) + steps/ (when multi-step)
 **Source:** Amazon's Working Backwards methodology, adopted by BMAD `bmad-prfaq`.
 **When to invoke:** Before `/design` for any non-trivial feature. Forces clarity on customer, problem, solution, and success before specs.
 **Primary agent:** `@product-manager` (Sarah).
-**Output:** `artifacts/output/02-strategy/pr-faq.md` with: internal press release (1 page), customer FAQ (5–8 questions), internal FAQ (5–8 questions including "what's the risk?" and "what if it works?"), success criteria.
+**Output:** `artifacts/output/03-strategy/pr-faq.md` with: internal press release (1 page), customer FAQ (5–8 questions), internal FAQ (5–8 questions including "what's the risk?" and "what if it works?"), success criteria.
 **Hard rule:** if any section is wishy-washy, the PR-FAQ is rejected and the user has to revise. This is the single most important artifact for forcing clarity.
 **Effort:** ~1 day.
 
@@ -403,7 +403,7 @@ For each skill: create folder + SKILL.md (bootloader) + steps/ (when multi-step)
 **Source:** BMAD `bmad-create-epics-and-stories` + `bmad-create-story`.
 **When to invoke:** After `/design` produces a PRD; before `/plan` / `@tech-lead` task breakdown.
 **Primary agent:** `@product-manager`.
-**Output:** `artifacts/output/02-strategy/epics-and-stories.md` with: epics (1-3 months of work), stories (1-3 days each), acceptance criteria (Given/When/Then), dependencies, and a stable story ID (`US-NNN-feature-name`).
+**Output:** `artifacts/output/03-strategy/epics-and-stories.md` with: epics (1-3 months of work), stories (1-3 days each), acceptance criteria (Given/When/Then), dependencies, and a stable story ID (`US-NNN-feature-name`).
 **Effort:** ~1.5 days.
 
 ---
@@ -413,7 +413,7 @@ For each skill: create folder + SKILL.md (bootloader) + steps/ (when multi-step)
 **Source:** ECC `market-research` skill.
 **When to invoke:** After `/validate-idea` returns GO. Needed for any product with external customers (B2B, B2C, B2B2C).
 **Primary agents:** `@researcher` (market sizing) + `@growth-marketer` (GTM) + `@user-researcher` (ICP definition).
-**Output:** `artifacts/output/01-research/market-sizing.md` with: TAM/SAM/SOM, ICP definition (3-5 segments), GTM motion (PLG / SLG / community / partner-led), channel strategy, "the beachhead segment" with rationale.
+**Output:** `artifacts/output/02-research/market-sizing.md` with: TAM/SAM/SOM, ICP definition (3-5 segments), GTM motion (PLG / SLG / community / partner-led), channel strategy, "the beachhead segment" with rationale.
 **Effort:** ~2 days.
 
 ---
@@ -443,7 +443,7 @@ For each skill: create folder + SKILL.md (bootloader) + steps/ (when multi-step)
 **Source:** BMAD `bmad-cis-design-thinking`.
 **When to invoke:** User has a vague problem (not a feature) and needs structured empathy-first discovery. Complements `/validate-idea` and `/brainstorming`.
 **Primary agents:** `@user-researcher` (Paige) + `@ux-researcher` (Zara).
-**Output:** `artifacts/output/00-discovery/design-thinking-synthesis.md` with: empathy maps, jobs-to-be-done, "how might we" questions, prototype ideas.
+**Output:** `artifacts/output/01-discovery/design-thinking-synthesis.md` with: empathy maps, jobs-to-be-done, "how might we" questions, prototype ideas.
 **Effort:** ~1.5 days.
 
 ---
@@ -503,7 +503,7 @@ For each skill: create folder + SKILL.md (bootloader) + steps/ (when multi-step)
 **Source:** BMAD `bmad-correct-course`.
 **When to invoke:** When a project is mid-flight and the strategy has changed (market shift, user feedback, new constraint, executive decision).
 **Primary agents:** `@founder` (Elena) leads; `@product-manager` (Sarah) for PRD update; `@architect` (Vera) for technical impact; `@tech-lead` (Grant) for plan update.
-**Output:** `artifacts/output/02-strategy/correct-course-decision.md` with: what changed, why, blast-radius assessment (what artifacts are now stale), the cascade (PRD → spec → stories → plan → code), and a re-validation checklist.
+**Output:** `artifacts/output/03-strategy/correct-course-decision.md` with: what changed, why, blast-radius assessment (what artifacts are now stale), the cascade (PRD → spec → stories → plan → code), and a re-validation checklist.
 **Effort:** ~1.5 days.
 
 ---
@@ -528,7 +528,7 @@ For each skill: create folder + SKILL.md (bootloader) + steps/ (when multi-step)
 - [ ] **T1.28b** `/grade-artifact` — LLM-as-a-Judge Artifact Scoring
 
 **Source:** LLM-as-a-judge pattern (Zheng et al. 2023); scoring rubric referenced in `youtube.com/watch?v=N8EO-lSiLYw` ("Use AI to Score and Compare Ideas").
-**When to invoke:** At any artifact handoff — before step-08 PM verification in `/develop`; at idea-brief handoff in `/validate-idea`; at product-spec handoff in `/design`; at launch-log in `/launch`. Also invocable ad-hoc: `/grade-artifact artifacts/output/02-strategy/prd/SPEC.md`.
+**When to invoke:** At any artifact handoff — before step-08 PM verification in `/develop`; at idea-brief handoff in `/validate-idea`; at product-spec handoff in `/design`; at launch-log in `/launch`. Also invocable ad-hoc: `/grade-artifact artifacts/output/03-strategy/prd/SPEC.md`.
 **Primary agent:** `@artifact-judge` (Minerva).
 **Modes:**
 - **Advisory (default):** produces the scorecard; the producing agent decides whether to revise. Low friction.
@@ -749,7 +749,7 @@ For each skill: create folder + SKILL.md (bootloader) + steps/ (when multi-step)
   3. *Technology Shift Mapping:* Identify emerging technical trends, platform shifts, and API ecosystem dependencies.
   4. *Competitive Landscape Matrix:* Map incumbents, direct rivals, and status-quo workarounds across 5 strategic axes.
   5. *White-Space Opportunity Synthesis:* Extract unserved customer niches, wedge opportunities, and structural market gaps.
-**Output:** `artifacts/output/01-research/domain-deep-dive.md` with domain overview, regulatory matrix, technology trend map, competitive grid, and strategic wedge recommendation.
+**Output:** `artifacts/output/02-research/domain-deep-dive.md` with domain overview, regulatory matrix, technology trend map, competitive grid, and strategic wedge recommendation.
 **Effort:** ~2 days.
 
 ---

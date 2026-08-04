@@ -42,15 +42,15 @@ If unclear, present the three modes and ask.
 4. **Brief Generation** → `steps/step-04-brief-generation.md` — write problem-space-brief.md, compile discovery report
 
 ## Output artifacts
-- `artifacts/output/01-research/problem-space-brief.md` — structured problem definition
-- `artifacts/output/01-research/root-cause-analysis.md` — root cause findings
-- `artifacts/output/01-research/empathy-map.md` — user empathy canvas
-- `artifacts/output/01-research/journey-map.md` — current-state journey
-- `artifacts/output/01-research/jtbd-hmw.md` — jobs-to-be-done + how-might-we
+- `artifacts/output/02-research/problem-space-brief.md` — structured problem definition
+- `artifacts/output/02-research/root-cause-analysis.md` — root cause findings
+- `artifacts/output/02-research/empathy-map.md` — user empathy canvas
+- `artifacts/output/02-research/journey-map.md` — current-state journey
+- `artifacts/output/02-research/jtbd-hmw.md` — jobs-to-be-done + how-might-we
 
 ## State machine integration
 At start: `@executor` runs `node .agents/scripts/orchestrator_state.js status`
-At end: `@executor` runs `node .agents/scripts/orchestrator_state.js complete --agent product-manager --artifact 01-research/problem-space-brief.md`
+At end: `@executor` runs `node .agents/scripts/orchestrator_state.js complete --agent product-manager --artifact 02-research/problem-space-brief.md`
 
 ## Memory integration
 **At start:** Load context before problem intake:

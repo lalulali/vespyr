@@ -34,7 +34,7 @@ Identify scenarios that belong in the acceptance criteria:
 
 ### 3b. Backport to user stories
 
-Delegate to `@writer` to update `artifacts/output/02-strategy/user-stories.md`:
+Delegate to `@writer` to update `artifacts/output/03-strategy/user-stories.md`:
 
 Append a new section at the end of the file:
 

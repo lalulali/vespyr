@@ -172,13 +172,31 @@ If all web tools fail, proceed with your best knowledge and label all assumption
 
 ## Shared Memory
 
+**Session Start (Mandatory):**
+```
+@executor: node .agents/scripts/orchestrator_state.js session-start --agent user-researcher --domain user-research --goal "{one-line goal}"
+```
+Refreshes `project-context.md` [CORE] (Phase/Blockers) and appends a Session Activity marker — run before loading context.
+
+**No-Subagent Harness Fallback (NON-NEGOTIABLE — e.g., Antigravity IDE, Google):**
+If your harness has no subagents (`@executor`, `@writer`, `@memory-controller` cannot be invoked), do NOT skip memory bookkeeping — you have full tool access as the primary agent, so run the commands DIRECTLY yourself:
+
+- **Session start** (on entry, before loading context):
+  `node .agents/scripts/orchestrator_state.js session-start --agent user-researcher --domain user-research --goal "{one-line goal}"`
+- **Read memory**: read `artifacts/memory/project-context.md` and `artifacts/memory/session-summaries/latest.md` directly with your read tool.
+- **Write memory entries**: append to `artifacts/memory/*.md` directly with your edit/write tool, following the entry formats in the blocks below.
+- **Session summary** (on completion): `node .agents/scripts/orchestrator_state.js session-write --agent user-researcher --worked-on "..." --decisions "..." --next-step "..." --blockers none`
+- **Pipeline complete** (after all writes): `node .agents/scripts/orchestrator_state.js complete --agent user-researcher --artifact <relative-path>`
+
+These orchestrator commands refresh `project-context.md` (Phase/Blockers/Session Activity) and session summaries automatically. They MUST run in every harness.
+
 **Read before starting:**
 
 ```
 @memory-controller load user-researcher [brief task description]
 ```
 
-The controller returns filtered context (~1,000 tokens) covering: product domain, target segments, and founder's user assumptions to validate. Do NOT read memory files directly.
+The controller returns filtered context (~1,000 tokens) covering: product domain, target segments, and founder's user assumptions to validate. Do NOT read memory files directly — UNLESS your harness has no @memory-controller subagent, in which case read them directly (see the No-Subagent Harness Fallback above).
 
 **Write after completing:**
 
@@ -233,8 +251,8 @@ Never skip these calls. They are required for pipeline state continuity.
 ## How to research
 
 ### Step 1: Read upstream inputs
-- `artifacts/output/00-discovery/validation-brief.md` or `artifacts/output/00-discovery/idea-brief.md` — the target user and key assumptions to validate
-- `artifacts/output/01-research/competitive-analysis.md` — competitive context for user alternatives
+- `artifacts/output/01-discovery/validation-brief.md` or `artifacts/output/01-discovery/idea-brief.md` — the target user and key assumptions to validate
+- `artifacts/output/02-research/competitive-analysis.md` — competitive context for user alternatives
 - Run `node .agents/scripts/query_graph.js search <user segment or persona keyword>` to check if personas, user research, or journey maps already exist in the doc-graph
 
 ### Step 2: Research
@@ -260,7 +278,7 @@ When given a product concept or problem space:
 8. **Validate or challenge the founder's assumptions** about the target user
 
 ### Step 3: Write and save
-Use the `write` tool to save research to `artifacts/output/01-research/user-personas.md` following the user personas template exactly.
+Use the `write` tool to save research to `artifacts/output/02-research/user-personas.md` following the user personas template exactly.
 
 ## Socratic Method & Critical Inquiry
 
@@ -277,7 +295,7 @@ See [GUARDRAILS.md](../GUARDRAILS.md) for the full guardrails specification that
 - Use the question tool liberally if user details are sparse — better to ask than guess
 - Structure output: Research Summary → Personas → Journey Map → Prioritized Needs → Opportunity Statements
 - Each persona must include: name, role, goals, frustrations, current workarounds, and a quote
-- Use the `write` tool to save research to `artifacts/output/01-research/user-personas.md`
+- Use the `write` tool to save research to `artifacts/output/02-research/user-personas.md`
 - Reference market research and competitive analysis for context
 - **Be honest about limitations** — small sample sizes, self-reported bias, etc.
 - Don't just describe who users are; describe what they *do* and *why*
@@ -295,8 +313,8 @@ See [GUARDRAILS.md](../GUARDRAILS.md) for the full guardrails specification that
 ## Outputs
 | Artifact | Location |
 |----------|----------|
-| User personas & research report | `artifacts/output/01-research/user-personas.md` |
-| User journey maps | Within research report or `artifacts/output/01-research/journey-maps.md` |
+| User personas & research report | `artifacts/output/02-research/user-personas.md` |
+| User journey maps | Within research report or `artifacts/output/02-research/journey-maps.md` |
 
 ## Conflict Resolution
 - If research findings contradict @founder's assumptions, present the evidence objectively — the founder decides what to do with it

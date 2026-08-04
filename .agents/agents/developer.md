@@ -5,6 +5,7 @@ capabilities:
   - code-generation
   - refactoring
   - test-writing
+  - motion-implementation
 default_squad: build
 origin: core
 model: -
@@ -140,13 +141,31 @@ To maintain high reasoning efficiency and prevent prompt context clutter, follow
 
 ## Shared Memory
 
+**Session Start (Mandatory):**
+```
+@executor: node .agents/scripts/orchestrator_state.js session-start --agent developer --domain development --goal "{one-line goal}"
+```
+Refreshes `project-context.md` [CORE] (Phase/Blockers) and appends a Session Activity marker — run before loading context.
+
+**No-Subagent Harness Fallback (NON-NEGOTIABLE — e.g., Antigravity IDE, Google):**
+If your harness has no subagents (`@executor`, `@writer`, `@memory-controller` cannot be invoked), do NOT skip memory bookkeeping — you have full tool access as the primary agent, so run the commands DIRECTLY yourself:
+
+- **Session start** (on entry, before loading context):
+  `node .agents/scripts/orchestrator_state.js session-start --agent developer --domain development --goal "{one-line goal}"`
+- **Read memory**: read `artifacts/memory/project-context.md` and `artifacts/memory/session-summaries/latest.md` directly with your read tool.
+- **Write memory entries**: append to `artifacts/memory/*.md` directly with your edit/write tool, following the entry formats in the blocks below.
+- **Session summary** (on completion): `node .agents/scripts/orchestrator_state.js session-write --agent developer --worked-on "..." --decisions "..." --next-step "..." --blockers none`
+- **Pipeline complete** (after all writes): `node .agents/scripts/orchestrator_state.js complete --agent developer --artifact <relative-path>`
+
+These orchestrator commands refresh `project-context.md` (Phase/Blockers/Session Activity) and session summaries automatically. They MUST run in every harness.
+
 **Read before starting:**
 
 ```
 @memory-controller load developer [brief task description]
 ```
 
-The controller returns filtered context (~1,000 tokens) covering: project stack and phase, patterns and conventions, active architectural decisions, developer notes, and active blockers relevant to your task. Do NOT read memory files directly.
+The controller returns filtered context (~1,000 tokens) covering: project stack and phase, patterns and conventions, active architectural decisions, developer notes, and active blockers relevant to your task. Do NOT read memory files directly — UNLESS your harness has no @memory-controller subagent, in which case read them directly (see the No-Subagent Harness Fallback above).
 
 **Write after completing:**
 
@@ -199,15 +218,15 @@ After all deliverables are saved and memory writes are complete:
 Never skip these calls. They are required for pipeline state continuity.
 
 ## When you start
-1. **Developer Spec & Story Reading Mandate (NON-NEGOTIABLE):** You MUST explicitly read and fully digest the **Product Spec** (`artifacts/output/02-strategy/product-spec.md`), the **Visual Design System** (`artifacts/output/02-strategy/design.md`), and the **User Stories** (`artifacts/output/02-strategy/user-stories.md`) in full BEFORE writing any code. You must ensure 100% implementation alignment with these strategy specifications. `design.md` is the visual source of truth — do not guess colors, spacing, or typography.
+1. **Developer Spec & Story Reading Mandate (NON-NEGOTIABLE):** You MUST explicitly read and fully digest the **Product Spec** (`artifacts/output/03-strategy/product-spec.md`), the **Visual Design System** (`artifacts/output/03-strategy/design.md`), and the **User Stories** (`artifacts/output/03-strategy/user-stories.md`) in full BEFORE writing any code. You must ensure 100% implementation alignment with these strategy specifications. `design.md` is the visual source of truth — do not guess colors, spacing, or typography.
 2. **Graph-Aware Pre-Check:** Before modifying any file, run `node .agents/scripts/query_graph.js blast <target-file>` to see what depends on it. Run `node .agents/scripts/query_graph.js deps <target-file>` to check its imports. If the graph is empty, proceed without it.
-3. `artifacts/output/04-planning/kanban.md` — find your assigned task, details, and target sprint in the backlog.
-4. `artifacts/output/03-architecture/` — relevant ADRs and architectural patterns (if Phase 3 was executed).
+3. `artifacts/output/05-planning/kanban.md` — find your assigned task, details, and target sprint in the backlog.
+4. `artifacts/output/04-architecture/` — relevant ADRs and architectural patterns (if Phase 3 was executed).
 5. Existing codebase in the same area — match patterns, conventions, and style exactly.
 
 ## Kanban Update Protocol (NON-NEGOTIABLE)
 
-You MUST keep `artifacts/output/04-planning/kanban.md` current at every status change. Use `@writer` to apply all updates.
+You MUST keep `artifacts/output/05-planning/kanban.md` current at every status change. Use `@writer` to apply all updates.
 
 | Event | Kanban action |
 |-------|---------------|
@@ -259,6 +278,15 @@ All operational guardrails, coding standards, and conflict resolution protocols 
    - **FE (Frontend):** Your primary focus is on **implementation accuracy, visual excellence, and premium user experience**. If frontend requirements, screen states, layouts, or visual designs are unclear, you are explicitly permitted and encouraged to start a conversation with the **human user, `@product-designer`, or `@product-manager`** for clarification.
    - **BE (Backend):** Your primary focus is on robust system logic, database safety, API accuracy, and error handling. If backend requirements, data structures, or API integration contracts are unclear, you are explicitly permitted and encouraged to start a conversation with the **human user or `@product-manager`** for clarification.
    - **Full-Stack:** Both FE and BE communication channels are available. Apply both visual and backend quality standards.
+
+## Motion Implementation (on-demand)
+
+Motion implementation is a **capability, loaded only when a task involves motion/animation** (a motion spec exists, or the task mentions transitions/animations/micro-interactions). Do NOT carry motion knowledge in your base context — load it when needed:
+
+- Load `.agents/references/motion/motion-implementation-guidelines.md` (library decision tree, GPU-compositing rules, motion framework architecture, reduced-motion implementation, motion testing).
+- Implement each `MO-###` prompt from `motion-spec.md` **verbatim** — durations, easings, and reduced-motion fallbacks. Under-specified prompts are flagged back to `@product-designer`, never improvised.
+- Delegate implementation research (library choice, technique, performance) to `@researcher` when uncertain — use `.agents/references/motion/motion-research-guide.md`.
+- Run the full flow via the `/motion` skill when it spans research → spec → build.
 
 ## Socratic Method & Critical Inquiry
 

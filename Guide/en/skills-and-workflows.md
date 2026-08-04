@@ -17,6 +17,7 @@ Vespyr organizes complex operations into atomic skills. Each skill is a folder w
 | `/unpack-problem` | 0-1 | Problem-first exploration before solution ideation |
 | `/shape-up` | 1-2 | Bridge semi-cooked ideas into design-ready specs (standalone or lifecycle) |
 | `/design` | 2-3 | PRD and screen specs creation |
+| `/motion` | 2-4 | Motion research, motion specification, and explicit handoff to `/develop` |
 | `/plan` | 4 | Standalone or sprint execution planning |
 | `/develop` | 5 | MVP development cycle |
 | `/launch` | 6 | Release readiness and deployment |
@@ -40,7 +41,7 @@ Vespyr organizes complex operations into atomic skills. Each skill is a folder w
 | Command | Description |
 |---------|-------------|
 | `/teach-me` | Personal learning partner — Quick, Explain, or Deep Dive on any topic |
-| `/craft-lesson` | Create multi-format educational materials (syllabus, handbook, cheatsheet, presentation, class, video script) |
+| `/craft-lesson` | Create multi-format educational materials (syllabus, detailed handbook, cheatsheet, presentation, class, video script) |
 
 ### Ideation & Socratic Alignment
 
@@ -96,18 +97,18 @@ Vespyr's 11-phase pipeline. `.agents/references/phase-table.md` is the canonical
 
 | Phase | ID | Folder | Primary Skill |
 |-------|----|--------|---------------|
-| Validation | -1 | `00-discovery/` | `/validate-idea` |
-| Discovery | 0 | `00-discovery/` | `/unpack-problem` |
-| Research | 1 | `01-research/` | `/explore-idea` |
+| Validation | 1 | `01-discovery/` | `/validate-idea` |
+| Discovery | 1 | `01-discovery/` | `/unpack-problem` |
+| Research | 2 | `02-research/` | `/explore-idea` |
 | Shaping Bridge | 1-2 | `01-discovery/` | `/shape-up` |
-| Strategy | 2 | `02-strategy/` | `/design` |
-| Architecture | 3 | `03-architecture/` | Architecture ADRs |
-| Planning | 4 | `04-planning/` | `/plan` |
-| Implementation | 5 | `05-implementation/` | `/develop` |
-| Launch | 6 | `06-launch/` | `/launch` |
-| Iteration | 7 | `07-iteration/` | `/iterate` |
-| Documentation | 8 | (cross-cutting) | Tech writer |
-| Retrospective | 9 | `09-retro/` | `/retro` |
+| Strategy | 3 | `03-strategy/` | `/design` |
+| Architecture | 4 | `04-architecture/` | Architecture ADRs |
+| Planning | 5 | `05-planning/` | `/plan` |
+| Implementation | 6 | `root` | `/develop` |
+| Launch | 7 | `06-launch/` | `/launch` |
+| Iteration | 8 | `07-iteration/` | `/iterate` |
+| Documentation | 9 | (cross-cutting) | Tech writer |
+| Retrospective | 10 | `09-retro/` | `/retro` |
 
 ## How Skills Work
 

@@ -28,8 +28,8 @@ Takes existing product specs and produces a task breakdown with effort estimates
 
 ## Prerequisites
 
-- `artifacts/output/02-strategy/product-spec.md` exists
-- Architecture decisions (ADRs) in `03-architecture/` (recommended)
+- `artifacts/output/03-strategy/product-spec.md` exists
+- Architecture decisions (ADRs) in `04-architecture/` (recommended)
 
 ## Execution plan template
 
@@ -105,11 +105,11 @@ For each feature: break into 1-4h tasks, define dependencies, estimate effort, i
 
 ### Step 5: Write execution plan
 
-Output to `artifacts/output/04-planning/execution-plan.md` using the template above.
+Output to `artifacts/output/05-planning/execution-plan.md` using the template above.
 
 ## Output artifacts
 
-- `artifacts/output/04-planning/execution-plan.md`
+- `artifacts/output/05-planning/execution-plan.md`
 
 ## State machine integration
 

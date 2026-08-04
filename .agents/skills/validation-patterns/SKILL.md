@@ -60,7 +60,7 @@ Guide the user through execution. Record results:
 ## Output artifacts
 
 - Validation design and results written to `artifacts/memory/active-decisions.md`
-- If the validation produces a structured output (survey results, A/B data), delegate to `@writer` for `artifacts/output/01-research/validation-results.md`
+- If the validation produces a structured output (survey results, A/B data), delegate to `@writer` for `artifacts/output/02-research/validation-results.md`
 
 ## State machine integration
 

@@ -97,6 +97,6 @@ graph TD
 |----------|------|
 | PRD / Spec kernel | `requirements.md` |
 | User stories | `user-stories.md` |
-| ADRs | `artifacts/output/03-architecture/` |
+| ADRs | `artifacts/output/04-architecture/` |
 | Visual design system | `design.md` |
-| Execution plan | `artifacts/output/04-planning/execution-plan.md` |
+| Execution plan | `artifacts/output/05-planning/execution-plan.md` |

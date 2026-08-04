@@ -7,7 +7,7 @@ last_updated: 2026-07-20
 
 # Research Plan
 
-Builds a structured research plan for validating product hypotheses. Outputs to `artifacts/output/01-research/research-plan.md`.
+Builds a structured research plan for validating product hypotheses. Outputs to `artifacts/output/02-research/research-plan.md`.
 
 ## Persona delegation
 This skill delegates to `@user-researcher`. The researcher designs the plan (goals, methodology, interview guides). The skill provides structure; `@user-researcher` provides research methodology expertise.
@@ -49,7 +49,7 @@ Choose from: qualitative interviews, surveys, usability testing, card sorting, d
 
 ### Step 5: Output
 
-Delegate to `@writer` for `artifacts/output/01-research/research-plan.md`:
+Delegate to `@writer` for `artifacts/output/02-research/research-plan.md`:
 
 ```markdown
 # Research Plan — {topic}
@@ -85,7 +85,7 @@ Delegate to `@writer` for `artifacts/output/01-research/research-plan.md`:
 
 ## State machine integration
 At start: `@executor` runs `node .agents/scripts/orchestrator_state.js status`
-At end: `@executor` runs `node .agents/scripts/orchestrator_state.js complete --agent user-researcher --artifact 01-research/research-plan.md`
+At end: `@executor` runs `node .agents/scripts/orchestrator_state.js complete --agent user-researcher --artifact 02-research/research-plan.md`
 
 ## Memory integration
 **At start:** Load context before defining research goals:

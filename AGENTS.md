@@ -45,7 +45,7 @@ The system features 23 highly tuned role profiles divided into three functional 
 
 | Agent Persona | Focus Area & Primary Responsibilities | Core Outputs & Artifacts |
 | :--- | :--- | :--- |
-| **`@founder` (Elena)** | Strategic concept stress-testing. Challenges assumptions with a GO/PIVOT/KILL verdict. | `artifacts/output/00-discovery/` |
+| **`@founder` (Elena)** | Strategic concept stress-testing. Challenges assumptions with a GO/PIVOT/KILL verdict. | `artifacts/output/01-discovery/` |
 | **`@product-manager` (Sarah)** | Comprehensive requirements scoping, PRD generation, user story maps, and Kanban board maintenance. | `requirements.md`, `kanban.md` |
 | **`@product-designer` (Ivy)** | Low-to-high fidelity UX/UI design specifications, screen states, and wireframes. | `product-spec.md` & visual mockups |
 | **`@architect` (Vera)** | Technical system designs, architecture trade-offs, and ADR records. | `adr/*.md` (ADRs) |
@@ -58,14 +58,14 @@ The system features 23 highly tuned role profiles divided into three functional 
 
 | Agent Persona | Focus Area & Primary Responsibilities | Core Outputs & Artifacts |
 | :--- | :--- | :--- |
-| **`@researcher` (Iris)** | Conducts market, competitor, and genre research, synthesizing findings to back decisions. | `artifacts/output/01-research/` |
-| **`@user-researcher` (Paige)** | Structures user research plans, executes interviews, and maps persona segments. | `artifacts/output/01-research/user-research/` |
-| **`@ux-researcher` (Zara)** | Evaluates usability, designs user journey maps, and builds interaction paradigms. | `artifacts/output/01-research/ux/` |
+| **`@researcher` (Iris)** | Conducts market, competitor, and genre research, synthesizing findings to back decisions. | `artifacts/output/02-research/` |
+| **`@user-researcher` (Paige)** | Structures user research plans, executes interviews, and maps persona segments. | `artifacts/output/02-research/user-research/` |
+| **`@ux-researcher` (Zara)** | Evaluates usability, designs user journey maps, and builds interaction paradigms. | `artifacts/output/02-research/ux/` |
 | **`@shifu` (Kong Qiu)** | Designs learning paths, synthesizes knowledge into multi-format educational content, adapts explanation depth to audience | `artifacts/output/teaching/` |
 | **`@data-analyst` (Nova)** | Sets up analytics instrumentation, synthesizes telemetry, and builds dashboards. | `artifacts/output/07-iteration/` |
-| **`@security-engineer` (Victor)** | Conducts security reviews, threat modeling, vulnerability scanning, and secure defaults. | `artifacts/output/03-architecture/security/` |
+| **`@security-engineer` (Victor)** | Conducts security reviews, threat modeling, vulnerability scanning, and secure defaults. | `artifacts/output/04-architecture/security/` |
 | **`@performance-engineer` (Felix)** | Analyzes system latency, identifies performance bottlenecks, and runs optimization audits. | `artifacts/output/07-iteration/performance/` |
-| **`@ml-ai-engineer` (Kai)** | Designs, builds, and evaluates AI & ML systems (LLMs, RAG, agentic workflows) and ML baselines. | `artifacts/output/03-architecture/ml/` |
+| **`@ml-ai-engineer` (Kai)** | Designs, builds, and evaluates AI & ML systems (LLMs, RAG, agentic workflows) and ML baselines. | `artifacts/output/04-architecture/ml/` |
 | **`@ml-ai-ops` (Atlas)** | Operates production AI & ML infrastructure, model serving, vector indexes, drift monitoring, and rollback. | `artifacts/output/ml-ai-ops/` |
 | **`@devops-engineer` (Axel)** | Designs CI/CD automation pipelines, provisions cloud infrastructure, and configures environments. | `.github/workflows/`, Terraform files |
 | **`@technical-writer` (Clara)** | Formulates user manuals, maintains API specifications, and drafts release documentation. | `docs/`, `api-reference.md` |
@@ -181,6 +181,7 @@ To maximize reliability, reduce over-engineering, and enforce high-fidelity exec
 *   **No Side-Effect Cleanup**: Do not silently delete or "clean up" unrelated dead code, comments, or document sections. If you notice unrelated issues, document them in `lessons-learned.md` or mention them, but do not touch them.
 *   **Surgical Edits**: When editing files, use the most precise edit tools possible. Avoid rewriting whole files when changing a few lines.
 *   **Antigravity I/O Redirection Safeguard**: When using file creation or edit tools, always set `IsArtifact: false` for all standard workspace files (e.g. within `artifacts/`, `src/`, or `.agents/`). Set `IsArtifact: true` *only* for the IDE planning artifacts (`task.md`, `implementation_plan.md`, `walkthrough.md`). This ensures files write directly to the workspace instead of the IDE's internal app data folders.
+*   **On-Demand Output Folder Scaffolding**: All agents write deliverables to their designated path under `artifacts/output/<phase-or-topic>/`. File creation tools (`@writer` / `write`) and scripts automatically create destination folders on-demand. Do not pre-create or require pre-existing empty phase directories.
 
 ### 4. Goal-Driven Execution
 *   **Define Success Early**: Before starting any phase (Discovery, Design, Dev, QA, etc.), clearly define the deliverables and their exact verification criteria.
@@ -188,7 +189,8 @@ To maximize reliability, reduce over-engineering, and enforce high-fidelity exec
 *   **Rigorous Verification**: Never claim a task is complete until it has been explicitly verified using automated tests, manual walkthroughs, or system feedback.
 *   **Close the Loop**: Log outcomes and update persistent memory (`lessons-learned.md` or `active-decisions.md`) upon completion.
 *   **Startup Phase Validation**: Before executing any task, check `artifacts/output/sprint-status.yaml` (or `pipeline-state.json`) to verify phase prerequisites are met. If the current project phase has not reached the required phase for the task, halt and report the phase mismatch. Do not execute work out of phase order.
-*   **Shutdown Completion Logging**: After saving deliverables, execute (or request `@executor` to execute) `node .agents/scripts/orchestrator_state.js complete --agent <name> --artifact <relative-path>` to update the state file and advance the pipeline.
+ *   **Shutdown Completion Logging**: After saving deliverables, execute (or request `@executor` to execute) `node .agents/scripts/orchestrator_state.js complete --agent <name> --artifact <relative-path>` to update the state file and advance the pipeline.
+ *   **Milestone Recording (step-by-step workflows)**: In any workflow that produces multiple deliverables with human verification gates (e.g., `craft-lesson` generating syllabus → handbook → cheatsheet one at a time), record EACH approved deliverable immediately via `node .agents/scripts/orchestrator_state.js complete --agent <name> --artifact <path>` — do NOT defer all recording to the end of the workflow. This refreshes `project-context.md` (Session Activity, Phase/Blockers/Repository/Stack) at every milestone, so context and session summaries stay current even if the user stops mid-workflow after a single deliverable. `complete` also fires at explicit session shutdown as the final boundary.
 
 ### 5. Memory Persistence (Mandatory)
 

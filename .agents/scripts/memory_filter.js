@@ -57,7 +57,7 @@ function ensureSessionSummaryFiles() {
         '# Session History',
         '',
         '<!-- Each entry is appended by @memory-controller session-write. Format:',
-        '## [YYYY-MM-DD] Agent: @{agent} — {topic}',
+        '## [YYYY-MM-DD HH:mm] Agent: @{agent} — {topic}',
         '- Worked on: ...',
         '- Decisions: ...',
         '- Next step: ...',

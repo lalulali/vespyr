@@ -8,7 +8,7 @@ This reference document acts as the master developer playbook for the `@develope
 
 When working in multi-developer mode (assigned a Developer ID like `@developer-N` and a specific worktree):
 
-1.  **Identify Assignment:** Inspect the `Backlog` / `To Do` lists in `artifacts/output/04-planning/kanban.md` to identify your assigned Developer ID, worktree path, feature branch, and files.
+1.  **Identify Assignment:** Inspect the `Backlog` / `To Do` lists in `artifacts/output/05-planning/kanban.md` to identify your assigned Developer ID, worktree path, feature branch, and files.
 2.  **Work in Assigned Worktree:** All file writes, modifications, and command executions MUST happen in your assigned worktree directory:
     *   *Path format:* `.agents/worktrees/feat/{base}/task-N` (e.g., `.agents/worktrees/feat/main/task-1`). Use `node .agents/scripts/worktree.js list` to find your exact path.
 3.  **Read Shared Repository Context:** You may read the Kanban board, architecture ADRs, product specs, user stories, and shared memory from the main repository directory (read-only access).
@@ -34,7 +34,7 @@ Before reading any upstream planning or strategy artifact, verify its existence 
 *   **Restart from beginning:** Direct the user on which upstream agents (e.g., `@founder`, `@product-manager`) need to be invoked to generate the missing assets first.
 
 ### Step 1: Read the Product Spec and User Stories (NON-NEGOTIABLE Mandate)
-You MUST load, read, and fully digest the **Product Spec** (`artifacts/output/02-strategy/product-spec.md`) and the companion **User Stories** (`artifacts/output/02-strategy/user-stories.md`) in full prior to writing any code. Make sure to:
+You MUST load, read, and fully digest the **Product Spec** (`artifacts/output/03-strategy/product-spec.md`) and the companion **User Stories** (`artifacts/output/03-strategy/user-stories.md`) in full prior to writing any code. Make sure to:
 *   Understand the complete end-to-end visual layouts, screen transitions, loading states, success states, and error states detailed in the product spec.
 *   Digest the business rationale, technical requirements, and acceptance criteria (Happy, Unhappy, and Edge cases) for your assigned stories.
 *   Conform 100% to these specs and stories. Do not commence implementation work until you have read both.
@@ -90,7 +90,7 @@ Before declaring a task complete and handing it over to downstream agents, verif
 
 *   **Explicit over Implicit:** Write clear, descriptive code. Avoid clever tricks or implicit language syntax that reduces readability.
 *   **Total Error Handling:** Never swallow exceptions or hide failures. Catch errors, log them with appropriate severity, and return clean user feedback or recovery alternatives.
-*   **Traceability:** Always reference the Kanban backlog (`kanban.md`) and architectural patterns (`03-architecture/`) in your task reasoning.
+*   **Traceability:** Always reference the Kanban backlog (`kanban.md`) and architectural patterns (`04-architecture/`) in your task reasoning.
 *   **Observability:** Treat structured logs as a first-class feature of the codebase.
 
 ---

@@ -38,11 +38,11 @@ Displays the current phase in the product pipeline, allows switching between pha
 Read `artifacts/output/pipeline-state.json` (or execute `node .agents/scripts/orchestrator_state.js status`) to read the canonical `"current_phase"`. 
 
 If not initialized, fall back to reading `artifacts/memory/project-context.md` for the current phase, or infer from the latest artifact in `artifacts/output/`:
-- `00-discovery/` has content → discovery
-- `01-research/` has content → research
-- `02-strategy/` has content → strategy
-- `03-architecture/` has content → architecture
-- `04-planning/` has content → planning
+- `01-discovery/` has content → discovery
+- `02-research/` has content → research
+- `03-strategy/` has content → strategy
+- `04-architecture/` has content → architecture
+- `05-planning/` has content → planning
 - `05-execution/` has content → execution
 - `06-launch/` has content → launch
 - `07-iteration/` has content → iteration

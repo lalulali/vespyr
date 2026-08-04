@@ -72,7 +72,7 @@ All agents in this system MUST follow these guardrails. This file is the single 
 - If an expected upstream artifact is missing, **do NOT proceed silently and do NOT hallucinate its content.**
 - Present the user with exactly these two options:
   1. **Continue** — Proceed with whatever context is available. Explicitly list every missing file and note the gaps in your reasoning.
-  2. **Restart from beginning** — Tell the user which upstream agent needs to run first (e.g., "`artifacts/output/01-research/` is missing — invoke `@founder` and `@researcher` first").
+  2. **Restart from beginning** — Tell the user which upstream agent needs to run first (e.g., "`artifacts/output/02-research/` is missing — invoke `@founder` and `@researcher` first").
 - **Default:** If the user does not respond within this turn, choose **Continue** but prominently flag all missing context as `[MISSING]` in your output.
 - Never fabricate requirements, personas, or competitive data from a missing file.
 
@@ -81,7 +81,7 @@ All agents in this system MUST follow these guardrails. This file is the single 
 When an agent discovers an issue with an upstream artifact (spec gap, implementation blocker, design conflict, etc.):
 
 1. **Do NOT re-invoke the upstream agent** to "fix" or "revise" the artifact.
-2. **File a change request** to `artifacts/output/04-planning/change-requests.md`:
+2. **File a change request** to `artifacts/output/05-planning/change-requests.md`:
    ```
    ## CR-NNN [OPEN]
    **From:** @{agent}

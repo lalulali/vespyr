@@ -149,4 +149,4 @@ Use this template 24-72 hours after launch to document metrics, issues, and init
 - Version: 1.0
 - Author: @product-manager, @data-analyst
 - Date: ...
-- Depends on: `artifacts/output/06-launch/launch-log.md`, `artifacts/output/02-strategy/requirements.md` (success criteria)
+- Depends on: `artifacts/output/06-launch/launch-log.md`, `artifacts/output/03-strategy/requirements.md` (success criteria)

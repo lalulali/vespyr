@@ -30,8 +30,8 @@ Ensure the feature is documented for both developers and end users. APIs, config
 
 ## Inputs
 - Completed feature code
-- ADRs from `artifacts/output/03-architecture/`
-- User stories from `artifacts/output/02-strategy/user-stories.md`
+- ADRs from `artifacts/output/04-architecture/`
+- User stories from `artifacts/output/03-strategy/user-stories.md`
 
 ## Output
 Updated documentation in the project's `docs/` directory or README.

@@ -2,7 +2,7 @@
 
 > **Used by:** Iris (@researcher)
 > **Feeds into:** Sarah (@product-manager)
-> **Save to:** `artifacts/output/01-research/market-analysis.md`
+> **Save to:** `artifacts/output/02-research/market-analysis.md`
 
 Use this template when writing the genre market analysis report.
 
@@ -88,7 +88,7 @@ Rules:
 
 ### 5.3 Segment Validation Against Founder Assumptions
 
-Reference the founder's idea brief (`artifacts/output/00-discovery/idea-brief.md`). Did the founder get the target player right?
+Reference the founder's idea brief (`artifacts/output/01-discovery/idea-brief.md`). Did the founder get the target player right?
 
 | Founder Assumption | Research Finding | Match / Mismatch | Implication |
 |-------------------|------------------|------------------|-------------|
@@ -162,5 +162,5 @@ Rules:
 - Version: 1.0
 - Author: @researcher
 - Date: ...
-- Input: `artifacts/output/00-discovery/idea-brief.md`
+- Input: `artifacts/output/01-discovery/idea-brief.md`
 - Supersedes: v1.0 (initial)

@@ -2,7 +2,7 @@
 step: 1
 name: Exploratory Enrichment
 prerequisites:
-  - PRD or user stories exist in artifacts/output/02-strategy/
+  - PRD or user stories exist in artifacts/output/03-strategy/
 delegation:
   reads: "@reader (user stories, PRD, acceptance criteria; per delegation-policy.md multi-file)"
   writes: "@writer (enrichment-findings.md > 50 lines; per delegation-policy.md)"
@@ -21,9 +21,9 @@ Before running tests, `@qa-engineer` enriches the acceptance criteria by identif
 ### 1a. Load baseline
 
 Delegate to `@reader` to load:
-- `artifacts/output/02-strategy/user-stories.md` — existing acceptance criteria
-- `artifacts/output/02-strategy/product-spec.md` — UX flows and screen states
-- `artifacts/output/02-strategy/requirements.md` or `SPEC.md` — capability definitions
+- `artifacts/output/03-strategy/user-stories.md` — existing acceptance criteria
+- `artifacts/output/03-strategy/product-spec.md` — UX flows and screen states
+- `artifacts/output/03-strategy/requirements.md` or `SPEC.md` — capability definitions
 
 ### 1b. Storm missing scenarios
 

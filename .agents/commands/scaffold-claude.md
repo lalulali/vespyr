@@ -38,7 +38,7 @@ The system features 23 highly tuned role profiles divided into three functional 
 
 | Agent Persona | Focus Area & Primary Responsibilities | Core Outputs & Artifacts |
 | :--- | :--- | :--- |
-| **`@founder` (Elena)** | Strategic concept stress-testing. Challenges assumptions with a GO/PIVOT/KILL verdict. | `artifacts/output/00-discovery/` |
+| **`@founder` (Elena)** | Strategic concept stress-testing. Challenges assumptions with a GO/PIVOT/KILL verdict. | `artifacts/output/01-discovery/` |
 | **`@product-manager` (Sarah)** | Comprehensive requirements scoping, PRD generation, user story maps, and Kanban board maintenance. | `requirements.md`, `kanban.md` |
 | **`@product-designer` (Ivy)** | Low-to-high fidelity UX/UI design specifications, screen states, and wireframes. | `product-spec.md` & visual mockups |
 | **`@architect` (Vera)** | Technical system designs, architecture trade-offs, and ADR records. | `adr/*.md` (ADRs) |
@@ -51,13 +51,13 @@ The system features 23 highly tuned role profiles divided into three functional 
 
 | Agent Persona | Focus Area & Primary Responsibilities | Core Outputs & Artifacts |
 | :--- | :--- | :--- |
-| **`@researcher` (Iris)** | Conducts market, competitor, and genre research, synthesizing findings to back decisions. | `artifacts/output/01-research/` |
-| **`@user-researcher` (Paige)** | Structures user research plans, executes interviews, and maps persona segments. | `artifacts/output/01-research/user-research/` |
-| **`@ux-researcher` (Zara)** | Evaluates usability, designs user journey maps, and builds interaction paradigms. | `artifacts/output/01-research/ux/` |
+| **`@researcher` (Iris)** | Conducts market, competitor, and genre research, synthesizing findings to back decisions. | `artifacts/output/02-research/` |
+| **`@user-researcher` (Paige)** | Structures user research plans, executes interviews, and maps persona segments. | `artifacts/output/02-research/user-research/` |
+| **`@ux-researcher` (Zara)** | Evaluates usability, designs user journey maps, and builds interaction paradigms. | `artifacts/output/02-research/ux/` |
 | **`@data-analyst` (Nova)** | Sets up analytics instrumentation, synthesizes telemetry, and builds dashboards. | `artifacts/output/07-iteration/` |
-| **`@security-engineer` (Victor)** | Conducts security reviews, threat modeling, vulnerability scanning, and secure defaults. | `artifacts/output/03-architecture/security/` |
+| **`@security-engineer` (Victor)** | Conducts security reviews, threat modeling, vulnerability scanning, and secure defaults. | `artifacts/output/04-architecture/security/` |
 | **`@performance-engineer` (Felix)** | Analyzes system latency, identifies performance bottlenecks, and runs optimization audits. | `artifacts/output/07-iteration/performance/` |
-| **`@ml-ai-engineer` (Kai)** | Standardizes AI logic, validates model integrations, and drafts prompt templates. | `artifacts/output/03-architecture/ml/` |
+| **`@ml-ai-engineer` (Kai)** | Standardizes AI logic, validates model integrations, and drafts prompt templates. | `artifacts/output/04-architecture/ml/` |
 | **`@devops-engineer` (Axel)** | Designs CI/CD automation pipelines, provisions cloud infrastructure, and configures environments. | `.github/workflows/`, Terraform files |
 | **`@technical-writer` (Clara)** | Formulates user manuals, maintains API specifications, and drafts release documentation. | `docs/`, `api-reference.md` |
 | **`@shifu` (Kong Qiu)** | Designs learning paths, synthesizes knowledge into multi-format educational content, adapts explanation depth to audience | `artifacts/output/teaching/` |
@@ -88,6 +88,7 @@ Vespyr organizes complex, multi-agent operations into highly structured **skills
 *   `/explore-idea` — Market, competitor, and user research
 *   `/explore-game-idea` — Genre market and player research
 *   `/design` — PRD and screen specs creation
+*   `/motion` — Motion research, motion spec, and implementation handoff
 *   `/develop` — MVP development cycle
 *   `/launch` — Release readiness and deployment
 *   `/iterate` — Post-launch behavior improvements

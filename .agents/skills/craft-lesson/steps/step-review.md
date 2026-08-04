@@ -35,7 +35,8 @@ Perform a comprehensive quality audit across all generated educational formats. 
   - Confirm inline citations `[N]` are correctly formatted where required.
 
 - **Vector 3: Format & Takeaway Rule Audit**
-  - Confirm `handbook.md` contains mandatory `> [!IMPORTANT]` "If Nothing Else, Remember This" callouts.
+  - Confirm `handbook.md` is a detailed, narrative textbook with full conceptual depth (not a condensed cheatsheet) and contains mandatory `> [!IMPORTANT]` "If Nothing Else, Remember This" callouts.
+  - **Handbook depth gate:** Verify `handbook.md` meets the concrete bar — ≥ 3,000 words total (or ≥ 1,200 per core chapter), ≥ 80% continuous prose, and every chapter has a first-principles explanation + worked example + Mermaid diagram + active-recall exercises + takeaway callout. If it reads like a quick reference, flag it as a FAIL and send it back to be expanded — do not certify a condensed handbook.
   - Confirm `cheatsheet.md` maintains high data-ink density without unnecessary prose.
   - Confirm `presentation.md` adheres to 1 key idea per slide.
 

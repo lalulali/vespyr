@@ -37,7 +37,7 @@ The spec kernel is the minimum viable specification every agent reads before sta
 ```
 
 **Where agent should find spec kernels produced by prior phases:**
-- `artifacts/output/02-strategy/SPEC.md` or `artifacts/output/02-strategy/requirements.md`
+- `artifacts/output/03-strategy/SPEC.md` or `artifacts/output/03-strategy/requirements.md`
 - If neither exists, run `/design` to produce one
 
 **Related:** See `.agents/templates/spec-law.md` for the 8 rules governing spec kernels.

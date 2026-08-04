@@ -9,7 +9,7 @@ This reference document defines the complete standards, formatting guidelines, c
 Every user story generated must be exhaustive, precise, and highly testable:
 *   **Audience:** The engineering team (developers, QA engineers, system architects).
 *   **Independence:** Every user story must be self-contained and independently testable.
-*   **Location:** All stories are appended to the cumulative backlog file: `artifacts/output/02-strategy/user-stories.md`.
+*   **Location:** All stories are appended to the cumulative backlog file: `artifacts/output/03-strategy/user-stories.md`.
 
 ### 1.1 Granularity & Content Standards: Functional Capabilities vs. Persona Journeys
 

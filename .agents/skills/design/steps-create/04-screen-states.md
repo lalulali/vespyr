@@ -43,11 +43,11 @@ If analytics instrumentation is needed, invoke `@data-analyst`:
 - Success metrics and instrumentation plan
 - Events, properties, tracking design
 
-**Output:** `artifacts/output/02-strategy/measurement-plan.md`
+**Output:** `artifacts/output/03-strategy/measurement-plan.md`
 
 ## Outputs
-- `artifacts/output/02-strategy/product-spec.md` — machine-readable, used by architect, developer, tech-lead, QA
-- `artifacts/output/02-strategy/product-spec.html` — human-readable, dynamic Tailwind generation
+- `artifacts/output/03-strategy/product-spec.md` — machine-readable, used by architect, developer, tech-lead, QA
+- `artifacts/output/03-strategy/product-spec.html` — human-readable, dynamic Tailwind generation
 
 ## Delegation
 - **Reads:** direct — user stories + personas (< 3 files)

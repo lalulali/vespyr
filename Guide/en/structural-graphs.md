@@ -75,12 +75,12 @@ node .agents/scripts/query_graph.js search <query>   # Find documents by title/s
 ```bash
 node .agents/scripts/query_graph.js trace user-stories.md
 # Output:
-# artifacts/output/02-strategy/user-stories.md (document): User Stories
+# artifacts/output/03-strategy/user-stories.md (document): User Stories
 # outgoing (2):
-#   specifies -> artifacts/output/02-strategy/product-spec.md (via US-001)
-#   traces_to -> artifacts/output/03-architecture/architecture.md (via US-001)
+#   specifies -> artifacts/output/03-strategy/product-spec.md (via US-001)
+#   traces_to -> artifacts/output/04-architecture/architecture.md (via US-001)
 # incoming (2):
-#   traces_to <- artifacts/output/02-strategy/product-spec.md (via US-001)
+#   traces_to <- artifacts/output/03-strategy/product-spec.md (via US-001)
 ```
 
 ### Configuration

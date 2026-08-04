@@ -31,7 +31,7 @@ Use this template to document post-launch analytics and user behavior data that 
 | [e.g., Error rate] | < 1% | 0.8% | ✅ | → |
 | ... | ... | ... | ... | ... |
 
-**Reference:** Success criteria from `artifacts/output/02-strategy/requirements.md` §3.3
+**Reference:** Success criteria from `artifacts/output/03-strategy/requirements.md` §3.3
 
 ---
 
@@ -158,4 +158,4 @@ Based on the data, what improvements should we test?
 - Version: 1.0
 - Author: @data-analyst
 - Date: ...
-- Depends on: `artifacts/output/02-strategy/requirements.md` (success criteria), `artifacts/output/02-strategy/user-stories.md`
+- Depends on: `artifacts/output/03-strategy/requirements.md` (success criteria), `artifacts/output/03-strategy/user-stories.md`

@@ -21,7 +21,7 @@ Confirm the architecture (or strategy specs if architecture was bypassed) suppor
 
 ## Agent invocation
 `@tech-lead` reviews:
-- If `ArchitectPhase: true`: ADRs in `artifacts/output/03-architecture/`
+- If `ArchitectPhase: true`: ADRs in `artifacts/output/04-architecture/`
 - If `ArchitectPhase: false`: strategy specs directly (`product-spec.md`, `requirements.md`)
 - Does the architecture/spec support all user stories?
 - Are there missing interfaces or structural risks?
@@ -37,7 +37,7 @@ Confirm the architecture (or strategy specs if architecture was bypassed) suppor
 Max 2 revision cycles. After 2 cycles with unresolved gaps, escalate to `@founder`.
 
 ## Output
-Review notes in `artifacts/output/04-planning/` (inline with execution-plan prep).
+Review notes in `artifacts/output/05-planning/` (inline with execution-plan prep).
 
 ## Delegation
 - **Reads:** @reader for architecture artifacts and strategy specs
