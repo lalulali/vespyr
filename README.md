@@ -4,7 +4,7 @@
 
 **A platform-agnostic, file-based multi-agent engine.** Install 23 specialized AI personas directly into your repository. They plan, design, build, review, test, and ship — with structured memory that persists across sessions and three architectural moats no other framework combines.
 
-[![Vespyr Version](https://img.shields.io/badge/version-2.0.1-blue)](https://github.com/lalulali/vespyr)
+[![Vespyr Version](https://img.shields.io/badge/version-2.0.2-blue)](https://github.com/lalulali/vespyr)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 📖 **[Full Documentation →](Guide/en/index.md)**

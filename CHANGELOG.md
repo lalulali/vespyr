@@ -4,6 +4,18 @@ All notable changes to the Vespyr project will be documented in this file.
 
 ---
 
+## [2.0.2] - 2026-08-04
+### Added
+- Added Elon Musk (first-principles, rapid iteration, radical simplification) and Steve Jobs (uncompromising perfectionism, visionary category creation) as channeled mentors to `@founder` (Elena).
+- Added Frank Thomas & Ollie Johnston (Disney's 12 principles of animation) and Jony Ive (tactile fluid interaction, visual elegance) as channeled mentors to `@product-designer` (Ivy).
+- Enriched `@growth-marketer` (Funé) persona definition in Phase 5 plan with traditional marketing skills (brand storytelling, positioning, PR/communications, messaging matrix) channeled from Seth Godin and Al Ries & Jack Trout alongside product growth loops.
+
+### Changed
+- Clarified GTM co-ownership between `@product-manager` (Sarah) and `@growth-marketer` (Funé).
+- Bumped package version to 2.0.2.
+
+---
+
 ## [2.0.1] - 2026-08-03
 ### Added
 - `/motion` skill — orchestrates motion research, motion specification, and an explicit implementation handoff for animation-significant products. Adds the `motion-design` capability to `@product-designer`, `motion-implementation` to `@developer`, and `motion-research` to `@researcher`/`@ux-researcher`. Domain knowledge lives on-demand in `.agents/references/motion/` (loaded only when motion is in scope, keeping agent initiation tokens low), with artifacts produced via `motion-spec.md` and `motion-handoff.md`. Includes a simulation harness (`test-motion.mjs`, 73 assertions) and evals.
