@@ -2,14 +2,7 @@
 name: round-table
 description: 'Orchestrates group discussions between Vespyr agents, enabling natural multi-agent conversations where each agent is a real subagent with independent thinking. Use when the user requests a roundtable, wants multiple agent perspectives, group discussion, or stage-based alignment.'
 compatibility: claude-code opencode kiro antigravity
-allowed-tools:
-  - Read
-  - Write
-  - Edit
-  - Grep
-  - Glob
-  - Bash
-  - AskUserQuestion
+allowed-tools: Read Write Edit Grep Glob Bash AskUserQuestion
 ---
 
 # Roundtable Discussion

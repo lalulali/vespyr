@@ -1,8 +1,9 @@
 ---
 name: research-plan
 description: Construct comprehensive research plans with goals, hypotheses, cohort definitions, methodology, and a 2-part interview guide (Profile + Behavioral)
-version: "2.0"
-last_updated: 2026-07-20
+metadata:
+  version: "2.0"
+  last_updated: "2026-07-20"
 ---
 
 # Research Plan

@@ -1,8 +1,9 @@
 ---
 name: jtbd
 description: Formulate Jobs-to-be-Done statements and map How Might We opportunity questions in a single canvas
-version: "2.0"
-last_updated: 2026-07-20
+metadata:
+  version: "2.0"
+  last_updated: "2026-07-20"
 ---
 
 # Jobs-to-be-Done + How Might We

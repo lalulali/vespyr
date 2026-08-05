@@ -1,6 +1,8 @@
 ---
 name: iterate
 description: Post-launch feature iteration — analyze user data, prioritize improvements, ship incremental value
+metadata:
+  version: "1.0"
 ---
 
 ## What this skill does

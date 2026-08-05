@@ -1,8 +1,9 @@
 ---
 name: plan
 description: Create an execution plan from existing specs — standalone, outside the full develop cycle
-version: "2.0"
-last_updated: 2026-07-10
+metadata:
+  version: "2.0"
+  last_updated: "2026-07-10"
 ---
 
 # Plan — Execution Planning

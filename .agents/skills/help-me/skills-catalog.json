@@ -239,7 +239,7 @@
   },
   {
     "name": "grill-me",
-    "description": "End-to-end Socratic alignment loop — stress-tests requirements, specifications, and architecture decisions before implementation. Use when user wants to be grilled on a plan, design, or idea.",
+    "description": "Runs a 7+1-branch Socratic decision tree that stress-tests requirements, specs, and architecture choices one assumption at a time — until you can articulate the decision tree in writing. Output is a decision log that survives the conversation. Use when you want to be grilled on a plan, design, or idea before committing.",
     "prerequisites": [
       "A concrete artifact to interrogate (plan, spec, architecture, hypothesis, design)",
       "If no artifact exists, run /validate-idea first to produce a brief"
@@ -267,7 +267,7 @@
   },
   {
     "name": "humanize",
-    "description": "Remove signs of AI-generated writing from text. Use when editing or reviewing\n",
+    "description": "Remove signs of AI-generated writing from text. Use when editing or reviewing text to make it sound more natural and human-written. Based on Wikipedia's comprehensive Signs of AI writing guide. Detects and fixes patterns such as inflated symbolism, promotional language, superficial -ing analyses, vague attributions, em dash overuse, rule of three, AI vocabulary words, passive voice, negative parallelisms, and filler phrases.",
     "prerequisites": [],
     "outputs": [],
     "key_agents": []

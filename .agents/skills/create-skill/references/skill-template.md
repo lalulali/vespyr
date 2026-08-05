@@ -1,8 +1,9 @@
 ---
 name: example-skill
 description: Brief summary of capability AND trigger contexts. Make sure to use this skill whenever the user mentions [keywords, tasks, triggers].
-version: "1.0"
-last_updated: YYYY-MM-DD
+metadata:
+  version: "1.0"
+  last_updated: YYYY-MM-DD
 ---
 
 # Skill Title — Overview

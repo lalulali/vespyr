@@ -1,6 +1,8 @@
 ---
 name: design
 description: Defines product requirements from validated ideas, then produces detailed developer-ready specs. Supports create/edit/validate modes.
+metadata:
+  version: "1.0"
 ---
 
 # Design

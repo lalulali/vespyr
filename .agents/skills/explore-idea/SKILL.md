@@ -1,6 +1,8 @@
 ---
 name: explore-idea
 description: Validates a concept through market, competitor, and user research — turns a validated idea into evidence-backed research
+metadata:
+  version: "1.0"
 ---
 
 ## What this skill does

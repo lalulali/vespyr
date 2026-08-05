@@ -1,8 +1,9 @@
 ---
 name: brainstorming
 description: Select and apply brainstorming methods from a 60-method catalog — SCAMPER, Six Thinking Hats, Starbursting, and more
-version: "2.0"
-last_updated: 2026-07-20
+metadata:
+  version: "2.0"
+  last_updated: "2026-07-20"
 ---
 
 # Brainstorming — Method Selection & Execution

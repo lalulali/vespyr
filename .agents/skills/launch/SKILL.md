@@ -1,6 +1,8 @@
 ---
 name: launch
 description: Go-to-market coordination — release readiness, deployment, smoke testing, post-launch monitoring, and completion
+metadata:
+  version: "1.0"
 ---
 
 # Launch — Multi-Step Workflow

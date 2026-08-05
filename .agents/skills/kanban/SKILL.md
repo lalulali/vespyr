@@ -1,6 +1,8 @@
 ---
 name: kanban
 description: Display and update the Kanban board — track task progress across phases
+metadata:
+  version: "1.0"
 ---
 
 ## Persona delegation

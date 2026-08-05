@@ -1,13 +1,12 @@
 ---
 name: teach-me
 description: "Personal learning partner: Quick, Explain, or Deep Dive on any topic"
-capabilities:
-  - curriculum-design
-  - content-synthesis
-version: "1.0"
-last_updated: "2026-07-24"
-author: "@shifu"
-mode: skill
+metadata:
+  capabilities: "curriculum-design, content-synthesis"
+  version: "1.0"
+  last_updated: "2026-07-24"
+  author: "@shifu"
+  mode: "skill"
 ---
 
 # Teach-Me — Personal Interactive Learning Partner

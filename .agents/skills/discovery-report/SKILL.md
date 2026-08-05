@@ -1,8 +1,9 @@
 ---
 name: discovery-report
 description: Compile design thinking and research outputs into a unified report with dynamic usability testing scoring
-version: "2.0"
-last_updated: 2026-07-20
+metadata:
+  version: "2.0"
+  last_updated: "2026-07-20"
 ---
 
 # Discovery Report

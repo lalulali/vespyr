@@ -1,6 +1,8 @@
 ---
 name: incident
 description: Production incident management — triage, mitigate, root-cause analysis, and post-incident review
+metadata:
+  version: "1.0"
 ---
 
 ## What this skill does

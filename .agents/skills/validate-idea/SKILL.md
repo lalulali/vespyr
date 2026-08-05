@@ -1,6 +1,8 @@
 ---
 name: validate-idea
 description: Stress-test product concepts before research. Supports create/edit/validate modes.
+metadata:
+  version: "1.0"
 ---
 
 # Validate Idea

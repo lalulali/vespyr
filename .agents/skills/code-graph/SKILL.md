@@ -1,8 +1,9 @@
 ---
 name: code-graph
 description: Codebase structural dependency mapper — initialize, view status, and run incremental updates for modified codebase files
-version: "2.2"
-last_updated: 2026-07-31
+metadata:
+  version: "2.2"
+  last_updated: "2026-07-31"
 ---
 
 # Code-Graph

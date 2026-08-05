@@ -1,8 +1,9 @@
 ---
 name: squad
 description: Show available agent squads, switch active squad, and initialize the team preset
-version: "2.0"
-last_updated: 2026-07-10
+metadata:
+  version: "2.0"
+  last_updated: "2026-07-10"
 ---
 
 # Squad — Team Preset Manager

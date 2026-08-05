@@ -1,6 +1,8 @@
 ---
 name: explore-game-idea
 description: Validates a game concept through genre market, competitive landscape, and player research — turns a validated game idea into evidence-backed research
+metadata:
+  version: "1.0"
 ---
 
 ## What this skill does

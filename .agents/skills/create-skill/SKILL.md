@@ -1,8 +1,9 @@
 ---
 name: create-skill
 description: Create new skills, modify and improve existing skills, and design lightweight skill evals. Make sure to use this skill whenever the user mentions creating a skill, adding a new skill, authoring workflow instructions, turning a conversation/workflow into a skill, building custom skill logic, or updating an existing skill definition.
-version: "1.0"
-last_updated: 2026-07-30
+metadata:
+  version: "1.0"
+  last_updated: "2026-07-30"
 ---
 
 # Create Skill — Skill Authoring & Optimization
@@ -32,7 +33,7 @@ Guides you through creating new Vespyr skills or enhancing existing skills. Help
 ```
 .agents/skills/<skill-name>/
 ├── SKILL.md (required)
-│   ├── Frontmatter (name, description, version, last_updated)
+│   ├── Frontmatter (name, description; optional: license, compatibility, metadata, allowed-tools)
 │   └── Body (Markdown instructions, <500 lines ideal)
 ├── references/ (optional — documentation loaded into context as needed)
 ├── scripts/    (optional — executable helper scripts for deterministic tasks)
@@ -67,11 +68,18 @@ Use `@reader` to list existing skills under `.agents/skills/`. Check names and d
 
 Construct `.agents/skills/<skill-name>/SKILL.md` using `.agents/skills/create-skill/references/skill-template.md` as a baseline.
 
-#### Frontmatter Guidelines
-- **name**: Concise kebab-case identifier (e.g. `create-skill`, `api-linter`).
-- **description**: **MUST include both what the skill does AND explicit triggering contexts.** Write descriptions that are slightly "pushy" to ensure the AI engine doesn't undertrigger. Include relevant keywords, user phrases, and slash command syntax.
-- **version**: `"1.0"`
-- **last_updated**: `YYYY-MM-DD`
+#### Frontmatter Guidelines (agentskills.io spec)
+
+Allowed top-level keys only: `name`, `description`, `license`, `compatibility`, `metadata`, `allowed-tools`.
+
+- **name**: Concise kebab-case identifier matching the folder name (e.g. `create-skill`, `api-linter`). Lowercase alphanumerics + hyphens only, no leading/trailing hyphen, ≤ 64 chars.
+- **description**: **MUST include both what the skill does AND explicit triggering contexts.** Write descriptions that are slightly "pushy" to ensure the AI engine doesn't undertrigger. Include relevant keywords, user phrases, and slash command syntax. Single line, 1–1024 chars, no `|`/`>` block scalars.
+- **metadata**: Optional map of string keys to string values — put `version`, `last_updated`, `author`, etc. here (e.g. `metadata:\n  version: "1.0"`). List values are not allowed; join lists into a comma-separated string.
+- **license**: Optional (e.g. `MIT`).
+- **compatibility**: Optional, 1–500 chars, only if the skill needs specific environment requirements.
+- **allowed-tools**: Optional, space-separated string (e.g. `Read Write Edit`). YAML list form is invalid.
+
+After drafting, new skills MUST pass: `node .agents/scripts/spec_check.js` (validates all skills in CI).
 
 #### Body Guidelines
 - Keep under 500 lines. Move large domain docs or extensive reference materials into `references/<topic>.md`.
@@ -116,8 +124,9 @@ If yes, write `.agents/skills/<skill-name>/evals/evals.json` following `.agents/
 
 Verify the skill setup:
 1. Review the `description` field in frontmatter — does it cover all anticipated user trigger phrases?
-2. Perform a dry run or manual walk-through against the drafted test prompts.
-3. Validate that `@qa-engineer` (Nina) or `/test` can read and evaluate the skill expectations.
+2. Run `node .agents/scripts/spec_check.js` — the new skill MUST pass (0 violations) before it is considered valid.
+3. Perform a dry run or manual walk-through against the drafted test prompts.
+4. Validate that `@qa-engineer` (Nina) or `/test` can read and evaluate the skill expectations.
 
 ### Step 7: Log the Skill Creation
 

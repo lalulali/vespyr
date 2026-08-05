@@ -1,6 +1,8 @@
 ---
 name: validate-game-idea
 description: Stress-test a game concept before investing production cycles — Socratic diagnostic for indie devs, game studios, and hobbyists
+metadata:
+  version: "1.0"
 ---
 
 ## What this skill does

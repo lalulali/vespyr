@@ -1,8 +1,9 @@
 ---
 name: unpack-problem
 description: Problem-first exploration before solution ideation — supports guided, automated, and combination modes. Facilitated by @product-manager and @user-researcher.
-version: "2.0"
-last_updated: 2026-07-20
+metadata:
+  version: "2.0"
+  last_updated: "2026-07-20"
 ---
 
 # Unpack Problem — Tri-Modal Problem Exploration

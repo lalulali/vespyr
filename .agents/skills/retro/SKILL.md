@@ -1,6 +1,8 @@
 ---
 name: retro
 description: Post-cycle review — extract lessons, calibrate estimates, improve processes, compact memory, and update team knowledge
+metadata:
+  version: "1.0"
 ---
 
 # Retro — Multi-Step Workflow

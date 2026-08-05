@@ -1,22 +1,11 @@
 ---
 name: humanize
-version: 2.5.1
-description: |
-  Remove signs of AI-generated writing from text. Use when editing or reviewing
-  text to make it sound more natural and human-written. Based on Wikipedia's
-  comprehensive "Signs of AI writing" guide. Detects and fixes patterns including:
-  inflated symbolism, promotional language, superficial -ing analyses, vague
-  attributions, em dash overuse, rule of three, AI vocabulary words, passive
-  voice, negative parallelisms, and filler phrases.
-source_file: https://github.com/blader/humanizer/blob/main/SKILL.md
+description: Remove signs of AI-generated writing from text. Use when editing or reviewing text to make it sound more natural and human-written. Based on Wikipedia's comprehensive Signs of AI writing guide. Detects and fixes patterns such as inflated symbolism, promotional language, superficial -ing analyses, vague attributions, em dash overuse, rule of three, AI vocabulary words, passive voice, negative parallelisms, and filler phrases.
 license: MIT
-allowed-tools:
-  - Read
-  - Write
-  - Edit
-  - Grep
-  - Glob
-  - AskUserQuestion
+allowed-tools: Read Write Edit Grep Glob AskUserQuestion
+metadata:
+  version: "2.5.1"
+  source_file: "https://github.com/blader/humanizer/blob/main/SKILL.md"
 ---
 
 > **Source:** [github.com/blader/humanizer](https://github.com/blader/humanizer) — MIT license.

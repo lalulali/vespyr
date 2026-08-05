@@ -1,8 +1,9 @@
 ---
 name: doc-graph
 description: Document relationship and traceability graph mapper — parse and update connections between PRDs, user stories, ADRs, active decisions, and codebase references
-version: "2.1"
-last_updated: 2026-07-21
+metadata:
+  version: "2.1"
+  last_updated: "2026-07-21"
 ---
 
 # Doc-Graph

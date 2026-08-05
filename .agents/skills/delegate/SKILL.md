@@ -1,8 +1,9 @@
 ---
 name: delegate
 description: One-shot I/O offload to @reader, @writer, or @executor — keeps your context focused on reasoning
-version: "2.0"
-last_updated: 2026-07-10
+metadata:
+  version: "2.0"
+  last_updated: "2026-07-10"
 ---
 
 # Delegate — I/O Offload

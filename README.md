@@ -110,6 +110,7 @@ validate → explore → design → plan → develop → launch → iterate → 
 ## 🧩 Key Capabilities
 
 - **40 slash commands** — from `/validate-idea` and `/design` to `/motion`, `/develop`, `/launch`, `/code-graph`, `/customize-skill`, and `/create-skill`
+- **Standard-compliant skills** — all 43 skills follow the [agentskills.io](https://agentskills.io) Agent Skills spec, validated in CI (`node .agents/scripts/spec_check.js`)
 - **Structural graphs** — code-graph maps dependencies, doc-graph maps document traceability. Agents query them instead of grepping.
 - **Agent customization** — 2-file TOML merge. Your overrides survive upgrades.
 - **Multi-harness** — works with OpenCode, Claude Code, Cursor, Windsurf, Copilot, Kiro, Aider.

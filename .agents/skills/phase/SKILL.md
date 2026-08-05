@@ -1,6 +1,8 @@
 ---
 name: phase
 description: Show current phase, switch phases, list phase artifacts
+metadata:
+  version: "1.0"
 ---
 
 ## What this skill does

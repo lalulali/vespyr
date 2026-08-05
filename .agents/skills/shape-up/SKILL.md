@@ -1,6 +1,8 @@
 ---
 name: shape-up
 description: Structure and stress-test semi-cooked ideas into design-ready briefs. No prerequisites — works at any point in the pipeline.
+metadata:
+  version: "1.0"
 ---
 
 # Shape Up

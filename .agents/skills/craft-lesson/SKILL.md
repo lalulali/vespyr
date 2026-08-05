@@ -1,15 +1,12 @@
 ---
 name: craft-lesson
 description: "Create multi-format educational materials (syllabus, handbook, cheatsheet, presentation, class, video script) from topic or draft"
-capabilities:
-  - curriculum-design
-  - content-synthesis
-  - assessment-creation
-  - pedagogical-structuring
-version: "1.0"
-last_updated: "2026-07-24"
-author: "@shifu"
-mode: skill
+metadata:
+  capabilities: "curriculum-design, content-synthesis, assessment-creation, pedagogical-structuring"
+  version: "1.0"
+  last_updated: "2026-07-24"
+  author: "@shifu"
+  mode: "skill"
 ---
 
 # Craft-Lesson — Multi-Format Educational Material Generator

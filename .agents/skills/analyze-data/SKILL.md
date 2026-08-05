@@ -1,8 +1,9 @@
 ---
 name: analyze-data
 description: General data analysis companion — EDA, dataset provision, visualization mapping, insight extraction, metric value evaluation, and PM metric co-piloting
-version: "2.0"
-last_updated: 2026-07-30
+metadata:
+  version: "2.0"
+  last_updated: "2026-07-30"
 ---
 
 # Analyze Data — General Data Analysis & Metric Strategy Workflow

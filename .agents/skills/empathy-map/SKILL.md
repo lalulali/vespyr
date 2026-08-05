@@ -1,8 +1,9 @@
 ---
 name: empathy-map
 description: Map user feelings, thoughts, sayings, and doings from observation data into an empathy quadrant canvas
-version: "2.0"
-last_updated: 2026-07-20
+metadata:
+  version: "2.0"
+  last_updated: "2026-07-20"
 ---
 
 # Empathy Map

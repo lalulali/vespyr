@@ -1,8 +1,9 @@
 ---
 name: grill-me
-description: End-to-end Socratic alignment loop — stress-tests requirements, specifications, and architecture decisions before implementation. Use when user wants to be grilled on a plan, design, or idea.
-version: "2.0"
-last_updated: 2026-07-10
+description: Runs a 7+1-branch Socratic decision tree that stress-tests requirements, specs, and architecture choices one assumption at a time — until you can articulate the decision tree in writing. Output is a decision log that survives the conversation. Use when you want to be grilled on a plan, design, or idea before committing.
+metadata:
+  version: "2.0"
+  last_updated: "2026-07-10"
 ---
 
 # Grill-Me — Socratic Stress-Test Loop
@@ -98,7 +99,21 @@ For each open question in the active branch:
 ### Step 3: Decision log
 
 After each resolved question, write to artifacts/memory/active-decisions.md:
-\\n
+
+```
+## AD-YYYY-MM-DD — <branch> — <decision title>
+
+**Decision:** <the resolved choice, one line>
+
+**Rationale:**
+- <key trade-off that was weighed>
+- <what was rejected and why>
+
+**Status:** <Open | Complete>
+```
+
+One entry per resolved question. Keep entries terse — the log is read back in Step 4.
+
 ### Step 4: Cross-branch consistency check
 
 After all 7+1 branches are exhausted, scan the decision log for contradictions:

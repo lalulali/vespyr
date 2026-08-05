@@ -106,7 +106,7 @@ function compileSkills() {
 
   const catalog = [];
 
-  for (const item of fs.readdirSync(SKILLS_DIR)) {
+  for (const item of fs.readdirSync(SKILLS_DIR).sort()) {
     const skillPath = path.join(SKILLS_DIR, item);
     if (!fs.statSync(skillPath).isDirectory()) continue;
 

@@ -1,0 +1,41 @@
+name: Skills Spec Compliance
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - '.agents/skills/**'
+      - '.agents/scripts/spec_check.js'
+      - '.agents/scripts/compile_skills.js'
+      - '.github/workflows/skills-spec.yml'
+  pull_request:
+    branches: [main, master]
+    paths:
+      - '.agents/skills/**'
+      - '.agents/scripts/spec_check.js'
+      - '.agents/scripts/compile_skills.js'
+      - '.github/workflows/skills-spec.yml'
+
+jobs:
+  spec:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18.x
+
+      - name: Validate skills against agentskills.io spec
+        run: node .agents/scripts/spec_check.js
+
+      - name: Self-test validator
+        run: node .agents/scripts/spec_check.js --self-test
+
+      - name: Check skills catalog is up to date
+        run: |
+          node .agents/scripts/compile_skills.js
+          git diff --exit-code -- .agents/skills/help-me/skills-catalog.json

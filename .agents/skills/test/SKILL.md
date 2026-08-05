@@ -1,8 +1,9 @@
 ---
 name: test
 description: Run tests, analyze failures, enrich acceptance criteria, and produce structured QA reports — supports feature and full-cycle testing
-version: "2.0"
-last_updated: 2026-07-20
+metadata:
+  version: "2.0"
+  last_updated: "2026-07-20"
 ---
 
 # Test — Multi-Step QA Workflow

@@ -1,6 +1,8 @@
 ---
 name: sprint-status
 description: Display and update the sprint-status.yaml pipeline state as a Kanban table
+metadata:
+  version: "1.0"
 ---
 
 # Sprint Status

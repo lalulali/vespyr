@@ -1,8 +1,9 @@
 ---
 name: validation-patterns
 description: Apply validation methods from a 30-method catalog — smoke tests, concierge MVPs, five-second tests, and more
-version: "2.0"
-last_updated: 2026-07-20
+metadata:
+  version: "2.0"
+  last_updated: "2026-07-20"
 ---
 
 # Validation Patterns — Method Selection & Execution

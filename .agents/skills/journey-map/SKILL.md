@@ -1,8 +1,9 @@
 ---
 name: journey-map
 description: Visualize user touchpoints, emotional state transitions, and friction points across current workflows
-version: "2.0"
-last_updated: 2026-07-20
+metadata:
+  version: "2.0"
+  last_updated: "2026-07-20"
 ---
 
 # Journey Map

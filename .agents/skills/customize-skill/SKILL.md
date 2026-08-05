@@ -1,8 +1,9 @@
 ---
 name: customize-skill
 description: Guided authoring flow for agent customization — describe your intent, map it to override fields, write the TOML, and verify it works. Use this skill whenever you need to modify, customize, adjust, or override any Vespyr agent's settings, model, temperature, capabilities, permissions, or conventions without editing the agent file directly.
-version: "2.0"
-last_updated: 2026-07-30
+metadata:
+  version: "2.0"
+  last_updated: "2026-07-30"
 ---
 
 # Customize Skill — Agent Override Authoring

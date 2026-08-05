@@ -1,6 +1,8 @@
 ---
 name: review
 description: Standalone code review on current changes — outside the dev loop
+metadata:
+  version: "1.0"
 ---
 
 ## Persona delegation

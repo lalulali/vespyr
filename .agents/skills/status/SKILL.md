@@ -1,6 +1,8 @@
 ---
 name: status
 description: Quick snapshot of current project state — phase, blockers, memory health, sprint progress
+metadata:
+  version: "1.0"
 ---
 
 ## What this skill does

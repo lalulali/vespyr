@@ -1,8 +1,9 @@
 ---
 name: motion
 description: Orchestrates motion research, motion specification, and an explicit handoff to the standard development workflow for animation-significant products. Use this skill whenever the user mentions motion design, animation, transitions, micro-interactions, motion spec, motion prompts, animated UI, or an animation-heavy surface. Knowledge lives in .agents/references/motion/ and is loaded on demand, never inline.
-version: "1.0"
-last_updated: 2026-08-04
+metadata:
+  version: "1.0"
+  last_updated: "2026-08-04"
 ---
 
 # Motion — Motion Design & Implementation Workflow

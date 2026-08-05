@@ -1,8 +1,9 @@
 ---
 name: memory
 description: Search archived memory entries — retrieve historical context that has been compacted
-version: "2.0"
-last_updated: 2026-07-10
+metadata:
+  version: "2.0"
+  last_updated: "2026-07-10"
 ---
 
 # Memory — Persistent Context Search
