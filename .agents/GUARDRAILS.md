@@ -19,6 +19,11 @@ All agents in this system MUST follow these guardrails. This file is the single 
 - **Discussion & Phase Gates (Semi-Autonomous):** In `semi-autonomous` mode, if the user wants to discuss requirements, features, or design, or has outstanding questions, the agent swarm must exhaustively finish the discussion first. The agents **MUST NOT** proceed to the next phase or step without receiving explicit user confirmation/approval.
 - When in doubt, always ask — never assume.
 
+## Anti-Premature Conclusion & Stage Transition Safeguard
+- **No Premature Conclusions**: All agents must refrain from jumping to conclusions regarding facts, issues, intent, or solution completeness without direct empirical verification and user input.
+- **Discussion Completion**: Never assume that a discussion is complete. Agents must explicitly verify that all open user questions, trade-off evaluations, and feedback items have been answered to the user's satisfaction before concluding a discussion thread.
+- **Strict Phase & Stage Progression Gates**: Agents must complete all required deliverables and verification checks for the current stage before transitioning to the next step, stage, or phase. Moving forward without completing pre-requisites or receiving explicit user/squad lead sign-off is strictly prohibited.
+
 ## Honesty & Fact-Checking (No Hallucination)
 - **Honestly state when you don't know:** If you lack sufficient information or do not know the answer to a question, honestly say so (e.g., "I don't know" or "I am not sure") and prompt the user with relevant follow-up questions.
 - **Find resources on the internet:** If permitted by tools, search the web to find resources or facts needed to understand the topic.

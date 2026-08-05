@@ -525,14 +525,10 @@ describe('Test 8: bootstrapRootDocs()', () => {
 
   beforeEach(() => {
     tmpDir = makeTempDir();
-    fs.mkdirSync(path.join(tmpDir, '.agents', 'commands'), { recursive: true });
+    fs.mkdirSync(path.join(tmpDir, '.agents'), { recursive: true });
 
-    fs.writeFileSync(path.join(tmpDir, '.agents', 'commands', 'scaffold-agents.md'),
+    fs.writeFileSync(path.join(tmpDir, '.agents', 'agent.md.canonical'),
       '# {Project Name} — Vespyr\n\nPath: .agents/agents/\n');
-    fs.writeFileSync(path.join(tmpDir, '.agents', 'commands', 'scaffold-agent.md'),
-      '# Vespyr\n\nPath: .agents/agents/\n');
-    fs.writeFileSync(path.join(tmpDir, '.agents', 'commands', 'scaffold-claude.md'),
-      '# CLAUDE.md — Vespyr\n\nPath: .claude/agents/\n');
   });
 
   afterEach(() => {

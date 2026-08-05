@@ -24,19 +24,14 @@ Use `@executor` to run:
 - `git log --oneline -10` (if git repo and outside dotfolder context)
 - `find . -name "*.md" -maxdepth 1` (existing docs, ignoring those in dotfolders)
 
-## Step 2: Create AGENTS.md and agent.md
+## Step 2: Create AGENTS.md, agent.md, and CLAUDE.md from canonical single source
 
-Read the scaffold templates from `.agents/commands/`:
-- `scaffold-agents.md` — source of truth for `AGENTS.md`
-- `scaffold-agent.md` — source of truth for `agent.md`
+Run `@executor` to execute `node .agents/scripts/sync-entry-points.js` (or read `.agents/agent.md.canonical` directly).
 
-Create `AGENTS.md` in the project root by copying `scaffold-agents.md`. Replace `{Project Name}` with the actual project name discovered in Step 1.
-
-Create `agent.md` in the project root by copying `scaffold-agent.md`. This file is identical to `AGENTS.md` except the System Directive Prompt Pattern references `agent.md` instead of `this document`.
-
-## Step 2b: Create CLAUDE.md (if Claude Code harness is detected)
-
-If a `.claude` folder is present, or if the user is using the Claude Code harness, scaffold a `CLAUDE.md` in the project root by copying `.agents/commands/scaffold-claude.md`.
+This reads `.agents/agent.md.canonical` as the single source of truth and generates:
+- `AGENTS.md` (project root, replacing `{Project Name}` with the project name discovered in Step 1)
+- `agent.md` (project root)
+- `CLAUDE.md` (project root, configured with `.claude/` dotfolder references if the Claude Code harness is detected)
 
 ## Step 3: Initialize artifact tree
 
@@ -66,7 +61,7 @@ Create `artifacts/memory/` with:
 - `pending-questions/` — create a subdirectory inside for each of the core agent personas (e.g. `founder/`, `architect/`, etc.)
 - `archive/` — empty directory
 
-## Step 4: Detect project type
+## Step 4: Detect project type & recommended pipeline
 
 Based on the codebase analysis (strictly ignoring all files inside the system dotfolder `.agents/` and the `artifacts/` directory), determine the project context:
 - **If the project is empty / blank** (i.e. contains no codebase/source files, manifest files like package.json/cargo.toml, or documentation files in the root or directories outside the dynamic system dotfolder and standard git config):
@@ -74,13 +69,16 @@ Based on the codebase analysis (strictly ignoring all files inside the system do
   - You **MUST** state clearly and explicitly in `artifacts/memory/project-context.md` that it is a **blank project starting from scratch**.
   - Configure the following exact neutral fallback values in `project-context.md`:
     - **Name**: "Blank Project / New Product Concept"
-    - **Type**: "Blank/Undetermined (Ready for Idea Validation)"
+    - **Type**: "Blank/Undetermined (Ready for Intake & Validation)"
     - **Stack**: "None (Starting from scratch)"
-    - **Pipeline**: Offer both `/validate-idea` and `/validate-game-idea` so the user can choose the correct pipeline for their new concept.
+    - **Pipeline Options**: Offer `/unpack-problem` (problem-first), `/validate-idea` (concept stress-testing), `/validate-game-idea` (game stress-testing), and `/shape-up` (shaping raw pitches/notes).
 - **Otherwise, for existing/brownfield codebases (containing files outside the system dotfolder)**:
   - Determine if it is a **Product** or **Game** (or other).
   - Determine if it is greenfield or brownfield.
-  - Set the recommended pipeline: `validate-idea` → `explore-idea` → `design` → `develop` → `launch` → `iterate` → `retro` OR `validate-game-idea` → `explore-game-idea` → `design` → `develop` → `launch` → `iterate` → `retro`.
+  - Set the recommended pipeline:
+    - **Product Pipeline**: `/unpack-problem` (or `/validate-idea` / `/shape-up`) → `/explore-idea` → `/shape-up` → `/design` (with optional `/motion`) → `/plan` → `/develop` → `/launch` → `/iterate` → `/retro`.
+    - **Game Pipeline**: `/validate-game-idea` → `/explore-game-idea` → `/design` → `/plan` → `/develop` → `/launch` → `/iterate` → `/retro`.
+    - **Note on `/shape-up`**: Zero prerequisites. Can be run standalone (`shape-up` → `design`), pre-research, post-validation, post-research, or for iterative re-shaping.
 
 Write these findings to `artifacts/memory/project-context.md`. Do not include any dotfolder files or scripts in your analysis.
 
@@ -95,39 +93,45 @@ Return a summary:
 ```
 ## Project Initialized
 **Name:** {detected project name OR "Blank Project / New Product Concept"}
-**Type:** {product/game/other OR "Blank/Undetermined (Ready for Idea Validation)"}
+**Type:** {product/game/other OR "Blank/Undetermined (Ready for Intake & Validation)"}
 **Stack:** {detected stack OR "None (Starting from scratch)"}
-**Pipeline:** {recommended pipeline OR "validate-idea / validate-game-idea"}
+**Pipeline:** {recommended pipeline OR "unpack-problem / validate-idea / shape-up"}
 **Operation Mode:** semi-autonomous
 
-### Available Skills
-- `/validate-idea` — Stress-test your idea before investing research
+### Available Core Skills
+- `/unpack-problem` — Problem-first exploration before solution ideation
+- `/validate-idea` — Stress-test product concepts before research (GO/PIVOT/KILL)
 - `/validate-game-idea` — Stress-test game concepts before production
 - `/explore-idea` — Market, competitor, and user research
 - `/explore-game-idea` — Genre market and player research
+- `/shape-up` — Structure and stress-test semi-cooked ideas into design-ready briefs (zero prerequisites)
 - `/design` — PRD, user stories, product specs
 - `/motion` — Motion research, motion spec, and implementation handoff
-- `/develop` — Architecture, planning, implementation, QA
+- `/plan` — Standalone execution planning
+- `/develop` — Core MVP workflow (architecture, planning, implementation, QA)
 - `/launch` — Release readiness, deployment, monitoring
-- `/iterate` — Post-launch improvements from user data
-- `/incident` — Production incident response
-- `/retro` — Post-cycle review and process improvement
+- `/iterate` — Post-launch improvements from telemetry and user data
+- `/incident` — Production incident triage and resolution
+- `/retro` — Post-cycle review and memory compaction
+
+### Navigation & Helper Skills
 - `/help-me` — Conversational next-step navigator and co-pilot
-- `/grill-me` — Relentless Socratic alignment and stress-testing interview
-- `/humanize` — AI-writing tell detector and style normalizer
 - `/status` — Quick project state snapshot
-- `/memory` — Search archived project context
 - `/phase` — Show/switch phases
 - `/squad` — Show available agent squads and switch active squad
-- `/delegate` — Quick I/O offload
-- `/plan` — Standalone execution planning
-- `/review` — Standalone code review
-- `/test` — Run tests, summarize failures
+- `/grill-me` — Relentless Socratic alignment and stress-testing interview
+- `/teach-me` — Personal learning partner (Quick, Explain, or Deep Dive)
+- `/craft-lesson` — Create multi-format educational materials
+- `/humanize` — AI-writing tell detector and style normalizer
 - `/kanban` — Display and update Kanban board
-- `/code-graph` — Generate/scan dependency graphs
-- `/doc-graph` — Generate/scan documentation links and trace coverage
+- `/sprint-status` — Pipeline state CLI Kanban table
+- `/analyze-data` — EDA, metrics, and visualization mapping
+- `/round-table` — Orchestrate multi-agent group discussions
+- `/elicitation` — Socratic & first-principles critique
+- `/create-skill` — Author and evaluate custom skills
+- `/customize-skill` — Customize agent prompts and TOML parameters
 
 ### Next Step
-Start with `/validate-idea` (or `/validate-game-idea`) if you have an unvalidated concept.
-Or use `/status` to see the current project state.
+Start with `/unpack-problem` (for pain points), `/validate-idea` (for new concepts), or `/shape-up` (for raw notes/pitches).
+Or run `/help-me` or `/status` anytime for guided next steps.
 ```

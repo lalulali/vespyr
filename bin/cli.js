@@ -493,17 +493,17 @@ _(auto-populated on every session by @memory-controller / orchestrator_state.js)
 }
 
 function bootstrapRootDocs(targetDir, projectName, selectedHarnesses) {
-	const commandsDir = fs.existsSync(path.join(targetDir, ".agents", "commands"))
-		? path.join(targetDir, ".agents", "commands")
-		: path.join(AGENTS_SRC, "commands");
+	const canonicalFile = fs.existsSync(path.join(targetDir, ".agents", "agent.md.canonical"))
+		? path.join(targetDir, ".agents", "agent.md.canonical")
+		: path.join(AGENTS_SRC, "agent.md.canonical");
 
-	const agentsMd = fs
-		.readFileSync(path.join(commandsDir, "scaffold-agents.md"), "utf8")
-		.replace(/\{Project Name\}/g, projectName);
-	const agentMd = fs.readFileSync(
-		path.join(commandsDir, "scaffold-agent.md"),
-		"utf8",
-	);
+	const canonicalContent = fs.existsSync(canonicalFile)
+		? fs.readFileSync(canonicalFile, "utf8").replace(/\{Project Name\}/g, projectName)
+		: "";
+
+	const agentsMd = canonicalContent;
+	const agentMd = canonicalContent;
+	const claudeMd = canonicalContent.replace(/\.agents\//g, ".claude/");
 
 	const agentsPath = path.join(targetDir, "AGENTS.md");
 	const agentPath = path.join(targetDir, "agent.md");
@@ -519,10 +519,6 @@ function bootstrapRootDocs(targetDir, projectName, selectedHarnesses) {
 	if (!fs.existsSync(agentPath)) fs.writeFileSync(agentPath, agentMd);
 
 	if (selectedHarnesses.includes("claude")) {
-		const claudeMd = fs.readFileSync(
-			path.join(commandsDir, "scaffold-claude.md"),
-			"utf8",
-		);
 		const claudePath = path.join(targetDir, "CLAUDE.md");
 		if (!fs.existsSync(claudePath)) fs.writeFileSync(claudePath, claudeMd);
 	}
@@ -2015,24 +2011,18 @@ function performSyncDocs(targetDir) {
 		return;
 	}
 
-	// Fallback: legacy template-based approach
-	const commandsDir = fs.existsSync(path.join(targetDir, ".agents", "commands"))
-		? path.join(targetDir, ".agents", "commands")
-		: path.join(AGENTS_SRC, "commands");
+	// Fallback: template-based approach from agent.md.canonical
+	const canonicalFile = fs.existsSync(path.join(targetDir, ".agents", "agent.md.canonical"))
+		? path.join(targetDir, ".agents", "agent.md.canonical")
+		: path.join(AGENTS_SRC, "agent.md.canonical");
 
-	const agentsMd = fs
-		.readFileSync(path.join(commandsDir, "scaffold-agents.md"), "utf8")
-		.replace(/\{Project Name\}/g, path.basename(targetDir));
-	const agentMd = fs.readFileSync(
-		path.join(commandsDir, "scaffold-agent.md"),
-		"utf8",
-	);
-
-	const agentsPath = path.join(targetDir, "AGENTS.md");
-	const agentPath = path.join(targetDir, "agent.md");
-
-	if (!fs.existsSync(agentsPath)) fs.writeFileSync(agentsPath, agentsMd);
-	if (!fs.existsSync(agentPath)) fs.writeFileSync(agentPath, agentMd);
+	if (fs.existsSync(canonicalFile)) {
+		const canonicalContent = fs.readFileSync(canonicalFile, "utf8").replace(/\{Project Name\}/g, path.basename(targetDir));
+		const agentsPath = path.join(targetDir, "AGENTS.md");
+		const agentPath = path.join(targetDir, "agent.md");
+		if (!fs.existsSync(agentsPath)) fs.writeFileSync(agentsPath, canonicalContent);
+		if (!fs.existsSync(agentPath)) fs.writeFileSync(agentPath, canonicalContent);
+	}
 }
 
 async function showActionMenu(targetDir, flags) {

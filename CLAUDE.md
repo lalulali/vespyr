@@ -165,9 +165,11 @@ To maximize reliability, reduce over-engineering, and enforce high-fidelity exec
 
 ### 1. Think Before Acting
 *   **No Silent Assumptions**: State all assumptions explicitly before executing. If a task or specification is ambiguous, pause and ask for clarification rather than making a guess and running with it.
+*   **No Jumping to Conclusions**: Never assume facts, root causes, intent, or completion status without inspecting authoritative sources, code, or empirical evidence first. Avoid hasty judgments or unverified assumptions.
 *   **Surface Trade-Offs**: Present multiple potential paths (e.g., in design, architecture, research, or testing) with their pros and cons. Never select a path silently.
 *   **Push Back When Warranted**: If a simpler path, lighter design, or more direct method exists to solve the problem, suggest it. Push back on unnecessary overhead.
 *   **Pause on Ambiguity & Active Discussion**: If any inputs (requirements, user feedback, APIs) are unclear, stop immediately, identify the confusion, and ask the user or squad lead. In `semi-autonomous` mode, if the user raises questions or wants to discuss requirements, features, or design, the agent swarm must finish the discussion and **MUST NOT** proceed to the next phase or step without receiving explicit user confirmation/approval.
+*   **Never Advance Prematurely & Never Assume Discussion is Complete**: Agents must never assume a discussion, requirements gathering, or design phase is complete, nor jump to the next step or stage prematurely. Always confirm that all open questions, user feedback, and stage deliverables are thoroughly addressed and resolved, and obtain explicit user/squad lead confirmation before proceeding to subsequent steps or phases.
 *   **Honesty & Fact-Checking (No Hallucination)**: If you do not know the answer or lack information, honestly say "I don't know" or "I am not sure" and ask relevant follow-up questions, or search the internet to find the resources needed to understand the topic. When using information from any real source (web, books, papers, code, interviews, data, benchmarks, frameworks), provide inline citations `[N]` with footnotes so the user can validate. See `.claude/references/citation-format.md` for the format. If you cannot find the source, say "Source: unverified" — never fabricate a citation. This expands the earlier internet-only policy to cover all sources and is enforced per-agent via the `## Citation Protocol` section.
 
 ### 2. Simplicity First
@@ -244,21 +246,18 @@ Vespyr is defined by three differentiators that no other multi-agent framework c
 
 When you make changes to Vespyr — new features, changed behaviors, new skills, updated scripts, or modified workflows — **ASK THE USER before updating any documentation file**:
 
-1. **Check if docs need updating.** Determine whether `README.md`, `README_CN.md`, `.agents/workflow.md`, `CHANGELOG.md`, or any file under `Guide/en/` and `Guide/cn/` needs to reflect the change.
+1. **Check if docs need updating.** Determine whether `README.md`, `README_CN.md`, or any file under `Guide/en/` and `Guide/cn/` needs to reflect the change.
 2. **Ask for permission.** Present the user with:
    > *"This change affects Vespyr documentation. Update the following?"*
    > - *[ ] README.md*
    > - *[ ] README_CN.md*
    > - *[ ] Guide/en/ (specific file)*
    > - *[ ] Guide/cn/ (specific file)*
-   > - *[ ] .agents/workflow.md (specific file)*
-   > - *[ ] CHANGELOG.md*
 3. **Do NOT update without explicit confirmation.** Never silently edit documentation files — even if the change seems obvious. The user owns the README and Guide content.
 4. **When approved:**
    - Update `README.md` and `README_CN.md` — keep them high-level (selling/overview). Move detailed how-to content into `Guide/`.
    - Update the relevant `Guide/en/` and `Guide/cn/` files — these contain the comprehensive step-by-step documentation.
-   - Update `CHANGELOG.md` — add a new entry for the change.
-   - Update the relevant `.agents/workflow.md` files — these contain the workflow documentation.
+   - Update the relevant `.claude/workflow.md` files — these contain the workflow documentation.
    - Keep English and Chinese versions synchronized — any change to one must be mirrored in the other.
 5. **Guide file conventions:**
    - `Guide/en/index.md` and `Guide/cn/index.md` are the organizer/entry-point files. If you add a new guide chapter, link it from the index.

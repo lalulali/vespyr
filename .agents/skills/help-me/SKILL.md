@@ -33,7 +33,7 @@ If either is missing, the project is uninitialized. **Do not call `@memory-contr
 - Read `.agents/skills/help-me/skills-catalog.json` for the skill index
 - Read `.agents/AGENTS.md` if you need framework context (phases, agents, guardrails)
 - Answer their question directly, citing the relevant skills/agents by name
-- If the question implies starting a project, close with `/validate-idea` or `/squad` as the natural next step
+- If the question implies starting a project, close with `/unpack-problem` (for pain points), `/validate-idea` (for concepts), `/shape-up` (for shaping pitches/notes), or `/squad` as the natural next step
 - Keep the response tight — they asked one thing, not a tour
 
 **Path B — User typed bare `/help-me` with no question** (or a generic "what should I do?"):
@@ -42,7 +42,11 @@ Respond with this exact short message:
 
 > This looks like a fresh project — no pipeline state yet.
 >
-> - **To start a project:** run `/validate-idea` (pressure-test a concept) or `/squad` (initialize the team preset)
+> - **To start a project:** 
+>   - Run `/unpack-problem` if you have a pain point or symptom (problem-first)
+>   - Run `/validate-idea` if you have an unvalidated concept (pressure-test with `@founder`)
+>   - Run `/shape-up` if you have a raw pitch, doc, or notes (shaping engine with zero prerequisites)
+>   - Run `/squad` to initialize the team preset
 > - **To learn the framework:** ask *"what skills are available"*, *"how does vespyr work"*, or *"what's the difference between /design and /develop"* — I'll walk you through it
 > - **To load existing state:** run `/status` if you have specs or a codebase already
 

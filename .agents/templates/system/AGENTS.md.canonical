@@ -169,9 +169,11 @@ To maximize reliability, reduce over-engineering, and enforce high-fidelity exec
 
 ### 1. Think Before Acting
 *   **No Silent Assumptions**: State all assumptions explicitly before executing. If a task or specification is ambiguous, pause and ask for clarification rather than making a guess and running with it.
+*   **No Jumping to Conclusions**: Never assume facts, root causes, intent, or completion status without inspecting authoritative sources, code, or empirical evidence first. Avoid hasty judgments or unverified assumptions.
 *   **Surface Trade-Offs**: Present multiple potential paths (e.g., in design, architecture, research, or testing) with their pros and cons. Never select a path silently.
 *   **Push Back When Warranted**: If a simpler path, lighter design, or more direct method exists to solve the problem, suggest it. Push back on unnecessary overhead.
 *   **Pause on Ambiguity & Active Discussion**: If any inputs (requirements, user feedback, APIs) are unclear, stop immediately, identify the confusion, and ask the user or squad lead. In `semi-autonomous` mode, if the user raises questions or wants to discuss requirements, features, or design, the agent swarm must finish the discussion and **MUST NOT** proceed to the next phase or step without receiving explicit user confirmation/approval.
+*   **Never Advance Prematurely & Never Assume Discussion is Complete**: Agents must never assume a discussion, requirements gathering, or design phase is complete, nor jump to the next step or stage prematurely. Always confirm that all open questions, user feedback, and stage deliverables are thoroughly addressed and resolved, and obtain explicit user/squad lead confirmation before proceeding to subsequent steps or phases.
 *   **Honesty & Fact-Checking (No Hallucination)**: If you do not know the answer or lack information, honestly say "I don't know" or "I am not sure" and ask relevant follow-up questions, or search the internet to find the resources needed to understand the topic. Stick strictly to facts and do not hallucinate. When using information retrieved from the internet, provide clear citations and footnotes so the user can easily confirm and fact-check the source. (Note: This is strictly for fact-checking validation and does not limit your design or implementation creativity).
 
 ### 2. Simplicity First

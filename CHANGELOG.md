@@ -4,6 +4,19 @@ All notable changes to the Vespyr project will be documented in this file.
 
 ---
 
+## [2.0.3] - 2026-08-05
+### Added
+- Added `No Jumping to Conclusions` and `Never Advance Prematurely & Never Assume Discussion is Complete` rules under `Think Before Acting` across all core system directives (`AGENTS.md`, `CLAUDE.md`, `agent.md`, `.agents/agent.md.canonical`, and `.agents/templates/system/AGENTS.md.canonical`).
+- Added `## Anti-Premature Conclusion & Stage Transition Safeguard` section to `.agents/GUARDRAILS.md`, enforcing empirical fact verification, active discussion completion, and strict stage transition gates before phase advancement.
+
+### Removed
+- Removed legacy template command files (`scaffold-agents.md`, `scaffold-agent.md`, `scaffold-claude.md`). `bin/cli.js` and test suites now generate root entry-point files directly from `.agents/agent.md.canonical`.
+
+### Changed
+- Bumped package version to 2.0.3.
+
+---
+
 ## [2.0.2] - 2026-08-04
 ### Added
 - Added Elon Musk (first-principles, rapid iteration, radical simplification) and Steve Jobs (uncompromising perfectionism, visionary category creation) as channeled mentors to `@founder` (Elena).
