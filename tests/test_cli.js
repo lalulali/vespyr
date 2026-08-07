@@ -1044,3 +1044,110 @@ describe('Test 17: End-to-End Installation, Update, Reconfiguration, and Uninsta
   });
 });
 
+describe('Test 18: Kiro Harness Scaffolding & Migration', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = makeTempDir();
+  });
+
+  afterEach(() => {
+    cleanTempDir(tmpDir);
+  });
+
+  it('should scaffold .kiro/steering/AGENTS.md and .kiro/skills correctly', async () => {
+    const { performReconfigure } = require('../bin/cli.js');
+
+    const agentsTarget = path.join(tmpDir, '.agents');
+    fs.mkdirSync(path.join(agentsTarget, 'skills'), { recursive: true });
+    fs.writeFileSync(path.join(agentsTarget, '.vespyr-version'), JSON.stringify({ version: VERSION }));
+    fs.writeFileSync(path.join(tmpDir, 'AGENTS.md'), '# AGENTS Guide');
+
+    await performReconfigure(tmpDir, { harnesses: ['kiro'], yes: true });
+
+    const kiroDir = path.join(tmpDir, '.kiro');
+    const steeringAgentsPath = path.join(kiroDir, 'steering', 'AGENTS.md');
+    const skillsDir = path.join(kiroDir, 'skills');
+
+    assert.ok(fs.existsSync(steeringAgentsPath));
+    assert.ok(fs.existsSync(skillsDir));
+
+    if (process.platform !== 'win32') {
+      const skillsStat = fs.lstatSync(skillsDir);
+      assert.ok(skillsStat.isSymbolicLink());
+
+      const steeringStat = fs.lstatSync(steeringAgentsPath);
+      assert.ok(steeringStat.isSymbolicLink());
+    }
+  });
+
+  it('should clean up legacy .kiro/steering symlink when reconfiguring kiro', async () => {
+    const { performReconfigure } = require('../bin/cli.js');
+
+    const agentsTarget = path.join(tmpDir, '.agents');
+    fs.mkdirSync(path.join(agentsTarget, 'agents'), { recursive: true });
+    fs.mkdirSync(path.join(agentsTarget, 'skills'), { recursive: true });
+    fs.writeFileSync(path.join(agentsTarget, '.vespyr-version'), JSON.stringify({ version: VERSION }));
+    fs.writeFileSync(path.join(tmpDir, 'AGENTS.md'), '# AGENTS Guide');
+
+    // Create legacy symlink: .kiro/steering -> .agents/agents
+    const kiroDir = path.join(tmpDir, '.kiro');
+    fs.mkdirSync(kiroDir, { recursive: true });
+    const legacySteeringLink = path.join(kiroDir, 'steering');
+    fs.symlinkSync(path.join(agentsTarget, 'agents'), legacySteeringLink, 'dir');
+
+    assert.ok(fs.lstatSync(legacySteeringLink).isSymbolicLink());
+
+    // Reconfigure with kiro
+    await performReconfigure(tmpDir, { harnesses: ['kiro'], yes: true });
+
+    // .kiro/steering should now be a directory (not a symlink to agents)
+    const steeringStat = fs.lstatSync(legacySteeringLink);
+    assert.strictEqual(steeringStat.isSymbolicLink(), false);
+    assert.ok(steeringStat.isDirectory());
+    assert.ok(fs.existsSync(path.join(legacySteeringLink, 'AGENTS.md')));
+  });
+});
+
+describe('Test 19: Root Docs Regeneration on Update', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = makeTempDir();
+  });
+
+  afterEach(() => {
+    cleanTempDir(tmpDir);
+  });
+
+  it('should recreate AGENTS.md, agent.md, and CLAUDE.md when deleted and updating', async () => {
+    const { performUpdate } = require('../bin/cli.js');
+
+    const agentsTarget = path.join(tmpDir, '.agents');
+    fs.mkdirSync(path.join(agentsTarget, 'agents'), { recursive: true });
+    fs.mkdirSync(path.join(agentsTarget, 'skills'), { recursive: true });
+    fs.writeFileSync(path.join(agentsTarget, 'agent.md.canonical'), '# {Project Name} Canonical');
+    fs.writeFileSync(path.join(agentsTarget, '.vespyr-version'), JSON.stringify({ version: '1.6.0' }));
+
+    // Setup Claude harness
+    const claudeDir = path.join(tmpDir, '.claude');
+    fs.mkdirSync(claudeDir, { recursive: true });
+    fs.writeFileSync(path.join(claudeDir, '.vespyr-version'), JSON.stringify({ version: '1.6.0' }));
+
+    // Ensure root docs do NOT exist
+    assert.strictEqual(fs.existsSync(path.join(tmpDir, 'AGENTS.md')), false);
+    assert.strictEqual(fs.existsSync(path.join(tmpDir, 'agent.md')), false);
+    assert.strictEqual(fs.existsSync(path.join(tmpDir, 'CLAUDE.md')), false);
+
+    // Run update
+    await performUpdate(tmpDir, { yes: true });
+
+    // Root docs should be recreated
+    assert.strictEqual(fs.existsSync(path.join(tmpDir, 'AGENTS.md')), true);
+    assert.strictEqual(fs.existsSync(path.join(tmpDir, 'agent.md')), true);
+    assert.strictEqual(fs.existsSync(path.join(tmpDir, 'CLAUDE.md')), true);
+  });
+});
+
+
+

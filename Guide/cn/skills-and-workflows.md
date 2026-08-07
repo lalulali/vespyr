@@ -81,7 +81,7 @@ Vespyr 将复杂操作组织为原子化技能。每个技能是一个文件夹�
 | `/doc-graph` | 生成/扫描文档链接和追溯覆盖 |
 | `/humanize` | AI 写作风格检测器和规范化工具 |
 | `/elicitation` | 69 种结构化提示引导，推动模型完善输出 |
-| `/round-table` | 多智能体分阶段圆桌讨论 |
+| `/round-table` | 多智能体分阶段圆桌讨论（覆盖全 11 个阶段与 23 个智能体角色） |
 
 ### 其他与自定义
 
@@ -149,6 +149,23 @@ stepsCompleted: [1, 2, 3]
 ```
 
 重新调用技能时自动从步骤 4 恢复。无需在智能体上下文中维护状态。
+
+### 多智能体圆桌讨论 (/round-table)
+
+`/round-table` 协调多智能体小组讨论，每个智能体作为一个具有独立推理能力的真实子代理参与。该技能跨越所有 11 个产品开发阶段，动态选择阶段感知的智能体阵容：
+
+- **验证 (阶段 -1)**: `@founder`, `@product-manager`, `@researcher`
+- **探索与研究 (阶段 0 & 1)**: `@founder`, `@researcher`, `@user-researcher`, `@ux-researcher`
+- **策略与需求 (阶段 2)**: `@product-manager`, `@founder`, `@product-designer`, `@user-researcher`
+- **架构与系统设计 (阶段 3)**: `@architect`, `@tech-lead`, `@security-engineer`, `@performance-engineer`
+- **规划与拆解 (阶段 4)**: `@tech-lead`, `@product-manager`, `@architect`, `@devops-engineer`
+- **开发与实现 (阶段 5)**: `@tech-lead`, `@developer`, `@qa-engineer`, `@code-reviewer`
+- **发布与部署 (阶段 6)**: `@devops-engineer`, `@product-manager`, `@qa-engineer`, `@technical-writer`
+- **发布后迭代与遥测 (阶段 7)**: `@product-manager`, `@data-analyst`, `@ux-researcher`, `@performance-engineer`
+- **文档与知识传递 (阶段 8)**: `@technical-writer`, `@shifu`, `@architect`, `@developer`
+- **复盘与流程改进 (阶段 9)**: `@product-manager`, `@tech-lead`, `@shifu`, `@qa-engineer`
+
+跨领域专家（`@security-engineer`、`@performance-engineer`、`@ml-ai-engineer`、`@ml-ai-ops`、`@devops-engineer`、`@data-analyst`、`@technical-writer`、`@shifu`）可根据话题相关性动态引入任何讨论中。
 
 ## 委托协议
 

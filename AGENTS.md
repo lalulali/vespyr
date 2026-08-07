@@ -17,9 +17,10 @@ A platform-agnostic, file-based multi-agent system configured to streamline prod
 
 Since agents are defined as plain Markdown personas, they can be loaded and executed by any AI developer harness. Choose the method corresponding to your current environment:
 
-### 1. Context-Aware & Mention-Capable IDEs (e.g., Cursor, Windsurf, GitHub Copilot)
+### 1. Context-Aware & Mention-Capable IDEs (e.g., Cursor, Windsurf, GitHub Copilot, Kiro)
 - **Direct Invocation**: Use the `@` symbol in your chat pane to mention the agent's markdown configuration file (e.g., `@.agents/agents/founder.md` or `@founder.md`).
 - **Context Injection**: Attach the specific agent's `.md` file to the chat window before starting your task to ensure the assistant adopts the exact profile and guardrails.
+- **Skill & Persona Interoperability**: When an agent persona is invoked via `@` (e.g., `@founder.md`) and a skill workflow is triggered via `/` (e.g., `/validate-idea` or `/develop`), the active agent MUST acknowledge the skill and execute its step-by-step workflow while maintaining the agent's persona profile and Socratic stance.
 
 ### 2. Single-Agent & Terminal Harnesses (e.g., Claude Code, Aider, CLI Assistants, Google Antigravity)
 - Instruct the active LLM session to read and adopt the persona explicitly. 
@@ -88,6 +89,9 @@ To maintain focus and avoid context bloat, the **`@product-manager`** and **`@pr
 ## 🛠️ Workflows (Skills)
 
 Vespyr organizes complex, multi-agent operations into highly structured **skills** (located in `.agents/skills/`). Each skill is an end-to-end workflow designed for a specific product milestone, operational phase, or utility concern. They guide agents through sequence gates, coordinate parallel execution paths, and enforce quality control.
+
+> [!IMPORTANT]
+> **Skill Execution Protocol**: When a skill (`/skill-name` or `.agents/skills/[skill]/SKILL.md`) is invoked alongside an `@agent` persona (or during an active agent session in Kiro/Cursor/Windsurf), the active agent persona MUST acknowledge the skill and execute its full step-by-step workflow. The persona's role, tone, and domain expertise apply *within* the structured steps of the skill, never replacing or ignoring the skill instructions.
 
 ### Curated Workflows
 *   `/teach-me` — Personal learning partner: Quick, Explain, or Deep Dive on any topic
@@ -239,29 +243,6 @@ Vespyr is defined by three differentiators that no other multi-agent framework c
 **What it is:** Memory loads in three tiers: Tier 1 (core context, ~200 tokens), Tier 2 (agent-specific patterns, ~300 tokens), Tier 3 (task-relevant results, ~500 tokens). Plus a pattern pre-fetch step that promotes relevant Tier 2 patterns to the front of the context window before the full load.
 
 **Why it matters:** Most frameworks either load everything (context bloat) or nothing (no continuity). Vespyr's progressive loading gives the agent exactly what it needs — relevant past decisions, patterns, and risks — without flooding the context window.
-
----
-
-## 📚 Documentation Update Protocol
-
-When you make changes to Vespyr — new features, changed behaviors, new skills, updated scripts, or modified workflows — **ASK THE USER before updating any documentation file**:
-
-1. **Check if docs need updating.** Determine whether `README.md`, `README_CN.md`, or any file under `Guide/en/` and `Guide/cn/` needs to reflect the change.
-2. **Ask for permission.** Present the user with:
-   > *"This change affects Vespyr documentation. Update the following?"*
-   > - *[ ] README.md*
-   > - *[ ] README_CN.md*
-   > - *[ ] Guide/en/ (specific file)*
-   > - *[ ] Guide/cn/ (specific file)*
-3. **Do NOT update without explicit confirmation.** Never silently edit documentation files — even if the change seems obvious. The user owns the README and Guide content.
-4. **When approved:**
-   - Update `README.md` and `README_CN.md` — keep them high-level (selling/overview). Move detailed how-to content into `Guide/`.
-   - Update the relevant `Guide/en/` and `Guide/cn/` files — these contain the comprehensive step-by-step documentation.
-   - Update the relevant `.agents/workflow.md` files — these contain the workflow documentation.
-   - Keep English and Chinese versions synchronized — any change to one must be mirrored in the other.
-5. **Guide file conventions:**
-   - `Guide/en/index.md` and `Guide/cn/index.md` are the organizer/entry-point files. If you add a new guide chapter, link it from the index.
-   - Each guide file includes breadcrumb navigation at the top: `> [← Back to Guide](index.md) | [Previous: ...](...) | [Next: ... →](...)`
 
 ---
 

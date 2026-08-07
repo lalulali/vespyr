@@ -43,20 +43,34 @@ Select 2-4 agents whose expertise matches the user's topic or the current stage 
 
 ### Recommended Rosters by Phase
 
-- **Validation Phase**: Summon `@founder`, `@product-manager`, and `@researcher`.
-- **Exploration Phase**: Summon `@founder`, `@researcher`, `@user-researcher`, and `@ux-researcher`.
-- **Design Phase**: Summon `@product-manager`, `@product-designer`, and `@architect`.
-- **Development Phase**: Summon `@tech-lead`, `@developer`, `@qa-engineer`, and `@code-reviewer`.
+- **Validation Phase (Phase -1)**: Summon `@founder`, `@product-manager`, and `@researcher`.
+- **Discovery & Research Phase (Phases 0 & 1)**: Summon `@founder`, `@researcher`, `@user-researcher`, and `@ux-researcher`.
+- **Strategy & Requirements Phase (Phase 2)**: Summon `@product-manager`, `@founder`, `@product-designer`, and `@user-researcher`.
+- **Architecture & System Design Phase (Phase 3)**: Summon `@architect`, `@tech-lead`, `@security-engineer`, and `@performance-engineer`.
+- **Planning & Breakdown Phase (Phase 4)**: Summon `@tech-lead`, `@product-manager`, `@architect`, and `@devops-engineer`.
+- **Development & Implementation Phase (Phase 5)**: Summon `@tech-lead`, `@developer`, `@qa-engineer`, and `@code-reviewer`.
+- **Launch & Deployment Phase (Phase 6)**: Summon `@devops-engineer`, `@product-manager`, `@qa-engineer`, and `@technical-writer`.
+- **Post-Launch Iteration & Telemetry Phase (Phase 7)**: Summon `@product-manager`, `@data-analyst`, `@ux-researcher`, and `@performance-engineer`.
+- **Documentation & Knowledge Transfer Phase (Phase 8)**: Summon `@technical-writer`, `@shifu`, `@architect`, and `@developer`.
+- **Retro & Process Improvement Phase (Phase 9)**: Summon `@product-manager`, `@tech-lead`, `@shifu`, and `@qa-engineer`.
 
-### Custom & Cross-cutting Roles
+### Custom & Domain-Specific Cross-cutting Roles
 
 - If the user names specific agents, always include them, plus 1-2 complementary voices.
-- If the topic is cross-cutting, you can suggest relevant experts:
-  - Security-critical / PII: Summon `@security-engineer`
-  - High performance SLAs: Summon `@performance-engineer`
-  - ML/AI heavy logic: Summon `@ml-ai-engineer`
-  - Telemetry and instrumentation: Summon `@data-analyst`
-  - Public APIs or documentation: Summon `@technical-writer`
+- Select domain experts based on the specific topic:
+  - **Security, PII & Compliance**: Summon `@security-engineer`
+  - **Performance, Latency & Scalability**: Summon `@performance-engineer`
+  - **AI/ML Logic, RAG & Prompts**: Summon `@ml-ai-engineer`
+  - **ML Infrastructure, Model Serving, Vector DBs & Drift**: Summon `@ml-ai-ops`
+  - **CI/CD, Cloud Infrastructure & Release Automation**: Summon `@devops-engineer`
+  - **Data Analytics, Telemetry & Funnel Tracking**: Summon `@data-analyst`
+  - **API References, User Guides & System Docs**: Summon `@technical-writer`
+  - **Pedagogy, Curriculum & Mentorship**: Summon `@shifu`
+  - **Market, Competitor & Industry Trends**: Summon `@researcher`
+  - **User Feedback, Persona Mapping & Interviews**: Summon `@user-researcher`
+  - **Usability, Interaction & Journey Mapping**: Summon `@ux-researcher`
+
+*Note: Operational I/O sub-agents (`@reader`, `@writer`, `@executor`, `@memory-controller`) execute file, shell, and memory actions behind the scenes and are not included as reasoning participants in roundtable discussions.*
 
 ## The Core Loop
 

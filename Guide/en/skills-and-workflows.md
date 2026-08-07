@@ -81,7 +81,7 @@ Vespyr organizes complex operations into atomic skills. Each skill is a folder w
 | `/doc-graph` | Generate/scan documentation links and trace coverage |
 | `/humanize` | AI-writing style detector and normalizer |
 | `/elicitation` | 69 structured methods to push LLM to refine output |
-| `/round-table` | Multi-agent stage-based roundtable discussions |
+| `/round-table` | Multi-agent stage-based roundtable discussions across all 11 phases and 23 agent roles |
 
 ### Other & Customization
 
@@ -149,6 +149,23 @@ stepsCompleted: [1, 2, 3]
 ```
 
 Re-invoke the skill and it automatically resumes from step 4. No state needs to be maintained in the agent's context.
+
+### Multi-Agent Roundtable (/round-table)
+
+`/round-table` orchestrates multi-agent group discussions where each agent acts as a real subagent with independent reasoning. The skill dynamically selects stage-aware agent rosters across all 11 product development phases:
+
+- **Validation (Phase -1)**: `@founder`, `@product-manager`, `@researcher`
+- **Discovery & Research (Phases 0 & 1)**: `@founder`, `@researcher`, `@user-researcher`, `@ux-researcher`
+- **Strategy & Requirements (Phase 2)**: `@product-manager`, `@founder`, `@product-designer`, `@user-researcher`
+- **Architecture & System Design (Phase 3)**: `@architect`, `@tech-lead`, `@security-engineer`, `@performance-engineer`
+- **Planning & Breakdown (Phase 4)**: `@tech-lead`, `@product-manager`, `@architect`, `@devops-engineer`
+- **Development & Implementation (Phase 5)**: `@tech-lead`, `@developer`, `@qa-engineer`, `@code-reviewer`
+- **Launch & Deployment (Phase 6)**: `@devops-engineer`, `@product-manager`, `@qa-engineer`, `@technical-writer`
+- **Post-Launch Iteration & Telemetry (Phase 7)**: `@product-manager`, `@data-analyst`, `@ux-researcher`, `@performance-engineer`
+- **Documentation & Knowledge Transfer (Phase 8)**: `@technical-writer`, `@shifu`, `@architect`, `@developer`
+- **Retro & Process Improvement (Phase 9)**: `@product-manager`, `@tech-lead`, `@shifu`, `@qa-engineer`
+
+Cross-cutting domain experts (`@security-engineer`, `@performance-engineer`, `@ml-ai-engineer`, `@ml-ai-ops`, `@devops-engineer`, `@data-analyst`, `@technical-writer`, `@shifu`) can be dynamically brought into any discussion based on topic relevance.
 
 ## Delegation Protocol
 
