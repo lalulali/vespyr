@@ -1,6 +1,6 @@
 # Vespyr Development Plan
 
-> **Status:** v2.0 — not started. This file is the single source of truth. If anything here conflicts with other docs in `strategy/`, this file wins.
+> **Status:** v2.0 — Phase 1 in progress (Phase 0 = v1.7 dev, shipped; Phase 1 = v2.0.0, complete through 02e; next: 02f). This file is the single source of truth. If anything here conflicts with other docs in `strategy/`, this file wins.
 > **Maintainer:** Chris (solo, AI-assisted)
 > **Created:** 2026-07-02 — consolidates and corrects the original strategy folder (7,330 lines → this folder)
 
@@ -30,7 +30,7 @@ Three releases. Each is independently shippable. If a release slips, the previou
 
 | Release | Scope | Calendar | Themes |
 |---|---|---|---|
-| **v2.0** | Phase 0 + Phase 1 — foundation, identity, skill restructure, artifact rigor, worktree tooling | ~5 weeks | T1, T2, T3, T7, T8 |
+| **v2.0** | **Phase 1 only** (Phase 0 = v1.7 dev, already shipped) — identity, skill restructure, artifact rigor, worktree tooling, security-and-integrity (02f) | In progress | T1, T2, T3, T7, T8 |
 | **v2.1** | Phase 2 + 3 + 4 + 6 — hooks, MCP, self-learning, graph, telemetry, modularity, loop engineering | ~6 weeks | T3, T4, T5, T6, T7, T8 |
 | **v2.2** | Phase 5 — Deeper Bench (T1 + T2 + T3 personas) | ~6 weeks | T1, T2, T8 |
 
@@ -67,8 +67,8 @@ deferred, disabled by a harness, or removed by a module.
 
 | Phase | Release | Themes | What ships | File |
 |---|---|---|---|---|
-| **0** | v2.0 | T1, T3, T7, T8 | Frontmatter v2, IDENTITY block, customization TOML, thin skills ≥80 lines, entry-point consolidation, phase table, glossary, agent contracts, **+ T7: worktree delegation enforcement + tooling (T7.1b), memory auto-loading, Socratic minimum bar, identity docs; + T8: shared satisfaction contract** | `01-phase-0-foundation.md` |
-| **1** | v2.0 | T1, T2, T3, T8 | 5 long skills → folder + steps (develop, validate-idea, retro, design, launch); tri-modal flows; spec-kernel PRD; sprint-status.yaml; ASCII CLI dashboards; 9 domain experts ≥200 lines; code-reviewer 15-item false-positive guard; Ivy design.md + dynamic HTML; **Teaching Partner: @shifu (Kong Qiu) agent + /teach-me + /craft-lesson skills; T8 handoff states** | `02-phase-1-skills.md`, `02b-teaching-partner.md` |
+| **0** | v1.7 (shipped) | T1, T3, T7, T8 | Frontmatter v2, IDENTITY block, customization TOML, thin skills ≥80 lines, entry-point consolidation, phase table, glossary, agent contracts, **+ T7: worktree delegation enforcement + tooling (T7.1b), memory auto-loading, Socratic minimum bar, identity docs; + T8: shared satisfaction contract** | `01-phase-0-foundation.md` |
+| **1** | v2.0 (in progress) | T1, T2, T3, T8 | 5 long skills → folder + steps (develop, validate-idea, retro, design, launch); tri-modal flows; spec-kernel PRD; sprint-status.yaml; ASCII CLI dashboards; 9 domain experts ≥200 lines; code-reviewer 15-item false-positive guard; Ivy design.md + dynamic HTML; **Teaching Partner: @shifu (Kong Qiu) agent + /teach-me + /craft-lesson skills; T8 handoff states; security & integrity architecture (02f)** | `02-phase-1-skills.md`, `02b-teaching-partner.md`, `02f-security-and-integrity-architecture.md` |
 | **2** | v2.1 | T4, T5, T8 | 12 lifecycle hooks; MCP server (10 tools); self-learning (episode→pattern→instinct); SHA-256 witness; delegation enforcement; QA as hard gate; **multi-agent orchestration (solo/parallel modes, CLI orchestrator, structured output, T8 runtime validation)** | `03-phase-2-enablement.md`, `03a-mcp-integration-plan.md`, `03b-multi-agent-orchestration.md` |
 | **3** | v2.1 | T3, T4, T8 | Graph auto-build at 5 lifecycle moments; graph query API; telemetry surface; catalog parity test; "See the Unseen" on all 21 agents; data analyst CLI tools; **satisfaction health telemetry** | `04-phase-3-observability.md` |
 | **4** | v2.1 | T6, T8 | install-modules (7 modules); rules/common + per-language; agent-builder/skill-builder/workflow-builder; worked example project; README/AGENTS/QUICK-REFERENCE/CHANGELOG rewrite; **core T8 inheritance and dogfood gate** | `05-phase-4-modularity.md` |
@@ -311,7 +311,7 @@ When a phase is mid-execution and a new constraint emerges (e.g., a phase overru
 |---|---|---|
 | v2.2 | Planned | Deeper Bench T2 + T3 (+7 personas, +4 skills) |
 | v2.1 | Planned | Phases 2+3+4 (hooks, MCP, self-learning, graph, telemetry, modularity) + Deeper Bench T1 (+14 personas, +14 skills, +3 squads) |
-| **v2.0** | **Not started** | Phases 0+1 (foundation, identity, skill restructure, artifact rigor) — 8 DoD criteria |
+| **v2.0** | **Phase 1 — in progress** | Phases: identity, skill restructure, artifact rigor (02a-02e done; 02f security-and-integrity pending) — 8 DoD criteria |
 | v1.7.x | Stable | `npx create-vespyr` installer, 8 active harnesses |
 | v1.1-v1.6 | Shipped | Per CHANGELOG |
 | v1.0 | Shipped | 21 agents, opencode native, delegation pattern, shared memory, game mode, humanizer |
