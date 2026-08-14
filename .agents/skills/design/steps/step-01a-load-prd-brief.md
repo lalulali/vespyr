@@ -3,11 +3,6 @@ step: 1a
 name: Load PRD Brief
 mode: create
 prerequisites: []
-delegation:
-  reads: "@reader (spec-kernel + research artifacts; per delegation-policy.md ≥4 files)"
-  writes: none
-  runs: none
-  direct_justified: []
 output_contract:
   citations: not-required
 ---
@@ -42,9 +37,5 @@ If operating in `semi-autonomous` mode and `FeatureDesignInteraction` is not `fa
 
 ## Output
 Loaded context: brief summary, feature scope (approved or auto-selected), research key points.
-
-## Delegation
-- **Reads:** @reader for spec-kernel, research artifacts (4+ files across 01-discovery/ and 02-research/)
-- **Writes:** none
 
 > **Tracker:** `node .agents/scripts/step_tracker.js complete --skill design-create --step 1`

@@ -4,11 +4,6 @@ name: Define Personas
 mode: create
 prerequisites:
   - step-01 completed
-delegation:
-  reads: "direct (research summaries; per delegation-policy.md < 3 files < 500 lines)"
-  writes: "@writer (personas output; per delegation-policy.md output file)"
-  runs: none
-  direct_justified: ["research artifacts < 500 lines total, < 3 files"]
 output_contract:
   citations: not-required
 ---
@@ -54,9 +49,5 @@ If in `semi-autonomous` mode and `FeatureDesignInteraction` is not `false`:
 - `artifacts/output/03-strategy/requirements.md` — use template `.agents/templates/product/prd-template.md` (full stakeholder PRD)
 - `artifacts/output/03-strategy/SPEC.md` — distill the full PRD into the 5-field spec kernel (`.agents/templates/product/SPEC.md`). This is the agent-facing contract — every downstream agent reads this instead of the full PRD.
 - Persona definitions (integrated into PRD)
-
-## Delegation
-- **Reads:** direct — research summaries (< 3 files, < 500 lines total)
-- **Writes:** @writer for personas output
 
 > **Tracker:** `node .agents/scripts/step_tracker.js complete --skill design-create --step 2`

@@ -4,11 +4,6 @@ name: User Stories
 mode: create
 prerequisites:
   - step-02 completed
-delegation:
-  reads: "direct (personas + spec-kernel; per delegation-policy.md < 3 files < 500 lines)"
-  writes: "@writer (user-stories.md; per delegation-policy.md output file)"
-  runs: none
-  direct_justified: ["< 3 small input files already in context"]
 output_contract:
   citations: not-required
 ---
@@ -54,9 +49,5 @@ Write story architecture decisions to memory:
 {story count, key architectural decisions encoded in ACs, any planned deferrals}
 **Status:** active
 ```
-
-## Delegation
-- **Reads:** direct — personas + spec-kernel (< 3 files, < 500 lines)
-- **Writes:** @writer for user-stories.md
 
 > **Tracker:** `node .agents/scripts/step_tracker.js complete --skill design-create --step 3`

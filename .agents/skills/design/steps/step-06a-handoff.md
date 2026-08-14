@@ -4,11 +4,6 @@ name: Handoff
 mode: create
 prerequisites:
   - step-05 completed
-delegation:
-  reads: none
-  writes: "@writer (product-spec.md + design.md + product-spec.html; per delegation-policy.md multi-file output)"
-  runs: "@executor (orchestrator_state.js complete)"
-  direct_justified: []
 output_contract:
   citations: not-required
 ---
@@ -73,10 +68,5 @@ Blockers: {any open design questions, or "none"}
 
 ## Handoff
 Load `develop` to proceed.
-
-## Delegation
-- **Reads:** none
-- **Writes:** @writer for product-spec.md, design.md, and product-spec.html
-- **Runs:** @executor for orchestrator_state.js complete
 
 > **Tracker:** `node .agents/scripts/step_tracker.js complete --skill design-create --step 6`

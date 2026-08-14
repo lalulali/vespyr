@@ -68,7 +68,7 @@ deferred, disabled by a harness, or removed by a module.
 | Phase | Release | Themes | What ships | File |
 |---|---|---|---|---|
 | **0** | v1.7 (shipped) | T1, T3, T7, T8 | Frontmatter v2, IDENTITY block, customization TOML, thin skills ≥80 lines, entry-point consolidation, phase table, glossary, agent contracts, **+ T7: worktree delegation enforcement + tooling (T7.1b), memory auto-loading, Socratic minimum bar, identity docs; + T8: shared satisfaction contract** | `01-phase-0-foundation.md` |
-| **1** | v2.0 (in progress) | T1, T2, T3, T8 | 5 long skills → folder + steps (develop, validate-idea, retro, design, launch); tri-modal flows; spec-kernel PRD; sprint-status.yaml; ASCII CLI dashboards; 9 domain experts ≥200 lines; code-reviewer 15-item false-positive guard; Ivy design.md + dynamic HTML; **Teaching Partner: @shifu (Kong Qiu) agent + /teach-me + /craft-lesson skills; T8 handoff states; security & integrity architecture (02f)** | `02-phase-1-skills.md`, `02b-teaching-partner.md`, `02f-phase-1-security-and-integrity-architecture.md` |
+| **1** | v2.0 (in progress) | T1, T2, T3, T8 | 5 long skills → folder + steps (develop, validate-idea, retro, design, launch); tri-modal flows; spec-kernel PRD; sprint-status.yaml; ASCII CLI dashboards; 9 domain experts ≥200 lines; code-reviewer 15-item false-positive guard; Ivy design.md + dynamic HTML; **Teaching Partner: @shifu (Kong Qiu) agent + /teach-me + /craft-lesson skills; T8 handoff states; security & integrity architecture (02f); harness honesty (02g); graph/cli modernization (02h); memory consolidation (02i); agent evals (02j)** | `02-phase-1-skills.md`, `02a`–`02j` sub-plans |
 | **2** | v2.1 | T4, T5, T8 | 13 lifecycle hooks; MCP server (17 first-party tools); self-learning (episode→pattern→instinct); SHA-256 witness; delegation enforcement; QA as hard gate; **multi-agent orchestration (solo/parallel modes, CLI orchestrator, structured output, T8 runtime validation)** | `03-phase-2-enablement.md`, `03a-phase-2-mcp-integration-plan.md`, `03b-phase-2-multi-agent-orchestration.md` |
 | **3** | v2.1 | T3, T4, T8 | Graph auto-build at 5 lifecycle moments; graph query API; telemetry surface; catalog parity test; "See the Unseen" on all 23 agents (v2.0 state); data analyst CLI tools; **satisfaction health telemetry** | `04-phase-3-observability.md` |
 | **4** | v2.1 | T6, T8 | install-modules (7 modules); rules/common + per-language; agent-builder/skill-builder/workflow-builder; worked example project; README/AGENTS/QUICK-REFERENCE/CHANGELOG rewrite; **core T8 inheritance and dogfood gate** | `05-phase-4-modularity.md` |
@@ -266,26 +266,36 @@ The "1-day ECC repackage" pattern is insufficient. Personas that don't clear eit
 
 ## 8. This Folder's Files
 
-| File | What it contains | Lines |
-|---|---|---|
-| `README.md` (this file) | Single source of truth: releases, phases, DoD, themes, counts, adoption matrix | 300 |
-| `01-phase-0-foundation.md` | Phase 0: full templates (phase table, glossary, agent contracts, grill-me, delegation-policy, IDENTITY block, frontmatter v2) + T7 identity work | 954 |
-| `02-phase-1-skills.md` | Phase 1: full templates (spec-kernel, spec-law, sprint-status.yaml, Ivy rubric, 15-item false-positive guard, step-file architecture) | 898 |
-| `03-phase-2-enablement.md` | Phase 2: full hooks table, MCP tool signatures, self-learning 3-tier spec, QA hard gate wording, delegation-policy content | 286 |
-| `03a-phase-2-mcp-integration-plan.md` | MCP Integration: first-party + 3rd-party MCP servers, 17 tools (10 + 6 from 13 + spawn_agent from 03b), context truncation, error handling | 289 |
-| `03b-phase-2-multi-agent-orchestration.md` | Multi-Agent Orchestration: solo/parallel mode, CLI orchestrator, structured output, quality guardrails, harness capability detection | ~420 |
-| `04-phase-3-observability.md` | Phase 3: graph query contracts per agent, See the Unseen directives, telemetry protocol | 240 |
-| `05-phase-4-modularity.md` | Phase 4: full install-modules.json, rules/ directory structure, builder flows, example project file list | 249 |
-| `06-phase-5-deeper-bench.md` | Phase 5: FULL persona charters (channeled mentor, charter, permissions, squad, complements) for all 22 new personas + 19 new skills | 892 |
-| `03c-phase-2-harness-integration.md` | Hermes + OpenClaw: full directory structures, SKILL.md templates, sandbox configs, invocation patterns, memory protocols | 445 |
-| `01a-phase-0-framework-analysis.md` | Condensed 4-framework comparison (insights only) | 101 |
-| `01b-phase-0-risk-register.md.md` | Consolidated risk register (62 risks, single source) | 119 |
-| `03d-phase-2-implementation-specs.md` | Full JS code for 15 sections (13 scripts + §16 test specs + §17 pending index): sync-entry-points, validate_frontmatter, merge_customization, memory prefetch, auto_graph, query_graph, telemetry_surface, witness, self_learn, delegation_audit, qa_check, worktree, goal_check, automation, validate_satisfaction | ~1737 |
-| `07-phase-6-loop-engineering.md` | Loop Engineering: `/goal` primitive + automations + loop state (v2.1) | 130 |
-| `02a-phase-1-step-tracker.md` | Step Tracker — debug-mode step enforcement audit breadcrumbs | 153 |
-| `03e-phase-2-token-effective-mode.md` | Quick Mode — token-effective discussion mode (ponytail-inspired) | ~170 |
-| `13-mcp-integration-plan.md` | Model Context Protocol (MCP) Integration Plan — Playwright, design system, standards linters | ~120 |
-| `08-cross-cutting-utter-satisfaction-dna.md` | Cross-cutting culture contract, state model, collaboration loop, runtime enforcement, telemetry, and future-surface checklists | ~300 |
+| File | What it contains |
+|---|---|
+| `README.md` (this file) | Single source of truth: releases, phases, DoD, themes, counts, adoption matrix |
+| `01-phase-0-foundation.md` | Phase 0: full templates (phase table, glossary, agent contracts, grill-me, IDENTITY block, frontmatter v2) + T7 identity work |
+| `01a-phase-0-framework-analysis.md` | Condensed 4-framework comparison (insights only) |
+| `01b-phase-0-risk-register.md` | Consolidated risk register (62 risks, single source) |
+| `02-phase-1-skills.md` | Phase 1: full templates (spec-kernel, spec-law, sprint-status.yaml, Ivy rubric, 15-item false-positive guard, step-file architecture) |
+| `02a-phase-1-step-tracker.md` | Step Tracker — debug-mode step enforcement audit breadcrumbs |
+| `02b-phase-1-agent-memory-fix.md` | Memory prefetch, tiering, and agent-level context optimization |
+| `02c-phase-1-teaching-partner.md` | Teaching Partner: @shifu (Kong Qiu) persona + /teach-me and /craft-lesson workflows |
+| `02d-phase-1-ai-ready-team.md` | AI-Ready Team: 9 domain expert personas + tooling depth |
+| `02e-phase-1-agentskills-standardization.md` | Skill frontmatter and metadata standardization (agentskills.io spec) |
+| `02f-phase-1-security-and-integrity-architecture.md` | Security & Integrity Architecture: supply-chain integrity, trust boundaries (T0–T3), prompt injection defense, audit-spec, and security scanner |
+| `02g-phase-1-harness-honesty.md` | Harness Honesty: capability-based delegation phrasing and No-Subagent Fallback |
+| `02h-phase-1-graph-shutup-and-cli.md` | Structural graph cleanup, `/shut-up` concise mode, and CLI update safety |
+| `02i-phase-1-memory-consolidation.md` | Memory persistence consolidation, machine-fenced state blocks, and token bounding |
+| `02j-phase-1-evals-and-agnostic-harness.md` | Agent evals Horizon 1: dogfooding test matrix, deterministic gates, and G-Eval benchmarks |
+| `03-phase-2-enablement.md` | Phase 2: full hooks table, MCP tool signatures, self-learning 3-tier spec, QA hard gate |
+| `03a-phase-2-mcp-integration-plan.md` | MCP Integration: first-party + 3rd-party MCP servers, 17 tools |
+| `03b-phase-2-multi-agent-orchestration.md` | Multi-Agent Orchestration: solo/parallel mode, CLI orchestrator, structured output |
+| `03c-phase-2-harness-integration.md` | Harness integration: Hermes, OpenClaw, and cross-harness adapters |
+| `03d-phase-2-implementation-specs.md` | Full JS code specifications for Phase 2 scripts and test suites |
+| `03e-phase-2-token-effective-mode.md` | Quick Mode — token-effective discussion mode |
+| `03f-phase-2-mcp-implementation.md` | Model Context Protocol (MCP) implementation specs and tool wiring |
+| `04-phase-3-observability.md` | Phase 3: graph query contracts per agent, See the Unseen directives, telemetry protocol |
+| `05-phase-4-modularity.md` | Phase 4: install-modules, rules/ directory structure, builder flows |
+| `06-phase-5-deeper-bench.md` | Phase 5: Deep bench persona charters and skill catalog expansions |
+| `07-phase-6-loop-engineering.md` | Loop Engineering: `/goal` primitive + automations + loop state |
+| `08-cross-cutting-utter-satisfaction-dna.md` | Cross-cutting culture contract, state model, collaboration loop, runtime enforcement |
+| `09-phase-7-pkm-knowledge-engine.md` | Personal Knowledge Management (PKM) & Knowledge Engine |
 
 ---
 

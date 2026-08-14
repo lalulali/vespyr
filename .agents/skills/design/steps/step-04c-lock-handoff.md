@@ -4,11 +4,6 @@ name: Lock & Handoff
 mode: validate
 prerequisites:
   - step-03 completed
-delegation:
-  reads: none
-  writes: "@writer (locked spec; per delegation-policy.md output file)"
-  runs: "@executor (orchestrator_state.js complete)"
-  direct_justified: []
 output_contract:
   citations: not-required
 ---
@@ -53,10 +48,5 @@ Blockers: {critical unresolved issues, or "none"}
 ## Handoff routing
 - **GO** → load `develop`
 - **FIX** → loop back to `steps/step-04a-screen-states.md` or `steps/step-03b-revise.md`
-
-## Delegation
-- **Reads:** none
-- **Writes:** @writer for locked spec
-- **Runs:** @executor for orchestrator_state.js complete
 
 > **Tracker:** `node .agents/scripts/step_tracker.js complete --skill design-validate --step 4`

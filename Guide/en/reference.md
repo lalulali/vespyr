@@ -4,7 +4,7 @@
 
 ## Agent Architecture
 
-Vespyr's 23 agents are organized into three layers:
+Vespyr's 20 agents are organized into three functional categories (Core Swarm, Specialized Domain Experts, and Shared Memory Layer):
 
 ## Memory Protocol
 

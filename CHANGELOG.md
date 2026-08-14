@@ -17,7 +17,13 @@ All notable changes to the Vespyr project will be documented in this file.
 - Implemented prototype scanner [`.agents/scripts/security-scan.js`](.agents/scripts/security-scan.js) with 3-state exit contract (`0 = clean`, `1 = findings`, `2 = fail-closed / tool failure`), sliding Shannon entropy secret detection (threshold 2.6), and base64 heuristic false-positive suppression.
 - Built Red-Team evaluation harness in [`eval/security/corpus/`](eval/security/corpus/) with positive/negative fixture pairs, CI invariant checker [`.agents/scripts/check_corpus_invariants.js`](.agents/scripts/check_corpus_invariants.js), and frozen baseline [`baseline-2026-08-10.json`](eval/security/corpus/baseline-2026-08-10.json).
 - Conducted fresh security audit on `security-scan.js` producing findings report `findings-report-security-scan-f1-47.md` (11 findings triaged for Phase 2 entry gate).
-- Sanitized security corpus test fixture path from `inj-path..\..\config.md` to `inj-path;traversal.md` to resolve Git cross-platform tree index validation errors, updating the corpus baseline and documentation.
+### Harness Honesty & Direct-I/O Execution (Epic 02g)
+- Fully executed the repository-wide **Harness Honesty** scrub (Epic 02g) across all 43 active skills and 89 step files:
+  - Cleaned all legacy `delegation:` frontmatter blocks and dead `@reader`, `@writer`, and `@executor` subagent handles from `design`, `test`, `unpack-problem`, `craft-lesson`, and `validate-idea` step files.
+  - Standardized on the Direct-I/O execution model with `@memory-controller` as the sole specialized sub-agent for 3-tier memory loading and session closeout.
+  - Implemented **ADR-005: Harness-Neutral Delegation Contract**, establishing capability-based phrasing and explicit No-Subagent Fallbacks across single-agent and multi-agent harnesses.
+  - Updated skill verification test suites ([`test-qa-enrichment.mjs`](.agents/skills/test/test-qa-enrichment.mjs), [`test-unpack-problem.mjs`](.agents/skills/unpack-problem/test-unpack-problem.mjs)) to assert `output_contract.citations`.
+  - Harmonized development plan naming conventions across all sub-plans (`02a`–`02j`, `09-phase-7-pkm-knowledge-engine.md`) and eliminated duplicate `02c-teaching-partner.md`.
 
 ### Added
 - `02g-phase-1-harness-honesty.md` development plan and **ADR-005: Harness-Neutral Delegation Contract**, defining capability-based delegation phrasing (`"Write via the writer role, or write directly if no subagents are available"`) and the canonical `Delegation path: <capability> → <role> | direct-fallback` line.

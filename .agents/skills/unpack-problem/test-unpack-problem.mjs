@@ -86,7 +86,7 @@ if (step01) {
   assertIncludes(step01, 'Impact', 'Step 01 collects impact');
   assertIncludes(step01, 'workaround', 'Step 01 collects current workaround');
   assertIncludes(step01, 'park solutions', 'Step 01 redirects solution proposals');
-  assertIncludes(step01, 'delegation:', 'Step 01 has delegation frontmatter');
+  assertIncludes(step01, 'output_contract:', 'Step 01 has output_contract frontmatter');
 }
 
 const step02 = checkFileExists('unpack-problem/steps/step-02-analysis-execution.md', 'analysis step');
@@ -96,7 +96,7 @@ if (step02) {
   assertIncludes(step02, 'Automated mode', 'Step 02 has Automated mode');
   assertIncludes(step02, 'Combination mode', 'Step 02 has Combination mode');
   assertIncludes(step02, '[AUTO-DRAFT]', 'Step 02 labels automated drafts');
-  assertIncludes(step02, 'delegation:', 'Step 02 has delegation frontmatter');
+  assertIncludes(step02, 'output_contract:', 'Step 02 has output_contract frontmatter');
 
   // F1.31 integration — must explicitly reference the 6 sub-skills
   results.push('\n📋 SCENARIO: F1.31 integration — step-02 references 6 sub-skills by name');
@@ -118,7 +118,7 @@ if (step03) {
   assertIncludes(step03, 'Remove the need', 'Step 03 considers removing the need');
   assertIncludes(step03, 'testable hypothesis', 'Step 03 requires testable hypotheses');
   assertIncludes(step03, 'confidence level', 'Step 03 assigns confidence levels');
-  assertIncludes(step03, 'delegation:', 'Step 03 has delegation frontmatter');
+  assertIncludes(step03, 'output_contract:', 'Step 03 has output_contract frontmatter');
 }
 
 const step04 = checkFileExists('unpack-problem/steps/step-04-brief-generation.md', 'brief generation step');
@@ -129,7 +129,7 @@ if (step04) {
   assertIncludes(step04, 'session-write', 'Step 04 does memory closeout');
   assertIncludes(step04, 'orchestrator_state.js complete', 'Step 04 runs state completion');
   assertIncludes(step04, 'Handoff', 'Step 04 has handoff section');
-  assertIncludes(step04, 'delegation:', 'Step 04 has delegation frontmatter');
+  assertIncludes(step04, 'output_contract:', 'Step 04 has output_contract frontmatter');
 }
 
 // ── F1.30.3 — Template exists ────────────────────────────────────

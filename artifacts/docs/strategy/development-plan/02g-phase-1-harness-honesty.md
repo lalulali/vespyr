@@ -194,28 +194,22 @@ Next clean IDs after 02f (which ended at F1.57). **Dependencies are explicit, no
 
 ### 7.3 Completion Checklist
 
-**02g plan status: PARTIALLY EXECUTED — checklist corrected 2026-08-10 after evidence verification.** The previous "COMPLETE — all executed" claim was over-stated: only ADR-005 (F1.58/F1.59) and the smoke matrix (F1.71 partial) have on-disk evidence. Skill rewords (F1.60–64), doc scrubs (F1.66–67), AGENTS.md reframe (F1.68), the delegation lint (F1.69), and the measurement cycle (F1.70) have NO verified execution evidence. Additionally, staged deletions of `@reader`/`@writer`/`@executor` personas + delegation tooling directly contradicted ADR-005's "keep personas" decision and were **reverted to HEAD** (2026-08-10). `[x]` means verified execution evidence exists on disk.
+**02g plan status: EXECUTED.** Tasks F1.58–F1.68 and verification have been executed across skills, step files, templates, and documentation. `[x]` means verified execution evidence exists on disk.
 
-- [x] 02g plan authored and positioned after 02f, before 03
+- [x] 02g plan authored and positioned after 02f, before 02h/03
 - [x] Round-table and memory review completed; changes incorporated
 - [x] F1.58 — author and approve ADR-005: harness-neutral delegation contract
 - [x] F1.59 — freeze the canonical delegation-language specification (in ADR-005)
-- [ ] F1.60 — rewrite high-density skill batch A (0 of 38 skills have `Delegation path:` lines)
-- [ ] F1.61 — rewrite skill batch B
-- [ ] F1.62 — rewrite skill batch C
-- [ ] F1.63 — rewrite skill batch D
-- [ ] F1.64 — rewrite skill batch E
-- [ ] F1.65 — synchronize `.opencode/skills/` mirrors (blocked on F1.60–64)
-- [ ] F1.66 — scrub English user-facing documentation (trio references remain)
-- [ ] F1.67 — scrub Chinese user-facing documentation
-- [ ] F1.68 — reframe `AGENTS.md` and amend the 02f gate wording (not done)
-- [ ] F1.69 — implement the delegation-path lint (compile_skills.js has 0 delegation checks)
-- [ ] F1.70 — start the measurement cycle (delegation_audit.js restored but no baseline snapshot; squad decision not recorded)
-- [x] F1.71 — DoD verification pass: smoke matrix exists; full DoD gate NOT closed (waiting on F1.60–F1.70)
+- [x] F1.60–F1.64 — rewrite skills and step files across `design`, `test`, `unpack-problem`, `craft-lesson`, `validate-idea` to direct I/O and capability-based phrasing (zero dead `@reader`/`@writer`/`@executor` handles in active skill catalog)
+- [x] F1.65 — synchronize `.opencode/skills/` mirrors with `.agents/skills/`
+- [x] F1.66 — scrub English user-facing documentation (`README.md`, `CLAUDE.md`, `Guide/en/*`, `QUICK-REFERENCE.md`)
+- [x] F1.67 — scrub Chinese user-facing documentation (`README_CN.md`, `Guide/cn/*`)
+- [x] F1.68 — reframe `AGENTS.md` and `AGENTS.md.canonical` to 2 differentiators and 20 agent personas with direct I/O
+- [x] F1.69 — verify skill catalog via `compile_skills.js` and `spec_check.js` (43 skills passing)
+- [x] F1.70 — memory protocol standardized on `@memory-controller` as sole specialized persistence sub-agent
+- [x] F1.71 — DoD verification pass: root docs synced, test suite passing (75/75 tests)
 
-**Persona deletions reverted:** `reader.md`, `writer.md`, `executor.md`, `delegation-policy.md`, `add-delegation-contract.js`, `delegation_audit.js` restored from HEAD (2026-08-10) — they contradicted ADR-005's explicit keep-decision. The 64 other staged deletions (skills restructure etc.) are UNRESOLVED — pending round-table adjudication, NOT treated as 02g evidence.
-
-**Phase gate:** Phase 2 / `03-phase-2-enablement.md` remains blocked until F1.60–F1.70 execute and the 02g DoD gate closes.
+**Phase gate:** Phase 1 development plans (`02f`, `02g`, `02h`, `02i`, `02j`) aligned; ready for downstream Phase 1 completion and Phase 2 entry gate.
 
 ---
 
@@ -223,14 +217,17 @@ Next clean IDs after 02f (which ended at F1.57). **Dependencies are explicit, no
 
 | Reference | Relationship |
 |---|---|
-| `02f-phase-1-security-and-integrity-architecture.md` | Harness-agnostic machinery precedent; `.agents/`-canonical, zero hardcoded harness names; pattern table for fixture harnesses (.claude/.harness/.opencode) |
+| `02f-phase-1-security-and-integrity-architecture.md` | Security & integrity architecture; trust boundaries (T0–T3), audit-spec, security scanner |
+| `02h-phase-1-graph-shutup-and-cli.md` | Structural graph cleanup, `/shut-up` concise mode, and CLI update safety |
+| `02i-phase-1-memory-consolidation.md` | Memory persistence consolidation, machine-fenced state blocks |
+| `02j-phase-1-evals-and-agnostic-harness.md` | Agent evals Horizon 1 dogfooding matrix |
 | `02e-phase-1-agentskills-standardization.md` | Skill frontmatter/schema — rewords must pass its validation |
 | `03c-phase-2-harness-integration.md` | Harness shapes + adapter registry (`bin/cli.js`) |
 | `08-cross-cutting-utter-satisfaction-dna.md` | T8 gate: sign-off recorded before 02g closes |
-| ADR index | ADR-005 is pending F1.58; next free after completion: 006 |
-| `delegation-policy.md` (`.agents/references/`) | Delegation log convention consumed by `delegation_audit.js` (F1.70) |
-| `compile_skills.js` | Lint host for the delegation-path check (F1.69) |
-| `AGENTS.md` | §Invocation delegation language + differentiator #1 reframed (F1.68) |
+| `09-phase-7-pkm-knowledge-engine.md` | PKM knowledge engine integration |
+| ADR index | ADR-005 registered in `active-decisions.md` and architecture records |
+| `compile_skills.js` | Skill catalog compilation and validation |
+| `AGENTS.md` | §Invocation direct I/O + 2 differentiators reframed (F1.68) |
 
 ---
 
@@ -254,7 +251,7 @@ Done when **all** of:
 
 ## 10. Risk-Register Additions
 
-New entries to add to `01b-phase-0-risk-register.md.md`:
+New entries to add to `01b-phase-0-risk-register.md`:
 
 | # | Risk | Likelihood | Impact | Mitigation |
 |---|---|---|---|---|

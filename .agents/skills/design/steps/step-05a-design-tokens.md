@@ -4,11 +4,6 @@ name: Design Tokens
 mode: create
 prerequisites:
   - step-04 completed
-delegation:
-  reads: "direct (screen states; per delegation-policy.md 1 file < 500 lines)"
-  writes: "@writer (design.md; per delegation-policy.md output file)"
-  runs: none
-  direct_justified: ["single input reference already in context"]
 output_contract:
   citations: not-required
 ---
@@ -49,9 +44,5 @@ Theme combinations:
 
 ## Output
 `artifacts/output/03-strategy/design.md`
-
-## Delegation
-- **Reads:** direct — screen states (single reference in context)
-- **Writes:** @writer for design.md
 
 > **Tracker:** `node .agents/scripts/step_tracker.js complete --skill design-create --step 5`

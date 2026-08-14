@@ -3,9 +3,6 @@ step: 4
 name: Brief Generation
 prerequisites:
   - step-03 completed
-delegation:
-  memory: "@memory-controller (session-write; per delegation-policy.md all memory)"
-  direct_justified: []
 output_contract:
   citations: not-required
 ---

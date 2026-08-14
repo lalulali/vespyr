@@ -4,11 +4,6 @@ name: Screen States
 mode: create
 prerequisites:
   - step-03 completed
-delegation:
-  reads: "direct (user stories + personas; per delegation-policy.md < 3 files < 500 lines)"
-  writes: "@writer (screen-states output; per delegation-policy.md output file)"
-  runs: none
-  direct_justified: ["< 3 small input files already in context"]
 output_contract:
   citations: not-required
 ---
@@ -48,9 +43,5 @@ If analytics instrumentation is needed, invoke `@data-analyst`:
 ## Outputs
 - `artifacts/output/03-strategy/product-spec.md` — machine-readable, used by architect, developer, tech-lead, QA
 - `artifacts/output/03-strategy/product-spec.html` — human-readable, dynamic Tailwind generation
-
-## Delegation
-- **Reads:** direct — user stories + personas (< 3 files)
-- **Writes:** @writer for screen-states output
 
 > **Tracker:** `node .agents/scripts/step_tracker.js complete --skill design-create --step 4`

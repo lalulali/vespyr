@@ -4,11 +4,6 @@ name: Finalize
 mode: edit
 prerequisites:
   - step-03 completed
-delegation:
-  reads: none
-  writes: "@writer (finalized spec files; per delegation-policy.md multi-file output)"
-  runs: "@executor (orchestrator_state.js complete)"
-  direct_justified: []
 output_contract:
   citations: not-required
 ---
@@ -51,10 +46,5 @@ Blockers: {any unresolved design questions, or "none"}
 
 ## Handoff
 Load `develop` to proceed. If revisions changed scope significantly, re-offer the Architect phase gate.
-
-## Delegation
-- **Reads:** none
-- **Writes:** @writer for finalized spec files
-- **Runs:** @executor for orchestrator_state.js complete
 
 > **Tracker:** `node .agents/scripts/step_tracker.js complete --skill design-edit --step 4`

@@ -3,11 +3,6 @@ step: 1b
 name: Load Existing
 mode: edit
 prerequisites: []
-delegation:
-  reads: "@reader (product-spec + design.md + user-stories; per delegation-policy.md ≥3 files)"
-  writes: none
-  runs: none
-  direct_justified: []
 output_contract:
   citations: not-required
 ---
@@ -26,16 +21,12 @@ Read the existing PRD, user stories, and product spec. Understand current state 
 3. Read `artifacts/output/03-strategy/user-stories.md`
 4. Read `artifacts/output/03-strategy/product-spec.md`
 5. Read `artifacts/output/03-strategy/design.md` (if it exists)
-6. If any file > 1000 words, invoke `@reader` to summarize.
+6. Extract key sections and constraints relevant to the requested edit.
 7. Ask the user: **"What specifically do you want to refine? The PRD scope, user stories, screen designs, or design system?"**
 
 ## Output
 Loaded design artifacts with user's edit targets identified.
 
 If any core artifact is missing (no PRD, no spec), flag immediately — the edit may need a full create-mode run instead.
-
-## Delegation
-- **Reads:** @reader for product-spec.md, design.md, and user-stories.md
-- **Writes:** none
 
 > **Tracker:** `node .agents/scripts/step_tracker.js complete --skill design-edit --step 1`

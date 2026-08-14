@@ -35,8 +35,9 @@ Games follow the same phases but use **game-specific skills** that speak in play
 | @product-designer | **deny** | **deny** | allow | yes | Premium (default) | Writes product specs + design tokens  |
 | @architect | **deny** | **deny** | allow | yes | Premium (default) | Writes ADRs  |
 | @tech-lead | allow | allow | allow | yes | Premium (default) | Writes execution plans, runs git worktrees |
-| @developer | allow | allow | allow | yes | Premium (default) | Writes production code and tests. Delegation: required/optional/none per task. |
+| @developer | allow | allow | allow | yes | Premium (default) | Writes production code and tests |
 | @ml-ai-engineer | allow | allow | allow | yes | Premium (default) | Writes ML pipelines, models, serving code |
+| @ml-ai-ops | allow | **deny** | allow | no | Premium (default) | Operates production AI & ML infrastructure |
 | @data-analyst | **deny** | **deny** | allow | yes | Premium (default) | Writes measurement plans, instrument code  |
 | @code-reviewer | allow | **deny** | allow | no | Premium (default) | Read code, report findings — no edits |
 | @qa-engineer | allow | allow | allow | yes | Premium (default) | Writes tests, validates behavior |
@@ -44,6 +45,7 @@ Games follow the same phases but use **game-specific skills** that speak in play
 | @performance-engineer | allow | **deny** | allow | no | Premium (default) | Profile and benchmark — report only |
 | @devops-engineer | allow | allow | allow | yes | Premium (default) | Writes CI/CD, infra, deployment configs |
 | @ux-researcher | **deny** | **deny** | allow | yes | Premium (default) | Evaluates usability — writes report  |
+| @shifu | **deny** | **deny** | allow | yes | Premium (default) | Designs learning paths & educational content |
 | @technical-writer | **deny** | allow | allow | yes | Premium (default) | Writes and updates documentation (no commands allowed) |
 | @memory-controller | **deny** | **deny** | allow | yes | Premium (default) | Memory gatekeeper: context loading, writes, compaction |
 

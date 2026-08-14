@@ -79,7 +79,7 @@ Vespyr organizes complex operations into atomic skills. Each skill is a folder w
 | `/doc-graph` | Generate/scan documentation links and trace coverage |
 | `/humanize` | AI-writing style detector and normalizer |
 | `/elicitation` | 69 structured methods to push LLM to refine output |
-| `/round-table` | Multi-agent stage-based roundtable discussions across all 11 phases and 23 agent roles |
+| `/round-table` | Multi-agent stage-based roundtable discussions across all 11 phases and 20 agent roles |
 
 ### Other & Customization
 

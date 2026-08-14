@@ -191,7 +191,7 @@ if (step04) {
   assertIncludes(step04, 'GO', 'Step 04 supports GO recommendation');
   assertIncludes(step04, 'CONDITIONAL GO', 'Step 04 supports CONDITIONAL GO recommendation');
   assertIncludes(step04, 'NO-GO', 'Step 04 supports NO-GO recommendation');
-  assertIncludes(step04, 'delegation:', 'Step 04 has delegation frontmatter');
+  assertIncludes(step04, 'output_contract:', 'Step 04 has output_contract frontmatter');
 }
 
 // ── Auto-proceed language verification (F1.32 consistency) ────────

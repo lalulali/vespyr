@@ -4,11 +4,6 @@ name: Accessibility Check
 mode: validate
 prerequisites:
   - step-02 completed
-delegation:
-  reads: "direct (screen states reference; per delegation-policy.md 1 file < 500 lines)"
-  writes: "@writer (accessibility check report)"
-  runs: none
-  direct_justified: ["single spec reference file"]
 output_contract:
   citations: not-required
 ---
@@ -41,9 +36,5 @@ Ensure the product is usable by people with disabilities. Catch a11y issues befo
 
 ## Output
 A11y report appended to `artifacts/output/02-research/ux-research-report.md`.
-
-## Delegation
-- **Reads:** direct — screen states (single reference)
-- **Writes:** @writer for accessibility check report
 
 > **Tracker:** `node .agents/scripts/step_tracker.js complete --skill design-validate --step 3`

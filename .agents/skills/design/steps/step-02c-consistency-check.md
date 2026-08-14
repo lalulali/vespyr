@@ -4,11 +4,6 @@ name: Consistency Check
 mode: validate
 prerequisites:
   - step-01 completed
-delegation:
-  reads: "direct (heuristic results + spec in context)"
-  writes: "@writer (consistency check report)"
-  runs: none
-  direct_justified: ["in-context data from step 1; no new file reads"]
 output_contract:
   citations: not-required
 ---
@@ -36,9 +31,5 @@ Find inconsistencies: one screen's button says "Save" and another says "Submit",
 
 ## Output
 Consistency report appended to `artifacts/output/02-research/ux-research-report.md` with findings mapped to screens/stories.
-
-## Delegation
-- **Reads:** direct — heuristic results and spec already in context
-- **Writes:** @writer for consistency check report
 
 > **Tracker:** `node .agents/scripts/step_tracker.js complete --skill design-validate --step 2`

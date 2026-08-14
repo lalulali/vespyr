@@ -4,11 +4,6 @@ name: Revise
 mode: edit
 prerequisites:
   - step-02 completed
-delegation:
-  reads: "direct (spec sections in context)"
-  writes: "@writer (revised spec sections; per delegation-policy.md output)"
-  runs: none
-  direct_justified: ["spec sections already in context from step 1"]
 output_contract:
   citations: not-required
 ---
@@ -37,9 +32,5 @@ Never introduce new content that wasn't prompted by the user's edit target. If t
 
 ## Output
 Revised artifact sections, integrated into the existing documents.
-
-## Delegation
-- **Reads:** direct — spec sections already in context
-- **Writes:** @writer for revised spec sections
 
 > **Tracker:** `node .agents/scripts/step_tracker.js complete --skill design-edit --step 3`

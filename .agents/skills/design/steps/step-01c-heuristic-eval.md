@@ -3,11 +3,6 @@ step: 1c
 name: Heuristic Evaluation
 mode: validate
 prerequisites: []
-delegation:
-  reads: "@reader (product-spec + screen states; per delegation-policy.md ≥2 large files)"
-  writes: "@writer (heuristic evaluation report)"
-  runs: none
-  direct_justified: []
 output_contract:
   citations: not-required
 ---
@@ -44,9 +39,5 @@ Identify usability issues in the current design before they reach implementation
 `artifacts/output/02-research/ux-research-report.md` — heuristic scorecard with issues per screen.
 
 Use template `.agents/templates/research/ux-research-report-template.md`.
-
-## Delegation
-- **Reads:** @reader for product-spec and screen states
-- **Writes:** @writer for heuristic evaluation report
 
 > **Tracker:** `node .agents/scripts/step_tracker.js complete --skill design-validate --step 1`

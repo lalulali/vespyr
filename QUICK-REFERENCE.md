@@ -53,29 +53,29 @@ Optional        @ml-ai-engineer       AI & ML models, RAG, prompt engineering, e
 
 ──────────────────────────────────────────────────
 
-SUBAGENTS — invoke by @mention
+AGENT PERSONAS (20 roles) — invoke by @mention
 ──────────────────────────────────────────────────
-@architect       Full access  — System design, ADRs, tech stack
-@code-reviewer   Read-only    — Code quality gate (no edits)
-@data-analyst    Full access  — Measurement + analytics
-@developer       Full access  — Production code
-@devops-engineer Full access  — Infrastructure, CI/CD
-@founder         Read-only    — Strategic ideation
-@ml-ai-engineer  Full access  — AI & ML models, RAG, prompts, evals
-@ml-ai-ops       Full access  — Production AI serving, drift ops, rollback
-@product-designer Full access — UX/UI specs, design tokens
-@product-manager Full access  — PRD, user stories
-@qa-engineer     Full access  — Testing, validation
-@researcher      Read-only    — Market research, competitive analysis
-@security-engineer Read-only  — Security audit (no edits)
-@shifu           Full access  — Learning paths, educational content
-@tech-lead       Full access  — Planning, task breakdown
-@technical-writer Full access — Documentation
-@user-researcher Read-only    — User research, personas
-@performance-eng. Read-only   — Performance profiling
-@ux-researcher   Read-only    — Usability evaluation
-
-──────────────────────────────────────────────────
+@architect          Full access  — System design, ADRs, tech stack
+@code-reviewer      Read-only    — Code quality gate (no edits)
+@data-analyst       Full access  — Measurement + analytics
+@developer          Full access  — Production code & tests
+@devops-engineer    Full access  — Infrastructure, CI/CD
+@founder            Read-only    — Strategic ideation & stress testing
+@ml-ai-engineer     Full access  — AI & ML models, RAG, prompts, evals
+@ml-ai-ops          Full access  — Production AI serving, drift ops, rollback
+@product-designer   Full access  — UX/UI specs, design tokens
+@product-manager    Full access  — PRD, user stories
+@qa-engineer        Full access  — Testing, validation
+@researcher         Read-only    — Market research, competitive analysis
+@security-engineer  Read-only    — Security audit (no edits)
+@shifu              Full access  — Learning paths, educational content
+@tech-lead          Full access  — Planning, task breakdown
+@technical-writer   Full access  — Documentation & guides
+@user-researcher    Read-only    — User research, personas
+@performance-eng.   Read-only    — Performance profiling
+@ux-researcher      Read-only    — Usability evaluation
+@memory-controller  Specialized  — 3-tier memory persistence & loading
+───────────────────────────────────────────────────
 
 QUALITY GATES (in order)
 ──────────────────────────────────────────────────
