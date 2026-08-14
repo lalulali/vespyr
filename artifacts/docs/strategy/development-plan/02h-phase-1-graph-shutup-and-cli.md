@@ -54,142 +54,235 @@
 └────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### 1.4 The Four Core Pillars
-
-```
-┌────────────────────────────────────────────────────────────────────────┐
-│                        Epic 02h Core Pillars                           │
-├────────────────────────────────────────────────────────────────────────┤
-│  Pillar 1: Legacy Graph Deletion                                       │
-│  - Scrap shallow_graph.js, incremental_graph.js, doc_graph.js, etc.     │
-│  - Remove code-graph.json and doc-graph.json                           │
-│  - Scrub all agent/skill references to query_graph.js                  │
-├────────────────────────────────────────────────────────────────────────┤
-│  Pillar 2: /shut-up Skill Implementation                               │
-│  - 1-shot invocation: /shut-up <instructions>                          │
-│  - Introvert / lazy-to-talk AI behavior: zero lectures, minimal text   │
-│  - Destructive safety gate (confirm only on irreversible actions)      │
-├────────────────────────────────────────────────────────────────────────┤
-│  Pillar 3: "No Yes-Men" Core DNA & /grill-me Hardening                 │
-│  - Embed Anti-Sycophancy DNA in socratic-universal.md and AGENTS.md    │
-│  - Ban agreeable rubber-stamping ("Sounds great!", immediate codegen)  │
-│  - Strengthen /grill-me 7+1 branch failure-path interrogation loop     │
-│  - Enforce persistent decision logs before downstream development      │
-├────────────────────────────────────────────────────────────────────────┤
-│  Pillar 4: bin/cli.js Modernization                                    │
-│  - Stack auto-detection on init (package.json, Cargo.toml, etc.)       │
-│  - First-class `npx vespyr update` command                             │
-│  - Harness additions: Antigravity, Gemini, Aider                       │
-│  - Non-interactive headless flags for CI/CD                            │
-└────────────────────────────────────────────────────────────────────────┘
-```
-
 ---
 
-## 2. Technical Specifications
+## 2. Pillar 1: Legacy Graph Deletion & Scrap Specification
 
-### 2.1 Pillar 1: Graph Subsystem Deletion
-- **Files to Delete:**
-  - `.agents/scripts/shallow_graph.js`
-  - `.agents/scripts/incremental_graph.js`
-  - `.agents/scripts/doc_graph.js`
-  - `.agents/scripts/ensure_graph.js`
-  - `.agents/scripts/query_graph.js`
-  - `artifacts/memory/structural/code-graph.json`
-  - `artifacts/memory/structural/doc-graph.json`
-  - `.agents/skills/code-graph/`
-  - `.agents/skills/doc-graph/`
-- **Agent Prompts to Scrub:** Remove `query_graph.js summary/blast/trace` instructions across `.agents/agents/*.md` and `.agents/templates/system/*.canonical`.
+### 2.1 Strategic Rationale
+Homegrown graph scripts (`shallow_graph.js`, `incremental_graph.js`, `doc_graph.js`, `ensure_graph.js`, `query_graph.js`) created significant maintenance overhead, AST parsing brittleness, and duplicate structural state files (`code-graph.json`, `doc-graph.json`). Modern developer ecosystems have dedicated, mature graph tooling (e.g. Graphify, Tree-sitter AST indexers, IDE LSP). Vespyr removes homegrown graph scripts to keep the engine lightweight and focused on agent orchestration.
 
-### 2.2 Pillar 2: `/shut-up` Skill Specification
-- **Skill Location:** `.agents/skills/shut-up/SKILL.md`
-- **Frontmatter:**
-  ```yaml
-  name: shut-up
-  description: One-shot silent execution mode — executes tasks directly with zero unsolicited critique, no conversational filler, and ultra-minimal output.
-  metadata:
-    version: "1.0"
-    last_updated: "2026-08-14"
-  ```
-- **Architectural Boundary:**
-  - Strictly a **runtime/prompt context modifier**. It MUST NOT write state, flags, or settings to persistent workspace memory (`active-decisions.md` or `project-context.md`).
-- **Positive Structural Directives & Guardrails:**
-  1. Suppress Socratic stance, trade-off lectures, and philosophical advice entirely.
-  2. Positive output schema: Return ONLY direct code diffs, command executions, and 1–2 line status summaries (strict token ceiling: <100 tokens per turn).
-  3. Perform requested file modifications or shell commands immediately without preambles or post-completion essays.
-  4. Prompt for confirmation *only* if the commanded action causes irreversible data destruction.
+### 2.2 File Deletion Inventory
 
-### 2.3 Pillar 3: "No Yes-Men" Core DNA & `/grill-me` Hardening Specification
-- **Core DNA Locations:**
-  - `AGENTS.md` (§Default Stance: Socratic — Always On)
-  - `.agents/references/socratic-universal.md`
+```
+.agents/scripts/
+├── [DELETE] shallow_graph.js        # Legacy initial full-repo AST graph parser
+├── [DELETE] incremental_graph.js    # Legacy incremental git-diff graph updater
+├── [DELETE] doc_graph.js            # Legacy markdown document link mapper
+├── [DELETE] ensure_graph.js         # Legacy startup graph verification check
+└── [DELETE] query_graph.js          # Legacy blast-radius and symbol query script
+
+artifacts/memory/structural/
+├── [DELETE] code-graph.json         # Large 50KB+ generated codebase AST graph
+└── [DELETE] doc-graph.json          # Large generated markdown traceability graph
+
+.agents/skills/
+├── [DELETE] code-graph/             # Legacy codebase graph skill directory
+│   ├── SKILL.md
+│   └── steps/
+└── [DELETE] doc-graph/              # Legacy document graph skill directory
+    ├── SKILL.md
+    └── steps/
+```
+
+### 2.3 Agent Prompts & System Template Scrubbing
+All agent persona files and system canonical templates must be scrubbed of `query_graph.js` references:
+- Remove instructions referencing `node .agents/scripts/query_graph.js summary`
+- Remove instructions referencing `node .agents/scripts/query_graph.js blast --symbol <X>`
+- Remove instructions referencing `node .agents/scripts/query_graph.js trace --doc <Y>`
+- Files affected:
+  - `.agents/agents/*.md` (all 20 persona files)
   - `.agents/templates/system/*.canonical`
-- **Core Principle Codified:** *"No Yes-Men in the Swarm. A yes-man agent is an engine defect. Push back before you help ship the mess."*
-- **DNA Directives across all Agents:**
-  1. **Strict Prohibition of Rubber-Stamping:** Explicitly forbid agreeable phrases (*"Sounds great!"*, *"I can build that right away"*, *"Awesome idea"*) when analyzing incoming plans or prompts.
-  2. **Mandatory Assumption & Blast-Radius Challenge:** Before diving into code generation or task creation, agents must surface unverified assumptions, dependency failure modes, and layer-0 data risks.
-  3. **Preserve Integrity over Agreement:** An agent that agrees with a broken or ambiguous user premise fails its core quality gate.
-- **`/grill-me` Skill Hardening (`.agents/skills/grill-me/SKILL.md`):**
-  1. **Adversarial Failure-Mode Probing:** Interrogate unhappy paths, state mutation invariants, and phantom backlog creep across all 7+1 branches.
-  2. **Mandatory Decision Log:** Write structured decisions (`AD-YYYY-MM-DD`) into `artifacts/memory/active-decisions.md` and `artifacts/output/{current-phase}/grill-me-decisions.md` before handoff to `/develop` or `/design`.
-  3. **Role Challenge Modules:** Incorporate distinct grill profiles for Founder (ROI/Market), Architect (Boundaries/Data Models), Tech Lead (Blast Radius/Effort), and QA (Failure Paths/Edge Cases).
+  - `.agents/skills/develop/steps/01-spec-review.md`
+  - `.agents/skills/develop/steps/02-architecture.md`
+  - `.agents/skills/plan/steps/*.md`
 
-### 2.4 Pillar 4: `bin/cli.js` Improvements
-- **Stack Auto-Detection (`detectStack`)**:
-  - Checks for `package.json` (React, Next.js, Vue, Vite, Express), `Cargo.toml` (Rust), `go.mod` (Go), `pyproject.toml` / `requirements.txt` (Python).
-  - Populates `project-context.md` `Stack:` field dynamically instead of `None`.
-- **First-Class Update Mode (`npx vespyr update`)**:
-  - Overwrites `.agents/` engine personas and skills with latest release.
-  - Strictly preserves `artifacts/memory/` and `artifacts/output/` (untouchable by updates).
-  - Creates `.bak` backups on user-customized skill/agent conflict diffs (no destructive overwrites).
-- **Expanded Harness Options**:
-  - Add `antigravity` (Google Antigravity IDE/CLI), `gemini` (Gemini CLI), and `aider` (.aider.conf.yml).
-- **Headless CI/CD Flags**:
-  - Support `--project-name`, `--user-nickname`, `--stack`, `--harness`, `--target`, and `--yes` for 1-line non-interactive setup.
+### 2.4 Automated Deprecation Assertion Script (`test/graph-deprecation.test.js`)
+An automated test assertion will run in CI to guarantee that zero references to deleted graph scripts or JSON artifacts remain:
+```javascript
+// Asserts that no file in .agents/, artifacts/, bin/, or guide/ contains query_graph, code-graph.json, or doc-graph.json
+const forbiddenPatterns = [
+  'query_graph.js',
+  'shallow_graph.js',
+  'incremental_graph.js',
+  'ensure_graph.js',
+  'code-graph.json',
+  'doc-graph.json',
+  '/code-graph',
+  '/doc-graph'
+];
+```
 
 ---
 
-## 3. Workstreams & Tasks
+## 3. Pillar 2: `/shut-up` Skill Specification
 
-### WS-1: Graph Deletion & Codebase Cleanliness
-- [ ] **Task 1.1**: Delete all 5 legacy graph scripts in `.agents/scripts/`.
-- [ ] **Task 1.2**: Remove `artifacts/memory/structural/` JSON files and skill folders.
-- [ ] **Task 1.3**: Scrub references to `query_graph.js` from all agent `.md` files, skill step files, and canonical templates.
-- [ ] **Task 1.4**: Author static AST/grep regression assertion script asserting zero lingering references to `query_graph.js` or `code-graph.json` across `.agents/`, `artifacts/`, and `bin/`.
-- [ ] **Task 1.5**: Run `compile_skills.js` and `spec_check.js` to ensure zero broken dependencies.
+### 3.1 Concept & Architectural Boundary
+`/shut-up` is a **one-shot, runtime prompt context modifier**. It temporarily suppresses the agent's verbose Socratic persona, educational explanations, and multi-paragraph commentary.
 
-### WS-2: `/shut-up` Skill Development & Registration
-- [ ] **Task 2.1**: Author `.agents/skills/shut-up/SKILL.md` with positive output constraints and token ceilings.
+```
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                                /shut-up Execution Model                                │
+├────────────────────────────────────────────────────────────────────────────────────────┤
+│  User Input:  /shut-up add email validation regex to auth helper                       │
+│                                                                                        │
+│  Agent Response Under /shut-up:                                                        │
+│  ```diff                                                                               │
+│  +export const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email); │
+│  ```                                                                                   │
+│  Added `isValidEmail` to `src/utils/auth.ts`.                                          │
+│                                                                                        │
+│  Token Spend: ~45 tokens (vs. ~650 tokens with unsolicited Socratic review)             │
+└────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+### 3.2 Invariant Rules & Schema
+1. **Runtime Context Only:** `/shut-up` MUST NOT write flags or state to `project-context.md` or `active-decisions.md`.
+2. **Output Token Ceiling:** Responses must strictly remain under **100 output tokens**.
+3. **Schema Contract:** Output must contain ONLY:
+   - Direct file edits (diff blocks or file tool calls)
+   - Exact shell command execution outputs
+   - A single 1-line status summary
+4. **Destructive Safety Gate Exception:** If a requested command causes permanent data loss (e.g. `rm -rf`, `DROP TABLE`, uncommitted git wipe), the agent is permitted a single 1-line confirmation prompt before proceeding.
+
+### 3.3 Skill Frontmatter & Content (`.agents/skills/shut-up/SKILL.md`)
+```yaml
+---
+name: shut-up
+description: One-shot silent execution mode — executes tasks directly with zero unsolicited critique, no conversational filler, and ultra-minimal output.
+metadata:
+  version: "1.0"
+  last_updated: "2026-08-14"
+---
+```
+
+---
+
+## 4. Pillar 3: "No Yes-Men" Core DNA & `/grill-me` Hardening
+
+### 4.1 Codifying Anti-Sycophancy in Vespyr Core DNA
+The anti-sycophancy directive is injected into the foundation of all 20 agents:
+- **`AGENTS.md` (§Default Stance: Socratic — Always On):**
+  > **No Yes-Men in the Swarm.**  
+  > *A yes-man agent is an engine defect. Push back before you help ship the mess.*  
+  > Agreeable rubber-stamping (*"Sounds like a great idea!"*, *"I'll write that immediately"*) on broken, incomplete, or hazardous premises is strictly forbidden.
+- **`.agents/references/socratic-universal.md`:** Codified mandate requiring every agent to challenge unverified assumptions, boundary risks, and missing error paths before code is written.
+
+### 4.2 `/grill-me` Hardening: The 7+1 Failure-Mode Decision Tree
+
+`/grill-me` (`.agents/skills/grill-me/SKILL.md`) is upgraded into an active interrogation protocol across 8 specific risk branches:
+
+```
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                        The 7+1 Branch Adversarial Decision Tree                        │
+├────────────────────────────────────────────────────────────────────────────────────────┤
+│  Branch 1: Problem & Premise Validation (Is this a real problem or an XY distraction?) │
+│  Branch 2: Architecture & Boundaries (Does this violate Layer-0 isolation?)            │
+│  Branch 3: Data Mutations & Invariants (Can state become inconsistent or corrupted?)   │
+│  Branch 4: Blast Radius & Side Effects (What breaks when this service fails?)          │
+│  Branch 5: Security & Secrets (Are there injection, auth, or plaintext leaks?)        │
+│  Branch 6: Failure Paths & Recoverability (How does the system recover from crashes?)   │
+│  Branch 7: Unit Economics & Scale (What is the marginal cost at 100x traffic?)         │
+│  Branch 8: YAGNI & MVP Scope Lock (Can 80% of this be cut to ship in 1 day?)          │
+└────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+### 4.3 Mandatory Decision Log Output Contract
+`/grill-me` concludes by generating an immutable decision log saved to:
+1. `artifacts/output/{phase}/grill-me-decisions.md`
+2. Appended to `artifacts/memory/active-decisions.md`
+
+```markdown
+### [DECISION] AD-YYYY-MM-DD: <Decision Title> [agent: @grill-me]
+- **Target Premise:** <What was proposed>
+- **Challenges Identified:** <Flaws, unhappy paths, or blast radius surfaced>
+- **Resolution & Trade-Off:** <Explicit agreed solution and what was discarded>
+- **Handoff Target:** @developer / @design
+**Status:** active
+```
+
+---
+
+## 5. Pillar 4: `bin/cli.js` Modernization Specification
+
+### 5.1 Automatic Stack Detection (`detectStack`)
+On initialization (`npx vespyr init` or `npx vespyr`), the CLI inspects the target directory for language/framework manifests and automatically populates `project-context.md`:
+
+```javascript
+function detectStack(targetDir) {
+  const checks = [
+    { file: 'package.json', check: (pkg) => pkg.dependencies?.next ? 'Next.js' : pkg.dependencies?.react ? 'React' : 'Node.js' },
+    { file: 'Cargo.toml', label: 'Rust' },
+    { file: 'go.mod', label: 'Go' },
+    { file: 'pyproject.toml', label: 'Python' },
+    { file: 'requirements.txt', label: 'Python' },
+    { file: 'pom.xml', label: 'Java (Maven)' },
+    { file: 'build.gradle', label: 'Java (Gradle)' }
+  ];
+  // Returns detected stack string (e.g. "TypeScript, Next.js, Tailwind")
+}
+```
+
+### 5.2 First-Class Update Mode (`npx vespyr update`)
+The CLI introduces safe, non-destructive engine updates:
+- **Overwrites:** Core engine personas (`.agents/agents/*.md`), core skill workflows (`.agents/skills/*`), and engine scripts (`.agents/scripts/*`).
+- **Strictly Preserves:** `artifacts/memory/` and `artifacts/output/` are never touched or clobbered.
+- **Custom Conflict Backups:** If a user has customized an existing skill or agent file, the updater creates `.bak` backups (e.g. `SKILL.md.bak-20260814`) rather than silently discarding user changes.
+
+### 5.3 Expanded Multi-Harness Integration
+Adds first-class scaffolding for modern AI developer harnesses:
+- **`antigravity`:** Scaffolds `.agents/` + Antigravity configuration shims.
+- **`gemini`:** Generates Gemini CLI configuration templates.
+- **`aider`:** Generates `.aider.conf.yml` and pre-prompt instructions.
+
+### 5.4 Headless CI/CD Automation Flags
+Enables one-line zero-prompt installation for CI/CD runners:
+```bash
+npx vespyr init --project-name "my-app" --user-nickname "Alex" --stack "Next.js" --harness "antigravity" --yes
+```
+
+---
+
+## 6. Workstreams & Execution Tasks
+
+### WS-1: Graph Subsystem Deletion & Cleanliness
+- [ ] **Task 1.1**: Delete all 5 graph scripts in `.agents/scripts/` (`shallow_graph.js`, `incremental_graph.js`, `doc_graph.js`, `ensure_graph.js`, `query_graph.js`).
+- [ ] **Task 1.2**: Remove `artifacts/memory/structural/` (`code-graph.json`, `doc-graph.json`) and skill folders (`.agents/skills/code-graph/`, `.agents/skills/doc-graph/`).
+- [ ] **Task 1.3**: Scrub references to `query_graph.js` from all agent `.md` files, skill step files, and canonical system templates.
+- [ ] **Task 1.4**: Author `test/graph-deprecation.test.js` static AST/grep regression assertion script asserting zero dangling graph references across `.agents/`, `artifacts/`, and `bin/`.
+- [ ] **Task 1.5**: Run `node .agents/scripts/compile_skills.js` and `spec_check.js` to ensure clean build.
+
+### WS-2: `/shut-up` Skill Implementation & Registration
+- [ ] **Task 2.1**: Author `.agents/skills/shut-up/SKILL.md` with runtime-only context modifier and <100 token ceiling.
 - [ ] **Task 2.2**: Register `/shut-up` in `skills.md`, `workflow.md`, `README.md`, `README_CN.md`, and `opencode.json`.
-- [ ] **Task 2.3**: Verify `/shut-up` behavior across agent runners with brevity and destructive-gate snapshot tests.
+- [ ] **Task 2.3**: Author automated snapshot test fixtures asserting brevity (<100 tokens) and destructive confirmation gates.
 
-### WS-3: "No Yes-Men" Core DNA & `/grill-me` Hardening Upgrades
+### WS-3: "No Yes-Men" DNA & `/grill-me` Hardening Upgrades
 - [ ] **Task 3.1**: Codify the "No Yes-Men in the Swarm" anti-sycophancy principle in `AGENTS.md` and `.agents/references/socratic-universal.md`.
-- [ ] **Task 3.2**: Update `.agents/skills/grill-me/SKILL.md` with hardened anti-sycophancy directives, failure-mode checklists, and role-based challenge modules.
+- [ ] **Task 3.2**: Update `.agents/skills/grill-me/SKILL.md` with 7+1 branch failure-path interrogation and role challenge modules.
 - [ ] **Task 3.3**: Update agent system templates (`.agents/templates/system/*.canonical`) to ban premature agreeableness and rubber-stamping.
-- [ ] **Task 3.4**: Ensure clean handoff from `/grill-me` decision log to `/design` and `/develop` workflows.
+- [ ] **Task 3.4**: Author test fixtures verifying `/grill-me` output decision log generation and clean handoff into downstream planning.
 
 ### WS-4: `bin/cli.js` Modernization & Testing
-- [ ] **Task 4.1**: Implement `detectStack(targetDir)` helper in `bin/cli.js`.
-- [ ] **Task 4.2**: Add `npx vespyr update` subcommand handling with memory preservation and `.bak` conflict backups.
-- [ ] **Task 4.3**: Add Antigravity, Gemini, and Aider to harness options and transpilation handlers.
-- [ ] **Task 4.4**: Add non-interactive parameter flags (`--project-name`, `--user-nickname`, `--stack`).
-- [ ] **Task 4.5**: Test local dry-run, installation, and update across clean directories and existing version fixtures.
+- [ ] **Task 4.1**: Implement `detectStack(targetDir)` helper in `bin/cli.js` with multi-language manifest checks.
+- [ ] **Task 4.2**: Implement `npx vespyr update` subcommand handling with memory preservation and `.bak` conflict backups.
+- [ ] **Task 4.3**: Add Antigravity, Gemini, and Aider to harness options and configuration scaffolding.
+- [ ] **Task 4.4**: Implement non-interactive headless CLI parameter flags (`--project-name`, `--user-nickname`, `--stack`, `--harness`, `--yes`).
+- [ ] **Task 4.5**: Author cross-platform initialization and update test matrix across clean workspaces and pre-existing versions.
 
 ---
 
-## 4. Definition of Done (DoD)
+## 7. Definition of Done (DoD)
 
-1. Zero legacy graph scripts or JSON artifacts exist in `.agents/` or `artifacts/memory/`, verified by automated static deprecation check.
-2. `/shut-up` is fully functional, runtime-only (no persistent memory pollution), and registered across all documentation and skill catalogs.
-3. The *"No Yes-Men in the Swarm"* Anti-Sycophancy principle is embedded across `AGENTS.md`, universal Socratic references, persona templates, and `/grill-me`.
-4. `/grill-me` actively prevents sycophantic rubber-stamping, enforces the 7+1 decision tree with failure-path challenges, and persists decision logs cleanly.
-5. `bin/cli.js` detects repository stack automatically, supports safe non-destructive `update` mode, supports Antigravity/Gemini/Aider harnesses, and installs cleanly in both interactive and headless modes.
-6. All unit and lint checks pass cleanly.
+1. Zero legacy graph scripts (`shallow_graph.js`, etc.) or structural JSON files exist in the repository, verified by automated static AST/grep deprecation test.
+2. `/shut-up` is fully registered across all documentation and executes tasks in $<100$ tokens without writing persistent state.
+3. The *"No Yes-Men in the Swarm"* Anti-Sycophancy principle is embedded in `AGENTS.md`, universal Socratic references, and persona templates.
+4. `/grill-me` actively interrogates assumptions across the 7+1 decision tree and produces structured decision logs before downstream development.
+5. `bin/cli.js` accurately detects repository stacks, executes safe non-destructive `update` operations, supports Antigravity/Gemini/Aider, and operates in headless mode.
+6. All automated unit and regression tests pass cleanly.
 
 ---
 
-## 5. Completion Checklist
+## 8. Completion Checklist
 
 **02h plan authoring status: COMPLETE.**
 
@@ -216,7 +309,7 @@
 
 ---
 
-## 6. Sign-Off
+## 9. Sign-Off
 
 **@founder (Elena):** APPROVED — SATISFIED (2026-08-14). Scope: "No Yes-Men in the Swarm" embedded as non-negotiable core DNA alongside Socratic stance; clean separation of /shut-up (silent execution) and /grill-me (Socratic anti-sycophancy).  
 **@architect (Vera):** APPROVED — SATISFIED (2026-08-14). Scope: Anti-Sycophancy DNA stops premature Layer 0 blast radius; /shut-up bounded strictly as runtime modifier without memory pollution.  

@@ -8,85 +8,193 @@
 
 ---
 
-## 1. Mandate & Strategic Scope
+## 1. Mandate & Strategic Rationale
 
 ### 1.1 Mandate (from Chris)
 "Project context is the gate for agent to understand the context, the information should be enough for agent to understand the context... consolidate the fragmented memory files, eliminate role-siloed agent-notes and ghost folders, and make project-context.md + active-decisions.md the authoritative core."
 
 ### 1.2 The 5 Core Problems Being Solved
 
-1. **Frozen Front Gate (`project-context.md`)**: `project-context.md` core metadata (stack, git repo, phase, sprint, blockers) was seeded once on project initialization and stayed frozen, leaving agents with obsolete context.
-2. **The "Write-Only Graveyard"**: Agents wrote extensively to `agent-notes/*.md`, but subsequent agents rarely or never read them because standard IDE harnesses lack automated pre-prompt injection hooks.
-3. **Role Siloing in Notes**: Separating `developer-notes.md` from `architect-notes.md` blocked cross-disciplinary context sharing.
-4. **Duplicate / Ephemeral Checkpoints**: Having both `session-checkpoints/checkpoint.md` and `session-summaries/latest.md` created ambiguity over which was authoritative. Active discussions were lost if sessions closed before a final exit write.
-5. **Compaction Delay**: Memory compaction only ran at retro (every 5 cycles), allowing `active-decisions.md` to accumulate contradictory and obsolete rules across intermediate phases.
+```
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                        The 5 Persistent Memory Pathologies                             │
+├────────────────────────────────────────────────────────────────────────────────────────┤
+│  1. Frozen Front Gate (project-context.md)                                             │
+│     Seeded once on init and never updated, leaving agents with obsolete stack info.   │
+├────────────────────────────────────────────────────────────────────────────────────────┤
+│  2. The "Write-Only Graveyard" (agent-notes/*.md)                                      │
+│     Agents wrote extensive notes, but downstream agents never read them due to no hooks│
+├────────────────────────────────────────────────────────────────────────────────────────┤
+│  3. Role Siloing in Memory                                                             │
+│     Separating developer-notes from architect-notes blocked holistic cross-agent context│
+├────────────────────────────────────────────────────────────────────────────────────────┤
+│  4. Split-Brain Checkpoints                                                            │
+│     Duplicate session-checkpoints/checkpoint.md and session-summaries/latest.md created│
+│     ambiguity over which file represented the authoritative active cursor.             │
+├────────────────────────────────────────────────────────────────────────────────────────┤
+│  5. Compaction Delay & Decision Drift                                                  │
+│     Compaction only occurred at retro (every 5 cycles), accumulating stale decisions.  │
+└────────────────────────────────────────────────────────────────────────────────────────┘
+```
 
 ---
 
-## 2. Target Architecture
+## 2. Target Memory Layer Architecture & Specifications
+
+### 2.1 Consolidated 3-Tier Memory Hierarchy
 
 ```
 artifacts/memory/
-├── project-context.md          # Tier 1 Living Front Gate: Identity, Auto-detected Stack, Git Repo, Active Phase, Sprint, Dev Plan
-├── active-decisions.md         # Active Architectural & Design Constraints (Pruned at every phase handoff)
-├── patterns-and-conventions.md # Unified Code & Architecture Patterns (Consolidates all role notes)
-├── lessons-learned.md          # High-value gotchas, bugs fixed, and architectural retrospective lessons
-├── blockers-and-risks.md       # Live active blockers and mitigations (Auto-cleaned when resolved)
+├── project-context.md          # [Tier 1] Living Front Gate: Auto-synced stack, git, phase, sprint (<300 tok)
+├── active-decisions.md         # [Tier 1] Active Architectural & Design Constraints (<400 tok)
+├── patterns-and-conventions.md # [Tier 2] Consolidated Code & Arch Patterns (Consolidates agent-notes, <500 tok)
+├── lessons-learned.md          # [Tier 2] High-value gotchas, bugs fixed, and retro lessons (<500 tok)
+├── blockers-and-risks.md       # [Tier 3] Live active blockers and mitigations (Auto-cleaned when resolved)
 ├── session-summaries/
-│   └── latest.md               # Single Authoritative Live Cursor & latest milestone summary
-└── archive/                    # Compacted historical quarterly logs & superseded decisions
+│   └── latest.md               # [Tier 3] Single Authoritative Live Cursor & latest milestone summary
+└── archive/                    # [Tier 3] Compacted historical quarterly logs & superseded decisions
 ```
 
-### 2.1 Key Architectural Changes
+### 2.2 Memory File Contracts & Budgets
 
-1. **Auto-Syncing `project-context.md` with Isolated Machine State Fences**:
-   - `orchestrator_state.js` automatically updates `project-context.md` within a dedicated machine-managed comment block (`<!-- BEGIN MACHINE STATE --> ... <!-- END MACHINE STATE -->`).
-   - Prevents split-brain markdown parser clobbering: human/LLM custom sections remain untouched.
-   - Dynamic auto-detection: Inspects `package.json`, `Cargo.toml`, `go.mod`, etc. for current stack and runs `git` commands for active branch/repo.
-2. **Single Live Cursor (`session-summaries/latest.md`)**:
-   - Scrap `session-checkpoints/checkpoint.md`.
-   - Milestones and breaks write directly to `session-summaries/latest.md` and `active-decisions.md` during execution.
-3. **De-siloing `agent-notes/` into Budgeted `patterns-and-conventions.md`**:
-   - Role-specific notes (`developer-notes.md`, `architect-notes.md`, etc.) are merged into `patterns-and-conventions.md`.
-   - Enforce strict token budgeting (<500 tokens) with active pattern eviction to avoid context junk-drawer bloat.
-4. **Phase-Boundary Compaction Gate & Validation**:
-   - Every phase handoff (e.g. Discovery ➔ Strategy ➔ Architecture ➔ Dev) runs an automated memory validation sweep to archive superseded decisions from `active-decisions.md` into `archive/`.
-   - Structural diff validation: Ensures no active architectural constraint is archived without explicit resolution status.
+| Memory File | Tier | Strict Token Budget | Primary Read Triggers | Primary Write Triggers |
+|---|---|---|---|---|
+| **`project-context.md`** | Tier 1 | $< 300\text{ tokens}$ | Initialized on every turn / agent bootstrap | `orchestrator_state.js` atomic sync (phase, stack, sprint) |
+| **`active-decisions.md`** | Tier 1 | $< 400\text{ tokens}$ | Strategy, Architecture, Plan, Dev, Grill | `@grill-me`, `/design`, `/develop` decision commits |
+| **`patterns-and-conventions.md`** | Tier 2 | $< 500\text{ tokens}$ | Feature implementation, refactoring | `@developer`, `@architect` upon establishing code pattern |
+| **`lessons-learned.md`** | Tier 2 | $< 500\text{ tokens}$ | Bug fixing, incident triage, retro | `@qa-engineer`, `@devops-engineer`, `/retro` |
+| **`blockers-and-risks.md`** | Tier 3 | Dynamic | Swarm blocker triage | Lifecycle blocker logging (`--blocker`, `--resolve-blocker`) |
+| **`session-summaries/latest.md`** | Tier 3 | Dynamic | Resuming previous conversation | Session-write / milestone checkpoints |
 
 ---
 
-## 3. Workstreams & Execution Tasks
+## 3. Machine State Fencing & Atomic Synchronization Protocol
+
+### 3.1 Isolated Machine State Fence Specification
+To prevent human-LLM parser collisions and split-brain overwrites, `project-context.md` uses machine comment delimiters:
+
+```markdown
+# Project Context
+
+## [IDENTITY]
+- Project Name: vespyr
+- User Nickname: Chris
+- Primary Objective: Autonomous Multi-Agent Engineering Swarm
+
+<!-- BEGIN MACHINE STATE -->
+## [RUNTIME STATE]
+- Stack: TypeScript, Node.js (v20+), Vitest
+- Git Branch: feature/02h-streamlining
+- Active Phase: 01-discovery (Phase 1 / vespyr 2.0.0)
+- Active Sprint: Sprint 4
+- Blocker Status: 0 active blockers
+- Engine Version: 2.0.0-alpha.4
+<!-- END MACHINE STATE -->
+
+## [CONSTRAINTS & POLICIES]
+- No Yes-Men in the Swarm: Push back before you help ship the mess.
+- Memory Load Limit: Tier 1 + Tier 2 budget strictly < 1500 tokens.
+```
+
+### 3.2 Atomic Synchronization Algorithm (`orchestrator_state.js`)
+Whenever `orchestrator_state.js` advances a phase, updates sprint status, or logs blockers, it executes an atomic read-replace-write sequence:
+1. **Read Existing Content:** Read `artifacts/memory/project-context.md`.
+2. **Auto-Detect Environmental Metadata:** Inspect repository manifest (`package.json`, `Cargo.toml`, etc.) and run `git branch --show-current` to ensure stack and branch are never stale.
+3. **Regex Splice Machine Block:** Match `/<!-- BEGIN MACHINE STATE -->[\s\S]*?<!-- END MACHINE STATE -->/` and replace only the fenced section with updated runtime state.
+4. **Atomic File Write:** Write the payload to a temporary file (`project-context.md.tmp`) and atomically rename it (`fs.renameSync`) over the target file to prevent partial write corruption.
+
+---
+
+## 4. De-Siloing & Idempotent Migration Engine
+
+### 4.1 Merging Role Notes into `patterns-and-conventions.md`
+The migration script (`.agents/scripts/migrate_memory_v2.js`) scans all legacy role-siloed files in `artifacts/memory/agent-notes/`:
+- `developer-notes.md`
+- `architect-notes.md`
+- `product-designer-notes.md`
+- `qa-notes.md`
+- `devops-notes.md`
+
+```javascript
+// Migration & De-duplication Logic
+const roleNotes = fs.readdirSync('artifacts/memory/agent-notes');
+const unifiedPatterns = new Map();
+
+for (const file of roleNotes) {
+  const content = fs.readFileSync(path.join('artifacts/memory/agent-notes', file), 'utf8');
+  const sections = parseMarkdownSections(content);
+  for (const [header, body] of sections) {
+    if (!unifiedPatterns.has(header)) {
+      unifiedPatterns.set(header, body);
+    }
+  }
+}
+// Writes deduplicated content to artifacts/memory/patterns-and-conventions.md with <500 token budget check
+```
+
+### 4.2 Ghost Directory Purge
+Once migrated and verified, the script purges legacy directories:
+```bash
+rm -rf artifacts/memory/pending-questions/
+rm -rf artifacts/memory/session-checkpoints/
+rm -rf artifacts/memory/agent-notes/
+```
+
+---
+
+## 5. Phase-Boundary Compaction Gate Specification
+
+### 5.1 Compaction on Phase Advance
+When `node .agents/scripts/orchestrator_state.js advance` is called to transition the project across phase boundaries (e.g. Discovery ➔ Strategy ➔ Architecture ➔ Dev ➔ QA ➔ Launch), an automated memory compaction routine is triggered:
+1. **Decision Archival Sweep:** Scan `active-decisions.md` for completed, superseded, or rejected decisions.
+2. **Historical Sharding:** Move inactive decisions into `artifacts/memory/archive/YYYY-QX-archive.md` with timestamp and resolving agent metadata.
+3. **Active Retain Gate:** Retain only live architectural invariants and active constraints in `active-decisions.md`.
+4. **Token Budget Assertion:** Assert that `active-decisions.md` is strictly under 400 tokens before allowing the phase advance to succeed.
+
+---
+
+## 6. Swarm Reference Scrubbing & Tooling Updates
+
+### 6.1 Scrubbing Inventory
+- **Agent Prompts (`.agents/agents/*.md`):** Scrub references instructing agents to read or write to `agent-notes/` or `session-checkpoints/`. Update instructions to use `patterns-and-conventions.md` and `session-summaries/latest.md`.
+- **Skill Steps (`.agents/skills/*/steps/*.md`):** Update all step execution guides to reference the consolidated memory layout.
+- **CLI Scaffolder (`bin/cli.js`):** Update `scaffoldArtifacts()` so that newly initialized projects generate the streamlined 6-file memory directory structure.
+- **Memory Filter (`.agents/scripts/memory_filter.js`):** Update Tier 1/2/3 loader functions to read from the consolidated files.
+
+---
+
+## 7. Workstreams & Execution Tasks
 
 ### WS-1: Script & State Machine Synchronization
-- [ ] **Task 1.1**: Update `orchestrator_state.js` to write machine state atomically inside `<!-- BEGIN MACHINE STATE -->` in `project-context.md` on every state change (phase advance, complete, sprint, blocker updates).
-- [ ] **Task 1.2**: Implement project metadata auto-detector in `orchestrator_state.js` (detect stack from manifest files, branch from git).
-- [ ] **Task 1.3**: Add phase-handoff compaction trigger in `orchestrator_state.js advance` (running structural deduping and archiving superseded entries).
-- [ ] **Task 1.4**: Update `memory_filter.js` to reflect the consolidated memory layout (Tiers 1–3) without relying on deleted `agent-notes/` folders.
+- [ ] **Task 1.1**: Update `orchestrator_state.js` to execute atomic writes inside `<!-- BEGIN MACHINE STATE -->` in `project-context.md` on state changes.
+- [ ] **Task 1.2**: Implement stack and git branch auto-detector in `orchestrator_state.js`.
+- [ ] **Task 1.3**: Add phase-boundary compaction trigger in `orchestrator_state.js advance` with structural deduping and archival sharding.
+- [ ] **Task 1.4**: Update `memory_filter.js` for the consolidated 3-tier layout without references to deleted directories.
 
-### WS-2: Directory & Artifact Cleanup & Idempotent Migration
-- [ ] **Task 2.1**: Author idempotent migration utility to merge active entries from `artifacts/memory/agent-notes/*.md` into `patterns-and-conventions.md` with header collision resolution and rollback protection.
-- [ ] **Task 2.2**: Delete `artifacts/memory/pending-questions/`, `artifacts/memory/session-checkpoints/`, and legacy `agent-notes/`.
-- [ ] **Task 2.3**: Update `bin/cli.js` `scaffoldArtifacts()` to scaffold the consolidated memory layout for newly initialized projects.
+### WS-2: Idempotent Migration Engine & Cleanup
+- [ ] **Task 2.1**: Author `.agents/scripts/migrate_memory_v2.js` to merge `agent-notes/*.md` into `patterns-and-conventions.md` with collision resolution.
+- [ ] **Task 2.2**: Execute directory cleanup purging `pending-questions/`, `session-checkpoints/`, and `agent-notes/`.
+- [ ] **Task 2.3**: Update `bin/cli.js` `scaffoldArtifacts()` to scaffold the consolidated memory layout on `vespyr init`.
 
-### WS-3: Skill & Agent Reference Updates & Test Harness
-- [ ] **Task 3.1**: Scrub agent prompt files (`.agents/agents/*.md`) removing references to `agent-notes/` and `session-checkpoints`.
-- [ ] **Task 3.2**: Update `.agents/skills/` step files to reference the streamlined memory paths and auto-syncing `project-context.md`.
-- [ ] **Task 3.3**: Update `AGENTS.md`, `workflow.md`, and `skills.md` to document the consolidated 3-tier memory protocol.
-- [ ] **Task 3.4**: Author memory migration test fixtures asserting zero data loss across legacy memory snapshots and concurrent state-write stress tests.
-
----
-
-## 4. Definition of Done (DoD) & Verification
-
-1. Running `node .agents/scripts/orchestrator_state.js advance` automatically and atomically updates machine state inside `artifacts/memory/project-context.md` without corrupting human-edited sections.
-2. Idempotent memory migration runs cleanly with zero data loss or header collisions, validated by deterministic test fixtures.
-3. No agent prompt or skill step references non-existent `agent-notes/` or `session-checkpoints/`.
-4. `artifacts/memory/active-decisions.md` contains only live, non-contradictory constraints, with superseded items properly archived in `artifacts/memory/archive/`.
-5. Automated test suite passes with zero memory filter, atomic write, or frontmatter validation errors.
+### WS-3: Cross-Swarm Reference Updates & Verification Harness
+- [ ] **Task 3.1**: Scrub all 20 `.agents/agents/*.md` persona files of dead memory folder references.
+- [ ] **Task 3.2**: Update `.agents/skills/` step files to reference streamlined memory paths.
+- [ ] **Task 3.3**: Update `AGENTS.md`, `workflow.md`, and `skills.md` documentation for the consolidated memory system.
+- [ ] **Task 3.4**: Author deterministic memory migration test fixtures asserting zero data loss and concurrent state-write locks.
 
 ---
 
-## 5. Completion Checklist
+## 8. Definition of Done (DoD)
+
+1. `orchestrator_state.js` automatically and atomically syncs runtime state within `<!-- BEGIN MACHINE STATE -->` in `project-context.md` without clobbering human-edited sections.
+2. `patterns-and-conventions.md` replaces all legacy `agent-notes/*.md` files, verified by deterministic migration test fixtures.
+3. Ghost folders (`pending-questions/`, `session-checkpoints/`, `agent-notes/`) are completely removed with zero lingering references across all agent personas and skill steps.
+4. Phase handoff via `orchestrator_state.js advance` automatically archives superseded decisions and enforces $<400$ token budget in `active-decisions.md`.
+5. All automated unit and memory validation tests pass cleanly.
+
+---
+
+## 9. Completion Checklist
 
 **02i plan authoring status: COMPLETE.**
 
@@ -107,10 +215,11 @@ artifacts/memory/
 
 ---
 
-## 6. Sign-Off
+## 10. Sign-Off
 
 **@founder (Elena):** APPROVED — SATISFIED (2026-08-14). Scope: authoritative project-context.md front gate with zero memory fragmentation.  
 **@architect (Vera):** APPROVED — SATISFIED (2026-08-14). Scope: fenced machine block in project-context.md preventing split-brain corruption; <500 token budget on patterns-and-conventions.md.  
 **@tech-lead (Grant):** APPROVED — SATISFIED (2026-08-14). Scope: atomic write locks and structured state injection rather than brittle raw markdown regex rewrites.  
 **@qa-engineer (Nina):** APPROVED — SATISFIED (2026-08-14). Scope: idempotent migration fixtures with rollback protection and structural compaction diff checks.  
 **@memory-controller (Mnemos):** APPROVED — SATISFIED (2026-08-14). Scope: streamlined 3-tier memory protocol without ghost directories.
+
