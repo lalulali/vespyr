@@ -3,21 +3,22 @@
 **Decision:** Execute immediate engine streamlining, DNA-level anti-sycophancy hardening, and validation governance:
 1. **Graph Deletion**: Fully scrap all homegrown legacy graph scripts (`shallow_graph.js`, `incremental_graph.js`, `doc_graph.js`, `ensure_graph.js`, `query_graph.js`) and structural JSON artifacts (`code-graph.json`, `doc-graph.json`), deprecating `/code-graph` and `/doc-graph` skills. Let users independently adopt external graph tooling (e.g. Graphify) or PKM if desired.
 2. **`/shut-up` Skill**: Author a dedicated 1-shot skill (`/shut-up <instructions>`) enforcing an introvert, ultra-minimal response style with zero unsolicited Socratic lecturing, pausing only on destructive actions.
-3. **"No Yes-Men in the Swarm" Core DNA & `/grill-me` Hardening**: Formally embed the *"No Yes-Men in the Swarm"* anti-sycophancy principle directly into Vespyr's Core DNA alongside the Universal Socratic Default. Treat agreeable AI rubber-stamping as an engine defect. Upgrade `/grill-me` as the primary operational interrogation loop that enforces pushback before code is ever written.
+3. **"No Yes-Men in the Swarm" Core DNA, `/grill-me` Hardening & `/round-table` Dialectic Collision**: Formally embed the *"No Yes-Men in the Swarm"* anti-sycophancy principle directly into Vespyr's Core DNA alongside the Universal Socratic Default. Treat agreeable AI rubber-stamping as an engine defect. Upgrade `/grill-me` as the primary operational interrogation loop that enforces pushback before code is ever written. Hardcode the 4-Phase Dialectic Cross-Examination protocol in `/round-table` to turn passive multi-agent polling into active position defense under pushback.
 4. **CLI Modernization (`bin/cli.js`)**: Modernize the `npx vespyr` CLI with automatic stack detection on init, first-class `npx vespyr update` mode, expanded harness options (Antigravity, Gemini, Aider), headless CI/CD flags, and aligned memory scaffolding.
 
 **Position:** Phase 1 (vespyr 2.0.0) sub-plan — 9th in the `02*` series, positioned immediately prior to `02i-phase-1-memory-consolidation.md` and `02j-phase-1-evals-and-agnostic-harness.md`.
 
-**Gate Reviews:** Round table 2026-08-14 (@founder, @architect, @tech-lead, @developer, @devops-engineer, @qa-engineer), unanimous alignment recorded in `artifacts/memory/active-decisions.md`.
+**Gate Reviews:** Round table 2026-08-14 (@founder, @architect, @tech-lead, @developer, @devops-engineer, @qa-engineer, @ml-ai-engineer), unanimous alignment recorded in `artifacts/memory/active-decisions.md`.
 
 ---
 
 ## 1. Mandate & Scope
 
 ### 1.1 Mandate (from Chris)
-- Combine graph deletion, `/shut-up`, `/grill-me` improvements, and CLI modernization into Epic 02h.
+- Combine graph deletion, `/shut-up`, `/grill-me` improvements, `/round-table` dialectic hardening, and CLI modernization into Epic 02h.
 - **Embed *"No Yes-Men in the Swarm"* into Vespyr Core DNA alongside the Socratic stance across the entire swarm.**
 - Separate `/grill-me` clearly from `/shut-up`: they serve two completely opposite, complementary purposes in the workflow.
+- **Eliminate passive committee consensus in `/round-table`:** enforce true perspective collision where agents are mandated to defend their positions under pushback or justify concessions with technical proof.
 
 ### 1.2 Vespyr Core DNA: "No Yes-Men in the Swarm"
 
@@ -51,6 +52,20 @@
 │  • Attitude: Introverted, zero lecture │  • Attitude: Anti-sycophantic, zero nodding   │
 │  • Stance: Suppress all debate         │  • Stance: Attack assumptions, demand proof   │
 │  • Target: Shipping verified tasks     │  • Target: Killing bugs before they are coded │
+└────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+### 1.4 Perspective Collision: Single Assistant vs. Naive Polling vs. Dialectic Roundtable
+
+```
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│              The Multi-Agent Isolation vs. Collision Spectrum                          │
+├────────────────────────────────────────────────────────────────────────────────────────┤
+│  1. Single-Agent Isolation   → Optimizes locally; suffers from blindspots & anchoring.  │
+│  2. Naive Multi-Agent Polling→ Fan-out presentation; collapses into additive consensus.│
+│  3. Dialectic Roundtable     → Forces pairwise cross-examination; agents must defend   │
+│                                positions under pushback or record justified concessions│
+│                                with hard empirical evidence. Gaps surface here.        │
 └────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -157,7 +172,7 @@ metadata:
 
 ---
 
-## 4. Pillar 3: "No Yes-Men" Core DNA & `/grill-me` Hardening
+## 4. Pillar 3: "No Yes-Men" Core DNA, `/grill-me` Hardening & `/round-table` Dialectic Collision
 
 ### 4.1 Codifying Anti-Sycophancy in Vespyr Core DNA
 The anti-sycophancy directive is injected into the foundation of all 20 agents:
@@ -199,6 +214,38 @@ The anti-sycophancy directive is injected into the foundation of all 20 agents:
 - **Handoff Target:** @developer / @design
 **Status:** active
 ```
+
+### 4.4 `/round-table` Dialectic Hardening: The 4-Phase Cross-Examination Protocol
+
+The current `/round-table` skill (`.agents/skills/round-table/SKILL.md`) implements **Parallel Polling (Scatter/Gather)**: subagents are sampled independently to eliminate anchor bias, but their outputs are merely aggregated. To enforce true perspective collision where agents must defend their positions under pushback, `/round-table` is upgraded to a **4-Phase Dialectic State Machine**:
+
+```
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                   The 4-Phase Dialectic Roundtable Protocol                            │
+├────────────────────────────────────────────────────────────────────────────────────────┤
+│  Phase 1: Position Stating (Scatter)                                                   │
+│  • Independent parallel subagent dispatch (no anchor bias, unconditioned priors).      │
+│                                                                                        │
+│  Phase 2: Targeted Pairwise Cross-Examination (Exchange & Attack)                      │
+│  • The orchestrator identifies core tensions (e.g. @architect vs @developer).          │
+│  • Agent X receives Agent Y's stance with an explicit mandate: identify unstated       │
+│    assumptions, boundary blindspots, and invalid invariants.                           │
+│                                                                                        │
+│  Phase 3: Defense & Justified Concession (Rebuttal)                                    │
+│  • Challenged agents MUST defend with hard empirical constraints (token budgets,       │
+│    benchmarks, schema invariants) OR formally log a concession with root-cause proof. │
+│  • Passive nodding or unacknowledged pivots are rejected as Sycophantic Drift.        │
+│                                                                                        │
+│  Phase 4: Synthesis Gate & Irreconcilable Trade-Off Escalation                         │
+│  • No false consensus: if trade-offs are mutually exclusive, log them as an explicit  │
+│    ADR decision record rather than synthesizing a muddy compromise.                    │
+└────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+#### Invariant Anti-Sycophancy Rules for `/round-table`:
+1. **Mandatory Pairwise Critique in Multi-Agent Debates:** Every multi-agent session with >1 panelist must execute Phase 2 cross-examination before synthesis.
+2. **Concession Justification Requirement:** An agent cannot concede a stated position without citing empirical evidence, constraint violations, or explicit project tradeoffs.
+3. **Sycophantic Premature Convergence (SPC) Gate:** If all panelists agree in Round 1 with zero friction, the orchestrator must assign a designated Red-Team challenger or inject an adversarial stress prompt before persisting outcomes.
 
 ---
 
@@ -282,11 +329,13 @@ To eliminate duplicate file parsing, fragile `process.cwd()` dependencies, and u
 - [ ] **Task 2.2**: Register `/shut-up` in `skills.md`, `workflow.md`, `README.md`, `README_CN.md`, and `opencode.json`.
 - [ ] **Task 2.3**: Author automated snapshot test fixtures asserting brevity (<100 tokens) and destructive confirmation gates.
 
-### WS-3: "No Yes-Men" DNA & `/grill-me` Hardening Upgrades
+### WS-3: "No Yes-Men" DNA, `/grill-me` Hardening & `/round-table` Dialectic Upgrades
 - [ ] **Task 3.1**: Codify the "No Yes-Men in the Swarm" anti-sycophancy principle in `AGENTS.md` and `.agents/references/socratic-universal.md`.
 - [ ] **Task 3.2**: Update `.agents/skills/grill-me/SKILL.md` with 7+1 branch failure-path interrogation and role challenge modules.
 - [ ] **Task 3.3**: Update agent system templates (`.agents/templates/system/*.canonical`) to ban premature agreeableness and rubber-stamping.
 - [ ] **Task 3.4**: Author test fixtures verifying `/grill-me` output decision log generation and clean handoff into downstream planning.
+- [ ] **Task 3.5**: Update `.agents/skills/round-table/SKILL.md` to codify the 4-Phase Dialectic Cross-Examination protocol (Scatter -> Targeted Pairwise Attack -> Rebuttal/Concession -> ADR Escalation Gate).
+- [ ] **Task 3.6**: Author test fixtures verifying `/round-table` pairwise critique enforcement, concession tracking, and anti-sycophantic convergence blocking.
 
 ### WS-4: `bin/cli.js` Modernization, CLI Helpers & NPX Package Verification
 - [ ] **Task 4.1**: Extract CLI helper modules into `bin/lib/` (`detector.js`, `prompts.js`, `transpilers.js`) and slim `bin/cli.js`.
@@ -312,7 +361,7 @@ To eliminate duplicate file parsing, fragile `process.cwd()` dependencies, and u
 1. Zero legacy graph scripts (`shallow_graph.js`, etc.) or structural JSON files exist in the repository, verified by automated static AST/grep deprecation test.
 2. `/shut-up` is fully registered across all documentation and executes tasks in $<100$ tokens without writing persistent state.
 3. The *"No Yes-Men in the Swarm"* Anti-Sycophancy principle is embedded in `AGENTS.md`, universal Socratic references, and persona templates.
-4. `/grill-me` actively interrogates assumptions across the 7+1 decision tree and produces structured decision logs before downstream development.
+4. `/grill-me` actively interrogates assumptions across the 7+1 decision tree, and `/round-table` enforces the 4-phase dialectic cross-examination protocol (Scatter -> Attack -> Rebuttal -> ADR Gate), eliminating unearned additive consensus.
 5. `bin/cli.js` is modularized with `bin/lib/`, accurately detects repository stacks, executes safe non-destructive `update` operations, supports Antigravity/Gemini/Aider, operates in headless mode, and passes NPX package verification (`npm pack` dry-run).
 6. `.agents/scripts/lib/` provides centralized atomic I/O, root resolution, frontmatter parsing, and identity sync across engine scripts.
 7. All automated unit and regression tests pass cleanly.
@@ -325,7 +374,7 @@ To eliminate duplicate file parsing, fragile `process.cwd()` dependencies, and u
 
 **Execution Checklist:**
 - [x] Epic 02h authored and positioned as 9th sub-plan in Phase 1 series
-- [x] Round-table review completed; anti-sycophancy DNA, skill separation, centralized helper architecture, and NPX packaging plan incorporated
+- [x] Round-table review completed; anti-sycophancy DNA, skill separation, /round-table dialectic protocol, centralized helper architecture, and NPX packaging plan incorporated
 - [ ] Task 1.1 — Delete 5 legacy graph scripts in `.agents/scripts/`
 - [ ] Task 1.2 — Remove `artifacts/memory/structural/` JSON files and skill folders
 - [ ] Task 1.3 — Scrub `query_graph.js` references across `.agents/agents/*.md`, skills, and templates
@@ -338,6 +387,8 @@ To eliminate duplicate file parsing, fragile `process.cwd()` dependencies, and u
 - [ ] Task 3.2 — Update `.agents/skills/grill-me/SKILL.md` with anti-sycophancy directives & failure-mode checklists
 - [ ] Task 3.3 — Update agent system templates to ban rubber-stamping and premature codegen
 - [ ] Task 3.4 — Test `/grill-me` handoff into active decisions and downstream planning
+- [ ] Task 3.5 — Update `.agents/skills/round-table/SKILL.md` with 4-phase Dialectic Cross-Examination protocol
+- [ ] Task 3.6 — Author test fixtures verifying `/round-table` pairwise critique and concession justification enforcement
 - [ ] Task 4.1 — Extract CLI helpers to `bin/lib/` (`detector.js`, `prompts.js`, `transpilers.js`) and slim `bin/cli.js`
 - [ ] Task 4.2 — Implement `detectStack(targetDir)` helper with multi-language manifest checks
 - [ ] Task 4.3 — Implement `npx vespyr update` with memory preservation and `.bak-${YYYYMMDD}` conflict backups
@@ -356,11 +407,11 @@ To eliminate duplicate file parsing, fragile `process.cwd()` dependencies, and u
 
 ## 9. Sign-Off
 
-**@founder (Elena):** APPROVED — SATISFIED (2026-08-14). Scope: "No Yes-Men in the Swarm" embedded as non-negotiable core DNA alongside Socratic stance; clean separation of /shut-up (silent execution) and /grill-me (Socratic anti-sycophancy).  
-**@architect (Vera):** APPROVED — SATISFIED (2026-08-14). Scope: Anti-Sycophancy DNA stops premature Layer 0 blast radius; /shut-up bounded strictly as runtime modifier without memory pollution; modular CLI (`bin/lib/`), NPX package distribution verification, and runtime helper library (`.agents/scripts/lib/`) locked.  
-**@tech-lead (Grant):** APPROVED — SATISFIED (2026-08-14). Scope: execution ordering locked (02h -> 02i -> 02j); helper infrastructure eliminates ~1,200 lines of duplicated boilerplate and guarantees crash-safe state updates; NPX tarball build verified.  
-**@qa-engineer (Nina):** APPROVED — SATISFIED (2026-08-14). Scope: happy-path destruction across all agent personas, mandatory AST deprecation lint, CLI upgrade matrix, and atomic write + NPX pack test suite.  
-**@ml-ai-engineer (Kai):** APPROVED — SATISFIED (2026-08-14). Scope: anti-sycophancy prompt heuristics across system canonicals; token ceilings for /shut-up.
+**@founder (Elena):** APPROVED — SATISFIED (2026-08-14). Scope: "No Yes-Men in the Swarm" embedded as non-negotiable core DNA alongside Socratic stance; clean separation of /shut-up (silent execution), /grill-me (Socratic interrogation), and /round-table (dialectical cross-examination).  
+**@architect (Vera):** APPROVED — SATISFIED (2026-08-14). Scope: Anti-Sycophancy DNA stops premature Layer 0 blast radius; /round-table 4-phase state machine transforms passive broadcasting into pairwise challenge and justified concessions; modular CLI (`bin/lib/`), NPX package distribution verification, and runtime helper library (`.agents/scripts/lib/`) locked.  
+**@tech-lead (Grant):** APPROVED — SATISFIED (2026-08-14). Scope: execution ordering locked (02h -> 02i -> 02j); /round-table state loop codified into 4 discrete phases; helper infrastructure eliminates ~1,200 lines of duplicated boilerplate and guarantees crash-safe state updates; NPX tarball build verified.  
+**@qa-engineer (Nina):** APPROVED — SATISFIED (2026-08-14). Scope: happy-path destruction across all agent personas, /round-table concession assertion tests, mandatory AST deprecation lint, CLI upgrade matrix, and atomic write + NPX pack test suite.  
+**@ml-ai-engineer (Kai):** APPROVED — SATISFIED (2026-08-14). Scope: anti-sycophancy prompt heuristics across system canonicals; elimination of Sycophantic Premature Convergence (SPC) via mandatory pairwise cross-examination; token ceilings for /shut-up.
 
 
 
