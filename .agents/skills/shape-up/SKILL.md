@@ -50,7 +50,7 @@ None. This is a flexible entry point.
 - `artifacts/memory/active-decisions.md` (appended)
 
 ## State & memory integration
-At start, via `@executor`: `node .agents/scripts/orchestrator_state.js status`
+At start, run: `node .agents/scripts/orchestrator_state.js status`
 
 **At start:** Load context before context scan (step-01):
 ```

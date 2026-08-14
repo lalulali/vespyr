@@ -3,11 +3,6 @@ step: 2
 name: Deploy
 prerequisites:
   - step-01 completed
-delegation:
-  reads: none
-  writes: none
-  runs: "@executor (deployment commands; per delegation-policy.md all bash)"
-  direct_justified: []
 output_contract:
   citations: not-required
 ---
@@ -15,7 +10,6 @@ output_contract:
 # Step 2 — Deploy
 
 Deploy the feature to production.
-
 
 > **Tracker:** `node .agents/scripts/step_tracker.js begin --skill launch --step 2`
 ## Agent invocation
@@ -41,12 +35,10 @@ Deploy the feature to production.
 - Verify feature flags and gradual rollout
 - Track real-time error rates and user impact
 
-## Output
-`artifacts/output/06-launch/launch-log.md` — use template `.agents/templates/launch/launch-log-template.md`
+## Memory closeout
+- `@memory-controller session-write` — record step 2 deployment status and release log.
 
 ## Delegation
-- **Reads:** none
-- **Writes:** none
-- **Runs:** @executor for deployment commands (@devops-engineer)
+- **Memory:** @memory-controller for session-write
 
 > **Tracker:** `node .agents/scripts/step_tracker.js complete --skill launch --step 2`

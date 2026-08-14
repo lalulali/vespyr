@@ -2,9 +2,9 @@
 
 > [English](README.md) | 中文
 
-**一个平台无关、基于文件的多智能体引擎。** 将 23 个专业 AI 角色直接安装到你的仓库中。它们规划、设计、构建、审查、测试和交付——拥有跨会话持久化的结构化记忆，以及三大其他框架无法同时具备的架构护城河。
+**一个平台无关、基于文件的多智能体引擎。** 将 20 个专业 AI 角色直接安装到你的仓库中。它们规划、设计、构建、审查、测试和交付——拥有跨会话持久化的结构化记忆，以及两大其他框架无法同时具备的架构护城河。
 
-[![Vespyr Version](https://img.shields.io/badge/version-2.0.2-blue)](https://github.com/lalulali/vespyr)
+[![Vespyr Version](https://img.shields.io/badge/version-2.0.6-blue)](https://github.com/lalulali/vespyr)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 📖 **[完整文档 →](Guide/cn/index.md)**
@@ -15,7 +15,6 @@
 
 | 差异化能力 | 成本影响 | 质量影响 |
 |---|---|---|
-| **权限拒绝式 I/O 分离** — 推理智能体不能触碰文件或 Shell。所有 I/O 通过窄化子代理。 | **API 成本节省 85-95%。** 上下文窗口保持在约 1,000 tokens，而非 15,000+。 | 子代理产出一致、结构化的输出——推理流中无临时文件 diff。 |
 | **苏格拉底式深度方法** — 每个智能体声明其挑战的内容。`/grill-me` 运行 7+1 分支决策树。 | 在代码编写*之前*捕捉隐藏假设——避免代价高昂的重写。 | 架构冲突和边界情况在设计阶段就被暴露，而非在审查中才发现。 |
 | **三级渐进式记忆** — 上下文分三层加载（核心 → 角色专属 → 任务相关），配合主动模式预取。 | 不会因加载全部内容导致上下文膨胀，也不会因什么都不加载导致遗忘。 | 智能体在需要时获取相关的历史决策、模式和风险，不受上下文窗口洪泛影响。 |
 
@@ -54,7 +53,7 @@ npx vespyr --yes --target /path/to/my-project --harness opencode,claude
 
 ---
 
-## 👥 团队（23 个智能体）
+## 👥 团队（20 个智能体）
 
 ### 核心群体
 
@@ -67,9 +66,9 @@ npx vespyr --yes --target /path/to/my-project --harness opencode,claude
 | `@data-analyst` 📊 | `@security-engineer` 🔒 | `@performance-engineer` ⚡ | `@ml-ai-engineer` 🤖 |
 | `@ml-ai-ops` ⚙️ | `@devops-engineer` 🚀 | `@technical-writer` ✍️ |
 
-### I/O 子代理 (4)
+### 记忆层
 
-`@reader` 📖 · `@writer` ✏️ · `@executor` ⚙️ · `@memory-controller` 🧠
+`@memory-controller` 🧠 — 基于脚本的记忆服务（渐进式上下文加载、经校验的写入、压缩）
 
 ---
 
@@ -77,21 +76,19 @@ npx vespyr --yes --target /path/to/my-project --harness opencode,claude
 
 ```
 ┌──────────────────────────────────────────┐
-│           推理智能体 (19)                 │
-│  founder、PM、architect、developer...    │
-│  （按设计无文件权限、无 Shell）           │
+│           推理智能体 (19)                  │
+│  founder、PM、architect、developer...     │
 └──────────────┬───────────────────────────┘
                 │ 委托至
                 ▼
 ┌──────────────────────────────────────────┐
-│           I/O 子代理 (4)                 │
-│  @reader · @writer · @executor           │
-│  @memory-controller                      │
-│  三级渐进式加载 + 模式预取               │
+│           记忆服务                        │
+│  @memory-controller (基于脚本)            │
+│  三级渐进式加载 + 模式预取                  │
 └──────────────────────────────────────────┘
 ```
 
-**推理智能体思考。子代理执行。** 这种分离不是限制——是架构设计。它保持上下文窗口精简，输出结构化，每次操作可审计。[委托工作原理 →](Guide/cn/reference.md#委托策略)
+**智能体直接行动。** 每个智能体都使用自己的工具直接执行读取、写入和命令运行；记忆操作经由 `@memory-controller`（基于脚本的服务，而非推理智能体的委托对象）。
 
 ---
 

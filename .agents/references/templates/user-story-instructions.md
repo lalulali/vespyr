@@ -41,7 +41,6 @@ To ensure user stories are developer-ready and sprint-actionable, they must repr
 *   `US-006 | Label Generation & Printing (Sprint 1)` — "System generates and prints shipping label after payment confirmation."
 *   `US-009 | Offline Capability (Sprint 2)` — "Form works with degraded functionality during network issues."
 
-
 ---
 
 ### 1.2 Backlog Hierarchy Tree Summary

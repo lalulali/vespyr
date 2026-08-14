@@ -3,8 +3,8 @@
  * memory_write.js — Unified Memory Entry Writer for Vespyr
  *
  * Combines validation + dedup + write + threshold check into one bash call.
- * Allows agents to bypass the @memory-controller subagent for writes,
- * going directly to @executor with a single bash command.
+ * Allows agents to bypass the @memory-controller subagent for writes
+ * with a single bash command.
  *
  * Usage:
  *   node .agents/scripts/memory_write.js \

@@ -2,9 +2,9 @@
 
 > English | [中文](README_CN.md)
 
-**A platform-agnostic, file-based multi-agent engine.** Install 23 specialized AI personas directly into your repository. They plan, design, build, review, test, and ship — with structured memory that persists across sessions and three architectural moats no other framework combines.
+**A platform-agnostic, file-based multi-agent engine.** Install 20 specialized AI personas directly into your repository. They plan, design, build, review, test, and ship — with structured memory that persists across sessions and two architectural moats no other framework combines.
 
-[![Vespyr Version](https://img.shields.io/badge/version-2.0.2-blue)](https://github.com/lalulali/vespyr)
+[![Vespyr Version](https://img.shields.io/badge/version-2.0.6-blue)](https://github.com/lalulali/vespyr)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 📖 **[Full Documentation →](Guide/en/index.md)**
@@ -15,7 +15,6 @@
 
 | Differentiator | Cost Impact | Quality Impact |
 |---|---|---|
-| **Permission-denial I/O split** — reasoning agents can't touch files or shell. All I/O goes through narrow sub-agents. | **85-95% API cost savings.** Context windows stay at ~1,000 tokens instead of 15,000+. | Sub-agents produce consistent, structured output — no ad-hoc diffs in the reasoning stream. |
 | **Socratic methodology depth** — every agent declares what it challenges. `/grill-me` runs a 7+1-branch decision tree. | Catches hidden assumptions *before* code is written — preventing expensive rewrites. | Architectural conflicts and edge cases surfaced by design, not caught in review. |
 | **3-tier progressive memory** — context loads in tiers (core → agent-specific → task-relevant), with proactive pattern pre-fetch. | No context bloat from loading everything. No amnesia from loading nothing. | Agents get relevant past decisions, patterns, and risks without context window flooding. |
 
@@ -54,7 +53,7 @@ Then run your first workflow:
 
 ---
 
-## 👥 The Team (23 Agents)
+## 👥 The Team (20 Agents)
 
 ### Core Swarm
 
@@ -67,9 +66,9 @@ Then run your first workflow:
 | `@data-analyst` 📊 | `@security-engineer` 🔒 | `@performance-engineer` ⚡ | `@ml-ai-engineer` 🤖 |
 | `@ml-ai-ops` ⚙️ | `@devops-engineer` 🚀 | `@technical-writer` ✍️ |
 
-### I/O Sub-Agents (4)
+### Memory Layer
 
-`@reader` 📖 · `@writer` ✏️ · `@executor` ⚙️ · `@memory-controller` 🧠
+`@memory-controller` 🧠 — script-backed memory service (progressive context loading, validated writes, compaction)
 
 ---
 
@@ -77,21 +76,19 @@ Then run your first workflow:
 
 ```
 ┌──────────────────────────────────────────┐
-│           REASONING AGENTS (19)          │
+│               AGENTS (20)                │
 │  founder, PM, architect, developer...    │
-│  (No file access, no shell — by design)  │
-└──────────────┬───────────────────────────┘
-                │ delegates to
-                ▼
+└──────────────────────────────────────────┘
+        │ memory operations
+        ▼
 ┌──────────────────────────────────────────┐
-│           I/O SUB-AGENTS (4)             │
-│  @reader · @writer · @executor           │
-│  @memory-controller                      │
+│           MEMORY SERVICE                 │
+│  @memory-controller (script-backed)      │
 │  3-tier progressive load + pre-fetch     │
 └──────────────────────────────────────────┘
 ```
 
-**Reasoning agents think. Sub-agents execute.** This split isn't a limitation — it's the architecture. It keeps context windows lean, output structured, and every operation auditable. [How delegation works →](Guide/en/reference.md#delegation-policy)
+**Agents act directly.** Every persona performs its own reads, writes, and command runs with its own tools; memory operations go through `@memory-controller` (a script-backed service, not a reasoning-agent delegate).
 
 ---
 

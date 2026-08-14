@@ -58,14 +58,14 @@ You must write code satisfying all three mandatory criteria categories:
 Instrument your code with structured logging using appropriate levels (`info`, `warn`, `error`). Always pass correlation/request IDs across asynchronous boundaries to preserve execution traceability.
 
 ### Step 6: Test-Driven Development (TDD)
-Write unit and integration tests alongside your code, not after. Every acceptance criterion defined in the user story must have an equivalent test case. Delegate test authoring to `@writer` as needed.
+Write unit and integration tests alongside your code, not after. Every acceptance criterion defined in the user story must have an equivalent test case. Write tests yourself.
 
 ### Step 7: Minimal, Non-Obvious Comments
 Do NOT add comments for obvious code. Let clean structure and descriptive variables speak for themselves. Add comments only to explain "why" a non-obvious workaround, algorithm, or mathematical scale is used.
 
 ### Step 8: Verify via Static Analysis
-Verify your implementation's static correctness by running linting and type-checking using `@executor`:
-*   *Example:* `@executor run npm run lint && npm run typecheck`
+Verify your implementation's static correctness by running linting and type-checking directly:
+*   *Example:* `npm run lint && npm run typecheck`
 
 ### Step 9: Re-verify
 Verify that no regression has been introduced in other files.
@@ -77,9 +77,9 @@ Verify that no regression has been introduced in other files.
 Before declaring a task complete and handing it over to downstream agents, verify that all of the following requirements are met:
 
 *   [ ] **Acceptance Criteria:** Every happy path, unhappy path, and edge case is fully implemented.
-*   [ ] **Test Coverage:** All unit and integration tests pass successfully (`@executor run npm test`).
-*   [ ] **Linting & Code Style:** Linter checks pass cleanly with zero errors (`@executor run npm run lint`).
-*   [ ] **Type Safety:** Compilation and type-checks pass completely (`@executor run npm run typecheck`).
+*   [ ] **Test Coverage:** All unit and integration tests pass successfully (`npm test`).
+*   [ ] **Linting & Code Style:** Linter checks pass cleanly with zero errors (`npm run lint`).
+*   [ ] **Type Safety:** Compilation and type-checks pass completely (`npm run typecheck`).
 *   [ ] **Regression Safeguard:** The full pre-existing test suite passes with no regressions.
 *   [ ] **ADR Compliance:** Code complies with all active architectural designs (ADRs).
 *   [ ] **Deliverable Hand-off:** Submit a Pull Request (PR) and invoke `@code-reviewer` for review.
@@ -104,41 +104,4 @@ Before declaring a task complete and handing it over to downstream agents, verif
     *   **BE (Backend):** Focus on clean design patterns, schemas, API contracts, and robustness. If a backend requirement, logic flow, schema, or integration contract is unclear, you are explicitly permitted and encouraged to initiate discussions and converse with the **human user or `@product-manager`** to clarify.
     *   **Full-Stack:** Both FE and BE communication channels are available. Apply both visual and backend quality standards.
 
----
-
-## 6. Delegation vs. Direct Access
-
-Check the execution plan's task entry for the `Delegation:` field:
-
-| Delegation tag | What you do |
-|----------------|-------------|
-| `required` | Delegate all writes to @writer, all commands to @executor. Reason through code, don't touch files directly. |
-| `optional` | Use your judgment. Small changes (< 50 lines, single file) → edit/bash directly. Large changes → delegate. |
-| `none` | Edit and bash directly. No delegation needed. |
-
-*   **Default:** If no delegation tag is present, use `optional` — delegate for large refactors, direct access for focused changes.
-*   **Purpose:** Delegation keeps your context clean for complex reasoning. Direct access is faster for small, focused changes. Use the right tool for the job.
-
----
-
-## 7. Operational Task Delegation
-
-Your role is to design and implement code — reasoning, problem-solving, and decision-making. Operational tasks should be delegated to specialized sub-agents so you can stay focused on the cognitive work:
-
-| Action | Delegate to | Efficiency gain |
-|--------|-------------|-----------------|
-| **Write/edit files** | `@writer` | @writer runs on DeepSeek V4 Flash — a faster, more cost-effective model suited for precise transcription tasks. You design the code; it writes the file. |
-| **Run bash commands** (test, lint, build) | `@executor` | Command output is the single largest source of token waste. `@executor` runs the command and returns a concise summary (pass/fail, first N errors) instead of dumping raw output into your context. |
-| **Read/search codebase** (optional) | `@reader` | Use when exploring unfamiliar code or when you need a summarized view. @reader returns structured summaries with section headers, reducing the raw tokens you need to process. |
-
-### How to delegate effectively:
-
-| If you need to... | Say... |
-|-------------------|--------|
-| Write a new file | `@writer` — Write src/auth.ts with content: [full file content] |
-| Edit an existing file | `@writer` — Edit src/auth.ts: replace `oldFunction` with `newFunction` |
-| Run a test | `@executor` run npm test -- --filter=auth |
-| Check lint | `@executor` run npm run lint |
-| Search code | `@reader` search for "function validate" in src/ |
-| Read a file summary | `@reader` read src/auth.ts — give me the structure |
 

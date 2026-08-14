@@ -13,8 +13,8 @@ This folder supersedes the following files in `strategy/`:
 | Original file | Status | What happened to its content |
 |---|---|---|
 | `0. vespyr-master-roadmap.md` (546 lines) | Superseded | Consolidated into this README + phase files |
-| `1. framework_comparison_*.md` (412 lines) | Condensed | → `08-framework-analysis.md` |
-| `2. vespyr_evolution_plan.md` (2,375 lines) | Superseded | Code specs → `10-implementation-specs.md`; micro-tasks merged into phase files |
+| `1. framework_comparison_*.md` (412 lines) | Condensed | → `01a-phase-0-framework-analysis.md` |
+| `2. vespyr_evolution_plan.md` (2,375 lines) | Superseded | Code specs → `03d-phase-2-implementation-specs.md`; micro-tasks merged into phase files |
 | `3. adoption-plan-*.md` (687 lines) | Superseded | Adoption matrix → this README §3; details merged into phase files |
 | `4. persona-skill-enrichment-plan.md` (1,190 lines) | Condensed | → `06-phase-5-deeper-bench.md` |
 | `ROADMAP.md` (442 lines) | Keep as public-facing | This README is the internal source; ROADMAP.md is the public mirror |
@@ -68,16 +68,17 @@ deferred, disabled by a harness, or removed by a module.
 | Phase | Release | Themes | What ships | File |
 |---|---|---|---|---|
 | **0** | v1.7 (shipped) | T1, T3, T7, T8 | Frontmatter v2, IDENTITY block, customization TOML, thin skills ≥80 lines, entry-point consolidation, phase table, glossary, agent contracts, **+ T7: worktree delegation enforcement + tooling (T7.1b), memory auto-loading, Socratic minimum bar, identity docs; + T8: shared satisfaction contract** | `01-phase-0-foundation.md` |
-| **1** | v2.0 (in progress) | T1, T2, T3, T8 | 5 long skills → folder + steps (develop, validate-idea, retro, design, launch); tri-modal flows; spec-kernel PRD; sprint-status.yaml; ASCII CLI dashboards; 9 domain experts ≥200 lines; code-reviewer 15-item false-positive guard; Ivy design.md + dynamic HTML; **Teaching Partner: @shifu (Kong Qiu) agent + /teach-me + /craft-lesson skills; T8 handoff states; security & integrity architecture (02f)** | `02-phase-1-skills.md`, `02b-teaching-partner.md`, `02f-security-and-integrity-architecture.md` |
-| **2** | v2.1 | T4, T5, T8 | 12 lifecycle hooks; MCP server (10 tools); self-learning (episode→pattern→instinct); SHA-256 witness; delegation enforcement; QA as hard gate; **multi-agent orchestration (solo/parallel modes, CLI orchestrator, structured output, T8 runtime validation)** | `03-phase-2-enablement.md`, `03a-mcp-integration-plan.md`, `03b-multi-agent-orchestration.md` |
-| **3** | v2.1 | T3, T4, T8 | Graph auto-build at 5 lifecycle moments; graph query API; telemetry surface; catalog parity test; "See the Unseen" on all 21 agents; data analyst CLI tools; **satisfaction health telemetry** | `04-phase-3-observability.md` |
+| **1** | v2.0 (in progress) | T1, T2, T3, T8 | 5 long skills → folder + steps (develop, validate-idea, retro, design, launch); tri-modal flows; spec-kernel PRD; sprint-status.yaml; ASCII CLI dashboards; 9 domain experts ≥200 lines; code-reviewer 15-item false-positive guard; Ivy design.md + dynamic HTML; **Teaching Partner: @shifu (Kong Qiu) agent + /teach-me + /craft-lesson skills; T8 handoff states; security & integrity architecture (02f)** | `02-phase-1-skills.md`, `02b-teaching-partner.md`, `02f-phase-1-security-and-integrity-architecture.md` |
+| **2** | v2.1 | T4, T5, T8 | 13 lifecycle hooks; MCP server (17 first-party tools); self-learning (episode→pattern→instinct); SHA-256 witness; delegation enforcement; QA as hard gate; **multi-agent orchestration (solo/parallel modes, CLI orchestrator, structured output, T8 runtime validation)** | `03-phase-2-enablement.md`, `03a-phase-2-mcp-integration-plan.md`, `03b-phase-2-multi-agent-orchestration.md` |
+| **3** | v2.1 | T3, T4, T8 | Graph auto-build at 5 lifecycle moments; graph query API; telemetry surface; catalog parity test; "See the Unseen" on all 23 agents (v2.0 state); data analyst CLI tools; **satisfaction health telemetry** | `04-phase-3-observability.md` |
 | **4** | v2.1 | T6, T8 | install-modules (7 modules); rules/common + per-language; agent-builder/skill-builder/workflow-builder; worked example project; README/AGENTS/QUICK-REFERENCE/CHANGELOG rewrite; **core T8 inheritance and dogfood gate** | `05-phase-4-modularity.md` |
-| **5** | v2.2 | T1, T2, T8 | Deeper Bench: T1 (14 personas + 14 skills + 3 squads), T2 (7 personas + 4 skills), T3 (1 persona); **new-surface T8 validation** | `06-phase-5-deeper-bench.md` |
-| **6** | v2.1 | T4, T7, T8 | Loop Engineering: `/goal` primitive (run-until-verifiable-condition with separate verifier), automations/heartbeat (scheduled task execution, starts with 1 CI-failure triage), loop state on disk; **satisfaction-aware completion** | `11-phase-6-loop-engineering.md` |
+| **5** | v2.2 | T1, T2, T8 | Deeper Bench: T1 (14 net-new personas + 14 skills + 3 squads), T2 (7 personas + 4 skills), T3 (1 persona); **new-surface T8 validation** | `06-phase-5-deeper-bench.md` |
+| **6** | v2.1 | T4, T7, T8 | Loop Engineering: `/goal` primitive (run-until-verifiable-condition with separate verifier), automations/heartbeat (scheduled task execution, starts with 1 CI-failure triage), loop state on disk; **satisfaction-aware completion** | `07-phase-6-loop-engineering.md` |
+| **7** | v2.3 | T3, T6, T8 | Personal Knowledge Management (PKM) & Knowledge Engine: discovery & exploration tracks for Zettelkasten, PARA, Karpathy LLM-Wiki, and Andy Matuschak Evergreen Notes & Sliding-Pane Navigation | `09-phase-7-pkm-knowledge-engine.md` |
 
 **Total: 3 releases.**
 
-**T8 applies to every phase.** Read [14-utter-satisfaction-dna.md](14-utter-satisfaction-dna.md) before implementing any phase, skill, agent, module, harness adapter, MCP tool, or loop. Phase files may add domain-specific checks, but none may weaken the T8 contract.
+**T8 applies to every phase.** Read [08-cross-cutting-utter-satisfaction-dna.md](08-cross-cutting-utter-satisfaction-dna.md) before implementing any phase, skill, agent, module, harness adapter, MCP tool, or loop. Phase files may add domain-specific checks, but none may weaken the T8 contract.
 
 ---
 
@@ -87,7 +88,7 @@ This is the single DoD list.
 
 ### v2.0 DoD (criteria 1-8)
 
-1. All 21 agents have v2 frontmatter (`name`, `icon`, `capabilities`, `default_squad`, `origin`, `channeled_mentor`) + `<!-- IDENTITY: do not edit -->` block. `validate_frontmatter.js` exits 0.
+1. All agent files (23 at v2.0 shipped) have v2 frontmatter (`name`, `icon`, `capabilities`, `default_squad`, `origin`, `channeled_mentor`) + `<!-- IDENTITY: do not edit -->` block. `validate_frontmatter.js` exits 0.
 2. The 5 long skills are folder + step files with resume semantics: `develop` (10 steps), `validate-idea` (tri-modal 7+5+5), `retro` (5), `design` (tri-modal 6+4+4), `launch` (5).
 3. Spec-kernel is the canonical PRD shape (`templates/prd/SPEC.md` + companions). Old `prd-template.md` removed.
 4. `sprint-status.yaml` is the human-readable state of truth. `orchestrator_state.js status`/`next` read from it.
@@ -99,12 +100,12 @@ This is the single DoD list.
 
 ### v2.1 DoD (criteria 9-14)
 
-9. 12 lifecycle hooks registered, env-var-disablable, documented.
-10. MCP tool surface exposes 10 tools, callable from Claude Code or OpenCode.
+9. 13 lifecycle hooks registered, env-var-disablable, documented.
+10. MCP tool surface exposes 17 first-party tools (10 from 03a + 6 from 13 + `vespyr_spawn_agent` from 03b), callable from Claude Code or OpenCode.
 11. `orchestrator_state.js next` refuses to advance out of `development` without `qa-signoff.md`.
 12. Self-learning works end-to-end (episode → pattern → instinct). `instincts.md` loaded FIRST by `@memory-controller`.
-13. Graph auto-built at 5 lifecycle moments. `auto_graph.js check` < 500ms. `graph_query.js` returns structured responses.
-14. Catalog parity test passes (`npm test` includes `test_catalog_parity.js`). All 21 agents have "See the Unseen" directive + response prefixes. `@data-analyst` has `data_analyzer.js` + `dashboard_generator.js`.
+13. Graph auto-built at 5 lifecycle moments. `auto_graph.js check` < 500ms. `query_graph.js` returns structured responses.
+14. Catalog parity test passes (`npm test` includes `test_catalog_parity.js`). All 23 agent files (v2.0 state) have "See the Unseen" directive + response prefixes. `@data-analyst` has `data_analyzer.js` + `dashboard_generator.js`.
 
 ### v2.1 DoD — Loop Engineering (criteria 15-17)
 
@@ -117,7 +118,7 @@ This is the single DoD list.
 18. **Dogfood project:** full pipeline exercised end-to-end (`/validate-idea` → `/iterate`) on a real project. Integration bugs filed as GitHub issues. Artifacts published as a second worked example.
 19. **Migration path:** `npx vespyr migrate` converts v1.7.x hand-edits into `.agents/custom/*.toml` overrides with backup. Migration report lists every action taken.
 20. **Onboarding:** web guide published covering getting started, concepts, tutorials, and reference. `npx vespyr doctor` runs a health check. README has "Last verified" dates per section.
-21. **See the Unseen DNA:** all 21 agents have "See the Unseen" in their IDENTITY block (non-negotiable, not customizable). `validate_frontmatter.js` checks for the section.
+21. **See the Unseen DNA:** all agent files have "See the Unseen" in their IDENTITY block (non-negotiable, not customizable). `validate_frontmatter.js` checks for the section.
 
 ### T8 DoD (criteria 22-25; applies across releases)
 
@@ -142,12 +143,12 @@ The original plan had scope creep and wrong priorities. Here's what changed:
 |---|---|---|---|
 | **T7 Vespyr Identity** (3 differentiators) | Backlog (no timeline) | **Phase 0** (v2.0) | The moat ships first, not last. Without T7, v2.0 is all imports. |
 | **F0.23-F0.28** (critic infrastructure: multi-agent patterns, critic-review skill, 5 rubrics, patterns/critics frontmatter) | Phase 0 (v2.0) | **Deferred to v2.3+** | Speculative engineering. No critic personas exist until v2.2. The infrastructure has no consumers. Violates "Simplicity First." |
-| **F1.27-F1.28** (build-wiki skill + script) | Phase 1 (v2.0) | **Moved to Phase 3** (v2.1) | Depends on doc-graph (Phase 3 work). Forward dependency. |
-| **Pre-Phase 0** (Hermes/OpenClaw integration) | v2.0 (6-10h) | **Deferred to v2.1+** | Scope creep for 2 non-top-8 harnesses. OpenClaw prioritized above Hermes (can enforce permissions). See `07-harness-integration.md`. |
+| **F1.27-F1.28 / T1.28** (build-wiki & llm-wiki) | Phase 1 / Phase 3 / Phase 5 | **Moved to Phase 7** (v2.3) | Consolidated into dedicated PKM & Knowledge Engine exploration phase (`09-phase-7-pkm-knowledge-engine.md`). |
+| **Pre-Phase 0** (Hermes/OpenClaw integration) | v2.0 (6-10h) | **Deferred to v2.3+** | Scope creep for 2 non-top-8 harnesses. Folded into 03b's M1-M4 adapter work. OpenClaw prioritized above Hermes (can enforce permissions); security gate (Hunt.io) must pass first. See `03c-phase-2-harness-integration.md`. |
 | **35-harness future table** | ROADMAP.md (35 rows) | **Deleted** | Performative. A solo maintainer cannot port to 35 harnesses. Replaced with: "additional harnesses added as community demand warrants." |
 | **Critic consortium** (4 critic personas + consortium pattern + 3 loading modes + discriminated loading) | v2.1 (Phase 5 T1) | **Deferred to v2.3+** | 600 lines of spec for 4 personas with no consumers. Ship 1 critic + the skill first; add the other 3 if the first one gets used. |
-| **Hermes integration** (623-line plan) | Pre-Phase 0 (v2.0) | **v2.1+, degraded mode** | Hermes cannot enforce permission-denial (Vespyr's #1 moat) or route I/O to cheap models. Degraded experience. See `07-harness-integration.md`. |
-| **OpenClaw integration** (365-line plan) | Pre-Phase 0 (v2.0) | **v2.1+, prioritized above Hermes** | OpenClaw CAN enforce permissions via sandbox. Better fit. Security review required first. See `07-harness-integration.md`. |
+| **Hermes integration** (623-line plan) | Pre-Phase 0 (v2.0) | **v2.3+, degraded mode** | Hermes cannot enforce permission-denial (Vespyr's #1 moat) or route I/O to cheap models. Degraded experience. See `03c-phase-2-harness-integration.md`. |
+| **OpenClaw integration** (365-line plan) | Pre-Phase 0 (v2.0) | **v2.3+, prioritized above Hermes** | OpenClaw CAN enforce permissions via sandbox. Better fit. Security review required first (unconditional `VESPYR_OPENCLAW=off` default). See `03c-phase-2-harness-integration.md`. |
 
 ---
 
@@ -165,15 +166,15 @@ Principle: **adopt the idea, not the inventory.** We do not want Vespyr to look 
 | BMAD — hardcoded identity + customizable behavior | T1 | 0 | `<!-- IDENTITY: do not edit -->` block |
 | BMAD — icon-prefixed persona | T1 | 0 | First line of every response |
 | BMAD — frontmatter schema | T1 | 0 | `name`, `icon`, `capabilities`, `default_squad`, `origin` |
-| BMAD — channeled mentor | T1 | 0 | 1-2 references per agent |
+| BMAD — channeled mentor | T1 | 0 | 1-5 references per agent (prefer 2) |
 | BMAD — sprint-status.yaml | T3 | 1 | Layered on pipeline-state.json |
 | BMAD — glossary + agent-contracts | T1, T3 | 0 | One definition per term, owns/doesn't-own table |
-| Ruflo — lifecycle hooks | T4 | 2 | 12 hooks with stable IDs + env-var disable |
-| Ruflo — MCP tool surface | T4 | 2 | 10 tools wrapping existing scripts |
+| Ruflo — lifecycle hooks | T4 | 2 | 13 hooks with stable IDs + env-var disable |
+| Ruflo — MCP tool surface | T4 | 2 | 17 first-party tools wrapping existing scripts + new capability tools |
 | Ruflo — witness/verification | T3 | 2 | SHA-256 (no Ed25519 — overkill for local-first) |
 | Ruflo — self-learning / instincts | T5 | 2 | 3-tier episode → pattern → instinct |
 | Ruflo — delegation enforcement | T1 | 2 | `delegation-policy.md` + `[DIRECT-IO-JUSTIFIED]` + audit |
-| Ruflo — graph auto-build + query API | T3 | 3 | `auto_graph.js` + `graph_query.js` |
+| Ruflo — graph auto-build + query API | T3 | 3 | `auto_graph.js` + `query_graph.js` |
 | Ruflo — telemetry surface | T3 | 3 | LLM-consumable digests |
 | Ruflo — QA as hard gate | T1 | 2 | `qa-signoff.md` blocks phase advance |
 | ECC — code-reviewer false-positive guard | T1 | 1 | 15-item skip-list |
@@ -202,25 +203,26 @@ Principle: **adopt the idea, not the inventory.** We do not want Vespyr to look 
 
 ## 7. Persona & Skill Counts (Canonical)
 
-The original docs had 5 different counts for T1 personas (14, 18, 18, 19, 25). This is the canonical count.
+The original docs had 5 different counts for T1 personas (14, 18, 18, 19, 25). This is the canonical count, as reconciled in the 2026-08-08 round-table review (see `06-phase-5-deeper-bench.md` §Canonical counts and `04-phase-3-observability.md` F3.13 — counts are DERIVED FROM DISK, never hardcoded).
 
-### Current (v1.7.x)
+### Current (v2.0 shipped, on disk)
 
 | Entity | Count |
 |---|---|
-| Agents | 21 (4 I/O sub-agents + 17 reasoning personas) |
-| Skills | 24 |
+| Agent files | 23 (19 reasoning + 4 I/O) — incl. @shifu, @ml-ai-engineer, @ml-ai-ops |
+| Skills | 43 |
 | Squads | 7 |
+| Internal agents (v2.1+: @goal-verifier, flint.md — `origin: internal`, validated but excluded from persona counts) | +2 files |
 
-### After v2.2 (full Deeper Bench)
+### After v2.2 (full Deeper Bench — ALL tiers ship in v2.2)
 
 | Tier | New personas | New skills | New squads | Ships in |
 |---|---|---|---|---|
-| T1 | 14 | 14 (incl. llm-wiki) | 3 (growth, data-platform, migration) | v2.1 |
+| T1 | 14 net-new (+2 promoted in v2.0) | 14 (llm-wiki moved to Phase 7 PKM) | 3 (growth, data-platform, migration) | v2.2 |
 | T2 | 7 | 4 | 0 | v2.2 |
 | T3 | 1 | 0 | 0 | v2.2 |
-| **Total new** | **22** | **18** | **3** | |
-| **Grand total** | **43** | **42** | **10** | |
+| **Total new** | **22** | **19** | **3** | |
+| **Grand total** | **45 personas / 62 skills / 10 squads** | | | |
 
 ### Deferred to v2.3+ (critic consortium)
 
@@ -230,14 +232,15 @@ The original docs had 5 different counts for T1 personas (14, 18, 18, 19, 25). T
 | /critic-review skill | 1 | Same. |
 | Multi-agent patterns reference | 1 | Same. |
 | Domain rubrics (research, user-research, ux, code, docs) | 5 | Same. |
+| OpenClaw / Hermes adapters (from `03c-phase-2-harness-integration.md`) | 2 | Folded into 03b M1-M4 adapter work; OpenClaw security gate (Hunt.io) must pass first. |
 
-### T1 personas (14) — ship in v2.1
+### T1 personas (14 net-new; T1.10/T1.10b promoted to v2.0) — ship in v2.2
 
-brainstormer, innovation-strategist, problem-solver, storyteller, presentation-master, growth-marketer, seo-specialist, database-engineer, api-designer, ml-ops, accessibility-architect, migration-engineer, customer-success, support-engineer
+brainstormer, innovation-strategist, problem-solver, storyteller, presentation-master, growth-marketer, seo-specialist, database-engineer, api-designer, accessibility-architect, migration-engineer, customer-success, support-engineer, artifact-judge
 
-### T1 skills (14) — ship in v2.1
+### T1 skills (15) — ship in v2.2
 
-brainstorming, pr-faq, epics-and-stories, market-research, storytelling, presentation, design-thinking, accessibility-audit, cost-analysis, api-design, database-migration, migrate-stack, correct-course, llm-wiki
+brainstorming, pr-faq, epics-and-stories, market-research, storytelling, presentation, design-thinking, accessibility-audit, cost-analysis, api-design, database-migration, migrate-stack, correct-course, grade-artifact
 
 ### T2 personas (7) — ship in v2.2
 
@@ -269,33 +272,33 @@ The "1-day ECC repackage" pattern is insufficient. Personas that don't clear eit
 | `01-phase-0-foundation.md` | Phase 0: full templates (phase table, glossary, agent contracts, grill-me, delegation-policy, IDENTITY block, frontmatter v2) + T7 identity work | 954 |
 | `02-phase-1-skills.md` | Phase 1: full templates (spec-kernel, spec-law, sprint-status.yaml, Ivy rubric, 15-item false-positive guard, step-file architecture) | 898 |
 | `03-phase-2-enablement.md` | Phase 2: full hooks table, MCP tool signatures, self-learning 3-tier spec, QA hard gate wording, delegation-policy content | 286 |
-| `03a-mcp-integration-plan.md` | MCP Integration: first-party + 3rd-party MCP servers, 10 tools, context truncation, error handling | 289 |
-| `03b-multi-agent-orchestration.md` | Multi-Agent Orchestration: solo/parallel mode, CLI orchestrator, structured output, quality guardrails, harness capability detection | ~420 |
-| `04-phase-3-observability.md` | Phase 3: graph query contracts per agent, See the Unseen directives, telemetry protocol, build-wiki spec | 240 |
+| `03a-phase-2-mcp-integration-plan.md` | MCP Integration: first-party + 3rd-party MCP servers, 17 tools (10 + 6 from 13 + spawn_agent from 03b), context truncation, error handling | 289 |
+| `03b-phase-2-multi-agent-orchestration.md` | Multi-Agent Orchestration: solo/parallel mode, CLI orchestrator, structured output, quality guardrails, harness capability detection | ~420 |
+| `04-phase-3-observability.md` | Phase 3: graph query contracts per agent, See the Unseen directives, telemetry protocol | 240 |
 | `05-phase-4-modularity.md` | Phase 4: full install-modules.json, rules/ directory structure, builder flows, example project file list | 249 |
-| `06-phase-5-deeper-bench.md` | Phase 5: FULL persona charters (channeled mentor, charter, permissions, squad, complements) for all 22 new personas + 18 new skills | 682 |
-| `07-harness-integration.md` | Hermes + OpenClaw: full directory structures, SKILL.md templates, sandbox configs, invocation patterns, memory protocols | 445 |
-| `08-framework-analysis.md` | Condensed 4-framework comparison (insights only) | 101 |
-| `09-risk-register.md` | Consolidated risk register (45 risks, single source) | 119 |
-| `10-implementation-specs.md` | Full JS code for 15 scripts: sync-entry-points, validate_frontmatter, merge_customization, memory prefetch, auto_graph, graph_query, telemetry_surface, witness, self_learn, delegation_audit, qa_check, worktree, goal_check, automation, validate_satisfaction | ~1277 |
-| `11-phase-6-loop-engineering.md` | Loop Engineering: `/goal` primitive + automations + loop state (v2.1) | 130 |
-| `02a-step-tracker.md` | Step Tracker — debug-mode step enforcement audit breadcrumbs | 153 |
-| `12-token-effective-mode.md` | Quick Mode — token-effective discussion mode (ponytail-inspired) | ~170 |
+| `06-phase-5-deeper-bench.md` | Phase 5: FULL persona charters (channeled mentor, charter, permissions, squad, complements) for all 22 new personas + 19 new skills | 892 |
+| `03c-phase-2-harness-integration.md` | Hermes + OpenClaw: full directory structures, SKILL.md templates, sandbox configs, invocation patterns, memory protocols | 445 |
+| `01a-phase-0-framework-analysis.md` | Condensed 4-framework comparison (insights only) | 101 |
+| `01b-phase-0-risk-register.md.md` | Consolidated risk register (62 risks, single source) | 119 |
+| `03d-phase-2-implementation-specs.md` | Full JS code for 15 sections (13 scripts + §16 test specs + §17 pending index): sync-entry-points, validate_frontmatter, merge_customization, memory prefetch, auto_graph, query_graph, telemetry_surface, witness, self_learn, delegation_audit, qa_check, worktree, goal_check, automation, validate_satisfaction | ~1737 |
+| `07-phase-6-loop-engineering.md` | Loop Engineering: `/goal` primitive + automations + loop state (v2.1) | 130 |
+| `02a-phase-1-step-tracker.md` | Step Tracker — debug-mode step enforcement audit breadcrumbs | 153 |
+| `03e-phase-2-token-effective-mode.md` | Quick Mode — token-effective discussion mode (ponytail-inspired) | ~170 |
 | `13-mcp-integration-plan.md` | Model Context Protocol (MCP) Integration Plan — Playwright, design system, standards linters | ~120 |
-| `14-utter-satisfaction-dna.md` | Cross-cutting culture contract, state model, collaboration loop, runtime enforcement, telemetry, and future-surface checklists | ~300 |
+| `08-cross-cutting-utter-satisfaction-dna.md` | Cross-cutting culture contract, state model, collaboration loop, runtime enforcement, telemetry, and future-surface checklists | ~300 |
 
 ---
 
 ## 9. How to Use This Folder
 
-1. **Read the DNA contract.** Open `14-utter-satisfaction-dna.md` first. It applies to every future change.
+1. **Read the DNA contract.** Open `08-cross-cutting-utter-satisfaction-dna.md` first. It applies to every future change.
 2. **Pick a phase.** Open the matching `01-phase-0-foundation.md` … `06-phase-5-deeper-bench.md`.
 3. **Read the "Source mapping" table.** Each micro-task cites the original F-number and source.
 4. **Work in order.** Phases are linearly dependent (0 → 1 → 2 → 3 → 4 → 5). Within a phase, F-items can be parallelized unless noted.
 5. **Tick the checkbox.** Each micro-task ends with `- [ ]`. The "Done when" block at the end of each phase is the gate to the next.
 6. **If a phase slips**, ship the previous phase's release as a valid intermediate. Phases 0, 1, 2 are independently shippable, but each still requires the T8 gate.
-7. **For implementation code**, see `10-implementation-specs.md` — it has the full JS specs for every new script.
-8. **For harness work**, see `07-harness-integration.md` — it has the honest assessments for Hermes and OpenClaw.
+7. **For implementation code**, see `03d-phase-2-implementation-specs.md` — it has the full JS specs for every new script.
+8. **For harness work**, see `03c-phase-2-harness-integration.md` — it has the honest assessments for Hermes and OpenClaw.
 
 ---
 
@@ -309,8 +312,8 @@ When a phase is mid-execution and a new constraint emerges (e.g., a phase overru
 
 | Version | Status | What shipped |
 |---|---|---|
-| v2.2 | Planned | Deeper Bench T2 + T3 (+7 personas, +4 skills) |
-| v2.1 | Planned | Phases 2+3+4 (hooks, MCP, self-learning, graph, telemetry, modularity) + Deeper Bench T1 (+14 personas, +14 skills, +3 squads) |
+| v2.2 | Planned | Deeper Bench — ALL tiers (T1+T2+T3: +22 personas, +19 skills, +3 squads) |
+| v2.1 | Planned | Phases 2+3+4+6 (13 hooks, MCP 17 tools, self-learning, witness, graph, telemetry, modularity, loop engineering, T8 runtime gate) — infrastructure only; no Deeper Bench T1 |
 | **v2.0** | **Phase 1 — in progress** | Phases: identity, skill restructure, artifact rigor (02a-02e done; 02f security-and-integrity pending) — 8 DoD criteria |
 | v1.7.x | Stable | `npx create-vespyr` installer, 8 active harnesses |
 | v1.1-v1.6 | Shipped | Per CHANGELOG |
@@ -374,7 +377,7 @@ review ritual. It is the contract that connects Vespyr's role depth, artifact
 rigor, orchestration, observability, modularity, harness adapters, and loops.
 
 The detailed implementation contract lives in
-[14-utter-satisfaction-dna.md](14-utter-satisfaction-dna.md). The short rule is:
+[08-cross-cutting-utter-satisfaction-dna.md](08-cross-cutting-utter-satisfaction-dna.md). The short rule is:
 
 > Work until every active, relevant agent is satisfied with evidence. Resolve
 > or escalate every blocking concern. Do not ship until the team gate is GO.

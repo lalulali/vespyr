@@ -98,3 +98,6 @@ Use this compact record in handoff artifacts and review reports:
 - Residual risks: none, or risk with owner, mitigation, and acceptance
 - Revalidation trigger: change that would invalidate this state
 ```
+
+> [!IMPORTANT]
+> **Where to write sign-off records** — This file is a static protocol reference. Never append execution sign-off records here. Write completed sign-off records to `artifacts/output/06-quality/sign-off-history.md`. Write in-progress review records inside the epic's own review report (e.g., `artifacts/docs/strategy/development-plan/<epic>.md`).

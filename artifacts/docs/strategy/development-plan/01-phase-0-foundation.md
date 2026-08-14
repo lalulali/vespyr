@@ -51,7 +51,7 @@ orchestration modes, modules, and harness adapters must preserve.
 **Foundation rule:** a new persona, skill, or harness adapter cannot be
 considered complete unless it references and preserves the T8 contract. The
 full future implementation is in
-[`14-utter-satisfaction-dna.md`](14-utter-satisfaction-dna.md).
+[`08-cross-cutting-utter-satisfaction-dna.md`](08-cross-cutting-utter-satisfaction-dna.md).
 
 ---
 
@@ -111,15 +111,15 @@ Three documents currently disagree on phase numbering. A canonical table elimina
 
 **Source:** Evolution §1.3 | **Theme:** T1
 
-- [x] F0.2 — Move canonical version to `.agents/agent.md.canonical` (consolidate with `templates/system/AGENTS.md.canonical`)
-- [x] F0.3 — Replace `AGENTS.md`, `agent.md`, `CLAUDE.md` with symlinks to `.agents/agent.md.canonical`
+- [x] F0.2 — Move canonical version to `.agents/templates/system/AGENTS.md.canonical` (consolidate with `templates/system/AGENTS.md.canonical`)
+- [x] F0.3 — Replace `AGENTS.md`, `agent.md`, `CLAUDE.md` with symlinks to `.agents/templates/system/AGENTS.md.canonical`
 - [x] F0.4 — Create `.agents/scripts/sync-entry-points.js` (~80 lines)
-  - Reads `.agents/agent.md.canonical`
+  - Reads `.agents/templates/system/AGENTS.md.canonical`
   - Replaces harness dotfolder references per target (`.agents/`, `.claude/`, `.kiro/`)
   - Writes to `AGENTS.md`, `agent.md`, `CLAUDE.md`, and per-harness `AGENTS.md`
   - Validates each output is non-empty and contains canonical sections
 - [x] Hook `sync-entry-points.js` into `bin/cli.js init` command
-- [x] **Implementation code:** See `10-implementation-specs.md` §1
+- [x] **Implementation code:** See `03d-phase-2-implementation-specs.md` §1
 
 ### Problem
 `CLAUDE.md`, `agent.md`, `AGENTS.md` are three near-identical files (~168 lines each) with only minor path swaps (`.claude/` vs `.agents/`). They drift independently and are a maintenance burden.
@@ -129,19 +129,19 @@ Single source of truth + generated derivatives.
 
 ### Proposed content
 
-**F0.2 — Canonical file:** Move the canonical version to `.agents/agent.md.canonical` (already exists as `templates/system/AGENTS.md.canonical` — consolidate).
+**F0.2 — Canonical file:** Move the canonical version to `.agents/templates/system/AGENTS.md.canonical` (already exists as `templates/system/AGENTS.md.canonical` — consolidate).
 
 **F0.3 — Symlinks:**
 
 ```bash
 cd /Users/christianhadianto/Documents/TechSmith/vespyr
-ln -sf .agents/agent.md.canonical AGENTS.md
-ln -sf .agents/agent.md.canonical agent.md
-ln -sf .agents/agent.md.canonical CLAUDE.md
+ln -sf .agents/templates/system/AGENTS.md.canonical AGENTS.md
+ln -sf .agents/templates/system/AGENTS.md.canonical agent.md
+ln -sf .agents/templates/system/AGENTS.md.canonical CLAUDE.md
 ```
 
 **F0.4 — `sync-entry-points.js` (~80 lines):** A Node.js script that:
-- Reads `.agents/agent.md.canonical`
+- Reads `.agents/templates/system/AGENTS.md.canonical`
 - Replaces the harness dotfolder references per target (`.agents/`, `.claude/`, `.kiro/`, etc.)
 - Writes to `AGENTS.md`, `agent.md`, `CLAUDE.md`, and per-harness `AGENTS.md` in `.claude/`, `.kiro/`, etc.
 - Validates each output is non-empty and contains the canonical sections
@@ -364,7 +364,7 @@ This is a trivial change with outsized UX impact. BMAD does it, and once you see
   - Exit 0 if all 21 pass; exit 1 with file list if any fail
 - [x] Add `npm run validate:frontmatter` to `package.json`
 - [x] Wire into `bin/cli.js init`
-- [x] **Implementation code:** See `10-implementation-specs.md` §2
+- [x] **Implementation code:** See `03d-phase-2-implementation-specs.md` §2
 
 ### Problem
 There is no enforcement of the v2 frontmatter schema. A missing `icon` or a `name` that doesn't match the filename silently breaks routing and persona-prefixing.
@@ -1147,3 +1147,26 @@ Once Phase 0 is done, every new file in Phase 1+ can assume:
 - Every reasoning agent has a Citation Protocol (facts from real sources get inline `[N]` citations + footnotes).
 - AGENTS.md states the 3 differentiators explicitly.
 - Every participating agent inherits the UTTERLY SATISFIED contract; future runtime enforcement is explicitly owned by Phase 2.
+
+---
+
+## Completion Checklist
+
+**Phase 0 Foundation status: COMPLETE & SHIPPED (71/72 done).**
+
+- [x] Frontmatter v2 migration completed across all agent personas
+- [x] IDENTITY block boundaries locked in template system
+- [x] Channeled mentors & Socratic stances integrated
+- [x] Phase table, glossary, and agent contracts established as single source of truth
+- [x] Customization system (`.agents/custom/*.toml`) implemented
+- [x] 3-tier progressive memory loading baseline established
+- [x] UTTERLY SATISFIED DNA embedded across persona definitions
+
+---
+
+## Sign-Off
+
+**@founder (Elena):** APPROVED — SATISFIED (2026-08-01). Scope: Phase 0 foundation architecture and identity boundaries.  
+**@architect (Vera):** APPROVED — SATISFIED (2026-08-01). Scope: system design, contracts, frontmatter v2 schema, and entry point synchronization.  
+**@tech-lead (Grant):** APPROVED — SATISFIED (2026-08-01). Scope: foundation execution tasks, delegation patterns, and migration tooling.  
+**@qa-engineer (Nina):** APPROVED — SATISFIED (2026-08-01). Scope: frontmatter validators, contract linting, and baseline test gates.

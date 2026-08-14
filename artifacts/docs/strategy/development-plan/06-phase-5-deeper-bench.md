@@ -1,31 +1,38 @@
-# Phase 5 — Deeper Bench (Post-v2.1 Enrichment)
+# Phase 5 — Deeper Bench (Enrichment)
 
-> **Release:** v2.2 (T1 ships with v2.1 alongside Phase 2-4; T2+T3 ship in v2.2)
+> **Release:** v2.2 (ALL tiers ship together — the earlier "T1 ships with v2.1 alongside Phase 2-4" claim was contradicted by this file's own Weeks 9-14 calendar and the v2.1 infra workload; the round-table resolved: T1 → v2.2. See the release-bundling decision in §What changed below and the v2.1/v2.2 scope notes in `05-phase-4-modularity.md` F4.11/F4.16 and `08-cross-cutting-utter-satisfaction-dna.md` §7)
 > **Calendar:** Weeks 9-14
 > **Themes:** T1 (Agent depth), T2 (Skill atomicity), T8 (UTTERLY SATISFIED culture)
-> **Goal:** Enrich the 21-persona bench to 43 personas and the 24-skill library to 42 skills. Add 3 new opt-in squads. Fill the gaps between v1.7's engineering core and broader product-team needs without fragmenting the shared satisfaction culture.
+> **Goal:** Enrich the 23-persona bench (v2.0 shipped state) toward 45 personas and the 43-skill library to 62 skills. Add 3 new opt-in squads. Fill the gaps between v1.7's engineering core and broader product-team needs without fragmenting the shared satisfaction culture.
 
 ## What changed from the original
 
 | Item | Original | This file | Why |
 |---|---|---|---|
-| T1 personas count | 14 (ROADMAP) / 18 (enrichment plan) | **15** | Canonical count. Game personas moved to T2; critic personas deferred; +@artifact-judge (axis-bound scorer, not a critic). |
-| T1 skills count | 13 (ROADMAP) / 14 (enrichment plan) | **15** (incl. llm-wiki + grade-artifact) | Canonical count. |
+| T1 personas count | 14 (ROADMAP) / 18 (enrichment plan) | **14 net-new** (16 blocks listed, 2 promoted to Phase 1) | Canonical count. Game personas moved to T2; critic personas deferred; +@artifact-judge (axis-bound scorer, not a critic). The two promoted blocks (T1.10, T1.10b) are retained for canonical reference only — they already shipped in v2.0. |
+| T1 skills count | 13 (ROADMAP) / 14 (enrichment plan) | **14** (llm-wiki moved to Phase 7 PKM) | Canonical count. |
 | T2 personas count | 5 (5-deeper-bench) / 6 (enrichment plan) | **7** | Added @finance-analyst. Game personas confirmed T2. |
 | T2 skills count | 4 (5-deeper-bench) / 6 (enrichment plan) | **4** | Canonical count. |
 | Critic consortium | T1 (v2.1) | **Deferred to v2.3+** | No consumers until infrastructure ships. |
 | Game personas tier | T1 / T2 (conflicted) | **T2** | Need a game project to validate against. |
 | @devrel | T2 | **Deferred to v3.0** | Make explicit. |
+| Release slot | T1 in v2.1 | **All tiers in v2.2** | Calendar + workload reality (round-table decision). |
 
 ## Canonical counts
 
+> **Base (v2.0 shipped, verified on disk):** 23 agent files (19 reasoning + 4 I/O — incl. @shifu, @ml-ai-engineer, @ml-ai-ops) / 43 skills / 7 squads. @goal-verifier and flint.md join in v2.1 as `origin: internal` agents.
+> **Counting rule (F3.13):** `test_catalog_parity.js` derives counts from disk; personas with `origin: internal` are validated but excluded from advertised persona counts.
+
 | Tier | New personas | New skills | New squads | Ships in |
 |---|---|---|---|---|
-| T1 | 15 | 15 (incl. llm-wiki + grade-artifact) | 3 (growth, data-platform, migration) | v2.1 |
+| T1 | 14 net-new (+2 promoted, already shipped) | 14 (llm-wiki moved to Phase 7) | 3 (growth, data-platform, migration) | v2.2 |
 | T2 | 7 | 4 | 0 | v2.2 |
 | T3 | 1 | 0 | 0 | v2.2 |
-| **Total new** | **23** | **19** | **3** | |
-| **Grand total** | **44** | **43** | **10** | |
+| **Total new** | **22** | **19** | **3** | |
+| **Grand total** | **45 personas / 62 skills / 10 squads** | | | |
+
+> Errata fixed from earlier drafts: "44/43/10", "43/42/10", "43 personas",
+> "21 → 44" and "T1 = 15" were all wrong under the disk-derived counting rule.
 
 ### Deferred to v2.3+ (F0.25-F0.28 Critic Infrastructure)
 
@@ -40,7 +47,7 @@ These items were originally planned for Phase 0 (v2.0) but deferred because no c
 
 **Dependency chain:** F0.27 (rubrics) → F0.26 (critic-review skill) → F0.25 (patterns) → F0.28 (frontmatter). All four must ship together in v2.3+.
 
-**Critic personas** (@research-critic, @code-critic, @ux-critic, @doc-critic) are 4 personas that depend on this infrastructure. They're defined in this file's T1 section but gated behind F0.25-F0.28 completion.
+**Critic personas** (@research-critic, @code-critic, @ux-critic, @doc-critic) are 4 personas that depend on this infrastructure. They're gated behind F0.25-F0.28 completion and defined in the deferred table above — they do NOT appear as T1 blocks in this file (an earlier sentence claimed they were "defined in the T1 section"; corrected).
 
 | Critic persona | Reviews output of | Rubric used |
 |---|---|---|
@@ -68,9 +75,13 @@ The "1-day ECC repackage" pattern is insufficient. Personas that don't clear eit
 
 ---
 
-## Tier 1 — Deeper Bench (ships with v2.1, ~60h)
+## Tier 1 — Deeper Bench (ships with v2.2, ~240-330h)
 
-### T1 Personas (15)
+> **Estimate correction:** the previous "~60h" claim summed to ~24-27 persona-days +
+> ~21-24 skill-days when the per-item efforts (T1.1-T1.14b, T1.15-T1.28b) are
+> added up. This is why T1 moved to v2.2.
+
+### T1 Personas (14 net-new; T1.10/T1.10b promoted to Phase 1)
 
 For each: create agent file (v2 frontmatter, IDENTITY block, channeled mentor, icon), wire into squad(s), add to agent-contracts.md, add to glossary.md if new terminology.
 
@@ -161,7 +172,9 @@ For each: create agent file (v2 frontmatter, IDENTITY block, channeled mentor, i
 
 - [ ] **T1.6** `@growth-marketer` (Funé) — Marketing & Growth Strategist
 
-**Channeled mentor:** Seth Godin (permission marketing & storytelling) + Al Ries & Jack Trout (positioning & brand strategy) + April Dunford (product positioning) + Sean Ellis (growth hacking) + Hiten Shah (product-led growth) + Annie Duke (thinking in probabilities) + Steve Jobs (product marketing & brand building). Speaks with equal mastery of brand storytelling and growth analytics — every campaign has a narrative, every metric has a story, and every channel has a cost.
+**Channeled mentor:** Seth Godin (permission marketing & storytelling) + Al Ries & Jack Trout (positioning & brand strategy) + April Dunford (product positioning) + Sean Ellis (growth hacking) + Annie Duke (thinking in probabilities). Speaks with equal mastery of brand storytelling and growth analytics — every campaign has a narrative, every metric has a story, and every channel has a cost.
+
+> **Mentor count errata:** the first draft listed 7 mentors (incl. Hiten Shah and Steve Jobs) — above the 1-5 rule (T5.60) and the shipped validator's limit. Trimmed to 5.
 
 **Charter:**
 - Co-owns the Go-To-Market (GTM) strategy with `@product-manager` (Sarah): Sarah owns release readiness and product/commercial scope; Funé owns full-funnel marketing GTM strategy, brand positioning, messaging matrix, PR/communications strategy, and growth experiment loops.
@@ -225,7 +238,7 @@ For each: create agent file (v2 frontmatter, IDENTITY block, channeled mentor, i
 
 - [x] **T1.10** `@ml-ai-ops` (Atlas) — AI & ML Operations & Infrastructure
 
-> **⬆ Promoted to Phase 1.** Full spec and implementation checklist live in `02d-ai-ready-team.md` (Part C). Charter below is retained for Phase 5 canonical reference only.
+> **⬆ Promoted to Phase 1.** Full spec and implementation checklist live in `02d-phase-1-ai-ready-team.md` (Part C). Charter below is retained for Phase 5 canonical reference only.
 
 **Channeled mentor:** Huyen Chip (Designing Machine Learning Systems) + Goku Mohandas (Anima) + Eugene Yan (AI Systems). Speaks like an SRE who happens to work on AI/ML pipelines — vLLM/Ollama model serving, prompt caching ops, vector DB indexing, drift/hallucination monitoring, token cost telemetry, lineage, and rollback are first-class.
 
@@ -246,7 +259,7 @@ For each: create agent file (v2 frontmatter, IDENTITY block, channeled mentor, i
 
 - [x] **T1.10b** `@ml-ai-engineer` (Kai) — AI & Machine Learning Engineer
 
-> **⬆ Promoted to Phase 1.** Full spec and implementation checklist live in `02d-ai-ready-team.md` (Part B). Charter below is retained for Phase 5 canonical reference only.
+> **⬆ Promoted to Phase 1.** Full spec and implementation checklist live in `02d-phase-1-ai-ready-team.md` (Part B). Charter below is retained for Phase 5 canonical reference only.
 
 **Channeled mentor:** Andrej Karpathy (Software 2.0 & LLM training) + François Chollet (Deep Learning & abstraction) + Harrison Chase (LangChain / Agentic orchestration) + Jason Wei (Chain-of-Thought & Emergent capabilities). Speaks like a principal AI researcher who lives in the code — precise, empirical, benchmark-obsessed, allergic to "AI magic hype." Believes every AI feature must prove its superiority over a deterministic baseline.
 
@@ -272,7 +285,11 @@ For each: create agent file (v2 frontmatter, IDENTITY block, channeled mentor, i
 
 ---
 
-- [ ] **T1.11** `@accessibility-architect` (Atlas) — Accessibility Specialist
+- [ ] **T1.11** `@accessibility-architect` (Aria) — Accessibility Specialist
+
+> **Icon errata:** earlier drafts named this persona "Atlas" — a collision with
+> `@ml-ai-ops` (Atlas). Renamed to **Aria** (a11y reference). T5.60 now enforces
+> icon + human-name uniqueness across the agent dir.
 
 **Channeled mentor:** Léonie Watson (screen-reader-first thinking) + Hidde de Vries (inclusive design). Speaks like an a11y auditor — assistive-tech-first, empathy-second, code-third.
 
@@ -382,7 +399,7 @@ For each skill: create folder + SKILL.md (bootloader) + steps/ (when multi-step)
 
 **Source:** BMAD `bmad-brainstorming` (uses `brain-methods.csv`).
 **When to invoke:** User is stuck, brief is stale, `@founder` rejected 3+ framings, user explicitly says "I need more ideas."
-**Primary agent:** `@brainstormer` (Carson). May also invoke `@innovation-strategist` for a positioning check at the end.
+**Primary agent:** `@brainstormer` (Thoth — name corrected from "Carson"). May also invoke `@innovation-strategist` for a positioning check at the end.
 **Output:** `artifacts/output/01-discovery/brainstorm-output.md` with 5+ concepts (1 outlandish), each with: one-line description, why-it-might-work, why-it-might-fail, "the most interesting question about this."
 **Effort:** ~1 day.
 
@@ -423,7 +440,7 @@ For each skill: create folder + SKILL.md (bootloader) + steps/ (when multi-step)
 
 **Source:** BMAD `bmad-cis-storytelling`.
 **When to invoke:** User needs a launch post, a blog, a case study, an internal memo, a vision narrative.
-**Primary agent:** `@storyteller` (Sophia). Always pairs with `humanize` skill.
+**Primary agent:** `@storyteller` (Oda — name corrected from "Sophia"). Always pairs with `humanize` skill.
 **Output:** 3 drafts (tweet / paragraph / long-form) + McKee value-charge review.
 **Effort:** ~1 day.
 
@@ -433,7 +450,7 @@ For each skill: create folder + SKILL.md (bootloader) + steps/ (when multi-step)
 
 **Source:** BMAD `bmad-cis-presentation`.
 **When to invoke:** User needs a pitch deck, an internal all-hands, a conference talk.
-**Primary agent:** `@presentation-master` (Caravaggio).
+**Primary agent:** `@presentation-master` (Lindenberg — name corrected from "Caravaggio").
 **Output:** slide-by-slide outline + visual brief + 3-second-rule audit.
 **Effort:** ~1 day.
 
@@ -453,7 +470,7 @@ For each skill: create folder + SKILL.md (bootloader) + steps/ (when multi-step)
 
 **Source:** ECC `accessibility` skill + WAI-ARIA Authoring Practices.
 **When to invoke:** Pre-launch, after every major UI change, when a user reports an a11y issue.
-**Primary agent:** `@accessibility-architect` (Atlas-A11y).
+**Primary agent:** `@accessibility-architect` (Aria — "Atlas-A11y" corrected).
 **Output:** `artifacts/output/a11y/audit.md` with: WCAG violations (by principle: perceivable / operable / understandable / robust), assistive-tech test results, remediation priority list (P0/P1/P2).
 **Effort:** ~1.5 days.
 
@@ -509,20 +526,9 @@ For each skill: create folder + SKILL.md (bootloader) + steps/ (when multi-step)
 
 ---
 
-- [ ] **T1.28** `/llm-wiki` — LLM-Wiki Knowledge Base Generation and Navigation `[TBD: Discuss at Dev Stage]`
+- [ ] **T1.28** `/llm-wiki` — LLM-Wiki Knowledge Base Generation and Navigation `[Moved to Phase 7]`
 
-**Status:** ⏳ **Pending Discussion at Dev Stage** (Custom design based on Karpathy's OG Gist: `https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f`).
-**When to invoke:** When generating, searching, or traversing the internal project wiki / documentation knowledge base.
-**Primary agent:** `@technical-writer` (Clara) leads; `@developer` (Rex) or `@architect` (Vera) for technical source verification.
-
-**Adopt & Improve Requirements (OG Karpathy Architecture):**
-- **Custom OG Karpathy Design:** Build directly from Karpathy's original 3-layer architecture (`raw sources`, `persistent wiki vault`, `schema`) rather than generic/bloated off-the-shelf implementations.
-- **Reduce Hallucination:** Strict citation and footnote policy for every assertion, term, or design claim generated in the wiki result. All citations must trace back to concrete source files, code symbols, or ADR markdown documents.
-- **Link Integrity:** Verify the target destination of every generated markdown link. If a target destination does not exist yet (i.e. it is a placeholder or has no target destination), the generator must output it as regular, non-clickable text instead of a broken link.
-- **Compounding Synthesis:** Automatically file valuable query answers back into `artifacts/output/10-wiki/synthesis/`.
-
-**Output:** `artifacts/output/10-wiki/wiki-home.md` or targeted wiki pages under `artifacts/output/10-wiki/` with validated cross-links and footnotes.
-**Effort:** ~1.5 days.
+**Status:** ➡️ **Moved to Phase 7** (`09-phase-7-pkm-knowledge-engine.md`). All PKM, Zettelkasten, PARA, and LLM-Wiki exploration has been consolidated into dedicated Phase 7.
 
 ---
 
@@ -543,7 +549,7 @@ For each skill: create folder + SKILL.md (bootloader) + steps/ (when multi-step)
 - **Critic personas are domain-bound** (research-critic / code-critic / ux-critic / doc-critic) and produce *findings + suggested fixes* against domain rubrics (F0.27: Product / Architecture / Code / UX / Documentation).
 - **@artifact-judge is axis-bound** (accuracy / completeness / relevance / tone) and produces *scores + verdict*, not fixes.
 - They compose, they don't compete: a critic can invoke @artifact-judge for the generic quality baseline, then layer domain judgment on top. F0.27's Documentation Rubric ("completeness, accuracy, readability") overlaps 3 of @artifact-judge's axes — by design, so @doc-critic gets a consistent baseline score before applying doc-specific judgment.
-- **Why ship @artifact-judge in v2.1, not v2.3+ with critics:** every Phase 1 artifact-producing skill (develop, validate-idea, design, launch) has an immediate quality-floor need. Waiting for F0.25–F0.28 leaves all v2.0/v2.1 artifacts unscored. @artifact-judge is self-contained (4 axes inline, no F0.27 dependency) and ships now; critics arrive later and build on top.
+- **Why ship @artifact-judge in v2.2 with T1, not v2.3+ with critics:** every artifact-producing skill (develop, validate-idea, design, launch) has an immediate quality-floor need. Waiting for F0.25–F0.28 leaves all v2.0/v2.1 artifacts unscored. @artifact-judge is self-contained (4 axes inline, no F0.27 dependency) and ships with the T1 bench; critics arrive later and build on top.
 
 ---
 
@@ -556,13 +562,14 @@ For each skill: create folder + SKILL.md (bootloader) + steps/ (when multi-step)
 
 ### T1 Done when
 
-- [ ] All 15 T1 personas have v2 frontmatter, IDENTITY block, channeled mentor, icon, charter
+- [ ] All 14 net-new T1 personas have v2 frontmatter, IDENTITY block, channeled mentor, icon, charter (T1.10/T1.10b already shipped in Phase 1 — not re-worked)
 - [ ] All 15 T1 skills are folder + SKILL.md + steps/ (or tri-modal), integrated with orchestrator
-- [ ] The 3 new squads (`growth`, `data-platform`, `migration`) are opt-in via `install-modules`
+- [ ] The 3 new squads (`growth`, `data-platform`, `migration`) are opt-in via `install-modules` (v2.2)
 - [ ] `brainstormer ↔ founder` pairing documented in AGENTS.md (divergent vs convergent)
 - [ ] `humanize` skill invoked by default by every external-facing persona (@storyteller, @presentation-master, @growth-marketer, @seo-specialist)
 - [ ] @ml-ai-ops ↔ @ml-ai-engineer handoff rule is artifact-based (model-approved-for-production.md), not direct call
 - [ ] No persona duplicates an existing persona's charter (pre-release @architect review)
+- [ ] No icon or human-name collisions (validate_frontmatter.js T5.60 rule)
 - [ ] Persona gating: each T1 persona clears Gate A (3+ community requests) OR Gate B (≥200 lines with depth)
 - [ ] Every T1 persona and skill preserves the T8 contract and has a domain-specific evidence/review definition
 
@@ -655,7 +662,10 @@ For each skill: create folder + SKILL.md (bootloader) + steps/ (when multi-step)
 
 ---
 
-- [ ] **T2.6** `@content-engineer` (Quill+) — Content Pipeline & SEO Editorial Lead
+- [ ] **T2.6** `@content-engineer` (Quin) — Content Pipeline & SEO Editorial Lead
+
+> **Name errata:** earlier drafts used "Quill+" — a collision with `@writer`'s
+> human name "Quill". Renamed to **Quin**.
 
 **Channeled mentor:** Animalz Content Strategy + Brian Dean (Backlinko Data-Driven Editorial) + Ann Handley (Everybody Writes). Speaks like a managing editor — structural, SEO-conscious, audience-first, relentless about actionable value per paragraph.
 
@@ -831,11 +841,11 @@ For each skill: create folder + SKILL.md (bootloader) + steps/ (when multi-step)
 
 ## Cross-cutting updates
 
-- [ ] **T5.60** `validate_frontmatter.js` updates: persona count ≤ 50 (sanity alarm); no duplicate charter descriptions; channeled mentor count ≤ 2
-- [ ] **T5.61** `test_catalog_parity.js` updates with new persona/skill/squad counts (44/43/10)
-- [ ] **T5.62** `agent-contracts.md` updates with 23 new personas' owns/doesn't-own
+- [ ] **T5.60** `validate_frontmatter.js` updates: persona count ≤ 50 (sanity alarm); no duplicate charter descriptions; **channeled mentor count 1-5** (matches the shipped validator's allowed range — earlier "≤ 2" contradicted both the validator and this file's own 3-4 mentor charters; prefer 2, allow up to 5); **icon + human_name uniqueness across the agent dir** (catches the Atlas/Quill+ class of collision — name checks catch what charter checks miss)
+- [ ] **T5.61** `test_catalog_parity.js` updates: derive counts from disk per F3.13 (personas = validated agent files minus `origin: internal`); grand totals v2.2 = **45 personas / 62 skills / 10 squads**
+- [ ] **T5.62** `agent-contracts.md` updates with 22 new personas' owns/doesn't-own
 - [ ] **T5.63** `skills.md` quick-reference updates with 19 new skills
-- [ ] **T5.64** `AGENTS.md` updates agent count from 21 → 44
+- [ ] **T5.64** `AGENTS.md` updates agent count from 23 (v2.0) → 45 (v2.2), noting the 2 internal agents (@goal-verifier, flint) are validated but excluded from the persona count
 - [ ] **T5.65** `ROADMAP.md` updates with v2.2 entry
 - [ ] **T5.66** Builder and catalog validation checks every new persona/skill for the T8 contract
 
@@ -843,13 +853,13 @@ For each skill: create folder + SKILL.md (bootloader) + steps/ (when multi-step)
 
 ## Phase 5 Done when
 
-- [ ] 23 new personas all have v2 frontmatter, IDENTITY block, channeled mentor, icon, charter
+- [ ] 22 new personas all have v2 frontmatter, IDENTITY block, channeled mentor, icon, charter
 - [ ] 19 new skills all folder + step files
 - [ ] 3 new opt-in squads work via `install-modules`
 - [ ] `humanize` invoked by default by every external-facing persona
-- [ ] No persona duplicates an existing persona's charter
-- [ ] `validate_frontmatter.js` exits 0 on all 43 personas
-- [ ] `test_catalog_parity.js` exits 0 with new counts (43/42/10)
+- [ ] No persona duplicates an existing persona's charter; no icon/human-name collisions
+- [ ] `validate_frontmatter.js` exits 0 on all 45 personas (23 base + 22 new)
+- [ ] `test_catalog_parity.js` exits 0 with disk-derived counts (45/62/10)
 - [ ] `brainstormer ↔ founder` pairing documented
 - [ ] @ml-ai-ops ↔ @ml-ai-engineer handoff is artifact-based
 - [ ] @legal-counsel reviewed by a lawyer and shipped as opt-in
@@ -858,7 +868,7 @@ For each skill: create folder + SKILL.md (bootloader) + steps/ (when multi-step)
 ## Risks
 
 - **Persona overlap discovered post-release.** Pre-release @architect review against existing 21. "No overlap" rule is a hard gate.
-- **Channeled mentors become a crutch.** Hard rule: max 2 per persona. Reject 3+.
+- **Channeled mentors become a crutch.** Hard rule: 1-5 per persona (validator allows 1-5; prefer 2). Reject 6+.
 - **"21 was already too many" criticism.** Frame as "21 core + 22 opt-in." New personas never in `startup` or `build` by default.
 - **Game-studio squad can't find a real project.** T2 ship-block: a working game project exercises every game persona. If none found, defer to separate minor release.
 - **New personas all want `read + bash`, breaking the reasoning/I/O split.** Hard rule: any persona with `bash` is "thinking + execution" (developer-tier). Every bash command goes through `@executor`. The split is preserved.
@@ -871,3 +881,23 @@ If Phase 5 breaks:
 - **New personas:** each persona is a standalone `.md` file. Delete any persona that causes issues without affecting the 21 core agents.
 - **New squads:** squads are opt-in via `install-modules`. If a squad causes routing issues, remove it from the default install.
 - **New skills:** each skill is a standalone folder. Delete any skill that causes issues without affecting the 24 core skills.
+
+---
+
+## Completion Checklist
+
+**Phase 5 Deeper Bench status: PLANNED (v2.2 Scope — Not Started).**
+
+- [ ] Tier 1 expansion (+6 core specialist personas)
+- [ ] Tier 2 expansion (+10 game studio & domain specialist personas)
+- [ ] Tier 3 expansion (+6 specialized legal, hardware, and niche personas)
+- [ ] 19 new specialized skills & 3 new opt-in squads
+- [ ] Comprehensive validation and catalog parity check across 45 personas
+
+---
+
+## Sign-Off
+
+**@founder (Elena):** PENDING — Gated on earlier phases.  
+**@architect (Vera):** PENDING — Persona non-overlap review required.  
+**@tech-lead (Grant):** PENDING — Execution scheduled for v2.2.

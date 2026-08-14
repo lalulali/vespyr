@@ -4,9 +4,6 @@ name: Completion
 prerequisites:
   - step-03 completed
 delegation:
-  reads: "@reader (all test results for final report; per delegation-policy.md multi-file)"
-  writes: "@writer (test-report.md; per delegation-policy.md single output)"
-  runs: "@executor (orchestrator_state.js complete; per delegation-policy.md all bash)"
   memory: "@memory-controller (session-write; per delegation-policy.md all memory)"
   direct_justified: []
 output_contract:
@@ -21,7 +18,7 @@ Produce the final test report and close the QA cycle.
 
 ### 4a. Compile test report
 
-`@qa-engineer` synthesizes all findings into a single report. Delegate to `@writer` for `artifacts/output/05-execution/quality/test-report.md`:
+`@qa-engineer` synthesizes all findings into a single report. Write `artifacts/output/05-execution/quality/test-report.md`:
 
 ```markdown
 # Test Report
@@ -69,13 +66,9 @@ Blockers: {any blocking defects, or "none"}
 
 ### 4c. State machine
 
-Delegate to `@executor`:
+Run:
 ```bash
 node .agents/scripts/orchestrator_state.js complete --agent qa-engineer --artifact 05-execution/quality/test-report.md
 ```
-
 ## Delegation
-- **Reads:** @reader for all test results
-- **Writes:** @writer for test-report.md
-- **Runs:** @executor for orchestrator_state.js complete
 - **Memory:** @memory-controller for session-write

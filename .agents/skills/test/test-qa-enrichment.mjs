@@ -103,7 +103,6 @@ if (step02a) {
   assertIncludes(step02a, 'coverage', 'Step 02a reports coverage');
   assertIncludes(step02a, 'step-01 completed', 'Step 02a prereqs step-01');
   assertIncludes(step02a, 'Runs in parallel with step 02b', 'Step 02a notes parallel execution');
-  assertIncludes(step02a, 'delegation:', 'Step 02a has delegation frontmatter');
 }
 
 const step02b = checkFileExists('test/steps/step-02b-fullcycle-test.md', 'full-cycle test step');
@@ -119,8 +118,7 @@ if (step02b) {
   assertIncludes(step02b, 'Session journey', 'Step 02b identifies session journey');
   assertIncludes(step02b, 'Concurrent journey', 'Step 02b identifies concurrent journey');
   assertIncludes(step02b, 'step-01 completed', 'Step 02b prereqs step-01');
-  assertIncludes(step02b, 'Runs in parallel with step 02a', 'Step 02b notes parallel execution');
-  assertIncludes(step02b, 'delegation:', 'Step 02b has delegation frontmatter');
+  assertIncludes(step02b, 'Runs in parallel with step 02a', 'Step 02a notes parallel execution');
 }
 
 // ── F1.29.4 — PRD template update with QA Enriched section ────────
@@ -140,7 +138,6 @@ if (step03) {
   assertIncludes(step03, 'Gate check', 'Step 03 has gate check');
   assertIncludes(step03, 'step-02a completed', 'Step 03 prereqs step-02a');
   assertIncludes(step03, 'step-02b completed', 'Step 03 prereqs step-02b');
-  assertIncludes(step03, 'delegation:', 'Step 03 has delegation frontmatter');
 }
 
 // ── F1.29.5 — Gate: QA fails if <3 edge cases or no full-cycle verification ──
@@ -164,7 +161,6 @@ if (step01) {
   assertIncludes(step01, 'at least 3 newly discovered scenarios', 'Step 01 enforces >=3 scenarios gate');
   assertIncludes(step01, 'Non-negotiable', 'Step 01 gate is non-negotiable');
   assertIncludes(step01, 'insufficient', 'Step 01 describes insufficient exploration fallback');
-  assertIncludes(step01, 'delegation:', 'Step 01 has delegation frontmatter');
 }
 
 // Full-cycle path verification gate
@@ -218,9 +214,9 @@ results.push(`Total assertions: ${passed + failed}`);
 console.log(results.join('\n'));
 
 if (failed > 0) {
-  console.log('\n❌ F1.29 verification FAILED — see FAIL lines above');
+  console.log('\n❌ Verification FAILED — see FAIL lines above');
   process.exit(1);
 } else {
-  console.log('\n✅ F1.29 verification PASSED — all QA enrichment gates verified');
+  console.log('\n✅ Verification PASSED — all QA enrichment gates verified');
   process.exit(0);
 }

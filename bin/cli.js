@@ -50,7 +50,7 @@ const HARNESS_OPTIONS = [
 	{
 		id: "kiro",
 		label: "Kiro Steering & Skills",
-		description: "scaffolds .kiro/steering/AGENTS.md & .kiro/skills/ symlink",
+		description: "scaffolds .kiro/steering/vespyr-steering.md & .kiro/skills/ symlink",
 	},
 ];
 
@@ -444,7 +444,6 @@ Stack: None
 Phase: validation
 Sprint: none
 Blockers: 0
-Squad: full-team
 
 ## [IDENTITY]
 User Nickname: ${userNickname}
@@ -464,9 +463,9 @@ _(auto-populated on every session by @memory-controller / orchestrator_state.js)
 - **Constraints**: None recorded
 
 ## Team
-- **Squad**: full-team
+
 - **Operation Mode**: semi-autonomous
-- **Active Agents**: ${agentCount} (full-team preset)
+- **Active Agents**: ${agentCount} agents
 
 ## Memory
 - **Lessons Learned**: None yet
@@ -493,9 +492,13 @@ _(auto-populated on every session by @memory-controller / orchestrator_state.js)
 }
 
 function bootstrapRootDocs(targetDir, projectName, selectedHarnesses) {
-	const canonicalFile = fs.existsSync(path.join(targetDir, ".agents", "agent.md.canonical"))
-		? path.join(targetDir, ".agents", "agent.md.canonical")
-		: path.join(AGENTS_SRC, "agent.md.canonical");
+	const canonicalFile = fs.existsSync(path.join(targetDir, ".agents", "templates", "system", "AGENTS.md.canonical"))
+		? path.join(targetDir, ".agents", "templates", "system", "AGENTS.md.canonical")
+		: fs.existsSync(path.join(targetDir, ".agents", "templates", "system", "agent.md.canonical"))
+		? path.join(targetDir, ".agents", "templates", "system", "agent.md.canonical")
+		: fs.existsSync(path.join(AGENTS_SRC, "templates", "system", "AGENTS.md.canonical"))
+		? path.join(AGENTS_SRC, "templates", "system", "AGENTS.md.canonical")
+		: path.join(AGENTS_SRC, "templates", "system", "agent.md.canonical");
 
 	const canonicalContent = fs.existsSync(canonicalFile)
 		? fs.readFileSync(canonicalFile, "utf8").replace(/\{Project Name\}/g, projectName)
@@ -589,7 +592,7 @@ function printSummary(targetDir, selections) {
 		`============================================================`,
 		``,
 		`  Target:       ${targetDir}`,
-		`  Squad:        full-team (${count} agents)`,
+
 		`  Harnesses:    ${selections.harnesses.join(", ") || "core only"}`,
 		``,
 		`  Created:`,
@@ -616,7 +619,7 @@ function printSummary(targetDir, selections) {
 		lines.push(`    ✓ .windsurfrules -> GUARDRAILS    (Windsurf rules)`);
 	}
 	if (selections.harnesses.includes("kiro")) {
-		lines.push(`    ✓ .kiro/steering/AGENTS.md        (Kiro steering)`);
+		lines.push(`    ✓ .kiro/steering/vespyr-steering.md (Kiro steering)`);
 		lines.push(`    ✓ .kiro/skills -> skills          (Kiro skills)`);
 	}
 
@@ -626,7 +629,7 @@ function printSummary(targetDir, selections) {
 		`    1. Run /init to bootstrap your project context`,
 		`    2. Type @founder, /validate-idea, or /validate-game-idea "your idea" to stress-test a concept`,
 		`    3. Use @help-me for a tailored navigation report`,
-		`    4. Use /squad to view or switch team presets`,
+
 		``,
 		`  Docs: https://github.com/lalulali/vespyr`,
 		`  Report issues: https://github.com/lalulali/vespyr/issues`,
@@ -980,17 +983,24 @@ async function installHarnesses(targetDir, selections, method) {
 			);
 		}
 
-		const steeringAgentsPath = path.join(steeringDir, "AGENTS.md");
-		const rootAgentsPath = path.join(targetDir, "AGENTS.md");
+		const steeringAgentsPath = path.join(steeringDir, "vespyr-steering.md");
+		const canonicalSource = fs.existsSync(
+			path.join(agentsTarget, "templates", "system", "vespyr-steering.md.canonical"),
+		)
+			? path.join(agentsTarget, "templates", "system", "vespyr-steering.md.canonical")
+			: fs.existsSync(path.join(agentsTarget, "templates", "system", "agent.md.canonical"))
+			? path.join(agentsTarget, "templates", "system", "agent.md.canonical")
+			: path.join(targetDir, "AGENTS.md");
+
 		handleConflict(
 			steeringAgentsPath,
-			"kiro steering AGENTS.md",
+			"kiro steering vespyr-steering.md",
 			targetDir,
 			method,
 		);
 		if (!fs.existsSync(steeringAgentsPath)) {
 			createLinkOrCopy(
-				path.relative(steeringDir, rootAgentsPath),
+				path.relative(steeringDir, canonicalSource),
 				steeringAgentsPath,
 				"file",
 				method,
@@ -1319,18 +1329,20 @@ async function performGlobalInstall(selections, method, userNickname) {
 				if (!fs.existsSync(steeringDir)) {
 					fs.mkdirSync(steeringDir, { recursive: true });
 				}
-				const steeringAgentsPath = path.join(steeringDir, "AGENTS.md");
+				const steeringAgentsPath = path.join(steeringDir, "vespyr-steering.md");
 				handleConflict(
 					steeringAgentsPath,
-					`${h} steering AGENTS.md`,
+					`${h} steering vespyr-steering.md`,
 					home,
 					method,
 				);
 				if (!fs.existsSync(steeringAgentsPath)) {
 					const canonicalSource = fs.existsSync(
-						path.join(globalAgentsDir, "agent.md.canonical"),
+						path.join(globalAgentsDir, "templates", "system", "vespyr-steering.md.canonical"),
 					)
-						? path.join(globalAgentsDir, "agent.md.canonical")
+						? path.join(globalAgentsDir, "templates", "system", "vespyr-steering.md.canonical")
+						: fs.existsSync(path.join(globalAgentsDir, "templates", "system", "agent.md.canonical"))
+						? path.join(globalAgentsDir, "templates", "system", "agent.md.canonical")
 						: path.join(globalAgentsDir, "AGENTS.md");
 					createLinkOrCopy(
 						canonicalSource,
@@ -1436,7 +1448,7 @@ async function performFreshInstall(targetDir, flags) {
 				}
 			} else if (step === "name") {
 				userNickname = await askQuestion(
-					"What should the agent squad call you? (e.g., Lyor, Laura)",
+					"What should the agent call you? (e.g., Lyor, Laura)",
 					userNickname || "User",
 				);
 				userNickname =
@@ -1639,7 +1651,7 @@ async function performReconfigure(targetDir, flags) {
 		);
 		if (fs.existsSync(contextPath)) {
 			userNickname = await askQuestion(
-				"What should the agent squad call you? (e.g., Lyor, Laura)",
+				"What should the agent call you? (e.g., Lyor, Laura)",
 				userNickname,
 			);
 			userNickname = userNickname.replace(/[^a-zA-Z0-9\s\-_.]/g, "") || "User";
@@ -1734,7 +1746,7 @@ function surgicallyCleanupAgentsDir(agentsTarget) {
 		"commands",
 		"references",
 		"scripts",
-		"squads",
+
 		"templates",
 	];
 	for (const folder of coreFolders) {
@@ -1748,7 +1760,6 @@ function surgicallyCleanupAgentsDir(agentsTarget) {
 	const coreFiles = [
 		"GUARDRAILS.md",
 		"TROUBLESHOOTING.md",
-		"delegation-pattern.md",
 		"skills.md",
 		"workflow.md",
 		".vespyr-version",
@@ -2103,9 +2114,13 @@ function performSyncDocs(targetDir) {
 	}
 
 	// Fallback: template-based approach from agent.md.canonical
-	const canonicalFile = fs.existsSync(path.join(targetDir, ".agents", "agent.md.canonical"))
-		? path.join(targetDir, ".agents", "agent.md.canonical")
-		: path.join(AGENTS_SRC, "agent.md.canonical");
+	const canonicalFile = fs.existsSync(path.join(targetDir, ".agents", "templates", "system", "AGENTS.md.canonical"))
+		? path.join(targetDir, ".agents", "templates", "system", "AGENTS.md.canonical")
+		: fs.existsSync(path.join(targetDir, ".agents", "templates", "system", "agent.md.canonical"))
+		? path.join(targetDir, ".agents", "templates", "system", "agent.md.canonical")
+		: fs.existsSync(path.join(AGENTS_SRC, "templates", "system", "AGENTS.md.canonical"))
+		? path.join(AGENTS_SRC, "templates", "system", "AGENTS.md.canonical")
+		: path.join(AGENTS_SRC, "templates", "system", "agent.md.canonical");
 
 	if (fs.existsSync(canonicalFile)) {
 		const canonicalContent = fs.readFileSync(canonicalFile, "utf8").replace(/\{Project Name\}/g, path.basename(targetDir));

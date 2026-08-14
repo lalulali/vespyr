@@ -6,44 +6,16 @@
 
 Vespyr's 23 agents are organized into three layers:
 
-```
-┌──────────────────────────────────────────────┐
-│          REASONING AGENTS (19)               │
-│  founder, PM, architect, developer, ...      │
-│  NO file access, NO shell — by design.       │
-│  Must delegate all I/O to sub-agents.        │
-└──────────────────┬───────────────────────────┘
-                    │ delegates to
-                    ▼
-┌──────────────────────────────────────────────┐
-│          I/O SUB-AGENTS (4)                  │
-│  @reader              — reads & summarizes   │
-│  @writer              — writes & edits       │
-│  @executor            — runs shell commands  │
-│  @memory-controller   — 3-tier load + fetch  │
-└──────────────────────────────────────────────┘
-```
+## Memory Protocol
 
-### Why I/O Is Denied
+Every agent performs file reads, writes, and command runs directly with its own tools. The one specialized service is **memory**: all memory operations route through `@memory-controller` (script-backed).
 
-Reasoning agents (founder, developer, architect, etc.) cannot touch files or run commands. This isn't a limitation — it's the architecture:
+- **Load** — `@memory-controller load <agent> [task]`: progressive 3-tier context (see Memory System Architecture)
+- **Write** — `@memory-controller write <file>`: schema-validated entries into `artifacts/memory/`
+- **Session** — every session ends with `@memory-controller session-write`: updates `session-summaries/latest.md` and pipeline state
+- **Fallback** — if `@memory-controller` is unavailable, read/write memory files directly with your own tools and note it in the session summary
 
-1. **Context efficiency** — Reasoning agents stay at ~1,000 tokens. Without I/O noise, context windows stay lean. 85-95% API cost savings compared to agents that handle their own I/O.
-2. **Structured output** — Sub-agents produce consistent, predictable output formats. No ad-hoc file diffs in the reasoning stream.
-3. **Auditability** — Every file read and write goes through narrow, specialized agents. The delegation audit script (`delegation_audit.js`) tracks compliance.
-
-### Delegation Policy
-
-| Threshold | Rule |
-|-----------|------|
-| ≤3 small files | Read directly |
-| >3 files | Delegate to `@reader` |
-| ≤50 lines | Write directly |
-| >50 lines | Delegate to `@writer` |
-| Any shell command | Delegate to `@executor` |
-| Any memory operation | Delegate to `@memory-controller` |
-
-Direct I/O outside thresholds requires `[DIRECT-IO-JUSTIFIED: reason]` in the response.
+Memory files live in `artifacts/memory/` (`project-context.md`, `active-decisions.md`, `lessons-learned.md`).
 
 ## Agent Contracts
 
@@ -85,7 +57,6 @@ Terminology is locked — no synonyms allowed. Full glossary at `.agents/referen
 | **ADR** | Architecture Decision Record |
 | **PRD** | Product Requirements Document |
 | **Memory** | Persistent shared context across agents and sessions |
-| **Squad** | A team preset of activated agents |
 | **Harness** | The AI developer tool loading the agents (OpenCode, Claude Code, etc.) |
 
 ## Memory System Architecture

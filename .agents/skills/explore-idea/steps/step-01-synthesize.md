@@ -3,11 +3,6 @@ step: 1
 name: Synthesize
 prerequisites:
   - idea concept provided by user or from upstream skill
-delegation:
-  reads: "@reader (validation brief, shaped brief, or problem-space brief if they exist; per delegation-policy.md multi-file)"
-  writes: "@writer (idea-brief.md; per delegation-policy.md output file)"
-  runs: none
-  direct_justified: []
 output_contract:
   citations: not-required
 ---
@@ -33,7 +28,7 @@ Delegate to `@memory-controller`:
 load founder [product exploration — synthesize concept]
 ```
 
-### 1c. Synthesize via @founder
+### 1c. Synthesize — @founder
 
 Invoke `@founder` to produce the structured brief:
 - Synthesize into a clear, one-sentence concept
@@ -46,7 +41,7 @@ Invoke `@founder` to produce the structured brief:
 
 ### 1d. Output
 
-Delegate to `@writer` for `artifacts/output/01-discovery/idea-brief.md`.
+Write `artifacts/output/01-discovery/idea-brief.md`.
 
 ### 1e. Gate check
 
@@ -55,7 +50,8 @@ Before proceeding to Phase 2, verify:
 - [ ] At least 3 assumptions are identified with assigned researchers
 - [ ] Optional agent decisions are documented
 
+## Memory closeout
+- `@memory-controller session-write` — record step 1 synthesis and research brief creation.
+
 ## Delegation
-- **Reads:** @reader for existing briefs (validation, shaped, problem-space)
-- **Writes:** @writer for idea-brief.md
-- **Runs:** none
+- **Memory:** @memory-controller for project-context and session-write

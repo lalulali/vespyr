@@ -112,7 +112,7 @@ function syncDetectedFields(content, repository, stack) {
 // Insert a missing [CORE] field after an existing sibling line, or append it
 // to the [CORE] block if none of the known siblings are present.
 function insertCoreField(content, key, value) {
-  const siblings = ['Project:', 'Stack:', 'Phase:', 'Sprint:', 'Blockers:', 'Squad:'];
+  const siblings = ['Project:', 'Stack:', 'Phase:', 'Sprint:', 'Blockers:'];
   const blockRe = /(## \[CORE\][^\n]*\n)([\s\S]*?)(?=\n## |\n---|\s*$)/;
   const block = content.match(blockRe);
   if (!block) return content;

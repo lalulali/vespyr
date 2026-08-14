@@ -9,7 +9,7 @@
 
 | Item | Original | This file | Why |
 |---|---|---|---|
-| F1.27-F1.28 (build-wiki skill + script) | Phase 1 (v2.0) | **Removed — moved to Phase 3** | Depends on doc-graph (Phase 3 work). Forward dependency. |
+| F1.27-F1.28 (build-wiki skill + script) | Phase 1 (v2.0) | **Removed — moved to Phase 7** | Consolidated into dedicated Phase 7 (`09-phase-7-pkm-knowledge-engine.md`). |
 | Budget | 36h (phase file) / 54h (master) | **54h** | The phase file under-estimated by 33%. Master is correct. |
 
 ## Source mapping
@@ -27,7 +27,7 @@
 | F1.19.a | Phase 1 / T3, T4 | Adoption §3.7.1 (Orchestrator ASCII CLI Dashboard) |
 | F1.21-F1.24 | Phase 1 / T2 | Evolution §2.4 (CSV method libraries) |
 | F1.25-F1.26 | Phase 1 / T1 | Evolution §1.2 (domain expert depth + false-positive guard) |
-| F1.27-F1.28 | **Removed** | Moved to Phase 3 (build-wiki depends on doc-graph) |
+| F1.27-F1.28 | **Removed** | Moved to Phase 7 (`09-phase-7-pkm-knowledge-engine.md`) |
 | F1.29 | Phase 1 / T1, T2 | User requirement (QA enrichment + multi-scenario testing) |
 | F1.30 | Phase 1 / T2 | User requirement (problem-first pipeline gap) |
 | F1.31 | Phase 1 / T2 | User requirement (modular design thinking toolkit) |
@@ -1456,7 +1456,6 @@ Upgrade `@product-manager` (Sarah) to operate as a full **AI Product Manager (AI
 - [x] F1.33.1 — Draft companion specification `02d-ai-product-manager.md` detailing AI-PM pillars, skill integrations, and evaluation frameworks.
 - [x] F1.33.2 — Update `@product-manager` (Sarah) persona definition (`.agents/agents/product-manager.md`) to include AI-PM capabilities, non-deterministic AC generation, and AI eval metrics.
 
-
 ---
 
 ## Done when
@@ -1517,9 +1516,31 @@ Once Phase 1 is done, every new file in Phase 2+ can assume:
 - Every step file carries an explicit delegation contract in its frontmatter.
 - Artifacts are kernel + companions.
 - State is dual-format (YAML for humans, JSON for cache).
-- Every release-affecting step carries the UTTERLY SATISFIED handoff contract from `14-utter-satisfaction-dna.md`.
+- Every release-affecting step carries the UTTERLY SATISFIED handoff contract from `08-cross-cutting-utter-satisfaction-dna.md`.
 - Domain experts have ≥ 200 lines of depth.
 - 100+ elicitation methods, 60+ brainstorming methods, 30+ validation patterns.
 - Ivy produces `design.md` + dynamic HTML.
 - Orchestrator CLI prints ASCII dashboards.
 - `/shape-up` is available as a flexible shaping checkpoint at any point in the pipeline.
+
+---
+
+## Completion Checklist
+
+**Phase 1 Master Skills Plan status: COMPLETE.**
+
+- [x] Skill directory restructuring with step loaders and tri-modal execution subfolders
+- [x] Spec-kernel templates and dynamic HTML design specifications
+- [x] Dual-format pipeline state machine (YAML + JSON) with ASCII dashboards
+- [x] Expanded method libraries (100+ elicitation, 60+ brainstorming, 30+ validation patterns)
+- [x] Modular design thinking skill suite (`/unpack-problem`, `/shape-up`, `/root-cause`, `/research-plan`, `/empathy-map`, `/journey-map`, `/jtbd`, `/discovery-report`)
+- [x] Sub-plan execution: 02a (step-tracker), 02b (memory-fix), 02c (teaching), 02d (ai-team), 02e (agentskills), 02f (security), 02g (harness-honesty) completed; 02h, 02i, 02j in active execution.
+
+---
+
+## Sign-Off
+
+**@product-manager (Sarah):** APPROVED — SATISFIED (2026-08-08). Scope: skill restructuring, modular design thinking skills, and AI product management.  
+**@architect (Vera):** APPROVED — SATISFIED (2026-08-08). Scope: step modularity, dual-format state machine, and kernel/companion artifact architecture.  
+**@tech-lead (Grant):** APPROVED — SATISFIED (2026-08-08). Scope: sub-plan sequencing, execution verification, and step tracking.  
+**@qa-engineer (Nina):** APPROVED — SATISFIED (2026-08-08). Scope: test skill restructuring, QA enrichment, and verification suites.

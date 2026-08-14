@@ -102,7 +102,7 @@ When auditing existing or proposed metrics to ensure they drive real value:
 
 ### Mode 2: PM Metric Strategy & Collaboration Co-Pilot
 
-Partner directly with `@product-manager` (and product squad) to define product metrics, driver trees, and telemetry tracking plans during product scoping.
+Partner directly with `@product-manager` to define product metrics, driver trees, and telemetry tracking plans during product scoping.
 
 #### Step 1: Joint Metric Discovery
 - Load product requirements (`artifacts/output/03-strategy/requirements.md` or PRD).
@@ -143,7 +143,7 @@ Produce an implementation-ready specification for `@developer`:
 
 ## Output Artifacts & Delivery
 
-Delegate file creation to `@writer`:
+Write:
 
 1. **For General Data Analysis & Insights**:
    - Location: `artifacts/output/07-iteration/data-analysis-report.md`

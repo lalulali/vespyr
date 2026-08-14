@@ -1,0 +1,259 @@
+{
+  "version": "1.0",
+  "schema": "vespyr-audit-spec",
+  "derived_from": "bin/cli.js (HARNESS_OPTIONS, detectInstalledHarnesses, harnessLinkMap)",
+  "harness_names_only_in_pattern_table": true,
+  "pattern_table": [
+    {
+      "harness_dir": "opencode",
+      "config_files": [
+        ".opencode/**",
+        "opencode.json"
+      ],
+      "scope": "T0"
+    },
+    {
+      "harness_dir": "claude",
+      "config_files": [
+        ".claude/**",
+        "CLAUDE.md"
+      ],
+      "scope": "T0"
+    },
+    {
+      "harness_dir": "cursor",
+      "config_files": [
+        ".cursor/rules/**"
+      ],
+      "scope": "T0"
+    },
+    {
+      "harness_dir": "github",
+      "config_files": [
+        ".github/agents/**"
+      ],
+      "scope": "T0"
+    },
+    {
+      "harness_dir": "windsurf",
+      "config_files": [
+        ".windsurf/**",
+        ".windsurfrules"
+      ],
+      "scope": "T0"
+    },
+    {
+      "harness_dir": "kiro",
+      "config_files": [
+        ".kiro/**"
+      ],
+      "scope": "T0"
+    }
+  ],
+  "pin_store": {
+    "policy": {
+      "npm": {
+        "mandatory_fields": [
+          "name",
+          "version",
+          "integrity"
+        ],
+        "integrity_format": "sha512-<base64> (npm registry `integrity` field value; sha1-<base64> accepted for legacy rows)",
+        "allowlist_semantics": "allowlist=true = pinned and trusted (change requires human review); allowlist=false = known-untrusted, finding always; absent = unpinned, finding (severity medium)",
+        "changes": "any add, remove, or version/integrity bump requires a human-reviewed diff; automated update (e.g. `npm audit fix --force`, `npm update`) is forbidden unless the resulting diff passes human review"
+      },
+      "github_refs": {
+        "mandatory_fields": [
+          "repo",
+          "tag",
+          "commit_sha"
+        ],
+        "commit_sha_format": "full 40-hex (SHA-1) or 64-hex (SHA-256) commit SHA; short SHAs are invalid (moved-tag/malleable-ref defense)",
+        "allowlist_semantics": "allowlist=true = pinned and trusted (change requires human review); allowlist=false = known-untrusted, finding always; absent = unpinned or floating ref (branch/range), finding (severity high)",
+        "changes": "any add, remove, or commit_sha change requires a human-reviewed diff; `git verify-tag` is not a substitute for SHA pinning (moved tags), it is a supplement"
+      },
+      "rebaseline": "requires a human-reviewed diff; never auto-accepted; every re-baseline is recorded with owner, rationale, and date",
+      "human_review_covers": [
+        "version intent: exact-semver pin vs floating range",
+        "integrity/provenance: registry integrity field, npm provenance (Sigstore), signed tags",
+        "install scripts: presence of postinstall/preinstall/install in the pinned version's manifest",
+        "publisher identity: npm maintainer / GitHub owner verified, not typosquat",
+        "license and declared dependencies of the pinned artifact",
+        "lockfile diff accompanying the pin change"
+      ]
+    },
+    "npm": [
+      {
+        "name": "",
+        "version": "",
+        "integrity": "",
+        "allowlist": true
+      }
+    ],
+    "github_refs": [
+      {
+        "repo": "",
+        "tag": "",
+        "commit_sha": "",
+        "allowlist": true
+      }
+    ]
+  },
+  "rules": [
+    {
+      "id": "GH-1",
+      "label": "INJ-HOOK",
+      "path": "**/.git/config,**/gitdir/config,**/.git/hooks/**,**/.husky/**",
+      "pattern": "(core\\.hooksPath|hooksPath)\\s*=|(pre-commit|pre-push|post-checkout|post-merge|prepare-commit-msg)\\s*$",
+      "severity": "high",
+      "mode": "parse",
+      "note": ""
+    },
+    {
+      "id": "INJ-PROMPT",
+      "label": "INJ-PROMPT",
+      "path": "**/*.md",
+      "pattern": "ignore (all |any )?(previous|prior|earlier) instructions|disregard (all |any )?(previous|prior) instructions|forget (all |any )?(previous|prior) instructions",
+      "severity": "high",
+      "mode": "regex"
+    },
+    {
+      "id": "INJ-TOOL",
+      "label": "INJ-TOOL",
+      "path": "**/*.md",
+      "pattern": "<(invoke|use_mcp_tool|execute_command|tool_use|antml:invoke)[^>]*>",
+      "severity": "high",
+      "mode": "regex"
+    },
+    {
+      "id": "INJ-OBFUSC",
+      "label": "INJ-OBFUSC",
+      "path": "**",
+      "pattern": "[A-Za-z0-9+/]{40,}={0,2}|(\\\\x[0-9a-fA-F]{2}){16,}",
+      "severity": "medium",
+      "mode": "regex",
+      "known_fp_excludes": [
+        "**/package-lock.json",
+        "**/package.json",
+        "**/.agents/package-lock.json",
+        "**/*.lock"
+      ],
+      "known_fp_note": "npm integrity fields (sha512-...) and lockfile hashes are legitimate base64 blobs; excluded as documented known-FP class (02f \u00a710, Nina FP budget)",
+      "known_fp_classes": [
+        "camelCase-acronym word runs joined by single / (e.g. Substitute/Combine/Adapt)",
+        "URL fragments with repeated slashes or dots (file://, raw.githubusercontent.com)",
+        "long absolute POSIX paths"
+      ],
+      "note": "F-3 (Victor): looksLikeBase64 guard (digit-or-symbol + mixed case + no // and no .) reduced repo-wide FPs 87 -> 3 on .agents. Remaining 3 = documented FP classes above; not suppressed further to avoid masking real blobs."
+    },
+    {
+      "id": "INJ-ROLE",
+      "label": "INJ-ROLE",
+      "path": "**/*.md",
+      "pattern": "you are now (the )?(system|root|superuser)|act as (the )?system\\b|new system prompt:",
+      "severity": "medium",
+      "mode": "regex"
+    },
+    {
+      "id": "INJ-TEMPLATE",
+      "label": "INJ-TEMPLATE",
+      "path": "**/templates/**,**/*.template.*",
+      "pattern": "\\{\\{\\s*[^}]{0,40}\\}\\}|<%[=-]?\\s*[^%]{0,60}%>",
+      "severity": "medium",
+      "mode": "regex"
+    },
+    {
+      "id": "INJ-PATH",
+      "label": "INJ-PATH",
+      "path": "**",
+      "pattern": "(\\.[\\/\\\\])|(^[\\\\/]{2})|([`$();|&])",
+      "severity": "medium",
+      "mode": "regex",
+      "scope": "filename",
+      "note": "applied to filenames + interpolated identifiers only, never full prose (supply-chain-audit-spec.md line 183; QA F-1)"
+    },
+    {
+      "id": "INJ-SECRET",
+      "label": "INJ-SECRET",
+      "path": "**",
+      "pattern": "AKIA[0-9A-Z]{16}|ghp_[A-Za-z0-9]{36}|sk-[A-Za-z0-9]{20,}|xox[baprs]-[A-Za-z0-9-]{10,}|AIza[0-9A-Za-z_-]{35}|(api[_-]?key|secret|token|password)\\s*[:=]\\s*[\"'][A-Za-z0-9_\\-./+]{16,}[\"']",
+      "severity": "medium",
+      "mode": "regex+entropy",
+      "entropy": {
+        "min_shannon_per_char": 2.6,
+        "window": "8-char sliding",
+        "note": "threshold 2.6 (max achievable for 8 distinct chars is 3.0; 3.5 was unreachable \u2014 rule could never fire). Regex match with entropy < threshold is NOT a finding (negative fixture: AKIA + repeated chars -> ~0.0)."
+      }
+    },
+    {
+      "id": "INJ-CONFIG",
+      "label": "INJ-CONFIG",
+      "path": "{T0}",
+      "pattern": "mcpServers|\"command\"\\s*:\\s*\"|plugins?\\s*[:=]",
+      "severity": "high",
+      "mode": "regex"
+    },
+    {
+      "id": "INJ-SYMLINK",
+      "label": "INJ-SYMLINK",
+      "path": "**",
+      "pattern": "<lstat:target_outside_repo>",
+      "severity": "medium",
+      "mode": "lstat"
+    },
+    {
+      "id": "BEACON-1",
+      "label": "S16-BEACON",
+      "path": "**/*.{js,sh,py,mjs,cjs,ps1,cmd,bat}",
+      "pattern": "(curl|wget|Invoke-WebRequest)[^\\n|]*\\| *(?:sudo +)?(sh|bash|powershell|pwsh|iex|cmd)",
+      "severity": "medium",
+      "mode": "regex",
+      "note": "F-4 (Victor): extended to pwsh/iex/cmd + sudo; iex is canonical PowerShell download-exec"
+    }
+  ],
+  "fault_contract": {
+    "note": "Exit 2 (fail-closed) is triggered by tool/environment failure, NOT by harness-shaped content. Negative fixtures (harness-shaped unknown dirs) must exit 0.",
+    "fault_inputs": [
+      {
+        "id": "FAULT-1",
+        "trigger": "unparseable or schema-invalid audit-spec.json import",
+        "expected_exit": 2
+      },
+      {
+        "id": "FAULT-2",
+        "trigger": "npm audit/OSV/socket.dev subprocess killed or non-zero",
+        "expected_exit": 2
+      },
+      {
+        "id": "FAULT-3",
+        "trigger": "offline network for composed scanners",
+        "expected_exit": 2
+      },
+      {
+        "id": "FAULT-4",
+        "trigger": "corrupt signed manifest",
+        "expected_exit": 2
+      }
+    ]
+  },
+  "fp_metric": {
+    "numerator": "informational findings := rule hits labeled severity low OR known-FP-class (documented per-rule known-FP notes)",
+    "denominator": "corpus files \u00d7 harness shapes per run (baseline-corpus executions)",
+    "formula": "FP rate = numerator \u00f7 denominator, frozen corpus only, per harness shape",
+    "gate": "NEW-FINDINGS-ONLY vs frozen baseline; new findings labeled, never auto-baselined"
+  },
+  "known_fp_excludes": {
+    "note": "Path globs whose matches are documented-FP-prone; scanner must not report these paths for the listed rules (02f \u00a710, QA F-9).",
+    "rules": {
+      "INJ-OBFUSC": [
+        "**/package-lock.json",
+        "**/package.json",
+        "**/*.lock",
+        "**/baseline-*.json"
+      ],
+      "INJ-SECRET": [
+        "**/baseline-*.json"
+      ]
+    }
+  }
+}

@@ -4,11 +4,6 @@ name: Criteria Backport
 prerequisites:
   - step-02a completed
   - step-02b completed
-delegation:
-  reads: "@reader (enrichment-findings.md, feature + fullcycle results; per delegation-policy.md multi-file)"
-  writes: "@writer (updated user-stories.md, updated product-spec.md; per delegation-policy.md multi-file output)"
-  runs: none
-  direct_justified: []
 output_contract:
   citations: not-required
 ---
@@ -34,7 +29,7 @@ Identify scenarios that belong in the acceptance criteria:
 
 ### 3b. Backport to user stories
 
-Delegate to `@writer` to update `artifacts/output/03-strategy/user-stories.md`:
+Update `artifacts/output/03-strategy/user-stories.md`:
 
 Append a new section at the end of the file:
 
@@ -51,7 +46,7 @@ Append a new section at the end of the file:
 
 ### 3c. Flag spec gaps
 
-If test findings reveal requirements that the PRD/SPEC doesn't address, delegate to `@writer` to update `product-spec.md`:
+If test findings reveal requirements that the PRD/SPEC doesn't address, update `product-spec.md`:
 
 ```markdown
 ## QA-Discovered Requirements
@@ -68,7 +63,9 @@ If test findings reveal requirements that the PRD/SPEC doesn't address, delegate
 - Flagged as a spec gap, OR
 - Documented as "unreachable in practice" with justification
 
+## Memory closeout
+- `@memory-controller session-write` — record step 3 criteria backport progress.
+
 ## Delegation
-- **Reads:** @reader for enrichment-findings.md, feature-test-results.md, fullcycle-test-results.md
-- **Writes:** @writer for updated user-stories.md and product-spec.md
-- **Runs:** none
+- **Memory:** @memory-controller for session-write
+

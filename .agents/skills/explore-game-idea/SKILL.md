@@ -76,7 +76,7 @@ Invoke `@researcher market` to validate genre market potential:
 
 **Input:** validation brief or idea brief
 **Output:** `artifacts/output/02-research/market-analysis.md`
-**Completion:** Run `@executor` command immediately when complete:
+**Completion:** Run immediately when complete:
 ```bash
 node .agents/scripts/orchestrator_state.js complete --agent researcher --artifact 02-research/market-analysis.md
 ```
@@ -99,7 +99,7 @@ Invoke `@researcher competitive` to map the genre landscape:
 
 **Input:** validation brief or idea brief
 **Output:** `artifacts/output/02-research/competitive-analysis.md`
-**Completion:** Run `@executor` command immediately when complete:
+**Completion:** Run immediately when complete:
 ```bash
 node .agents/scripts/orchestrator_state.js complete --agent researcher --artifact 02-research/competitive-analysis.md
 ```
@@ -126,7 +126,7 @@ Invoke `@user-researcher` to validate player needs:
 
 **Input:** validation brief or idea brief + `artifacts/output/02-research/competitive-analysis.md`
 **Output:** `artifacts/output/02-research/user-personas.md`
-**Completion:** Run `@executor` command immediately when complete:
+**Completion:** Run immediately when complete:
 ```bash
 node .agents/scripts/orchestrator_state.js complete --agent user-researcher --artifact 02-research/user-personas.md
 ```
@@ -177,12 +177,12 @@ The pipeline state machine (`node .agents/scripts/orchestrator_state.js`) is the
 
 ### At Start
 
-Run via `@executor`:
+Run:
 ```bash
 node .agents/scripts/orchestrator_state.js status
 ```
 
-If pipeline is uninitialized, initialize first via `squad` or directly:
+If pipeline is uninitialized, initialize first:
 ```bash
 node .agents/scripts/orchestrator_state.js init --name "<project>" --type <startup|company|personal>
 ```

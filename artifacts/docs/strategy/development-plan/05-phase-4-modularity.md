@@ -15,11 +15,11 @@
 
 **Source:** Evolution §3.1 | **Theme:** T6
 
-**Problem:** The `game-studio` squad, the `ml-engineer` agent, and the `validate-game-idea` skill are not core to most users. Today they ship anyway. Users can't opt out.
+**Problem:** The `game-studio` squad, the `ml-ai-engineer` agent, and the `validate-game-idea` skill are not core to most users. Today they ship anyway. Users can't opt out.
 
 **Target:** 7 installable modules with explicit dependencies. `core` is always required.
 
-**Full install-modules.json structure:**
+**Full install-modules.json structure (deduped + dependency-complete):**
 
 ```json
 {
@@ -28,52 +28,77 @@
     "core": {
       "description": "Core orchestration: founder, PM, tech-lead, developer, code-reviewer, QA",
       "agents": ["founder", "product-manager", "tech-lead", "developer", "code-reviewer", "qa-engineer"],
-      "skills": ["validate-idea", "design", "develop", "launch", "iterate", "retro"],
-      "required": true
+      "skills": ["validate-idea", "develop", "launch", "iterate"],
+      "required": true,
+      "depends_on": ["io"]
+    },
+    "io": {
+      "description": "I/O sub-agents + memory infrastructure. REQUIRED closure of every module: delegation hooks (03 F2.1) and every skill invoke @reader/@writer/@executor/@memory-controller.",
+      "agents": ["reader", "writer", "executor", "memory-controller"],
+      "skills": [],
+      "required": true,
+      "depends_on": []
     },
     "research": {
       "description": "Research agents: market, user, UX researchers",
       "agents": ["researcher", "user-researcher"],
-      "skills": ["explore-idea"]
+      "skills": ["explore-idea"],
+      "depends_on": ["io"]
     },
     "design": {
       "description": "Design agents and UX skills",
       "agents": ["product-designer", "ux-researcher"],
-      "skills": ["design", "humanize"]
+      "skills": ["humanize"],
+      "depends_on": ["io"]
     },
     "architecture": {
       "description": "Architecture + specialist technical agents",
-      "agents": ["architect", "security-engineer", "performance-engineer", "ml-engineer", "data-analyst", "devops-engineer"],
-      "skills": ["incident"]
+      "agents": ["architect", "security-engineer", "performance-engineer", "ml-ai-engineer", "ml-ai-ops", "shifu", "data-analyst", "devops-engineer"],
+      "skills": ["incident"],
+      "depends_on": ["io"]
     },
     "game": {
       "description": "Game development overlay",
       "agents": [],
-      "skills": ["validate-game-idea", "explore-game-idea"]
+      "skills": ["validate-game-idea", "explore-game-idea"],
+      "depends_on": ["io"]
     },
     "memory": {
-      "description": "Memory controller + memory skills",
-      "agents": ["memory-controller"],
-      "skills": ["memory", "retro"]
+      "description": "Memory skills (agents live in io — no duplicate installs)",
+      "agents": [],
+      "skills": ["memory", "retro"],
+      "depends_on": ["io"]
     },
     "orchestration": {
       "description": "Cross-cutting skills: grill, plan, review, test, kanban, status, phase, squad, delegate, code-graph, doc-graph, help-me",
       "agents": [],
-      "skills": ["grill-me", "plan", "review", "test", "kanban", "status", "phase", "squad", "delegate", "code-graph", "doc-graph", "help-me", "round-table", "elicitation"]
+      "skills": ["grill-me", "plan", "review", "test", "kanban", "status", "phase", "squad", "delegate", "code-graph", "doc-graph", "help-me", "round-table", "elicitation"],
+      "depends_on": ["io"]
     }
   },
   "default": ["core", "research", "design", "architecture", "memory", "orchestration"]
 }
 ```
 
+> **Manifest fixes (round-table review):** `design` and `retro` were listed in
+> both `core` and their own modules (duplicate installs) — moved. I/O
+> sub-agents and `@memory-controller` appeared in NO module although every
+> skill and hook depends on them — new required `io` module is the dependency
+> closure ("a user can disable the orchestration module and still have a
+> working core install" is now true; previously the `memory` module was
+> droppable while hooks invoked the controller). `ml-engineer` → `ml-ai-engineer`;
+> `ml-ai-ops` and `shifu` are placed (they existed on disk but in no module).
+
 The `core` module always includes the T8 protocol, release templates, and
 validator contract. A module may add domain reviewers, but it cannot remove or
 override the core satisfaction states, escalation rules, or launch gate. The
 manifest validator must reject a module that declares a conflicting state
-vocabulary or a release path without a satisfaction check.
+vocabulary or a release path without a satisfaction check. Module content is
+installed through `vespyr verify`-style hash checks (02f F1.42/F1.48 linkage) —
+an unsigned or drifted module file is rejected, not copied.
 
-- [ ] F4.1 — Create `.agents/manifests/install-modules.json` (~180 lines, structure above)
-- [ ] F4.2 — Create `.agents/scripts/install-modules.js` (~100 lines): `list`, `install <module-list>`, `remove <module-list>`, `--dry-run`. Reads manifest, resolves dependency closure, copies files, writes `install-state.json` for safe uninstall.
+- [ ] F4.1 — Create `.agents/manifests/install-modules.json` (~200 lines, structure above)
+- [ ] F4.2 — Create `.agents/scripts/install-modules.js` (~120 lines): `list`, `install <module-list>`, `remove <module-list>`, `--dry-run`. Reads manifest, resolves dependency closure (incl. required `io`), verifies content hashes before copying, writes `install-state.json` for safe uninstall. **Spec:** pending — `03d-phase-2-implementation-specs.md` §17
 - [ ] F4.3 — Add `install-modules` subcommand to `bin/cli.js`: `npx vespyr install-modules core,design`, `--list`, `--remove`, `--dry-run`
 
 ## F4.4-F4.5 — Language-specific rules (CSS-like specificity)
@@ -134,7 +159,7 @@ vocabulary or a release path without a satisfaction check.
 
 ```
 Step 1: Define the role (one sentence)
-Step 2: Pick the channeled mentor (1-2 references)
+Step 2: Pick the channeled mentor (1-5 references — prefer 2, matches `validate_frontmatter.js`)
 Step 3: Pick the icon
 Step 4: Set the permissions (read + question for thinkers; bash + edit for doers)
 Step 5: Write the charter (when to invoke, when NOT, output artifacts)
@@ -168,7 +193,7 @@ Every builder also emits the T8 extension contract:
 - New agents declare collaborators, domain evidence, blockers, and escalation.
 - New skills declare the handoff state and revalidation trigger.
 - New workflows declare the active release participants and the hard gate.
-- Generated output references `14-utter-satisfaction-dna.md` and passes the
+- Generated output references `08-cross-cutting-utter-satisfaction-dna.md` and passes the
   satisfaction validator before it is considered complete.
 
 - [ ] F4.6 — Create `.agents/skills/agent-builder/SKILL.md` (~220 lines, 5-step flow above)
@@ -209,22 +234,23 @@ The example is a deliberately trivial project ("a CLI todo list") — the point 
 
 ## F4.11 — Rewrite README.md
 
-- [ ] New sections: "What is Vespyr" (1 paragraph), "The 7 themes" (T1-T7, one line each), "The phases of v2.0" (link to this folder), "Squads" (table of 7→10), "Install" (`npx vespyr`, `--modules`, `mcp start`), "Hooks" (10 IDs, env-var disable), "MCP tools" (10 tools), "Scripts" (new scripts), "Customization" (2-file TOML), "Vespyr Identity" (3 differentiators — from Phase 0 T7.4), "Roadmap" (link to this folder)
+- [ ] New sections: "What is Vespyr" (1 paragraph), "The 8 themes" (T1-T8, one line each — T8 is cross-cutting; earlier drafts said "7 themes"), "The phases of v2.0" (link to this folder), "Squads" (table of the current 7 — the 3 Phase 5 squads land in v2.2, not v2.1), "Install" (`npx vespyr`, `--modules`, `mcp start`), "Hooks" (**13 IDs**, env-var disable), "MCP tools" (**17 first-party tools**: 10 from 03a + 6 from 13 + `vespyr_spawn_agent` from 03b; 6 third-party servers — counts must reflect the final v2.1 surface, not 10), "Scripts" (new scripts), "Customization" (2-file TOML), "Vespyr Identity" (3 differentiators — from Phase 0 T7.4), "Roadmap" (link to this folder)
 
 ## F4.12 — Rewrite AGENTS.md (canonical)
 
-- [ ] Surface new contracts: frontmatter v2 schema, IDENTITY block, customization contract, hook graph (10 IDs), MCP tools, self-learning pipeline, spec-kernel + companions, 7 themes summary, Vespyr Identity section (3 differentiators)
+- [ ] Surface new contracts: frontmatter v2 schema, IDENTITY block, customization contract, hook graph (**13 IDs**), MCP tools (**17**), self-learning pipeline, spec-kernel + companions, 8 themes summary, Vespyr Identity section (3 differentiators)
 
 ## F4.13 — Update QUICK-REFERENCE.md
 
-- [ ] Add new commands: `mcp start`/`list-tools`/`test`, `install-modules`, `witness check`/`sign`, `graph_query` (9 sub-commands), `self_learn scan`/`promote-pattern`/`promote-instinct`, `delegation_audit`, `qa_check`, `goal`/`automation` (Phase 6)
+- [ ] Add new commands (complete list — earlier draft missed 6): `mcp start`/`list-tools`/`test`, `install-modules` (plural — `install-module` singular is retired; covers MCP opt-ins), `detect`, `sync-agents`, `agent-run`, `doctor`, `init --example`, `migrate`, `goal`/`automation` (Phase 6), `witness sign`/`verify`/`check`/`list`, `query_graph` (9 sub-commands), `self_learn scan`/`find-patterns`/`promote-pattern`/`promote-instinct`/`demote-instinct`/`scan-patterns`/`instinct-cost`, `delegation_audit --since --fail-below`, `qa_check` — and only commands that actually exist in the implementation specs (self_learn list matches 10 §9)
 
 ## F4.14 — Update ROADMAP.md
 
 - [ ] Mark v1.x work as shipped
 - [ ] Mark v2.0 as "this plan" with link to development-plan/ folder
-- [ ] Add v3.0 backlog: multi-agent parallelism via git worktrees, MCP server-as-tool, agent marketplace, VS Code extension, Vespyr Cloud, multi-locale docs, language-specific reviewer agents, WDS persona handoff, critic consortium (v2.3+)
-- [ ] **Delete the 35-harness future table.** Replace with: "Additional harnesses added as community demand warrants. See `07-harness-integration.md` for OpenClaw (v2.1+, can enforce permissions) and Hermes (v2.1+, degraded mode)."
+- [ ] Add v3.0 backlog: agent marketplace, VS Code extension, Vespyr Cloud, multi-locale docs, language-specific reviewer agents, WDS persona handoff, critic consortium (v2.3+)
+- [ ] **Remove from v3.0 backlog (already shipping):** multi-agent parallelism via git worktrees (= Phase 0 T7.1b, v2.0) and MCP server-as-tool (= 03b M2, v2.1)
+- [ ] **Delete the 35-harness future table.** Replace with: "Additional harnesses added as community demand warrants. See `03c-phase-2-harness-integration.md` for OpenClaw (v2.3+, can enforce permissions) and Hermes (v2.3+, degraded mode)."
 
 ## F4.15 — Add CHANGELOG.md v2.0 entry
 
@@ -234,9 +260,9 @@ The example is a deliberately trivial project ("a CLI todo list") — the point 
 
 ## F4.16 — Dogfood validation project
 
-**Problem:** The plan builds infrastructure for building things but never validates it by building something real. The example project (F4.9-F4.10) is a CLI todo list — it doesn't stress-test 43 personas, 42 skills, hooks, MCP, self-learning, graph, and loop engineering together. Integration bugs are discovered by real users, not by the maintainer.
+**Problem:** The plan builds infrastructure for building things but never validates it by building something real. The example project (F4.9-F4.10) is a CLI todo list — it doesn't stress-test hooks, MCP, self-learning, graph, and loop engineering together. Integration bugs are discovered by real users, not by the maintainer. (Baseline corrected: the v2.1 dogfood runs against **23 agent files (19 reasoning + 4 I/O, incl. @shifu/@ml-ai-engineer/@ml-ai-ops; plus 2 internal agents @goal-verifier and flint.md) / 43 skills / 7 squads** — the earlier "43 personas, 42 skills" was the stale v2.2 figure.)
 
-**Target:** A non-trivial dogfood project that exercises the full v2.0+v2.1 pipeline from `/validate-idea` through `/iterate`. The project must:
+**Target:** A non-trivial dogfood project that exercises the full v2.1 pipeline from `/validate-idea` through `/iterate`. The project must:
 
 1. Start with `/validate-idea` → produce a GO/PIVOT/KILL brief
 2. Run `/explore-idea` → market + user research
@@ -260,21 +286,21 @@ The example is a deliberately trivial project ("a CLI todo list") — the point 
 
 ### Success metrics
 
-These are quantitative pass/fail criteria. The dogfood project is NOT complete until every metric is measured and the human-in-the-loop gate (below) confirms the results.
+These are quantitative pass/fail criteria. The dogfood project is NOT complete until every metric is measured and the human-in-the-loop gate (below) confirms the results. **Every metric's measuring instrument is listed — the round-table review found M2-M5/M8 referenced commands that didn't exist.**
 
 | # | Metric | Target | How measured |
 |---|---|---|---|
 | M1 | **Pipeline step completion** | 10/10 steps (phases -1 through 9) | Orchestrator state: all phases marked complete |
-| M2 | **Squad diversity** | ≥3 squads exercised | Squad switch log in `loop-state.json` |
-| M3 | **Agent invocation breadth** | ≥15 of 21 agents invoked during the pipeline | `delegation-log.json` agent list |
-| M4 | **Delegation rate** | ≥70% of I/O calls delegated to sub-agents | `delegation_audit.js --since 14d` |
-| M5 | **Self-learning output** | ≥1 pattern promoted from episodes | Episodes count in `self_learn scan` output; at least 1 promoted |
-| M6 | **QA hard gate exercised** | `qa-signoff.md` blocked advancement at least once | Orchestrator log shows a `BLOCKED` state before `qa-signoff.md` |
-| M7 | **Loop engineering** | `/goal` converged within ≤10 iterations; 1 automation produced a triage file | `loop-state.json` + `artifacts/output/01-discovery/triage/` |
-| M8 | **Latency budget** | All 6 session-start operations under budget (≤1000ms total per README §13) | `test_session_latency.js` exit 0 |
+| M2 | **Squad diversity** | ≥3 squads exercised | `squad_switches[]` in `loop-state.json` (F6.9 schema now includes it; written by `squads.js switch`) |
+| M3 | **Agent invocation breadth** | ≥15 of 23 agent files invoked during the pipeline | Telemetry `agent_invoke` events (F3.12) — NOT delegation-log, which only records delegated events by design (F2.22) |
+| M4 | **Delegation rate** | ≥70% of I/O calls delegated to sub-agents | `delegation_audit.js --since 14d --fail-below 70` (F2.21 — the `--since` flag ships with the audit rewrite) |
+| M5 | **Self-learning output** | ≥1 pattern promoted from episodes | `self_learn.js scan` (F2.12 — full-pipeline command ships with the §9 rewrite); episode count + promotion record |
+| M6 | **QA hard gate exercised** | `qa-signoff.md` blocked advancement at least once | Orchestrator log shows a `BLOCKED` state before `qa-signoff.md` (T-GATE-3 fixture behavior observed in the wild) |
+| M7 | **Loop engineering** | `/goal` converged within ≤10 iterations; 1 automation produced a triage file | `loop-state.json` + `artifacts/output/01-discovery/triage/`. **Dependency: Phase 6 (11) must be complete first — if it slips, M7 is re-tested in v2.1.x, not waived.** |
+| M8 | **Latency budget** | All 6 session-start operations under budget (≤1000ms total per 03 F2.14 table) | `test_session_latency.js` exit 0 (F3.21 — the instrument now has an owner) |
 | M9 | **Bug discovery** | ≥5 integration bugs filed as GitHub issues | GitHub Issues count, label `dogfood` |
-| M10 | **Time-to-completion** | Informational baseline — no target, just measured | Wall clock: `validate-idea` start → `/iterate` end |
-| M11 | **UTTERLY SATISFIED gate** | 100% of active rows have evidence-backed `SATISFIED` before dogfood GO | `release-readiness.md` + machine-readable satisfaction record |
+| M10 | **Time-to-completion** | Informational baseline — no target, just measured | Wall clock: `validate-idea` start → `/iterate` end. Human gate marks this "N/A — baseline" so it cannot fail vacuously. |
+| M11 | **UTTERLY SATISFIED gate** | 100% of active rows have evidence-backed `SATISFIED` before dogfood GO | `release-readiness.md` + machine-readable satisfaction record; evidence refs verified by `validate_satisfaction.js --strict` (F2.28 — evidence EXISTENCE is checked on release paths; dogfood runs the strict path, matching /launch) |
 
 ### Human-in-the-loop validation gate
 
@@ -364,7 +390,7 @@ Only after sign-off with **GO** or **CONDITIONAL** (with conditions satisfied) i
 - [ ] A new workflow can be defined in 10 minutes via `workflow-builder`
 - [ ] `rules/common/` + `rules/typescript/` merged at install time produces correct precedence
 - [ ] A user can disable the orchestration module and still have a working core install
-- [ ] `README.md` reflects v2.0 architecture (7 themes, identity section, hooks, MCP, modules)
+- [ ] `README.md` reflects v2.0 architecture (8 themes incl. T8, identity section, 13 hooks, 17 MCP tools, modules)
 - [ ] `AGENTS.md` (canonical) surfaces all new contracts
 - [ ] `ROADMAP.md` no longer has the 35-harness table
 - [ ] **Dogfood:** full pipeline exercised end-to-end on a real project; all 10 metrics (M1-M10) measured; integration bugs filed as GitHub issues; **human-in-the-loop validation sign-off** completed in `validation-signoff.md`
@@ -391,3 +417,23 @@ If Phase 4 breaks:
 When Phase 4 is done, all v2.1 DoD criteria (9-14 and T8 criteria 23-25 from README.md §4) should pass. Ship v2.1 only after the UTTERLY SATISFIED team gate is GO.
 
 Then begin Phase 5 (`06-phase-5-deeper-bench.md`) for the v2.2 enrichment.
+
+---
+
+## Completion Checklist
+
+**Phase 4 Modularity status: PLANNED (Future v2.1 Scope — Not Started).**
+
+- [ ] Module system (`core`, `design`, `orchestration`, `quality`)
+- [ ] Agent, skill, and workflow interactive builders
+- [ ] Language-specific rules engine (`rules/common/`, `rules/typescript/`, etc.)
+- [ ] Full end-to-end dogfood project execution with M1-M11 metrics
+- [ ] Web guide and new-user onboarding documentation
+
+---
+
+## Sign-Off
+
+**@founder (Elena):** PENDING — Gated on Phase 2 & 3 completion.  
+**@architect (Vera):** PENDING — Gated on modular packaging and rules engine design.  
+**@tech-lead (Grant):** PENDING — Execution scheduled for Phase 4.

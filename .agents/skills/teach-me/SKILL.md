@@ -17,7 +17,7 @@ Provides a rapid, personalized learning companion powered by **`@shifu` (Kong Qi
 
 ## Persona delegation
 
-This skill delegates reasoning and content formulation to **`@shifu` (Kong Qiu)**, channeling Richard Feynman's first-principles clarity and Barbara Oakley's cognitive load control. All file operations are delegated to operational sub-agents (`@memory-controller`, `@researcher`, `@writer`).
+This skill delegates reasoning and content formulation to **`@shifu` (Kong Qiu)**, channeling Richard Feynman's first-principles clarity and Barbara Oakley's cognitive load control. All file operations are delegated to operational sub-agents (`@memory-controller`, `@researcher`).
 
 ## When to use
 
@@ -112,7 +112,7 @@ Execute according to selected scope:
   3. **Analogy Anchor**: Include 1 core conceptual analogy matched to explanation style.
   4. **Concrete Example**: Provide code, visual diagram (Mermaid), math formula, or step-by-step scenario.
   5. **Active Recall Prompt**: End with 1 self-test question or mental exercise.
-- If requested or if content length $> 1,000$ words, delegate file saving to `@writer`:
+- If requested or if content length $> 1,000$ words, save the file:
   - Path: `artifacts/output/teaching/notes/{topic-slug}.md`
 
 #### C. Deep Dive Scope (~2,000–5,000 words comprehensive note)
@@ -124,7 +124,7 @@ Execute according to selected scope:
   - Edge Cases, Trade-offs, & Common Pitfalls
   - Historical / Theoretical Context & Footnote Citations `[N]`
   - Active Recall Scenarios & Self-Assessment Exercises
-- **File Output**: Delegate writing to `@writer`:
+- **File Output**: Write:
   - Path: `artifacts/output/teaching/notes/{topic-slug}.md`
 - Deliver inline summary with link to saved note.
 
@@ -154,7 +154,7 @@ After delivering the lesson, offer 4 active follow-up paths:
 |---|---|---|
 | Load / Save Teaching Preferences | `@memory-controller` (Mnemos) | `artifacts/memory/teaching-style.md` |
 | Deep Dive Topic Research | `@researcher` (Iris) | Multi-source literature & technical research |
-| Save Learning Note File | `@writer` (Quill) | `artifacts/output/teaching/notes/{topic-slug}.md` |
+| Save Learning Note File | Direct I/O | `artifacts/output/teaching/notes/{topic-slug}.md` |
 | Pedagogical Structuring & Style | `@shifu` (Kong Qiu) | Direct reasoning persona |
 
 ---

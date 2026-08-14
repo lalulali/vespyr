@@ -49,7 +49,7 @@ for (const name of REASONING_AGENTS) {
 
 After all deliverables are saved and memory writes are complete:
 
-1. **Orchestrator completion** — always run (or request \`@executor\` to run):
+1. **Orchestrator completion** — always run directly:
    \`\`\`
    node .agents/scripts/orchestrator_state.js complete --agent ${name} --artifact <relative-path-to-artifact>
    \`\`\`

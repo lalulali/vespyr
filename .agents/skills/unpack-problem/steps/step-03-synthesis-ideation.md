@@ -3,11 +3,6 @@ step: 3
 name: Synthesis & Ideation
 prerequisites:
   - step-02 completed
-delegation:
-  reads: "@reader (analysis artifacts from step 02; per delegation-policy.md multi-file)"
-  writes: "direct (candidate concepts, < 50 lines conversation output)"
-  runs: none
-  direct_justified: ["ideation is conversational synthesis"]
 output_contract:
   citations: not-required
 ---
@@ -20,7 +15,7 @@ output_contract:
 
 ### 3a. Review findings
 
-Load the four analysis artifacts from step 02 via `@reader`:
+Read the four analysis artifacts from step 02:
 - `root-cause-analysis.md` — what's the root cause?
 - `empathy-map.md` — what's the user experiencing?
 - `journey-map.md` — where's the friction point?
@@ -47,11 +42,9 @@ Present concepts to the user. In guided/combination mode, ask: "Which of these f
 
 User selects primary concept (or combination). Document the selection and rationale.
 
-## Output
-
-Candidate concepts remain in-conversation (no file output in this step). They feed into step 04 for formal brief generation.
+## Memory closeout
+- `@memory-controller session-write` — record step 3 synthesis and selected solution concept.
 
 ## Delegation
-- **Reads:** @reader for step 02 analysis artifacts
-- **Writes:** none (conversational synthesis)
-- **Runs:** none
+- **Memory:** @memory-controller for session-write
+

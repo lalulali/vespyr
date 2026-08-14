@@ -1,6 +1,6 @@
 ---
 name: create-skill
-description: Create new skills, modify and improve existing skills, and design lightweight skill evals. Make sure to use this skill whenever the user mentions creating a skill, adding a new skill, authoring workflow instructions, turning a conversation/workflow into a skill, building custom skill logic, or updating an existing skill definition.
+description: Create new skills and design lightweight skill evals. Make sure to use this skill whenever the user mentions creating a skill, adding a new skill, authoring workflow instructions, turning a conversation/workflow into a skill, building custom skill logic, or doing a major rewrite of an existing skill. For surgical tweaks to an existing skill's triggering, description, or workflow steps, use /customize-skill instead.
 metadata:
   version: "1.0"
   last_updated: "2026-07-30"
@@ -17,12 +17,13 @@ Guides you through creating new Vespyr skills or enhancing existing skills. Help
 - "Create a new skill for X"
 - "Turn what we just did into a skill"
 - "Package this deployment workflow into a reusable skill"
-- "Improve the triggering and instructions of `@skill-name`"
+- "Rebuild or heavily restructure an existing skill (major rewrites)"
 - "Add test prompts/evals to a skill"
 
 ## When NOT to use
 
-- For agent persona customizations (use `/customize-skill`)
+- For agent persona customizations (use `/customize-agent`)
+- For surgical tweaks to an existing skill's description, triggering, or workflow (use `/customize-skill`)
 - For standard codebase features or project code (use `/develop`)
 - For adding simple prompt snippets or memory notes (use `project-context.md` or `active-decisions.md`)
 
@@ -49,7 +50,7 @@ Guides you through creating new Vespyr skills or enhancing existing skills. Help
 ### Step 1: Capture Intent
 
 Start by understanding what the skill should accomplish. 
-- **If capturing from chat context**: Use `@reader` to extract tools used, sequence of steps, user corrections, and input/output formats observed in the session.
+- **If capturing from chat context**: Read the session to extract tools used, sequence of steps, user corrections, and input/output formats observed.
 - **If building from scratch**: Conduct a short interview with the user.
 
 Ask these key questions:
@@ -60,7 +61,7 @@ Ask these key questions:
 
 ### Step 2: Deduplication & Collision Check
 
-Use `@reader` to list existing skills under `.agents/skills/`. Check names and descriptions to ensure:
+List the existing skills under `.agents/skills/`. Check names and descriptions to ensure:
 - The proposed skill does not duplicate an existing skill (e.g. `/plan`, `/design`, `/test`).
 - If an existing skill covers ~80% of the intent, suggest enhancing the existing skill instead of creating a duplicate.
 
@@ -89,7 +90,7 @@ After drafting, new skills MUST pass: `node .agents/scripts/spec_check.js` (vali
 
 ### Step 4: Write Skill Files
 
-Use `@writer` to write `.agents/skills/<skill-name>/SKILL.md`.
+Write `.agents/skills/<skill-name>/SKILL.md`.
 
 If the skill requires extra resources:
 - Create subdirectories (`references/`, `scripts/`, `resources/`) as needed.

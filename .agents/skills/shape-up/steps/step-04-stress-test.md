@@ -3,11 +3,6 @@ step: 4
 name: Stress-Test
 prerequisites:
   - step-03 completed
-delegation:
-  reads: "direct (structured draft < 200 lines; per delegation-policy.md 1 file < 500 lines)"
-  writes: none
-  runs: none
-  direct_justified: ["pure Socratic reasoning; no file writes; draft is in-conversation"]
 output_contract:
   citations: not-required
 ---
@@ -53,7 +48,10 @@ Push for: switching cost awareness. The status quo is the real competitor.
 ## Escape hatch
 After **3+ questions**, the user can say "enough" or "move on." Remaining concerns are logged as open questions in the brief — they don't disappear, they become explicit deferrals.
 
-## Output
-Stress-test findings: confirmed strengths, identified weaknesses, and open questions for step 5.
+## Memory closeout
+- `@memory-controller session-write` — record step 4 stress-test findings and open questions.
+
+## Delegation
+- **Memory:** @memory-controller for session-write
 
 > **Tracker:** `node .agents/scripts/step_tracker.js complete --skill shape-up --step 4`

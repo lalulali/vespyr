@@ -13,28 +13,29 @@
 Choose the motion tool by what is being animated — not by preference.
 
 ```
-Is the motion an animated visual asset (illustration, character, logo)?
-├── Authorable/vector art, small team → Rive (single runtime, state machines,
-│     animations driven by input events without code)
-├── After-Effects-exported, designers own it → Lottie (JSON via bodymovin)
-└── Inline SVG, needs full code control → hand-rolled SMIL/CSS/SVG animation
+Is the motion smooth scrolling / page scroll kinetics?
+└── Lenis (lightweight, touch-normalized scroll physics, syncs with GSAP/Framer)
 
-Is it component/UI motion inside a React app?
-├── Small, reusable micro-interactions → CSS transitions + inline keyframes
-│     (zero deps, GPU-friendly — start here)
-├── Mount/unmount, layout, gestures, spring physics → Framer Motion
-│     (AnimatePresence, layout animations, useSpring, useScroll)
-└── Legacy class component / no React → GSAP (works everywhere, full timeline
-      control, ScrollTrigger for scroll-driven motion)
+Is it complex timeline choreography, SVG morphing, or scroll-scrubbed motion?
+├── Heavy timelines, ScrollTrigger, layout morphing → GSAP
+├── Micro-sized JS animation engine for SVG/CSS/DOM → Anime.js
+└── React layout animation, gesture physics, springs → Motion / Framer Motion
+
+Is it component/UI micro-interaction & interactive primitives?
+├── Micro-animations, unstyled primitives → Motion Primitives (Framer Motion)
+├── Tactile button states & glow micro-interactions → Kokonut UI
+├── Visual micro-animated cards & badge pulses → Bitlit UI
+├── React background motion patterns & text reveals → React Bits
+└── Pre-built visual design tokens & UI templates → OriginKit
 
 Is it scroll/parallax/canvas/3D?
-├── Scroll-scrubbed timelines → GSAP ScrollTrigger or Framer useScroll/useTransform
-├── High-volume particles/data-viz → Canvas 2D (custom RAF loop)
-├── 3D product/immersive → Three.js / react-three-fiber
+├── 3D WebGL scenes, custom shaders → Three.js / React Three Fiber (R3F)
+├── High-volume particles / data-viz → Canvas 2D / Particle Shaders (particles.js)
+├── Scroll-scrubbed timelines → GSAP ScrollTrigger or Motion useScroll/useTransform
 └── Interactive canvas games → PixiJS / Phaser
 ```
 
-**Default posture:** CSS transitions for anything below "delight" threshold. Framer Motion for anything that mounts/unmounts or needs physics. GSAP for complex timelines and scroll work. Rive/Lottie only when there's a designed asset. Never reach for a library when a CSS transition is 5 lines.
+**Default posture:** CSS transitions for anything below "delight" threshold. Lenis for smooth scroll kinetics. Motion / Framer Motion for React components mounting/unmounting or gesture physics. GSAP for complex timelines and scroll work. Three.js/R3F for 3D canvases. Never reach for a heavy library when a CSS transition or primitive is 5 lines.
 
 ---
 

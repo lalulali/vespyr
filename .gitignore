@@ -12,6 +12,7 @@ yarn.lock
 # AI scratchpads, logs, and ephemeral data
 artifacts/telemetry/
 artifacts/memory/
+artifacts/output/
 .opencode/logs/
 *.scratch.md
 *.tmp

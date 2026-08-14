@@ -9,6 +9,58 @@ const path = require('path');
 const AGENTS_DIR = path.join(__dirname, '..', 'agents');
 const CUSTOM_DIR = path.join(__dirname, '..', 'custom');
 
+function splitArrayItems(value, lineNumber) {
+  const items = [];
+  let current = '';
+  let quote = null;
+
+  for (let i = 0; i < value.length; i++) {
+    const char = value[i];
+    if ((char === '"' || char === "'") && value[i - 1] !== '\\') {
+      quote = quote === char ? null : quote || char;
+    }
+    if (char === ',' && !quote) {
+      if (!current.trim()) throw new Error(`Invalid empty array item at line ${lineNumber}`);
+      items.push(current.trim());
+      current = '';
+    } else {
+      current += char;
+    }
+  }
+
+  if (quote) throw new Error(`Unclosed string at line ${lineNumber}`);
+  if (!current.trim()) throw new Error(`Invalid empty array item at line ${lineNumber}`);
+  items.push(current.trim());
+  return items;
+}
+
+function parseValue(rawValue, lineNumber) {
+  const value = rawValue.trim();
+
+  if (value === 'true') return true;
+  if (value === 'false') return false;
+  if (/^\d+$/.test(value)) return parseInt(value, 10);
+  if (/^\d+\.\d+$/.test(value)) return parseFloat(value);
+
+  if ((value.startsWith('"') || value.startsWith("'"))) {
+    const quote = value[0];
+    if (value.length < 2 || value[value.length - 1] !== quote) {
+      throw new Error(`Unclosed string at line ${lineNumber}`);
+    }
+    return value.slice(1, -1);
+  }
+
+  if (value.startsWith('[') || value.endsWith(']')) {
+    if (!value.startsWith('[') || !value.endsWith(']')) {
+      throw new Error(`Malformed array at line ${lineNumber}`);
+    }
+    const inner = value.slice(1, -1).trim();
+    return inner ? splitArrayItems(inner, lineNumber).map(item => parseValue(item, lineNumber)) : [];
+  }
+
+  throw new Error(`Unsupported TOML value at line ${lineNumber}`);
+}
+
 function parseToml(content) {
   const result = {};
   const lines = content.split('\n');
@@ -50,21 +102,14 @@ function parseToml(content) {
       continue;
     }
 
-    const kvMatch = line.match(/^(\S+)\s*=\s*(.+)$/);
+    const kvMatch = line.match(/^([A-Za-z0-9_-]+)\s*=\s*(.+)$/);
     if (kvMatch) {
       const key = kvMatch[1];
-      let value = kvMatch[2].trim();
-
-      if (value === 'true') value = true;
-      else if (value === 'false') value = false;
-      else if (/^\d+$/.test(value)) value = parseInt(value, 10);
-      else if (/^\d+\.\d+$/.test(value)) value = parseFloat(value);
-      else if (value.startsWith('"') && value.endsWith('"')) value = value.slice(1, -1);
-      else if (value.startsWith("'") && value.endsWith("'")) value = value.slice(1, -1);
-
-      currentTable[key] = value;
+      currentTable[key] = parseValue(kvMatch[2], i + 1);
       continue;
     }
+
+    throw new Error(`Invalid TOML syntax at line ${i + 1}`);
   }
 
   return result;
@@ -113,11 +158,16 @@ const overridePath = path.join(CUSTOM_DIR, `${agentName}.toml`);
 let defaults = {};
 let override = {};
 
-if (fs.existsSync(defaultsPath)) {
-  defaults = parseToml(fs.readFileSync(defaultsPath, 'utf8'));
-}
-if (fs.existsSync(overridePath)) {
-  override = parseToml(fs.readFileSync(overridePath, 'utf8'));
+try {
+  if (fs.existsSync(defaultsPath)) {
+    defaults = parseToml(fs.readFileSync(defaultsPath, 'utf8'));
+  }
+  if (fs.existsSync(overridePath)) {
+    override = parseToml(fs.readFileSync(overridePath, 'utf8'));
+  }
+} catch (error) {
+  console.error(`Invalid customization for agent ${agentName}: ${error.message}`);
+  process.exit(1);
 }
 
 if (!fs.existsSync(defaultsPath) && !fs.existsSync(overridePath)) {

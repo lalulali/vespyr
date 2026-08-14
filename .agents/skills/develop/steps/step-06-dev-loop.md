@@ -4,11 +4,6 @@ name: Dev Loop
 prerequisites:
   - step-04 completed
   - step-05 completed (or skipped)
-delegation:
-  reads: "@reader (specs + codebase; per delegation-policy.md multi-file + large files)"
-  writes: "@writer (source code, test files; per delegation-policy.md multi-file output)"
-  runs: "@executor (worktree validation, npm test, npm run lint, git merge; per delegation-policy.md all bash)"
-  direct_justified: []
 output_contract:
   citations: not-required
 ---
@@ -16,7 +11,6 @@ output_contract:
 # Step 6 — Dev Loop
 
 The core implementation step. Write code, run tests, get reviewed, merge.
-
 
 > **Tracker:** `node .agents/scripts/step_tracker.js begin --skill develop --step 6`
 ## Mode selection
@@ -103,7 +97,7 @@ npm run lint
 
 ### 6.6 Cleanup (`@tech-lead`)
 
-Delegate to `@executor`:
+Run:
 ```bash
 node .agents/scripts/worktree.js clean-all
 ```
@@ -139,9 +133,6 @@ Max 2 review cycles per task. After 2 cycles of unresolved issues, escalate to `
 Merged code on the working branch, updated kanban board.
 
 ## Delegation
-- **Reads:** @reader for specs, user stories, and codebase files
-- **Writes:** @writer for source code, test files, commit messages
-- **Runs:** @executor for worktree validation, npm test, npm run lint, git merge
 - **Memory:** @memory-controller for developer notes
 
 > **Tracker:** `node .agents/scripts/step_tracker.js complete --skill develop --step 6`

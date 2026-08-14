@@ -2,11 +2,6 @@
 step: 1
 name: Problem Intake
 prerequisites: none
-delegation:
-  reads: "direct (user input only)"
-  writes: "direct (in-conversation draft, < 50 lines)"
-  runs: "@executor (orchestrator_state.js status; per delegation-policy.md all bash)"
-  direct_justified: ["user input is conversational, no file reading needed"]
 output_contract:
   citations: not-required
 ---
@@ -50,7 +45,8 @@ Present to the user for confirmation.
 In guided mode: confirm the problem statement before proceeding.
 In automated/combination mode: confirm the problem statement, then explain the mode will auto-draft artifacts in step 02.
 
+## Memory closeout
+- `@memory-controller session-write` — record step 1 intake progress and confirmed problem statement.
+
 ## Delegation
-- **Reads:** none (conversational intake)
-- **Writes:** none (draft stays in conversation)
-- **Runs:** @executor for orchestrator_state.js status
+- **Memory:** @memory-controller for project-context and session-write

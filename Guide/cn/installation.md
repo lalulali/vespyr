@@ -10,7 +10,6 @@
 
 ## 安装
 
-
 ```bash
 # 选项 1：作为本地或全局包进行安装
 npm install vespyr
@@ -30,7 +29,6 @@ node bin/cli.js --yes --harness opencode,claude
 
 1. **平台选择** — 选择你的 IDE/CLI 平台（OpenCode、Claude Code、Cursor 等）
 2. **项目目标** — 安装到哪个仓库（默认为当前目录）
-3. **团队预设** — 激活哪个智能体团队（完整团队 / 精简版 / 单人）
 
 ## 创建的文件
 
@@ -39,8 +37,8 @@ node bin/cli.js --yes --harness opencode,claude
 ```
 your-project/
 ├── .agents/              # 智能体角色、技能、脚本、配置、参考
-│   ├── agents/           # 21 个智能体角色 Markdown 文件
-│   ├── skills/           # 31+ 原子化技能工作流
+│   ├── agents/           # 20 个智能体角色 Markdown 文件
+│   ├── skills/           # 43 个原子化技能工作流
 │   ├── scripts/          # 编排器、图谱、记忆、遥测
 │   ├── config.yaml       # 项目配置
 │   └── references/       # 阶段表、术语表、契约
@@ -94,4 +92,4 @@ node bin/cli.js --yes --target /path/to/my-project
 npm update vespyr
 ```
 
-`.agents/custom/` 中的自定义配置在升级时不会被覆盖。`.agents/agents/` 中的智能体文件会更新，但 `.agents/custom/` 中的覆盖配置优先。
+`.agents/custom/` 中的自定义声明在升级时不会被覆盖。可使用 `node .agents/scripts/merge_customization.js <agent-name>` 预览合并结果，但当前没有运行时组件在智能体加载时读取这些文件，因此它们尚不会改变智能体行为。

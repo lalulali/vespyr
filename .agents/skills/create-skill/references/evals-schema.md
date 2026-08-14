@@ -77,19 +77,18 @@ Each skill can optionally contain an `evals/evals.json` file:
 ```json
 {
   "skill_name": "customize-skill",
-  "description": "Test suite for agent customization override generation",
+  "description": "Test suite for surgical skill customization",
   "evals": [
     {
       "id": 1,
-      "name": "developer-temperature-override",
-      "prompt": "Customize @developer to set temperature to 0.4 and use named exports convention",
-      "expected_output": ".agents/custom/developer.toml created with temperature and conventions table",
-      "files": [".agents/agents/developer/customize.toml"],
+      "name": "skill-trigger-widening",
+      "prompt": "The /validate-idea skill should also trigger when I say 'check my concept' — update it",
+      "expected_output": "validate-idea/SKILL.md description extended with the new trigger phrase and spec_check passes",
+      "files": [".agents/skills/validate-idea/SKILL.md"],
       "expectations": [
-        "The file .agents/custom/developer.toml exists",
-        "temperature is set to 0.4",
-        "conventions.exports specifies named exports",
-        "merge script returns valid merged JSON without errors"
+        "The description field in validate-idea/SKILL.md includes 'check my concept'",
+        "The mirror .opencode/skills/validate-idea/SKILL.md is byte-identical",
+        "node .agents/scripts/spec_check.js exits 0"
       ]
     }
   ]

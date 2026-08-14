@@ -62,11 +62,16 @@ function parseFrontmatter(content) {
   return { data, body };
 }
 
+function stripFencedBlocks(text) {
+  return text.replace(/```[\s\S]*?```/g, '');
+}
+
 function extractOutputs(text) {
   const outputs = new Set();
   const pattern = /(?:artifacts\/output\/|artifacts\/memory\/)[a-zA-Z0-9_.\/-]+/g;
   let m;
-  while ((m = pattern.exec(text)) !== null) {
+  const stripped = stripFencedBlocks(text);
+  while ((m = pattern.exec(stripped)) !== null) {
     outputs.add(m[0].replace(/[).,*]+$/, ''));
   }
   return Array.from(outputs);
@@ -74,10 +79,11 @@ function extractOutputs(text) {
 
 function extractKeyAgents(text) {
   const agents = new Set();
-  const ignored = new Set(['writer', 'reader', 'executor', 'memory-controller']);
+  const ignored = new Set(['memory-controller']);
   const pattern = /@([a-zA-Z0-9_-]+)/g;
   let m;
-  while ((m = pattern.exec(text)) !== null) {
+  const stripped = stripFencedBlocks(text);
+  while ((m = pattern.exec(stripped)) !== null) {
     if (!ignored.has(m[1])) agents.add(`@${m[1]}`);
   }
   return Array.from(agents);

@@ -50,7 +50,7 @@ Choose from: qualitative interviews, surveys, usability testing, card sorting, d
 
 ### Step 5: Output
 
-Delegate to `@writer` for `artifacts/output/02-research/research-plan.md`:
+Write `artifacts/output/02-research/research-plan.md`:
 
 ```markdown
 # Research Plan — {topic}
@@ -85,8 +85,8 @@ Delegate to `@writer` for `artifacts/output/02-research/research-plan.md`:
 ```
 
 ## State machine integration
-At start: `@executor` runs `node .agents/scripts/orchestrator_state.js status`
-At end: `@executor` runs `node .agents/scripts/orchestrator_state.js complete --agent user-researcher --artifact 02-research/research-plan.md`
+At start: Run `node .agents/scripts/orchestrator_state.js status`
+At end: Run `node .agents/scripts/orchestrator_state.js complete --agent user-researcher --artifact 02-research/research-plan.md`
 
 ## Memory integration
 **At start:** Load context before defining research goals:

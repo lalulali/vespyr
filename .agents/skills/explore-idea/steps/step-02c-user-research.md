@@ -3,11 +3,6 @@ step: 2c
 name: User Research
 prerequisites:
   - step-02b completed (competitive-analysis.md exists)
-delegation:
-  reads: "@reader (validation brief or idea brief + competitive-analysis.md; per delegation-policy.md multi-file)"
-  writes: "@writer (user-personas.md; per delegation-policy.md output file)"
-  runs: "@executor (orchestrator_state.js complete; per delegation-policy.md all bash)"
-  direct_justified: []
 output_contract:
   citations: required
 ---
@@ -20,11 +15,11 @@ Validate user needs against the research gathered so far. Depends on step 2b out
 
 ### 2c.1 Load inputs
 
-Delegate to `@reader` to load:
+Read:
 - Validation brief (or idea brief)
 - `artifacts/output/02-research/competitive-analysis.md`
 
-### 2c.2 Research via @user-researcher
+### 2c.2 Research — @user-researcher
 
 Invoke `@user-researcher` to validate user needs:
 - Target users and their goals
@@ -39,16 +34,17 @@ Invoke `@user-researcher` to validate user needs:
 
 ### 2c.3 Output
 
-Delegate to `@writer` for `artifacts/output/02-research/user-personas.md`.
+Write `artifacts/output/02-research/user-personas.md`.
 
 ### 2c.4 Record completion
 
-Delegate to `@executor`:
+Run:
 ```bash
 node .agents/scripts/orchestrator_state.js complete --agent user-researcher --artifact 02-research/user-personas.md
 ```
 
+## Memory closeout
+- `@memory-controller session-write` — record step 2c user research findings.
+
 ## Delegation
-- **Reads:** @reader for validation/idea brief and competitive analysis
-- **Writes:** @writer for user-personas.md
-- **Runs:** @executor for orchestrator_state.js complete
+- **Memory:** @memory-controller for session-write

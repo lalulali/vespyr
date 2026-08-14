@@ -67,5 +67,5 @@ Update `artifacts/output/05-planning/kanban.md` and log the change to `artifacts
 
 ## State machine integration
 
-At start: `@executor` runs `node .agents/scripts/orchestrator_state.js status`
-At end: `@executor` runs `node .agents/scripts/orchestrator_state.js complete --agent product-manager --artifact kanban-update`
+At start: run `node .agents/scripts/orchestrator_state.js status`
+At end: run `node .agents/scripts/orchestrator_state.js complete --agent product-manager --artifact kanban-update`

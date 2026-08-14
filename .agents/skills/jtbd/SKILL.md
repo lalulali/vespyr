@@ -47,7 +47,7 @@ Example: JTBD "When I'm running late for a meeting, I want to find the fastest r
 
 ### Step 4: Output
 
-Delegate to `@writer` for `artifacts/output/02-research/jtbd-hmw.md`:
+Write `artifacts/output/02-research/jtbd-hmw.md`:
 
 ```markdown
 # Jobs-to-be-Done + HMW Canvas — {product/feature}
@@ -71,5 +71,5 @@ Delegate to `@writer` for `artifacts/output/02-research/jtbd-hmw.md`:
 ```
 
 ## State machine integration
-At start: `@executor` runs `node .agents/scripts/orchestrator_state.js status`
-At end: `@executor` runs `node .agents/scripts/orchestrator_state.js complete --agent product-manager --artifact 02-research/jtbd-hmw.md`
+At start: Run `node .agents/scripts/orchestrator_state.js status`
+At end: Run `node .agents/scripts/orchestrator_state.js complete --agent product-manager --artifact 02-research/jtbd-hmw.md`

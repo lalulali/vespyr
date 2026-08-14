@@ -4,11 +4,6 @@ name: Architecture
 prerequisites:
   - step-01 completed
 conditional: ArchitectPhase
-delegation:
-  reads: "@reader (project context + existing artifacts; per delegation-policy.md ≥4 files)"
-  writes: "@writer (ADR files in 04-architecture/; per delegation-policy.md multi-file output)"
-  runs: none
-  direct_justified: []
 output_contract:
   citations: not-required
 ---
@@ -16,7 +11,6 @@ output_contract:
 # Step 2 — Architecture
 
 Produce architectural decisions and trade-off documentation. This step is conditional — it only runs if `ArchitectPhase: true` in `project-context.md`.
-
 
 > **Tracker:** `node .agents/scripts/step_tracker.js begin --skill develop --step 2`
 ## Goal
@@ -48,7 +42,6 @@ After each key decision, persist:
 Architecture gap that breaks a user story's feasibility. Escalate to `@tech-lead`.
 
 ## Delegation
-- **Reads:** @reader for project context and existing artifacts
-- **Writes:** @writer for ADR files in 04-architecture/
+- **Memory:** @memory-controller for project-context and active-decisions
 
 > **Tracker:** `node .agents/scripts/step_tracker.js complete --skill develop --step 2`

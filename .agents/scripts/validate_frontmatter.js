@@ -4,18 +4,6 @@ const fs = require('fs');
 const path = require('path');
 
 const AGENTS_DIR = path.resolve(__dirname, '..', 'agents');
-const SQUADS_DIR = path.resolve(__dirname, '..', 'squads');
-
-const KNOWN_SQUADS = (() => {
-  try {
-    if (fs.existsSync(SQUADS_DIR)) {
-      return fs.readdirSync(SQUADS_DIR)
-        .filter(f => f.endsWith('.md'))
-        .map(f => path.basename(f, '.md'));
-    }
-  } catch (_) {}
-  return ['build', 'design', 'full-team', 'game-studio', 'research', 'ship', 'startup'];
-})();
 
 const REQUIRED_FIELDS = [
   'name',
@@ -24,9 +12,7 @@ const REQUIRED_FIELDS = [
   'version',
   'human_name',
   'mode',
-  'permission',
   'capabilities',
-  'default_squad',
   'origin',
   'channeled_mentor',
 ];
@@ -65,14 +51,9 @@ function validateAgent(filePath) {
     errors.push(`icon "${iconMatch[1]}" doesn't look like a single emoji`);
   }
 
-  const squadMatch = fm.match(/^default_squad: (.+)$/m);
-  if (squadMatch && squadMatch[1] !== "none" && !KNOWN_SQUADS.includes(squadMatch[1])) {
-    errors.push(`default_squad "${squadMatch[1]}" not in known squads: ${KNOWN_SQUADS.join(', ')}`);
-  }
-
   const originMatch = fm.match(/^origin: (.+)$/m);
-  if (originMatch && originMatch[1] !== 'core' && !originMatch[1].startsWith('module:')) {
-    errors.push(`origin "${originMatch[1]}" must be "core" or "module:<name>"`);
+  if (originMatch && originMatch[1] !== 'core' && originMatch[1] !== 'custom' && !/^module:.+/.test(originMatch[1])) {
+    errors.push(`origin "${originMatch[1]}" must be "core", "custom", or "module:<name>"`);
   }
 
   const mentorMatch = fm.match(/^channeled_mentor: (.+)$/m);
@@ -155,7 +136,7 @@ function validateAgent(filePath) {
   return true;
 }
 
-// F1.24.b.3 verification helper — every step file declares delegation + output_contract.citations
+// CR-002 Row 7: step files declare output_contract.citations
 function validateStep(filePath) {
   const content = fs.readFileSync(filePath, 'utf-8');
   const rel = path.relative(path.resolve(__dirname, '..'), filePath);
@@ -167,12 +148,8 @@ function validateStep(filePath) {
     return false;
   }
 
-  if (!fm.includes('delegation:')) {
-    errors.push(`missing delegation: frontmatter field (F1.24.b.3)`);
-  }
-
   if (!fm.includes('output_contract:')) {
-    errors.push(`missing output_contract: frontmatter field (F1.24.b.3)`);
+    errors.push(`missing output_contract: frontmatter field`);
   } else {
     const citationsMatch = fm.match(/^\s*citations:\s*(.+)$/m);
     if (!citationsMatch) {
@@ -220,12 +197,12 @@ function main() {
     process.exit(1);
   }
 
-  // F1.24.b.3 + CR-002 Row 7: validate step files declare delegation + output_contract.citations
+  // CR-002 Row 7: validate step files declare output_contract.citations
   const SKILLS_DIR = path.resolve(__dirname, '..', 'skills');
   const stepFiles = [];
   if (fs.existsSync(SKILLS_DIR)) {
     for (const skillDir of fs.readdirSync(SKILLS_DIR)) {
-      for (const sub of ['steps', 'steps-create', 'steps-edit', 'steps-validate']) {
+      for (const sub of ['steps']) {
         const subPath = path.join(SKILLS_DIR, skillDir, sub);
         if (fs.existsSync(subPath) && fs.statSync(subPath).isDirectory()) {
           for (const f of fs.readdirSync(subPath)) {

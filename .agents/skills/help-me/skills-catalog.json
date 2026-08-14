@@ -50,8 +50,8 @@
       "artifacts/output/teaching/presentation.md",
       "artifacts/output/teaching/class/",
       "artifacts/output/teaching/video-script.md",
-      "artifacts/output/teaching/knowledge-map.md",
-      "artifacts/memory/teaching-style.md"
+      "artifacts/memory/teaching-style.md",
+      "artifacts/output/teaching/knowledge-map.md"
     ],
     "key_agents": [
       "@shifu",
@@ -59,20 +59,31 @@
     ]
   },
   {
+    "name": "create-agent",
+    "description": "Guided authoring flow for creating new Vespyr agent personas — specify the role, goals, and guardrails, then scaffold the agent markdown file with valid frontmatter, identity block, persona voice, Socratic stance, delegation contracts, and memory wiring, and verify it resolves and passes validation. Use this skill whenever you want to create, add, scaffold, or author a new agent, persona, or role in Vespyr. Trigger on \"create a new agent\", \"add an agent for X\", \"new persona\", \"scaffold an agent\", \"make an agent that does Y\".",
+    "prerequisites": [
+      "A clear role for the new agent (what it owns, what it does NOT own)",
+      "The repo uses the Vespyr structure: .agents/agents/<name>.md per persona"
+    ],
+    "outputs": [
+      "artifacts/memory/active-decisions.md"
+    ],
+    "key_agents": []
+  },
+  {
     "name": "create-skill",
-    "description": "Create new skills, modify and improve existing skills, and design lightweight skill evals. Make sure to use this skill whenever the user mentions creating a skill, adding a new skill, authoring workflow instructions, turning a conversation/workflow into a skill, building custom skill logic, or updating an existing skill definition.",
+    "description": "Create new skills and design lightweight skill evals. Make sure to use this skill whenever the user mentions creating a skill, adding a new skill, authoring workflow instructions, turning a conversation/workflow into a skill, building custom skill logic, or doing a major rewrite of an existing skill. For surgical tweaks to an existing skill's triggering, description, or workflow steps, use /customize-skill instead.",
     "prerequisites": [],
     "outputs": [
       "artifacts/memory/active-decisions.md"
     ],
     "key_agents": [
-      "@skill-name",
       "@qa-engineer"
     ]
   },
   {
-    "name": "customize-skill",
-    "description": "Guided authoring flow for agent customization — describe your intent, map it to override fields, write the TOML, and verify it works. Use this skill whenever you need to modify, customize, adjust, or override any Vespyr agent's settings, model, temperature, capabilities, permissions, or conventions without editing the agent file directly.",
+    "name": "customize-agent",
+    "description": "Guided authoring flow for agent customization — describe your intent, map it to override fields, write the TOML, and verify it works. Use this skill whenever you need to modify, customize, adjust, or override any Vespyr agent's settings, model, temperature, capabilities, permissions, or conventions without editing the agent file directly. Trigger on \"customize @developer\", \"change the model for @architect\", \"override agent settings\", \"adjust agent temperature\", \"add a capability to @qa-engineer\".",
     "prerequisites": [
       "The agent file exists under .agents/agents/<name>.md",
       "You know which agent you want to customize",
@@ -85,15 +96,19 @@
       "@developer",
       "@architect",
       "@qa-engineer",
-      "@tech-lead",
-      "@testing-library"
+      "@tech-lead"
     ]
   },
   {
-    "name": "delegate",
-    "description": "One-shot I/O offload to @reader, @writer, or @executor — keeps your context focused on reasoning",
-    "prerequisites": [],
-    "outputs": [],
+    "name": "customize-skill",
+    "description": "Guided flow for customizing an existing Vespyr skill — describe what to change, locate the skill's SKILL.md and support files, apply surgical edits, and verify triggering plus spec compliance. Use this skill whenever you need to modify, adjust, retune, or refine an existing skill's description, trigger phrases, workflow steps, or resources without rebuilding it from scratch. Trigger on \"customize the X skill\", \"tweak this skill\", \"adjust skill triggering\", \"fix the skill description\", \"make the X skill trigger more often\", \"update the X skill workflow\".",
+    "prerequisites": [
+      "The skill exists under .agents/skills/<skill-name>/ (and its harness mirror, e.g. .opencode/skills/<skill-name>/)",
+      "You know which skill you want to customize and roughly what should change"
+    ],
+    "outputs": [
+      "artifacts/memory/active-decisions.md"
+    ],
     "key_agents": []
   },
   {
@@ -267,7 +282,7 @@
   },
   {
     "name": "humanize",
-    "description": "Remove signs of AI-generated writing from text. Use when editing or reviewing text to make it sound more natural and human-written. Based on Wikipedia's comprehensive Signs of AI writing guide. Detects and fixes patterns such as inflated symbolism, promotional language, superficial -ing analyses, vague attributions, em dash overuse, rule of three, AI vocabulary words, passive voice, negative parallelisms, and filler phrases.",
+    "description": "Remove signs of AI-generated writing from text with user-selectable tone. Use when editing or reviewing text to make it sound more natural and human-written. Supports tone selection (casual, formal, professional, technical, and more) — ask the user for a tone only if they haven't specified one. Based on Wikipedia's comprehensive Signs of AI writing guide. Detects and fixes patterns such as inflated symbolism, promotional language, superficial -ing analyses, vague attributions, em dash overuse, rule of three, AI vocabulary words, passive voice, negative parallelisms, and filler phrases.",
     "prerequisites": [],
     "outputs": [],
     "key_agents": []
@@ -356,9 +371,7 @@
       "artifacts/memory/agent-notes/product-manager-notes.md"
     ],
     "key_agents": [
-      "@product-manager",
-      "@developer-1",
-      "@code-reviewer"
+      "@product-manager"
     ]
   },
   {
@@ -495,8 +508,8 @@
     "description": "Orchestrates group discussions between Vespyr agents, enabling natural multi-agent conversations where each agent is a real subagent with independent thinking. Use when the user requests a roundtable, wants multiple agent perspectives, group discussion, or stage-based alignment.",
     "prerequisites": [],
     "outputs": [
-      "artifacts/memory/project-context.md",
-      "artifacts/output/pipeline-state.json"
+      "artifacts/memory/active-decisions.md",
+      "artifacts/memory/session-summaries/latest.md"
     ],
     "key_agents": [
       "@founder",
@@ -517,8 +530,7 @@
       "@data-analyst",
       "@shifu",
       "@ml-ai-engineer",
-      "@ml-ai-ops",
-      "@round-table"
+      "@ml-ai-ops"
     ]
   },
   {
@@ -539,20 +551,6 @@
       "artifacts/output/sprint-status.yaml"
     ],
     "key_agents": []
-  },
-  {
-    "name": "squad",
-    "description": "Show available agent squads, switch active squad, and initialize the team preset",
-    "prerequisites": [],
-    "outputs": [
-      "artifacts/memory/project-context.md",
-      "artifacts/memory/active-squad.md",
-      "artifacts/memory/active-decisions.md"
-    ],
-    "key_agents": [
-      "@squad",
-      "@agent-name"
-    ]
   },
   {
     "name": "status",

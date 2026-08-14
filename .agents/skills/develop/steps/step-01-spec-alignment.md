@@ -4,11 +4,6 @@ name: Spec Alignment & Read Check
 prerequisites:
   - PR exists or design docs are in `artifacts/output/03-strategy/`
   - User story is in `artifacts/output/03-strategy/user-stories.md`
-delegation:
-  reads: "@reader (5+ spec files across 03-strategy/ and 04-architecture/; per delegation-policy.md ≥4 files)"
-  writes: "@writer (spec-alignment-check.md; per delegation-policy.md output file)"
-  runs: none
-  direct_justified: ["SPEC.md direct read — < 100 lines, agent contract"]
 output_contract:
   citations: not-required
 ---
@@ -36,7 +31,7 @@ Load and cross-check every strategy artifact against the user stories. Confirm a
 
 ## Process
 > **Tracker:** `node .agents/scripts/step_tracker.js begin --skill develop --step 1`
-1. Read every file in the inputs list. If any file > 1000 words, invoke `@reader` to summarize.
+1. Read every file in the inputs list. If any file > 1000 words, read it to summarize.
 2. Cross-check ACs against the spec-kernel capabilities (CAP-1, CAP-2, ...).
 3. Confirm all edge cases and scope boundaries are defined.
 4. File CRs for any spec gap. Track them in a running list.
@@ -48,8 +43,6 @@ Load and cross-check every strategy artifact against the user stories. Confirm a
 Any spec gap unfilled after 2 CR cycles. Escalate to `@founder`.
 
 ## Delegation
-- **Reads:** @reader for spec files (5+ artifacts across 03-strategy/ and 04-architecture/)
-- **Writes:** @writer for spec-alignment-check.md
-- **Direct I/O:** reading SPEC.md directly permitted (< 100 lines, agent contract)
+- **Memory:** @memory-controller for project-context
 
 > **Tracker:** `node .agents/scripts/step_tracker.js complete --skill develop --step 1`

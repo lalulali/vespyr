@@ -3,11 +3,6 @@ step: 10
 name: Completion
 prerequisites:
   - step-09 completed
-delegation:
-  reads: none
-  writes: "@writer (develop-state.md)"
-  runs: "@executor (orchestrator_state.js complete, orchestrator_state.js next)"
-  direct_justified: []
 output_contract:
   citations: not-required
 ---
@@ -57,9 +52,6 @@ Finalize the development cycle: verify all completion criteria, write the state,
 - Production incident → load `incident` skill
 
 ## Delegation
-- **Reads:** none
-- **Writes:** @writer for develop-state.md
-- **Runs:** @executor for orchestrator_state.js complete and next
 - **Memory:** @memory-controller for lessons, decisions, blockers, session-write
 
 > **Tracker:** `node .agents/scripts/step_tracker.js complete --skill develop --step 10`

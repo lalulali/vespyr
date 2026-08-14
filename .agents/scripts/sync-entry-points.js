@@ -4,12 +4,15 @@ const fs = require('fs');
 const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..', '..');
-const CANONICAL = path.join(ROOT, '.agents', 'agent.md.canonical');
+const CANONICAL_PATH = path.join(ROOT, '.agents', 'templates', 'system', 'AGENTS.md.canonical');
+const FALLBACK_CANONICAL = path.join(ROOT, '.agents', 'templates', 'system', 'agent.md.canonical');
+const CANONICAL = fs.existsSync(CANONICAL_PATH) ? CANONICAL_PATH : FALLBACK_CANONICAL;
 
 const TARGETS = [
   { file: 'AGENTS.md', dotfolder: '.agents/' },
   { file: 'agent.md',  dotfolder: '.agents/' },
   { file: 'CLAUDE.md', dotfolder: '.claude/' },
+  { file: path.join('.kiro', 'steering', 'vespyr-steering.md'), dotfolder: '.kiro/', optional: true },
 ];
 
 const CANONICAL_SECTIONS = [
@@ -50,6 +53,11 @@ function main() {
 
   for (const target of TARGETS) {
     const outPath = path.join(ROOT, target.file);
+    const dirPath = path.dirname(outPath);
+
+    if (target.optional && !fs.existsSync(dirPath)) {
+      continue;
+    }
 
     if (fs.existsSync(outPath) && fs.lstatSync(outPath).isSymbolicLink()) {
       fs.unlinkSync(outPath);

@@ -3,11 +3,6 @@ step: 2
 name: Pattern Scan
 prerequisites:
   - step-01 completed
-delegation:
-  reads: "@reader (artifacts/memory/ — multiple files; per delegation-policy.md ≥4 files)"
-  writes: none
-  runs: none
-  direct_justified: []
 output_contract:
   citations: not-required
 ---
@@ -15,7 +10,6 @@ output_contract:
 # Step 2 — Pattern Scan
 
 Scan memory for recurring patterns — episodes that appear 3+ times across 2+ agents. Surface repeated issues, not one-off incidents.
-
 
 > **Tracker:** `node .agents/scripts/step_tracker.js begin --skill retro --step 2`
 ## Goal
@@ -46,8 +40,10 @@ Flag when an episode appears:
 ## Output
 `artifacts/output/09-retro/pattern-scan.md` — list of recurring patterns with source references.
 
+## Memory closeout
+- `@memory-controller session-write` — record step 2 pattern scan progress.
+
 ## Delegation
-- **Reads:** @reader for artifacts/memory/ (multiple files)
-- **Writes:** none
+- **Memory:** @memory-controller for project-context, lessons, notes, patterns, and session-write
 
 > **Tracker:** `node .agents/scripts/step_tracker.js complete --skill retro --step 2`

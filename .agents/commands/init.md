@@ -13,22 +13,22 @@ Override the built-in `/init`. Do NOT just create AGENTS.md — do the full boot
 > The dotfolder contains files, commands, schemas, and agents that belong to the harness system itself, NOT the user's project. Looking inside it will cause you to falsely assume the project is a "Vespyr engine clone" or has node/typescript dependencies when it might be completely empty or belong to a different language.
 > Keep all scans strictly restricted to files *outside* the system dotfolder `.agents/` and the `artifacts/` directory.
 
-Use `@reader` to scan the codebase (**EXCLUDING** the system dotfolder `.agents/` and the `artifacts/` directory):
+Scan the codebase directly (**EXCLUDING** the system dotfolder `.agents/` and the `artifacts/` directory):
 - Directory structure (top 2 levels, ignoring the system dotfolder and `artifacts/` folder)
 - Tech stack (package.json, requirements.txt, go.mod, Cargo.toml, etc., outside the system dotfolder)
 - Existing patterns and conventions (outside the system dotfolder)
 - Test framework
 - CI/CD config if present
 
-Use `@executor` to run:
+Run directly:
 - `git log --oneline -10` (if git repo and outside dotfolder context)
 - `find . -name "*.md" -maxdepth 1` (existing docs, ignoring those in dotfolders)
 
 ## Step 2: Create AGENTS.md, agent.md, and CLAUDE.md from canonical single source
 
-Run `@executor` to execute `node .agents/scripts/sync-entry-points.js` (or read `.agents/agent.md.canonical` directly).
+Run `node .agents/scripts/sync-entry-points.js` (or read `.agents/templates/system/AGENTS.md.canonical` directly).
 
-This reads `.agents/agent.md.canonical` as the single source of truth and generates:
+This reads `.agents/templates/system/AGENTS.md.canonical` as the single source of truth and generates:
 - `AGENTS.md` (project root, replacing `{Project Name}` with the project name discovered in Step 1)
 - `agent.md` (project root)
 - `CLAUDE.md` (project root, configured with `.claude/` dotfolder references if the Claude Code harness is detected)
@@ -37,7 +37,7 @@ This reads `.agents/agent.md.canonical` as the single source of truth and genera
 
 Create `artifacts/output/` — base output directory.
 > [!NOTE]
-> **On-Demand Subdirectory Creation**: Do NOT pre-create empty phase subdirectories (`01-discovery/`, `02-research/`, `03-strategy/`, etc.). When agents produce deliverables, file creation tools (`@writer` / `write`) automatically create the designated phase folder on demand.
+> **On-Demand Subdirectory Creation**: Do NOT pre-create empty phase subdirectories (`01-discovery/`, `02-research/`, `03-strategy/`, etc.). When agents produce deliverables, file creation tools automatically create the designated phase folder on demand.
 
 Create `artifacts/telemetry/` — agent execution logs, token usage, and performance metrics.
 
@@ -51,7 +51,7 @@ Create these directories under `artifacts/`:
 - `input/flows/` — user flows, journey maps, wireframes
 
 Create `artifacts/memory/` with:
-- `project-context.md` — pre-populate with discovered project info and chosen squad preset (e.g. `Squad: startup` or chosen `--squad` flag, defaulting to `full-team` if unspecified)
+- `project-context.md` — pre-populate with discovered project info
 - `active-decisions.md` — empty, ready for entries
 - `patterns-and-conventions.md` — pre-populate with discovered code patterns
 - `lessons-learned.md` — empty
@@ -118,7 +118,6 @@ Return a summary:
 - `/help-me` — Conversational next-step navigator and co-pilot
 - `/status` — Quick project state snapshot
 - `/phase` — Show/switch phases
-- `/squad` — Show available agent squads and switch active squad
 - `/grill-me` — Relentless Socratic alignment and stress-testing interview
 - `/teach-me` — Personal learning partner (Quick, Explain, or Deep Dive)
 - `/craft-lesson` — Create multi-format educational materials
@@ -129,7 +128,9 @@ Return a summary:
 - `/round-table` — Orchestrate multi-agent group discussions
 - `/elicitation` — Socratic & first-principles critique
 - `/create-skill` — Author and evaluate custom skills
-- `/customize-skill` — Customize agent prompts and TOML parameters
+- `/customize-skill` — Surgically customize existing skills (triggering, workflow, references)
+- `/create-agent` — Author and register new agent personas
+- `/customize-agent` — Guided TOML authoring for agent settings, permissions, and models
 
 ### Next Step
 Start with `/unpack-problem` (for pain points), `/validate-idea` (for new concepts), or `/shape-up` (for raw notes/pitches).

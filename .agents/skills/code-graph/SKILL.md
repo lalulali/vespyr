@@ -70,7 +70,7 @@ For multi-file queries, run `blast` per file and union the results — the scrip
 
 ## Workflow
 
-1. Run `ensure_graph.js code` via `@executor`
+1. Run `ensure_graph.js code`
 2. If status is `"fresh"` — graph is current, skip regeneration
 3. If status is `"regenerated"` — report file count so user sees cost
 4. Use `query_graph.js` commands to answer dependency questions — do NOT read the raw JSON

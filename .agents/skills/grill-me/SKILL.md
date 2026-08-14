@@ -142,8 +142,8 @@ Append a summary block to `artifacts/output/{current-phase}/grill-me-decisions.m
 
 ## State machine integration
 
-At start: `@executor` runs `node .agents/scripts/orchestrator_state.js status`
-At end: `@executor` runs `node .agents/scripts/orchestrator_state.js complete --agent founder --artifact grill-me-decisions.md`
+At start: run `node .agents/scripts/orchestrator_state.js status`
+At end: run `node .agents/scripts/orchestrator_state.js complete --agent founder --artifact grill-me-decisions.md`
 
 ## Anti-patterns to avoid
 

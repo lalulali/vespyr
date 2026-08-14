@@ -2,11 +2,6 @@
 step: 1
 name: Hot Paths
 prerequisites: []
-delegation:
-  reads: none
-  writes: none
-  runs: "@executor (telemetry_surface.js hot-paths; per delegation-policy.md all bash)"
-  direct_justified: []
 output_contract:
   citations: not-required
 ---
@@ -49,9 +44,10 @@ Surfaces the top 3 most frequent agent paths, most common failure points, and hi
 ## Output
 `artifacts/output/09-retro/data-collection.md` — use template `.agents/templates/memory/retrospective-template.md`
 
+## Memory closeout
+- `@memory-controller session-write` — record step 1 retrospective data collection progress.
+
 ## Delegation
-- **Reads:** none
-- **Writes:** none
-- **Runs:** @executor for telemetry_surface.js hot-paths
+- **Memory:** @memory-controller for project-context, blockers, and session-write
 
 > **Tracker:** `node .agents/scripts/step_tracker.js complete --skill retro --step 1`

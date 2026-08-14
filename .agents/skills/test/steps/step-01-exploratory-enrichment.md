@@ -3,11 +3,6 @@ step: 1
 name: Exploratory Enrichment
 prerequisites:
   - PRD or user stories exist in artifacts/output/03-strategy/
-delegation:
-  reads: "@reader (user stories, PRD, acceptance criteria; per delegation-policy.md multi-file)"
-  writes: "@writer (enrichment-findings.md > 50 lines; per delegation-policy.md)"
-  runs: none
-  direct_justified: []
 output_contract:
   citations: not-required
 ---
@@ -20,7 +15,7 @@ Before running tests, `@qa-engineer` enriches the acceptance criteria by identif
 
 ### 1a. Load baseline
 
-Delegate to `@reader` to load:
+Read:
 - `artifacts/output/03-strategy/user-stories.md` — existing acceptance criteria
 - `artifacts/output/03-strategy/product-spec.md` — UX flows and screen states
 - `artifacts/output/03-strategy/requirements.md` or `SPEC.md` — capability definitions
@@ -37,7 +32,7 @@ Apply Socratic gap discovery against the loaded baseline. For each user story, a
 
 ### 1c. Output discovered scenarios
 
-Delegate to `@writer` for `artifacts/output/05-execution/quality/enrichment-findings.md`:
+Write `artifacts/output/05-execution/quality/enrichment-findings.md`:
 
 ```markdown
 # QA Enrichment Findings
@@ -63,7 +58,9 @@ Delegate to `@writer` for `artifacts/output/05-execution/quality/enrichment-find
 
 **Non-negotiable:** QA must identify at least 3 newly discovered scenarios (edge cases, failure modes, or boundary conditions) not already covered by existing acceptance criteria. If fewer than 3, the PRD is unusually thorough — document this finding and proceed. If zero, the QA exploration was insufficient — repeat 1b with deeper Socratic probing.
 
+## Memory closeout
+- `@memory-controller session-write` — record step 1 exploratory enrichment progress.
+
 ## Delegation
-- **Reads:** @reader for user stories, PRD, acceptance criteria
-- **Writes:** @writer for enrichment-findings.md (delegate when > 50 lines)
-- **Runs:** none
+- **Memory:** @memory-controller for session-write
+

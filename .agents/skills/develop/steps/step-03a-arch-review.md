@@ -3,11 +3,6 @@ step: 3a
 name: Architecture Review
 prerequisites:
   - step-02 completed OR ArchitectPhase: false
-delegation:
-  reads: "@reader (ADRs + strategy specs; per delegation-policy.md ≥4 files)"
-  writes: "@writer (review notes)"
-  runs: none
-  direct_justified: []
 output_contract:
   citations: not-required
 ---
@@ -36,11 +31,15 @@ Confirm the architecture (or strategy specs if architecture was bypassed) suppor
 ## Loop limit
 Max 2 revision cycles. After 2 cycles with unresolved gaps, escalate to `@founder`.
 
+## Memory closeout
+- `@memory-controller session-write` — record step 3a architecture review results.
+
+## Delegation
+- **Memory:** @memory-controller for session-write
+
 ## Output
 Review notes in `artifacts/output/05-planning/` (inline with execution-plan prep).
 
-## Delegation
-- **Reads:** @reader for architecture artifacts and strategy specs
-- **Writes:** @writer for review notes
+
 
 > **Tracker:** `node .agents/scripts/step_tracker.js complete --skill develop --step 3a`

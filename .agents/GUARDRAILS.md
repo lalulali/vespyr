@@ -22,7 +22,7 @@ All agents in this system MUST follow these guardrails. This file is the single 
 ## Anti-Premature Conclusion & Stage Transition Safeguard
 - **No Premature Conclusions**: All agents must refrain from jumping to conclusions regarding facts, issues, intent, or solution completeness without direct empirical verification and user input.
 - **Discussion Completion**: Never assume that a discussion is complete. Agents must explicitly verify that all open user questions, trade-off evaluations, and feedback items have been answered to the user's satisfaction before concluding a discussion thread.
-- **Strict Phase & Stage Progression Gates**: Agents must complete all required deliverables and verification checks for the current stage before transitioning to the next step, stage, or phase. Moving forward without completing pre-requisites or receiving explicit user/squad lead sign-off is strictly prohibited.
+- **Strict Phase & Stage Progression Gates**: Agents must complete all required deliverables and verification checks for the current stage before transitioning to the next step, stage, or phase. Moving forward without completing pre-requisites or receiving explicit user/project lead sign-off is strictly prohibited.
 
 ## Honesty & Fact-Checking (No Hallucination)
 - **Honestly state when you don't know:** If you lack sufficient information or do not know the answer to a question, honestly say so (e.g., "I don't know" or "I am not sure") and prompt the user with relevant follow-up questions.
@@ -111,19 +111,7 @@ When an agent discovers an issue with an upstream artifact (spec gap, implementa
 | Design vs. accessibility | `@ux-researcher` | Yes |
 | Security finding vs. timeline | `@security-engineer` | Yes |
 
-## Small-File Direct Write
 
-Thinking agents (@founder, @architect, @product-manager, @product-designer, @tech-lead, @researcher, @user-researcher, etc.) may write files directly without delegating to `@writer` when:
-
-| Condition | Write directly | Delegate to @writer |
-|-----------|---------------|---------------------|
-| File size | < 200 lines or < 500 words | ≥ 200 lines or ≥ 500 words |
-| File type | CRs, status updates, short reports, notes | PRDs, specs, ADRs, user stories, research reports |
-| Edit type | Append new entry, edit single section | Rewrite entire document, structural changes |
-
-**Rationale:** The double-hop tax (agent → @writer → disk) costs ~200 tokens per invocation. For small files, this overhead exceeds the file content itself. Large documents benefit from @writer's transcription focus, keeping the thinking agent's context clean.
-
-**Exception:** If an agent's frontmatter explicitly denies `edit` permission, they must delegate regardless of file size.
 
 ## Concise Chat Responses (Save Tokens & Noise)
 
@@ -138,15 +126,9 @@ Thinking agents (@founder, @architect, @product-manager, @product-designer, @tec
 - **Never Write Business Logic or Application Code**: The `@architect` must NEVER write raw controller/handler logic, application algorithms, helper methods, or UI components.
 - **Preserve Developer Creativity**: Leaving implementation details open ensures the `@developer` retains complete coding creativity, performance optimization control, and technical execution autonomy.
 
-## Antigravity Harness I/O Handling (IsArtifact)
-
-- **Always set `IsArtifact: false`** when invoking file creation or writing tools (`write_to_file`, `replace_file_content`, etc.) for standard files that should reside in the workspace directories (e.g. `artifacts/`, `src/`, `.agents/`).
-- **Exception:** Only use `IsArtifact: true` for system-defined planning mode artifacts (`task.md`, `implementation_plan.md`, `walkthrough.md`) that are designed to be intercepted and managed by the IDE's internal planning engine.
-- This prevents the Antigravity harness from redirecting standard project documents into the IDE's internal private app data folders.
-
 ## Step Tracking
 
-- Most step files include `begin` and `complete` calls to `node .agents/scripts/step_tracker.js`; step-tracker is optional in analysis-heavy skills (`test`, `iterate`, `unpack-problem`, `explore-idea`). Agents must run the calls via `@executor` (or directly if they have bash permission).
+- Most step files include `begin` and `complete` calls to `node .agents/scripts/step_tracker.js`; step-tracker is optional in analysis-heavy skills (`test`, `iterate`, `unpack-problem`, `explore-idea`). Agents must run the calls directly.
 - The tracker reads `.agents/config.yaml` for `step_tracking` mode (`off` | `silent` | `verbose`). In `off` mode the script exits immediately — 0 output, 0 files written.
 - **Never skip the tracker calls** even when `step_tracking` is `off`. The script self-governs based on config — skipping calls breaks audit continuity when the user later enables tracking.
 - Drift warnings are soft — the tracker logs them but never blocks. Continue the step regardless.

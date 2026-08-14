@@ -65,13 +65,11 @@ Vespyr organizes complex operations into atomic skills. Each skill is a folder w
 | `/status` | Quick snapshot of current project state |
 | `/sprint-status` | Display pipeline status as an interactive Kanban table |
 | `/phase` | Show/switch phases |
-| `/squad` | Show available agent squads and switch active squad |
 | `/plan` | Standalone execution planning |
 | `/review` | Standalone code review |
 | `/test` | Run tests, summarize failures |
 | `/kanban` | Display and update Kanban board |
 | `/memory` | Search archived project context |
-| `/delegate` | One-shot I/O offload to `@reader`, `@writer`, or `@executor` |
 
 ### Intelligence
 
@@ -87,8 +85,10 @@ Vespyr organizes complex operations into atomic skills. Each skill is a folder w
 
 | Command | Description |
 |---------|-------------|
-| `/customize-skill` | Guided agent customization authoring flow |
-| `/create-skill` | Create, modify, and test skills with evals |
+| `/customize-skill` | Surgically customize an existing skill |
+| `/create-skill` | Create new skills, major rewrites, and evals |
+| `/create-agent` | Scaffold and register new agent personas |
+| `/customize-agent` | Preview TOML customization declarations for agents |
 | `/incident` | Production incident response |
 
 ## Pipeline Phase Table
@@ -135,9 +135,11 @@ Some skills auto-detect their mode based on existing artifacts:
 ```
 .agents/skills/design/
 ├── SKILL.md
-└── steps-create/      # Run when no PRD/spec exists
-└── steps-edit/        # Run when PRD/spec exists and needs changes
-└── steps-validate/    # Run when validating an existing design
+└── steps/
+    ├── step-01a-load-prd-brief.md   # Create mode (run when no PRD/spec exists)
+    ├── step-01b-load-existing.md    # Edit mode (PRD/spec exists and needs changes)
+    ├── step-01c-heuristic-eval.md   # Validate mode (validating an existing design)
+    └── ...
 ```
 
 ### Resumable Execution
@@ -166,16 +168,3 @@ Re-invoke the skill and it automatically resumes from step 4. No state needs to 
 - **Retro & Process Improvement (Phase 9)**: `@product-manager`, `@tech-lead`, `@shifu`, `@qa-engineer`
 
 Cross-cutting domain experts (`@security-engineer`, `@performance-engineer`, `@ml-ai-engineer`, `@ml-ai-ops`, `@devops-engineer`, `@data-analyst`, `@technical-writer`, `@shifu`) can be dynamically brought into any discussion based on topic relevance.
-
-## Delegation Protocol
-
-All reasoning agents delegate I/O to sub-agents per `.agents/references/delegation-policy.md`:
-
-| Task | Sub-Agent | Threshold |
-|------|-----------|-----------|
-| Read files | `@reader` | >3 files delegated |
-| Write files | `@writer` | >50 lines delegated |
-| Run commands | `@executor` | Always delegated (reasoning agents have no shell access) |
-| Memory operations | `@memory-controller` | Always delegated |
-
-Direct I/O outside these rules requires `[DIRECT-IO-JUSTIFIED: ...]` in the agent's response.

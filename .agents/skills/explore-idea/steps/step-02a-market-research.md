@@ -3,11 +3,6 @@ step: 2a
 name: Market Research
 prerequisites:
   - step-01 completed (or validation/shaped/problem-space brief exists)
-delegation:
-  reads: "@reader (validation brief or idea brief; per delegation-policy.md)"
-  writes: "@writer (market-analysis.md; per delegation-policy.md output file)"
-  runs: "@executor (orchestrator_state.js complete; per delegation-policy.md all bash)"
-  direct_justified: []
 output_contract:
   citations: required
 ---
@@ -20,9 +15,9 @@ Validate market potential for the concept. Runs in parallel with step 2b.
 
 ### 2a.1 Load input
 
-Delegate to `@reader` to load the validation brief (or idea brief).
+Read the validation brief (or idea brief).
 
-### 2a.2 Research via @researcher
+### 2a.2 Research — @researcher
 
 Invoke `@researcher market` to validate market potential:
 - Market size (TAM, SAM, SOM)
@@ -37,16 +32,12 @@ Invoke `@researcher market` to validate market potential:
 
 ### 2a.3 Output
 
-Delegate to `@writer` for `artifacts/output/02-research/market-analysis.md`.
+Write `artifacts/output/02-research/market-analysis.md`.
 
-### 2a.4 Record completion
-
-Delegate to `@executor`:
-```bash
-node .agents/scripts/orchestrator_state.js complete --agent researcher --artifact 02-research/market-analysis.md
-```
+## Memory closeout
+- `@memory-controller session-write` — record step 2a market research findings.
 
 ## Delegation
-- **Reads:** @reader for validation brief or idea brief
-- **Writes:** @writer for market-analysis.md
-- **Runs:** @executor for orchestrator_state.js complete
+- **Memory:** @memory-controller for session-write
+
+

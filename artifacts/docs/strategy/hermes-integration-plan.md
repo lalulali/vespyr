@@ -370,10 +370,10 @@ When loaded, @memory-controller must:
 
 4. Use memory() to load any Hermes-side durable facts
 
-5. Compress to ~1,000 tokens for session context
+5. Compress to a lean session context
 
 Output format:
-[VESPYR MEMORY — ~1,000 tokens]
+[VESPYR MEMORY]
 Project: [name] | Phase: [phase] | Stack: [stack]
 User: [nickname]
 

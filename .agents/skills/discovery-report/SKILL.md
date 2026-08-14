@@ -46,7 +46,7 @@ Synthesize findings into a unified narrative. Focus on connections: how does the
 
 ### Step 3: Output
 
-Delegate to `@writer` for the appropriate output file.
+Write the appropriate output file.
 
 #### When UT data exists → `usability-report.md`
 ```markdown
@@ -97,5 +97,5 @@ Delegate to `@writer` for the appropriate output file.
 ```
 
 ## State machine integration
-At start: `@executor` runs `node .agents/scripts/orchestrator_state.js status`
-At end: `@executor` runs `node .agents/scripts/orchestrator_state.js complete --agent product-manager --artifact 02-research/{report-type}.md`
+At start: Run `node .agents/scripts/orchestrator_state.js status`
+At end: Run `node .agents/scripts/orchestrator_state.js complete --agent product-manager --artifact 02-research/{report-type}.md`

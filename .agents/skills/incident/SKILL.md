@@ -171,7 +171,7 @@ The pipeline state machine (`node .agents/scripts/orchestrator_state.js`) is the
 
 ### At Start
 
-Run via `@executor`:
+Run:
 ```bash
 node .agents/scripts/orchestrator_state.js status
 ```
@@ -182,7 +182,6 @@ Load incident context before triage:
 ```
 
 If pipeline is uninitialized (e.g., the project has no pipeline state yet but has a live incident), initialize with the current project name and type before recording. If the pipeline is mid-workflow, do NOT advance the phase — incident work happens in parallel.
-
 
 ### At End — Record Completion
 

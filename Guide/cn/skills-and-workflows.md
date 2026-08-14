@@ -65,13 +65,11 @@ Vespyr 将复杂操作组织为原子化技能。每个技能是一个文件夹�
 | `/status` | 当前项目状态快照 |
 | `/sprint-status` | 以交互式看板表显示流水线状态 |
 | `/phase` | 显示/切换阶段 |
-| `/squad` | 显示可用团队并切换活跃团队 |
 | `/plan` | 独立执行计划 |
 | `/review` | 独立代码审查 |
 | `/test` | 运行测试，汇总失败信息 |
 | `/kanban` | 显示并更新看板 |
 | `/memory` | 搜索归档项目上下文 |
-| `/delegate` | 单次 I/O 委托至 `@reader`、`@writer` 或 `@executor` |
 
 ### 智能
 
@@ -87,8 +85,10 @@ Vespyr 将复杂操作组织为原子化技能。每个技能是一个文件夹�
 
 | 命令 | 描述 |
 |---------|-------------|
-| `/customize-skill` | 引导式智能体自定义覆盖编写流程 |
-| `/create-skill` | 创建、修改与测试带评估集（evals）的技能 |
+| `/customize-skill` | 对现有技能进行手术式自定义 |
+| `/create-skill` | 创建新技能、重大重写及评估集 |
+| `/create-agent` | 创建并注册新的智能体角色 |
+| `/customize-agent` | 预览智能体 TOML 自定义声明 |
 | `/incident` | 生产事故响应 |
 
 ## 流水线阶段表
@@ -135,9 +135,11 @@ Vespyr 的 11 阶段流水线。`.agents/references/phase-table.md` 是权威来
 ```
 .agents/skills/design/
 ├── SKILL.md
-└── steps-create/      # 当 PRD/规格不存在时运行
-└── steps-edit/        # 当 PRD/规格存在且需要修改时运行
-└── steps-validate/    # 当验证现有设计时运行
+└── steps/
+    ├── step-01a-load-prd-brief.md   # 创建模式（当 PRD/规格不存在时运行）
+    ├── step-01b-load-existing.md    # 编辑模式（PRD/规格存在且需要修改时）
+    ├── step-01c-heuristic-eval.md   # 验证模式（验证现有设计时）
+    └── ...
 ```
 
 ### 可恢复执行
@@ -166,16 +168,3 @@ stepsCompleted: [1, 2, 3]
 - **复盘与流程改进 (阶段 9)**: `@product-manager`, `@tech-lead`, `@shifu`, `@qa-engineer`
 
 跨领域专家（`@security-engineer`、`@performance-engineer`、`@ml-ai-engineer`、`@ml-ai-ops`、`@devops-engineer`、`@data-analyst`、`@technical-writer`、`@shifu`）可根据话题相关性动态引入任何讨论中。
-
-## 委托协议
-
-所有推理智能体根据 `.agents/references/delegation-policy.md` 将 I/O 委托给子代理：
-
-| 任务 | 子代理 | 阈值 |
-|------|-----------|-----------|
-| 读取文件 | `@reader` | >3 个文件委托 |
-| 写入文件 | `@writer` | >50 行委托 |
-| 运行命令 | `@executor` | 始终委托（推理智能体没有 Shell 访问权限） |
-| 记忆操作 | `@memory-controller` | 始终委托 |
-
-超出此规则的直接 I/O 需要响应中的 `[DIRECT-IO-JUSTIFIED: ...]` 声明。

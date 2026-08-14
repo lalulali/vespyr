@@ -3,11 +3,6 @@ step: 8
 name: PM Verification
 prerequisites:
   - step-07 completed
-delegation:
-  reads: "direct (SPEC.md + user-stories.md; per delegation-policy.md 2 files < 500 lines)"
-  writes: none
-  runs: none
-  direct_justified: ["SPEC.md + user-stories.md direct read — 2 small files for CAP-N verification"]
 output_contract:
   citations: not-required
 ---
@@ -15,7 +10,6 @@ output_contract:
 # Step 8 — PM Verification
 
 `@product-manager` verifies the shipped feature against the original acceptance criteria. This is a gate — PM must accept before documentation and completion.
-
 
 > **Tracker:** `node .agents/scripts/step_tracker.js begin --skill develop --step 8`
 ## Goal
@@ -36,11 +30,10 @@ Max 2 rejection cycles:
 - **Accept** → proceed to step 9
 - **Reject** → log gaps, loop back to step 6 (dev loop)
 
-## Halt condition
-PM rejects 3 times. Escalate per the loop limit rules above.
+## Memory closeout
+- `@memory-controller session-write` — record step 8 PM verification outcome.
 
 ## Delegation
-- **Reads:** direct — SPEC.md + user-stories.md (2 files < 500 lines, CAP-N verification)
-- **Writes:** none (this step produces a decision, not a file)
+- **Memory:** @memory-controller for session-write
 
 > **Tracker:** `node .agents/scripts/step_tracker.js complete --skill develop --step 8`

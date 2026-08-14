@@ -65,8 +65,8 @@ CLI 标志（`--src`、`--docs`、`--ids`）会覆盖配置值，用于一次性
 个性化智能体行为且不被升级覆盖：
 
 ```
-.agents/agents/<name>/customize.toml   # 出厂默认值（升级时重新生成）
-.agents/custom/<name>.toml              # 你的覆盖配置（永不被触碰）
+.agents/agents/<name>/customize.toml   # 可选的出厂默认值
+.agents/custom/<name>.toml              # 你的声明（永不被触碰）
 ```
 
 示例——让 developer 更简洁：
@@ -85,28 +85,13 @@ verbosity = "concise"
 - **表** — 深度合并
 - **数组** — 按键合并（匹配 ID 的项目更新，不重复）
 
-应用自定义：
+创建并预览自定义声明：
 
 ```
-/customize
+node .agents/scripts/merge_customization.js <agent-name>
 ```
 
-这将运行引导式创作流程——描述你的意图，映射到覆盖字段，写入 TOML，验证。
-
-## 团队配置
-
-切换团队预设：
-
-```
-/squad
-```
-
-可用预设：
-- **完整团队** — 全部 21 个智能体（默认）
-- **精简版** — 8 个核心群体智能体 + @reader/@writer/@executor
-- **单人** — 单智能体模式，可访问技能
-
-`/squad` 命令也允许你初始化自定义团队预设。
+使用 `/customize-agent` 描述意图、映射覆盖字段、写入 TOML 并验证合并预览。当前尚未接入运行时消费这些声明，因此预览不会改变智能体行为。
 
 ## 记忆配置
 

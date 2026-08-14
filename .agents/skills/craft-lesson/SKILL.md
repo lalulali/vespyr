@@ -17,7 +17,7 @@ Takes any topic, lecture draft, raw notes, video transcript, or domain documenta
 
 ## Persona delegation
 
-This skill delegates pedagogical strategy, objective framing, content sequencing, and quality review to **`@shifu` (Kong Qiu)**. All file I/O operations delegate to `@writer` and `@reader`, memory operations to `@memory-controller`, and external research to `@researcher`.
+This skill delegates pedagogical strategy, objective framing, content sequencing, and quality review to **`@shifu` (Kong Qiu)**. All file I/O operations are performed directly; memory operations delegate to `@memory-controller`, and external research to `@researcher`.
 
 ## When to use
 
@@ -43,7 +43,7 @@ This skill delegates pedagogical strategy, objective framing, content sequencing
 
 2. **Mode 2: Draft / Transcript / Notes (Synthesis Path)**
    - User provides raw content (e.g. `/craft-lesson --file=drafts/lecture-notes.txt` or pastes raw transcript).
-   - `@shifu` delegates reading to `@reader` (Page), extracts key concepts, identifies knowledge gaps, and organizes unstructured ideas into pedagogical form.
+   - `@shifu` reads and extracts key concepts, identifies knowledge gaps, and organizes unstructured ideas into pedagogical form.
 
 ---
 
@@ -70,19 +70,19 @@ This skill delegates pedagogical strategy, objective framing, content sequencing
                            │
              ┌─────────────┴─────────────┐
              ▼                           ▼
-┌─────────────────────────┐ ┌─────────────────────────┐
-│ Phase 2a: Research      │ │ Phase 2b: Synthesize    │
-│ (Topic-Only Path via    │ │ (Draft/Transcript Path  │
-│  step-research.md)      │ │  via step-synthesize.md)│
-└────────────┬────────────┘ └────────────┬────────────┘
+┌────────────────────────┐ ┌──────────────────────────────┐
+│ Phase 2a: Research     │ │ Phase 2b: Synthesize         │
+│ (Topic-Only Path via   │ │ (Draft/Transcript Path       │
+│  step-02a-research.md) │ │  via step-02b-synthesize.md) │
+└────────────┬───────────┘ └────────────┬─────────────────┘
              │                           │
              └─────────────┬─────────────┘
                            ▼
 ┌─────────────────────────────────────────────────────────┐
-│ Phase 3: Master Knowledge Map Creation                   │
+│ Phase 3: Master Knowledge Map Creation                  │
 │ Bloom's taxonomy tagging, sequencing, "If Nothing Else" │
 │ Output: artifacts/output/teaching/knowledge-map.md      │
-│ (via step-structure.md)                                 │
+│ (via step-03-structure.md)                              │
 └──────────────────────────┬──────────────────────────────┘
                            ▼
 ┌─────────────────────────────────────────────────────────┐
@@ -98,11 +98,11 @@ This skill delegates pedagogical strategy, objective framing, content sequencing
 │ approved. Do NOT batch-produce formats.                 │
 └──────────────────────────┬──────────────────────────────┘
                            ▼
-┌─────────────────────────────────────────────────────────┐
-│ Phase 5: Self-Review & Quality Certification            │
-│ Style audit, jargon check, pedagogical verification     │
-│ (via step-review.md) — runs AFTER all formats approved  │
-└─────────────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────────────────┐
+│ Phase 5: Self-Review & Quality Certification              │
+│ Style audit, jargon check, pedagogical verification       │
+│ (via step-05-review.md) — runs AFTER all formats approved │
+└───────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -151,17 +151,17 @@ This skill delegates pedagogical strategy, objective framing, content sequencing
 ### Phase 2: Knowledge Extraction (Route by Mode)
 
 - If **Mode 1 (Topic-Only)**:
-  Execute `step-research.md` (`.agents/skills/craft-lesson/steps/step-research.md`).
+  Execute `step-02a-research.md` (`.agents/skills/craft-lesson/steps/step-02a-research.md`).
   Delegates domain research to `@researcher` (Iris), extracts core principles, and establishes concept boundaries.
 - If **Mode 2 (Draft/Transcript)**:
-  Execute `step-synthesize.md` (`.agents/skills/craft-lesson/steps/step-synthesize.md`).
-  Delegates file reading to `@reader` (Page), parses raw text, identifies missing prerequisites, and structures raw insights.
+  Execute `step-02b-synthesize.md` (`.agents/skills/craft-lesson/steps/step-02b-synthesize.md`).
+  Reads the file, parses raw text, identifies missing prerequisites, and structures raw insights.
 
 ---
 
 ### Phase 3: Master Knowledge Map Creation
 
-Execute `step-structure.md` (`.agents/skills/craft-lesson/steps/step-structure.md`).
+Execute `step-03-structure.md` (`.agents/skills/craft-lesson/steps/step-03-structure.md`).
 `@shifu` synthesizes all extracted research/notes into `artifacts/output/teaching/knowledge-map.md`:
 - Tag every objective with **Bloom's Taxonomy Level**:
   - `[REMEMBER]` — Recall facts & basic concepts
@@ -195,7 +195,7 @@ Execute `step-structure.md` (`.agents/skills/craft-lesson/steps/step-structure.m
 ```
 
 **3b. RECORD MILESTONE (after EVERY approval — NON-NEGOTIABLE):**
-After the user approves a deliverable, record it in the pipeline state AND refresh project-context/session activity via the orchestrator. Run (directly, or via `@executor` if available):
+After the user approves a deliverable, record it in the pipeline state AND refresh project-context/session activity via the orchestrator. Run:
 
 ```
 node .agents/scripts/orchestrator_state.js complete --agent shifu --artifact artifacts/output/teaching/{deliverable}.md --next "{next deliverable, or 'all done'}"
@@ -205,14 +205,14 @@ This is what updates `project-context.md` (`## Session Activity`, Phase/Blockers
 
 **Format generation order** (generate in list order, skipping any the user did not select):
 
-1. **Syllabus Step**: `step-syllabus.md` $\rightarrow$ `artifacts/output/teaching/syllabus.md`
-2. **Handbook Step**: `step-handbook.md` $\rightarrow$ `artifacts/output/teaching/handbook.md`
-3. **Cheatsheet Step**: `step-cheatsheet.md` $\rightarrow$ `artifacts/output/teaching/cheatsheet.md`
-4. **Presentation Step**: `step-presentation.md` $\rightarrow$ `artifacts/output/teaching/presentation.md`
-5. **Online Class Step**: `step-class.md` $\rightarrow$ `artifacts/output/teaching/class/`
-6. **Video Script Step**: `step-video-script.md` $\rightarrow$ `artifacts/output/teaching/video-script.md`
+1. **Syllabus Step**: `step-04a-syllabus.md` $\rightarrow$ `artifacts/output/teaching/syllabus.md`
+2. **Handbook Step**: `step-04b-handbook.md` $\rightarrow$ `artifacts/output/teaching/handbook.md`
+3. **Cheatsheet Step**: `step-04c-cheatsheet.md` $\rightarrow$ `artifacts/output/teaching/cheatsheet.md`
+4. **Presentation Step**: `step-04d-presentation.md` $\rightarrow$ `artifacts/output/teaching/presentation.md`
+5. **Online Class Step**: `step-04e-class.md` $\rightarrow$ `artifacts/output/teaching/class/`
+6. **Video Script Step**: `step-04f-video-script.md` $\rightarrow$ `artifacts/output/teaching/video-script.md`
 
-All output files MUST be written using operational sub-agent `@writer` (Quill).
+All output files MUST be written.
 
 **Verification prompt format (use at every gate):**
 
@@ -234,7 +234,7 @@ All output files MUST be written using operational sub-agent `@writer` (Quill).
 
 **Run ONLY after every selected format has been individually approved in Phase 4.**
 
-Execute `step-review.md` (`.agents/skills/craft-lesson/steps/step-review.md`).
+Execute `step-05-review.md` (`.agents/skills/craft-lesson/steps/step-05-review.md`).
 `@shifu` performs an audit across 3 check vectors:
 1. **Style Fidelity Audit**: Verifies text matches target style (`Beginner`, `Intermediate`, or `Expert`).
 2. **Jargon & Clarity Audit**: Ensures all introduced technical terms are defined upon first use.
@@ -246,14 +246,14 @@ Execute `step-review.md` (`.agents/skills/craft-lesson/steps/step-review.md`).
 
 ## Delegation Matrix
 
-| Workflow Phase | Responsible Agent | Sub-Agent Operational Delegation | Key Deliverables |
+| Workflow Phase | Responsible Agent | Operational I/O | Key Deliverables |
 |---|---|---|---|
 | **Phase 1: Intake** | `@shifu` | `@memory-controller` | Preference state loaded |
 | **Phase 2a: Research** | `@shifu` | `@researcher` (Iris) | Raw domain research |
-| **Phase 2b: Synthesize** | `@shifu` | `@reader` (Page) | Parsed draft synthesis |
-| **Phase 3: Knowledge Map**| `@shifu` | `@writer` (Quill) | `artifacts/output/teaching/knowledge-map.md` |
-| **Phase 4: Formats** | `@shifu` | `@writer` (Quill) | ONE format deliverable per loop iteration in `artifacts/output/teaching/`, each human-verified + recorded via `orchestrator_state.js complete` before the next |
-| **Phase 5: Review** | `@shifu` | `@writer` (Quill) / User | Quality review & delivery log (after all formats approved) |
+| **Phase 2b: Synthesize** | `@shifu` | Direct I/O | Parsed draft synthesis |
+| **Phase 3: Knowledge Map**| `@shifu` | Direct I/O | `artifacts/output/teaching/knowledge-map.md` |
+| **Phase 4: Formats** | `@shifu` | Direct I/O | ONE format deliverable per loop iteration in `artifacts/output/teaching/`, each human-verified + recorded via `orchestrator_state.js complete` before the next |
+| **Phase 5: Review** | `@shifu` | Direct I/O / User | Quality review & delivery log (after all formats approved) |
 
 ---
 
@@ -262,4 +262,4 @@ Execute `step-review.md` (`.agents/skills/craft-lesson/steps/step-review.md`).
 - **Do NOT batch-produce all selected formats in one turn.** Generate one format, pause for human verification, and only continue after explicit approval. One at a time, always.
 - **Do NOT bypass Phase 3 Knowledge Map.** Formats MUST be generated from a single unified map, not ad-hoc per format.
 - **Do NOT mix explanation styles.** Maintain consistent style (Beginner vs Intermediate vs Expert) across all selected formats in a single run.
-- **Do NOT perform direct file writes from `@shifu`.** Always delegate file output to `@writer`.
+- **Do NOT perform direct file writes from `@shifu`.** Always write files directly.

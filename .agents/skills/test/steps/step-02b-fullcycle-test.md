@@ -3,11 +3,6 @@ step: 2b
 name: Full-Cycle Testing
 prerequisites:
   - step-01 completed
-delegation:
-  reads: "@reader (integration configs, API specs; per delegation-policy.md multi-file)"
-  writes: "@writer (e2e test files, fullcycle-test-results.md; per delegation-policy.md multi-file output)"
-  runs: "@executor (e2e test suite, integration test commands; per delegation-policy.md all bash)"
-  direct_justified: []
 output_contract:
   citations: not-required
 ---
@@ -35,7 +30,7 @@ Every primary journey MUST have at least one E2E test. Every recovery journey MU
 
 ### 2b.2 Write/run E2E tests
 
-For each identified journey, delegate to `@executor` to run E2E tests:
+For each identified journey, run E2E tests:
 
 ```bash
 # Run E2E / integration test suite
@@ -57,7 +52,7 @@ npm run test:e2e  # or project equivalent
 - Flaky E2E detection (E2E is the flakiest track — must be tracked explicitly)
 - Regression detection (previously passing journeys that now fail)
 
-Delegate to `@writer` for `artifacts/output/05-execution/quality/fullcycle-test-results.md`:
+Write `artifacts/output/05-execution/quality/fullcycle-test-results.md`:
 
 ```markdown
 # Full-Cycle Test Results
@@ -98,3 +93,9 @@ Max 2 fix-test cycles per failure. If a failure persists after 2 fix attempts, e
 - Design-flaw blocker → `@tech-lead`
 - Spec-gap-driven failure → file a CR to `@product-manager`
 - Auth/secrecy-driven failure → `@security-engineer`
+
+## Memory closeout
+- `@memory-controller session-write` — record step 2b full-cycle testing results.
+
+## Delegation
+- **Memory:** @memory-controller for session-write

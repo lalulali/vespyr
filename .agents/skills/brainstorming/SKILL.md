@@ -31,7 +31,7 @@ Ask the user: what are you trying to brainstorm? What's the domain, the constrai
 
 ### Step 2: Select method
 
-Delegate to `@executor`:
+Run:
 
 ```bash
 node .agents/scripts/match_methods.js --source brainstorming --context "{user's problem description}"
@@ -65,8 +65,8 @@ Record outputs to memory:
 
 ## State machine integration
 
-At start: `@executor` runs `node .agents/scripts/orchestrator_state.js status`
-At end: `@executor` runs `node .agents/scripts/orchestrator_state.js complete --agent founder --artifact brainstorming-session`
+At start: Run `node .agents/scripts/orchestrator_state.js status`
+At end: Run `node .agents/scripts/orchestrator_state.js complete --agent founder --artifact brainstorming-session`
 
 ## Handoff
 

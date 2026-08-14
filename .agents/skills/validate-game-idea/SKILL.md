@@ -50,7 +50,7 @@ Determine at the start. This changes the questions and the bar for evidence.
 2. Check `artifacts/output/` for prior validation briefs or design docs
 3. Ask: **What's your context?** (startup / company / personal)
 4. Ask: **Is this greenfield or brownfield?** (new game / existing game or sequel)
-5. Ask: **What experience are you creating, and what's the core fun loop?** — Get both the player desire ("I want the tension of survival crafting with meaningful multiplayer trade") and the proposed mechanics ("scarce resources, player-driven economy, perma-death squads"). This is a rough hypothesis — the diagnostic will refine it into a value proposition.
+5. Ask: **What experience are you creating, and what's the core fun loop?** — Get both the player desire ("I want the tension of survival crafting with meaningful multiplayer trade") and the proposed mechanics ("scarce resources, player-driven economy, permanent-death parties"). This is a rough hypothesis — the diagnostic will refine it into a value proposition.
 
    **If the answer is ambiguous**, push for clarity before proceeding:
    - **Vague terms** ("a roguelike with a twist," "soulslike but different") → "What's the twist? What do you actually do each session? Describe 60 seconds of gameplay."
@@ -260,7 +260,7 @@ The pipeline state machine (`node .agents/scripts/orchestrator_state.js`) is the
 
 ### At Start
 
-Run via `@executor`:
+Run:
 ```bash
 node .agents/scripts/orchestrator_state.js status
 ```
@@ -274,7 +274,7 @@ Then run `next` to confirm the current phase expects validation work.
 
 ### At End — Record Completion
 
-For the validation brief this skill produces, run via `@executor`:
+For the validation brief this skill produces, run:
 ```bash
 node .agents/scripts/orchestrator_state.js complete --agent founder --artifact 01-discovery/validation-brief.md
 ```

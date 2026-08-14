@@ -3,11 +3,6 @@ step: 5
 name: Decision Alignment
 prerequisites:
   - step-04 completed
-delegation:
-  reads: none
-  writes: "@writer (active-decisions.md; per delegation-policy.md output file)"
-  runs: none
-  direct_justified: ["decision reasoning is pure analysis; only output is memory write"]
 output_contract:
   citations: not-required
 ---
@@ -57,7 +52,11 @@ Deferred items are NOT silent omissions. Each gets:
 If 3+ blocker-severity items are deferred without a clear unblock path, pause and ask:
 > "We have [N] unresolved blockers. Should we continue shaping, or do you need to step back and run `/validate-idea` or `/explore-idea` first?"
 
-## Output
-All open items resolved or explicitly deferred. Decision log written to memory.
+## Memory closeout
+- `@memory-controller write active-decisions.md` — persist resolved decisions.
+- `@memory-controller session-write` — record step 5 decision alignment progress.
+
+## Delegation
+- **Memory:** @memory-controller for active-decisions and session-write
 
 > **Tracker:** `node .agents/scripts/step_tracker.js complete --skill shape-up --step 5`

@@ -2,11 +2,6 @@
 step: 1
 name: Context Scan
 prerequisites: []
-delegation:
-  reads: "direct (scanning for artifact existence; per delegation-policy.md < 3 files < 500 lines)"
-  writes: none
-  runs: "@executor (orchestrator_state.js status)"
-  direct_justified: ["artifact existence checks are < 10 lines each; pure routing logic"]
 output_contract:
   citations: not-required
 ---
@@ -22,7 +17,7 @@ Establish what the user is bringing and what prior work exists. Set context vari
 > **Tracker:** `node .agents/scripts/step_tracker.js begin --skill shape-up --step 1`
 
 1. `@memory-controller load founder [shape-up — {concept}]` — seed project context.
-2. Check pipeline state via `@executor`:
+2. Check pipeline state:
    ```bash
    node .agents/scripts/orchestrator_state.js status
    ```
@@ -48,8 +43,6 @@ Establish what the user is bringing and what prior work exists. Set context vari
 Context state established for use in subsequent steps.
 
 ## Delegation
-- **Reads:** direct — artifact existence checks (< 10 lines each)
-- **Runs:** @executor for orchestrator_state.js status
-- **Direct:** routing logic is pure reasoning
+- **Memory:** @memory-controller for project-context
 
 > **Tracker:** `node .agents/scripts/step_tracker.js complete --skill shape-up --step 1`

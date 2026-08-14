@@ -3,11 +3,6 @@ step: 4
 name: Write Digest
 prerequisites:
   - step-03 completed
-delegation:
-  reads: none
-  writes: "@writer (retro-digest.md; per delegation-policy.md output file)"
-  runs: none
-  direct_justified: []
 output_contract:
   citations: not-required
 ---
@@ -15,7 +10,6 @@ output_contract:
 # Step 4 — Write Digest
 
 Synthesize all reviews into actionable improvements. Write the retro digest.
-
 
 > **Tracker:** `node .agents/scripts/step_tracker.js begin --skill retro --step 4`
 ## Goal
@@ -43,12 +37,10 @@ Convert observations into concrete, owned, deadline-bound action items. An obser
 Use template `.agents/templates/memory/retrospective-template.md`.
 
 ## State machine
-```bash
-node .agents/scripts/orchestrator_state.js complete --agent product-manager --artifact 09-retro/action-items.md
-```
+## Memory closeout
+- `@memory-controller session-write` — record step 4 retro digest and action items.
 
 ## Delegation
-- **Reads:** none
-- **Writes:** @writer for retro-digest.md
+- **Memory:** @memory-controller for session-write
 
 > **Tracker:** `node .agents/scripts/step_tracker.js complete --skill retro --step 4`

@@ -43,8 +43,8 @@ This skill runs in sequential steps. Each step is a self-contained file with its
 - Compaction would archive entries younger than 7 days (skip compaction, report)
 
 ## State machine integration
-At start: `@executor` runs `node .agents/scripts/orchestrator_state.js status`
-At end: `@executor` runs `node .agents/scripts/orchestrator_state.js complete --agent memory-controller --artifact 09-retro/retro-digest.md`
+At start: run `node .agents/scripts/orchestrator_state.js status`
+At end: run `node .agents/scripts/orchestrator_state.js complete --agent memory-controller --artifact 09-retro/retro-digest.md`
 
 ## Memory integration
 **At start (step-01):** Load full memory context before hot-path scan:

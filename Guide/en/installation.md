@@ -29,7 +29,6 @@ The interactive CLI wizard walks you through:
 
 1. **Harness selection** — choose your IDE/CLI harness (OpenCode, Claude Code, Cursor, etc.)
 2. **Project target** — which repository to install into (defaults to `cwd`)
-3. **Squad preset** — which agent squad to activate (full team / lean / solo)
 
 ## What Gets Created
 
@@ -38,8 +37,8 @@ After installation, your project root gets:
 ```
 your-project/
 ├── .agents/              # Agent personas, skills, scripts, config, references
-│   ├── agents/           # 21 agent persona markdown files
-│   ├── skills/           # 31+ atomic skill workflows
+│   ├── agents/           # 20 agent persona markdown files
+│   ├── skills/           # 43 atomic skill workflows
 │   ├── scripts/          # Orchestrator, graph, memory, telemetry
 │   ├── config.yaml       # Project configuration
 │   └── references/       # Phase table, glossary, contracts
@@ -93,4 +92,4 @@ If you see errors, check that:
 npm update vespyr
 ```
 
-Your customizations in `.agents/custom/` survive upgrades. Agent persona files in `.agents/agents/` are updated, but your overrides in `.agents/custom/` take precedence.
+Your customization declarations in `.agents/custom/` survive upgrades. They can be previewed with `node .agents/scripts/merge_customization.js <agent-name>`, but no runtime component currently consumes them when an agent loads, so they do not yet change agent behavior.

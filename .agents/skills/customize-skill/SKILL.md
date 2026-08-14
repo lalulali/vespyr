@@ -1,50 +1,36 @@
 ---
 name: customize-skill
-description: Guided authoring flow for agent customization — describe your intent, map it to override fields, write the TOML, and verify it works. Use this skill whenever you need to modify, customize, adjust, or override any Vespyr agent's settings, model, temperature, capabilities, permissions, or conventions without editing the agent file directly.
+description: Guided flow for customizing an existing Vespyr skill — describe what to change, locate the skill's SKILL.md and support files, apply surgical edits, and verify triggering plus spec compliance. Use this skill whenever you need to modify, adjust, retune, or refine an existing skill's description, trigger phrases, workflow steps, or resources without rebuilding it from scratch. Trigger on "customize the X skill", "tweak this skill", "adjust skill triggering", "fix the skill description", "make the X skill trigger more often", "update the X skill workflow".
 metadata:
-  version: "2.0"
-  last_updated: "2026-07-30"
+  version: "1.0"
+  last_updated: "2026-08-11"
 ---
 
-# Customize Skill — Agent Override Authoring
+# Customize Skill — Surgical Skill Editing
 
 ## What this skill does
 
-Helps you customize any Vespyr agent without editing the agent file directly. You describe what you want to change, the skill maps your intent to the correct override fields, writes a `.agents/custom/<agent>.toml` file, and verifies the merge works.
+Helps you customize an existing Vespyr skill. You describe what feels wrong or what should change, the skill locates the right files (SKILL.md, references/, scripts/, resources/), applies minimal surgical edits, and verifies the skill still passes spec checks and triggers correctly.
 
 ## When to use
 
-- "Customize @developer to use a higher temperature"
-- "Change the model for @architect"
-- "Add a new capability to @qa-engineer"
-- "Override the developer guidelines for this project"
-- "Set custom conventions for @tech-lead"
+- "The `/validate-idea` skill doesn't trigger when I say X"
+- "This skill's description is too vague, make it pushier"
+- "Reorder the workflow steps in `/develop`"
+- "The skill should support a new output format"
+- "Add a new reference document to `/motion`"
 
 ## When NOT to use
 
-- For one-off behavior changes in a single prompt (just instruct the agent in your prompt)
-- For squad-wide changes (use `/squad`)
-- When you just want to document a project context/convention (use memory instead)
+- To build a brand-new skill from scratch (use `/create-skill`)
+- To change a skill's core purpose or rewrite most of its body (create a new skill with `/create-skill`, or migrate the content deliberately)
+- For agent persona or settings changes (use `/customize-agent`)
+- For one-off behavior guidance in a single prompt (just instruct the agent in your prompt)
 
 ## Prerequisites
 
-- The agent file exists under `.agents/agents/<name>.md`
-- You know which agent you want to customize
-- If the agent has no `customize.toml` defaults yet, the merge will apply your override cleanly
-
----
-
-## Safety & Governance Principles
-
-### Principle of Least Surprise
-Customization overrides alter agent defaults for your entire workspace. **Do not create overrides that introduce unexpected side effects, break existing agent contracts, or silently alter team-wide security configurations** without explicit confirmation from the user.
-
-### Non-Overridable Core Identity
-The following agent frontmatter and blocks are **hardcoded and cannot be overridden** via TOML:
-- `<!-- IDENTITY: do not edit -->` section
-- `name`, `icon`, `origin` frontmatter fields
-
-Everything else in `customize.toml` defaults (temperature, model, permissions, capabilities, principles, conventions) is fully overridable.
+- The skill exists under `.agents/skills/<skill-name>/` (and its harness mirror, e.g. `.opencode/skills/<skill-name>/`)
+- You know which skill you want to customize and roughly what should change
 
 ---
 
@@ -52,87 +38,69 @@ Everything else in `customize.toml` defaults (temperature, model, permissions, c
 
 ### Step 1: Capture Intent (Socratic Probes)
 
-Ask the user or extract from context what they want to change using these probes:
-1. **Which agent?** (e.g., `@developer`, `@architect`)
-2. **What specific behavior or setting?** (e.g., temperature, model, coding rules, tool access)
-3. **What is the current value (if known)?**
-4. **What should the new value be?**
-5. **Why this change?**
+Ask the user or extract from context:
+1. **Which skill?** (e.g., `/plan`, `/motion`)
+2. **What specifically is wrong or missing?** (triggering, description, workflow steps, references, output format)
+3. **What should the new behavior be?**
+4. **Why this change?**
 
 Example intents:
-- *"I want @developer to be more creative — set temperature to 0.5"*
-- *"I want @architect to always use TypeScript interfaces, not types"*
-- *"I want @qa-engineer to skip performance tests by default"*
+- *"`/validate-idea` should also fire when I say 'check my concept'"*
+- *"The description doesn't mention mobile apps, so it never triggers for them"*
+- *"Step 4 and 5 should be swapped — verification should come before writing the file"*
 
-### Step 2: Map Intent to Override Fields
+### Step 2: Locate the Skill Files
 
-Use `@reader` to inspect `.agents/agents/<name>/customize.toml` (if available) or the agent's markdown definition to identify target fields:
+Inspect the skill directory. Note: skills are mirrored across harness folders (`.agents/skills/` and `.opencode/skills/`) — identify every copy of the skill that needs the same change.
 
-| Intent | Field | Type |
-|---|---|---|
-| More/less creativity | `temperature` | number |
-| Different model | `model` | string |
-| Add/remove capability | `capabilities` | array of strings |
-| Change permissions | `permission` | table |
-| Add/configure tool access | `tools` | table |
-| Adjust core principles | `principles` | array of strings |
-| Project-specific conventions | `conventions` | table |
-
-If the user's intent doesn't map to an existing field, create a clean entry under `[conventions]`.
-
-### Step 3: Build the Override TOML
-
-Construct the `.agents/custom/<agent>.toml` content. Keep it minimal — **include only the fields being changed**.
-
-```toml
-# developer.toml — project-specific overrides for @developer
-temperature = 0.5
-model = "anthropic/claude-sonnet-4.6"
-
-[conventions]
-testing = "vitest + @testing-library/react"
-exports = "named exports only, no default exports"
-quotes = "single quotes, no semicolons"
+```
+.agents/skills/<skill-name>/
+├── SKILL.md         (required — frontmatter + body)
+├── references/      (docs loaded on demand)
+├── scripts/         (helper scripts)
+├── resources/       (templates, assets, static data)
+└── evals/evals.json (verification test cases)
 ```
 
-### Step 4: Write the Override File
+Read the current `SKILL.md` frontmatter and body before editing. Understand the existing structure before touching anything.
 
-Use `@writer` to create or update `.agents/custom/<agent>.toml`.
+### Step 3: Decide What to Edit
 
-> [!IMPORTANT]
-> If `.agents/custom/<agent>.toml` already exists, read it first, merge the new fields into existing keys surgically, and write back the updated file. Do NOT blindly overwrite existing custom settings.
+| Change | File(s) to edit |
+|---|---|
+| Triggering behavior | `SKILL.md` frontmatter `description` |
+| Workflow steps, tone, guardrails | `SKILL.md` body |
+| Large domain content | `references/<topic>.md` (add/update, keep SKILL.md lean) |
+| Deterministic helper logic | `scripts/` |
+| Templates/assets | `resources/` |
+| Test prompts & expectations | `evals/evals.json` |
 
-### Step 5: Verify the Merge
+### Step 4: Apply Surgical Edits
 
-Run via `@executor`:
+- **Triggering first.** The `description` field is the single highest-leverage edit. It MUST include both what the skill does AND explicit triggering contexts — write it slightly "pushy" with relevant keywords and user phrases so the engine doesn't undertrigger. Single line, 1–1024 chars, no `|`/`>` block scalars.
+- **Body edits minimal.** Change only the sections relevant to the intent. Keep the file under 500 lines; push large additions into `references/`.
+- **Keep conventions.** Preserve the skill's existing structure, headings, and tone. Don't restructure sections that weren't part of the request.
+- **Mirror the change.** Apply the identical edit to every harness copy of the skill (e.g., `.opencode/skills/<skill-name>/SKILL.md`) so copies do not drift.
 
-```bash
-node .agents/scripts/merge_customization.js <agent-name>
-```
+### Step 5: Verify
 
-Check the JSON output:
-- The overridden field reflects your new value
-- Unchanged fields show the default values
-- No syntax or TOML parsing errors occur
-
-Report to the user:
-```
-Customization applied to @<agent>:
-  temperature: 0.1 → 0.5
-  model: unchanged (claude-sonnet-4.6)
-
-Override file: .agents/custom/<agent>.toml
-```
+1. Run the spec validator — the skill MUST pass with 0 violations:
+   ```bash
+   node .agents/scripts/spec_check.js
+   ```
+2. Review the `description` — does it cover all anticipated user trigger phrases?
+3. Walk through the skill's own test prompts (from `evals/evals.json` if present) against the edited workflow.
+4. Confirm the mirrored copies are identical (e.g., `diff .agents/skills/<name>/SKILL.md .opencode/skills/<name>/SKILL.md`).
 
 ### Step 6: Log the Change
 
 Append to `artifacts/memory/active-decisions.md`:
 
 ```markdown
-### [DECISION] Customized @<agent> [date: YYYY-MM-DD]
+### [DECISION] Customized Skill: <skill-name> [date: YYYY-MM-DD]
 **Changes:** {summary of what was changed and why}
-**Override file:** .agents/custom/<agent>.toml
-**Status:** active
+**Path:** .agents/skills/<skill-name>/SKILL.md
+**Trigger impact:** {new/updated trigger phrases}
 ```
 
 ---
@@ -141,21 +109,23 @@ Append to `artifacts/memory/active-decisions.md`:
 
 | Issue | Root Cause | Solution |
 |---|---|---|
-| Merge script output unchanged | Misspelled field key or invalid TOML table syntax | Inspect `.agents/custom/<agent>.toml` line by line against `customize.toml` default keys |
-| Frontmatter error | Attempted to override `name` or `origin` | Remove identity keys from `.agents/custom/<agent>.toml` |
-| Array overwrite instead of merge | Scalar array type override | Note that scalar arrays (strings/numbers) append by default; table arrays with `code`/`id` replace matching entries |
+| Skill still doesn't trigger | Description too vague or lacks user phrases | Rewrite description with exact phrases users say; include synonyms and variations |
+| Spec check fails | Invalid frontmatter (block scalars, list metadata, wrong top-level keys) | Only `name`, `description`, `license`, `compatibility`, `metadata`, `allowed-tools` allowed; `metadata` values are strings only |
+| Skill file too long | Large body edits pushed inline | Move extensive content into `references/<topic>.md` |
+| Copies drifted apart | Only one harness folder updated | Diff the mirrors and apply the same edit to all copies |
 
 ---
 
 ## Anti-patterns
 
-- **Editing agent `.md` files directly.** Your changes will be wiped on the next `npx vespyr` upgrade.
-- **Overriding entire files for single-field changes.** Only put altered fields in `.agents/custom/<agent>.toml`.
-- **Forgetting to verify.** Always run `merge_customization.js` to confirm the output is as expected.
+- **Rewriting the whole skill for one tweak.** Change only what the intent requires.
+- **Editing the description without checking trigger phrases.** The description IS the trigger — verify it against real user phrasings.
+- **Forgetting mirrors.** Skills exist in multiple harness folders; updating only one leaves stale copies that still load in other harnesses.
+- **Skipping validation.** Always run `spec_check.js` after edits.
 
 ---
 
 ## Output Artifacts
 
-- `.agents/custom/<agent>.toml` (the override file)
+- Updated `SKILL.md` (and any support files) under `.agents/skills/<skill-name>/` and its harness mirrors
 - `artifacts/memory/active-decisions.md` (audit log entry)

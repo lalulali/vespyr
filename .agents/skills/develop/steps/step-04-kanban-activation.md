@@ -4,11 +4,6 @@ name: Kanban Activation
 prerequisites:
   - step-03b completed
   - execution-plan.md exists
-delegation:
-  reads: "direct (2 small files: kanban.md + execution-plan.md; per delegation-policy.md < 3 files < 500 lines)"
-  writes: "@writer (updated kanban.md)"
-  runs: none
-  direct_justified: ["kanban.md + execution-plan.md direct read — 2 files < 500 lines total"]
 output_contract:
   citations: not-required
 ---
@@ -16,7 +11,6 @@ output_contract:
 # Step 4 — Kanban Activation
 
 Activate the Kanban board. This is a gate — development cannot start until the PM confirms the backlog and the tech-lead activates tasks.
-
 
 > **Tracker:** `node .agents/scripts/step_tracker.js begin --skill develop --step 4`
 ## Goal
@@ -37,11 +31,15 @@ PM confirms the prioritized backlog is correct and aligned with sprint deadlines
 ## Output
 Updated `artifacts/output/05-planning/kanban.md` with tasks in "To Do" — use template `.agents/templates/planning/kanban-template.md`
 
+## Memory closeout
+- `@memory-controller session-write` — record step 4 kanban activation status.
+
+## Delegation
+- **Memory:** @memory-controller for session-write
+
 ## Halt condition
 PM does not sign off. Re-scope with `@product-manager` before continuing.
 
-## Delegation
-- **Reads:** direct — kanban.md + execution-plan.md (2 files < 500 lines total)
-- **Writes:** @writer for updated kanban.md
+
 
 > **Tracker:** `node .agents/scripts/step_tracker.js complete --skill develop --step 4`

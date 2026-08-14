@@ -6,44 +6,16 @@
 
 Vespyr 的 23 个智能体分为三层：
 
-```
-┌──────────────────────────────────────────────┐
-│          推理智能体 (19)                       │
-│  founder、PM、architect、developer、...       │
-│  按设计无文件访问权限、无 Shell——             │
-│  必须将所有 I/O 委托给子代理。                │
-└──────────────────┬───────────────────────────┘
-                    │ 委托至
-                    ▼
-┌──────────────────────────────────────────────┐
-│          I/O 子代理 (4)                       │
-│  @reader              — 读取并摘要            │
-│  @writer              — 精确写入和编辑        │
-│  @executor            — 运行 Shell 命令       │
-│  @memory-controller   — 三级加载 + 预取       │
-└──────────────────────────────────────────────┘
-```
+## 记忆协议
 
-### 为什么拒绝 I/O
+每个智能体都使用自己的工具直接执行文件读取、写入和命令运行。唯一的专门化服务是**记忆**：所有记忆操作都经由 `@memory-controller`（基于脚本）。
 
-推理智能体（founder、developer、architect 等）不能触碰文件或运行命令。这不是限制——是架构设计：
+- **加载** — `@memory-controller load <agent> [task]`：渐进式三级上下文（见记忆系统架构）
+- **写入** — `@memory-controller write <file>`：经模式校验的条目写入 `artifacts/memory/`
+- **会话** — 每个会话以 `@memory-controller session-write` 结束：更新 `session-summaries/latest.md` 和流水线状态
+- **回退** — 若 `@memory-controller` 不可用，直接使用自己的工具读写记忆文件，并在会话摘要中注明
 
-1. **上下文效率** — 推理智能体保持在约 1,000 tokens。无 I/O 噪音，上下文窗口保持精简。相比自行处理 I/O 的智能体，API 成本节省 85-95%。
-2. **结构化输出** — 子代理产生一致、可预测的输出格式。推理流中没有临时文件 diff。
-3. **可审计性** — 每次文件读写都通过窄化、专门的代理。委托审计脚本（`delegation_audit.js`）追踪合规性。
-
-### 委托策略
-
-| 阈值 | 规则 |
-|-----------|-----------|
-| ≤3 个小文件 | 直接读取 |
-| >3 个文件 | 委托给 `@reader` |
-| ≤50 行 | 直接写入 |
-| >50 行 | 委托给 `@writer` |
-| 任何 Shell 命令 | 委托给 `@executor` |
-| 任何记忆操作 | 委托给 `@memory-controller` |
-
-超出阈值的直接 I/O 需要响应中的 `[DIRECT-IO-JUSTIFIED: 理由]`。
+记忆文件位于 `artifacts/memory/`（`project-context.md`、`active-decisions.md`、`lessons-learned.md`）。
 
 ## 智能体契约
 
@@ -85,7 +57,6 @@ Vespyr 的 23 个智能体分为三层：
 | **ADR** | 架构决策记录 |
 | **PRD** | 产品需求文档 |
 | **记忆（Memory）** | 跨智能体和会话的持久共享上下文 |
-| **团队（Squad）** | 已激活智能体的团队预设 |
 | **平台（Harness）** | 加载智能体的 AI 开发者工具（OpenCode、Claude Code 等） |
 
 ## 记忆系统架构

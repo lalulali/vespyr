@@ -3,11 +3,6 @@ step: 5
 name: Launch Log
 prerequisites:
   - step-04 completed
-delegation:
-  reads: none
-  writes: "@writer (launch-log.md; per delegation-policy.md output file)"
-  runs: "@executor (orchestrator_state.js complete)"
-  direct_justified: []
 output_contract:
   citations: not-required
 ---
@@ -15,7 +10,6 @@ output_contract:
 # Step 5 — Launch Log
 
 Write the final launch report, record completion, and close the session.
-
 
 > **Tracker:** `node .agents/scripts/step_tracker.js begin --skill launch --step 5`
 ## Launch retrospective
@@ -65,8 +59,6 @@ node .agents/scripts/orchestrator_state.js complete --agent product-manager --ar
 - For production incidents → load `incident`
 
 ## Delegation
-- **Reads:** none
-- **Writes:** @writer for launch-log.md
-- **Runs:** @executor for orchestrator_state.js complete
+- **Memory:** @memory-controller for lessons-learned and session-write
 
 > **Tracker:** `node .agents/scripts/step_tracker.js complete --skill launch --step 5`

@@ -3,11 +3,6 @@ step: 3
 name: Smoke Test
 prerequisites:
   - step-02 completed
-delegation:
-  reads: none
-  writes: "@writer (smoke-test-results.md)"
-  runs: "@executor (test commands; per delegation-policy.md all bash)"
-  direct_justified: []
 output_contract:
   citations: not-required
 ---
@@ -15,7 +10,6 @@ output_contract:
 # Step 3 — Smoke Test
 
 Validate the production deployment with smoke tests.
-
 
 > **Tracker:** `node .agents/scripts/step_tracker.js begin --skill launch --step 3`
 ## Goal
@@ -39,12 +33,10 @@ Confirm the deployed feature works in production. Catch deployment issues before
 - Record failure in launch-log
 - Invoke `incident` skill if user-facing impact
 
-## Halt condition
-Smoke test identifies a critical flow failure. Rollback and resolve before retrying.
+## Memory closeout
+- `@memory-controller session-write` — record step 3 smoke test results and validation status.
 
 ## Delegation
-- **Reads:** none
-- **Writes:** @writer for smoke-test-results.md
-- **Runs:** @executor for smoke test commands
+- **Memory:** @memory-controller for session-write
 
 > **Tracker:** `node .agents/scripts/step_tracker.js complete --skill launch --step 3`

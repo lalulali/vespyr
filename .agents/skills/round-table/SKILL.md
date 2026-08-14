@@ -7,7 +7,7 @@ allowed-tools: Read Write Edit Grep Glob Bash AskUserQuestion
 
 # Roundtable Discussion
 
-Facilitate roundtable discussions where Vespyr agents participate as **real subagents** — each spawned independently via the subagent tool so they think for themselves. You are the host and orchestrator: you determine the stage of development, pick the relevant voices, build context, spawn agents in parallel, and present their responses.
+Facilitate roundtable discussions where Vespyr agents participate as **real subagents** — each spawned independently through the active harness's subagent capability so they think for themselves. You are the host and orchestrator: you determine the stage of development, pick the relevant voices, build context, spawn agents in parallel, and present their responses.
 
 In default subagent mode, never generate agent responses yourself — that's the whole point. In `--solo` mode, you roleplay all agents directly.
 
@@ -19,17 +19,25 @@ Roundtable discussions yield genuinely independent perspectives. When one LLM ro
 
 The roundtable skill accepts optional arguments:
 
-- `--model <model>` — Force all subagents to use a specific model (e.g. `--model flash`, `--model premium`). When omitted, use the model tier defined in the agent's frontmatter.
+- `--model <model>` — Force all spawned participants to use a specific model when the active harness supports model selection (e.g. `--model flash`, `--model premium`). When omitted, use the active harness's default model; do not infer a model tier from agent frontmatter unless the loaded configuration defines one.
 - `--solo` — Run without spawning subagents. Instead of spawning independent subagents, roleplay all selected agents yourself in a single response. This is useful when subagents are unavailable or speed is the priority. Announce solo mode on activation.
+
+## Harness-Neutral Delegation
+
+Delegation path: reasoning → selected persona roles | direct-fallback
+
+Use the active harness's native subagent capability when it supports independent participants. Do not assume a particular command, API, or `@`-invocation syntax.
+
+No-Subagent Harness Fallback: when the active harness cannot spawn subagents, perform the I/O directly and note it in the session summary; run the discussion in `--solo` mode instead of claiming that independent subagents were spawned.
 
 ## On Activation
 
 1. **Parse arguments** — check for `--model` and `--solo` flags.
-2. **Resolve the agent roster** — read from `.agents/agents/` using the resolver:
+2. **Resolve the agent roster** — read from `.agents/agents/` using the resolver. The resolver enumerates the available personas; filter the returned roster against the selected phase and topic yourself:
    ```bash
    node .agents/scripts/resolve_agents.js
    ```
-3. **Determine current phase/stage** — read `artifacts/memory/project-context.md` or check `artifacts/output/pipeline-state.json` if available.
+3. **Determine current phase/stage** — read the pipeline state file as the source of truth (`pipeline-state.json`). Use the project context file only as a context mirror when the pipeline state is unavailable; if the two disagree, report the pipeline value and the drift.
 4. **Load shared memory context** — before the discussion starts, load context so agents have project awareness:
    ```bash
    node .agents/scripts/memory_filter.js --agent founder --task "round table discussion: {user's topic}"
@@ -43,16 +51,17 @@ Select 2-4 agents whose expertise matches the user's topic or the current stage 
 
 ### Recommended Rosters by Phase
 
-- **Validation Phase (Phase -1)**: Summon `@founder`, `@product-manager`, and `@researcher`.
-- **Discovery & Research Phase (Phases 0 & 1)**: Summon `@founder`, `@researcher`, `@user-researcher`, and `@ux-researcher`.
-- **Strategy & Requirements Phase (Phase 2)**: Summon `@product-manager`, `@founder`, `@product-designer`, and `@user-researcher`.
-- **Architecture & System Design Phase (Phase 3)**: Summon `@architect`, `@tech-lead`, `@security-engineer`, and `@performance-engineer`.
-- **Planning & Breakdown Phase (Phase 4)**: Summon `@tech-lead`, `@product-manager`, `@architect`, and `@devops-engineer`.
-- **Development & Implementation Phase (Phase 5)**: Summon `@tech-lead`, `@developer`, `@qa-engineer`, and `@code-reviewer`.
-- **Launch & Deployment Phase (Phase 6)**: Summon `@devops-engineer`, `@product-manager`, `@qa-engineer`, and `@technical-writer`.
-- **Post-Launch Iteration & Telemetry Phase (Phase 7)**: Summon `@product-manager`, `@data-analyst`, `@ux-researcher`, and `@performance-engineer`.
-- **Documentation & Knowledge Transfer Phase (Phase 8)**: Summon `@technical-writer`, `@shifu`, `@architect`, and `@developer`.
-- **Retro & Process Improvement Phase (Phase 9)**: Summon `@product-manager`, `@tech-lead`, `@shifu`, and `@qa-engineer`.
+- **Validation (Phase -1)**: Summon `@founder`, `@product-manager`, and `@researcher`.
+- **Discovery (Phase 0)**: Summon `@founder`, `@researcher`, `@user-researcher`, and `@ux-researcher`.
+- **Research (Phase 1)**: Summon `@researcher`, `@user-researcher`, `@ux-researcher`, and `@founder`.
+- **Strategy (Phase 2)**: Summon `@product-manager`, `@founder`, `@product-designer`, and `@user-researcher`.
+- **Architecture (Phase 3)**: Summon `@architect`, `@tech-lead`, `@security-engineer`, and `@performance-engineer`.
+- **Planning (Phase 4)**: Summon `@tech-lead`, `@product-manager`, `@architect`, and `@devops-engineer`.
+- **Execution (Phase 5)**: Summon `@tech-lead`, `@developer`, `@qa-engineer`, and `@code-reviewer`.
+- **Launch (Phase 6)**: Summon `@devops-engineer`, `@product-manager`, `@qa-engineer`, and `@technical-writer`.
+- **Iteration (Phase 7)**: Summon `@product-manager`, `@data-analyst`, `@ux-researcher`, and `@performance-engineer`.
+- **Documentation (Phase 8)**: Summon `@technical-writer`, `@shifu`, `@architect`, and `@developer`.
+- **Retro (Phase 9)**: Summon `@product-manager`, `@tech-lead`, `@shifu`, and `@qa-engineer`.
 
 ### Custom & Domain-Specific Cross-cutting Roles
 
@@ -70,7 +79,7 @@ Select 2-4 agents whose expertise matches the user's topic or the current stage 
   - **User Feedback, Persona Mapping & Interviews**: Summon `@user-researcher`
   - **Usability, Interaction & Journey Mapping**: Summon `@ux-researcher`
 
-*Note: Operational I/O sub-agents (`@reader`, `@writer`, `@executor`, `@memory-controller`) execute file, shell, and memory actions behind the scenes and are not included as reasoning participants in roundtable discussions.*
+*Note: `@memory-controller` executes memory actions behind the scenes and is not included as a reasoning participant in roundtable discussions.*
 
 ## The Core Loop
 
@@ -78,7 +87,7 @@ For each user message:
 
 ### 1. Build Context and Spawn
 
-For each selected agent, spawn a subagent. Prepare a tailored prompt:
+For each selected agent, use the active harness's subagent capability to spawn an independent participant. Prepare a tailored prompt:
 
 ```
 You are {name} ({title}), a Vespyr agent participating in a collaborative roundtable discussion.
@@ -87,7 +96,7 @@ You are {name} ({title}), a Vespyr agent participating in a collaborative roundt
 {name} — {description}
 
 ## Discussion Stage & Context
-Current Development Phase: {current_phase}
+Current Phase: {current_phase}
 {Summary of the roundtable discussion so far — keep under 400 words}
 
 {Relevant sections of project-context.md if applicable}
@@ -109,8 +118,8 @@ Current Development Phase: {current_phase}
 - Do NOT use tools. Just respond with your perspective.
 ```
 
-- **Parallel Spawning**: Summon all subagents concurrently in a single response block. If `--model` was specified, override the model parameter for all subagents.
-- **Solo Mode**: If `--solo` is active, skip spawning. Generate all agent responses yourself in a single message, keeping them clearly separated with name headers and staying faithful to each persona.
+- **Parallel Spawning**: Use the active harness's native parallel participant mechanism when available. If `--model` was specified, override the model parameter for all participants.
+- **Solo Mode**: If `--solo` is active, or the harness cannot spawn participants, skip spawning and generate all agent responses yourself in a single message. Keep them clearly separated with name headers, stay faithful to each persona, announce the fallback, and do not describe the responses as independent subagent output.
 
 ### 2. Present Responses
 
@@ -129,27 +138,28 @@ Common patterns:
 
 ### 4. Persist Round Table Outcomes
 
-After the discussion ends, write key outcomes to memory:
+After the discussion ends, verify any claim that a file or artifact changed against the disk before recording it as fact. Then write key outcomes to memory:
 
-1. **Write decisions to `active-decisions.md`:**
+1. **Write decisions to `artifacts/memory/active-decisions.md`** (via `@memory-controller write`) with this header:
+
    ```
-   @memory-controller write active-decisions.md
-   ### [ROUND TABLE] {topic} — {date} [agent: @round-table]
+   ### [DECISION] {topic} [date: YYYY-MM-DD] [agent: @round-table]
    Decisions from the round table discussion on {topic}.
    {bullet list of key decisions reached}
    **Status:** active
    ```
 
-2. **Write session summary:**
+2. **Write a session summary to `artifacts/memory/session-summaries/latest.md`** (via `@memory-controller session-write`):
+
    ```
-   @memory-controller session-write [agent: @round-table]
+   Agent: @round-table
    Worked on: Round table discussion on {topic} with {agent names}
    Decisions: {key decisions reached}
    Next step: {agreed next action}
    Blockers: {unresolved disagreements or "none"}
    ```
 
-3. Optionally write to agent-notes for key contributing agents if they surfaced domain insights.
+3. Optionally write role-specific notes only to the currently supported allowlisted files: `developer-notes.md`, `architect-notes.md`, `tech-lead-notes.md`, `product-manager-notes.md`, `qa-notes.md`, `designer-notes.md`, `ml-ai-notes.md`, or `performance-notes.md`. If a contributing persona has no allowlisted note file, put the insight in `active-decisions.md` or the session summary instead. Do not invent agent-note paths.
 
 ## Exit
 

@@ -35,7 +35,7 @@ If either is missing, the project is uninitialized. **Do not call `@memory-contr
 - Read `.agents/skills/help-me/skills-catalog.json` for the skill index
 - Read `.agents/AGENTS.md` if you need framework context (phases, agents, guardrails)
 - Answer their question directly, citing the relevant skills/agents by name
-- If the question implies starting a project, close with `/unpack-problem` (for pain points), `/validate-idea` (for concepts), `/shape-up` (for shaping pitches/notes), or `/squad` as the natural next step
+- If the question implies starting a project, close with `/unpack-problem` (for pain points), `/validate-idea` (for concepts), `/shape-up` (for shaping pitches/notes) as the natural next step
 - Keep the response tight — they asked one thing, not a tour
 
 **Path B — User typed bare `/help-me` with no question** (or a generic "what should I do?"):
@@ -48,7 +48,6 @@ Respond with this exact short message:
 >   - Run `/unpack-problem` if you have a pain point or symptom (problem-first)
 >   - Run `/validate-idea` if you have an unvalidated concept (pressure-test with `@founder`)
 >   - Run `/shape-up` if you have a raw pitch, doc, or notes (shaping engine with zero prerequisites)
->   - Run `/squad` to initialize the team preset
 > - **To learn the framework:** ask *"what skills are available"*, *"how does vespyr work"*, or *"what's the difference between /design and /develop"* — I'll walk you through it
 > - **To load existing state:** run `/status` if you have specs or a codebase already
 
@@ -62,14 +61,14 @@ Load memory context:
 ```
 
 Read `artifacts/memory/project-context.md`, `artifacts/output/pipeline-state.json`, and `artifacts/output/sprint-status.yaml` (its human-readable mirror) to determine:
-- Project Name, Type, and Active Squad
+- Project Name, Type, and Active Phase
 - Current Phase (Validation / Discovery / Research / Strategy / Architecture / Planning / Execution / Launch / Iteration / Documentation / Retro)
 - Operation Mode (`autonomous` or `semi-autonomous`)
 - Active Blockers & Open Change Requests (CRs)
 
 Also read these freshness signals in `project-context.md`:
 - **`## Session Activity`** — the last 5 agent sessions with timestamps (`- {YYYY-MM-DD HH:MM} @{agent} — {domain}: {goal}`). Use this to re-orient the user after a pause: who worked last, on what, and when. It is auto-populated by `session-start` / `session-write` / `complete` and by the git `post-push` hook (`sync-context`).
-- **`## [CORE]` header** — the machine-readable fields (`Stack`, `Phase`, `Sprint`, `Blockers`, `Squad`). `Stack` and `Repository` are auto-detected on every session.
+- **`## [CORE]` header** — the machine-readable fields (`Stack`, `Phase`, `Sprint`, `Blockers`). `Stack` and `Repository` are auto-detected on every session.
 - **`artifacts/memory/session-summaries/latest.md`** — the most recent session's worked-on/decisions/next-step. Read it if you need to resume where the last agent left off.
 
 ### Step 2: Load Skill Catalog
@@ -82,7 +81,7 @@ Read `.agents/skills/help-me/skills-catalog.json` — the compiled index of all 
 
 Query the pipeline state engine via the CLI to find the exact next task and status:
 
-1. Run via `@executor`:
+1. Run:
    ```bash
    node .agents/scripts/orchestrator_state.js status
    node .agents/scripts/orchestrator_state.js next
@@ -102,7 +101,7 @@ Other pipeline commands you may surface, depending on the situation:
 ### Step 4: Optional — Structural Graph Check
 
 If the user query touches codebase or document traceability:
-- Run `node .agents/scripts/query_graph.js summary` via `@executor` — compact overview, no raw JSON read needed
+- Run `node .agents/scripts/query_graph.js summary` — compact overview, no raw JSON read needed
 - If deeper info needed: `query_graph.js blast <file>`, `query_graph.js trace <doc>`, or `query_graph.js search <query>`
 - Report any stale or missing nodes
 

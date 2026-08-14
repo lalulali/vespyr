@@ -1,35 +1,9 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "_comment": "Vespyr-managed opencode config. The model token in each subagent is filled in by the installer (default: anthropic/claude-sonnet-4-5, override with --model). Edit freely after install — re-running `npx vespyr update` will NOT overwrite this file.",
   "agent": {
-    "reader": {
-      "description": "Specialized sub-agent for reading files and searching code — returns summarized results to conserve context",
-      "model": "{DEFAULT_MODEL}",
-      "mode": "subagent",
-      "permission": {
-        "bash": "deny",
-        "edit": "deny"
-      }
-    },
-    "writer": {
-      "description": "Specialized sub-agent for writing and editing files — executes precisely without reasoning, keeping the caller focused on design",
-      "model": "{DEFAULT_MODEL}",
-      "mode": "subagent",
-      "permission": {
-        "bash": "deny"
-      }
-    },
-    "executor": {
-      "description": "Specialized sub-agent for running bash commands — returns summarized output instead of raw logs",
-      "model": "{DEFAULT_MODEL}",
-      "mode": "subagent",
-      "permission": {
-        "edit": "deny"
-      }
-    },
     "memory-controller": {
       "description": "Memory gatekeeper — loads filtered context for agents (progressive tiers), validates and persists memory writes, compacts files that exceed thresholds, and archives resolved entries with a searchable index",
-      "model": "{DEFAULT_MODEL}",
+      "model": "opencode-go/deepseek-v4-flash",
       "mode": "subagent",
       "permission": {
         "bash": "deny",
@@ -38,29 +12,54 @@
     }
   },
   "permission": {
+    "external_directory": {
+      "~/.local/share/opencode/worktree/**": "allow"
+    },
     "skill": {
-      "validate-idea": "allow",
-      "explore-idea": "allow",
+      "analyze-data": "allow",
+      "brainstorming": "allow",
+      "code-graph": "allow",
+      "craft-lesson": "allow",
+      "create-agent": "allow",
+      "create-skill": "allow",
+      "customize-agent": "allow",
+      "customize-skill": "allow",
       "design": "allow",
       "develop": "allow",
-      "launch": "allow",
-      "iterate": "allow",
-      "incident": "allow",
-      "retro": "allow",
-      "humanize": "allow",
-      "validate-game-idea": "allow",
+      "discovery-report": "allow",
+      "doc-graph": "allow",
+      "elicitation": "allow",
+      "empathy-map": "allow",
       "explore-game-idea": "allow",
-      "status": "allow",
-      "memory": "allow",
-      "phase": "allow",
-      "delegate": "allow",
-      "plan": "allow",
-      "review": "allow",
-      "test": "allow",
-      "kanban": "allow",
-      "squad": "allow",
+      "explore-idea": "allow",
+      "grill-me": "allow",
       "help-me": "allow",
-      "grill-me": "allow"
+      "humanize": "allow",
+      "incident": "allow",
+      "iterate": "allow",
+      "journey-map": "allow",
+      "jtbd": "allow",
+      "kanban": "allow",
+      "launch": "allow",
+      "memory": "allow",
+      "motion": "allow",
+      "phase": "allow",
+      "plan": "allow",
+      "research-plan": "allow",
+      "retro": "allow",
+      "review": "allow",
+      "root-cause": "allow",
+      "round-table": "allow",
+      "shape-up": "allow",
+      "sprint-status": "allow",
+      "status": "allow",
+      "teach-me": "allow",
+      "test": "allow",
+      "unpack-problem": "allow",
+      "validate-game-idea": "allow",
+      "validate-idea": "allow",
+      "validation-patterns": "allow"
     }
-  }
+  },
+  "plugin": ["opencode-websearch-cited@1.2.0"]
 }

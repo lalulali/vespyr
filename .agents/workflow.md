@@ -16,29 +16,45 @@ Agents execute in dependency order. An agent cannot start until its upstream age
 
 ```
 PHASE -1: VALIDATION
-  ├── Product track (validate-idea skill)
-  │     └── @founder — Socratic diagnostic: stress-test the idea before investing research cycles
+  ├── Product Track (validate-idea skill)
+  │     └── @founder — Socratic diagnostic: stress-test idea before investing research/dev cycles
   │           │         Adapts by context: startup | company | personal
   │           │         Adapts by maturity: greenfield | brownfield
-  │           │         Produces: artifacts/output/01-discovery/validation-brief.md
+  │           │         Produces: artifacts/output/01-discovery/validation-brief.md (GO/PIVOT/KILL)
   │           │
-  │           ├── GO ──────────▼
-  │           │          PHASE 0: DISCOVERY (explore-idea skill)
-  │           │            └── @researcher, @user-researcher — market analysis, user research, competitive landscape
-  │           │                  │         produces: artifacts/output/01-discovery/idea-brief.md
-  │           │                  ▼
+  │           ├── GO ───► Choose Entry Route:
+  │           │           │
+  │           │           ├── 1. Problem Exploration Route (unpack-problem skill)
+  │           │           │      └── @product-manager, @user-researcher — 5 Whys, root cause, empathy & journey mapping, JTBD, HMW questions
+  │           │           │            │         produces: problem-brief.md, jtbd-canvas.md
+  │           │           │            ▼
+  │           │           ├── 2. Idea Shaping Route (shape-up skill)
+  │           │           │      └── @founder, @product-manager — 6-step context scan, intake structure, gap analysis, Socratic stress-test
+  │           │           │            │         produces: shaped-brief.md
+  │           │           │            ▼
+  │           │           ├── 3. Brainstorming & Ideation (brainstorming skill)
+  │           │           │      └── @product-manager, @founder — 60-method catalog (SCAMPER, 6 Hats, Starbursting, Reverse Brainstorming)
+  │           │           │            │         produces: brainstorming-session.md, solution-concepts.md
+  │           │           │            ▼
+  │           │           └── 4. Direct Research Route (explore-idea skill)
+  │           │                  └── @researcher, @user-researcher — market analysis, competitor landscape, user personas
+  │           │                        │         produces: artifacts/output/01-discovery/idea-brief.md
+  │           │                        ▼
+  │           │                    PHASE 2: STRATEGY & SPEC DESIGN (design skill)
+  │           │                      └── @product-manager, @product-designer — PRD, SPEC.md, user stories, screen states, design tokens
+  │           │                            ▼
+  │           │                        PHASE 5: DEVELOPMENT (develop skill)
+  │           │
   │           ├── PIVOT ──▶ Re-run Phase -1 with revised framing
   │           │
   │           └── KILL ──▶ Stop. Brief documents why. Save research cycles.
   │
-  └── Game track (validate-game-idea skill)
-        └── @founder — Socratic diagnostic: stress-test the game concept before investing production cycles
-              │         Adapts by context: startup | company | personal
-              │         Adapts by maturity: greenfield | brownfield
-              │         Produces: artifacts/output/01-discovery/validation-brief.md
+  └── Game Track (validate-game-idea skill)
+        └── @founder — Socratic diagnostic: stress-test game concept before investing production cycles
+              │         Produces: artifacts/output/01-discovery/validation-brief.md (GO/PIVOT/KILL)
               │
               ├── GO ──────────▼
-              │          PHASE 0: DISCOVERY (explore-game-idea skill)
+              │          PHASE 0-1: DISCOVERY (explore-game-idea skill)
               │            └── @researcher, @user-researcher — genre market analysis, player research, competitive landscape
               │                  │         produces: artifacts/output/01-discovery/idea-brief.md
               │                  ▼
@@ -64,8 +80,10 @@ Set the operation mode in `artifacts/memory/project-context.md`. Default is **se
 | Phase | Primary Skill | Autonomous | Semi-autonomous | Manual |
 |-------|---------------|------------|----------------|--------|
 | **-1: Validation** | `validate-idea` / `validate-game-idea` | Auto-generate validation brief from context. Auto-decide GO/PIVOT/KILL based on available evidence. | Run diagnostic questions interactively. **Pause for GO/PIVOT/KILL verdict.** | Full Socratic session. Every question interactive. Human confirms each answer before next. |
-| **0: Discovery** | `explore-idea` / `explore-game-idea` | @founder auto-synthesizes, no review. | @founder synthesizes. **Pause for human review of idea brief before research.** | @founder drafts, human refines iteratively. |
-| **1: Research** | `explore-idea` / `explore-game-idea` | All research agents run in parallel, auto-complete. | Research runs autonomously. Human reviews at Phase 1→2 gate. | Human reviews each research output before the next agent starts. |
+| **-0.5: Problem Exploration** | `unpack-problem` | Auto-unpack symptoms into root cause, empathy map, JTBD canvas, and HMW questions. | Run intake & 5 Whys analysis. **Pause for problem brief confirmation before ideation.** | Human co-explores problem space, empathy quadrants, and 5 Whys step-by-step. |
+| **-0.2: Idea Shaping** | `shape-up` | Auto-structure raw concepts through 6-step intake, gap analysis, and stress testing. | Run intake & gap analysis. **Pause for decision alignment & shaped brief approval.** | Human collaborates interactively on every shaping step and gap resolution. |
+| **0: Ideation & Brainstorming** | `brainstorming` | Auto-select top 3 methods from 60-method catalog and generate solution concepts. | Propose ideation methods. **Pause for human selection & concept review.** | Facilitate selected brainstorming method step-by-step with user. |
+| **0-1: Discovery & Research** | `explore-idea` / `explore-game-idea` | All research agents run in parallel, auto-complete market, competitor, and user research. | Research runs autonomously. **Pause for human review at Phase 1→2 gate.** | Human reviews each research artifact before the next agent starts. |
 | **2: Strategy** | `design` | Auto-generate PRD, specs, user stories. | Draft features. **Pause for human selection & feedback.** Finalize PRD/user stories. **Pause for human spec approval.** | Human co-writes requirements and specs with agents. |
 | **3: Architecture (Optional)** | `develop` / `design` | Auto-generate ADRs if enabled. | **Optional Phase.** Pause to ask user: run `@architect` first or bypass directly to `@tech-lead`/`@developer`? | Human collaborates on ADRs if executed. |
 | **4: Planning & Kanban** | `plan` / `kanban` | `@product-manager` auto-seeds Kanban board. `@tech-lead` auto-generates `execution-plan.md` task breakdown and estimates. | **Kanban & Planning.** `@product-manager` seeds the Kanban board. `@tech-lead` breaks down user stories into developer-centric tasks (1-4h, dependencies). **Pause for human approval of the execution plan.** | Human collaborates on task slicing, estimates, and reviews the Kanban board. |
@@ -121,7 +139,6 @@ FeatureDesignInteraction: false
 - **`FeatureDesignInteraction: true` (default in semi-autonomous):** Pause during feature selection to get user feedback.
 - **`FeatureDesignInteraction: false`:** Bypasses the feature selection pause entirely. `@product-manager` will auto-generate the complete PRD and user stories without stopping.
 - **Natural language support:** If a user says `"bypass feature review"`, `"automate feature design selection"`, or `"skip interactive feature design"`, the agent will set `FeatureDesignInteraction: false` in `artifacts/memory/project-context.md` and log the override.
-
 
 ### Changing mode
 
@@ -296,21 +313,30 @@ escalated to the binding decision authority. `CHANGES REQUESTED` and `BLOCKED`
 states stop the handoff. After a material change, affected sign-offs must be
 revalidated.
 
-### Validation → Discovery
+### Validation → Problem Unpacking / Idea Shaping / Discovery
 
 | From | To | Required Artifacts | Contract |
 |------|-----|-------------------|----------|
-| @founder (validate-idea) | @founder (explore-idea) | `artifacts/output/01-discovery/validation-brief.md` | Must contain GO verdict, value proposition, target user, narrowest wedge, agreed premises, and open questions for exploration |
-| @founder (validate-game-idea) | @founder (explore-game-idea) | `artifacts/output/01-discovery/validation-brief.md` | Must contain GO verdict, value proposition, target player, core fun loop, agreed premises, and open questions for exploration |
+| @founder (validate-idea) | @product-manager / @user-researcher (unpack-problem) | `artifacts/output/01-discovery/validation-brief.md` | Must contain GO verdict, problem framing, target user, and key open questions for problem unpacking |
+| @founder (validate-idea) | @founder / @product-manager (shape-up) | `artifacts/output/01-discovery/validation-brief.md` | Must contain GO verdict, core concept, target user, and primary constraints |
+| @founder (validate-idea) | @researcher / @user-researcher (explore-idea) | `artifacts/output/01-discovery/validation-brief.md` | Must contain GO verdict, value proposition, target user, narrowest wedge, agreed premises, and open questions for exploration |
+| @founder (validate-game-idea) | @researcher / @user-researcher (explore-game-idea) | `artifacts/output/01-discovery/validation-brief.md` | Must contain GO verdict, value proposition, target player, core fun loop, agreed premises, and open questions for exploration |
 
-**Note:** If the validation brief exists with a GO verdict, Phase 0 (Discovery) can be skipped — the validation brief directly feeds into Phase 1 (Research). Research agents focus on the "Open questions for exploration" section.
-
-### Discovery → Research
+### Problem Unpacking & Shaping → Brainstorming & Research
 
 | From | To | Required Artifacts | Contract |
 |------|-----|-------------------|----------|
-| @founder | @researcher | `validation-brief.md` OR `idea-brief.md` | Must contain target user, value proposition, key assumptions, and recommended next step |
-| @founder | @user-researcher | `validation-brief.md` OR `idea-brief.md` | Must contain primary user definition and assumptions to validate |
+| @product-manager / @user-researcher (unpack-problem) | @product-manager / @founder (brainstorming) | `artifacts/output/01-discovery/problem-brief.md`, `jtbd-canvas.md` | Must contain validated root causes, HMW opportunity questions, and target user pain points |
+| @product-manager / @user-researcher (unpack-problem) | @founder / @product-manager (shape-up) | `artifacts/output/01-discovery/problem-brief.md` | Must contain clear problem statement and validated constraints |
+| @founder / @product-manager (shape-up) | @researcher / @user-researcher (explore-idea) | `artifacts/output/01-discovery/shaped-brief.md` | Must contain 6-step shaped brief with clear scope boundaries and gap analysis |
+| @product-manager / @founder (brainstorming) | @product-manager / @product-designer (design) | `artifacts/output/01-discovery/brainstorming-session.md` | Must contain prioritized solution concepts and evaluation criteria |
+
+### Discovery & Research → Strategy
+
+| From | To | Required Artifacts | Contract |
+|------|-----|-------------------|----------|
+| @founder / @researcher | @researcher | `validation-brief.md`, `shaped-brief.md`, OR `idea-brief.md` | Must contain target user, value proposition, key assumptions, and recommended next step |
+| @founder / @researcher | @user-researcher | `validation-brief.md`, `shaped-brief.md`, OR `idea-brief.md` | Must contain primary user definition and assumptions to validate |
 | @founder | @ux-researcher | `validation-brief.md` OR `idea-brief.md` | Must contain target user profile and key user-facing features |
 
 ### Research → Strategy
@@ -332,14 +358,12 @@ revalidated.
 | @product-designer | @developer | `artifacts/output/03-strategy/product-spec.md` (validated by @ux-researcher if applicable) | UI is usability-tested or @product-designer has documented rationale for skipping |
 | @ux-researcher | @product-designer | `artifacts/output/02-research/ux-research-report.md` | Must contain severity-rated findings; critical issues resolved before dev handoff |
 
-
 ### Architecture → Planning (Only if Phase 3 is executed)
 
 | From | To | Required Artifacts | Contract |
 |------|-----|-------------------|----------|
 | @architect | @tech-lead | `artifacts/output/04-architecture/` (ADRs) | Must contain data model, API contracts, and tech stack decision |
 | @product-manager | @tech-lead | `artifacts/output/03-strategy/requirements.md` | Must contain priorities and business deadlines |
-
 
 ### Strategy → Planning (Direct Handoff - Bypassing Optional Phase 3)
 
@@ -350,7 +374,6 @@ If the user opts to bypass Phase 3 (Architecture), the Strategy artifacts feed d
 | @product-manager | @tech-lead | `artifacts/output/03-strategy/requirements.md`, `user-stories.md` | Tech Lead consumes strategic requirements directly for task breakdown |
 | @product-designer | @tech-lead | `artifacts/output/03-strategy/product-spec.md` | Tech Lead maps tasks directly to visual/interaction specifications |
 | @product-designer | @developer | `artifacts/output/03-strategy/product-spec.md` | Developer implements visual layouts and interaction specs directly |
-
 
 ### Planning → Execution
 
@@ -572,7 +595,7 @@ These skills form the backbone of the product and game development lifecycle. Sk
 |-------|-------|----------------|--------------------------|
 | `code-graph` | Any | @architect, @tech-lead | Codebase structural dependency scanner (`code-graph.json`) and query engine |
 | `doc-graph` | Any | @product-manager, @technical-writer | Documentation link and requirement-to-code traceability graph mapper |
-| `humanize` | Any | @technical-writer, @writer | AI-writing tell detector and natural language style normalizer |
+| `humanize` | Any | @technical-writer | AI-writing tell detector and natural language style normalizer |
 | `elicitation` | Any | Harness / Any | 98 structured methods to push LLM to reconsider, refine, and improve output |
 | `round-table` | Any | Harness / Any | Multi-agent stage-based roundtable discussions with independent agent perspectives |
 
@@ -584,23 +607,22 @@ These skills form the backbone of the product and game development lifecycle. Sk
 | `status` | Any | @product-manager | Quick snapshot of project state, active phase, blockers, memory health |
 | `sprint-status` | Any | @product-manager, @tech-lead | Visualizes `sprint-status.yaml` pipeline state as an interactive Kanban table |
 | `phase` | Any | @product-manager | Display current phase, switch active phase, list phase artifacts |
-| `squad` | Any | Harness / Any | Display available agent squads, switch active squad, initialize team preset |
 | `review` | Any | @code-reviewer | Standalone code review on current changes outside full development loop |
 | `test` | Any | @qa-engineer | Run test suite, summarize failures, enrich acceptance criteria, QA report |
 | `kanban` | Any | @product-manager | Interactive Kanban board display and status updates |
 | `memory` | Any | @memory-controller | Search archived project context and compacted memory entries |
-| `delegate` | Any | Any reasoning agent | One-shot I/O offload to @reader, @writer, or @executor |
 
 ### 8.8 Customization & Incident Management
 
 | Skill | Phase | Primary Agents | Key Output / Description |
 |-------|-------|----------------|--------------------------|
-| `customize-skill` | Any | Harness / Any | Guided TOML authoring flow for agent settings, permissions, and models |
+| `create-agent` | Any | Harness / Any | Author new agent personas: scaffold, register, and verify `.agents/agents/<name>.md` |
+| `customize-agent` | Any | Harness / Any | Guided TOML authoring flow for agent settings, permissions, and models |
 | `create-skill` | Any | Harness / Any | Author new skills, modify existing workflows, build lightweight skill evals |
+| `customize-skill` | Any | Harness / Any | Surgical edits to existing skills: triggering, workflow, references, spec compliance |
 | `incident` | Any | @devops-engineer, @developer | Production incident triage, mitigation, root cause analysis, and post-mortem |
 
 ---
-
 
 ## 9. Shared Memory & Context
 
@@ -634,14 +656,13 @@ artifacts/memory/
 
 **The Kanban board (`artifacts/output/05-planning/kanban.md`) is a persistent project artifact, not just a template.** It is initialized and seeded directly by `@product-manager` once Strategy requirements, product specs, and user stories are approved (in semi-autonomous/manual mode) or immediately (skipping all approval pauses in autonomous mode). It is updated continuously throughout the project lifecycle. Every cross-agent handoff, blocker resolution, and scope change must be reflected in the Kanban.
 
-
 ### Memory Protocol
 
 **Before starting work, every agent MUST:**
 ```
 @memory-controller load [agent-type] [brief task description]
 ```
-The controller returns ~1,000 tokens of filtered context across three tiers:
+The controller returns filtered context across three tiers:
 - **Tier 1** (~200 tokens): project name, stack, phase, sprint, blocker count, last session summary
 - **Tier 2** (~300 tokens): files specific to the agent's role
 - **Tier 3** (~500 tokens): chunks from any file scoring ≥ 2 against the task keywords
@@ -714,7 +735,6 @@ The **pipeline state machine** (`node .agents/scripts/orchestrator_state.js`) is
 - **Change requests** (open CRs that block phase advancement)
 - **Blockers** (active blockers with owners and ETAs)
 - **History** (every `init`, `set-phase`, `complete`, `file-cr` event)
-- **Squad** (which agent preset is active)
 
 ### When to call the state machine
 
@@ -725,7 +745,7 @@ The **pipeline state machine** (`node .agents/scripts/orchestrator_state.js`) is
 | Skill produces an artifact | `orchestrator_state.js complete --agent X --artifact Y` | Record work, fire telemetry, refresh code-graph |
 | User wants to switch phases | `orchestrator_state.js set-phase --phase X` | Advance with proper logging |
 | Cross-team change needed | `orchestrator_state.js file-cr --from X --to Y --target Z --issue "..."` | Block advancement until resolved |
-| Project initialization | `orchestrator_state.js init --name "X" --type Y` | First-run setup (also via `/squad`) |
+| Project initialization | `orchestrator_state.js init --name "X" --type Y` | First-run setup |
 | Graph refresh (code) | `orchestrator_state.js ensure-graph code` | Force refresh code-graph |
 | Graph refresh (doc) | `orchestrator_state.js ensure-graph doc` | Force refresh doc-graph |
 

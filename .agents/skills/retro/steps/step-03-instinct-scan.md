@@ -3,11 +3,6 @@ step: 3
 name: Instinct Scan
 prerequisites:
   - step-02 completed
-delegation:
-  reads: "@reader (memory files + ADR cross-refs; per delegation-policy.md ≥4 files)"
-  writes: none
-  runs: none
-  direct_justified: []
 output_contract:
   citations: not-required
 ---
@@ -15,7 +10,6 @@ output_contract:
 # Step 3 — Instinct Scan
 
 Review execution quality, team process, product alignment, and architecture. Surface instinct candidates — patterns stable 30+ days with 2+ ADR refs that should become conventions.
-
 
 > **Tracker:** `node .agents/scripts/step_tracker.js begin --skill retro --step 3`
 ## 3a. Execution Review
@@ -57,11 +51,10 @@ Review execution quality, team process, product alignment, and architecture. Sur
 
 All reviews use template `.agents/templates/memory/retrospective-template.md`.
 
-## Instinct candidates
-After all reviews, identify patterns stable 30+ days with 2+ ADR references. These are candidates for promotion to conventions or guardrails.
+## Memory closeout
+- `@memory-controller session-write` — record step 3 instinct scan progress.
 
 ## Delegation
-- **Reads:** @reader for memory files and ADR cross-references
-- **Writes:** none
+- **Memory:** @memory-controller for session-write
 
 > **Tracker:** `node .agents/scripts/step_tracker.js complete --skill retro --step 3`

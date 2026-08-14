@@ -35,36 +35,36 @@ These personas are invoked by step files. The router declares them so the agent 
 
 ## Mode selection + routing
 Detect by checking for existing artifacts + parsing user wording:
-- **Create** → no `requirements.md` or `product-spec.md` exists. Route: `steps-create/01-load-prd-brief.md`
-- **Edit** → artifacts exist, user wants to refine. Route: `steps-edit/01-load-existing.md`
-- **Validate** → artifacts exist, user wants design review. Route: `steps-validate/01-heuristic-eval.md`
+- **Create** → no `requirements.md` or `product-spec.md` exists. Route: `steps/step-01a-load-prd-brief.md`
+- **Edit** → artifacts exist, user wants to refine. Route: `steps/step-01b-load-existing.md`
+- **Validate** → artifacts exist, user wants design review. Route: `steps/step-01c-heuristic-eval.md`
 
 If unclear, ask: "Are you designing from scratch, refining existing specs, or reviewing a design?"
 
 ## Create mode step sequence
-1. Load PRD Brief → `steps-create/01-load-prd-brief.md`
-2. Define Personas → `steps-create/02-define-personas.md`
-3. User Stories → `steps-create/03-user-stories.md`
-4. Screen States → `steps-create/04-screen-states.md`
-5. Design Tokens → `steps-create/05-design-tokens.md`
-6. Handoff → `steps-create/06-handoff.md`
+1. Load PRD Brief → `steps/step-01a-load-prd-brief.md`
+2. Define Personas → `steps/step-02a-define-personas.md`
+3. User Stories → `steps/step-03a-user-stories.md`
+4. Screen States → `steps/step-04a-screen-states.md`
+5. Design Tokens → `steps/step-05a-design-tokens.md`
+6. Handoff → `steps/step-06a-handoff.md`
 
 ## Edit mode step sequence
-1. Load Existing → `steps-edit/01-load-existing.md`
-2. Identify Gaps → `steps-edit/02-identify-gaps.md`
-3. Revise → `steps-edit/03-revise.md`
-4. Finalize → `steps-edit/04-finalize.md`
+1. Load Existing → `steps/step-01b-load-existing.md`
+2. Identify Gaps → `steps/step-02b-identify-gaps.md`
+3. Revise → `steps/step-03b-revise.md`
+4. Finalize → `steps/step-04b-finalize.md`
 
 ## Validate mode step sequence
-1. Heuristic Eval → `steps-validate/01-heuristic-eval.md`
-2. Consistency Check → `steps-validate/02-consistency-check.md`
-3. Accessibility Check → `steps-validate/03-a11y-check.md`
-4. Lock & Handoff → `steps-validate/04-lock-handoff.md`
+1. Heuristic Eval → `steps/step-01c-heuristic-eval.md`
+2. Consistency Check → `steps/step-02c-consistency-check.md`
+3. Accessibility Check → `steps/step-03c-a11y-check.md`
+4. Lock & Handoff → `steps/step-04c-lock-handoff.md`
 
 ## Output artifacts
 `requirements.md`, `user-stories.md`, `product-spec.md`, `product-spec.html`, `design.md`, plus `measurement-plan.md` and `ux-research-report.md` (optional).
 ## State & memory integration
-At start, via `@executor`: `node .agents/scripts/orchestrator_state.js status` then `next`. Also: `@memory-controller load product-manager [design — {feature}]`
+At start, run: `node .agents/scripts/orchestrator_state.js status` then `next`. Also: `@memory-controller load product-manager [design — {feature}]`
 At each step end: record per-artifact via `node .agents/scripts/orchestrator_state.js complete --agent {agent} --artifact {path}` (see step files for agent-specific calls). After all: `node .agents/scripts/ensure_graph.js doc`.
 
 **After PRD + user stories (create step 3 / edit step 3):** Write key product decisions:

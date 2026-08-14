@@ -1,16 +1,16 @@
 ---
 name: humanize
-description: Remove signs of AI-generated writing from text. Use when editing or reviewing text to make it sound more natural and human-written. Based on Wikipedia's comprehensive Signs of AI writing guide. Detects and fixes patterns such as inflated symbolism, promotional language, superficial -ing analyses, vague attributions, em dash overuse, rule of three, AI vocabulary words, passive voice, negative parallelisms, and filler phrases.
+description: Remove signs of AI-generated writing from text with user-selectable tone. Use when editing or reviewing text to make it sound more natural and human-written. Supports tone selection (casual, formal, professional, technical, and more) — ask the user for a tone only if they haven't specified one. Based on Wikipedia's comprehensive Signs of AI writing guide. Detects and fixes patterns such as inflated symbolism, promotional language, superficial -ing analyses, vague attributions, em dash overuse, rule of three, AI vocabulary words, passive voice, negative parallelisms, and filler phrases.
 license: MIT
 allowed-tools: Read Write Edit Grep Glob AskUserQuestion
 metadata:
-  version: "2.5.1"
+  version: "2.6.0"
   source_file: "https://github.com/blader/humanizer/blob/main/SKILL.md"
 ---
 
 > **Source:** [github.com/blader/humanizer](https://github.com/blader/humanizer) — MIT license.
 > To update this skill, pull the latest from `https://raw.githubusercontent.com/blader/humanizer/refs/heads/main/SKILL.md`
-> and replace this file. Version tracked: 2.5.1.
+> and replace this file. Version tracked: 2.6.0.
 
 # Humanizer: Remove AI Writing Patterns
 
@@ -27,6 +27,56 @@ When given text to humanize:
 5. **Add soul** - Don't just remove bad patterns; inject actual personality
 6. **Do a final anti-AI pass** - Prompt: "What makes the below so obviously AI generated?" Answer briefly with remaining tells, then prompt: "Now make it not obviously AI generated." and revise
 
+## Tone Selection
+
+Before rewriting, determine the target tone for the output. This shapes word choice, sentence rhythm, and how much personality to inject.
+
+### Rule: Skip the question when the user already stated a tone
+
+If the user's request already specifies a tone — "keep it formal," "make it sound like a confident founder," "professional but friendly," "techy," etc. — **do NOT ask**. Extract the tone from their request and use it directly.
+
+### Otherwise: infer the tone from content purpose
+
+If the user did NOT specify a tone, first try to infer one from the content's purpose and context:
+
+1. **Identify what the text is and who it's for.** What kind of document is it (cover letter, landing page, API docs, Reddit post, board report)? Who is the audience? What is it trying to accomplish?
+2. **Suggest a tone from the purpose.** If you can tell what the content is for with reasonable confidence, **do NOT ask** — state your suggested tone in one line ("I'm treating this as a cover letter, so I'll keep it professional.") and proceed with the rewrite. The user can interrupt if they disagree.
+
+Common purpose → tone mappings:
+
+| If the content looks like | Suggested tone |
+|---|---|
+| Cover letter, résumé, application | **Professional** |
+| Academic paper, official correspondence, legal or regulatory text | **Formal** |
+| Landing page, marketing copy, sales pitch | **Persuasive** |
+| Technical docs, API reference, specifications, how-to guides | **Technical** |
+| Social media post, forum reply, personal message | **Casual** |
+| Newsletter, blog post, opinion piece | **Conversational** (or **Witty** if the tone is playful) |
+| Customer support, FAQ, onboarding, error messages | **Warm** |
+| Internal memo, business report, email to a client | **Professional** |
+| Press release, executive summary | **Formal** |
+
+### Ask the user only when the purpose is unclear
+
+If you **cannot** infer the content's purpose or context — the text is ambiguous, mixes registers, is a fragment, or could plausibly serve several audiences — ask once using `AskUserQuestion` (single choice, one question, no follow-ups). Present this menu:
+
+| Tone | What it sounds like |
+|---|---|
+| **Casual** | Relaxed, contractions, everyday words, "you" address |
+| **Conversational** | Like talking to a friend; personal, uses "I," flows naturally |
+| **Professional** | Clean and confident, no slang, but still natural (not stiff) |
+| **Formal** | Precise, restrained, conventional grammar, no contractions |
+| **Technical** | Domain jargon is fine, precise terms, zero fluff |
+| **Persuasive** | Confident, pointed, opinionated, moves toward a takeaway |
+| **Warm** | Friendly, empathetic, approachable, human touch |
+| **Witty** | Light humor, irony, playful asides (only where appropriate) |
+| **Neutral (default)** | No strong flavor — natural, varied, plain-spoken |
+
+### Applying the tone
+
+- Rewrite every section of the text to match the chosen tone consistently — not just vocabulary, but sentence length, contractions, and level of personality.
+- The PERSONALITY AND SOUL section below applies to **every** tone. A formal rewrite is not an excuse for sterile prose; it just expresses personality more subtly (precise opinions, measured reactions, quiet confidence). A casual rewrite can let more mess and humor in.
+- The anti-AI patterns (CONTENT PATTERNS, LANGUAGE AND GRAMMAR PATTERNS, etc.) apply identically regardless of tone. Tone is calibrated *after* AI-isms are removed, never as a reason to keep them.
 
 ## Voice Calibration (Optional)
 
@@ -42,12 +92,12 @@ If the user provides a writing sample (their own previous writing), analyze it b
 
 2. **Match their voice in the rewrite.** Don't just remove AI patterns - replace them with patterns from the sample. If they write short sentences, don't produce long ones. If they use "stuff" and "things," don't upgrade to "elements" and "components."
 
-3. **When no sample is provided,** fall back to the default behavior (natural, varied, opinionated voice from the PERSONALITY AND SOUL section below).
+3. **When no sample is provided,** fall back to the default behavior (natural, varied, opinionated voice from the PERSONALITY AND SOUL section below) calibrated to the tone from TONE SELECTION.
 
 ### How to provide a sample
 - Inline: "Humanize this text. Here's a sample of my writing for voice matching: [sample]"
+- Inline with tone: "Humanize this text, keep it formal." or "Make it sound warm and human."
 - File: "Humanize this text. Use my writing style from [file path] as a reference."
-
 
 ## PERSONALITY AND SOUL
 
@@ -81,7 +131,6 @@ Avoiding AI patterns is only half the job. Sterile, voiceless writing is just as
 ### After (has a pulse):
 > I genuinely don't know how to feel about this one. 3 million lines of code, generated while the humans presumably slept. Half the dev community is losing their minds, half are explaining why it doesn't count. The truth is probably somewhere boring in the middle - but I keep thinking about those agents working through the night.
 
-
 ## CONTENT PATTERNS
 
 ### 1. Undue Emphasis on Significance, Legacy, and Broader Trends
@@ -96,7 +145,6 @@ Avoiding AI patterns is only half the job. Sterile, voiceless writing is just as
 **After:**
 > The Statistical Institute of Catalonia was established in 1989 to collect and publish regional statistics independently from Spain's national statistics office.
 
-
 ### 2. Undue Emphasis on Notability and Media Coverage
 
 **Words to watch:** independent coverage, local/regional/national media outlets, written by a leading expert, active social media presence
@@ -108,7 +156,6 @@ Avoiding AI patterns is only half the job. Sterile, voiceless writing is just as
 
 **After:**
 > In a 2024 New York Times interview, she argued that AI regulation should focus on outcomes rather than methods.
-
 
 ### 3. Superficial Analyses with -ing Endings
 
@@ -122,7 +169,6 @@ Avoiding AI patterns is only half the job. Sterile, voiceless writing is just as
 **After:**
 > The temple uses blue, green, and gold colors. The architect said these were chosen to reference local bluebonnets and the Gulf coast.
 
-
 ### 4. Promotional and Advertisement-like Language
 
 **Words to watch:** boasts a, vibrant, rich (figurative), profound, enhancing its, showcasing, exemplifies, commitment to, natural beauty, nestled, in the heart of, groundbreaking (figurative), renowned, breathtaking, must-visit, stunning
@@ -134,7 +180,6 @@ Avoiding AI patterns is only half the job. Sterile, voiceless writing is just as
 
 **After:**
 > Alamata Raya Kobo is a town in the Gonder region of Ethiopia, known for its weekly market and 18th-century church.
-
 
 ### 5. Vague Attributions and Weasel Words
 
@@ -148,7 +193,6 @@ Avoiding AI patterns is only half the job. Sterile, voiceless writing is just as
 **After:**
 > The Haolai River supports several endemic fish species, according to a 2019 survey by the Chinese Academy of Sciences.
 
-
 ### 6. Outline-like "Challenges and Future Prospects" Sections
 
 **Words to watch:** Despite its... faces several challenges..., Despite these challenges, Challenges and Legacy, Future Outlook
@@ -160,7 +204,6 @@ Avoiding AI patterns is only half the job. Sterile, voiceless writing is just as
 
 **After:**
 > Traffic congestion increased after 2015 when three new IT parks opened. The municipal corporation began a stormwater drainage project in 2022 to address recurring floods.
-
 
 ## LANGUAGE AND GRAMMAR PATTERNS
 
@@ -176,7 +219,6 @@ Avoiding AI patterns is only half the job. Sterile, voiceless writing is just as
 **After:**
 > Somali cuisine also includes camel meat, which is considered a delicacy. Pasta dishes, introduced during Italian colonization, remain common, especially in the south.
 
-
 ### 8. Avoidance of "is"/"are" (Copula Avoidance)
 
 **Words to watch:** serves as/stands as/marks/represents [a], boasts/features/offers [a]
@@ -188,7 +230,6 @@ Avoiding AI patterns is only half the job. Sterile, voiceless writing is just as
 
 **After:**
 > Gallery 825 is LAAA's exhibition space for contemporary art. The gallery has four rooms totaling 3,000 square feet.
-
 
 ### 9. Negative Parallelisms and Tailing Negations
 
@@ -206,7 +247,6 @@ Avoiding AI patterns is only half the job. Sterile, voiceless writing is just as
 **After:**
 > The options come from the selected item without forcing the user to guess.
 
-
 ### 10. Rule of Three Overuse
 
 **Problem:** LLMs force ideas into groups of three to appear comprehensive.
@@ -216,7 +256,6 @@ Avoiding AI patterns is only half the job. Sterile, voiceless writing is just as
 
 **After:**
 > The event includes talks and panels. There's also time for informal networking between sessions.
-
 
 ### 11. Elegant Variation (Synonym Cycling)
 
@@ -228,7 +267,6 @@ Avoiding AI patterns is only half the job. Sterile, voiceless writing is just as
 **After:**
 > The protagonist faces many challenges but eventually triumphs and returns home.
 
-
 ### 12. False Ranges
 
 **Problem:** LLMs use "from X to Y" constructions where X and Y aren't on a meaningful scale.
@@ -239,7 +277,6 @@ Avoiding AI patterns is only half the job. Sterile, voiceless writing is just as
 **After:**
 > The book covers the Big Bang, star formation, and current theories about dark matter.
 
-
 ### 13. Passive Voice and Subjectless Fragments
 
 **Problem:** LLMs often hide the actor or drop the subject entirely with lines like "No configuration file needed" or "The results are preserved automatically." Rewrite these when active voice makes the sentence clearer and more direct.
@@ -249,7 +286,6 @@ Avoiding AI patterns is only half the job. Sterile, voiceless writing is just as
 
 **After:**
 > You do not need a configuration file. The system preserves the results automatically.
-
 
 ## STYLE PATTERNS
 
@@ -263,7 +299,6 @@ Avoiding AI patterns is only half the job. Sterile, voiceless writing is just as
 **After:**
 > The term is primarily promoted by Dutch institutions, not by the people themselves. You don't say "Netherlands, Europe" as an address, yet this mislabeling continues in official documents.
 
-
 ### 15. Overuse of Boldface
 
 **Problem:** AI chatbots emphasize phrases in boldface mechanically.
@@ -273,7 +308,6 @@ Avoiding AI patterns is only half the job. Sterile, voiceless writing is just as
 
 **After:**
 > It blends OKRs, KPIs, and visual strategy tools like the Business Model Canvas and Balanced Scorecard.
-
 
 ### 16. Inline-Header Vertical Lists
 
@@ -287,7 +321,6 @@ Avoiding AI patterns is only half the job. Sterile, voiceless writing is just as
 **After:**
 > The update improves the interface, speeds up load times through optimized algorithms, and adds end-to-end encryption.
 
-
 ### 17. Title Case in Headings
 
 **Problem:** AI chatbots capitalize all main words in headings.
@@ -297,7 +330,6 @@ Avoiding AI patterns is only half the job. Sterile, voiceless writing is just as
 
 **After:**
 > ## Strategic negotiations and global partnerships
-
 
 ### 18. Emojis
 
@@ -311,7 +343,6 @@ Avoiding AI patterns is only half the job. Sterile, voiceless writing is just as
 **After:**
 > The product launches in Q3. User research showed a preference for simplicity. Next step: schedule a follow-up meeting.
 
-
 ### 19. Curly Quotation Marks
 
 **Problem:** ChatGPT uses curly quotes ("...") instead of straight quotes ("...").
@@ -321,7 +352,6 @@ Avoiding AI patterns is only half the job. Sterile, voiceless writing is just as
 
 **After:**
 > He said "the project is on track" but others disagreed.
-
 
 ## COMMUNICATION PATTERNS
 
@@ -337,7 +367,6 @@ Avoiding AI patterns is only half the job. Sterile, voiceless writing is just as
 **After:**
 > The French Revolution began in 1789 when financial crisis and food shortages led to widespread unrest.
 
-
 ### 21. Knowledge-Cutoff Disclaimers
 
 **Words to watch:** as of [date], Up to my last training update, While specific details are limited/scarce..., based on available information...
@@ -350,7 +379,6 @@ Avoiding AI patterns is only half the job. Sterile, voiceless writing is just as
 **After:**
 > The company was founded in 1994, according to its registration documents.
 
-
 ### 22. Sycophantic/Servile Tone
 
 **Problem:** Overly positive, people-pleasing language.
@@ -360,7 +388,6 @@ Avoiding AI patterns is only half the job. Sterile, voiceless writing is just as
 
 **After:**
 > The economic factors you mentioned are relevant here.
-
 
 ## FILLER AND HEDGING
 
@@ -374,7 +401,6 @@ Avoiding AI patterns is only half the job. Sterile, voiceless writing is just as
 - "The system has the ability to process" → "The system can process"
 - "It is important to note that the data shows" → "The data shows"
 
-
 ### 24. Excessive Hedging
 
 **Problem:** Over-qualifying statements.
@@ -385,7 +411,6 @@ Avoiding AI patterns is only half the job. Sterile, voiceless writing is just as
 **After:**
 > The policy may affect outcomes.
 
-
 ### 25. Generic Positive Conclusions
 
 **Problem:** Vague upbeat endings.
@@ -395,7 +420,6 @@ Avoiding AI patterns is only half the job. Sterile, voiceless writing is just as
 
 **After:**
 > The company plans to open two more locations next year.
-
 
 ### 26. Hyphenated Word Pair Overuse
 
@@ -409,7 +433,6 @@ Avoiding AI patterns is only half the job. Sterile, voiceless writing is just as
 **After:**
 > The cross functional team delivered a high quality, data driven report on our client facing tools. Their decision making process was known for being thorough and detail oriented.
 
-
 ### 27. Persuasive Authority Tropes
 
 **Phrases to watch:** The real question is, at its core, in reality, what really matters, fundamentally, the deeper issue, the heart of the matter
@@ -422,7 +445,6 @@ Avoiding AI patterns is only half the job. Sterile, voiceless writing is just as
 **After:**
 > The question is whether teams can adapt. That mostly depends on whether the organization is ready to change its habits.
 
-
 ### 28. Signposting and Announcements
 
 **Phrases to watch:** Let's dive in, let's explore, let's break this down, here's what you need to know, now let's look at, without further ado
@@ -434,7 +456,6 @@ Avoiding AI patterns is only half the job. Sterile, voiceless writing is just as
 
 **After:**
 > Next.js caches data at multiple layers, including request memoization, the data cache, and the router cache.
-
 
 ### 29. Fragmented Headers
 
@@ -458,14 +479,14 @@ Avoiding AI patterns is only half the job. Sterile, voiceless writing is just as
 
 ## Process
 
-1. Read the input text carefully
+1. **Determine the tone** — (a) If the user named a tone, use it. (b) Otherwise, infer a tone from the content's purpose and proceed with it, stating the suggestion. (c) Ask once via `AskUserQuestion` only if the purpose is genuinely unclear (see TONE SELECTION). Read the input text carefully
 2. Identify all instances of the patterns above
 3. Rewrite each problematic section
 4. Ensure the revised text:
    - Sounds natural when read aloud
    - Varies sentence structure naturally
    - Uses specific details over vague claims
-   - Maintains appropriate tone for context
+   - Matches the selected tone consistently (word choice, contractions, sentence rhythm)
    - Uses simple constructions (is/are/has) where appropriate
 5. Present a draft humanized version
 6. Prompt: "What makes the below so obviously AI generated?"
@@ -480,7 +501,6 @@ Provide:
 2. "What makes the below so obviously AI generated?" (brief bullets)
 3. Final rewrite
 4. A brief summary of changes made (optional, if helpful)
-
 
 ## Full Example
 
@@ -543,7 +563,6 @@ Provide:
 - Removed filler phrases and persuasive framing ("In order to", "At its core")
 - Removed generic positive conclusion ("the future looks bright", "exciting times lie ahead")
 - Made the voice more personal and less "assembled" (varied rhythm, fewer placeholders)
-
 
 ## Reference
 

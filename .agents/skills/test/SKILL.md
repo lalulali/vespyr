@@ -33,8 +33,8 @@ This skill delegates to `@qa-engineer`. The qa-engineer runs tests, analyzes fai
 4. **Completion** → `steps/step-04-completion.md` — write test report, update status
 
 ## State machine integration
-At start: `@executor` runs `node .agents/scripts/orchestrator_state.js status`
-At end: `@executor` runs `node .agents/scripts/orchestrator_state.js complete --agent qa-engineer --artifact test-report.md`
+At start: run `node .agents/scripts/orchestrator_state.js status`
+At end: run `node .agents/scripts/orchestrator_state.js complete --agent qa-engineer --artifact test-report.md`
 
 ## Done when
 - All steps completed

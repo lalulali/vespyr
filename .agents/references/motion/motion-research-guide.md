@@ -2,7 +2,7 @@
 
 > **When to load:** This file is loaded ONLY when the current task involves motion/animation research (delegated by `@product-designer` or `@developer` via the `/motion` skill). Keep the base persona lean — this is an on-demand reference.
 >
-> **Ownership:** You produce evidence that motion design and implementation decisions can be traced to. `@researcher` owns the merge after both research tracks complete and delegates `@writer` to create `artifacts/output/02-research/motion-research.md`. The merged artifact is consumed by @product-designer (Ivy) for the motion spec and @developer (Rex) for the motion framework.
+> **Ownership:** You produce evidence that motion design and implementation decisions can be traced to. `@researcher` owns the merge after both research tracks complete and writes `artifacts/output/02-research/motion-research.md` directly. The merged artifact is consumed by @product-designer (Ivy) for the motion spec and @developer (Rex) for the motion framework.
 
 ---
 
@@ -83,7 +83,7 @@ Run the two tracks in parallel. Do not merge until all five track artifacts exis
 | `motion-competitive.md` + `motion-tech-landscape.md` | @researcher | Ivy + Rex | `artifacts/output/02-research/` |
 | `motion-usability.md` + `motion-accessibility.md` + `motion-patterns.md` | @ux-researcher | Ivy | `artifacts/output/02-research/` |
 
-Delegate file writes to `@writer`; memory writes to `@memory-controller`. Record each track artifact, then record the merged artifact as `@researcher` via the `/motion` skill's orchestrator commands. A full motion pipeline cannot proceed to Ivy until the merged artifact is complete.
+Write files directly; route memory writes through `@memory-controller`. Record each track artifact, then record the merged artifact as `@researcher` via the `/motion` skill's orchestrator commands. A full motion pipeline cannot proceed to Ivy until the merged artifact is complete.
 
 ---
 

@@ -74,7 +74,7 @@ These are the canonical 17 domain tags (see `.agents/templates/memory/memory-ent
 
 ### Step 0: Session start (project-context refresh)
 
-Every agent calls this on entry, before loading context — it keeps `project-context.md` accurate no matter which agent is invoked ad-hoc. Run via `@executor`:
+Every agent calls this on entry, before loading context — it keeps `project-context.md` accurate no matter which agent is invoked ad-hoc. Run:
 
 ```
 node .agents/scripts/orchestrator_state.js session-start --agent {agent} --domain {domain} --goal "{one-line goal}"

@@ -161,12 +161,12 @@ The pipeline state machine (`node .agents/scripts/orchestrator_state.js`) is the
 
 ### At Start
 
-Run via `@executor`:
+Run:
 ```bash
 node .agents/scripts/orchestrator_state.js status
 ```
 
-The project should be in the development phase (or post-launch, depending on how your squad is configured). If pipeline is uninitialized, run `squad` first.
+The project should be in the development phase (or post-launch, depending on how your project is configured). If pipeline is uninitialized, run `init` first.
 
 ### At End — Record Completion
 

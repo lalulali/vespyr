@@ -262,7 +262,7 @@ Vespyr's memory protocol uses file-based `artifacts/memory/*.md`. This maps dire
 1. Read `artifacts/memory/project-context.md` → extract project name, stack, phase, user
 2. Read `artifacts/memory/active-decisions.md` → extract last 5 decisions
 3. Read `artifacts/memory/lessons-learned.md` → extract recent patterns
-4. Compress to ~1,000 tokens as session preamble
+4. Compress to a lean session preamble
 
 # Memory Writing Protocol
 

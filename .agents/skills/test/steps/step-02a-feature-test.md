@@ -3,11 +3,6 @@ step: 2a
 name: Feature Testing
 prerequisites:
   - step-01 completed
-delegation:
-  reads: "@reader (source files for test context; per delegation-policy.md multi-file)"
-  writes: "@writer (test files, feature-test-results.md; per delegation-policy.md multi-file output)"
-  runs: "@executor (npm test, pytest, etc.; per delegation-policy.md all bash)"
-  direct_justified: []
 output_contract:
   citations: not-required
 ---
@@ -22,7 +17,7 @@ Runs in parallel with step 02b.
 
 ### 2a.1 Detect test framework
 
-Delegate to `@reader` to check `package.json`, `Makefile`, or project root for the test stack. Detect test command, coverage tool, and test file conventions.
+Read to check `package.json`, `Makefile`, or project root for the test stack. Detect test command, coverage tool, and test file conventions.
 
 ### 2a.2 Write/update unit tests
 
@@ -53,7 +48,7 @@ For each user story in `user-stories.md`, ensure:
 
 ### 2a.3 Run feature tests
 
-Delegate to `@executor`:
+Run:
 ```bash
 # Run unit tests with coverage
 npm test -- --coverage  # or project equivalent
@@ -67,7 +62,7 @@ npm test -- --coverage  # or project equivalent
 - Flaky test detection (tests that fail intermittently)
 - Regression detection (previously passing tests that now fail)
 
-Delegate to `@writer` for `artifacts/output/05-execution/quality/feature-test-results.md`:
+Write `artifacts/output/05-execution/quality/feature-test-results.md`:
 
 ```markdown
 # Feature Test Results
@@ -104,3 +99,9 @@ Max 2 fix-test cycles per failure. If a failure persists after 2 fix attempts, e
 - Design-flaw blocker → `@tech-lead`
 - Spec-gap-driven failure → file a CR to `@product-manager`
 - Auth/secrecy-driven failure → `@security-engineer`
+
+## Memory closeout
+- `@memory-controller session-write` — record step 2a feature testing results.
+
+## Delegation
+- **Memory:** @memory-controller for session-write

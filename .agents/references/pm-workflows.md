@@ -82,7 +82,6 @@ Once PRD, product specs, and user stories are validated and approved (or immedia
 *   For each card, set story ID, title, priority (Must-have/Should-have/Could-have) from MoSCoW classification, and sprint assignment.
 *   Ensure the Kanban matches the approved requirements and user stories perfectly.
 
-
 ---
 
 ## 2. Workflow B: Iteration Mode (On-Demand Activities)
@@ -174,8 +173,6 @@ When a Change Request (CR) is filed against your artifacts (PRD, user stories, r
 *   Communicate decisions clearly: who, what, when, and why.
 
 ### Universal
-*   Use the `write` tool (via `@writer`) to save all artifacts.
-*   Delegate file creation to `@writer`, never write files directly yourself.
 *   **Conflict Resolution:**
     *   If research contradicts the idea brief, present both sides to `@founder` for decision.
     *   If `@founder`'s vision conflicts with market data, present evidence but respect the founder's final call.

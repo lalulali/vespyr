@@ -3,11 +3,6 @@ step: 7
 name: Quality Gates
 prerequisites:
   - step-06 completed
-delegation:
-  reads: "@reader (QA reports, security findings; per delegation-policy.md multi-file)"
-  writes: "@writer (quality reports, findings-report.md)"
-  runs: "@executor (orchestrator_state.js complete; per delegation-policy.md all bash)"
-  direct_justified: []
 output_contract:
   citations: not-required
 ---
@@ -15,7 +10,6 @@ output_contract:
 # Step 7 — Quality Gates
 
 QA is a hard gate. Security and performance are conditional gates. They can run in parallel once the dev loop completes.
-
 
 > **Tracker:** `node .agents/scripts/step_tracker.js begin --skill develop --step 7`
 ## 7a. QA (hard gate — cannot be skipped)
@@ -56,6 +50,15 @@ Run this gate when `artifacts/output/03-strategy/motion-spec.md` or `artifacts/o
 - [ ] Motion tokens match `design.md`; SSR/hydration behavior is covered where applicable.
 
 Any missing motion evidence is a QA failure and sends the task back to `@developer` or `@product-designer`.
+
+### 7c. Accessibility Audit (A11Y.md hard gate)
+
+`@qa-engineer` conducts an accessibility audit enforcing [fecarrico/A11Y.md](https://github.com/fecarrico/A11Y.md/blob/main/docs/en/A11Y.md) severity thresholds:
+- [ ] 🔴 **CRITICAL:** Keyboard operability, focus management, semantic HTML elements — zero unlogged failures allowed.
+- [ ] 🟠 **HIGH:** Contrast ratios (4.5:1 text, 3:1 UI), min target sizes (24x24px / 44x44px), image `alt` text resolution, media controls — zero unlogged failures allowed.
+- [ ] **Artifacts generated:** `artifacts/output/06-quality/a11y-report.md` (audit report) and `artifacts/output/06-quality/EXCEPTIONS.md` (if any approved WCAG SC exceptions exist).
+
+Any unlogged 🔴 CRITICAL or 🟠 HIGH violation blocks release sign-off.
 
 ## 7b. Security Audit (conditional)
 
@@ -114,9 +117,6 @@ agents are `SATISFIED`.
 - Performance benchmark exceeds SLA by >20%
 
 ## Delegation
-- **Reads:** @reader for QA reports and security findings
-- **Writes:** @writer for quality reports and findings-report.md
-- **Runs:** @executor for orchestrator_state.js complete
 - **Memory:** @memory-controller for blockers-and-risks (Critical/High findings)
 
 > **Tracker:** `node .agents/scripts/step_tracker.js complete --skill develop --step 7`

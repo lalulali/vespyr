@@ -5,11 +5,6 @@ prerequisites:
   - step-02a completed
   - step-02b completed
   - step-02c completed
-delegation:
-  reads: "@reader (all research artifacts; per delegation-policy.md multi-file)"
-  writes: "@writer (session summary; per delegation-policy.md)"
-  runs: "@executor (orchestrator_state.js complete; per delegation-policy.md all bash)"
-  direct_justified: []
 output_contract:
   citations: not-required
 ---
@@ -22,7 +17,7 @@ Gate check after all research completes. The founder reviews findings against th
 
 ### 3a. Load all research
 
-Delegate to `@reader` to load:
+Read:
 - `artifacts/output/02-research/market-analysis.md`
 - `artifacts/output/02-research/competitive-analysis.md`
 - `artifacts/output/02-research/user-personas.md`
@@ -68,6 +63,4 @@ New blockers: {any research gaps or unresolved questions, or "none"}
 Load `design` to define requirements and create specs — or load `shape-up` first if findings need consolidation before specs.
 
 ## Delegation
-- **Reads:** @reader for all research artifacts
-- **Writes:** @writer for session summary
-- **Runs:** @executor for orchestrator_state.js complete
+- **Memory:** @memory-controller for project-context and session-write

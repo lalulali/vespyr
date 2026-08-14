@@ -93,7 +93,7 @@ Vespyr 使用 11 个顺序阶段。随时查看当前阶段：
 | `/help-me` | 动态导航——告诉你下一步做什么 |
 | `/status` | 快速快照：阶段、阻塞项、记忆健康状况 |
 | `/phase` | 显示或切换阶段 |
-| `/squad` | 列出并切换智能体团队 |
+| `/sprint-status` | 显示 sprint-status.yaml 流水线状态 |
 | `/kanban` | 显示并更新看板 |
 | `/memory` | 搜索归档的项目上下文 |
 

@@ -2,11 +2,6 @@
 step: 1
 name: Readiness Check
 prerequisites: []
-delegation:
-  reads: "@reader (QA signoff + security audit + perf review; per delegation-policy.md ≥3 files)"
-  writes: "@writer (readiness-check.md)"
-  runs: none
-  direct_justified: []
 output_contract:
   citations: not-required
 ---
@@ -14,7 +9,6 @@ output_contract:
 # Step 1 — Readiness Check
 
 Verify all pre-launch gates have passed. Any red item blocks launch.
-
 
 > **Tracker:** `node .agents/scripts/step_tracker.js begin --skill launch --step 1`
 ## Agent invocation
@@ -50,11 +44,10 @@ The PM must not confirm GO while any active agent is `CHANGES REQUESTED` or `BLO
 - `artifacts/output/06-launch/release-readiness.md` — use template `.agents/templates/launch/release-readiness-template.md`
 - `artifacts/output/06-launch/go-nogo-decision.md` — use template `.agents/templates/launch/go-nogo-decision-template.md`
 
-## Halt condition
-Any red item on the readiness checklist, an incomplete UTTERLY SATISFIED team gate, or an active agent that is not `SATISFIED`. Resolve before proceeding. Max 2 readiness cycles; escalate unresolved issues rather than silently waiving them.
+## Memory closeout
+- `@memory-controller session-write` — record step 1 readiness check results and GO/NO-GO decision.
 
 ## Delegation
-- **Reads:** @reader for QA signoff, security audit, and performance review reports
-- **Writes:** @writer for readiness-check.md
+- **Memory:** @memory-controller for session-write
 
 > **Tracker:** `node .agents/scripts/step_tracker.js complete --skill launch --step 1`

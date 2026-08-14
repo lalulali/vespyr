@@ -19,6 +19,7 @@ Takes a completed feature from development and ships it. The bridge between "cod
 - Development is complete and all QA gates have passed
 - Feature needs to go live for users
 - Coordinated release orchestration is required
+- Release orchestration and deployment are led by `@devops-engineer`
 
 ## Skill chain
 - Prev: `develop` (produces working, tested code)
@@ -38,7 +39,7 @@ Takes a completed feature from development and ships it. The bridge between "cod
 5. **Launch Log** — write completion report → `steps/step-06-launch-log.md`
 
 ## State & memory integration
-At start: `node .agents/scripts/orchestrator_state.js status`. If uninitialized, run `squad` first, then `next`.
+At start: `node .agents/scripts/orchestrator_state.js status`. If uninitialized, run `init` first, then `next`.
 
 **At start:** Load context before readiness check:
 ```

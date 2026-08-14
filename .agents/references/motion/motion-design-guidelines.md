@@ -192,7 +192,29 @@ Write one of these per motion. Group them by screen or interaction in `motion-sp
 | Motion research (full pipeline) | `artifacts/output/02-research/motion-research.md` | `motion-research-guide.md` |
 | Lightweight evidence decision | `artifacts/output/03-strategy/motion-spec.md` | Record `Evidence mode: lightweight` |
 
-Delegate file writes to `@writer`; memory writes to `@memory-controller`. Motion spec must reference the user stories it satisfies (same bidirectional traceability rule as the product spec — `Associated Stories: US-###`).
+Write files directly; route memory writes through `@memory-controller`. Motion spec must reference the user stories it satisfies (same bidirectional traceability rule as the product spec — `Associated Stories: US-###`).
+
+---
+
+## 9. Motion Technology Ecosystem & Benchmark Catalog
+
+When crafting motion prompts (`MO-###`) for `@developer`, leverage this framework taxonomy to select the right execution engine for each surface:
+
+| Ecosystem / Tool | Primary Strengths & Purpose | Motion Prompt Mapping |
+|---|---|---|
+| **Lenis** ([lenis.dev](https://lenis.dev/)) | Smooth scroll physics, touch normalization, velocity tracking | Specify `--scroll-mode: lenis` for page-level scroll kinetics and parallax sync. |
+| **GSAP** ([gsap.com](https://gsap.com/)) | Timeline orchestration, ScrollTrigger, Flip morphing | Use for complex, multi-stage choreography and SVG shape morphing. |
+| **Anime.js** ([animejs.com](https://animejs.com/)) | Micro-sized JS animation engine | Best for lightweight DOM property and SVG attribute animations. |
+| **Motion / Framer Motion** ([motion.dev](https://motion.dev/)) | React layout animation (`layoutId`), gesture physics, springs | Default engine for component enter/exit, reordering, and gesture physics. |
+| **Three.js & R3F** ([threejs.org](https://threejs.org/), [r3f.docs.pmnd.rs](https://r3f.docs.pmnd.rs/)) | Declarative 3D WebGL scenes, custom shaders | Use for 3D hero interactions, interactive product models, and spatial canvases. |
+| **Canvas Particle Shaders** ([particles.js](https://vincentgarreau.com/particles.js/)) | Generative background particles, interactive fields | Specify GPU-accelerated canvas backdrops for interactive state visualizers. |
+| **Kokonut UI** ([kokonutui.com](https://kokonutui.com/)) | Interactive UI component micro-interactions | Reference for tactile button states, input glows, and smooth component transitions. |
+| **Bitlit UI** ([bklitui.com](https://bklitui.com)) | Micro-animated visual UI components | Reference for animated cards, badge pulses, and dynamic notification panels. |
+| **React Bits** ([reactbits.dev](https://reactbits.dev/)) | Animated React patterns & background effects | Reference for kinetic text reveals, card tilt effects, and animated background grids. |
+| **Motion Primitives** ([motion-primitives.com](https://motion-primitives.com/)) | Framer Motion powered unstyled UI primitives | Reference for accessible animated modals, tabs, accordions, and popovers. |
+| **OriginKit** ([originkit.dev](https://originkit.dev/)) | High-quality UI component primitives & motion assets | Reference for production-grade UI design system tokens and motion blueprints. |
+| **Motion Sites** ([motionsites.ai](https://motionsites.ai/)) | AI motion site inspiration & layout references | Benchmark reference for modern scroll-driven web experiences. |
+| **Manus** ([manus.im](https://manus.im/)) | Benchmark for agentic UI & glassmorphic motion | Benchmark reference for fluid, multi-agent spatial product experiences. |
 
 ---
 

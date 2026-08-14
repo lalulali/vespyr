@@ -21,9 +21,9 @@ First, detect the user's intent:
 If unclear, ask: "Are you starting a new idea, refining an existing brief, or stress-testing it?"
 
 ## Mode routing + steps
-- **Create** → `steps-create/01-session-setup.md` → ... → `07-handoff.md` (7 steps: session setup, input analysis, idea framing, stress-test R1, stress-test R2, GO/PIVOT/KILL, handoff)
-- **Edit** → `steps-edit/01-load-existing.md` → ... → `05-finalize.md` (5 steps: load, identify gaps, revise, stress-test, finalize)
-- **Validate** → `steps-validate/01-open-questions.md` → ... → `05-lock-handoff.md` (5 steps: open questions, 7-branch tree, cross-branch check, decision log, lock & handoff)
+- **Create** → `steps/step-01a-session-setup.md` → ... → `07-handoff.md` (7 steps: session setup, input analysis, idea framing, stress-test R1, stress-test R2, GO/PIVOT/KILL, handoff)
+- **Edit** → `steps/step-01b-load-existing.md` → ... → `05-finalize.md` (5 steps: load, identify gaps, revise, stress-test, finalize)
+- **Validate** → `steps/step-01c-open-questions.md` → ... → `05-lock-handoff.md` (5 steps: open questions, 7-branch tree, cross-branch check, decision log, lock & handoff)
 
 ## Prerequisites
 - Create mode: none (this is the entry point)
@@ -37,8 +37,8 @@ If unclear, ask: "Are you starting a new idea, refining an existing brief, or st
 - 2 edit cycles without convergence (edit mode)
 
 ## State machine integration
-At start: `@executor` runs `node .agents/scripts/orchestrator_state.js status`
-At end: `@executor` runs `node .agents/scripts/orchestrator_state.js complete --agent founder --artifact 01-discovery/idea-brief.md`
+At start: run `node .agents/scripts/orchestrator_state.js status`
+At end: run `node .agents/scripts/orchestrator_state.js complete --agent founder --artifact 01-discovery/idea-brief.md`
 
 ## Memory integration
 **At start:** Load founder context before any Socratic analysis:

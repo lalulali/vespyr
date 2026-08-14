@@ -4,8 +4,8 @@
  *
  * Manages pipeline state, validates outputs, tracks artifact versions,
  * and determines next actions. This script is the canonical source of
- * truth for project state — every skill calls it directly via
- * `@executor`. There is no @orchestrator subagent; the script itself
+ * truth for project state — every skill calls it directly.
+ * There is no @orchestrator subagent; the script itself
  * is the state machine.
  *
  * State hierarchy:
@@ -56,7 +56,7 @@ function readYaml() {
     const raw = fs.readFileSync(YAML_STATE, 'utf8');
     const lines = raw.split('\n');
     const state = {
-      project: { name: '', type: '', squad: '' },
+      project: { name: '', type: '' },
       created_at: null,
       last_updated: null,
       current_phase: 'discovery',
@@ -81,9 +81,6 @@ function readYaml() {
       } else if (trimmed.startsWith('project:') && !trimmed.startsWith('project_key:')) {
         state.project.name = trimmed.split(':').slice(1).join(':').trim();
         state.name = state.project.name;
-      } else if (trimmed.startsWith('squad:')) {
-        state.project.squad = trimmed.split(':').slice(1).join(':').trim();
-        state.squad = state.project.squad;
       } else if (trimmed.startsWith('phase:')) {
         state.current_phase = trimmed.split(':').slice(1).join(':').trim();
         state.phase = state.current_phase;
@@ -125,7 +122,7 @@ function readState() {
     // Auto-initialize if missing, to prevent "No pipeline state found" errors.
     try {
       const name = path.basename(process.cwd());
-      const state = createInitialState(name, 'startup', 'full-team');
+      const state = createInitialState(name, 'startup');
       writeState(state);
       
       // Pre-create project-context.md under artifacts/memory/
@@ -135,7 +132,7 @@ function readState() {
       }
       const projectContextFile = path.join(memoryDir, 'project-context.md');
       if (!fs.existsSync(projectContextFile)) {
-        const content = `# Project Context\n\n## [CORE]\nProject: ${name} (startup)\nStack: None\nPhase: ${state.current_phase}\nSprint: none\nBlockers: 0\nSquad: full-team\n\n## [IDENTITY]\nUser Nickname: User\n`;
+        const content = `# Project Context\n\n## [CORE]\nProject: ${name} (startup)\nStack: None\nPhase: ${state.current_phase}\nSprint: none\nBlockers: 0\n\n## [IDENTITY]\nUser Nickname: User\n`;
         fs.writeFileSync(projectContextFile, content, 'utf8');
       }
       return state;
@@ -162,7 +159,6 @@ const YAML_STATE = path.join(OUTPUT_DIR, 'sprint-status.yaml');
 function syncYaml(state) {
   const name = (state.project && state.project.name) || state.name || '';
   const phase = state.current_phase || state.phase || PHASE_ORDER[0];
-  const squad = (state.project && state.project.squad) || state.squad || 'full-team';
   const yaml = [
     '# artifacts/output/sprint-status.yaml',
     `generated: ${state.created_at ? state.created_at.split('T')[0] : new Date().toISOString().split('T')[0]}`,
@@ -170,7 +166,6 @@ function syncYaml(state) {
     `project: ${name}`,
     `project_key: ${name.toLowerCase().replace(/\s+/g, '-')}`,
     'tracking_system: file-system',
-    `squad: ${squad}`,
     `phase: ${phase}`,
     '',
     '# Phase-level status',
@@ -210,11 +205,9 @@ function printDashboard(state) {
   const icon = (s) => s === 'done' ? '✅' : s === 'in-progress' ? '▶️ ' : s === 'pending' ? '  ' : '  ';
   const name = (state.project && state.project.name) || state.name || 'unnamed';
   const phase = resolveCurrentPhase(state);
-  const squad = (state.project && state.project.squad) || state.squad || 'full-team';
   console.log(`\n╔══════════════════════════════════════════╗`);
   console.log(`║  Project: ${name.padEnd(28)} ║`);
   console.log(`║  Phase:   ${phase.padEnd(28)} ║`);
-  console.log(`║  Squad:   ${squad.padEnd(28)} ║`);
   console.log(`╠══════════════════════════════════════════╣`);
   console.log(`║  Phase Pipeline                          ║`);
   console.log(`╠══════════════════════════════════════════╣`);
@@ -308,15 +301,7 @@ function ensureGraph(type) {
   }
 }
 
-function createInitialState(name, type, squadName = 'full-team') {
-  let squad = null;
-  try {
-    const squadsUtil = require('./squads');
-    squad = squadsUtil.loadSquad(squadName);
-  } catch (e) {
-    squad = { name: 'full-team', agents: [] };
-  }
-
+function createInitialState(name, type) {
   const defaultPhases = {
     validation: { status: 'pending', started_at: null, completed_at: null, agents: ['founder'] },
     discovery: { status: 'pending', started_at: null, completed_at: null, agents: ['researcher', 'user-researcher'] },
@@ -331,16 +316,6 @@ function createInitialState(name, type, squadName = 'full-team') {
     retro: { status: 'pending', started_at: null, completed_at: null, agents: ['product-manager'] }
   };
 
-  if (squadName !== 'full-team') {
-    const activeAgents = new Set(squad.agents);
-    for (const phaseKey of Object.keys(defaultPhases)) {
-      defaultPhases[phaseKey].agents = defaultPhases[phaseKey].agents.filter(a => activeAgents.has(a));
-      if (defaultPhases[phaseKey].agents.length === 0) {
-        defaultPhases[phaseKey].status = 'complete';
-      }
-    }
-  }
-
   let startPhase = PHASE_ORDER[0];
   for (const phaseKey of PHASE_ORDER) {
     if (defaultPhases[phaseKey].status !== 'complete') {
@@ -350,7 +325,7 @@ function createInitialState(name, type, squadName = 'full-team') {
   }
 
   return {
-    project: { name, type, squad: squadName },
+    project: { name, type },
     created_at: new Date().toISOString(),
     last_updated: new Date().toISOString(),
     current_phase: startPhase,
@@ -637,28 +612,26 @@ function main() {
     if (cmd === 'init') {
       let name = 'Untitled';
       let type = 'startup';
-      let squad = 'full-team';
       for (let i = 1; i < args.length; i += 2) {
         if (args[i] === '--name') name = args[i + 1];
         if (args[i] === '--type') type = args[i + 1];
-        if (args[i] === '--squad') squad = args[i + 1];
       }
-      const state = createInitialState(name, type, squad);
+      const state = createInitialState(name, type);
       writeState(state);
 
       // Pre-create and write project-context.md if artifacts/memory/ exists
       const memoryDir = path.join(process.cwd(), 'artifacts', 'memory');
       const projectContextFile = path.join(memoryDir, 'project-context.md');
       if (fs.existsSync(memoryDir)) {
-        let content = `# Project Context\n\n## [CORE]\nProject: ${name} (${type})\nStack: None\nPhase: ${state.current_phase}\nSprint: none\nBlockers: 0\nSquad: ${squad}\n\n## [IDENTITY]\nUser Nickname: User\n`;
+        let content = `# Project Context\n\n## [CORE]\nProject: ${name} (${type})\nStack: None\nPhase: ${state.current_phase}\nSprint: none\nBlockers: 0\n\n## [IDENTITY]\nUser Nickname: User\n`;
         fs.writeFileSync(projectContextFile, content, 'utf8');
       }
 
-      console.log(JSON.stringify({ success: true, project: name, type, squad, state_file: STATE_FILE }));
+      console.log(JSON.stringify({ success: true, project: name, type, state_file: STATE_FILE }));
 
       recordTelemetry('phase_transition', {
         phase: state.current_phase,
-        data: { action: 'init', project: name, type, squad }
+        data: { action: 'init', project: name, type }
       });
 
       // Seed the doc-graph on project init so traceability is available

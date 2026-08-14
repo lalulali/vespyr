@@ -41,7 +41,7 @@ Work through each quadrant interactively:
 
 ### Step 4: Output
 
-Delegate to `@writer` for `artifacts/output/02-research/empathy-map.md`:
+Write `artifacts/output/02-research/empathy-map.md`:
 
 ```markdown
 # Empathy Map — {user segment} in {scenario}
@@ -68,5 +68,5 @@ Delegate to `@writer` for `artifacts/output/02-research/empathy-map.md`:
 ```
 
 ## State machine integration
-At start: `@executor` runs `node .agents/scripts/orchestrator_state.js status`
-At end: `@executor` runs `node .agents/scripts/orchestrator_state.js complete --agent user-researcher --artifact 02-research/empathy-map.md`
+At start: Run `node .agents/scripts/orchestrator_state.js status`
+At end: Run `node .agents/scripts/orchestrator_state.js complete --agent user-researcher --artifact 02-research/empathy-map.md`

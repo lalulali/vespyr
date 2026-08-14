@@ -93,7 +93,7 @@ The pipeline enforces ordering — you can't execute development without passing
 | `/help-me` | Dynamic navigator — tells you what to do next |
 | `/status` | Quick snapshot of phase, blockers, memory health |
 | `/phase` | Show or switch phases |
-| `/squad` | List and switch agent squads |
+| `/sprint-status` | Display the sprint-status.yaml pipeline state |
 | `/kanban` | Display and update the Kanban board |
 | `/memory` | Search archived project context |
 

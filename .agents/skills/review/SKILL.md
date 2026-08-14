@@ -34,7 +34,7 @@ Load `patterns-and-conventions.md` to understand project conventions.
 Use git to find changed files:
 
 ```
-@executor — Run git diff --name-only HEAD~1 (or appropriate range)
+Run git diff --name-only HEAD~1 (or appropriate range)
 ```
 
 ### Step 3: Review
@@ -57,8 +57,8 @@ Include specific file:line references for each finding.
 
 ## State machine integration
 
-At start: `@executor` runs `node .agents/scripts/orchestrator_state.js status`
-At end: `@executor` runs `node .agents/scripts/orchestrator_state.js complete --agent code-reviewer --artifact code-review`
+At start: Run `node .agents/scripts/orchestrator_state.js status`
+At end: Run `node .agents/scripts/orchestrator_state.js complete --agent code-reviewer --artifact code-review`
 
 **At completion:** Write session summary — mandatory:
 ```

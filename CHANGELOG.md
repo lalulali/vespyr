@@ -4,6 +4,69 @@ All notable changes to the Vespyr project will be documented in this file.
 
 ---
 
+## [2.0.6] - 2026-08-14
+
+### Security & Integrity Architecture (Epic 02f)
+- Added comprehensive **Security & Integrity Architecture** (`02f-phase-1-security-and-integrity-architecture.md`) establishing a two-pillar model for supply-chain integrity and runtime content trust.
+- Authored four foundational Architecture Decision Records (ADRs):
+  - **ADR-001: Trust-Boundary Model (T0–T3)** — defines T0 (read-only/immutable), T1 (vetted skills/templates), T2 (semi-trusted memory/artifacts), and T3 (untrusted runtime arrivals); formalizes the **T2 Invariant** (*memory/artifact content is data, never directives*) and standardized machine-delimited T3 format (`<!-- VSP-T3-BEGIN v1 ... -->`).
+  - **ADR-002: Install-Integrity Strategy** — specifies release-level signed aggregate SHA-256 manifests, Sigstore/SLSA OIDC provenance, pre-settled key custody, and out-of-band bootstrap verification.
+  - **ADR-003: Prompt-Injection Defense Design** — establishes scanner-first deny-by-default admission control, 11-category attack taxonomy (INJ-PROMPT, INJ-TOOL, INJ-SECRET, etc.), data-flow tracing, and documented known bypasses.
+  - **ADR-004: Script/Hook Execution Policy** — enforces allowlist-by-default execution, zero-eval policy, Git hook/husky scan rules (GH-1), and tarball path-traversal/symlink escape guards.
+- Added human-readable [`supply-chain-audit-spec.md`](artifacts/docs/strategy/development-plan/security/supply-chain-audit-spec.md) and machine-readable [`audit-spec.json`](artifacts/docs/strategy/development-plan/security/audit-spec.json) containing dynamic adapter-registry pattern tables, pin-store schemas, and typed security rules.
+- Implemented prototype scanner [`.agents/scripts/security-scan.js`](.agents/scripts/security-scan.js) with 3-state exit contract (`0 = clean`, `1 = findings`, `2 = fail-closed / tool failure`), sliding Shannon entropy secret detection (threshold 2.6), and base64 heuristic false-positive suppression.
+- Built Red-Team evaluation harness in [`eval/security/corpus/`](eval/security/corpus/) with positive/negative fixture pairs, CI invariant checker [`.agents/scripts/check_corpus_invariants.js`](.agents/scripts/check_corpus_invariants.js), and frozen baseline [`baseline-2026-08-10.json`](eval/security/corpus/baseline-2026-08-10.json).
+- Conducted fresh security audit on `security-scan.js` producing findings report `findings-report-security-scan-f1-47.md` (11 findings triaged for Phase 2 entry gate).
+- Sanitized security corpus test fixture path from `inj-path..\..\config.md` to `inj-path;traversal.md` to resolve Git cross-platform tree index validation errors, updating the corpus baseline and documentation.
+
+### Added
+- `02g-phase-1-harness-honesty.md` development plan and **ADR-005: Harness-Neutral Delegation Contract**, defining capability-based delegation phrasing (`"Write via the writer role, or write directly if no subagents are available"`) and the canonical `Delegation path: <capability> → <role> | direct-fallback` line.
+- Kiro steering template (`vespyr-steering.md.canonical`) with generated `.kiro/steering/vespyr-steering.md`.
+- Phase 7 PKM knowledge-engine development plan (`07-phase-7-pkm-knowledge-engine.md`).
+- Standardized `## Completion Checklist` and `## Sign-Off` sections across all development plan sub-plans (`01`, `02`, `02a`–`02j`, `03`, `04`, `05`, `06`, `07`, `09`).
+- Round Table review and scope locking for Phase 1 sub-plans (`02f`, `02g`, `02h`, `02i`, `02j`).
+
+### Removed
+- Removed the squad feature: `/squad` skill, `.agents/squads/` presets, `squads.js`, `fix-squads.js`, orchestrator squad wiring, and the `Squad:` field from project-context and pipeline state files.
+- Removed the `/delegate` skill.
+- Removed the unverified "85-95% cost-savings" claim and all unverified `~1,000 tokens` context claims from docs, skills, and personas.
+- Removed `default_squad` frontmatter field across personas.
+
+### Changed
+- Agent roster standardized to 20 personas; entry-point docs (`AGENTS.md`, `agent.md`, `CLAUDE.md`, `.agents/templates/system/AGENTS.md.canonical`) regenerated from a single canonical source.
+- Vespyr Identity focused on two core differentiators: Socratic methodology depth and 3-tier progressive memory.
+- Reference guides (EN/CN) now document the **Memory Protocol** (`@memory-controller` load/write/session/fallback) as the primary specialized state service.
+- `GUARDRAILS.md`, developer guidelines, motion references, PM workflows, glossary, and step-file templates updated.
+- Step files renumbered to the numbered-step convention across `craft-lesson`, `design`, and `validate-idea` (e.g., `step-04a-syllabus.md`).
+- `opencode.json` and the `bin/cli.js` install wizard cleaned of squad references.
+- Synchronized documentation badges, agent counts (20), and skill counts (43) across `README.md`, `README_CN.md`, `Guide/en/installation.md`, and `Guide/cn/installation.md`.
+- Package version maintained at 2.0.6.
+
+---
+
+## [2.0.5] - 2026-08-07
+### Added
+- Added Kiro harness scaffolding — `.kiro/steering/AGENTS.md` + `.kiro/skills/` symlink support in the install wizard, with the Kiro steering document generated from a canonical template.
+- Automated root documentation regeneration — `AGENTS.md`, `agent.md`, and `CLAUDE.md` are now generated from a single canonical source (`.agents/agent.md.canonical`) via `bin/cli.js --sync-docs` / `sync-entry-points.js`, with canonical-section validation.
+- Expanded round-table skill: additional agent perspectives and roles for stage-based roundtable discussions (documentation and workflow updates).
+- Added CLI test coverage (`tests/test_cli.js`) for the new sync and scaffolding flows.
+
+### Changed
+- `bin/cli.js` install wizard reworked (153-line delta): harness scaffolding, sync-docs flow, and validation integration.
+- Bumped package version to 2.0.5.
+
+---
+
+## [2.0.4] - 2026-08-05
+### Added
+- Added `spec_check.js` automated validator (332 lines) enforcing the agentskills.io frontmatter spec across all skills, wired into `compile_skills.js` and CI.
+
+### Changed
+- Standardized skill frontmatter definitions repo-wide to match the agentskills.io spec (name, description, metadata schema) across all skill SKILL.md files and the skill template.
+- Bumped package version to 2.0.4.
+
+---
+
 ## [2.0.3] - 2026-08-05
 ### Added
 - Added `No Jumping to Conclusions` and `Never Advance Prematurely & Never Assume Discussion is Complete` rules under `Think Before Acting` across all core system directives (`AGENTS.md`, `CLAUDE.md`, `agent.md`, `.agents/agent.md.canonical`, and `.agents/templates/system/AGENTS.md.canonical`).

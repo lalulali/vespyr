@@ -3,11 +3,6 @@ step: 5
 name: Compact
 prerequisites:
   - step-04 completed
-delegation:
-  reads: none
-  writes: none
-  runs: "@executor (witness.js check, compaction commands; per delegation-policy.md all bash)"
-  direct_justified: []
 output_contract:
   citations: not-required
 ---
@@ -15,7 +10,6 @@ output_contract:
 # Step 5 — Compact
 
 Update shared memory, compact old entries, and close the session.
-
 
 > **Tracker:** `node .agents/scripts/step_tracker.js begin --skill retro --step 5`
 ## 5a. Memory updates
@@ -111,8 +105,6 @@ Blockers: {any new blockers, or "none"}
 - Session summary written
 
 ## Delegation
-- **Reads:** none
-- **Writes:** none
-- **Runs:** @executor for witness.js check and memory compaction
+- **Memory:** @memory-controller for write, compact, session-write
 
 > **Tracker:** `node .agents/scripts/step_tracker.js complete --skill retro --step 5`

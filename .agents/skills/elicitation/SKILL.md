@@ -59,7 +59,7 @@ The resolver scans `.agents/agents/*.md` and returns each agent's configuration,
 
 #### Smart Selection
 
-1. Run the method matching script via `@executor` to dynamically identify the top 5 most relevant elicitation methods for the current context (the active document, artifact name, or task details):
+1. Run the method matching script to dynamically identify the top 5 most relevant elicitation methods for the current context (the active document, artifact name, or task details):
    ```bash
    node .agents/scripts/match_methods.js --context "[detailed task context, artifact name, and current section]"
    ```

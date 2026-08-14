@@ -20,8 +20,8 @@ Returns a concise status report of the project. No workflow, no phases — just 
 
 ### Step 1: Load pipeline state
 
-Read `artifacts/output/pipeline-state.json` (or run `node .agents/scripts/orchestrator_state.js status` via `@executor`) to extract:
-- Project metadata (`name`, `type`, active `squad`)
+Read `artifacts/output/pipeline-state.json` (or run `node .agents/scripts/orchestrator_state.js status`) to extract:
+- Project metadata (`name`, `type`, active `phase`)
 - Current active `"current_phase"`
 - Complete `"artifacts"` mapping (lists which deliverables exist and their exact versions)
 - Active `"blockers"` and open `"change_requests"` (status: `OPEN`)
@@ -49,7 +49,6 @@ Return a concise, premium status card:
 ```
 ## Project Status: {project.name} ({project.type})
 **Active Phase:** {current_phase (validation / exploration / design / development)}
-**Squad Preset:** {project.squad}
 **Operation Mode:** {from project-context.md}
 
 ### Active Blockers

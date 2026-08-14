@@ -26,7 +26,7 @@ Runs the motion **design preflow**: **motion research → motion spec → implem
 
 - Products with a handful of trivial hovers → just let @developer use CSS transitions inside `/develop`; no skill invocation needed.
 - Static-only products → skip entirely.
-- Persona-level customization of Ivy or Rex → use `/customize-skill`.
+- Persona-level customization of Ivy or Rex → use `/customize-agent`.
 
 ## Prerequisites
 
@@ -50,7 +50,7 @@ Determine whether full motion treatment is warranted:
 - **Lightweight** — only micro-interactions and transitions. Run Phase 3 only (spec, no dedicated research phase). Ivy loads the design guidelines and produces the motion spec directly.
 - **None** — no motion in scope. Stop and report; do not manufacture work.
 
-**State machine:** run via `@executor`:
+**State machine:** run:
 ```bash
 node .agents/scripts/orchestrator_state.js status
 node .agents/scripts/orchestrator_state.js next
@@ -68,7 +68,7 @@ Delegate to `@researcher` and `@ux-researcher`, each instructed to load `.agents
   - `artifacts/output/02-research/motion-usability.md`
   - `artifacts/output/02-research/motion-accessibility.md`
   - `artifacts/output/02-research/motion-patterns.md`
-- After all five track artifacts exist, `@researcher` owns the merge and delegates `@writer` to create `artifacts/output/02-research/motion-research.md` with attributed sections, source list, and a decision summary for Ivy and Rex. The spec gate cannot open until this merged artifact exists.
+- After all five track artifacts exist, `@researcher` owns the merge and writes `artifacts/output/02-research/motion-research.md`, with attributed sections, source list, and a decision summary for Ivy and Rex. The spec gate cannot open until this merged artifact exists.
 
 Record completion for each research artifact:
 ```bash

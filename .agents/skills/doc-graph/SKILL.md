@@ -24,7 +24,7 @@ node .agents/scripts/query_graph.js search <query>   # find documents by title/s
 
 ## Workflow
 
-1. Run `ensure_graph.js doc` via `@executor`
+1. Run `ensure_graph.js doc`
 2. If status is `"fresh"` — graph is current, skip regeneration
 3. If status is `"regenerated"` — report doc count and edge count so user sees cost
 4. Use `query_graph.js` commands to answer relationship questions — do NOT read the raw JSON

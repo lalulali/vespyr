@@ -3,11 +3,6 @@ step: 3
 name: Gap Analysis
 prerequisites:
   - step-02 completed
-delegation:
-  reads: "@reader when hasResearch (3+ research files > 500 lines total; per delegation-policy.md ≥4 files); direct otherwise"
-  writes: none
-  runs: none
-  direct_justified: ["gap reasoning is pure analysis; direct reads for < 3 small files"]
 output_contract:
   citations: required
 ---
@@ -53,7 +48,10 @@ For each assumption in the structured draft:
 | **Should-fix** | Design will be weaker without this | Resolve or explicitly defer with rationale |
 | **Nice-to-know** | Would improve the brief but not blocking | Log as open question |
 
-## Output
-Gap report presented to user. Each gap has: description, severity, and suggested resolution path.
+## Memory closeout
+- `@memory-controller session-write` — record step 3 gap analysis progress and identified gaps.
+
+## Delegation
+- **Memory:** @memory-controller for session-write
 
 > **Tracker:** `node .agents/scripts/step_tracker.js complete --skill shape-up --step 3`

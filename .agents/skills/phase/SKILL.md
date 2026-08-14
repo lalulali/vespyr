@@ -57,7 +57,7 @@ Return a concise report reflecting the active pipeline state:
 
 ```
 ## Current Phase: {phase name (validation / discovery / research / strategy / architecture / planning / execution / launch / iteration / documentation / retro)}
-**Active Squad:** {squad from pipeline-state.json}
+**Active Phase:** {phase from pipeline-state.json}
 **Phase Status:** {status from pipeline-state.json's phases[phase]}
 **Operation Mode:** {from project-context.md}
 
@@ -71,7 +71,7 @@ Return a concise report reflecting the active pipeline state:
 ### Step 3: Switch phase (on request)
 
 If the user requests a phase switch:
-1. Run via `@executor`:
+1. Run:
    ```bash
    node .agents/scripts/orchestrator_state.js set-phase --phase {targetPhase}
    ```

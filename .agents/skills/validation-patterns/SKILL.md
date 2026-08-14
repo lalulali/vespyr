@@ -31,7 +31,7 @@ Ask the user: what are you trying to validate? What's the hypothesis? What would
 
 ### Step 2: Select method
 
-Delegate to `@executor`:
+Run:
 
 ```bash
 node .agents/scripts/match_methods.js --source validation --context "{user's hypothesis}"
@@ -61,12 +61,12 @@ Guide the user through execution. Record results:
 ## Output artifacts
 
 - Validation design and results written to `artifacts/memory/active-decisions.md`
-- If the validation produces a structured output (survey results, A/B data), delegate to `@writer` for `artifacts/output/02-research/validation-results.md`
+- If the validation produces a structured output (survey results, A/B data), write to `artifacts/output/02-research/validation-results.md`
 
 ## State machine integration
 
-At start: `@executor` runs `node .agents/scripts/orchestrator_state.js status`
-At end: `@executor` runs `node .agents/scripts/orchestrator_state.js complete --agent founder --artifact validation-results`
+At start: run `node .agents/scripts/orchestrator_state.js status`
+At end: run `node .agents/scripts/orchestrator_state.js complete --agent founder --artifact validation-results`
 
 ## Handoff
 

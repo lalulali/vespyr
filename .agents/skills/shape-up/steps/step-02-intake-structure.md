@@ -3,11 +3,6 @@ step: 2
 name: Intake & Structure
 prerequisites:
   - step-01 completed
-delegation:
-  reads: "direct (user input + optional brief/research < 200 lines each; per delegation-policy.md < 3 files < 500 lines)"
-  writes: none
-  runs: none
-  direct_justified: ["founder synthesis is pure reasoning; input docs are typically < 200 lines"]
 output_contract:
   citations: not-required
 ---
@@ -54,7 +49,10 @@ The draft is internal (not yet the final artifact). It captures:
 - **Constraints:** Technical, budget, timeline, team, regulatory.
 - **Open questions:** What do we not know yet?
 
-## Output
-Structured draft presented to user for confirmation before proceeding to gap analysis.
+## Memory closeout
+- `@memory-controller session-write` — record step 2 intake & structure progress and draft context.
+
+## Delegation
+- **Memory:** @memory-controller for session-write
 
 > **Tracker:** `node .agents/scripts/step_tracker.js complete --skill shape-up --step 2`

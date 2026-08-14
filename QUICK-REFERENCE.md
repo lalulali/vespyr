@@ -1,58 +1,50 @@
 # Quick Reference Card
 
 ```
-VESPYR IDENTITY — 3 differentiators
+VESPYR IDENTITY — 2 differentiators
 ────────────────────────────────────
-1. Permission-denial I/O split — reasoning agents delegate all I/O to sub-agents
-2. Socratic methodology depth — every reasoning agent challenges assumptions
-3. 3-tier progressive memory — context loaded in tiers, not all-at-once or not-at-all
+1. Socratic methodology depth — every reasoning agent challenges assumptions
+2. 3-tier progressive memory — context loaded in tiers, not all-at-once or not-at-all
 
-PHASES
-──────
-Product:   Validation → Exploration → Design → Development
-Games:     Validation → Exploration → Design → Development
-
-SQUADS (curated presets)
+ENTRY POINTS & WORKFLOWS
 ────────────────────────
-full-team    All 21 agents (default)
-startup      founder, researcher, competitor, user-researcher, PM, designer, architect, tech-lead, developer, reviewer, QA, devops (Idea to MVP)
-build        architect, tech-lead, developer, reviewer, QA, devops, technical-writer (Build from spec)
-research     founder, researcher, competitor, user-researcher, PM (Validation only, no code)
-design       PM, designer, ux-researcher, data-analyst (Strategy & sprint)
-ship         developer, reviewer, QA, security, performance, devops (Quality & delivery)
-game-studio  founder (game), researcher, user-researcher, PM, designer, architect, tech-lead, developer, QA (Game variant)
+Entry points:   /unpack-problem      (problem-first exploration before solution ideation)
+                /validate-idea       (stress-test raw product concepts with GO/PIVOT/KILL)
+                /shape-up            (structure semi-cooked ideas into design-ready briefs)
+                /validate-game-idea  (stress-test game concepts before production)
 
-Switch squad:  /squad [squadName]
-Show squads:   /squad show
-Next step:     /help-me [query]      (conversational navigator for project state)
+Product flow:   Entry Point → /explore-idea → /shape-up → /design (/motion) → /plan → /develop → /launch → /iterate → /retro
+Games flow:     /validate-game-idea → /explore-game-idea → /design → /plan → /develop → /launch → /iterate → /retro
+
+Navigation:    /help-me [query]      (conversational navigator for project state)
 Stress-test:   /grill-me             (Socratic alignment / Q&A pressure test)
 Elicit/refine: /elicitation          (Interactive output critique and improvement loop)
-
-
+Status:        /status               (Quick project state snapshot)
+Sprint state:  /sprint-status        (Pipeline state CLI Kanban table)
 
 PRIMARY AGENTS (by phase)
 ──────────────────────────────────────────────────
-Validation     @founder              Socratic stress-test (idea or game concept)
+Validation &    @founder              Socratic stress-test (idea or game concept)
+Entry           @product-manager      Problem space exploration (@user-researcher)
 
-Exploration    @founder              Synthesize → decide → commit
-                @market-researcher    Validate market exists
-                @competitor-analyzer  Map competition
-                @user-researcher      Validate user needs
+Exploration &   @founder              Synthesize → decide → commit
+Research        @researcher           Validate market & competition
+                @user-researcher      Validate user needs & personas
 
-Design         @product-manager      PRD + User Stories
-                @product-designer     Flows + UI specs + design tokens
+Design          @product-manager      PRD + User Stories
+                @product-designer     Flows + UI specs + design tokens + motion specs
                 @architect            System architecture + ADRs
 
-Development    @tech-lead            Task breakdown + execution plan
+Development     @tech-lead            Task breakdown + execution plan
                 @developer            Write code + tests
                 @code-reviewer        Quality gate (read-only)
                 @qa-engineer          Validate against acceptance criteria
 
-Infrastructure @devops-engineer      CI/CD + infra + deployment
+Infrastructure  @devops-engineer      CI/CD + infra + deployment
                 @performance-engineer Profiling + load testing
                 @security-engineer    OWASP + CVE audit
 
-Optional       @ml-ai-engineer       AI & ML models, RAG, prompt engineering, evals
+Optional        @ml-ai-engineer       AI & ML models, RAG, prompt engineering, evals
                 @ml-ai-ops            Production AI serving, vector indexes, drift ops
                 @ux-researcher        Usability validation
                 @data-analyst         Metrics + instrumentation
@@ -97,6 +89,61 @@ QUALITY GATES (in order)
 
 ──────────────────────────────────────────────────
 
+CORE SKILL CATALOG
+──────────────────────────────────────────────────
+Entry Points:
+  /unpack-problem      Problem-first exploration before solution ideation
+  /validate-idea       Stress-test product concepts before research (GO/PIVOT/KILL)
+  /shape-up            Structure semi-cooked ideas into design-ready briefs (zero prereqs)
+  /validate-game-idea  Stress-test game concepts before production
+
+Lifecycle Workflows:
+  /explore-idea        Market, competitor, and user research
+  /explore-game-idea   Genre market and player research
+  /design              PRD, user stories, product specs
+  /motion              Motion research, motion spec, handoff to /develop
+  /plan                Standalone task breakdown & worktree execution planning
+  /develop             Core MVP cycle (architecture, implementation, QA)
+  /launch              Release readiness, deployment, monitoring
+  /iterate             Post-launch feature improvements from telemetry/data
+  /retro               Post-cycle review & memory compaction
+  /incident            Production incident triage and resolution
+
+Discovery & Ideation:
+  /brainstorming       60-method ideation catalog (SCAMPER, Six Hats, etc.)
+  /validation-patterns 30-method validation catalog (smoke tests, concierge MVPs)
+  /jtbd                Jobs-to-be-Done statements + How Might We questions
+  /empathy-map         User empathy quadrant canvas (Says/Thinks/Does/Feels)
+  /journey-map         User touchpoint & emotional state journey mapping
+  /discovery-report    Unified research & usability report with dynamic scoring
+  /research-plan       Research goals, methodology & 2-part interview guide
+  /root-cause          Socratic 5-Whys and Fishbone root cause analysis
+
+Socratic & Intelligence:
+  /grill-me            Relentless 7+1 branch Socratic alignment interview
+  /elicitation         98 structured methods to critique & refine LLM output
+  /round-table         Multi-agent roundtable discussions
+  /code-graph          Codebase structural dependency mapper
+  /doc-graph           Doc-to-code requirement & traceability mapper
+  /humanize            AI-writing tell detector & style normalizer
+  /analyze-data        EDA, dataset provision & PM metric co-piloting
+
+Operations & Customization:
+  /help-me             Conversational next-step navigator and co-pilot
+  /status              Quick project state snapshot
+  /sprint-status       Pipeline state interactive CLI Kanban table
+  /phase               Show/switch active phase & list phase artifacts
+  /kanban              Interactive Kanban board display & updates
+  /memory              Search archived project context & compacted memory
+  /teach-me            Personal learning partner (Quick, Explain, Deep Dive)
+  /craft-lesson        Multi-format educational content generator
+  /create-skill        Author new skills, modify workflows, create evals
+  /customize-skill     Surgically customize existing skills (triggering, workflow, references)
+  /create-agent        Author and register new agent personas
+  /customize-agent     Guided TOML authoring for agent settings, permissions, and models
+
+──────────────────────────────────────────────────
+
 SHARED MEMORY (artifacts/memory/)
 ──────────────────────────────────────────────────
 project-context.md           Static: project basics, tech stack
@@ -122,7 +169,6 @@ BLOCKERS:@memory-controller load blockers
 SESSION: @memory-controller session-write [content]
 STATUS:  @memory-controller status
 
-Progressive loading: ~1,000 tokens vs ~15,000 tokens raw (85-95% savings)
 Hybrid scoring: keyword pre-filter (Stage 1) + semantic refinement (Stage 2)
 Synonym expansion: auth≈login, db≈database, deploy≈release, etc.
 Session continuity: ~100 tokens for last-session context
@@ -135,7 +181,7 @@ Deduplication: write validation rejects near-identical entries
 KEY FILES
 ──────────────────────────────────────────────────
 Workflow              .agents/workflow.md
-Workflows & Skills   .agents/skills.md
+Workflows & Skills    .agents/skills.md
 Troubleshooting       .agents/TROUBLESHOOTING.md
 Agent library         .agents/agents/
 Agent templates       .agents/agents/templates/

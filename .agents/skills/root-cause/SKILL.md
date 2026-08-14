@@ -35,7 +35,7 @@ If multiple causal factors are suspected, map them across categories: People, Pr
 
 ### Step 4: Output
 
-Delegate to `@writer` for `artifacts/output/02-research/root-cause-analysis.md`:
+Write `artifacts/output/02-research/root-cause-analysis.md`:
 
 ```markdown
 # Root Cause Analysis — {problem}
@@ -65,5 +65,5 @@ Delegate to `@writer` for `artifacts/output/02-research/root-cause-analysis.md`:
 ```
 
 ## State machine integration
-At start: `@executor` runs `node .agents/scripts/orchestrator_state.js status`
-At end: `@executor` runs `node .agents/scripts/orchestrator_state.js complete --agent product-manager --artifact 02-research/root-cause-analysis.md`
+At start: Run `node .agents/scripts/orchestrator_state.js status`
+At end: Run `node .agents/scripts/orchestrator_state.js complete --agent product-manager --artifact 02-research/root-cause-analysis.md`

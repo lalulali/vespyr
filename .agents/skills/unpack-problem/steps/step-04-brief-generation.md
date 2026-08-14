@@ -4,9 +4,6 @@ name: Brief Generation
 prerequisites:
   - step-03 completed
 delegation:
-  reads: "@reader (all analysis artifacts; per delegation-policy.md multi-file)"
-  writes: "@writer (problem-space-brief.md; per delegation-policy.md single output)"
-  runs: "@executor (orchestrator_state.js complete; per delegation-policy.md all bash)"
   memory: "@memory-controller (session-write; per delegation-policy.md all memory)"
   direct_justified: []
 output_contract:
@@ -21,7 +18,7 @@ output_contract:
 
 ### 4a. Compile problem-space brief
 
-Delegate to `@writer` for `artifacts/output/02-research/problem-space-brief.md` using the template at `.agents/templates/discovery/problem-brief.md`:
+Write `artifacts/output/02-research/problem-space-brief.md` using the template at `.agents/templates/discovery/problem-brief.md`:
 
 ```markdown
 # Problem Space Brief — {problem summary}
@@ -79,7 +76,7 @@ Next step: {recommended workflow}
 
 ### 4c. State machine
 
-Delegate to `@executor`:
+Run:
 ```bash
 node .agents/scripts/orchestrator_state.js complete --agent product-manager --artifact 02-research/problem-space-brief.md
 ```
@@ -92,7 +89,4 @@ Present the brief to the user with a clear recommendation:
 - "We need market validation → I recommend loading `/explore-idea`"
 
 ## Delegation
-- **Reads:** @reader for all analysis artifacts
-- **Writes:** @writer for problem-space-brief.md
-- **Runs:** @executor for orchestrator_state.js complete
 - **Memory:** @memory-controller for session-write

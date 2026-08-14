@@ -3,11 +3,6 @@ step: 2
 name: Identify Opportunities
 prerequisites:
   - step-01 completed (analytics-insights.md exists)
-delegation:
-  reads: "@reader (analytics-insights.md; per delegation-policy.md)"
-  writes: "@writer (iteration-backlog.md; per delegation-policy.md output file)"
-  runs: "@executor (orchestrator_state.js complete; per delegation-policy.md all bash)"
-  direct_justified: []
 output_contract:
   citations: not-required
 ---
@@ -18,7 +13,7 @@ Synthesize analytics insights into a ranked backlog of iteration opportunities.
 
 ## Workflow
 
-### 2a. Synthesize via @product-manager
+### 2a. Synthesize — @product-manager
 
 Invoke `@product-manager` to synthesize insights into opportunities:
 - Map data signals to user stories (new, modified, or deprioritized)
@@ -29,19 +24,15 @@ Invoke `@product-manager` to synthesize insights into opportunities:
 
 ### 2b. Output
 
-Delegate to `@writer` for `artifacts/output/07-iteration/iteration-backlog.md` using template:
+Write `artifacts/output/07-iteration/iteration-backlog.md` using template:
 ```
 .agents/templates/planning/iteration-backlog-template.md
 ```
 
-### 2c. Record completion
-
-Delegate to `@executor`:
-```bash
-node .agents/scripts/orchestrator_state.js complete --agent product-manager --artifact 07-iteration/iteration-backlog.md
-```
+## Memory closeout
+- `@memory-controller session-write` — record step 2 opportunity identification and iteration backlog.
 
 ## Delegation
-- **Reads:** @reader for analytics-insights.md
-- **Writes:** @writer for iteration-backlog.md
-- **Runs:** @executor for orchestrator_state.js complete
+- **Memory:** @memory-controller for session-write
+
+

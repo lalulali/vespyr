@@ -68,19 +68,24 @@ function appendAudit(entry) {
 
 // ---------------------------------------------------------------------------
 // Skill step sequence reader — reads step file frontmatter for label + name
-// Resolves compound skill names (e.g. "design-create" → skills/design/steps-create/)
+// Resolves compound skill names (e.g. "design-create" → skills/design/steps/
+// filtered by frontmatter mode: create)
 // ---------------------------------------------------------------------------
 function readStepSequence(skill) {
   // 1. Try exact: .agents/skills/{skill}/steps/
   let stepsDir = path.join(PROJECT_ROOT, '.agents', 'skills', skill, 'steps');
+  let modeFilter = null;
   if (!fs.existsSync(stepsDir)) {
-    // 2. Try compound: design-create → .agents/skills/design/steps-create/
+    // 2. Try compound: design-create → .agents/skills/design/steps/ filtered by mode
     const parts = skill.split('-');
     if (parts.length >= 2) {
       const mode = parts.pop();
       const base = parts.join('-');
-      const compoundDir = path.join(PROJECT_ROOT, '.agents', 'skills', base, `steps-${mode}`);
-      if (fs.existsSync(compoundDir)) stepsDir = compoundDir;
+      const baseDir = path.join(PROJECT_ROOT, '.agents', 'skills', base, 'steps');
+      if (fs.existsSync(baseDir)) {
+        stepsDir = baseDir;
+        modeFilter = mode;
+      }
     }
   }
   if (!fs.existsSync(stepsDir)) return [];
@@ -92,10 +97,17 @@ function readStepSequence(skill) {
     const fmMatch = raw.match(/^---\r?\n([\s\S]+?)\r?\n---/);
     if (!fmMatch) return;
     const fmText = fmMatch[1];
+    if (modeFilter) {
+      const modeMatch = fmText.match(/^mode:\s*(\S+)/m);
+      if (!modeMatch || modeMatch[1] !== modeFilter) return;
+    }
     const stepMatch = fmText.match(/^step:\s*(\d+[a-z]?)/m);
     const nameMatch = fmText.match(/^name:\s*(.+)$/m);
     if (stepMatch && nameMatch) {
-      steps.push({ label: stepMatch[1].trim(), name: nameMatch[1].trim() });
+      // Compound skills track mode-local step numbers (--step 2), so strip the
+      // mode letter (2b → 2) for matching against tracker entries.
+      const label = modeFilter ? stepMatch[1].replace(/[a-z]/i, '') : stepMatch[1].trim();
+      steps.push({ label, name: nameMatch[1].trim() });
     }
   });
   // Natural sort: 1, 2, 3, 3a, 3b, 4, ...

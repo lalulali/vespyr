@@ -50,8 +50,8 @@ If unclear, present the three modes and ask.
 - `artifacts/output/02-research/jtbd-hmw.md` — jobs-to-be-done + how-might-we
 
 ## State machine integration
-At start: `@executor` runs `node .agents/scripts/orchestrator_state.js status`
-At end: `@executor` runs `node .agents/scripts/orchestrator_state.js complete --agent product-manager --artifact 02-research/problem-space-brief.md`
+At start: run `node .agents/scripts/orchestrator_state.js status`
+At end: run `node .agents/scripts/orchestrator_state.js complete --agent product-manager --artifact 02-research/problem-space-brief.md`
 
 ## Memory integration
 **At start:** Load context before problem intake:

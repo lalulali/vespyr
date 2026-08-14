@@ -3,11 +3,6 @@ step: 6
 name: Handoff
 prerequisites:
   - step-05 completed
-delegation:
-  reads: none
-  writes: "@writer (shaped-brief.md; per delegation-policy.md output file)"
-  runs: "@executor (orchestrator_state.js complete)"
-  direct_justified: []
 output_contract:
   citations: not-required
 ---
@@ -34,9 +29,6 @@ node .agents/scripts/orchestrator_state.js complete --agent founder --artifact 0
 - `@memory-controller session-write` (summarize decisions, next steps, blockers).
 
 ## Delegation
-- **Reads:** none
-- **Writes:** @writer for shaped-brief.md
-- **Runs:** @executor for orchestrator_state.js complete
 - **Memory:** @memory-controller for active-decisions and session-write
 
 > **Tracker:** `node .agents/scripts/step_tracker.js complete --skill shape-up --step 6`

@@ -3,11 +3,6 @@ step: 3b
 name: Backlog Preparation
 prerequisites:
   - step-03a completed
-delegation:
-  reads: "@reader (user stories, kanban, ADRs; per delegation-policy.md ≥3 files)"
-  writes: "@writer (execution-plan.md; per delegation-policy.md output file)"
-  runs: "@executor (orchestrator_state.js complete)"
-  direct_justified: []
 output_contract:
   citations: not-required
 ---
@@ -15,7 +10,6 @@ output_contract:
 # Step 3b — Backlog Preparation
 
 `@tech-lead` reviews stories, plans the build sequence, and evaluates parallelism for multi-developer execution.
-
 
 > **Tracker:** `node .agents/scripts/step_tracker.js begin --skill develop --step 3b`
 ## Goal
@@ -48,7 +42,7 @@ If the execution plan has 2+ independent parallel tasks, `@tech-lead` MUST creat
 
 ### Step 0: Check prerequisites
 
-Delegate to `@executor`:
+Run:
 
 ```bash
 # Resolve current branch
@@ -62,7 +56,7 @@ If `WORKTREE_NOT_SUPPORTED` is returned, fall back to single-developer mode rega
 
 ### Step 1: Create worktrees
 
-Delegate to `@executor` for each parallel developer:
+Run for each parallel developer:
 
 ```bash
 node .agents/scripts/worktree.js create feat/${BRANCH}/task-1
@@ -84,12 +78,10 @@ Update `artifacts/output/05-planning/kanban.md` with the Task Assignment table (
 
 **Spike hazard:** If step 5 (Spike) later changes the execution plan (new tasks, split tasks, dependency changes), the worktrees created here may be stale. Step 6.1 includes a re-validation gate for this scenario. If spike findings invalidate the worktree plan, step 6 will halt and escalate back to `@tech-lead` for re-allocation.
 
-## Halt condition
-Dependency chain that forces serial execution on a time-critical feature. Escalate to `@product-manager` for scope negotiation.
+## Memory closeout
+- `@memory-controller session-write` — record step 3b backlog preparation and execution plan.
 
 ## Delegation
-- **Reads:** @reader for user stories, kanban board, and ADRs
-- **Writes:** @writer for execution-plan.md
-- **Runs:** @executor for orchestrator_state.js complete AND worktree.js create/list
+- **Memory:** @memory-controller for session-write
 
 > **Tracker:** `node .agents/scripts/step_tracker.js complete --skill develop --step 3b`

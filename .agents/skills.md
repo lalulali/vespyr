@@ -28,48 +28,38 @@ Games follow the same phases but use **game-specific skills** that speak in play
 
 | Agent | Bash | Edit | Read | Write Tool | Model Tier | Purpose |
 |-------|------|------|------|------------|------------|---------|
-| @reader | **deny** | **deny** | allow | no | **Lightweight** (DS Flash) | Read/search codebase — summarized results |
-| @writer | **deny** | allow | ask | yes | **Lightweight** (DS Flash) | Write/edit files — precise execution |
-| @executor | allow | **deny** | **deny** | no | **Lightweight** (DS Flash) | Run commands — summarized output |
-| @founder | **deny** | **deny** | allow | yes | Premium (default) | Strategic ideation, writes idea brief via @writer |
-| @researcher | **deny** | **deny** | allow | yes | Premium (default) | Market + competitive research via @writer |
-| @user-researcher | **deny** | **deny** | allow | yes | Premium (default) | User research synthesis via @writer |
-| @product-manager | **deny** | **deny** | allow | yes | Premium (default) | Writes PRD + user stories via @writer |
-| @product-designer | **deny** | **deny** | allow | yes | Premium (default) | Writes product specs + design tokens via @writer |
-| @architect | **deny** | **deny** | allow | yes | Premium (default) | Writes ADRs via @writer |
+| @founder | **deny** | **deny** | allow | yes | Premium (default) | Strategic ideation, writes idea brief |
+| @researcher | **deny** | **deny** | allow | yes | Premium (default) | Market + competitive research  |
+| @user-researcher | **deny** | **deny** | allow | yes | Premium (default) | User research synthesis  |
+| @product-manager | **deny** | **deny** | allow | yes | Premium (default) | Writes PRD + user stories  |
+| @product-designer | **deny** | **deny** | allow | yes | Premium (default) | Writes product specs + design tokens  |
+| @architect | **deny** | **deny** | allow | yes | Premium (default) | Writes ADRs  |
 | @tech-lead | allow | allow | allow | yes | Premium (default) | Writes execution plans, runs git worktrees |
 | @developer | allow | allow | allow | yes | Premium (default) | Writes production code and tests. Delegation: required/optional/none per task. |
 | @ml-ai-engineer | allow | allow | allow | yes | Premium (default) | Writes ML pipelines, models, serving code |
-| @data-analyst | **deny** | **deny** | allow | yes | Premium (default) | Writes measurement plans, instrument code via @writer |
+| @data-analyst | **deny** | **deny** | allow | yes | Premium (default) | Writes measurement plans, instrument code  |
 | @code-reviewer | allow | **deny** | allow | no | Premium (default) | Read code, report findings — no edits |
 | @qa-engineer | allow | allow | allow | yes | Premium (default) | Writes tests, validates behavior |
 | @security-engineer | allow | **deny** | allow | no | Premium (default) | Audit code and infra — report only |
 | @performance-engineer | allow | **deny** | allow | no | Premium (default) | Profile and benchmark — report only |
 | @devops-engineer | allow | allow | allow | yes | Premium (default) | Writes CI/CD, infra, deployment configs |
-| @ux-researcher | **deny** | **deny** | allow | yes | Premium (default) | Evaluates usability — writes report via @writer |
+| @ux-researcher | **deny** | **deny** | allow | yes | Premium (default) | Evaluates usability — writes report  |
 | @technical-writer | **deny** | allow | allow | yes | Premium (default) | Writes and updates documentation (no commands allowed) |
-| @memory-controller | **deny** | **deny** | allow | yes | Premium (default) | Memory I/O, preflight checks, compaction |
+| @memory-controller | **deny** | **deny** | allow | yes | Premium (default) | Memory gatekeeper: context loading, writes, compaction |
 
-## Delegation Layer
+## Memory Operations & State Control
 
-The agent system separates reasoning from execution. Thinking agents (@developer, @architect, @tech-lead, etc.) handle the cognitive work — designing, planning, analyzing, deciding. Operational I/O is delegated to specialized sub-agents that are efficient at their narrow tasks:
+All agents manage step progress, decision tracking, and context persistence exclusively through the memory system (`@memory-controller`). Every step in every skill explicitly records state and memory updates through `@memory-controller`.
 
 ```
-Thinking Agent
-  │ reason, design, plan, decide
+Agent — execute step, reason, design, plan, decide
   │
-  ├─→ @reader     — read/search files, return structured summary
-  ├─→ @writer     — write/edit files precisely, confirm result
-  └─→ @executor   — run commands, return condensed output
+  ├── context load & query ──> @memory-controller (load Tier 1-3 context)
+  ├── decision & lesson persistence ──> @memory-controller (active-decisions / lessons-learned)
+  └── step progress closeout ──> @memory-controller (session-write step state)
 ```
 
-**Why separation matters:** Command output is the largest source of token waste. A test run can dump 10K+ tokens into context. @executor reduces that to ~200 tokens (pass/fail count, failed names, first errors). @writer handles file transcription so thinking agents don't pay for output tokens. @reader provides structural summaries so thinking agents don't consume raw file dumps.
-
-The model tier doesn't matter as much as the architecture: even if all agents used the same model, the separation is valuable because each sub-agent's context stays narrow and focused.
-
-**Enforced delegation (bash + edit denied):** @founder, @researcher, @user-researcher, @product-manager, @product-designer, @architect, @data-analyst, @ux-researcher, @shifu, @memory-controller.
-**Recommended pattern (full I/O, delegation optional):** @developer, @tech-lead, @qa-engineer, @devops-engineer, @ml-ai-engineer — they delegate for cost efficiency, not because they are restricted.
-**Partially enforced (bash denied, edit allowed):** @technical-writer (writes directly, but never runs commands).
+Memory operations route through `@memory-controller` to maintain 100% step-level continuity across sessions and agents.
 
 ## Flow
 
@@ -100,13 +90,12 @@ Validation is optional but recommended — you can skip to Exploration if the id
 
 | Skill | Loads Into | When to invoke | How to invoke |
 |-------|-----------|----------------|---------------|
-| **humanize** | @writer | Any text needs to sound less like AI — email, docs, specs, comments, PR descriptions | Say "humanize this" or "use the humanize skill" |
+| **humanize** | Harness (Direct) | Any text needs to sound less like AI — email, docs, specs, comments, PR descriptions | Say "humanize this" or "use the humanize skill" |
 | **motion** | @product-designer + @researcher + @ux-researcher + @tech-lead | Animation-significant products: motion research, complete motion spec, and explicit handoff to `/develop` | Say "add motion", "create a motion spec", or `/motion` |
 | **help-me** | Harness (Direct) | Unsure of next steps, phase readiness check, or need a navigation report with recommended commands | Say `help me`, `/help-me`, or `/help-me [query]` |
 | **grill-me** | Harness (Direct) | Stress-test a plan, spec, idea, or design before committing to it — Socratic Q&A, one question at a time | Say "grill me", "run grill-me", or `/grill-me` |
 | **elicitation** | Harness (Direct) | Push the LLM/agent to reconsider, refine, and improve its recent output using 98 structured methods | Say "elicitation", "run elicitation", or `/elicitation` |
 | **round-table** | Harness (Direct) | Multi-agent roundtable discussions based on their perspective and stage of development | Say "round-table", "run roundtable", or `/round-table` |
-
 
 ## Optional Agents — Invoke on Demand
 
@@ -119,7 +108,6 @@ Validation is optional but recommended — you can skip to Exploration if the id
 | @security-engineer | Read + bash (no edit) | Sensitive data (payments, PII, health) |
 | @technical-writer | Full access | Public-facing API or user-facing feature changes |
 | @devops-engineer | Full access | Deploying, changing infrastructure, or setting up CI/CD |
-
 
 ---
 
@@ -221,13 +209,13 @@ The archive index uses newline-delimited JSON for append-only writes:
 | Tier 1 — Core | Project name, stack, phase, sprint, blocker count + last session (5 lines) | ~200 |
 | Tier 2 — Agent-specific | Files relevant to the agent's role | ~300 |
 | Tier 3 — Task-specific | Hybrid-scored chunks (keyword + semantic) | ~500 |
-| **Total** | | **~1,000 tokens** |
+| **Total**| | **tiered** |
 
-Without the controller, loading all memory files costs ~10,000–20,000 tokens per agent invocation. The controller reduces this by 85–95%.
+Without the controller, loading all memory files costs thousands of tokens per agent invocation.
 
 ### Compaction Guard
 
-`compaction_guard.js` detects memory files that exceed their word thresholds and flags them (exit code 2); it does not modify files. `@memory-controller` then performs the manual compaction flow — archiving `resolved`/`stale` entries via `archive_manager.js` and rewriting the source file via `@writer`:
+`compaction_guard.js` detects memory files that exceed their word thresholds and flags them (exit code 2); it does not modify files. `@memory-controller` then performs the manual compaction flow — archiving `resolved`/`stale` entries via `archive_manager.js` and rewriting the source file directly:
 
 | File | Threshold |
 |------|-----------|

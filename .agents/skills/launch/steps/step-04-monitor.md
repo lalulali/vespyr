@@ -3,11 +3,6 @@ step: 4
 name: Monitor
 prerequisites:
   - step-03 completed
-delegation:
-  reads: none
-  writes: "@writer (monitoring report)"
-  runs: "@executor (monitoring commands; per delegation-policy.md all bash)"
-  direct_justified: []
 output_contract:
   citations: not-required
 ---
@@ -15,7 +10,6 @@ output_contract:
 # Step 4 — Monitor
 
 Post-launch monitoring — observe the feature in production.
-
 
 > **Tracker:** `node .agents/scripts/step_tracker.js begin --skill launch --step 4`
 ## Goal
@@ -37,12 +31,10 @@ Track core metrics against success criteria from the PRD. Catch anomalies before
 - **Medium:** Hotfix path via `@developer` → `@code-reviewer` → `@qa-engineer`
 - **Low:** Log for next iteration via `iterate` skill
 
-## Output
-`artifacts/output/06-launch/post-launch-report.md` — use template `.agents/templates/launch/post-launch-report-template.md`
+## Memory closeout
+- `@memory-controller session-write` — record step 4 post-launch monitoring observations.
 
 ## Delegation
-- **Reads:** none
-- **Writes:** @writer for monitoring report
-- **Runs:** @executor for monitoring commands
+- **Memory:** @memory-controller for session-write
 
 > **Tracker:** `node .agents/scripts/step_tracker.js complete --skill launch --step 4`

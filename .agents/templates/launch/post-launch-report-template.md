@@ -15,7 +15,6 @@ Use this template 24-72 hours after launch to document metrics, issues, and init
 **Report Period:** [Launch date] through [Report date] ([X] hours/days)
 **Authors:** @product-manager, @data-analyst
 
-
 ---
 
 ## 1. Launch Summary

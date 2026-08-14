@@ -3,11 +3,6 @@ step: 6
 name: Decide Next Action
 prerequisites:
   - step-05 completed (iteration-results.md exists)
-delegation:
-  reads: "@reader (iteration-results.md; per delegation-policy.md)"
-  writes: none
-  runs: none
-  direct_justified: []
 output_contract:
   citations: not-required
 ---
@@ -30,14 +25,10 @@ Based on iteration results:
 
 Maximum 5 iteration cycles before a mandatory `retro` to assess whether the iteration strategy is working. This prevents endless polish on a feature that may need a fundamentally different approach.
 
-### 6c. Handoff options
-
-- Need to ship a completely new feature? → load `develop`
-- Production incident? → load `incident`
-- Want to review how the team is working? → load `retro`
-- Hit 5 iteration cycles? → **mandatory** `retro` before continuing
+## Memory closeout
+- `@memory-controller session-write` — record step 6 next action decision.
 
 ## Delegation
-- **Reads:** @reader for iteration-results.md
-- **Writes:** none
-- **Runs:** none
+- **Memory:** @memory-controller for session-write
+
+

@@ -65,8 +65,8 @@ CLI flags (`--src`, `--docs`, `--ids`) override config values for one-off scans.
 Personalize agent behavior without being overwritten by upgrades:
 
 ```
-.agents/agents/<name>/customize.toml   # Factory defaults (regenerated on upgrade)
-.agents/custom/<name>.toml              # Your overrides (never touched)
+.agents/agents/<name>/customize.toml   # Optional factory defaults
+.agents/custom/<name>.toml              # Your declaration (never touched)
 ```
 
 Example — make the developer more concise:
@@ -85,28 +85,13 @@ Merge rules:
 - **Tables** — deep merge
 - **Arrays** — keyed merge (items with matching IDs are updated, not duplicated)
 
-To apply customizations:
+To create and preview a customization declaration:
 
 ```
-/customize
+node .agents/scripts/merge_customization.js <agent-name>
 ```
 
-This runs the guided authoring flow — describe your intent, map to override fields, write the TOML, verify.
-
-## Squad Configuration
-
-Switch between team presets:
-
-```
-/squad
-```
-
-Available presets:
-- **Full Team** — All 21 agents (default)
-- **Lean** — 8 core swarm agents + @reader/@writer/@executor
-- **Solo** — Single-agent mode with skill access
-
-The `/squad` command also lets you initialize a custom team preset.
+Use `/customize-agent` to describe intent, map it to override fields, write the TOML, and verify the merged preview. Runtime consumption of these declarations is not wired yet, so the preview does not change agent behavior.
 
 ## Memory Configuration
 
