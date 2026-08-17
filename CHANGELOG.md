@@ -17,6 +17,7 @@ All notable changes to the Vespyr project will be documented in this file.
 - Implemented prototype scanner [`.agents/scripts/security-scan.js`](.agents/scripts/security-scan.js) with 3-state exit contract (`0 = clean`, `1 = findings`, `2 = fail-closed / tool failure`), sliding Shannon entropy secret detection (threshold 2.6), and base64 heuristic false-positive suppression.
 - Built Red-Team evaluation harness in [`eval/security/corpus/`](eval/security/corpus/) with positive/negative fixture pairs, CI invariant checker [`.agents/scripts/check_corpus_invariants.js`](.agents/scripts/check_corpus_invariants.js), and frozen baseline [`baseline-2026-08-10.json`](eval/security/corpus/baseline-2026-08-10.json).
 - Conducted fresh security audit on `security-scan.js` producing findings report `findings-report-security-scan-f1-47.md` (11 findings triaged for Phase 2 entry gate).
+- Implemented and verified complete downstream security & integrity test suites (12/12 passing), hardened frontmatter permission parser, and synchronized all development documentation (READMEs, Guides, Quick Reference, TROUBLESHOOTING, and skill catalogs).
 ### Harness Honesty & Direct-I/O Execution (Epic 02g)
 - Fully executed the repository-wide **Harness Honesty** scrub (Epic 02g) across all 43 active skills and 89 step files:
   - Cleaned all legacy `delegation:` frontmatter blocks and dead `@reader`, `@writer`, and `@executor` subagent handles from `design`, `test`, `unpack-problem`, `craft-lesson`, and `validate-idea` step files.

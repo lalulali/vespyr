@@ -86,6 +86,21 @@ node bin/cli.js --yes --target /path/to/my-project
 - `artifacts/memory/project-context.md` 是否存在
 - 你的开发工具是否能读取 `.agents/agents/*.md` 文件
 
+## 完整性与安全校验
+
+你可以验证安装的供应链完整性与安全合规性：
+
+```bash
+# 对照已签名的 SHA-256 清单校验 .agents/ 完整性
+npx vespyr verify
+
+# 运行供应链安全与内容完整性扫描器
+npx vespyr audit
+
+# 重新计算并输出清单校验和
+npx vespyr manifest
+```
+
 ## 升级
 
 ```bash

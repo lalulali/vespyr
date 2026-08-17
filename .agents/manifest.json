@@ -1,11 +1,11 @@
 {
   "version": "2.0.6",
-  "generated_at": "2026-08-17T07:46:49.793Z",
+  "generated_at": "2026-08-17T08:10:08.325Z",
   "file_count": 313,
   "files": {
     ".gitignore": "02be8395c2a0b6cdfcf971daa5689776e2d98cc43603b22a45d8c2bd78c13772",
     "GUARDRAILS.md": "44d0d42842165757349a7f7b11d40fed26096b2b2868bff09c5cda2f8b830509",
-    "TROUBLESHOOTING.md": "893a3428e7ef55bc380242b488ebab782786e2784c01f67fe0921d09e0742fe4",
+    "TROUBLESHOOTING.md": "ded343db786ad56ace21878e6e4d20a3b7a8dcfe22f0bdd8d86b84ba9cdc38a2",
     "agents/architect.md": "859d33e38c1a7912261122e489cb5a06fa2700984c70c5640182d21393557e84",
     "agents/code-reviewer.md": "1f8f6cf5fa02f1840c148f8a787480cb0063b5b5ed85cd982a82550ae0501d1f",
     "agents/data-analyst.md": "1e2baf0ad191e80b2e8374d015958f1ef8d96192fafee72d6207bfa94aea02c3",
@@ -257,7 +257,7 @@
     "skills/validate-idea/steps/step-07a-handoff.md": "69d2432082a009d8ea26d9a003bdeba86ff13fb3a85f1a2233a6836796fb133d",
     "skills/validation-patterns/SKILL.md": "582187921130692b1f2b3d98d5a1e8332a18c105e730c99ac86c5796a7abbc15",
     "skills/validation-patterns/methods.csv": "b713633037bcbb5db2362d5421ae2c5316f46ca9b83b60da3ce5b4fc5bd4b75d",
-    "skills.md": "7bb40c1a8bbc11f090a321e626a4eecb5d572369a537ca4810ccc32255e12b71",
+    "skills.md": "96931ddecfc27beda071fe6a76eab2af88e499c2e34aa701f8d9bac996d42197",
     "templates/architecture/adr-template.md": "be2caf81d319e7aba03d6f621d3170a23bd3af9b8f458a50d64939c2b5f45fa8",
     "templates/architecture/model-approved-for-production.md": "0b6b5d6480d9f4f9348957f9ccb96a84bd3c577f8ddc10ebb635ca8720c34020",
     "templates/discovery/discovery-report.md": "c9bfb5fdf80217dbbd34aa2bfad501410a0d2975808c3b44e827f973ec9aeb9b",

@@ -40,20 +40,20 @@ All 20 agents operate under a **closed permission registry** (`bash`, `edit`, `g
 | **`@architect`** | Vera | allow | allow | allow | allow | true | Technical architecture, data modeling, API contracts, ADRs |
 | **`@tech-lead`** | Grant | allow | allow | allow | allow | true | Granular execution plans, worktrees, task breakdown |
 | **`@developer`** | Rex | allow | allow | allow | allow | true | Production feature code, unit test suites, refactoring |
-| **`@code-reviewer`** | Scout | allow | **cre** | allow | allow | **false** | Read-only code audit, PR review, security validation |
+| **`@code-reviewer`** | Scout | allow | **deny** | allow | allow | **false** | Read-only code audit, PR review, security validation |
 | **`@qa-engineer`** | Nina | allow | allow | allow | allow | true | Test planning, regression suites, QA certification |
 | **`@researcher`** | Iris | allow | allow | allow | allow | true | Market, competitor, and genre research synthesis |
 | **`@user-researcher`** | Paige | allow | allow | allow | allow | true | User research plans, interview guides, persona mapping |
 | **`@ux-researcher`** | Zara | allow | allow | allow | allow | true | Usability evaluation, user journey maps, interaction paradigms |
 | **`@shifu`** | Kong Qiu | allow | allow | allow | allow | true | Learning path design, syllabus, multi-format education |
 | **`@data-analyst`** | Nova | allow | allow | allow | allow | true | Telemetry instrumentation, metrics strategy, analytics |
-| **`@security-engineer`** | Victor | allow | allow | allow | allow | true | Threat modeling, vulnerability scanning, security audits |
-| **`@performance-engineer`** | Felix | allow | allow | allow | allow | true | Latency profiling, bottleneck analysis, performance audits |
+| **`@security-engineer`** | Victor | allow | **deny** | allow | allow | **false** | Threat modeling, vulnerability scanning, security audits |
+| **`@performance-engineer`** | Felix | allow | **deny** | allow | allow | **false** | Latency profiling, bottleneck analysis, performance audits |
 | **`@ml-ai-engineer`** | Kai | allow | allow | allow | allow | true | LLM integration, prompt design, RAG, eval harnesses |
-| **`@ml-ai-ops`** | Atlas | allow | allow | allow | allow | true | Model serving, vector indexes, drift monitoring, rollback |
+| **`@ml-ai-ops`** | Atlas | allow | **deny** | allow | allow | **false** | Model serving, vector indexes, drift monitoring, rollback |
 | **`@devops-engineer`** | Axel | allow | allow | allow | allow | true | CI/CD automation, cloud infrastructure, deployment |
 | **`@technical-writer`** | Clara | allow | allow | allow | allow | true | User documentation, API references, runbooks |
-| **`@memory-controller`** | Memory | allow | allow | allow | allow | true | Persistent memory queries, writes, and compaction |
+| **`@memory-controller`** | Mnemos | **deny** | allow | allow | allow | true | Persistent memory queries, writes, and compaction |
 
 ---
 

@@ -606,7 +606,20 @@ describe('Test 10: parseFlags()', () => {
   it('should handle no flags', () => {
     const result = parseFlags(['node', 'cli.js']);
     assert.deepStrictEqual(result, {
-      dryRun: false, yes: false, target: null, harnesses: [], version: false, help: false, syncDocs: false, installGitHook: false,
+      dryRun: false,
+      yes: false,
+      target: null,
+      harnesses: [],
+      version: false,
+      help: false,
+      syncDocs: false,
+      installGitHook: false,
+      verify: false,
+      audit: false,
+      manifest: false,
+      json: false,
+      spec: null,
+      command: null,
     });
   });
 

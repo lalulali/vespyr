@@ -216,6 +216,34 @@ If the chunk is in the archive (was compacted), use search instead:
 
 ---
 
+## `vespyr verify` reports modified or tampered files
+
+**Problem:** Running `npx vespyr verify` fails with checksum mismatches on files in `.agents/`.
+
+**Fix:**
+- If you made intentional customizations or added new skills/agents, regenerate the manifest:
+  ```bash
+  npx vespyr manifest
+  ```
+- If you did not make changes, re-sync entry points or re-install from clean source:
+  ```bash
+  node bin/cli.js --sync-docs
+  ```
+
+**Prevention:** Do not modify `.agents/agents/*.md` directly for configuration; use `.agents/custom/<agent>.toml` overrides and the `/customize-agent` workflow.
+
+---
+
+## Content quarantined by memory admission control
+
+**Problem:** A memory entry was automatically quarantined and excluded from Tier 3 loading, and an alert was logged in `artifacts/memory/quarantine/quarantine-log.json`.
+
+**Fix:** Inspect `quarantine-log.json` to review the quarantined payload and matched rule pattern (e.g., prompt injection phrases like `ignore previous instructions`, fake role delimiters, or fake `<invoke>` calls). If the entry was a false positive from code documentation, sanitize or rephrase the entry in `active-decisions.md` or `lessons-learned.md`.
+
+**Prevention:** Never include raw unsanitized prompt injection attack strings directly in persistent memory files without wrapping them in explanatory code blocks or using quarantine-exempt test corpus locations (`eval/security/corpus/`).
+
+---
+
 *Canonical source files:*
 - *Workflow orchestration:* `workflow.md`
 - *Guardrails:* `GUARDRAILS.md`

@@ -86,6 +86,21 @@ If you see errors, check that:
 - `artifacts/memory/project-context.md` exists
 - Your harness can read `.agents/agents/*.md` files
 
+## Integrity & Security Verification
+
+You can verify the supply-chain integrity and security compliance of your installation:
+
+```bash
+# Verify .agents/ integrity against signed SHA-256 manifest
+npx vespyr verify
+
+# Run supply-chain security and content integrity scanner
+npx vespyr audit
+
+# Recompute and output manifest checksums
+npx vespyr manifest
+```
+
 ## Upgrading
 
 ```bash

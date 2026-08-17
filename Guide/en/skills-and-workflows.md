@@ -6,7 +6,7 @@
 
 Vespyr organizes complex operations into atomic skills. Each skill is a folder with a `SKILL.md` router + `steps/` directory.
 
-### Curated Workflows (Lifecycle & Shaping)
+### Curated Workflows (Lifecycle & Execution)
 
 | Command | Phase | Description |
 |---------|-------|-------------|
@@ -23,6 +23,7 @@ Vespyr organizes complex operations into atomic skills. Each skill is a folder w
 | `/launch` | 6 | Release readiness and deployment |
 | `/iterate` | 7 | Post-launch behavior improvements |
 | `/retro` | 9 | Post-cycle review and memory compaction |
+| `/incident` | Operational | Production incident response and triage |
 
 ### Design Thinking & Discovery
 
@@ -35,6 +36,7 @@ Vespyr organizes complex operations into atomic skills. Each skill is a folder w
 | `/discovery-report` | Compile design thinking outputs into unified report |
 | `/root-cause` | Socratic 5-Whys and Fishbone root cause analysis |
 | `/validation-patterns` | Apply validation from 30-method catalog |
+| `/brainstorming` | Select from 60 brainstorming methods (SCAMPER, Six Hats, etc.) |
 
 ### Learning & Teaching
 
@@ -43,13 +45,13 @@ Vespyr organizes complex operations into atomic skills. Each skill is a folder w
 | `/teach-me` | Personal learning partner — Quick, Explain, or Deep Dive on any topic |
 | `/craft-lesson` | Create multi-format educational materials (syllabus, detailed handbook, cheatsheet, presentation, class, video script) |
 
-### Ideation & Socratic Alignment
+### Socratic Alignment & Intelligence
 
 | Command | Description |
 |---------|-------------|
-| `/shape-up` | Structure and stress-test semi-cooked ideas into design-ready briefs |
-| `/brainstorming` | Select from 60 brainstorming methods (SCAMPER, Six Hats, etc.) |
 | `/grill-me` | Relentless Socratic alignment and stress-testing interview |
+| `/elicitation` | 98 structured methods to push LLM to refine output |
+| `/round-table` | Multi-agent stage-based roundtable discussions across all 11 phases and 20 agent roles |
 
 ### Data & Analytics
 
@@ -57,39 +59,35 @@ Vespyr organizes complex operations into atomic skills. Each skill is a folder w
 |---------|-------------|
 | `/analyze-data` | Data analysis companion — EDA, visualization, metric co-piloting |
 
-### Operations
+### Operations & State
 
 | Command | Description |
 |---------|-------------|
 | `/help-me` | Conversational project navigator and co-pilot |
 | `/status` | Quick snapshot of current project state |
 | `/sprint-status` | Display pipeline status as an interactive Kanban table |
-| `/phase` | Show/switch phases |
-| `/plan` | Standalone execution planning |
-| `/review` | Standalone code review |
-| `/test` | Run tests, summarize failures |
+| `/phase` | Show/switch phases and list phase artifacts |
 | `/kanban` | Display and update Kanban board |
 | `/memory` | Search archived project context |
 
-### Intelligence
+### Engineering Intelligence & Quality Gates
 
 | Command | Description |
 |---------|-------------|
-| `/code-graph` | Generate/scan dependency graphs |
+| `/review` | Standalone read-only code review and security audit |
+| `/test` | Run tests, analyze failures, and generate QA reports |
+| `/code-graph` | Generate/scan codebase dependency graphs |
 | `/doc-graph` | Generate/scan documentation links and trace coverage |
 | `/humanize` | AI-writing style detector and normalizer |
-| `/elicitation` | 69 structured methods to push LLM to refine output |
-| `/round-table` | Multi-agent stage-based roundtable discussions across all 11 phases and 20 agent roles |
 
-### Other & Customization
+### Authoring & Customization
 
 | Command | Description |
 |---------|-------------|
-| `/customize-skill` | Surgically customize an existing skill |
 | `/create-skill` | Create new skills, major rewrites, and evals |
+| `/customize-skill` | Surgically customize an existing skill |
 | `/create-agent` | Scaffold and register new agent personas |
 | `/customize-agent` | Preview TOML customization declarations for agents |
-| `/incident` | Production incident response |
 
 ## Pipeline Phase Table
 

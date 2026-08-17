@@ -104,6 +104,8 @@ Lifecycle Workflows:
   /motion              Motion research, motion spec, handoff to /develop
   /plan                Standalone task breakdown & worktree execution planning
   /develop             Core MVP cycle (architecture, implementation, QA)
+  /review              Standalone read-only code review and security audit
+  /test                Test execution, failure analysis, and QA reporting
   /launch              Release readiness, deployment, monitoring
   /iterate             Post-launch feature improvements from telemetry/data
   /retro               Post-cycle review & memory compaction
@@ -178,13 +180,23 @@ Deduplication: write validation rejects near-identical entries
 
 ──────────────────────────────────────────────────
 
+CLI & INTEGRITY TOOLING
+──────────────────────────────────────────────────
+Install / Wizard:   npx vespyr [--yes] [--target <dir>] [--harness <list>]
+Verify Manifest:    npx vespyr verify
+Audit Supply-Chain: npx vespyr audit
+Update Manifest:    npx vespyr manifest
+Sync Documentation: node bin/cli.js --sync-docs
+
+──────────────────────────────────────────────────
+
 KEY FILES
 ──────────────────────────────────────────────────
 Workflow              .agents/workflow.md
 Workflows & Skills    .agents/skills.md
 Troubleshooting       .agents/TROUBLESHOOTING.md
 Agent library         .agents/agents/
-Agent templates       .agents/agents/templates/
+Agent templates       .agents/templates/
 
 ──────────────────────────────────────────────────
 ```
