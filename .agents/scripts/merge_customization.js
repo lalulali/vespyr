@@ -9,91 +9,143 @@ const path = require('path');
 const AGENTS_DIR = path.join(__dirname, '..', 'agents');
 const CUSTOM_DIR = path.join(__dirname, '..', 'custom');
 
-function splitArrayItems(value, lineNumber) {
-  const items = [];
-  let current = '';
-  let quote = null;
+function parseTomlValue(raw, lineNum) {
+  const str = raw.trim();
+  if (str === '') throw new Error(`Empty value at line ${lineNum}`);
+  if (str === 'true') return true;
+  if (str === 'false') return false;
+  if (/^-?\d+$/.test(str)) return parseInt(str, 10);
+  if (/^-?\d+\.\d+$/.test(str)) return parseFloat(str);
 
-  for (let i = 0; i < value.length; i++) {
-    const char = value[i];
-    if ((char === '"' || char === "'") && value[i - 1] !== '\\') {
-      quote = quote === char ? null : quote || char;
-    }
-    if (char === ',' && !quote) {
-      if (!current.trim()) throw new Error(`Invalid empty array item at line ${lineNumber}`);
-      items.push(current.trim());
-      current = '';
-    } else {
-      current += char;
+  if (str.startsWith('"')) {
+    if (!str.endsWith('"') || str.length < 2) throw new Error(`Unclosed string at line ${lineNum}`);
+    try {
+      return JSON.parse(str);
+    } catch (e) {
+      throw new Error(`Invalid double-quoted string at line ${lineNum}: ${e.message}`);
     }
   }
 
-  if (quote) throw new Error(`Unclosed string at line ${lineNumber}`);
-  if (!current.trim()) throw new Error(`Invalid empty array item at line ${lineNumber}`);
-  items.push(current.trim());
-  return items;
-}
-
-function parseValue(rawValue, lineNumber) {
-  const value = rawValue.trim();
-
-  if (value === 'true') return true;
-  if (value === 'false') return false;
-  if (/^\d+$/.test(value)) return parseInt(value, 10);
-  if (/^\d+\.\d+$/.test(value)) return parseFloat(value);
-
-  if ((value.startsWith('"') || value.startsWith("'"))) {
-    const quote = value[0];
-    if (value.length < 2 || value[value.length - 1] !== quote) {
-      throw new Error(`Unclosed string at line ${lineNumber}`);
-    }
-    return value.slice(1, -1);
+  if (str.startsWith("'")) {
+    if (!str.endsWith("'") || str.length < 2) throw new Error(`Unclosed single-quoted string at line ${lineNum}`);
+    return str.slice(1, -1);
   }
 
-  if (value.startsWith('[') || value.endsWith(']')) {
-    if (!value.startsWith('[') || !value.endsWith(']')) {
-      throw new Error(`Malformed array at line ${lineNumber}`);
+  if (str.startsWith('[')) {
+    if (!str.endsWith(']')) throw new Error(`Unclosed array at line ${lineNum}`);
+    const inner = str.slice(1, -1).trim();
+    if (inner === '') return [];
+
+    const items = [];
+    let current = '';
+    let inQuote = null;
+    let bracketDepth = 0;
+    let braceDepth = 0;
+
+    for (let i = 0; i < inner.length; i++) {
+      const c = inner[i];
+      const prev = i > 0 ? inner[i - 1] : '';
+
+      if (inQuote) {
+        current += c;
+        if (c === inQuote && prev !== '\\') {
+          inQuote = null;
+        }
+      } else {
+        if (c === '"' || c === "'") {
+          inQuote = c;
+          current += c;
+        } else if (c === '[') {
+          bracketDepth++;
+          current += c;
+        } else if (c === ']') {
+          bracketDepth--;
+          current += c;
+        } else if (c === '{') {
+          braceDepth++;
+          current += c;
+        } else if (c === '}') {
+          braceDepth--;
+          current += c;
+        } else if (c === ',' && bracketDepth === 0 && braceDepth === 0) {
+          const itemTrimmed = current.trim();
+          if (itemTrimmed === '') throw new Error(`Empty element in array at line ${lineNum}`);
+          items.push(itemTrimmed);
+          current = '';
+        } else {
+          current += c;
+        }
+      }
     }
-    const inner = value.slice(1, -1).trim();
-    return inner ? splitArrayItems(inner, lineNumber).map(item => parseValue(item, lineNumber)) : [];
+
+    if (inQuote) throw new Error(`Unclosed string in array at line ${lineNum}`);
+    if (bracketDepth !== 0 || braceDepth !== 0) throw new Error(`Unbalanced brackets in array at line ${lineNum}`);
+
+    const lastTrimmed = current.trim();
+    if (lastTrimmed !== '') {
+      items.push(lastTrimmed);
+    }
+
+    return items.map(item => parseTomlValue(item, lineNum));
   }
 
-  throw new Error(`Unsupported TOML value at line ${lineNumber}`);
+  if (str.startsWith('{') && str.endsWith('}')) {
+    const inner = str.slice(1, -1).trim();
+    if (inner === '') return {};
+    const res = {};
+    const parts = inner.split(',');
+    for (const part of parts) {
+      const kv = part.match(/^([A-Za-z0-9_-]+)\s*=\s*(.+)$/);
+      if (!kv) throw new Error(`Invalid inline table entry at line ${lineNum}: "${part}"`);
+      res[kv[1].trim()] = parseTomlValue(kv[2].trim(), lineNum);
+    }
+    return res;
+  }
+
+  throw new Error(`Unsupported TOML value at line ${lineNum}: "${str}"`);
 }
 
 function parseToml(content) {
   const result = {};
-  const lines = content.split('\n');
+  const rawLines = content.split(/\r?\n/);
   let currentTable = result;
-  const tableStack = [];
-  let currentPath = '';
 
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trim();
+  let i = 0;
+  while (i < rawLines.length) {
+    let line = rawLines[i].trim();
+    const lineNum = i + 1;
+    i++;
 
     if (line === '' || line.startsWith('#')) continue;
 
-    const headerMatch = line.match(/^\[([^\]]+)\]$/);
+    const headerMatch = line.match(/^\[([^\[\]]+)\]$/);
     if (headerMatch) {
-      currentPath = headerMatch[1];
-      const parts = currentPath.split('.');
+      const parts = headerMatch[1].split('.');
       currentTable = result;
       for (const part of parts) {
+        if (currentTable[part] !== undefined && (typeof currentTable[part] !== 'object' || Array.isArray(currentTable[part]) || currentTable[part] === null)) {
+          throw new Error(`Cannot define table [${headerMatch[1]}] at line ${lineNum}: key "${part}" is already defined as non-table`);
+        }
         if (!currentTable[part]) currentTable[part] = {};
         currentTable = currentTable[part];
       }
       continue;
     }
 
-    const arrayHeaderMatch = line.match(/^\[\[([^\]]+)\]\]$/);
-    if (arrayHeaderMatch) {
-      currentPath = arrayHeaderMatch[1];
-      const parts = currentPath.split('.');
+    const arrHeaderMatch = line.match(/^\[\[([^\[\]]+)\]\]$/);
+    if (arrHeaderMatch) {
+      const parts = arrHeaderMatch[1].split('.');
       const arrKey = parts.pop();
       currentTable = result;
       for (const part of parts) {
+        if (currentTable[part] !== undefined && (typeof currentTable[part] !== 'object' || Array.isArray(currentTable[part]) || currentTable[part] === null)) {
+          throw new Error(`Cannot define array table [[${arrHeaderMatch[1]}]] at line ${lineNum}: key "${part}" is already defined as non-table`);
+        }
         if (!currentTable[part]) currentTable[part] = {};
         currentTable = currentTable[part];
+      }
+      if (currentTable[arrKey] !== undefined && !Array.isArray(currentTable[arrKey])) {
+        throw new Error(`Cannot redefine non-array key "${arrKey}" as table array at line ${lineNum}`);
       }
       if (!Array.isArray(currentTable[arrKey])) currentTable[arrKey] = [];
       const newItem = {};
@@ -102,14 +154,24 @@ function parseToml(content) {
       continue;
     }
 
-    const kvMatch = line.match(/^([A-Za-z0-9_-]+)\s*=\s*(.+)$/);
+    const kvMatch = line.match(/^([A-Za-z0-9_-]+)\s*=\s*(.*)$/);
     if (kvMatch) {
       const key = kvMatch[1];
-      currentTable[key] = parseValue(kvMatch[2], i + 1);
+      let valStr = kvMatch[2].trim();
+
+      if (valStr.startsWith('[') && !valStr.endsWith(']')) {
+        while (i < rawLines.length && !valStr.endsWith(']')) {
+          const nextLine = rawLines[i].trim();
+          i++;
+          valStr += ' ' + nextLine;
+        }
+      }
+
+      currentTable[key] = parseTomlValue(valStr, lineNum);
       continue;
     }
 
-    throw new Error(`Invalid TOML syntax at line ${i + 1}`);
+    throw new Error(`Invalid TOML syntax at line ${lineNum}: "${line}"`);
   }
 
   return result;

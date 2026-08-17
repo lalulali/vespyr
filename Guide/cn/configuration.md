@@ -60,16 +60,19 @@ graph:
 
 CLI 标志（`--src`、`--docs`、`--ids`）会覆盖配置值，用于一次性扫描。
 
-## 自定义智能体覆盖
+## 自定义智能体声明（仅限预览）
 
-个性化智能体行为且不被升级覆盖：
+声明特定于项目的智能体配置覆盖项，在升级时得以保留且无需直接编辑智能体源文件：
 
 ```
 .agents/agents/<name>/customize.toml   # 可选的出厂默认值
-.agents/custom/<name>.toml              # 你的声明（永不被触碰）
+.agents/custom/<name>.toml              # 你的声明（升级时永不覆盖）
 ```
 
-示例——让 developer 更简洁：
+> [!NOTE]
+> 覆盖文件为经过验证的配置声明。当前尚无运行时组件在加载智能体时动态读取 `.agents/custom/*.toml`，因此声明目前不会改变运行时的实际行为。你可以使用 `node .agents/scripts/merge_customization.js <agent-name>` 或 `/customize-agent` 技能编写并预览合并结果。
+
+示例——用于调整 developer 参数的声明：
 
 ```toml
 # .agents/custom/developer.toml
@@ -91,7 +94,7 @@ verbosity = "concise"
 node .agents/scripts/merge_customization.js <agent-name>
 ```
 
-使用 `/customize-agent` 描述意图、映射覆盖字段、写入 TOML 并验证合并预览。当前尚未接入运行时消费这些声明，因此预览不会改变智能体行为。
+使用 `/customize-agent` 描述意图、映射覆盖字段、写入 TOML 并验证合并预览。
 
 ## 记忆配置
 

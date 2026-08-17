@@ -72,7 +72,7 @@ Ask the user or extract from context:
 
 Write `.agents/agents/<name>.md` modeled on an existing agent (e.g., `developer.md` or `qa-engineer.md`):
 
-```markdown
+````markdown
 ---
 name: <name>
 icon: 🤖
@@ -136,7 +136,7 @@ Follow `.agents/references/citation-format.md`; cite real sources inline with fo
 ```
 node .agents/scripts/orchestrator_state.js session-start --agent <name> --domain <domain> --goal "{goal}"
 ```
-```
+````
 
 Keep it minimal and role-specific. Do not copy blocks the agent doesn't need. Replace every placeholder before continuing: `icon` must be a single emoji, `description` at least 10 characters, `version` semver, and `origin` must be `core`, `custom`, or `module:<name>` — these are enforced by `validate_frontmatter.js`.
 

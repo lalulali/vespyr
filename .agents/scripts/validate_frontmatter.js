@@ -52,8 +52,11 @@ function validateAgent(filePath) {
   }
 
   const originMatch = fm.match(/^origin: (.+)$/m);
-  if (originMatch && originMatch[1] !== 'core' && originMatch[1] !== 'custom' && !/^module:.+/.test(originMatch[1])) {
-    errors.push(`origin "${originMatch[1]}" must be "core", "custom", or "module:<name>"`);
+  if (originMatch) {
+    const originVal = originMatch[1].trim();
+    if (originVal !== 'core' && originVal !== 'custom' && !/^module:[a-zA-Z0-9_-]+$/.test(originVal)) {
+      errors.push(`origin "${originMatch[1]}" must be "core", "custom", or "module:<name>"`);
+    }
   }
 
   const mentorMatch = fm.match(/^channeled_mentor: (.+)$/m);

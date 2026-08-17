@@ -60,16 +60,19 @@ graph:
 
 CLI flags (`--src`, `--docs`, `--ids`) override config values for one-off scans.
 
-## Custom Agent Overrides
+## Custom Agent Declarations (Preview Only)
 
-Personalize agent behavior without being overwritten by upgrades:
+Declare project-specific agent configuration overrides that survive upgrades without editing agent source files:
 
 ```
 .agents/agents/<name>/customize.toml   # Optional factory defaults
-.agents/custom/<name>.toml              # Your declaration (never touched)
+.agents/custom/<name>.toml              # Your declaration (never touched by upgrades)
 ```
 
-Example — make the developer more concise:
+> [!NOTE]
+> Override files are validated configuration declarations. No runtime harness component currently consumes `.agents/custom/*.toml` dynamically when loading agents, so declarations do not yet alter live agent execution. You can author and preview them using `node .agents/scripts/merge_customization.js <agent-name>` or the `/customize-agent` skill.
+
+Example declaration for developer tuning:
 
 ```toml
 # .agents/custom/developer.toml
@@ -91,7 +94,7 @@ To create and preview a customization declaration:
 node .agents/scripts/merge_customization.js <agent-name>
 ```
 
-Use `/customize-agent` to describe intent, map it to override fields, write the TOML, and verify the merged preview. Runtime consumption of these declarations is not wired yet, so the preview does not change agent behavior.
+Use `/customize-agent` to describe intent, map it to override fields, write the TOML, and verify the merged preview.
 
 ## Memory Configuration
 
