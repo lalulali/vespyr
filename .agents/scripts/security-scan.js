@@ -231,6 +231,12 @@ function main() {
   const jsonMode = args.includes('--json');
   const dirFlag = args.indexOf('--dir');
   const specFlag = args.indexOf('--spec');
+  const faultFlag = args.indexOf('--fault-inject');
+
+  if (faultFlag !== -1 && args[faultFlag + 1]) {
+    const faultId = args[faultFlag + 1];
+    return failClosed(`Fault injection triggered: ${faultId}`, jsonMode);
+  }
 
   // FAULT-1: a scan without an explicit audit-spec.json is fail-open by
   // definition — refuse the old default-path fallback (exit 2, never scan).
@@ -509,6 +515,16 @@ function main() {
   }
 
   process.exitCode = uniqueFindings.length ? 1 : 0;
+  return { exitCode: process.exitCode, findings: uniqueFindings };
 }
 
-main();
+if (require.main === module) {
+  main();
+}
+
+module.exports = {
+  main,
+  shannonEntropy,
+  minWindowEntropy,
+  looksLikeBase64
+};

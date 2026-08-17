@@ -113,7 +113,7 @@
       "id": "INJ-PROMPT",
       "label": "INJ-PROMPT",
       "path": "**/*.md",
-      "pattern": "ignore (all |any )?(previous|prior|earlier) instructions|disregard (all |any )?(previous|prior) instructions|forget (all |any )?(previous|prior) instructions",
+      "pattern": "ignore\\s+(all\\s+|any\\s+)?(previous|prior|earlier)\\s+instructions|disregard\\s+(all\\s+|any\\s+)?(previous|prior)\\s+instructions|forget\\s+(all\\s+|any\\s+)?(previous|prior)\\s+instructions",
       "severity": "high",
       "mode": "regex"
     },
@@ -138,7 +138,7 @@
         "**/.agents/package-lock.json",
         "**/*.lock"
       ],
-      "known_fp_note": "npm integrity fields (sha512-...) and lockfile hashes are legitimate base64 blobs; excluded as documented known-FP class (02f \u00a710, Nina FP budget)",
+      "known_fp_note": "npm integrity fields (sha512-...) and lockfile hashes are legitimate base64 blobs; excluded as documented known-FP class (02f §10, Nina FP budget)",
       "known_fp_classes": [
         "camelCase-acronym word runs joined by single / (e.g. Substitute/Combine/Adapt)",
         "URL fragments with repeated slashes or dots (file://, raw.githubusercontent.com)",
@@ -150,7 +150,7 @@
       "id": "INJ-ROLE",
       "label": "INJ-ROLE",
       "path": "**/*.md",
-      "pattern": "you are now (the )?(system|root|superuser)|act as (the )?system\\b|new system prompt:",
+      "pattern": "you\\s+are\\s+now\\s+(the\\s+)?(system|root|superuser)|act\\s+as\\s+(the\\s+)?system\\b|new\\s+system\\s+prompt:",
       "severity": "medium",
       "mode": "regex"
     },
@@ -176,13 +176,13 @@
       "id": "INJ-SECRET",
       "label": "INJ-SECRET",
       "path": "**",
-      "pattern": "AKIA[0-9A-Z]{16}|ghp_[A-Za-z0-9]{36}|sk-[A-Za-z0-9]{20,}|xox[baprs]-[A-Za-z0-9-]{10,}|AIza[0-9A-Za-z_-]{35}|(api[_-]?key|secret|token|password)\\s*[:=]\\s*[\"'][A-Za-z0-9_\\-./+]{16,}[\"']",
+      "pattern": "AKIA[0-9A-Z]{16}|ghp_[A-Za-z0-9]{36}|sk-[A-Za-z0-9_-]{20,}|xox[baprs]-[A-Za-z0-9-]{10,}|AIza[0-9A-Za-z_-]{35}|(api[_-]?key|secret|token|password)\\s*[:=]\\s*[\"'][A-Za-z0-9_\\-./+]{16,}[\"']",
       "severity": "medium",
       "mode": "regex+entropy",
       "entropy": {
         "min_shannon_per_char": 2.6,
         "window": "8-char sliding",
-        "note": "threshold 2.6 (max achievable for 8 distinct chars is 3.0; 3.5 was unreachable \u2014 rule could never fire). Regex match with entropy < threshold is NOT a finding (negative fixture: AKIA + repeated chars -> ~0.0)."
+        "note": "threshold 2.6 (max achievable for 8 distinct chars is 3.0; 3.5 was unreachable — rule could never fire). Regex match with entropy < threshold is NOT a finding (negative fixture: AKIA + repeated chars -> ~0.0)."
       }
     },
     {

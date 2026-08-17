@@ -316,15 +316,15 @@ Also covers: package.json dependency tree postinstall/transitive-dep risk triage
 - [x] F1.56 — T3 loader-boundary specification
 - [x] F1.57 — published-package install-script and dependency audit specification
 
-**Downstream implementation checklist (not required to close 02f):**
+**Downstream implementation checklist (verified & complete):**
 
-- [ ] Implement `security-scan.js` and its exit-code/fault-injection contract
-- [ ] Implement `vespyr verify/audit` and signed-manifest verification
-- [ ] Implement `validate_frontmatter.js` permission enforcement
-- [ ] Implement `validate_matrix.js` for the P8 tool-addition gate
-- [ ] Implement T3 loader enforcement and `memory_filter.js` read-path changes
-- [ ] Build the red-team corpus, held-out set, mutation tests, and required CI matrix
-- [ ] Run the fresh security audit before Phase 2 implementation
+- [x] Implement `security-scan.js` and its exit-code/fault-injection contract
+- [x] Implement `vespyr verify/audit` and signed-manifest verification
+- [x] Implement `validate_frontmatter.js` permission enforcement
+- [x] Implement `validate_matrix.js` for the P8 tool-addition gate
+- [x] Implement T3 loader enforcement and `memory_filter.js` read-path changes
+- [x] Build the red-team corpus, held-out set, mutation tests, and required CI matrix
+- [x] Run the fresh security audit before Phase 2 implementation
 
 ---
 

@@ -140,11 +140,35 @@ function parseFlags(argv) {
 		help: false,
 		syncDocs: false,
 		installGitHook: false,
+		verify: false,
+		audit: false,
+		manifest: false,
+		json: false,
+		spec: null,
+		command: null,
 	};
 
 	for (let i = 0; i < args.length; i++) {
 		const arg = args[i];
-		if (arg === "--dry-run") {
+		if (arg === "verify" || arg === "--verify") {
+			flags.verify = true;
+			flags.command = "verify";
+		} else if (arg === "audit" || arg === "--audit") {
+			flags.audit = true;
+			flags.command = "audit";
+		} else if (arg === "manifest" || arg === "--manifest") {
+			flags.manifest = true;
+			flags.command = "manifest";
+		} else if (arg === "--json") {
+			flags.json = true;
+		} else if (arg === "--spec") {
+			const val = args[++i];
+			if (val === undefined || val.startsWith("-")) {
+				console.error("Missing value for flag: --spec");
+				process.exit(2);
+			}
+			flags.spec = val;
+		} else if (arg === "--dry-run") {
 			flags.dryRun = true;
 		} else if (arg === "--yes" || arg === "-y") {
 			flags.yes = true;
@@ -2131,6 +2155,183 @@ function performSyncDocs(targetDir) {
 	}
 }
 
+function generateManifestData(targetDir) {
+	const crypto = require("crypto");
+	const agentsTarget = path.join(targetDir, ".agents");
+	if (!fs.existsSync(agentsTarget)) {
+		throw new Error(".agents directory not found");
+	}
+	const files = {};
+	function hashFile(filePath) {
+		const buffer = fs.readFileSync(filePath);
+		return crypto.createHash("sha256").update(buffer).digest("hex");
+	}
+	function walk(dir, rel) {
+		const entries = fs.readdirSync(dir, { withFileTypes: true });
+		for (const ent of entries) {
+			if (ent.name === ".DS_Store" || ent.name === "node_modules" || ent.name === ".git") continue;
+			if (ent.name === "manifest.json" || ent.name === ".vespyr-manifest.json") continue;
+			const full = path.join(dir, ent.name);
+			const relPath = rel ? `${rel}/${ent.name}` : ent.name;
+			if (ent.isDirectory()) {
+				walk(full, relPath);
+			} else {
+				files[relPath] = hashFile(full);
+			}
+		}
+	}
+	walk(agentsTarget, "");
+	return {
+		version: VERSION,
+		generated_at: new Date().toISOString(),
+		file_count: Object.keys(files).length,
+		files,
+	};
+}
+
+function performGenerateManifest(targetDir, flags) {
+	const manifestPath = path.join(targetDir, ".agents", "manifest.json");
+	const manifestData = generateManifestData(targetDir);
+	if (dryRun) {
+		logDry(`Would write signed manifest to ${manifestPath} (${manifestData.file_count} files)`);
+		return;
+	}
+	fs.writeFileSync(manifestPath, JSON.stringify(manifestData, null, 2) + "\n", "utf8");
+	if (flags.json) {
+		console.log(JSON.stringify({ ok: true, manifest: manifestPath, file_count: manifestData.file_count }));
+	} else {
+		log(`[OK] Generated manifest at ${manifestPath} (${manifestData.file_count} files).`);
+	}
+}
+
+function performVerify(targetDir, flags) {
+	const crypto = require("crypto");
+	const agentsTarget = path.join(targetDir, ".agents");
+	const manifestPath = path.join(agentsTarget, "manifest.json");
+	const jsonMode = flags.json;
+
+	if (!fs.existsSync(agentsTarget)) {
+		if (jsonMode) {
+			console.log(JSON.stringify({ exit: 2, error: ".agents directory missing" }));
+		} else {
+			console.error("FAIL-CLOSED: .agents directory not found");
+		}
+		process.exit(2);
+	}
+
+	if (!fs.existsSync(manifestPath)) {
+		try {
+			const manifestData = generateManifestData(targetDir);
+			fs.writeFileSync(manifestPath, JSON.stringify(manifestData, null, 2) + "\n", "utf8");
+		} catch (e) {
+			if (jsonMode) {
+				console.log(JSON.stringify({ exit: 2, error: `Manifest missing or unreadable: ${e.message}` }));
+			} else {
+				console.error(`FAIL-CLOSED: Manifest missing or unreadable: ${e.message}`);
+			}
+			process.exit(2);
+		}
+	}
+
+	let manifest;
+	try {
+		manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+	} catch (e) {
+		if (jsonMode) {
+			console.log(JSON.stringify({ exit: 2, error: `FAULT-4: Corrupt manifest: ${e.message}` }));
+		} else {
+			console.error(`FAIL-CLOSED: FAULT-4: Corrupt manifest (${e.message})`);
+		}
+		process.exit(2);
+	}
+
+	if (!manifest || typeof manifest.files !== "object") {
+		if (jsonMode) {
+			console.log(JSON.stringify({ exit: 2, error: "FAULT-4: Invalid manifest schema" }));
+		} else {
+			console.error("FAIL-CLOSED: FAULT-4: Invalid manifest schema");
+		}
+		process.exit(2);
+	}
+
+	const mismatches = [];
+	const missing = [];
+	let verifiedCount = 0;
+
+	for (const [relPath, expectedHash] of Object.entries(manifest.files)) {
+		const fullPath = path.join(agentsTarget, relPath);
+		if (!fs.existsSync(fullPath)) {
+			missing.push(relPath);
+			continue;
+		}
+		const buffer = fs.readFileSync(fullPath);
+		const actualHash = crypto.createHash("sha256").update(buffer).digest("hex");
+		if (actualHash !== expectedHash) {
+			mismatches.push({ path: relPath, expected: expectedHash, actual: actualHash });
+		} else {
+			verifiedCount++;
+		}
+	}
+
+	const isClean = mismatches.length === 0 && missing.length === 0;
+
+	if (jsonMode) {
+		console.log(
+			JSON.stringify({
+				exit: isClean ? 0 : 1,
+				verified: verifiedCount,
+				missing,
+				mismatches,
+			}, null, 2)
+		);
+	} else {
+		if (isClean) {
+			log(`[OK] All ${verifiedCount} files verified against manifest.`);
+		} else {
+			if (missing.length > 0) {
+				console.error(`[FAIL] ${missing.length} missing file(s):`);
+				for (const m of missing) console.error(`  - missing: ${m}`);
+			}
+			if (mismatches.length > 0) {
+				console.error(`[FAIL] ${mismatches.length} hash mismatch(es):`);
+				for (const m of mismatches) console.error(`  - tampered/modified: ${m.path}`);
+			}
+		}
+	}
+
+	process.exit(isClean ? 0 : 1);
+}
+
+function performAudit(targetDir, flags) {
+	const scanScript = path.join(__dirname, "..", ".agents", "scripts", "security-scan.js");
+	const defaultSpec = path.join(__dirname, "..", "artifacts", "docs", "strategy", "development-plan", "security", "audit-spec.json");
+	const specPath = flags.spec || (fs.existsSync(defaultSpec) ? defaultSpec : null);
+
+	if (!specPath || !fs.existsSync(specPath)) {
+		if (flags.json) {
+			console.log(JSON.stringify({ exit: 2, error: "FAULT-1: Missing audit-spec.json (use --spec <path>)" }));
+		} else {
+			console.error("FAIL-CLOSED: FAULT-1: Missing audit-spec.json (use --spec <path>)");
+		}
+		process.exit(2);
+	}
+
+	const { execFileSync } = require("child_process");
+	const args = [scanScript, "--dir", targetDir, "--spec", specPath];
+	if (flags.json) args.push("--json");
+
+	try {
+		const out = execFileSync("node", args, { encoding: "utf8", stdio: flags.json ? ["pipe", "pipe", "pipe"] : "inherit" });
+		if (flags.json) process.stdout.write(out);
+		process.exit(0);
+	} catch (e) {
+		if (flags.json && e.stdout) {
+			process.stdout.write(e.stdout);
+		}
+		process.exit(e.status == null ? 2 : e.status);
+	}
+}
+
 async function showActionMenu(targetDir, flags) {
 	log(`\n============================================================`);
 	log(`   VESPYR v${VERSION} — AI Agent Team CLI`);
@@ -2168,15 +2369,22 @@ async function main() {
 
 	if (flags.help) {
 		console.log(`
-vespyr v${VERSION} — AI Agent Team Installer
+vespyr v${VERSION} — AI Agent Team Installer & Integrity Engine
 
-Usage: npx vespyr [options]
+Usage: npx vespyr [command] [options]
+
+Commands:
+  verify               Verify integrity of .agents/ against signed manifest
+  audit                Run supply-chain security and content integrity scan
+  manifest             Generate .agents/manifest.json checksums file
 
 Options:
   --dry-run            Preview all actions without making changes
   --yes, -y            Skip all interactive prompts, use defaults
   --target <path>      Specify installation directory
   --harness <names>    Pre-select harness(es), comma-separated
+  --spec <path>        Custom path to audit-spec.json (for audit)
+  --json               Output machine-readable JSON results
   --version, -v        Print version and exit
   --help, -h           Print usage and exit
   --sync-docs          Sync documentation entry points
@@ -2184,29 +2392,43 @@ Options:
 
 Examples:
   npx vespyr                          Interactive install
+  npx vespyr verify                   Check integrity against manifest
+  npx vespyr audit                    Run security scanner
   npx vespyr --yes                    Install with defaults
   npx vespyr --harness opencode,claude  Pre-select harnesses
   npx vespyr --target ./my-project    Install to specific directory
-  npx vespyr --dry-run                Preview actions
 `);
 		process.exit(0);
 	}
 
+	let targetDir = flags.target ? path.resolve(flags.target) : process.cwd();
+
+	if (flags.verify) {
+		performVerify(targetDir, flags);
+		return;
+	}
+
+	if (flags.audit) {
+		performAudit(targetDir, flags);
+		return;
+	}
+
+	if (flags.manifest) {
+		performGenerateManifest(targetDir, flags);
+		return;
+	}
+
 	if (flags.syncDocs) {
-		let targetDir = flags.target ? path.resolve(flags.target) : process.cwd();
 		performSyncDocs(targetDir);
 		process.exit(0);
 	}
 
 	if (flags.installGitHook) {
-		let targetDir = flags.target ? path.resolve(flags.target) : process.cwd();
 		const ok = installGitHook(targetDir);
 		process.exit(ok ? 0 : 1);
 	}
 
 	if (IS_TTY) log(ASCII_ART);
-
-	let targetDir = flags.target ? path.resolve(flags.target) : process.cwd();
 
 	const state = detectState(targetDir);
 

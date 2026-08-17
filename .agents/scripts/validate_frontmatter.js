@@ -13,9 +13,12 @@ const REQUIRED_FIELDS = [
   'human_name',
   'mode',
   'capabilities',
+  'permission',
   'origin',
   'channeled_mentor',
 ];
+
+const VALID_PERMISSIONS = ['bash', 'edit', 'glob', 'grep', 'question', 'read', 'webfetch'];
 
 function parseFrontmatter(content) {
   const match = content.match(/^---\n([\s\S]*?)\n---/);
@@ -38,6 +41,44 @@ function validateAgent(filePath) {
   for (const field of REQUIRED_FIELDS) {
     if (!fm.includes(`${field}:`)) {
       errors.push(`missing ${field}`);
+    }
+  }
+
+  // Permission Whitelist & Drift Enforcement (02f §6.3, F1.49)
+  const hasPermBlock = fm.match(/^permission:\s*$/m) || fm.includes('permission:');
+  if (!hasPermBlock) {
+    errors.push(`missing permission block`);
+  } else {
+    const parsedPerms = {};
+    let inPerm = false;
+    for (const line of fm.split(/\r?\n/)) {
+      if (line.match(/^permission:\s*$/)) {
+        inPerm = true;
+        continue;
+      }
+      if (inPerm) {
+        if (line.match(/^\s+[a-z_]+:\s*(allow|deny)$/)) {
+          const kv = line.trim().match(/^([a-z_]+):\s*(allow|deny)$/);
+          const [_, key, val] = kv;
+          if (!VALID_PERMISSIONS.includes(key)) {
+            errors.push(`unregistered permission key "${key}" (closed registry: ${VALID_PERMISSIONS.join(', ')})`);
+          }
+          parsedPerms[key] = val;
+        } else if (line.match(/^\s+[a-z_]+:/)) {
+          errors.push(`invalid permission entry: "${line.trim()}" (must be <key>: allow|deny)`);
+        } else if (line.match(/^\S/)) {
+          inPerm = false;
+        }
+      }
+    }
+
+    // Check drift against tools.write
+    const toolsWriteFalse = fm.includes('write: false');
+    if (toolsWriteFalse && parsedPerms['edit'] === 'allow') {
+      errors.push(`permission drift: tools.write is false but permission.edit is "allow" (must be "deny")`);
+    }
+    if (parsedPerms['edit'] === 'deny' && fm.includes('write: true')) {
+      errors.push(`permission drift: permission.edit is deny but tools.write is true`);
     }
   }
 
