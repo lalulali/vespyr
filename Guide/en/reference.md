@@ -77,13 +77,12 @@ Before the full context load, the memory controller surfaces relevant past decis
 
 ```
 artifacts/memory/
-├── project-context.md            # Stack, constraints, architecture
+├── project-context.md            # Stack, constraints, architecture, runtime state fence
 ├── active-decisions.md           # Critical choices in flight
 ├── lessons-learned.md            # Engineering insights, bugs fixed
 ├── patterns-and-conventions.md   # Established patterns
 ├── blockers-and-risks.md         # Active blockers
-├── pending-questions/            # Open questions by topic
-├── agent-notes/                  # Per-agent observations
+├── session-summaries/            # Rolling live cursor (latest.md) & history
 └── archive/                      # Compacted old entries (NDJSON index)
 ```
 

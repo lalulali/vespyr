@@ -151,11 +151,6 @@ The controller returns filtered context covering: testing framework and coverage
 **Write after completing:**
 
 ```
-@memory-controller write agent-notes/qa-notes.md
-### [TEST] {title} [date: YYYY-MM-DD] [agent: @qa-engineer]
-{flaky test or coverage gap}
-**Status:** active
-
 @memory-controller write patterns-and-conventions.md
 ### [TEST] {title} [date: YYYY-MM-DD] [agent: @qa-engineer]
 {testing pattern established}

@@ -181,11 +181,6 @@ The controller returns filtered context covering: tech stack and infrastructure,
 {model pattern established}
 **Status:** active
 
-@memory-controller write agent-notes/ml-ai-notes.md
-### [ML] {title} [date: YYYY-MM-DD] [agent: @ml-ai-engineer]
-{ML infrastructure note}
-**Status:** active
-
 @memory-controller write lessons-learned.md
 ### [LESSON] {title} [date: YYYY-MM-DD] [agent: @ml-ai-engineer]
 {ML-specific lesson}

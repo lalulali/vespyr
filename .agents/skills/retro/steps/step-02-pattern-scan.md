@@ -21,9 +21,8 @@ Find structural patterns in agent notes, lessons learned, and memory files. A si
 ```
 @memory-controller load product-manager [retrospective pattern scan]
 @memory-controller load-full lessons-learned.md
-@memory-controller load-full agent-notes/developer-notes.md
-@memory-controller load-full agent-notes/tech-lead-notes.md
 @memory-controller load-full patterns-and-conventions.md
+@memory-controller load-full active-decisions.md
 ```
 
 Also review:

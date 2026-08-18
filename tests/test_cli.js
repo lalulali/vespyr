@@ -498,16 +498,17 @@ describe('Test 7: scaffoldArtifacts()', () => {
     assert.ok(fs.existsSync(path.join(tmpDir, 'artifacts', 'existing.txt')));
   });
 
-  it('should create per-agent pending-questions subdirectories', () => {
+  it('should create consolidated memory directory layout (archive, session-summaries) and omit ghost folders', () => {
     scaffoldArtifacts(tmpDir, 'test-project');
 
-    const pendingDir = path.join(tmpDir, 'artifacts', 'memory', 'pending-questions');
-    assert.ok(fs.existsSync(pendingDir));
-    const dirs = fs.readdirSync(pendingDir);
-    assert.ok(dirs.length >= 20);
+    const memoryDir = path.join(tmpDir, 'artifacts', 'memory');
+    assert.ok(fs.existsSync(path.join(memoryDir, 'archive')));
+    assert.ok(fs.existsSync(path.join(memoryDir, 'session-summaries')));
+    assert.ok(!fs.existsSync(path.join(memoryDir, 'pending-questions')));
+    assert.ok(!fs.existsSync(path.join(memoryDir, 'agent-notes')));
   });
 
-  it('should seed 5 memory markdown files', () => {
+  it('should seed 5 memory markdown files with machine state fence', () => {
     scaffoldArtifacts(tmpDir, 'test-project');
 
     const memoryDir = path.join(tmpDir, 'artifacts', 'memory');
@@ -516,6 +517,11 @@ describe('Test 7: scaffoldArtifacts()', () => {
     assert.ok(fs.existsSync(path.join(memoryDir, 'patterns-and-conventions.md')));
     assert.ok(fs.existsSync(path.join(memoryDir, 'lessons-learned.md')));
     assert.ok(fs.existsSync(path.join(memoryDir, 'blockers-and-risks.md')));
+
+    const ctx = fs.readFileSync(path.join(memoryDir, 'project-context.md'), 'utf8');
+    assert.ok(ctx.includes('<!-- BEGIN MACHINE STATE -->'));
+    assert.ok(ctx.includes('<!-- END MACHINE STATE -->'));
+    assert.ok(ctx.includes('Engine Version: 2.0.7'));
   });
 });
 

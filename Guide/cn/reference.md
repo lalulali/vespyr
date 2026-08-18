@@ -77,14 +77,13 @@ Vespyr 的 20 个智能体分为三大功能类别（核心 Swarm、专门领域
 
 ```
 artifacts/memory/
-├── project-context.md            # 技术栈、约束、架构
+├── project-context.md            # 技术栈、约束、架构、运行状态栅栏
 ├── active-decisions.md           # 进行中的关键选择
 ├── lessons-learned.md            # 工程洞察、已修复的 Bug
 ├── patterns-and-conventions.md   # 已建立的模式
 ├── blockers-and-risks.md         # 活跃阻塞项
-├── pending-questions/            # 按主题分类的待解决问题
-├── agent-notes/                  # 每个智能体的观察笔记
-├── archive/                      # 已压缩的旧条目（NDJSON 索引）
+├── session-summaries/            # 滚动实时游标 (latest.md) 与历史
+└── archive/                      # 已压缩的旧条目（NDJSON 索引）
 ```
 
 ### 压缩

@@ -56,9 +56,7 @@ Create `artifacts/memory/` with:
 - `patterns-and-conventions.md` — pre-populate with discovered code patterns
 - `lessons-learned.md` — empty
 - `blockers-and-risks.md` — empty
-- `agent-notes/` — empty directory
 - `session-summaries/` — empty directory
-- `pending-questions/` — create a subdirectory inside for each of the core agent personas (e.g. `founder/`, `architect/`, etc.)
 - `archive/` — empty directory
 
 ## Step 4: Detect project type & recommended pipeline

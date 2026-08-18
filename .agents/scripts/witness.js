@@ -58,9 +58,15 @@ function checkEntryFile(filePath, relName) {
   flush();
 
   let entryCount = 0;
-  for (const section of sections) {
+  for (let idx = 0; idx < sections.length; idx++) {
+    const section = sections[idx];
     const bodyText = section.body.replace(/^#{2,3}\s.*$/m, '').trim();
     if (!bodyText) {
+      // Level-2 category headers followed by level-3 sub-entries are valid
+      const nextSection = sections[idx + 1];
+      if (section.level === 2 && nextSection && nextSection.level === 3) {
+        continue;
+      }
       errors.push(`empty section: "${section.header}"`);
       continue;
     }
@@ -154,13 +160,6 @@ function collectFiles(dir) {
     if (fs.existsSync(p)) files.push({ rel: name, path: p, kind: 'entry' });
   }
 
-  const agentNotes = path.join(dir, 'agent-notes');
-  if (fs.existsSync(agentNotes)) {
-    for (const f of fs.readdirSync(agentNotes)) {
-      if (f.endsWith('.md')) files.push({ rel: 'agent-notes/' + f, path: path.join(agentNotes, f), kind: 'entry' });
-    }
-  }
-
   const sessions = path.join(dir, 'session-summaries');
   if (fs.existsSync(sessions)) {
     for (const f of fs.readdirSync(sessions)) {
@@ -174,7 +173,9 @@ function collectFiles(dir) {
     if (fs.existsSync(ndjson)) files.push({ rel: 'archive/index.ndjson', path: ndjson, kind: 'archive' });
     for (const f of fs.readdirSync(archive)) {
       const p = path.join(archive, f);
-      if (fs.statSync(p).isDirectory()) {
+      if (f.endsWith('.md')) {
+        files.push({ rel: 'archive/' + f, path: p, kind: 'entry' });
+      } else if (fs.statSync(p).isDirectory()) {
         for (const sf of fs.readdirSync(p)) {
           if (sf.endsWith('.md')) files.push({ rel: 'archive/' + f + '/' + sf, path: path.join(p, sf), kind: 'entry' });
         }
@@ -213,7 +214,7 @@ function main() {
     console.log(`Usage:
   node witness.js check [--dir artifacts/memory]
 
-Checks every memory file (core, agent-notes, session-summaries, archive) against
+Checks every memory file (core, session-summaries, archive) against
 the memory-entry conventions. Exits non-zero if any file fails.`);
     process.exit(0);
   }

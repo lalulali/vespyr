@@ -146,14 +146,13 @@ Operations & Customization:
 
 SHARED MEMORY (artifacts/memory/)
 ──────────────────────────────────────────────────
-project-context.md           Static: project basics, tech stack
-session-checkpoints/checkpoint.md  LIVE rolling cursor (in-progress loop state) — auto-emitted by orchestrator_state.js
+project-context.md           Static/Machine: project basics, tech stack, runtime fence
 active-decisions.md          Dynamic: current decisions, rationale
 patterns-and-conventions.md  Dynamic: discovered patterns
 lessons-learned.md           Dynamic: insights from each phase
 blockers-and-risks.md        Dynamic: active blockers
-agent-notes/*.md             Per-agent accumulated knowledge
-session-summaries/latest.md  Most recent ENDED session context (~100 tokens)
+teaching-style.md            Dynamic: teaching preferences (for @shifu)
+session-summaries/latest.md  Live authoritative cursor & last session summary (~100 tokens)
 session-summaries/history.md Full session log (never loaded directly)
 archive/                     Compacted historical entries (searchable)
 

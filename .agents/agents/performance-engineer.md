@@ -168,11 +168,6 @@ The controller returns filtered context covering: tech stack and infrastructure,
 {performance pattern established}
 **Status:** active
 
-@memory-controller write agent-notes/performance-notes.md
-### [PERF] {title} [date: YYYY-MM-DD] [agent: @performance-engineer]
-{performance insight for architecture}
-**Status:** active
-
 @memory-controller write lessons-learned.md
 ### [LESSON] {title} [date: YYYY-MM-DD] [agent: @performance-engineer]
 {performance lesson}

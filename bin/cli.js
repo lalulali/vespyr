@@ -460,7 +460,6 @@ function scaffoldArtifacts(targetDir, projectName, userNickname = "User") {
 
 	const outputDirs = ["output"];
 	const memoryDirs = [
-		"memory/agent-notes",
 		"memory/archive",
 		"memory/session-summaries",
 	];
@@ -484,18 +483,12 @@ function scaffoldArtifacts(targetDir, projectName, userNickname = "User") {
 	}
 
 	const agentsDir = path.join(targetDir, ".agents", "agents");
-	let agentCount = 23;
+	let agentCount = 20;
 	if (fs.existsSync(agentsDir)) {
 		const agentFiles = fs
 			.readdirSync(agentsDir)
 			.filter((f) => f.endsWith(".md"));
-		agentCount = agentFiles.length || 23;
-		const pendingDir = path.join(artifactsDir, "memory", "pending-questions");
-		fs.mkdirSync(pendingDir, { recursive: true });
-		for (const agentFile of agentFiles) {
-			const agentName = path.basename(agentFile, ".md");
-			fs.mkdirSync(path.join(pendingDir, agentName), { recursive: true });
-		}
+		agentCount = agentFiles.length || 20;
 	}
 
 	const memoryPath = path.join(artifactsDir, "memory");
@@ -514,6 +507,16 @@ Blockers: 0
 
 ## [IDENTITY]
 User Nickname: ${userNickname}
+
+<!-- BEGIN MACHINE STATE -->
+## [RUNTIME STATE]
+- Stack: None
+- Git Branch: none
+- Active Phase: validation
+- Active Sprint: none
+- Blocker Status: 0 active blockers
+- Engine Version: 2.0.7
+<!-- END MACHINE STATE -->
 
 ## Session Activity
 _(auto-populated on every session by @memory-controller / orchestrator_state.js)_

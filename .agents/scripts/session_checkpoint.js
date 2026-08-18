@@ -79,40 +79,18 @@ function pipelineNext() {
   }
 }
 
-function writeCheckpoint({ event, agent, artifact = null, domain = null, next = null }) {
-  if (!event || !agent) throw new Error('Missing event or agent');
-
-  if (!fs.existsSync(CHECKPOINT_DIR)) fs.mkdirSync(CHECKPOINT_DIR, { recursive: true });
-
+/**
+ * @deprecated Deprecated by Epic 02i in Vespyr 2.0.7.
+ * Designated artifacts/memory/session-summaries/latest.md as the single live cursor.
+ */
+function writeCheckpoint({ event, agent, artifact = null, domain = null, next = null } = {}) {
   const phase = canonicalPhase();
-  const blockers = activeBlockers();
-  const activity = latestActivity();
-  let nextAction = next || pipelineNext();
-
-  const content = [
-    '# Session Checkpoint',
-    '',
-    `**Updated:** ${nowStamp()} (auto-emitted by orchestrator_state.js)`,
-    `**Event:** ${event}`,
-    `**Agent:** @${agent}`,
-    domain ? `**Domain:** ${domain}` : null,
-    '',
-    '## Current Cursor',
-    `- **Phase:** ${phase || '(unknown)'}`,
-    `- **Blockers:** ${blockers === null ? '?' : blockers}`,
-    artifact ? `- **Artifact:** ${artifact}` : null,
-    activity ? `- **Session Activity:** ${activity}` : null,
-    '',
-    '## Next Action',
-    nextAction || '(none detected — check orchestrator_state.js next)',
-    ''
-  ].filter((l) => l !== null).join('\n');
-
-  fs.writeFileSync(CHECKPOINT_FILE, content, 'utf8');
+  const nextAction = next || pipelineNext();
   return {
-    file: 'session-checkpoints/checkpoint.md',
-    event,
-    agent,
+    deprecated: true,
+    file: 'session-summaries/latest.md',
+    event: event || 'deprecated',
+    agent: agent || 'unknown',
     phase: phase || null,
     next: nextAction
   };

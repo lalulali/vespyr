@@ -18,7 +18,6 @@
     "skill": {
       "analyze-data": "allow",
       "brainstorming": "allow",
-      "code-graph": "allow",
       "craft-lesson": "allow",
       "create-agent": "allow",
       "create-skill": "allow",
@@ -27,7 +26,6 @@
       "design": "allow",
       "develop": "allow",
       "discovery-report": "allow",
-      "doc-graph": "allow",
       "elicitation": "allow",
       "empathy-map": "allow",
       "explore-game-idea": "allow",
@@ -51,6 +49,7 @@
       "root-cause": "allow",
       "round-table": "allow",
       "shape-up": "allow",
+      "shut-up": "allow",
       "sprint-status": "allow",
       "status": "allow",
       "teach-me": "allow",

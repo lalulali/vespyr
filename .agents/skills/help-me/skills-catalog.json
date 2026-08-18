@@ -350,7 +350,7 @@
     "prerequisites": [],
     "outputs": [
       "artifacts/output/05-planning/kanban.md",
-      "artifacts/memory/agent-notes/product-manager-notes.md"
+      "artifacts/memory/active-decisions.md"
     ],
     "key_agents": [
       "@product-manager"
@@ -512,7 +512,9 @@
       "@data-analyst",
       "@shifu",
       "@ml-ai-engineer",
-      "@ml-ai-ops"
+      "@ml-ai-ops",
+      "@agent-a",
+      "@agent-b"
     ]
   },
   {

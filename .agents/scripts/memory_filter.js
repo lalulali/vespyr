@@ -74,17 +74,17 @@ function ensureSessionSummaryFiles() {
 // Agent profiles: which files to check + domain keywords
 const AGENT_PROFILES = {
   developer: {
-    tier2: ['patterns-and-conventions.md', 'active-decisions.md', 'blockers-and-risks.md', 'agent-notes/developer-notes.md'],
+    tier2: ['patterns-and-conventions.md', 'active-decisions.md', 'blockers-and-risks.md'],
     domains: ['code', 'implementation', 'test', 'bug', 'refactor', 'pattern', 'dependency', 'api', 'database', 'auth'],
     max_results: 10
   },
   architect: {
-    tier2: ['active-decisions.md', 'patterns-and-conventions.md', 'agent-notes/architect-notes.md'],
+    tier2: ['active-decisions.md', 'patterns-and-conventions.md'],
     domains: ['architecture', 'system', 'design', 'adr', 'tech stack', 'database', 'api', 'security', 'scalability', 'integration'],
     max_results: 10
   },
   'product-manager': {
-    tier2: ['project-context.md', 'active-decisions.md', 'lessons-learned.md', 'blockers-and-risks.md', 'agent-notes/product-manager-notes.md'],
+    tier2: ['project-context.md', 'active-decisions.md', 'lessons-learned.md', 'blockers-and-risks.md'],
     domains: ['product', 'feature', 'requirement', 'user story', 'roadmap', 'priority', 'scope', 'metric', 'kpi', 'timeline', 'blocker', 'risk', 'milestone', 'sprint', 'stakeholder', 'delivery'],
     max_results: 10
   },
@@ -94,7 +94,7 @@ const AGENT_PROFILES = {
     max_results: 10
   },
   'tech-lead': {
-    tier2: ['active-decisions.md', 'patterns-and-conventions.md', 'blockers-and-risks.md', 'agent-notes/tech-lead-notes.md'],
+    tier2: ['active-decisions.md', 'patterns-and-conventions.md', 'blockers-and-risks.md'],
     domains: ['task', 'estimate', 'sprint', 'dependency', 'risk', 'execution', 'plan', 'milestone'],
     max_results: 10
   },
@@ -119,7 +119,7 @@ const AGENT_PROFILES = {
     max_results: 5
   },
   'security-engineer': {
-    tier2: ['active-decisions.md', 'agent-notes/architect-notes.md'],
+    tier2: ['active-decisions.md', 'patterns-and-conventions.md'],
     domains: ['security', 'auth', 'vulnerability', 'owasp', 'cve', 'threat', 'permission', 'encryption'],
     max_results: 10
   },
@@ -129,7 +129,7 @@ const AGENT_PROFILES = {
     max_results: 10
   },
   'performance-engineer': {
-    tier2: ['active-decisions.md', 'agent-notes/architect-notes.md'],
+    tier2: ['active-decisions.md', 'patterns-and-conventions.md', 'lessons-learned.md'],
     domains: ['performance', 'latency', 'throughput', 'load', 'cache', 'query', 'bottleneck'],
     max_results: 10
   },
@@ -149,7 +149,7 @@ const AGENT_PROFILES = {
     max_results: 10
   },
   'ml-ai-engineer': {
-    tier2: ['active-decisions.md', 'patterns-and-conventions.md', 'agent-notes/architect-notes.md'],
+    tier2: ['active-decisions.md', 'patterns-and-conventions.md'],
     domains: ['ml', 'model', 'training', 'inference', 'pipeline', 'feature', 'data', 'drift'],
     max_results: 10
   },
@@ -378,14 +378,6 @@ function filterMemory(agent, task, maxResults) {
     for (const f of fs.readdirSync(MEMORY_DIR)) {
       if (f.endsWith('.md') && !f.startsWith('session-')) {
         memoryFiles.push(f);
-      }
-      // Also check agent-notes subdirectory
-      if (f === 'agent-notes' && fs.existsSync(path.join(MEMORY_DIR, f))) {
-        for (const sf of fs.readdirSync(path.join(MEMORY_DIR, f))) {
-          if (sf.endsWith('.md')) {
-            memoryFiles.push(`agent-notes/${sf}`);
-          }
-        }
       }
     }
   }

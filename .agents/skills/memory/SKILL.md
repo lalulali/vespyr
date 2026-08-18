@@ -28,15 +28,12 @@ Searches the archive index for historical context. Use when you need to find a p
 
 | File | Purpose | When to write |
 |---|---|---|
-| `project-context.md` | Stack, constraints, architecture snapshot | Set during init, synced at every session start (`session-start`), updated on major stack changes |
-| `session-checkpoints/checkpoint.md` | **Rolling live cursor** of an in-progress session (Phase, current artifact, next action) | Auto-emitted by `orchestrator_state.js` at every state-changing command (complete, session-start, session-write, set-phase, file-cr, sync-context) — overwrites in place |
-| `session-summaries/latest.md` | Post-hoc wrap-up of the last ENDED unit of work | At session shutdown (`session-write`) |
+| `project-context.md` | Stack, constraints, architecture snapshot, machine state fence | Set during init, synced automatically at every session (`session-start`, `session-write`, `complete`, `set-phase`) |
+| `session-summaries/latest.md` | Single authoritative live cursor and wrap-up of the last session | At session shutdown (`session-write`) |
 | `active-decisions.md` | Running record of current-cycle decisions | After every resolved decision |
 | `lessons-learned.md` | Engineering insights, bugs, gotchas | After non-obvious fixes or discoveries |
 | `patterns-and-conventions.md` | Reusable patterns, coding conventions | When a pattern repeats across 3+ instances |
 | `blockers-and-risks.md` | Active blockers, known risks | When blocked; remove when resolved |
-
-**Checkpoint vs. summary:** the checkpoint answers *"where is work right now?"* (resume point for multi-turn loops); the summary answers *"what just ended?"*. On load, `@memory-controller` surfaces the checkpoint first (fresher) and demotes `latest.md` to last-session context.
 
 ## When to write to memory
 
@@ -114,12 +111,12 @@ Compaction is **word-based**, matching `.agents/scripts/compaction_guard.js` (th
 
 | File | Word threshold |
 |------|----------------|
+| `project-context.md` | 500 |
 | `active-decisions.md` | 1,800 |
 | `patterns-and-conventions.md` | 1,500 |
 | `lessons-learned.md` | 1,300 |
 | `blockers-and-risks.md` | 900 |
 | `session-summaries/latest.md` | 600 |
-| `agent-notes/*.md` (each) | 1,100 |
 
 `project-context.md` is never compacted (static file). When a file exceeds its threshold, the oldest `resolved`/`stale` entries are archived. Archived entries remain searchable via `@memory-controller search`.
 

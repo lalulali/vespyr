@@ -138,11 +138,6 @@ The controller returns filtered context covering: project constraints and timeli
 **Write after completing:**
 
 ```
-@memory-controller write agent-notes/tech-lead-notes.md
-### [PROCESS] {title} [date: YYYY-MM-DD] [agent: @tech-lead]
-{estimation calibration or velocity data}
-**Status:** active
-
 @memory-controller write active-decisions.md
 ### [ARCH] {title} [date: YYYY-MM-DD] [agent: @tech-lead]
 {planning decision}

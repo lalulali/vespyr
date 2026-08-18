@@ -59,14 +59,7 @@ const ALLOWED_FILES = new Set([
   'patterns-and-conventions.md',
   'blockers-and-risks.md',
   'project-context.md',
-  'agent-notes/developer-notes.md',
-  'agent-notes/architect-notes.md',
-  'agent-notes/tech-lead-notes.md',
-  'agent-notes/product-manager-notes.md',
-  'agent-notes/qa-notes.md',
-  'agent-notes/designer-notes.md',
-  'agent-notes/ml-ai-notes.md',
-  'agent-notes/performance-notes.md',
+  'teaching-style.md',
 ]);
 
 function countWords(text) {

@@ -52,7 +52,7 @@ BRANCH=$(git branch --show-current)
 git worktree list 2>/dev/null && echo "WORKTREE_SUPPORTED" || echo "WORKTREE_NOT_SUPPORTED"
 ```
 
-If `WORKTREE_NOT_SUPPORTED` is returned, fall back to single-developer mode regardless of the plan. Log this decision to `artifacts/memory/agent-notes/tech-lead-notes.md`.
+If `WORKTREE_NOT_SUPPORTED` is returned, fall back to single-developer mode regardless of the plan. Log this decision to `artifacts/memory/active-decisions.md`.
 
 ### Step 1: Create worktrees
 

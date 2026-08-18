@@ -53,7 +53,7 @@ All agents in this system MUST follow these guardrails. This file is the single 
 - If total input context exceeds ~6,000 words, read only:
   1. The **summary/overview section** of each artifact
   2. The **specific sections** referenced by your task
-  3. Your **agent notes** from shared memory
+  3. Relevant patterns from `patterns-and-conventions.md`
 - When in doubt, read the most recent version of an artifact and skip historical context.
 
 ## Session Continuity
@@ -63,7 +63,7 @@ All agents in this system MUST follow these guardrails. This file is the single 
 - The session summary costs ~100 tokens to load and saves the next agent from re-reading all memory files to understand where things stand.
 ## Merge Conflict Resolution
 
-> **Note:** `artifacts/memory/` is not git-tracked (only `pending-questions/.gitkeep` is committed), so git merge conflicts on memory files cannot occur in the default setup. The protocol below applies only if memory files are later placed under version control.
+> **Note:** `artifacts/memory/` is not git-tracked in default setup. The protocol below applies if memory files are placed under version control.
 
 - `artifacts/memory/archive/index.ndjson` is append-only. If a git merge conflict occurs:
   1. **Never** pick one side and discard the other.

@@ -102,6 +102,7 @@ Skills are invoked via `/skill-name` or by referencing `.agents/skills/[name]/SK
 - **`/motion`**: Motion design research, animation specifications, and development handoff.
 
 ### 💻 Engineering, Quality & Architecture
+- **`/shut-up`**: One-shot silent execution mode — executes tasks directly with zero unsolicited critique, no conversational filler, and ultra-minimal output.
 - **`/develop`**: Core MVP engineering lifecycle (spec review, architecture, coding, review, QA).
 - **`/plan`**: Standalone granular execution planning outside the develop loop.
 - **`/review`**: Standalone read-only code review and security audit.
@@ -138,6 +139,15 @@ Skills are invoked via `/skill-name` or by referencing `.agents/skills/[name]/SK
 
 All agents leverage the persistent memory system located in `artifacts/memory/` via `@memory-controller` and `.agents/scripts/memory_filter.js`.
 
+### Consolidated 5-File Memory Layout
+1. **`project-context.md`** — Static project basics, tech stack, and machine-fenced runtime state (`<!-- BEGIN MACHINE STATE -->`).
+2. **`active-decisions.md`** — Current architectural & product decisions ($<400$ token budget, auto-compacted on phase transitions).
+3. **`patterns-and-conventions.md`** — Established patterns, coding conventions, and cross-agent insights.
+4. **`lessons-learned.md`** — Non-obvious bugs, gotchas, and retrospective insights.
+5. **`blockers-and-risks.md`** — Active blockers and risk register.
+- **`session-summaries/latest.md`** — Single authoritative rolling live cursor.
+- **`archive/`** — Append-only NDJSON index and quarterly archives.
+
 ### 3-Tier Progressive Loading
 
 ```
@@ -145,8 +155,8 @@ All agents leverage the persistent memory system located in `artifacts/memory/` 
 │ Tier 1 — Core Context (~200 tokens)                          │
 │ Project stack, active phase, blockers, recent session cursor │
 ├─────────────────────────────────────────────────────────────┤
-│ Tier 2 — Agent-Specific Notes & Decisions (~300 tokens)     │
-│ Patterns, conventions, and notes relevant to the active role │
+│ Tier 2 — Agent-Specific Patterns & Decisions (~300 tokens)   │
+│ Patterns, conventions, and decisions for active role         │
 ├─────────────────────────────────────────────────────────────┤
 │ Tier 3 — Scored Task Data (~500 tokens)                     │
 │ Keyword + recency scored chunks inside canonical T3 blocks  │

@@ -166,21 +166,21 @@ When `node .agents/scripts/orchestrator_state.js advance` is called to transitio
 ## 7. Workstreams & Execution Tasks
 
 ### WS-1: Script & State Machine Synchronization
-- [ ] **Task 1.1**: Update `orchestrator_state.js` to execute atomic writes inside `<!-- BEGIN MACHINE STATE -->` in `project-context.md` on state changes.
-- [ ] **Task 1.2**: Implement stack and git branch auto-detector in `orchestrator_state.js`.
-- [ ] **Task 1.3**: Add phase-boundary compaction trigger in `orchestrator_state.js advance` with structural deduping and archival sharding.
-- [ ] **Task 1.4**: Update `memory_filter.js` for the consolidated 3-tier layout without references to deleted directories.
+- [x] **Task 1.1**: Update `orchestrator_state.js` to execute atomic writes inside `<!-- BEGIN MACHINE STATE -->` in `project-context.md` on state changes.
+- [x] **Task 1.2**: Implement stack and git branch auto-detector in `orchestrator_state.js`.
+- [x] **Task 1.3**: Add phase-boundary compaction trigger in `orchestrator_state.js advance` with structural deduping and archival sharding.
+- [x] **Task 1.4**: Update `memory_filter.js` for the consolidated 3-tier layout without references to deleted directories.
 
 ### WS-2: Idempotent Migration Engine & Cleanup
-- [ ] **Task 2.1**: Author `.agents/scripts/migrate_memory_v2.js` to merge `agent-notes/*.md` into `patterns-and-conventions.md` with collision resolution.
-- [ ] **Task 2.2**: Execute directory cleanup purging `pending-questions/`, `session-checkpoints/`, and `agent-notes/`.
-- [ ] **Task 2.3**: Update `bin/cli.js` `scaffoldArtifacts()` to scaffold the consolidated memory layout on `vespyr init`.
+- [x] **Task 2.1**: Author `.agents/scripts/migrate_memory_v2.js` to merge `agent-notes/*.md` into `patterns-and-conventions.md` with collision resolution.
+- [x] **Task 2.2**: Execute directory cleanup purging `pending-questions/`, `session-checkpoints/`, and `agent-notes/`.
+- [x] **Task 2.3**: Update `bin/cli.js` `scaffoldArtifacts()` to scaffold the consolidated memory layout on `vespyr init`.
 
 ### WS-3: Cross-Swarm Reference Updates & Verification Harness
-- [ ] **Task 3.1**: Scrub all 20 `.agents/agents/*.md` persona files of dead memory folder references.
-- [ ] **Task 3.2**: Update `.agents/skills/` step files to reference streamlined memory paths.
-- [ ] **Task 3.3**: Update `AGENTS.md`, `workflow.md`, and `skills.md` documentation for the consolidated memory system.
-- [ ] **Task 3.4**: Author deterministic memory migration test fixtures asserting zero data loss and concurrent state-write locks.
+- [x] **Task 3.1**: Scrub all 20 `.agents/agents/*.md` persona files of dead memory folder references.
+- [x] **Task 3.2**: Update `.agents/skills/` step files to reference streamlined memory paths.
+- [x] **Task 3.3**: Update `AGENTS.md`, `workflow.md`, and `skills.md` documentation for the consolidated memory system.
+- [x] **Task 3.4**: Author deterministic memory migration test fixtures asserting zero data loss and concurrent state-write locks.
 
 ---
 
@@ -201,17 +201,17 @@ When `node .agents/scripts/orchestrator_state.js advance` is called to transitio
 **Execution Checklist:**
 - [x] Epic 02i authored and positioned as 10th sub-plan in Phase 1 series
 - [x] Round-table review completed; machine-fenced state & token budgeting guardrails incorporated
-- [ ] Task 1.1 — Update `orchestrator_state.js` for atomic writes inside `<!-- BEGIN MACHINE STATE -->` in `project-context.md`
-- [ ] Task 1.2 — Implement stack and git branch auto-detector in `orchestrator_state.js`
-- [ ] Task 1.3 — Add phase-handoff compaction trigger in `orchestrator_state.js advance` with structural deduping
-- [ ] Task 1.4 — Update `memory_filter.js` for 3-tier consolidated memory layout without deleted directories
-- [ ] Task 2.1 — Implement idempotent migration utility for `agent-notes/` merging into `patterns-and-conventions.md` (<500 tokens)
-- [ ] Task 2.2 — Purge `pending-questions/`, `session-checkpoints/`, and legacy `agent-notes/` directories
-- [ ] Task 2.3 — Update `bin/cli.js` `scaffoldArtifacts()` for consolidated memory layout
-- [ ] Task 3.1 — Scrub all `.agents/agents/*.md` personas of dead memory folder references
-- [ ] Task 3.2 — Update all `.agents/skills/` step files to reference streamlined memory paths
-- [ ] Task 3.3 — Update `AGENTS.md`, `workflow.md`, and `skills.md` documentation
-- [ ] Task 3.4 — Execute deterministic migration test fixtures & concurrent write stress tests
+- [x] Task 1.1 — Update `orchestrator_state.js` for atomic writes inside `<!-- BEGIN MACHINE STATE -->` in `project-context.md`
+- [x] Task 1.2 — Implement stack and git branch auto-detector in `orchestrator_state.js`
+- [x] Task 1.3 — Add phase-handoff compaction trigger in `orchestrator_state.js advance` with structural deduping
+- [x] Task 1.4 — Update `memory_filter.js` for 3-tier consolidated memory layout without deleted directories
+- [x] Task 2.1 — Implement idempotent migration utility for `agent-notes/` merging into `patterns-and-conventions.md` (<500 tokens)
+- [x] Task 2.2 — Purge `pending-questions/`, `session-checkpoints/`, and legacy `agent-notes/` directories
+- [x] Task 2.3 — Update `bin/cli.js` `scaffoldArtifacts()` for consolidated memory layout
+- [x] Task 3.1 — Scrub all `.agents/agents/*.md` personas of dead memory folder references
+- [x] Task 3.2 — Update all `.agents/skills/` step files to reference streamlined memory paths
+- [x] Task 3.3 — Update `AGENTS.md`, `workflow.md`, and `skills.md` documentation
+- [x] Task 3.4 — Execute deterministic migration test fixtures & concurrent write stress tests
 
 ---
 

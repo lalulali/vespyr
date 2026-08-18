@@ -201,7 +201,7 @@ After the user approves a deliverable, record it in the pipeline state AND refre
 node .agents/scripts/orchestrator_state.js complete --agent shifu --artifact artifacts/output/teaching/{deliverable}.md --next "{next deliverable, or 'all done'}"
 ```
 
-This is what updates `project-context.md` (`## Session Activity`, Phase/Blockers/Repository/Stack), writes the rolling session checkpoint (`session-checkpoints/checkpoint.md`), and records the artifact as completed. Do NOT defer all recording to the end of the workflow — each approved deliverable is a milestone boundary and MUST be recorded immediately. If the user stops after a single format, the context and checkpoint still reflect that milestone.
+This is what updates `project-context.md` (`## Session Activity`, Phase/Blockers/Repository/Stack/Runtime state) and records the artifact as completed. Do NOT defer all recording to the end of the workflow — each approved deliverable is a milestone boundary and MUST be recorded immediately. If the user stops after a single format, the context still reflects that milestone.
 
 **Format generation order** (generate in list order, skipping any the user did not select):
 

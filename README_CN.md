@@ -4,7 +4,7 @@
 
 **一个平台无关、基于文件的多智能体引擎。** 将 20 个专业 AI 角色直接安装到你的仓库中。它们规划、设计、构建、审查、测试和交付——拥有跨会话持久化的结构化记忆，以及两大其他框架无法同时具备的架构护城河。
 
-[![Vespyr Version](https://img.shields.io/badge/version-2.0.6-blue)](https://github.com/lalulali/vespyr)
+[![Vespyr Version](https://img.shields.io/badge/version-2.0.7-blue)](https://github.com/lalulali/vespyr)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 📖 **[完整文档 →](Guide/cn/index.md)**
@@ -49,7 +49,7 @@ npx vespyr --yes --target /path/to/my-project --harness opencode,claude
 /validate-idea   →   /explore-idea   →   /design   →   /develop   →   /launch
 ```
 
-涵盖从 `/validate-idea`、`/design`、`/round-table` 到 `/motion`、`/develop`、`/launch`、`/customize-skill` 和 `/create-skill` 等 42 个端到端工作流（全部通过 CI 校验符合 [agentskills.io](https://agentskills.io) 智能体技能规范）。
+涵盖从 `/validate-idea`、`/design`、`/round-table` 到 `/shut-up`、`/motion`、`/develop`、`/launch`、`/customize-skill` 和 `/create-skill` 等 43 个端到端工作流（全部通过 CI 校验符合 [agentskills.io](https://agentskills.io) 智能体技能规范）。
 
 > **初次使用 Vespyr？** 跟随[快速上手指南](Guide/cn/getting-started.md)逐步学习。
 
@@ -108,12 +108,29 @@ validate → explore → design → plan → develop → launch → iterate → 
 
 ## 🧩 核心功能
 
+- **43 个精心策划的技能** — 涵盖从 `/validate-idea`、`/design`、`/round-table` 到 `/shut-up`、`/motion`、`/develop`、`/launch`、`/customize-skill` 和 `/create-skill` 等。
+- **整合的三级记忆与机器状态栅栏** — `project-context.md` 原子状态自动同步、精简的 5 文件共享记忆与阶段边界自动归档压缩。
 - **安全与完整性引擎** — 已签名的 SHA-256 清单校验（`vespyr verify`）、供应链安全审计（`vespyr audit`）、封闭权限注册表与 T3 数据信任边界准入控制。
 - **智能体自定义** — 双文件 TOML 合并。升级时你的覆盖配置保持不变。
 - **多平台支持** — 兼容 OpenCode、Claude Code、Cursor、Windsurf、Copilot、Kiro、Aider、Google Antigravity。
 - **11 阶段流水线** — 带强制执行。无越序执行。
 
 [完整技能目录 →](Guide/cn/skills-and-workflows.md) · [自定义 →](Guide/cn/configuration.md)
+
+---
+
+## 🔒 完整性与安全工具
+
+```bash
+# 校验 .agents/ 文件与已签名 SHA-256 清单的完整性
+npx vespyr verify
+
+# 运行供应链安全与内容完整性审计扫描
+npx vespyr audit
+
+# 生成或更新 .agents/manifest.json 校验和文件
+npx vespyr manifest
+```
 
 ---
 

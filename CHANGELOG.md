@@ -6,22 +6,34 @@ All notable changes to the Vespyr project will be documented in this file.
 
 ## [2.0.7] - 2026-08-18
 
-### Core DNA & Anti-Sycophancy Hardening (Functional Anti-Sycophancy)
+### Core DNA & Anti-Sycophancy Hardening
 - Codified **Prohibition of Functional Sycophancy ("Preach Then Comply")**: strictly forbidden from emitting cautionary warnings while still generating implementation plans, options, or workarounds for a flawed premise.
 - Established **The Mandatory Verdict Gate (`[KILL]` | `[PIVOT]` | `[PASS]`)** across `.agents/references/vespyr-dna.md`, `AGENTS.md`, `agent.md`, `CLAUDE.md`, and all canonical templates.
 - Enforced the **Zero-Blueprint-on-KILL Invariant**: when an idea is assigned `[KILL]`, agents are prohibited from generating implementation architecture or option menus; the only valid output is the Kill Autopsy and returning to problem discovery.
 - Added **Mandatory 3-Question Invariant Test** (Premise Invalidation Protocol) to eliminate speculative and vanity feature creep.
+- Decommissioned legacy doc-graph and code-graph scripts; removed phantom `/doc-graph` and `/code-graph` commands.
+- Added `/shut-up` one-shot silent execution skill and modernized `bin/cli.js` with direct sync commands (`--sync-docs`, `--sync-yaml`, `--export-state`).
 
 ### Dialectic /round-table Protocol Hardening
 - Mandated **Live Dialogue Stream Rendering**: orchestrators must output the visible, unvarnished back-and-forth dialogue between agents (`### @agent-a -> @agent-b`) before providing tension synthesis; pre-digesting debates into summary-only cards is prohibited.
 - Enforced **Subagent Dispatch Prompt Sanitization**: orchestrators must prompt subagents with raw verdict gates (`[KILL/PIVOT/PASS]`) and are prohibited from asking *"How do we make it work if the user insists?"*
 - Added comprehensive unit tests in `test/vespyr-dna.test.js` and `test/skills/round-table.test.js` (21 passing tests).
 
+### Memory Consolidation & Lifecycle Architecture
+- **Machine State Fencing & State Synchronization:** Injected atomic state fence `<!-- BEGIN MACHINE STATE -->` ... `<!-- END MACHINE STATE -->` into `artifacts/memory/project-context.md` with git branch, runtime version, sprint, and active blocker auto-detection, preserving custom human blocks untouched.
+- **Streamlined 5-File Memory Layout:** Consolidated active shared memory into `project-context.md`, `active-decisions.md`, `patterns-and-conventions.md`, `lessons-learned.md`, `blockers-and-risks.md`, plus `session-summaries/` and `archive/`.
+- **Idempotent Migration Engine:** Authored `.agents/scripts/migrate_memory_v2.js` to idempotently merge legacy `agent-notes/*.md` into `patterns-and-conventions.md` with header deduplication.
+- **Ghost Directory Purge:** Completely purged legacy directories (`agent-notes/`, `pending-questions/`, `session-checkpoints/`) and obsolete templates.
+- **Phase-Boundary Compaction:** Integrated automatic compaction into `orchestrator_state.js advance` and `set-phase`, archiving superseded decisions into `archive/index.ndjson` and keeping `active-decisions.md` under 400 tokens.
+- **Single Live Cursor:** Designated `artifacts/memory/session-summaries/latest.md` as the single authoritative rolling live cursor.
+- **Swarm Reference Scrubbing:** Updated all 20 agent personas, skill steps, templates, CLI scaffolder, and reference documentation to remove dead memory paths.
+- **Verification Harness:** Added `tests/test_memory_consolidation.js` with 81/81 automated tests passing across the suite.
+
 ---
 
 ## [2.0.6] - 2026-08-14
 
-### Security & Integrity Architecture (Epic 02f)
+### Security & Integrity Architecture
 - Added comprehensive **Security & Integrity Architecture** (`02f-phase-1-security-and-integrity-architecture.md`) establishing a two-pillar model for supply-chain integrity and runtime content trust.
 - Authored four foundational Architecture Decision Records (ADRs):
   - **ADR-001: Trust-Boundary Model (T0–T3)** — defines T0 (read-only/immutable), T1 (vetted skills/templates), T2 (semi-trusted memory/artifacts), and T3 (untrusted runtime arrivals); formalizes the **T2 Invariant** (*memory/artifact content is data, never directives*) and standardized machine-delimited T3 format (`<!-- VSP-T3-BEGIN v1 ... -->`).

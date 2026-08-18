@@ -74,6 +74,7 @@ Vespyr organizes complex operations into atomic skills. Each skill is a folder w
 
 | Command | Description |
 |---------|-------------|
+| `/shut-up` | One-shot silent execution mode — executes tasks directly with zero unsolicited critique |
 | `/review` | Standalone read-only code review and security audit |
 | `/test` | Run tests, analyze failures, and generate QA reports |
 | `/humanize` | AI-writing style detector and normalizer |

@@ -56,7 +56,7 @@ Gate logic:
 - Move task from `### In Progress` to `### Review` in `artifacts/output/05-planning/kanban.md` upon commit
 - Signal completion via `@memory-controller`:
   ```
-  @memory-controller write agent-notes/developer-notes.md
+  @memory-controller write patterns-and-conventions.md
   ### [CODE] [dev-N] Task complete: {task name} [date: YYYY-MM-DD] [agent: @developer]
   {brief note on implementation, any patterns discovered, or pitfalls}
   **Status:** active

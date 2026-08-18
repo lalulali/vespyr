@@ -31,12 +31,132 @@ const path = require('path');
 
 const { writeFileSync: atomicWriteFileSync, writeJsonSync, readJsonSync } = require('./lib/fs_atomic.js');
 const { syncProjectContext } = require('./session_start.js');
-const { writeCheckpoint } = require('./session_checkpoint.js');
 
 const STATE_FILE = path.join(process.cwd(), 'artifacts', 'output', 'pipeline-state.json');
 const OUTPUT_DIR = path.join(process.cwd(), 'artifacts', 'output');
 const TELEMETRY_DIR = path.join(process.cwd(), 'artifacts', 'telemetry');
 const PROJECT_ROOT = process.cwd();
+
+function countTokens(text) {
+  const words = text.trim().split(/\s+/).filter(Boolean).length;
+  return Math.round(words / 0.75);
+}
+
+function compactActiveDecisions() {
+  const memoryDir = path.join(process.cwd(), 'artifacts', 'memory');
+  const decisionsPath = path.join(memoryDir, 'active-decisions.md');
+  const archiveDir = path.join(memoryDir, 'archive');
+  const archiveNdjson = path.join(archiveDir, 'index.ndjson');
+
+  if (!fs.existsSync(decisionsPath)) return { compacted: false, count: 0, tokens: 0, underBudget: true };
+
+  const content = fs.readFileSync(decisionsPath, 'utf8');
+  const lines = content.split('\n');
+  const activeSections = [];
+  const archivedSections = [];
+  const headerLines = [];
+  let currentSection = null;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (line.startsWith('### ') || line.startsWith('## AD-')) {
+      if (currentSection) {
+        if (currentSection.isInactive) {
+          archivedSections.push(currentSection);
+        } else {
+          activeSections.push(currentSection);
+        }
+      }
+      currentSection = {
+        header: line.trim(),
+        lines: [line],
+        isInactive: false
+      };
+    } else if (currentSection) {
+      currentSection.lines.push(line);
+      const trimmed = line.trim().toLowerCase();
+      if (
+        trimmed.includes('**status:** resolved') ||
+        trimmed.includes('**status:** superseded') ||
+        trimmed.includes('**status:** archived') ||
+        trimmed.includes('**status:** complete') ||
+        trimmed.includes('**status:** stale')
+      ) {
+        currentSection.isInactive = true;
+      }
+    } else {
+      headerLines.push(line);
+    }
+  }
+
+  if (currentSection) {
+    if (currentSection.isInactive) {
+      archivedSections.push(currentSection);
+    } else {
+      activeSections.push(currentSection);
+    }
+  }
+
+  // If there are inactive sections, shard them into archive/
+  if (archivedSections.length > 0) {
+    if (!fs.existsSync(archiveDir)) fs.mkdirSync(archiveDir, { recursive: true });
+    const now = new Date();
+    const q = Math.floor(now.getMonth() / 3) + 1;
+    const shardFile = path.join(archiveDir, `${now.getFullYear()}-Q${q}-archive.md`);
+
+    const shardEntries = archivedSections.map(s => s.lines.join('\n').trim()).join('\n\n---\n\n');
+    if (!fs.existsSync(shardFile)) {
+      const shardHeader = `# Memory Archive (${now.getFullYear()} Q${q})\n\n`;
+      atomicWriteFileSync(shardFile, shardHeader + shardEntries + '\n', 'utf8');
+    } else {
+      fs.appendFileSync(shardFile, '\n\n---\n\n' + shardEntries + '\n', 'utf8');
+    }
+
+    // Append to index.ndjson
+    for (const s of archivedSections) {
+      const headerText = s.header.replace(/^#{2,3}\s+/, '');
+      const idMatch = headerText.match(/\[([A-Z]+)\]\s*([^[]+)/) || headerText.match(/(AD-\d{4}-\d{2}-\d{2})\s*—?\s*(.*)/);
+      const domain = idMatch ? idMatch[1] : 'DECISION';
+      const title = idMatch ? (idMatch[2] || '').trim() : headerText;
+      const dateMatch = headerText.match(/\[date:\s*(\d{4}-\d{2}-\d{2})\]/) || headerText.match(/(20\d{2}-\d{2}-\d{2})/);
+      const date = dateMatch ? dateMatch[1] : now.toISOString().split('T')[0];
+      const entryObj = {
+        id: `ARCH-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+        title: title.slice(0, 80),
+        domain,
+        keywords: [domain.toLowerCase(), ...title.toLowerCase().split(/\s+/).filter(w => w.length > 2)],
+        date,
+        status: 'superseded',
+        summary: s.lines.slice(1, 4).join(' ').trim().slice(0, 200),
+        location: `archive/${now.getFullYear()}-Q${q}-archive.md`,
+        archived_by: '@orchestrator',
+        archived_on: now.toISOString().split('T')[0]
+      };
+      if (!fs.existsSync(archiveNdjson)) {
+        const ndHeader = JSON.stringify({ schema_version: '1.0', created: date, last_updated: date }) + '\n';
+        atomicWriteFileSync(archiveNdjson, ndHeader + JSON.stringify(entryObj) + '\n', 'utf8');
+      } else {
+        fs.appendFileSync(archiveNdjson, JSON.stringify(entryObj) + '\n', 'utf8');
+      }
+    }
+
+    const newHeader = headerLines.join('\n').trim() || '# Active Decisions\n\nCritical active design choices and architectural constraints for Vespyr development.';
+    const newBody = activeSections.map(s => s.lines.join('\n').trim()).join('\n\n---\n\n');
+    const newContent = newHeader + '\n\n---\n\n' + newBody + '\n';
+    atomicWriteFileSync(decisionsPath, newContent, 'utf8');
+  }
+
+  const finalContent = fs.existsSync(decisionsPath) ? fs.readFileSync(decisionsPath, 'utf8') : '';
+  const tokens = countTokens(finalContent);
+
+  return {
+    compacted: archivedSections.length > 0,
+    archivedCount: archivedSections.length,
+    activeCount: activeSections.length,
+    tokens,
+    underBudget: tokens <= 400
+  };
+}
 
 // Canonical phase order — single source of truth: .agents/references/phase-table.md.
 // 11 phases: Validation (Phase -1, pre-phase gate, no folder) + folder phases 0-9.
@@ -580,10 +700,12 @@ const USAGE = `Usage:
   node orchestrator_state.js init --name "Project" --type startup
   node orchestrator_state.js status
   node orchestrator_state.js next
+  node orchestrator_state.js advance
+  node orchestrator_state.js set-phase --phase planning
   node orchestrator_state.js complete --agent founder --artifact idea-brief.md
   node orchestrator_state.js file-cr --from developer --to product-manager --target user-stories.md --issue "..."
-  node orchestrator_state.js set-phase --phase planning
-  node orchestrator_state.js ensure-graph <code|doc>
+  node orchestrator_state.js session-write --agent developer
+  node orchestrator_state.js compact
   node orchestrator_state.js validate --phase planning
   node orchestrator_state.js --help | usage | -h`;
 
@@ -825,12 +947,6 @@ function main() {
         data: { domain, goal }
       });
 
-      try {
-        writeCheckpoint({ event: 'session-start', agent, domain, next: goal });
-      } catch (e) {
-        // best-effort
-      }
-
       console.log(JSON.stringify({ success: true, message: 'Session start recorded.', ...result }));
     }
 
@@ -839,7 +955,6 @@ function main() {
       // post-push git hook so the Repository line updates right after a push.
       try {
         const result = syncProjectContext({ agent: 'git', domain: 'repo-sync', goal: null, recordMarker: false });
-        writeCheckpoint({ event: 'sync-context', agent: 'git' });
         console.log(JSON.stringify({ success: true, message: 'Project context refreshed.', ...result }));
       } catch (e) {
         console.error(JSON.stringify({ success: false, error: e.message }));
@@ -913,20 +1028,17 @@ function main() {
       ].join('\n');
 
       try {
-        fs.writeFileSync(path.join(sessionDir, 'latest.md'), latestContent, 'utf8');
+        atomicWriteFileSync(path.join(sessionDir, 'latest.md'), latestContent, 'utf8');
         fs.appendFileSync(path.join(sessionDir, 'history.md'), historyEntry + '\n', 'utf8');
       } catch (e) {
         console.error('Warning: Could not write session summary files: ' + e.message);
       }
 
       // Refresh project-context.md (Phase / Blockers / Repository / Stack /
-      // Session Activity). session-write is part of the mandatory shutdown
-      // protocol for every agent, so this guarantees the shared context stays
-      // fresh even when session-start and complete are skipped.
+      // Session Activity).
       try {
         const goal = workedOn && workedOn !== '(not specified)' ? workedOn.slice(0, 80) : null;
         const result = syncProjectContext({ agent, domain: 'session', goal });
-        writeCheckpoint({ event: 'session-write', agent, next: nextStep || null });
         console.log(JSON.stringify({ success: true, agent, date, message: 'Session summary written.', ...result }));
       } catch (e) {
         console.log(JSON.stringify({ success: true, agent, date, message: 'Session summary written.' }));
@@ -934,7 +1046,6 @@ function main() {
     }
 
     if (cmd === 'file-cr') {
-
       let from = null, to = null, target = null, issue = null, proposedFix = null, impact = null;
       for (let i = 1; i < args.length; i += 2) {
         if (args[i] === '--from') from = args[i + 1];
@@ -969,13 +1080,71 @@ function main() {
       state.last_updated = new Date().toISOString();
       writeState(state);
 
-      try {
-        writeCheckpoint({ event: 'file-cr', agent: from, artifact: target, next: `Resolve ${crId} → @${to}` });
-      } catch (e) {
-        // best-effort
+      console.log(JSON.stringify({ success: true, cr_id: crId, cr }));
+    }
+
+    if (cmd === 'advance') {
+      const state = readState();
+      if (!state) {
+        console.log(JSON.stringify({ error: 'No pipeline state found. Run init first.' }));
+        process.exit(1);
+      }
+      const currentPhase = resolveCurrentPhase(state);
+      const currentIdx = PHASE_ORDER.indexOf(currentPhase);
+      if (currentIdx < 0 || currentIdx >= PHASE_ORDER.length - 1) {
+        console.log(JSON.stringify({ error: `Cannot advance past final phase: ${currentPhase}` }));
+        process.exit(1);
+      }
+      const targetPhase = PHASE_ORDER[currentIdx + 1];
+
+      // Mark current phase complete
+      if (state.phases[currentPhase]) {
+        state.phases[currentPhase].status = 'complete';
+        state.phases[currentPhase].completed_at = new Date().toISOString();
+      }
+      state.current_phase = targetPhase;
+      if (!state.phases[targetPhase]) {
+        state.phases[targetPhase] = { status: 'in-progress', started_at: new Date().toISOString(), completed_at: null, agents: [] };
+      } else {
+        state.phases[targetPhase].status = 'in-progress';
+        if (!state.phases[targetPhase].started_at) {
+          state.phases[targetPhase].started_at = new Date().toISOString();
+        }
       }
 
-      console.log(JSON.stringify({ success: true, cr_id: crId, cr }));
+      state.history.push({
+        action: 'phase-advance',
+        from: currentPhase,
+        to: targetPhase,
+        timestamp: new Date().toISOString()
+      });
+      state.last_updated = new Date().toISOString();
+      writeState(state);
+
+      // Phase boundary compaction
+      const compactionResult = compactActiveDecisions();
+
+      // Sync project context
+      try {
+        syncProjectContext({ agent: 'orchestrator', domain: 'phase-advance', goal: `Advanced to ${targetPhase}` });
+      } catch (e) {}
+
+      recordTelemetry('phase_transition', {
+        phase: targetPhase,
+        data: { action: 'advance', from: currentPhase, to: targetPhase, compaction: compactionResult }
+      });
+
+      console.log(JSON.stringify({
+        success: true,
+        from: currentPhase,
+        to: targetPhase,
+        compaction: compactionResult
+      }));
+    }
+
+    if (cmd === 'compact') {
+      const result = compactActiveDecisions();
+      console.log(JSON.stringify({ success: true, ...result }));
     }
 
     if (cmd === 'set-phase') {
@@ -1002,7 +1171,6 @@ function main() {
       state.current_phase = phase;
 
       // Ensure the phase key exists in the map so next/status stay consistent
-      // even when the phase list was created under a different phase model.
       if (!state.phases[phase]) {
         state.phases[phase] = { status: 'pending', started_at: null, completed_at: null, agents: [] };
       }
@@ -1022,31 +1190,20 @@ function main() {
       state.last_updated = new Date().toISOString();
       writeState(state);
 
+      // Phase boundary compaction
+      const compactionResult = compactActiveDecisions();
+
       // Sync back to project-context.md
-      const memoryDir = path.join(process.cwd(), 'artifacts', 'memory');
-      const projectContextFile = path.join(memoryDir, 'project-context.md');
-      if (fs.existsSync(memoryDir) && fs.existsSync(projectContextFile)) {
-        try {
-          let content = fs.readFileSync(projectContextFile, 'utf8');
-          content = content.replace(/Phase:\s*\S+/g, `Phase: ${phase}`);
-          fs.writeFileSync(projectContextFile, content, 'utf8');
-        } catch (err) {
-          // Sync failure shouldn't crash the script, but print a warning
-        }
-      }
-
-      console.log(JSON.stringify({ success: true, from: oldPhase, to: phase }));
-
       try {
-        writeCheckpoint({ event: 'set-phase', agent: 'orchestrator', next: `Advance phase: ${phase}` });
-      } catch (e) {
-        // best-effort
-      }
+        syncProjectContext({ agent: 'orchestrator', domain: 'phase-switch', goal: `Switched to ${phase}` });
+      } catch (err) {}
 
       recordTelemetry('phase_transition', {
         phase,
-        data: { action: 'set-phase', from: oldPhase, to: phase }
+        data: { action: 'set-phase', from: oldPhase, to: phase, compaction: compactionResult }
       });
+
+      console.log(JSON.stringify({ success: true, from: oldPhase, to: phase, compaction: compactionResult }));
     }
 
     if (cmd === 'validate') {

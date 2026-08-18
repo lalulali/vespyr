@@ -105,11 +105,9 @@ This returns up to 5 matching patterns. Place them at the front of the context w
 
 ### Step 1 — Tier 1: Core context (~200 tokens)
 
-Read `artifacts/memory/project-context.md`. Extract: project name, user nickname, stack, phase, sprint, blocker count. If missing, auto-create it with your write tool (minimal header).
+Read `artifacts/memory/project-context.md`. Extract: project name, user nickname, stack, phase, sprint, blocker count from the machine state block (`<!-- BEGIN MACHINE STATE -->`). If missing, auto-create it with your write tool.
 
-Read the **session checkpoint FIRST** (it is the freshest state): `artifacts/memory/session-checkpoints/checkpoint.md`. If it exists, include its `Current Cursor` + `Next Action` (Phase, Blockers, Artifact, Session Activity, Next Action). This is the live resume point for in-progress multi-turn loops.
-
-Then check `artifacts/memory/session-summaries/latest.md`. If it exists, append first 5 lines of `## Last Session` section as the last-ended-session context.
+Then check `artifacts/memory/session-summaries/latest.md`. If it exists, append the `## Last Session` section as the last-ended-session context.
 
 Format:
 ```
@@ -120,11 +118,10 @@ Stack: {tech stack}
 Phase: {current phase}
 Sprint: {active sprint}
 Blockers: {N active}
-Checkpoint: {Updated/Event/Agent | Next Action}   ← freshest, if present
 Last session: {first 5 lines of latest.md or "none"}
 ```
 
-**IMPORTANT**: The `User` field is the user's preferred name (e.g. "Lyor"). Always include it in Tier 1 output so downstream agents can address the user by name. When both checkpoint and latest.md exist, the checkpoint is authoritative for *where work is right now*; latest.md describes the last *ended* unit.
+**IMPORTANT**: The `User` field is the user's preferred name (e.g. "Lyor"). Always include it in Tier 1 output so downstream agents can address the user by name.
 
 ### Step 2 — Tier 2: Agent-specific context (~300 tokens)
 
@@ -225,7 +222,6 @@ When writing to a memory file, use the corresponding template for the entry stru
 | `artifacts/memory/blockers-and-risks.md` | `.agents/templates/memory/blockers-and-risks-template.md` | Active blockers and risks |
 | `artifacts/memory/lessons-learned.md` | `.agents/templates/memory/lessons-learned-template.md` | Insights from each phase |
 | `artifacts/memory/patterns-and-conventions.md` | `.agents/templates/memory/patterns-and-conventions-template.md` | Discovered patterns and conventions |
-| `artifacts/memory/agent-notes/<agent>.md` | `.agents/templates/memory/agent-notes-template.md` | Per-agent accumulated knowledge |
 
 ### Validation
 
@@ -295,11 +291,11 @@ Format results:
 
 | File | Word threshold |
 |------|---------------|
+| `project-context.md` | 500 |
 | `active-decisions.md` | 1,800 |
 | `patterns-and-conventions.md` | 1,500 |
 | `lessons-learned.md` | 1,300 |
 | `blockers-and-risks.md` | 900 |
-| `agent-notes/*.md` | 1,100 |
 | `session-summaries/latest.md` | 600 |
 
 ### Steps

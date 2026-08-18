@@ -181,11 +181,6 @@ The controller returns filtered context covering: user segments and tech constra
 {UX finding or decision}
 **Status:** active
 
-@memory-controller write agent-notes/designer-notes.md
-### [UX] {title} [date: YYYY-MM-DD] [agent: @ux-researcher]
-{usability learning}
-**Status:** active
-
 @memory-controller write lessons-learned.md
 ### [LESSON] {title} [date: YYYY-MM-DD] [agent: @ux-researcher]
 {UX lesson}

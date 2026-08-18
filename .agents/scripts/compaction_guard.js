@@ -11,14 +11,14 @@ const fs = require('fs');
 const path = require('path');
 
 const THRESHOLDS = {
+  'project-context.md': { words: 500, tokens: 700 },
   'active-decisions.md': { words: 1800, tokens: 2500 },
   'patterns-and-conventions.md': { words: 1500, tokens: 2000 },
   'lessons-learned.md': { words: 1300, tokens: 1800 },
   'blockers-and-risks.md': { words: 900, tokens: 1200 },
+  'teaching-style.md': { words: 600, tokens: 800 },
   'session-summaries/latest.md': { words: 600, tokens: 800 }
 };
-
-const AGENT_NOTES_THRESHOLD = { words: 1100, tokens: 1500 };
 
 function countWords(content) {
   return content.split(/\s+/).filter(w => w.length > 0).length;
@@ -69,20 +69,6 @@ function checkDirectory(dirPath) {
     const result = checkFile(filePath, thresholds);
     if (result) {
       results[filename] = result;
-    }
-  }
-
-  // Check agent-notes directory
-  const agentNotesDir = path.join(dirPath, 'agent-notes');
-  if (fs.existsSync(agentNotesDir)) {
-    for (const entry of fs.readdirSync(agentNotesDir)) {
-      if (entry.endsWith('.md')) {
-        const filePath = path.join(agentNotesDir, entry);
-        const result = checkFile(filePath, AGENT_NOTES_THRESHOLD);
-        if (result) {
-          results[`agent-notes/${entry}`] = result;
-        }
-      }
     }
   }
 

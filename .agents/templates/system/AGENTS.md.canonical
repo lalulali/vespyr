@@ -126,6 +126,7 @@ Vespyr organizes complex, multi-agent operations into highly structured **skills
 *   `/iterate` — Post-launch behavior improvements
 *   `/incident` — Production incident response
 *   `/retro` — Post-cycle review and memory compaction
+*   `/shut-up` — One-shot silent execution mode with zero unsolicited critique and ultra-minimal output
 *   `/help-me` — Conversational project navigator and co-pilot
 *   `/grill-me` — Relentless Socratic alignment and stress-testing interview
 *   `/humanize` — AI-writing tell detector and style normalizer

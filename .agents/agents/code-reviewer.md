@@ -153,11 +153,6 @@ The controller returns filtered context covering: established patterns to enforc
 **Write after completing:**
 
 ```
-@memory-controller write agent-notes/qa-notes.md
-### [CODE] {title} [date: YYYY-MM-DD] [agent: @code-reviewer]
-{systemic issue or recurring pattern found across multiple files}
-**Status:** active
-
 @memory-controller write patterns-and-conventions.md
 ### [CODE] {title} [date: YYYY-MM-DD] [agent: @code-reviewer]
 {new anti-pattern discovered — what to avoid and why}

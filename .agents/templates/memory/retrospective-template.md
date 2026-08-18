@@ -177,11 +177,6 @@ Use `@memory-controller` for all memory updates — do not write files directly.
 {process improvement}
 **Status:** active
 
-@memory-controller write agent-notes/tech-lead-notes.md
-### [PROCESS] {title} [date: YYYY-MM-DD] [agent: @tech-lead]
-{estimation benchmark update}
-**Status:** active
-
 @memory-controller write project-context.md
 ### [ARCH] {title} [date: YYYY-MM-DD] [agent: @architect]
 {new technical decision}

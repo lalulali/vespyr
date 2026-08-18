@@ -146,11 +146,6 @@ The controller returns filtered context covering: project stack and phase, patte
 {new pattern or convention discovered}
 **Status:** active
 
-@memory-controller write agent-notes/developer-notes.md
-### [CODE] {title} [date: YYYY-MM-DD] [agent: @developer]
-{workaround, pitfall, or refactoring candidate}
-**Status:** active
-
 @memory-controller write blockers-and-risks.md
 ### [RISK] {title} [date: YYYY-MM-DD] [agent: @developer]
 {blocker description and impact}

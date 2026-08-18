@@ -63,7 +63,7 @@ Support these operations:
 - **Unblock** — remove blocker
 - **Complete** — mark as done
 
-Update `artifacts/output/05-planning/kanban.md` and log the change to `artifacts/memory/agent-notes/product-manager-notes.md` via `@memory-controller write`.
+Update `artifacts/output/05-planning/kanban.md` and log critical status changes to `artifacts/memory/active-decisions.md` via `@memory-controller write`.
 
 ## State machine integration
 

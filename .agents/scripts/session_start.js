@@ -3,24 +3,25 @@
  * Session Start — refresh project-context.md at session start / completion.
  *
  * Used by @memory-controller (`session-start`) and orchestrator_state.js
- * (`session-start` and `complete`). This is the deterministic engine — the
+ * (`session-start`, `complete`, `session-write`, `set-phase`). This is the deterministic engine — the
  * calling layer decides when to invoke it.
  *
  * Usage (CLI):
  *   node session_start.js --agent {agent-name} --domain {domain} [--goal "one-liner"]
  *
  * Behavior:
- *   1. Syncs [CORE] Phase: from artifacts/output/pipeline-state.json (canonical)
- *   2. Re-counts Blockers: from artifacts/memory/blockers-and-risks.md (active entries)
- *   3. Records a 1-line marker in the `## Session Activity` section — one per
- *      agent per day (updates in place, keeps last 5)
- *   4. Updates the Last updated / Updated by footer
- *
- * The function is idempotent and never rewrites the [CORE] header format.
+ *   1. Syncs machine state block (<!-- BEGIN MACHINE STATE --> ... <!-- END MACHINE STATE -->)
+ *      with Stack, Git Branch, Active Phase, Active Sprint, Blocker Status, Engine Version.
+ *   2. Keeps legacy [CORE] fields in sync if present.
+ *   3. Re-counts Blockers from artifacts/memory/blockers-and-risks.md (active entries).
+ *   4. Records a 1-line marker in `## Session Activity` section — one per agent per day.
+ *   5. Updates the Last updated / Updated by footer.
+ *   6. Uses atomic file writes (tmp file + rename) for crash safety.
  */
 
 const fs = require('fs');
 const path = require('path');
+const { writeFileSync: atomicWriteFileSync } = require('./lib/fs_atomic.js');
 
 const PROJECT_CONTEXT = path.join(process.cwd(), 'artifacts', 'memory', 'project-context.md');
 const PIPELINE_STATE = path.join(process.cwd(), 'artifacts', 'output', 'pipeline-state.json');
@@ -45,6 +46,17 @@ function canonicalPhase() {
   }
 }
 
+function canonicalSprint() {
+  const raw = readFile(PIPELINE_STATE);
+  if (!raw) return 'none';
+  try {
+    const state = JSON.parse(raw);
+    return state.sprint || state.active_sprint || 'none';
+  } catch {
+    return 'none';
+  }
+}
+
 function detectRepository() {
   const { execSync } = require('child_process');
   try {
@@ -55,6 +67,31 @@ function detectRepository() {
   } catch {
     return 'Not a git repository (local folder)';
   }
+}
+
+function detectBranch() {
+  const { execSync } = require('child_process');
+  try {
+    const inRepo = execSync('git rev-parse --is-inside-work-tree 2>/dev/null', { encoding: 'utf8' }).trim();
+    if (inRepo !== 'true') return 'none';
+    const branch = execSync('git branch --show-current 2>/dev/null', { encoding: 'utf8' }).trim();
+    if (branch) return branch;
+    const ref = execSync('git rev-parse --abbrev-ref HEAD 2>/dev/null', { encoding: 'utf8' }).trim();
+    return ref || 'none';
+  } catch {
+    return 'none';
+  }
+}
+
+function detectEngineVersion() {
+  try {
+    const pkgPath = path.join(process.cwd(), 'package.json');
+    if (fs.existsSync(pkgPath)) {
+      const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+      if (pkg.version) return pkg.version;
+    }
+  } catch {}
+  return '2.0.7';
 }
 
 function detectStack() {
@@ -81,12 +118,63 @@ function detectStack() {
   } catch {
     // best-effort detection; keep whatever exists
   }
-  return clues.join(', ');
+  return clues.length > 0 ? clues.join(', ') : 'None';
 }
 
-// cli.js scaffold format: "- **Repository**: ..." / "- **Stack**: ..." (## Identity / ## Technical)
-// [CORE] format: "Repository: ..." / "Stack: ..." (single line, machine-readable)
-// Replaces existing lines; inserts missing Repository/Stack into [CORE] when absent.
+function countActiveBlockers() {
+  const raw = readFile(BLOCKERS_FILE);
+  if (!raw) return 0;
+  const text = raw.toLowerCase();
+  if (text.includes('*no open blockers*') || text.includes('## active blockers\nnone')) return 0;
+  const active = [];
+  const statusRe = /\*\*status:\*\*\s*([a-z ]+)/gi;
+  let m;
+  while ((m = statusRe.exec(raw)) !== null) {
+    const status = m[1].trim().toLowerCase();
+    if (status === 'open' || status === 'in progress' || status === 'active') active.push(status);
+  }
+  return active.length;
+}
+
+function generateMachineStateBlock({ stack, branch, phase, sprint, blockers, version }) {
+  const blockerText = blockers === 1 ? '1 active blocker' : `${blockers} active blockers`;
+  return [
+    '<!-- BEGIN MACHINE STATE -->',
+    '## [RUNTIME STATE]',
+    `- Stack: ${stack || 'None'}`,
+    `- Git Branch: ${branch || 'none'}`,
+    `- Active Phase: ${phase || 'validation'}`,
+    `- Active Sprint: ${sprint || 'none'}`,
+    `- Blocker Status: ${blockerText}`,
+    `- Engine Version: ${version || '2.0.7'}`,
+    '<!-- END MACHINE STATE -->'
+  ].join('\n');
+}
+
+function spliceMachineState(content, machineBlock) {
+  const machineFenceRe = /<!-- BEGIN MACHINE STATE -->[\s\S]*?<!-- END MACHINE STATE -->/;
+  if (machineFenceRe.test(content)) {
+    return content.replace(machineFenceRe, machineBlock);
+  }
+
+  // If fence not present yet, inject it after ## [IDENTITY] section or ## [CORE] section, or at top
+  const identityRe = /(##\s*\[IDENTITY\][\s\S]*?)(?=\n## |\n---|\s*$)/i;
+  const identityMatch = content.match(identityRe);
+  if (identityMatch) {
+    const endPos = identityMatch.index + identityMatch[0].length;
+    return content.slice(0, endPos).trimEnd() + '\n\n' + machineBlock + '\n\n' + content.slice(endPos).trimStart();
+  }
+
+  const coreRe = /(##\s*\[CORE\][\s\S]*?)(?=\n## |\n---|\s*$)/i;
+  const coreMatch = content.match(coreRe);
+  if (coreMatch) {
+    const endPos = coreMatch.index + coreMatch[0].length;
+    return content.slice(0, endPos).trimEnd() + '\n\n' + machineBlock + '\n\n' + content.slice(endPos).trimStart();
+  }
+
+  return content.trimEnd() + '\n\n' + machineBlock + '\n';
+}
+
 function syncDetectedFields(content, repository, stack) {
   if (repository) {
     const replaced = content.replace(/^(\s*-\s+\*\*Repository\*\*:\s*).*$/gm, `$1${repository}`)
@@ -109,8 +197,6 @@ function syncDetectedFields(content, repository, stack) {
   return content;
 }
 
-// Insert a missing [CORE] field after an existing sibling line, or append it
-// to the [CORE] block if none of the known siblings are present.
 function insertCoreField(content, key, value) {
   const siblings = ['Project:', 'Stack:', 'Phase:', 'Sprint:', 'Blockers:'];
   const blockRe = /(## \[CORE\][^\n]*\n)([\s\S]*?)(?=\n## |\n---|\s*$)/;
@@ -131,21 +217,6 @@ function insertCoreField(content, key, value) {
   return content.replace(block[0], header + body);
 }
 
-function countActiveBlockers() {
-  const raw = readFile(BLOCKERS_FILE);
-  if (!raw) return 0;
-  const text = raw.toLowerCase();
-  if (text.includes('*no open blockers*') || text.includes('## active blockers\nnone')) return 0;
-  const active = [];
-  const statusRe = /\*\*status:\*\*\s*([a-z ]+)/gi;
-  let m;
-  while ((m = statusRe.exec(raw)) !== null) {
-    const status = m[1].trim().toLowerCase();
-    if (status === 'open' || status === 'in progress' || status === 'active') active.push(status);
-  }
-  return active.length;
-}
-
 function syncCore(content, phase, blockers) {
   if (phase) {
     content = content.replace(/(^Phase:\s*)\S+/gm, `$1${phase}`);
@@ -161,8 +232,6 @@ function nowStamp() {
 }
 
 function markerExists(lines, today, agent) {
-  // Matches both date-only ("- 2026-08-03 @shifu") and timestamped
-  // ("- 2026-08-03 21:29 @shifu") markers for the same agent.
   const re = new RegExp(`^- ${today}( \\d{2}:\\d{2})? @${agent}\\b`);
   return lines.some((l) => re.test(l.trim()));
 }
@@ -205,12 +274,10 @@ function updateFooter(content, agent) {
 }
 
 /**
- * Sync project-context.md. Returns a summary object or throws on fatal errors.
+ * Sync project-context.md atomically.
  * @param {object} opts - { agent (required), domain, goal }
- * @param {boolean} opts.ensureMarker - if true, force a marker even when one
- *   already exists for this agent today (used at completion as a backstop).
- * @param {boolean} opts.recordMarker - if false, skip the Session Activity marker
- *   entirely (used by the git post-push hook — only fields + footer refresh).
+ * @param {boolean} opts.ensureMarker - if true, force a marker even when one exists today
+ * @param {boolean} opts.recordMarker - if false, skip Session Activity marker
  */
 function syncProjectContext({ agent, domain, goal, ensureMarker = false, recordMarker = true }) {
   if (!agent) throw new Error('Missing agent');
@@ -220,43 +287,62 @@ function syncProjectContext({ agent, domain, goal, ensureMarker = false, recordM
   const today = new Date().toISOString().slice(0, 10);
   const stamp = nowStamp();
   const phase = canonicalPhase();
+  const sprint = canonicalSprint();
   const blockers = countActiveBlockers();
   const repository = detectRepository();
+  const branch = detectBranch();
   const stack = detectStack();
+  const version = detectEngineVersion();
 
   let updated = content;
+
+  // Splice machine state block
+  const machineBlock = generateMachineStateBlock({ stack, branch, phase, sprint, blockers, version });
+  updated = spliceMachineState(updated, machineBlock);
+
+  // Sync legacy CORE & detected fields for full backward compatibility
+  updated = syncCore(updated, phase, blockers);
+  updated = syncDetectedFields(updated, repository, stack);
+
   const marker = `- ${stamp} @${agent} — ${domain || 'work'}` + (goal ? `: ${goal}` : '');
 
-  if (!recordMarker) {
-    updated = syncCore(updated, phase, blockers);
-    updated = syncDetectedFields(updated, repository, stack);
-    updated = updateFooter(updated, agent);
-  } else if (ensureMarker) {
-    const headerRe = /^## Session Activity[^\n]*\n(?:\s*-[^\n]*\n?)*/m;
-    const exists = headerRe.test(updated) && markerExists(updated.match(headerRe)[0].split('\n').filter((l) => l.trim().startsWith('-')), today, agent);
-    if (exists) {
-      // Already recorded today; still refresh CORE + footer.
-      updated = syncCore(updated, phase, blockers);
-      updated = syncDetectedFields(updated, repository, stack);
-      updated = updateFooter(updated, agent);
+  if (recordMarker) {
+    if (ensureMarker) {
+      const headerRe = /^## Session Activity[^\n]*\n(?:\s*-[^\n]*\n?)*/m;
+      const exists = headerRe.test(updated) && markerExists(updated.match(headerRe)[0].split('\n').filter((l) => l.trim().startsWith('-')), today, agent);
+      if (!exists) {
+        updated = updateSessionActivity(updated, marker, today, agent);
+      }
     } else {
       updated = updateSessionActivity(updated, marker, today, agent);
-      updated = syncCore(updated, phase, blockers);
-      updated = syncDetectedFields(updated, repository, stack);
-      updated = updateFooter(updated, agent);
     }
-  } else {
-    updated = updateSessionActivity(updated, marker, today, agent);
-    updated = syncCore(updated, phase, blockers);
-    updated = syncDetectedFields(updated, repository, stack);
-    updated = updateFooter(updated, agent);
   }
 
-  fs.writeFileSync(PROJECT_CONTEXT, updated, 'utf8');
-  return { file: 'project-context.md', phase: phase || '(unchanged)', blockers, repository, stack, activity: recordMarker ? marker : null };
+  updated = updateFooter(updated, agent);
+
+  atomicWriteFileSync(PROJECT_CONTEXT, updated, 'utf8');
+  return {
+    file: 'project-context.md',
+    phase: phase || '(unchanged)',
+    blockers,
+    repository,
+    branch,
+    stack,
+    version,
+    activity: recordMarker ? marker : null
+  };
 }
 
-module.exports = { syncProjectContext };
+module.exports = {
+  syncProjectContext,
+  detectStack,
+  detectBranch,
+  detectRepository,
+  detectEngineVersion,
+  countActiveBlockers,
+  generateMachineStateBlock,
+  spliceMachineState
+};
 
 if (require.main === module) {
   const args = process.argv.slice(2);

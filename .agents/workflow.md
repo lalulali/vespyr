@@ -243,7 +243,7 @@ Each developer agent operates in its assigned worktree:
    - **Full-Stack:** Both FE and BE communication channels are available.
 4. **Implement task** — write code satisfying happy/unhappy/edge acceptance criteria, write unit/integration tests, and run lints inside the worktree.
 5. **Commit to feature branch** — commit code to the worktree's designated branch.
-6. **Signal completion** — update `artifacts/memory/agent-notes/developer-notes.md` in the main repo with status.
+6. **Signal completion** — update `artifacts/memory/patterns-and-conventions.md` in the main repo with status.
 
 ### Merge protocol
 
@@ -270,7 +270,7 @@ node .agents/scripts/worktree.js clean-all
 | Scenario | Action |
 |---|---|
 | **Merge conflict on test/config files** | `@tech-lead` resolves manually — these are usually additive |
-| **Merge conflict on source files** | Indicates task assignment overlap — `@tech-lead` resolves and logs to `developer-notes.md` for future planning |
+| **Merge conflict on source files** | Indicates task assignment overlap — `@tech-lead` resolves and logs to `patterns-and-conventions.md` for future planning |
 | **Test failures after merge** | `@tech-lead` identifies which developer's changes caused the failure, assigns fix to that developer |
 | **Architectural conflict** | Escalate to `@architect` — the ADRs may need updating |
 
@@ -285,7 +285,7 @@ If the project doesn't use git or worktrees aren't supported:
 ### Shared memory for multi-developer
 
 All developers read/write to the same shared memory files in the main repo:
-- `artifacts/memory/agent-notes/developer-notes.md` — shared log of progress, blockers, and discoveries
+- `artifacts/memory/patterns-and-conventions.md` — shared log of progress, patterns, and discoveries
 - `artifacts/memory/blockers-and-risks.md` — if one developer discovers a blocker that affects another's task
 
 When writing to shared memory, prefix entries with the developer ID:
@@ -630,22 +630,14 @@ All agents share a persistent memory layer in `artifacts/memory/`. Access is alw
 
 ```
 artifacts/memory/
-├── project-context.md           # Static: project basics, tech stack, conventions
+├── project-context.md           # Static/Machine: project basics, tech stack, runtime state fence
 ├── active-decisions.md          # Dynamic: current decisions and rationale
 ├── patterns-and-conventions.md  # Dynamic: discovered patterns and anti-patterns
 ├── lessons-learned.md           # Dynamic: insights from each phase
 ├── blockers-and-risks.md        # Dynamic: active blockers and their owners
-├── agent-notes/                 # Per-agent accumulated knowledge
-│   ├── architect-notes.md
-│   ├── developer-notes.md
-│   ├── designer-notes.md
-│   ├── tech-lead-notes.md
-│   ├── qa-notes.md
-│   ├── ml-ai-notes.md
-│   ├── performance-notes.md
-│   └── product-manager-notes.md
+├── teaching-style.md            # Dynamic: teaching preferences (for @shifu)
 ├── session-summaries/           # Cross-session continuity
-│   ├── latest.md                # Most recent session (~100 tokens, Tier 1)
+│   ├── latest.md                # Single authoritative live cursor (~100 tokens, Tier 1)
 │   └── history.md               # Full session log (append-only, never loaded directly)
 └── archive/                     # Compacted historical entries
     ├── index.ndjson             # Searchable index (auto-created on first compaction)
@@ -704,15 +696,15 @@ Use the format in `.agents/templates/memory/session-summary-template.md`. This w
 | When | What to Write | Where |
 |------|--------------|-------|
 | @founder decides direction | Key assumptions, optional agents requested | `active-decisions.md` |
-| @architect makes tech decision | ADR reference, rationale, constraints | `active-decisions.md` + `architect-notes.md` |
-| @developer discovers pattern | Code pattern, file location, why it works | `patterns-and-conventions.md` + `developer-notes.md` |
-| @developer finds workaround | Issue description, workaround, file | `developer-notes.md` |
-| @qa-engineer finds flaky test | Test name, failure pattern, frequency | `qa-notes.md` |
-| @product-designer evolves design system | Component change, version, reason | `designer-notes.md` |
-| @tech-lead estimates task | Estimated vs actual, variance reason | `tech-lead-notes.md` |
-| @ml-ai-engineer tunes model/prompt | Prompt template change, eval result, fallback behavior | `artifacts/memory/agent-notes/ml-ai-notes.md` |
-| @performance-engineer finds regression | Metric, threshold, optimization applied | `artifacts/memory/agent-notes/performance-notes.md` |
-| @product-manager records product insight | Requirement change, prioritization rationale, user impact | `artifacts/memory/agent-notes/product-manager-notes.md` |
+| @architect makes tech decision | ADR reference, rationale, constraints | `active-decisions.md` + `patterns-and-conventions.md` |
+| @developer discovers pattern | Code pattern, file location, why it works | `patterns-and-conventions.md` |
+| @developer finds workaround | Issue description, workaround, file | `patterns-and-conventions.md` |
+| @qa-engineer finds flaky test | Test name, failure pattern, frequency | `patterns-and-conventions.md` + `blockers-and-risks.md` |
+| @product-designer evolves design system | Component change, version, reason | `patterns-and-conventions.md` |
+| @tech-lead estimates task | Estimated vs actual, variance reason | `active-decisions.md` |
+| @ml-ai-engineer tunes model/prompt | Prompt template change, eval result, fallback behavior | `patterns-and-conventions.md` + `active-decisions.md` |
+| @performance-engineer finds regression | Metric, threshold, optimization applied | `patterns-and-conventions.md` + `lessons-learned.md` |
+| @product-manager records product insight | Requirement change, prioritization rationale, user impact | `active-decisions.md` |
 | @product-manager updates Kanban | Item column, status, activity log | `artifacts/output/05-planning/kanban.md` |
 | @product-manager re-prioritizes | Priority changes, scope additions/removals | `artifacts/output/05-planning/kanban.md` + `active-decisions.md` |
 | @data-analyst observes metric shift | Metric, threshold, context | `active-decisions.md` |

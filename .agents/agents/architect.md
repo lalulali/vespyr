@@ -156,11 +156,6 @@ The controller returns filtered context covering: project stack and phase, activ
 ### [ARCH] {title} [date: YYYY-MM-DD] [agent: @architect]
 {architectural pattern established}
 **Status:** active
-
-@memory-controller write agent-notes/architect-notes.md
-### [ARCH] {title} [date: YYYY-MM-DD] [agent: @architect]
-{tech debt, performance note, or integration insight}
-**Status:** active
 ```
 
 See `.agents/templates/memory/memory-entry-template.md` for the full entry format.

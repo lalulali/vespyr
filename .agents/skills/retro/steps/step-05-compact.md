@@ -21,11 +21,6 @@ Update shared memory, compact old entries, and close the session.
 {process improvement discovered this cycle}
 **Status:** active
 
-@memory-controller write agent-notes/tech-lead-notes.md
-### [PROCESS] {title} [date: YYYY-MM-DD] [agent: @tech-lead]
-{estimation benchmark — planned vs actual, variance reason}
-**Status:** active
-
 @memory-controller write project-context.md
 ### [ARCH] {title} [date: YYYY-MM-DD] [agent: @architect]
 {new technical decision or constraint}

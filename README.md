@@ -4,7 +4,7 @@
 
 **A platform-agnostic, file-based multi-agent engine.** Install 20 specialized AI personas directly into your repository. They plan, design, build, review, test, and ship — with structured memory that persists across sessions and two architectural moats no other framework combines.
 
-[![Vespyr Version](https://img.shields.io/badge/version-2.0.6-blue)](https://github.com/lalulali/vespyr)
+[![Vespyr Version](https://img.shields.io/badge/version-2.0.7-blue)](https://github.com/lalulali/vespyr)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 📖 **[Full Documentation →](Guide/en/index.md)**
@@ -106,13 +106,29 @@ validate → explore → design → plan → develop → launch → iterate → 
 
 ## 🧩 Key Capabilities
 
-validate-idea`, `/design`, and `/round-table` to `/motion`, `/develop`, `/launch`, `/customize-skill`, and `/create-skill` (all validated against the [agentskills.io](https://agentskills.io) spec via CI)
+- **43 curated skills** — from `/validate-idea`, `/design`, and `/round-table` to `/shut-up`, `/motion`, `/develop`, `/launch`, `/customize-skill`, and `/create-skill` (all validated against the [agentskills.io](https://agentskills.io) spec via CI)
+- **Consolidated 3-tier memory & machine fencing** — atomic state syncing in `project-context.md`, streamlined 5-file shared memory, and automatic phase-boundary compaction.
 - **Security & integrity engine** — signed SHA-256 manifest verification (`vespyr verify`), supply-chain audit (`vespyr audit`), closed permission registry, and T3 data trust boundary admission control.
 - **Agent customization** — 2-file TOML merge. Your overrides survive upgrades.
 - **Multi-harness** — works with OpenCode, Claude Code, Cursor, Windsurf, Copilot, Kiro, Aider, Google Antigravity.
 - **11-phase pipeline** — with enforcement. No out-of-order execution.
 
 [Complete skills catalog →](Guide/en/skills-and-workflows.md) · [Customization →](Guide/en/configuration.md)
+
+---
+
+## 🔒 Integrity & Security Tooling
+
+```bash
+# Verify integrity of .agents/ against signed SHA-256 manifest
+npx vespyr verify
+
+# Run supply-chain security and content integrity scanner
+npx vespyr audit
+
+# Generate or update .agents/manifest.json checksums
+npx vespyr manifest
+```
 
 ---
 
