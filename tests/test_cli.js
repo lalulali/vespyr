@@ -620,6 +620,9 @@ describe('Test 10: parseFlags()', () => {
       json: false,
       spec: null,
       command: null,
+      projectName: null,
+      userNickname: null,
+      stack: null,
     });
   });
 

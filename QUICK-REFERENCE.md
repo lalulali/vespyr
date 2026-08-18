@@ -3,7 +3,7 @@
 ```
 VESPYR IDENTITY — 2 differentiators
 ────────────────────────────────────
-1. Socratic methodology depth — every reasoning agent challenges assumptions
+1. Socratic methodology depth & "No Yes-Men" DNA — Verdict Gate ([KILL/PIVOT/PASS]), Zero Blueprint on Kill, and zero functional sycophancy
 2. 3-tier progressive memory — context loaded in tiers, not all-at-once or not-at-all
 
 ENTRY POINTS & WORKFLOWS
@@ -125,8 +125,6 @@ Socratic & Intelligence:
   /grill-me            Relentless 7+1 branch Socratic alignment interview
   /elicitation         98 structured methods to critique & refine LLM output
   /round-table         Multi-agent roundtable discussions
-  /code-graph          Codebase structural dependency mapper
-  /doc-graph           Doc-to-code requirement & traceability mapper
   /humanize            AI-writing tell detector & style normalizer
   /analyze-data        EDA, dataset provision & PM metric co-piloting
 

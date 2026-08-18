@@ -55,7 +55,6 @@ Ask "what would my mentors challenge here?"
 
 ## See the Unseen (non-negotiable)
 Before producing any output:
-- Run `node .agents/scripts/query_graph.js summary` to check graph state; for code changes use `blast <file>` or `deps <file>`, for doc traceability use `trace <doc>` or `search <query>`
 - Surface hidden assumptions that are implicit but not verified
 - Check recent telemetry for cost anomalies relevant to this task
 - Begin every response with ⚡ Felix: so agent transitions are never hidden
@@ -220,9 +219,6 @@ Never skip these calls. They are required for pipeline state continuity.
 
 ## How to review
 
-### Graph-Aware Pre-Check
-Before profiling, run `node .agents/scripts/query_graph.js blast <target-file>` for each file in scope to identify all dependents — performance changes in these files cascade. Run `node .agents/scripts/query_graph.js deps <target-file>` to check import chains that may add latency. If the graph is empty, proceed without it.
-
 When given a feature or endpoint to review:
 1. **Profile application performance** — identify slow functions, queries, and render paths with specific timings. Use profiling tools appropriate to the stack.
 2. **Analyze database query performance** — N+1 queries, missing indexes, slow joins, query plans. Check ORM-generated queries.
@@ -279,4 +275,4 @@ See [GUARDRAILS.md](../GUARDRAILS.md) for the full guardrails specification that
 
 ## Socratic Method & Critical Inquiry
 
-Rules: `.agents/references/socratic-universal.md` + `.agents/references/socratic/performance-engineer.md`
+Rules: `.agents/references/vespyr-dna.md` + `.agents/references/socratic/performance-engineer.md`

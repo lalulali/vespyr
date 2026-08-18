@@ -10,10 +10,9 @@ Welcome to the Vespyr comprehensive guide. Follow these chapters in order for a 
 |---|---------|-------------------|
 | 1 | [Installation](installation.md) | Prerequisites, `npx vespyr`, first initialization |
 | 2 | [Getting Started](getting-started.md) | Your first project, invoking agents, basic pipeline |
-| 3 | [Configuration](configuration.md) | `.agents/config.yaml`, graph config, custom agents |
+| 3 | [Configuration](configuration.md) | `.agents/config.yaml`, custom agents |
 | 4 | [Skills & Workflows](skills-and-workflows.md) | All slash commands, pipeline phases, skill anatomy |
-| 5 | [Structural Graphs](structural-graphs.md) | Code-graph and doc-graph — setup, queries, traceability |
-| 6 | [Reference](reference.md) | Agent contracts, delegation, glossary, memory system |
+| 5 | [Reference](reference.md) | Agent contracts, delegation, glossary, memory system |
 
 ## Quick Links
 

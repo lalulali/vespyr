@@ -593,8 +593,6 @@ These skills form the backbone of the product and game development lifecycle. Sk
 
 | Skill | Phase | Primary Agents | Key Output / Description |
 |-------|-------|----------------|--------------------------|
-| `code-graph` | Any | @architect, @tech-lead | Codebase structural dependency scanner (`code-graph.json`) and query engine |
-| `doc-graph` | Any | @product-manager, @technical-writer | Documentation link and requirement-to-code traceability graph mapper |
 | `humanize` | Any | @technical-writer | AI-writing tell detector and natural language style normalizer |
 | `elicitation` | Any | Harness / Any | 98 structured methods to push LLM to reconsider, refine, and improve output |
 | `round-table` | Any | Harness / Any | Multi-agent stage-based roundtable discussions with independent agent perspectives |
@@ -753,9 +751,7 @@ The **pipeline state machine** (`node .agents/scripts/orchestrator_state.js`) is
 
 The state machine is not just a state recorder. It auto-fires side effects that you would otherwise have to remember:
 
-- **`init`** → seeds `artifacts/memory/project-context.md` AND triggers `ensure_graph.js doc` so the doc-graph exists from the first call
 - **`set-phase`** → records `phase_transition` telemetry and syncs `Phase:` field in `project-context.md`
-- **`complete --agent developer|architect|tech-lead`** → records `agent_invoke` telemetry AND triggers `ensure_graph.js code` so the code-graph is current
 - **All `complete` calls** → record `agent_invoke` telemetry, even when no `--tokens` is supplied (token count is auto-estimated from artifact size)
 - **`file-cr`** → records the open CR in `pipeline-state.json`, which causes `next` to return `resolve-cr` until resolved
 

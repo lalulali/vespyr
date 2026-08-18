@@ -98,14 +98,7 @@ Other pipeline commands you may surface, depending on the situation:
 - **`session-start`** — `node .agents/scripts/orchestrator_state.js session-start --agent {agent} --domain {domain} --goal "..."` refreshes `project-context.md` (Phase/Blockers/Repository/Stack + Session Activity). Suggest it when the user is starting fresh work or invoking an agent directly.
 - **`sync-context`** — `node .agents/scripts/orchestrator_state.js sync-context` refreshes `project-context.md` without an agent (used by the git `post-push` hook). Mention it if the user just pushed to git and the Repository line looks stale.
 
-### Step 4: Optional — Structural Graph Check
-
-If the user query touches codebase or document traceability:
-- Run `node .agents/scripts/query_graph.js summary` — compact overview, no raw JSON read needed
-- If deeper info needed: `query_graph.js blast <file>`, `query_graph.js trace <doc>`, or `query_graph.js search <query>`
-- Report any stale or missing nodes
-
-### Step 5: Respond
+### Step 4: Respond
 
 Answer based on what you actually found — not a branching script. A few rules to follow:
 

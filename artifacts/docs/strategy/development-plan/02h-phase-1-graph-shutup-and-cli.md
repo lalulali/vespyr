@@ -180,7 +180,7 @@ The anti-sycophancy directive is injected into the foundation of all 20 agents:
   > **No Yes-Men in the Swarm.**  
   > *A yes-man agent is an engine defect. Push back before you help ship the mess.*  
   > Agreeable rubber-stamping (*"Sounds like a great idea!"*, *"I'll write that immediately"*) on broken, incomplete, or hazardous premises is strictly forbidden.
-- **`.agents/references/socratic-universal.md`:** Codified mandate requiring every agent to challenge unverified assumptions, boundary risks, and missing error paths before code is written.
+- **`.agents/references/vespyr-dna.md`:** Codified mandate requiring every agent to challenge unverified assumptions, boundary risks, and missing error paths before code is written.
 
 ### 4.2 `/grill-me` Hardening: The 7+1 Failure-Mode Decision Tree
 
@@ -330,7 +330,7 @@ To eliminate duplicate file parsing, fragile `process.cwd()` dependencies, and u
 - [ ] **Task 2.3**: Author automated snapshot test fixtures asserting brevity (<100 tokens) and destructive confirmation gates.
 
 ### WS-3: "No Yes-Men" DNA, `/grill-me` Hardening & `/round-table` Dialectic Upgrades
-- [ ] **Task 3.1**: Codify the "No Yes-Men in the Swarm" anti-sycophancy principle in `AGENTS.md` and `.agents/references/socratic-universal.md`.
+- [ ] **Task 3.1**: Codify the "No Yes-Men in the Swarm" anti-sycophancy principle in `AGENTS.md` and `.agents/references/vespyr-dna.md`.
 - [ ] **Task 3.2**: Update `.agents/skills/grill-me/SKILL.md` with 7+1 branch failure-path interrogation and role challenge modules.
 - [ ] **Task 3.3**: Update agent system templates (`.agents/templates/system/*.canonical`) to ban premature agreeableness and rubber-stamping.
 - [ ] **Task 3.4**: Author test fixtures verifying `/grill-me` output decision log generation and clean handoff into downstream planning.
@@ -375,33 +375,33 @@ To eliminate duplicate file parsing, fragile `process.cwd()` dependencies, and u
 **Execution Checklist:**
 - [x] Epic 02h authored and positioned as 9th sub-plan in Phase 1 series
 - [x] Round-table review completed; anti-sycophancy DNA, skill separation, /round-table dialectic protocol, centralized helper architecture, and NPX packaging plan incorporated
-- [ ] Task 1.1 — Delete 5 legacy graph scripts in `.agents/scripts/`
-- [ ] Task 1.2 — Remove `artifacts/memory/structural/` JSON files and skill folders
-- [ ] Task 1.3 — Scrub `query_graph.js` references across `.agents/agents/*.md`, skills, and templates
-- [ ] Task 1.4 — Author static AST/grep regression assertion script asserting zero dangling graph references
-- [ ] Task 1.5 — Run `compile_skills.js` and `spec_check.js` cleanly
-- [ ] Task 2.1 — Author `.agents/skills/shut-up/SKILL.md` (runtime-only, <100 token ceiling)
-- [ ] Task 2.2 — Register `/shut-up` across skill catalogs, READMEs, workflow, and OpenCode permissions
-- [ ] Task 2.3 — Author snapshot verification fixtures for `/shut-up` brevity and destructive confirmation gate
-- [ ] Task 3.1 — Codify "No Yes-Men in the Swarm" DNA in `AGENTS.md` and `socratic-universal.md`
-- [ ] Task 3.2 — Update `.agents/skills/grill-me/SKILL.md` with anti-sycophancy directives & failure-mode checklists
-- [ ] Task 3.3 — Update agent system templates to ban rubber-stamping and premature codegen
-- [ ] Task 3.4 — Test `/grill-me` handoff into active decisions and downstream planning
-- [ ] Task 3.5 — Update `.agents/skills/round-table/SKILL.md` with 4-phase Dialectic Cross-Examination protocol
-- [ ] Task 3.6 — Author test fixtures verifying `/round-table` pairwise critique and concession justification enforcement
-- [ ] Task 4.1 — Extract CLI helpers to `bin/lib/` (`detector.js`, `prompts.js`, `transpilers.js`) and slim `bin/cli.js`
-- [ ] Task 4.2 — Implement `detectStack(targetDir)` helper with multi-language manifest checks
-- [ ] Task 4.3 — Implement `npx vespyr update` with memory preservation and `.bak-${YYYYMMDD}` conflict backups
-- [ ] Task 4.4 — Add Antigravity, Gemini, and Aider harness options to CLI
-- [ ] Task 4.5 — Add non-interactive headless CLI parameters (`--project-name`, `--user-nickname`, `--stack`, `--harness`, `--yes`)
-- [ ] Task 4.6 — Run cross-platform initialization and update test matrix across OS fixtures
-- [ ] Task 4.7 — NPX Packaging & Manifest Verification (`npm pack` dry-run audit and zero-missing-module execution test)
-- [ ] Task 5.1 — Build `.agents/scripts/lib/fs_atomic.js` for crash-safe atomic reads and writes
-- [ ] Task 5.2 — Build `.agents/scripts/lib/workspace.js` for dynamic workspace root resolution
-- [ ] Task 5.3 — Build `.agents/scripts/lib/frontmatter.js` for unified YAML frontmatter parsing and serialization
-- [ ] Task 5.4 — Build `.agents/scripts/lib/identity.js` for dual-block identity updates in `project-context.md`
-- [ ] Task 5.5 — Refactor `orchestrator_state.js`, `archive_manager.js`, `step_tracker.js`, etc. to use `.agents/scripts/lib/`
-- [ ] Task 5.6 — Update test suite to verify atomic writes, root resolution, and frontmatter parsing integrity
+- [x] Task 1.1 — Delete 5 legacy graph scripts in `.agents/scripts/`
+- [x] Task 1.2 — Remove `artifacts/memory/structural/` JSON files and skill folders
+- [x] Task 1.3 — Scrub `query_graph.js` references across `.agents/agents/*.md`, skills, and templates
+- [x] Task 1.4 — Author static AST/grep regression assertion script asserting zero dangling graph references
+- [x] Task 1.5 — Run `compile_skills.js` and `spec_check.js` cleanly
+- [x] Task 2.1 — Author `.agents/skills/shut-up/SKILL.md` (runtime-only, <100 token ceiling)
+- [x] Task 2.2 — Register `/shut-up` across skill catalogs, READMEs, workflow, and OpenCode permissions
+- [x] Task 2.3 — Author snapshot verification fixtures for `/shut-up` brevity and destructive confirmation gate
+- [x] Task 3.1 — Codify "No Yes-Men in the Swarm" DNA in `AGENTS.md` and `vespyr-dna.md`
+- [x] Task 3.2 — Update `.agents/skills/grill-me/SKILL.md` with anti-sycophancy directives & failure-mode checklists
+- [x] Task 3.3 — Update agent system templates to ban rubber-stamping and premature codegen
+- [x] Task 3.4 — Test `/grill-me` handoff into active decisions and downstream planning
+- [x] Task 3.5 — Update `.agents/skills/round-table/SKILL.md` with 4-phase Dialectic Cross-Examination protocol
+- [x] Task 3.6 — Author test fixtures verifying `/round-table` pairwise critique and concession justification enforcement
+- [x] Task 4.1 — Extract CLI helpers to `bin/lib/` (`detector.js`, `prompts.js`, `transpilers.js`) and slim `bin/cli.js`
+- [x] Task 4.2 — Implement `detectStack(targetDir)` helper with multi-language manifest checks
+- [x] Task 4.3 — Implement `npx vespyr update` with memory preservation and `.bak-${YYYYMMDD}` conflict backups
+- [x] Task 4.4 — Add Antigravity, Gemini, and Aider harness options to CLI
+- [x] Task 4.5 — Add non-interactive headless CLI parameters (`--project-name`, `--user-nickname`, `--stack`, `--harness`, `--yes`)
+- [x] Task 4.6 — Run cross-platform initialization and update test matrix across OS fixtures
+- [x] Task 4.7 — NPX Packaging & Manifest Verification (`npm pack` dry-run audit and zero-missing-module execution test)
+- [x] Task 5.1 — Build `.agents/scripts/lib/fs_atomic.js` for crash-safe atomic reads and writes
+- [x] Task 5.2 — Build `.agents/scripts/lib/workspace.js` for dynamic workspace root resolution
+- [x] Task 5.3 — Build `.agents/scripts/lib/frontmatter.js` for unified YAML frontmatter parsing and serialization
+- [x] Task 5.4 — Build `.agents/scripts/lib/identity.js` for dual-block identity updates in `project-context.md`
+- [x] Task 5.5 — Refactor `orchestrator_state.js`, `archive_manager.js`, `step_tracker.js`, etc. to use `.agents/scripts/lib/`
+- [x] Task 5.6 — Update test suite to verify atomic writes, root resolution, and frontmatter parsing integrity
 
 ---
 

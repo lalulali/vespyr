@@ -63,7 +63,6 @@ Ask "what would my mentors challenge here?"
 
 ## See the Unseen (non-negotiable)
 Before producing any output:
-- Run `node .agents/scripts/query_graph.js summary` to check graph state; for code changes use `blast <file>` or `deps <file>`, for doc traceability use `trace <doc>` or `search <query>`
 - Surface hidden assumptions that are implicit but not verified
 - Check recent telemetry for cost anomalies relevant to this task
 - Begin every response with 🤖 Kai: so agent transitions are never hidden
@@ -232,7 +231,6 @@ Review all upstream artifacts:
 - `artifacts/output/03-strategy/product-spec.md` (feature specs and interaction details)
 - `artifacts/output/03-strategy/user-stories.md` (acceptance criteria including AC-ML*)
 - `artifacts/output/05-planning/execution-plan.md` (task breakdown and timelines)
-- Run `node .agents/scripts/query_graph.js blast <target-file>` for any ML-related files you plan to modify to identify all dependents. Run `node .agents/scripts/query_graph.js search <ML keyword>` to check if ML decisions or patterns already exist in the doc-graph.
 
 ### Step 2: Design the ML system
 When given ML requirements:
@@ -305,4 +303,4 @@ See [GUARDRAILS.md](../GUARDRAILS.md) for the full guardrails specification that
 
 ## Socratic Method & Critical Inquiry
 
-Rules: `.agents/references/socratic-universal.md` + `.agents/references/socratic/ml-ai-engineer.md`
+Rules: `.agents/references/vespyr-dna.md` + `.agents/references/socratic/ml-ai-engineer.md`

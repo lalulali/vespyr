@@ -104,8 +104,7 @@ This is the single DoD list.
 10. MCP tool surface exposes 17 first-party tools (10 from 03a + 6 from 13 + `vespyr_spawn_agent` from 03b), callable from Claude Code or OpenCode.
 11. `orchestrator_state.js next` refuses to advance out of `development` without `qa-signoff.md`.
 12. Self-learning works end-to-end (episode → pattern → instinct). `instincts.md` loaded FIRST by `@memory-controller`.
-13. Graph auto-built at 5 lifecycle moments. `auto_graph.js check` < 500ms. `query_graph.js` returns structured responses.
-14. Catalog parity test passes (`npm test` includes `test_catalog_parity.js`). All 23 agent files (v2.0 state) have "See the Unseen" directive + response prefixes. `@data-analyst` has `data_analyzer.js` + `dashboard_generator.js`.
+13. Catalog parity test passes (`npm test` includes `test_catalog_parity.js`). All 23 agent files (v2.0 state) have "See the Unseen" directive + response prefixes. `@data-analyst` has `data_analyzer.js` + `dashboard_generator.js`.
 
 ### v2.1 DoD — Loop Engineering (criteria 15-17)
 
@@ -174,7 +173,6 @@ Principle: **adopt the idea, not the inventory.** We do not want Vespyr to look 
 | Ruflo — witness/verification | T3 | 2 | SHA-256 (no Ed25519 — overkill for local-first) |
 | Ruflo — self-learning / instincts | T5 | 2 | 3-tier episode → pattern → instinct |
 | Ruflo — delegation enforcement | T1 | 2 | `delegation-policy.md` + `[DIRECT-IO-JUSTIFIED]` + audit |
-| Ruflo — graph auto-build + query API | T3 | 3 | `auto_graph.js` + `query_graph.js` |
 | Ruflo — telemetry surface | T3 | 3 | LLM-consumable digests |
 | Ruflo — QA as hard gate | T1 | 2 | `qa-signoff.md` blocks phase advance |
 | ECC — code-reviewer false-positive guard | T1 | 1 | 15-item skip-list |

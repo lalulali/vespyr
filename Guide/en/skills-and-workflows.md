@@ -1,6 +1,6 @@
 # 4. Skills & Workflows
 
-> [← Back to Guide](index.md) | [Previous: Configuration](configuration.md) | [Next: Structural Graphs →](structural-graphs.md)
+> [← Back to Guide](index.md) | [Previous: Configuration](configuration.md) | [Next: Reference →](reference.md)
 
 ## All Slash Commands
 
@@ -76,8 +76,6 @@ Vespyr organizes complex operations into atomic skills. Each skill is a folder w
 |---------|-------------|
 | `/review` | Standalone read-only code review and security audit |
 | `/test` | Run tests, analyze failures, and generate QA reports |
-| `/code-graph` | Generate/scan codebase dependency graphs |
-| `/doc-graph` | Generate/scan documentation links and trace coverage |
 | `/humanize` | AI-writing style detector and normalizer |
 
 ### Authoring & Customization

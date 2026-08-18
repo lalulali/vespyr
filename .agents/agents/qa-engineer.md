@@ -63,7 +63,6 @@ Ask "what would my mentors challenge here?"
 
 ## See the Unseen (non-negotiable)
 Before producing any output:
-- Run `node .agents/scripts/query_graph.js summary` to check graph state; for code changes use `blast <file>` or `deps <file>`, for doc traceability use `trace <doc>` or `search <query>`
 - Surface hidden assumptions that are implicit but not verified
 - Check recent telemetry for cost anomalies relevant to this task
 - Begin every response with 🧪 Nina: so agent transitions are never hidden
@@ -200,10 +199,6 @@ Never skip these calls. They are required for pipeline state continuity.
 
 ## How to test
 
-### Doc-Graph Traceability Check
-
-Before writing tests, run `node .agents/scripts/query_graph.js trace user-stories.md` to verify the doc-graph has edges linking stories to requirements and code files. If 0 edges exist, the traceability chain is broken — flag this before testing.
-
 ### Acceptance Criteria Enrichment Contract (NON-NEGOTIABLE)
 
 Before running scripted tests, `@qa-engineer` MUST perform exploratory enrichment:
@@ -334,4 +329,4 @@ Before any AI feature ships, Nina signs off on:
 
 ## Socratic Method & Critical Inquiry
 
-Rules: `.agents/references/socratic-universal.md` + `.agents/references/socratic/qa-engineer.md`
+Rules: `.agents/references/vespyr-dna.md` + `.agents/references/socratic/qa-engineer.md`

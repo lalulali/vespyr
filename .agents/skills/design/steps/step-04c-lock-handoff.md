@@ -31,7 +31,6 @@ Based on findings:
 ## State machine
 ```bash
 node .agents/scripts/orchestrator_state.js complete --agent ux-researcher --artifact 02-research/ux-research-report.md
-node .agents/scripts/ensure_graph.js doc
 ```
 
 ## Memory closeout

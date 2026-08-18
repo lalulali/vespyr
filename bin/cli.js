@@ -52,6 +52,21 @@ const HARNESS_OPTIONS = [
 		label: "Kiro Steering & Skills",
 		description: "scaffolds .kiro/steering/vespyr-steering.md & .kiro/skills/ symlink",
 	},
+	{
+		id: "antigravity",
+		label: "Google Antigravity",
+		description: "scaffolds .agents configuration shims for Antigravity",
+	},
+	{
+		id: "gemini",
+		label: "Gemini CLI",
+		description: "scaffolds Gemini CLI instructions & system context",
+	},
+	{
+		id: "aider",
+		label: "Aider",
+		description: "scaffolds .aider.conf.yml and pre-prompt instructions",
+	},
 ];
 
 let createdLinks = [];
@@ -146,11 +161,18 @@ function parseFlags(argv) {
 		json: false,
 		spec: null,
 		command: null,
+		projectName: null,
+		userNickname: null,
+		stack: null,
 	};
 
 	for (let i = 0; i < args.length; i++) {
 		const arg = args[i];
-		if (arg === "verify" || arg === "--verify") {
+		if (arg === "init") {
+			flags.command = "init";
+		} else if (arg === "update") {
+			flags.command = "update";
+		} else if (arg === "verify" || arg === "--verify") {
 			flags.verify = true;
 			flags.command = "verify";
 		} else if (arg === "audit" || arg === "--audit") {
@@ -172,6 +194,27 @@ function parseFlags(argv) {
 			flags.dryRun = true;
 		} else if (arg === "--yes" || arg === "-y") {
 			flags.yes = true;
+		} else if (arg === "--project-name") {
+			const val = args[++i];
+			if (val === undefined || val.startsWith("-")) {
+				console.error("Missing value for flag: --project-name");
+				process.exit(1);
+			}
+			flags.projectName = val;
+		} else if (arg === "--user-nickname") {
+			const val = args[++i];
+			if (val === undefined || val.startsWith("-")) {
+				console.error("Missing value for flag: --user-nickname");
+				process.exit(1);
+			}
+			flags.userNickname = val;
+		} else if (arg === "--stack") {
+			const val = args[++i];
+			if (val === undefined || val.startsWith("-")) {
+				console.error("Missing value for flag: --stack");
+				process.exit(1);
+			}
+			flags.stack = val;
 		} else if (arg === "--target") {
 			const val = args[++i];
 			if (val === undefined || val.startsWith("-")) {

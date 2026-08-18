@@ -91,7 +91,6 @@ On session start, agents re-read `project-context.md`, `active-decisions.md`, `l
 
 | # | Tool | Source | Input | Output | Primary Personas |
 |---|---|---|---|---|---|
-| 5 | `code_graph_scan` | Wrap: `ensure_graph.js` | `path` (directory) | `{ nodes, edges, hotspots[] }` | `@developer`, `@architect`, `@code-reviewer` |
 | 6 | `code_graph_query` | Wrap: graph query | `symbol` (e.g. `"auth.login"`) | `{ callers[], callees[] }` | `@developer`, `@architect`, `@code-reviewer` |
 
 `code_graph_scan` builds or incrementally updates a dependency graph, returning hotspots (highly-connected nodes likely to break). `code_graph_query` performs targeted lookups — "who calls this function?" or "what does this function depend on?"
@@ -100,9 +99,7 @@ On session start, agents re-read `project-context.md`, `active-decisions.md`, `l
 
 | # | Tool | Source | Input | Output | Primary Personas |
 |---|---|---|---|---|---|
-| 7 | `artifact_graph` | **New**: wraps `doc_graph.js` | `target` (file path), `direction` (`upstream`\|`downstream`\|`both`) | `{ feeds_into[], depends_on[], code_files[], req_ids[] }` | `@product-manager`, `@code-reviewer`, `@architect`, `@technical-writer` |
 
-Today `doc_graph.js` does a full batch scan and dumps a JSON file — agents must read the whole thing. `artifact_graph` answers targeted questions: "what requirements trace to this code file?", "what ADRs does this user story depend on?", "if I change src/auth.ts, which docs mention it?" Returns only the relevant subgraph.
 
 ### Elicitation (1 tool)
 
@@ -179,7 +176,6 @@ The internal MCP server delivers two things: structured access to existing scrip
 |---|---|---|---|
 | `memory_search` | `.agents/scripts/memory_search.js` | BM25 index + ranked query across memory files | ~120 |
 | `session_diff` | `.agents/scripts/session_diff.js` | Compare current memory state vs. last snapshot | ~80 |
-| `artifact_graph` | Wrap + extend `doc_graph.js` | Add `--target`, `--direction` flags for subgraph queries | ~60 |
 | `task_history` | `.agents/scripts/task_history.js` | Query `artifacts/telemetry/tasks.json` by similarity | ~80 |
 | `fidelity_check` | `.agents/scripts/fidelity_check.js` | Parse agent output, match against persona constraints | ~100 |
 

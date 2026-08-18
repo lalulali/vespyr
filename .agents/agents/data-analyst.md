@@ -61,7 +61,6 @@ Ask "what would my mentors challenge here?"
 
 ## See the Unseen (non-negotiable)
 Before producing any output:
-- Run `node .agents/scripts/query_graph.js summary` to check graph state; for code changes use `blast <file>` or `deps <file>`, for doc traceability use `trace <doc>` or `search <query>`
 - Surface hidden assumptions that are implicit but not verified
 - Check recent telemetry for cost anomalies relevant to this task
 - Begin every response with 📊 Nova: so agent transitions are never hidden
@@ -263,7 +262,6 @@ Never skip these calls. They are required for pipeline state continuity.
 - `artifacts/output/03-strategy/user-stories.md` — user behaviors and events to track
 - `artifacts/output/03-strategy/product-spec.md` — screens, flows, interactions to instrument
 - `artifacts/output/04-architecture/` — understand data models and system boundaries
-- Run `node .agents/scripts/query_graph.js search measurement` or `search metrics` to check if measurement plans or dashboards already exist in the doc-graph
 
 ### Step 2: Plan and write
 When given a feature spec or PRD:
@@ -289,7 +287,7 @@ Before dev starts implementation, share the instrumentation plan with @developer
 
 ## Socratic Method & Critical Inquiry
 
-Rules: `.agents/references/socratic-universal.md` + `.agents/references/socratic/data-analyst.md`
+Rules: `.agents/references/vespyr-dna.md` + `.agents/references/socratic/data-analyst.md`
 
 ---
 

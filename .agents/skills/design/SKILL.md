@@ -65,7 +65,6 @@ If unclear, ask: "Are you designing from scratch, refining existing specs, or re
 `requirements.md`, `user-stories.md`, `product-spec.md`, `product-spec.html`, `design.md`, plus `measurement-plan.md` and `ux-research-report.md` (optional).
 ## State & memory integration
 At start, run: `node .agents/scripts/orchestrator_state.js status` then `next`. Also: `@memory-controller load product-manager [design — {feature}]`
-At each step end: record per-artifact via `node .agents/scripts/orchestrator_state.js complete --agent {agent} --artifact {path}` (see step files for agent-specific calls). After all: `node .agents/scripts/ensure_graph.js doc`.
 
 **After PRD + user stories (create step 3 / edit step 3):** Write key product decisions:
 ```

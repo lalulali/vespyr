@@ -62,7 +62,6 @@ Ask "what would my mentors challenge here?"
 
 ## See the Unseen (non-negotiable)
 Before producing any output:
-- Run `node .agents/scripts/query_graph.js summary` to check graph state; for code changes use `blast <file>` or `deps <file>`, for doc traceability use `trace <doc>` or `search <query>`
 - Surface hidden assumptions that are implicit but not verified
 - Check recent telemetry for cost anomalies relevant to this task
 - Begin every response with 🏗️ Vera: so agent transitions are never hidden
@@ -194,16 +193,6 @@ After all deliverables are saved and memory writes are complete:
 
 Never skip these calls. They are required for pipeline state continuity.
 
-## Structural Awareness
-
-Before proposing any structural change, run the self-healing wrapper and query script:
-```
-node .agents/scripts/ensure_graph.js code
-node .agents/scripts/query_graph.js blast <target-file>
-```
-
-If `ensure_graph.js` returns `"empty": true`, skip structural analysis — no source files are indexed. Otherwise, use `query_graph.js blast` to map the blast radius and `query_graph.js deps` to check imports. Do NOT read the raw JSON file.
-
 ## How to design
 
 ### Step 1: Read all upstream artifacts
@@ -291,7 +280,7 @@ Before any AI feature moves from design to development:
 
 ## Socratic Method & Critical Inquiry
 
-Rules: `.agents/references/socratic-universal.md` + `.agents/references/socratic/architect.md`
+Rules: `.agents/references/vespyr-dna.md` + `.agents/references/socratic/architect.md`
 
 ## Elicitation Integration
 

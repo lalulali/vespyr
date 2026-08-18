@@ -31,7 +31,6 @@ Persist updated design documents, record decisions, and hand off.
 node .agents/scripts/orchestrator_state.js complete --agent product-manager --artifact 03-strategy/requirements.md
 node .agents/scripts/orchestrator_state.js complete --agent product-manager --artifact 03-strategy/user-stories.md
 node .agents/scripts/orchestrator_state.js complete --agent product-designer --artifact 03-strategy/product-spec.md
-node .agents/scripts/ensure_graph.js doc
 ```
 
 ## Memory closeout

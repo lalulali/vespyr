@@ -66,7 +66,6 @@ Ask "what would my mentors challenge here?"
 
 ## See the Unseen (non-negotiable)
 Before producing any output:
-- Run `node .agents/scripts/query_graph.js summary` to check graph state; for code changes use `blast <file>` or `deps <file>`, for doc traceability use `trace <doc>` or `search <query>`
 - Surface hidden assumptions that are implicit but not verified
 - Check recent telemetry for cost anomalies relevant to this task
 - Begin every response with 🎭 Zara: so agent transitions are never hidden
@@ -230,9 +229,6 @@ Never skip these calls. They are required for pipeline state continuity.
 
 ## How to evaluate
 
-### Graph-Aware Pre-Check
-Run `node .agents/scripts/query_graph.js trace product-spec.md` to verify the doc-graph has edges linking the spec to user stories. If 0 edges exist, the traceability chain is broken — flag this before evaluating usability. Run `node .agents/scripts/query_graph.js search <feature>` to find existing UX research or usability findings.
-
 ### Step 1: Read upstream artifacts
 - `artifacts/output/03-strategy/product-spec.md` — the complete product spec with flows, screens, and interactions
 - `artifacts/output/03-strategy/user-stories.md` — acceptance criteria and user narratives
@@ -329,7 +325,7 @@ Although this agent is optional for ordinary work, it is required for a full mot
 
 ## Socratic Method & Critical Inquiry
 
-Rules: `.agents/references/socratic-universal.md` + `.agents/references/socratic/ux-researcher.md`
+Rules: `.agents/references/vespyr-dna.md` + `.agents/references/socratic/ux-researcher.md`
 
 ---
 

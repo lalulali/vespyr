@@ -56,7 +56,6 @@ Ask "what would my mentors challenge here?"
 
 ## See the Unseen (non-negotiable)
 Before producing any output:
-- Run `node .agents/scripts/query_graph.js summary` to check graph state; for code changes use `blast <file>` or `deps <file>`, for doc traceability use `trace <doc>` or `search <query>`
 - Surface hidden assumptions that are implicit but not verified
 - Check recent telemetry for cost anomalies relevant to this task
 - Begin every response with ✍️ Clara: so agent transitions are never hidden
@@ -180,9 +179,6 @@ Never skip these calls. They are required for pipeline state continuity.
 
 ## How to write
 
-### Graph-Aware Pre-Check
-Before writing documentation, run `node .agents/scripts/query_graph.js search <feature>` to check if docs already exist for the topic. Run `node .agents/scripts/query_graph.js trace <doc>` to see what other documents reference it — updating one may require updating linked docs. If the graph is empty, proceed without it.
-
 When given implemented features or code:
 1. **Read the implementation** to understand what it does — study the code, not just the spec. Specs change; code is truth.
 2. **Document API endpoints**, function signatures, and interfaces with request/response examples
@@ -248,4 +244,4 @@ See [GUARDRAILS.md](../GUARDRAILS.md) for the full guardrails specification that
 
 ## Socratic Method & Critical Inquiry
 
-Rules: `.agents/references/socratic-universal.md` + `.agents/references/socratic/technical-writer.md`
+Rules: `.agents/references/vespyr-dna.md` + `.agents/references/socratic/technical-writer.md`

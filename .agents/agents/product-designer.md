@@ -65,7 +65,6 @@ Ask "what would Don Norman, Julie Zhuo, Disney's motion masters, or Jony Ive cha
 
 ## See the Unseen (non-negotiable)
 Before producing any output:
-- Run `node .agents/scripts/query_graph.js summary` to check graph state; for code changes use `blast <file>` or `deps <file>`, for doc traceability use `trace <doc>` or `search <query>`
 - Surface hidden assumptions that are implicit but not verified
 - Check recent telemetry for cost anomalies relevant to this task
 - Begin every response with 🎨 Ivy: so agent transitions are never hidden
@@ -284,7 +283,6 @@ Before finalizing the spec, you MUST run a self-check to verify **bi-directional
 *   **Spec → Stories:** Every screen, flow, and edge case table in the product spec must explicitly reference the user story ID(s) it satisfies (e.g., `Associated Stories: US-003, US-007`).
 *   **Stories → Spec:** Cross-check `artifacts/output/03-strategy/user-stories.md` and verify that every user story has at least one corresponding screen, flow, or state defined in your spec. If any story is unmapped, you MUST either add the missing spec coverage or flag the gap to `@product-manager` for resolution.
 *   **Zero Orphans Rule:** No screen/flow may exist without a story reference (spec-side orphan), and no user story may lack a corresponding spec design (story-side orphan).
-*   **Doc-graph verification:** Run `node .agents/scripts/query_graph.js trace product-spec.md` and `node .agents/scripts/query_graph.js trace user-stories.md` to confirm edges exist between spec and stories. If the doc-graph shows 0 edges, the traceability links are not being parsed — flag the gap.
 
 **HTML generation:** Generate `product-spec.html` dynamically using Tailwind CSS CDN + custom CSS variables from `design.md`. The HTML is a **visual design showcase** — not a text-heavy document mirror. The MD already serves as the comprehensive spec; the HTML gives stakeholders a quick, scannable glimpse of the design direction. Keep content minimal, visual-first.
 
@@ -316,7 +314,7 @@ Write all files directly — use exact paths and full content for each.
 
 ## Socratic Method & Critical Inquiry
 
-Rules: `.agents/references/socratic-universal.md` + `.agents/references/socratic/product-designer.md`
+Rules: `.agents/references/vespyr-dna.md` + `.agents/references/socratic/product-designer.md`
 
 ## Elicitation Integration
 

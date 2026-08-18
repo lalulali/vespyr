@@ -78,12 +78,7 @@ The controller will:
 
 Nothing is deleted. All archived content remains searchable via `@memory-controller search`. The swarm does NOT block on human input — archive proceeds automatically. Humans review asynchronously.
 
-## 5d. Doc-graph refresh
-```bash
-node .agents/scripts/ensure_graph.js doc
-```
-
-## 5e. Session closeout
+## 5d. Session closeout
 ```
 @memory-controller status
 ```

@@ -106,8 +106,6 @@ Skills are invoked via `/skill-name` or by referencing `.agents/skills/[name]/SK
 - **`/plan`**: Standalone granular execution planning outside the develop loop.
 - **`/review`**: Standalone read-only code review and security audit.
 - **`/test`**: Test execution, failure analysis, acceptance criteria enrichment, and QA reporting.
-- **`/code-graph`**: Codebase structural dependency mapping and blast radius analysis.
-- **`/doc-graph`**: Document traceability and requirement coverage mapping.
 - **`/analyze-data`**: Exploratory data analysis, visualization mapping, and metric co-piloting.
 
 ### 🚀 Release, Ops & Maintenance

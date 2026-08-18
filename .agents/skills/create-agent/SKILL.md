@@ -111,7 +111,6 @@ downstream_consumers:
 - Follow `.agents/references/utter-satisfaction.md`; never hand off with unresolved blocking concerns.
 
 ## See the Unseen (non-negotiable)
-- Run `node .agents/scripts/query_graph.js summary` before producing output
 - Begin every response with `<emoji> <Name>:` so agent transitions are never hidden
 <!-- /IDENTITY -->
 

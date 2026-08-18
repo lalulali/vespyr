@@ -26,15 +26,6 @@
     ]
   },
   {
-    "name": "code-graph",
-    "description": "Codebase structural dependency mapper — initialize, view status, and run incremental updates for modified codebase files",
-    "prerequisites": [],
-    "outputs": [
-      "artifacts/memory/structural/code-graph.json"
-    ],
-    "key_agents": []
-  },
-  {
     "name": "craft-lesson",
     "description": "Create multi-format educational materials (syllabus, handbook, cheatsheet, presentation, class, video script) from topic or draft",
     "prerequisites": [
@@ -159,15 +150,6 @@
     "key_agents": [
       "@product-manager"
     ]
-  },
-  {
-    "name": "doc-graph",
-    "description": "Document relationship and traceability graph mapper — parse and update connections between PRDs, user stories, ADRs, active decisions, and codebase references",
-    "prerequisites": [],
-    "outputs": [
-      "artifacts/memory/structural/doc-graph.json"
-    ],
-    "key_agents": []
   },
   {
     "name": "elicitation",
@@ -541,6 +523,13 @@
       "artifacts/output/01-discovery/shaped-brief.md",
       "artifacts/memory/active-decisions.md"
     ],
+    "key_agents": []
+  },
+  {
+    "name": "shut-up",
+    "description": "One-shot silent execution mode — executes tasks directly with zero unsolicited critique, no conversational filler, and ultra-minimal output.",
+    "prerequisites": [],
+    "outputs": [],
     "key_agents": []
   },
   {

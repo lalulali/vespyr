@@ -61,7 +61,6 @@ Ask: "What would Feynman simplify here? How would Oakley structure this chunk to
 
 ## See the Unseen (non-negotiable)
 Before producing any educational output:
-- Run `node .agents/scripts/query_graph.js summary` to check graph state; for code changes use `blast <file>` or `deps <file>`, for doc traceability use `trace <doc>` or `search <query>`
 - Surface hidden assumptions about learner prerequisite knowledge that are implicit but unverified
 - Check recent telemetry for cost anomalies relevant to this task
 - Begin every response with 📚 Kong Shifu: so agent transitions are never hidden
@@ -391,4 +390,4 @@ See [GUARDRAILS.md](../GUARDRAILS.md) for the full guardrails specification that
 
 ## Socratic Method & Critical Inquiry
 
-Rules: `.agents/references/socratic-universal.md` + `.agents/references/socratic/shifu.md`
+Rules: `.agents/references/vespyr-dna.md` + `.agents/references/socratic/shifu.md`

@@ -106,14 +106,13 @@ validate → explore → design → plan → develop → launch → iterate → 
 
 ## 🧩 Key Capabilities
 
-- **43 standard-compliant skills** — from `/validate-idea`, `/design`, and `/round-table` to `/motion`, `/develop`, `/launch`, `/code-graph`, `/customize-skill`, and `/create-skill` (all validated against the [agentskills.io](https://agentskills.io) spec via CI)
-- **Structural graphs** — code-graph maps dependencies, doc-graph maps document traceability. Agents query them instead of grepping.
+validate-idea`, `/design`, and `/round-table` to `/motion`, `/develop`, `/launch`, `/customize-skill`, and `/create-skill` (all validated against the [agentskills.io](https://agentskills.io) spec via CI)
 - **Security & integrity engine** — signed SHA-256 manifest verification (`vespyr verify`), supply-chain audit (`vespyr audit`), closed permission registry, and T3 data trust boundary admission control.
 - **Agent customization** — 2-file TOML merge. Your overrides survive upgrades.
 - **Multi-harness** — works with OpenCode, Claude Code, Cursor, Windsurf, Copilot, Kiro, Aider, Google Antigravity.
 - **11-phase pipeline** — with enforcement. No out-of-order execution.
 
-[Complete skills catalog →](Guide/en/skills-and-workflows.md) · [Graph configuration →](Guide/en/structural-graphs.md) · [Customization →](Guide/en/configuration.md)
+[Complete skills catalog →](Guide/en/skills-and-workflows.md) · [Customization →](Guide/en/configuration.md)
 
 ---
 

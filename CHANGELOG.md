@@ -4,6 +4,21 @@ All notable changes to the Vespyr project will be documented in this file.
 
 ---
 
+## [2.0.7] - 2026-08-18
+
+### Core DNA & Anti-Sycophancy Hardening (Functional Anti-Sycophancy)
+- Codified **Prohibition of Functional Sycophancy ("Preach Then Comply")**: strictly forbidden from emitting cautionary warnings while still generating implementation plans, options, or workarounds for a flawed premise.
+- Established **The Mandatory Verdict Gate (`[KILL]` | `[PIVOT]` | `[PASS]`)** across `.agents/references/vespyr-dna.md`, `AGENTS.md`, `agent.md`, `CLAUDE.md`, and all canonical templates.
+- Enforced the **Zero-Blueprint-on-KILL Invariant**: when an idea is assigned `[KILL]`, agents are prohibited from generating implementation architecture or option menus; the only valid output is the Kill Autopsy and returning to problem discovery.
+- Added **Mandatory 3-Question Invariant Test** (Premise Invalidation Protocol) to eliminate speculative and vanity feature creep.
+
+### Dialectic /round-table Protocol Hardening
+- Mandated **Live Dialogue Stream Rendering**: orchestrators must output the visible, unvarnished back-and-forth dialogue between agents (`### @agent-a -> @agent-b`) before providing tension synthesis; pre-digesting debates into summary-only cards is prohibited.
+- Enforced **Subagent Dispatch Prompt Sanitization**: orchestrators must prompt subagents with raw verdict gates (`[KILL/PIVOT/PASS]`) and are prohibited from asking *"How do we make it work if the user insists?"*
+- Added comprehensive unit tests in `test/vespyr-dna.test.js` and `test/skills/round-table.test.js` (21 passing tests).
+
+---
+
 ## [2.0.6] - 2026-08-14
 
 ### Security & Integrity Architecture (Epic 02f)

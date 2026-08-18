@@ -29,6 +29,7 @@
 const fs = require('fs');
 const path = require('path');
 
+const { writeFileSync: atomicWriteFileSync, writeJsonSync, readJsonSync } = require('./lib/fs_atomic.js');
 const { syncProjectContext } = require('./session_start.js');
 const { writeCheckpoint } = require('./session_checkpoint.js');
 
@@ -149,7 +150,7 @@ function readState() {
 
 function writeState(state) {
   ensureDir();
-  fs.writeFileSync(STATE_FILE, JSON.stringify(state, null, 2), 'utf8');
+  writeJsonSync(STATE_FILE, state, 2);
   syncYaml(state);
 }
 
@@ -194,7 +195,7 @@ function syncYaml(state) {
 // Symmetric with readYaml() — readYaml parses YAML_STATE, writeYaml persists it.
 function writeYaml(lines) {
   try {
-    fs.writeFileSync(YAML_STATE, lines.join('\n'), 'utf8');
+    atomicWriteFileSync(YAML_STATE, lines.join('\n'), 'utf8');
   } catch (e) {
     // YAML sync is best-effort; don't block on write failure
   }
@@ -281,7 +282,6 @@ function recordTelemetry(eventType, fields) {
 // Ensure a structural graph is fresh, recording the result as telemetry.
 // Never throws — graph failures must not block orchestration.
 function ensureGraph(type) {
-  const ensureScript = path.join(__dirname, 'ensure_graph.js');
   if (!fs.existsSync(ensureScript)) return null;
   try {
     const stdout = require('child_process').execFileSync(

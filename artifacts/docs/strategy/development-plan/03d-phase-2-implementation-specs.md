@@ -294,8 +294,6 @@ const path = require('path');
 const { execFileSync } = require('child_process');
 
 const STATE_FILE = path.join(__dirname, '..', 'state', 'graph-last-built.json');
-const CODE_GRAPH = path.join(__dirname, '..', '..', 'artifacts', 'memory', 'structural', 'code-graph.json');
-const DOC_GRAPH  = path.join(__dirname, '..', '..', 'artifacts', 'memory', 'structural', 'doc-graph.json');
 const SCRIPT_DIR = __dirname;
 const WATCH_DIRS = [
   path.join(__dirname, '..', '..', 'src'),
@@ -337,7 +335,6 @@ function isStale(graphFile) {
 }
 
 function build(target) {
-  const ensure = path.join(SCRIPT_DIR, 'ensure_graph.js');
   if (target === 'code' || target === 'both') {
     execFileSync('node', [ensure, 'code'], { stdio: 'inherit' });
   }
@@ -385,9 +382,6 @@ const fs = require('fs');
 const path = require('path');
 const { execFileSync } = require('child_process');
 
-const CODE_GRAPH = path.join(process.cwd(), 'artifacts', 'memory', 'structural', 'code-graph.json');
-const DOC_GRAPH  = path.join(process.cwd(), 'artifacts', 'memory', 'structural', 'doc-graph.json');
-const WRAPPER    = path.join(__dirname, 'ensure_graph.js');
 
 function ensureCode() { execFileSync('node', [WRAPPER, 'code'], { stdio: 'pipe' }); }
 function ensureDoc()  { execFileSync('node', [WRAPPER, 'doc'],  { stdio: 'pipe' }); }

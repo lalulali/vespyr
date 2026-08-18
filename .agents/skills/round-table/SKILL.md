@@ -81,62 +81,61 @@ Select 2-4 agents whose expertise matches the user's topic or the current stage 
 
 *Note: `@memory-controller` executes memory actions behind the scenes and is not included as a reasoning participant in roundtable discussions.*
 
-## The Core Loop
+## The 4-Phase Dialectic State Machine
 
-For each user message:
+Roundtable discussions enforce true perspective collision where agents are mandated to defend their positions under pushback or justify concessions with technical proof.
 
-### 1. Build Context and Spawn
+### Phase 1: Position Stating (Scatter & Verdict Gate)
+- **Unconditioned parallel subagent dispatch** (no anchor bias, unconditioned priors).
+- **Prompt Sanitization Rule:** The orchestrator MUST prompt each panelist to evaluate the premise against first principles and issue an explicit **Verdict: `[KILL]`, `[PIVOT]`, or `[PASS]`**. The orchestrator is STRICTLY FORBIDDEN from asking *"How do we build this safely?"* or *"What is the blueprint if the user insists?"*
+- **Zero-Blueprint-on-KILL:** Any agent issuing `[KILL]` must state the technical autopsy and stop. They are forbidden from drafting compromise options or implementation workarounds.
+- Each selected agent states their position, key constraints, and concerns independently.
 
-For each selected agent, use the active harness's subagent capability to spawn an independent participant. Prepare a tailored prompt:
+### Phase 2: Targeted Pairwise Cross-Examination (Exchange & Attack)
+- The orchestrator identifies core tensions (e.g. `@architect` vs `@developer`, `@tech-lead` vs `@product-manager`).
+- Agent X receives Agent Y's stance with an explicit mandate: identify unstated assumptions, boundary blindspots, and invalid invariants.
 
-```
-You are {name} ({title}), a Vespyr agent participating in a collaborative roundtable discussion.
+### Phase 3: Defense & Justified Concession (Rebuttal)
+- Challenged agents MUST defend with hard empirical constraints (token budgets, benchmarks, schema invariants) OR formally log an explicit concession with root-cause proof: `[CONCESSION: reason]`.
+- Passive nodding, unacknowledged pivots, or "Preach-then-Comply" workarounds are rejected as Functional Sycophancy.
+- Bounded iterations: Maximum 2 exchange rounds.
 
-## Your Persona
-{name} — {description}
+### Phase 4: Synthesis Gate & Irreconcilable Trade-Off Escalation
+- No false consensus: if trade-offs are mutually exclusive, log them as an explicit ADR decision record in `artifacts/memory/active-decisions.md` rather than synthesizing a muddy compromise.
 
-## Discussion Stage & Context
-Current Phase: {current_phase}
-{Summary of the roundtable discussion so far — keep under 400 words}
+### Invariant Anti-Sycophancy & Orchestration Rules
+1. **Mandatory Visible Dialogue Stream:** The orchestrator MUST output the visible back-and-forth agent dialogue (e.g. `### @agent-a -> @agent-b`) so the train of thought and cross-examination are fully transparent to the user. Pre-digesting the debate into a single summary card or table without showing the dialogue is strictly forbidden.
+2. **Prohibition of Functional Sycophancy ("Preach Then Comply"):** Emitting verbal warnings while still drafting implementation plans or option menus for a killed idea is an engine failure. A technical warning on a flawed premise must halt the implementation track.
+3. **Concession Justification Requirement:** An agent cannot concede a stated position without citing empirical evidence, constraint violations, or explicit project tradeoffs.
+4. **Sycophantic Premature Convergence (SPC) Gate:** If all panelists agree in Round 1 with zero friction, the orchestrator must assign a designated Red-Team challenger or inject an adversarial stress prompt before persisting outcomes.
+5. **Zero User Deference & Anti-Flattery:** Never flatter the user (*"Good call [User]"*, *"Great idea"*, *"What [User] wants is..."*). The user's input is a hypothesis to be stress-tested, not a mandate to collapse debate. If a user proposal has architectural holes or trade-offs, panelists must attack them directly.
 
-{Relevant sections of project-context.md if applicable}
+## Multi-Turn Dialectic Continuity (Conversation Chaining)
 
-## Project Context (from memory)
-{Loaded memory context from memory_filter.js — core project info, active decisions, recent lessons}
+When the user replies, questions, or steers the conversation in subsequent turns:
 
-## What Other Agents Said This Round
-{Include other agents' responses if this is a cross-talk/reaction round, otherwise omit}
+1. **Roundtable Mode Stays Permanently Active**:
+   - The orchestrator **MUST NEVER** drop character or collapse into a single AI assistant answering the user directly.
+   - Do not answer as a lone assistant. The panel remains assembled and actively debating until the user explicitly exits (`/exit`, `thanks`, `done`).
 
-## The User's Message
-{The user's actual input}
+2. **Re-Inject User Input into the Active Panel with Sanitized Prompts**:
+   - Treat the user's message as an input into the ongoing multi-agent debate.
+   - **In native subagent mode**: Pass the user's latest inquiry and prior context to the panel subagents for independent evaluation under the `[KILL / PIVOT / PASS]` Verdict Gate.
+   - **In `--solo` mode**: Continue roleplaying each panelist sequentially under their explicit headers (e.g. `### @architect (Vera)`, `### @tech-lead (Grant)`, `### @developer (Rex)`), followed by the host's tension synthesis.
 
-## Guidelines
-- Respond authentically as {name}. Embody your persona's voice, constraints, and expertise.
-- Start your response with: **{name}:**
-- Scale your response to the substance — don't pad. If you have a brief point, make it briefly.
-- Disagree with other agents when your perspective tells you to.
-- Do NOT use tools. Just respond with your perspective.
-```
+3. **Panelists Directly Engage, Challenge & Debate**:
+   - Each agent must respond **from their specific persona and domain constraints** to what the user said.
+   - Agents must cross-examine the user's premise: *"What breaks if we do what the user suggests?"*, *"What hidden complexity or latency does this introduce?"*
+   - Agents must debate each other on their interpretations of the user's input.
+   - If an agent agrees with the user, they must provide hard technical justification; if the user's idea violates domain invariants, the responsible agent must bluntly push back and assign `[KILL]`.
 
-- **Parallel Spawning**: Use the active harness's native parallel participant mechanism when available. If `--model` was specified, override the model parameter for all participants.
-- **Solo Mode**: If `--solo` is active, or the harness cannot spawn participants, skip spawning and generate all agent responses yourself in a single message. Keep them clearly separated with name headers, stay faithful to each persona, announce the fallback, and do not describe the responses as independent subagent output.
+4. **Multi-Turn Response Structure**:
+   Every turn in an active roundtable session must follow this structure:
+   - **Live Dialogue Stream / Debates**: Explicit dialogue sections showing each panelist reacting, cross-examining peers, and defending/conceding positions (`### @agent-a -> @agent-b`).
+   - **Host Collision Map / Synthesis**: 2-3 bullet points highlighting unresolved tensions, trade-offs, and emerging consensus.
+   - **Host Challenge / Next Prompt**: An open question or decision fork back to the room to drive the discussion forward.
 
-### 2. Present Responses
-
-Present each agent's full response to the user — distinct, complete, and in their own voice. Never blend, paraphrase, or summarize agent responses. 
-
-Format: each agent's response one after another, separated by a blank line.
-
-After presenting all responses, you may add a brief, clearly labeled **Orchestrator Note** (e.g. highlighting a key disagreement or proposing the next step/additional agents to bring in).
-
-### 3. Handle Follow-ups
-
-Common patterns:
-- **General discussion continuation**: Select fresh agents as appropriate and repeat.
-- **Reaction requests** ("Winston, what do you think about what Sally said?"): Spawn that single agent with the target response in their context.
-- **Roster expansion** ("Bring in Amelia"): Spawn the new agent with the discussion summary.
-
-### 4. Persist Round Table Outcomes
+## Persist Round Table Outcomes
 
 After the discussion ends, verify any claim that a file or artifact changed against the disk before recording it as fact. Then write key outcomes to memory:
 
@@ -163,4 +162,4 @@ After the discussion ends, verify any claim that a file or artifact changed agai
 
 ## Exit
 
-When the user indicates they are finished (e.g., "thanks", "done", "exit"), persist outcomes (step 4 above), provide a brief wrap-up of the key takeaways, and return to normal operation.
+When the user indicates they are finished (e.g., "thanks", "done", "exit"), persist outcomes, provide a brief wrap-up of the key takeaways, and return to normal operation.

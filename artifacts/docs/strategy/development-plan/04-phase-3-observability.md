@@ -15,7 +15,6 @@
 
 **Source:** Evolution §1.7 | **Theme:** T3
 
-**Problem:** `code-graph/SKILL.md` ships with a self-healing wrapper, and `orchestrator_state.js` has an `ensure-graph` subcommand called after developer/architect/tech-lead finish work. But nothing invokes either at session start, and `doc-graph` is only seeded on `init` — never refreshed. The user must call `/code-graph` manually. Consequence: cross-file refactors all read a stale graph. The infrastructure is built but inert.
 
 **Target:** Make graph generation automatic at 5 lifecycle moments:
 
@@ -58,7 +57,6 @@ After a rebuild completes, inject into the next context load: "Graph rebuilt: {f
 
 **Source:** Evolution §1.11 | **Theme:** T3
 
-**Problem:** The graph is built, the LLM is told to use it, but the LLM has no API. It either reads the entire JSON and burns context (50-500 KB), or skips the graph and grep's the source tree (defeating the purpose). The Phase 1 `query_graph.js` exists with `deps/blast/trace/search` — this phase EXTENDS it with `code summary|dependents|unreachable` and `doc trace|story-impl|adr-constrains|orphans` and unifies the CLI. **The name is `query_graph.js` — do NOT create a second script called `graph_query.js`; the transposed-name collision was a review finding.**
 
 **Target:** A typed query API with 9 subcommands. Every agent invokes this, never the raw JSON file. All queries are read-only after a single-flight build lock (concurrent round-table queries cannot race duplicate full builds).
 
@@ -69,8 +67,6 @@ After a rebuild completes, inject into the next context load: "Graph rebuilt: {f
 ## Graph Query Contract
 
 Before proposing ANY structural change:
-- @executor node .agents/scripts/query_graph.js code blast-radius <target-file>
-- @executor node .agents/scripts/query_graph.js doc adr-constrains <module>
 
 Emit the result as a "## Blast Radius" section in the ADR. Cost: ~1 query, ~50 tokens output. Without the graph: read every file in src/ and grep for the target — ~5000+ tokens.
 ```
@@ -80,8 +76,6 @@ Emit the result as a "## Blast Radius" section in the ADR. Cost: ~1 query, ~50 t
 ## Graph Query Contract
 
 Before breaking the architecture into tasks:
-- @executor node .agents/scripts/query_graph.js code summary — get topology
-- For each candidate parallel task: @executor node .agents/scripts/query_graph.js code blast-radius <file> — verify the tasks touch non-overlapping files (parallelism check)
 
 Emit a "## Topology" section in the execution plan citing the graph stats.
 ```
@@ -92,7 +86,6 @@ Emit a "## Topology" section in the execution plan citing the graph stats.
 
 For every PR review:
 - Identify files changed (git diff --name-only)
-- For each: @executor node .agents/scripts/query_graph.js code blast-radius <file>
 - Flag any change with blast_size > 5 as a "high-blast-radius" finding — these deserve extra scrutiny
 
 This catches refactors that miss dependent callers.
@@ -103,19 +96,15 @@ This catches refactors that miss dependent callers.
 ## Graph Query Contract
 
 Before any refactor (rename, signature change, file move):
-- @executor node .agents/scripts/query_graph.js code dependents <target-file>
 - Update every file in the response before committing
 
 Cost: 1 query. Without it: break the build, then re-grep and fix in a second pass (~3x the tokens).
 ```
 
-- [ ] F3.6 — Extend `.agents/scripts/query_graph.js` (~240 lines) with the 9 subcommands + single-flight build lock. **Implementation code:** See `03d-phase-2-implementation-specs.md` §6
-- [ ] F3.7 — Update 6 agents that read `code-graph.json` to use `query_graph.js`:
   - `architect.md` — blast-radius before proposing changes (contract block above)
   - `tech-lead.md` — summary for topology, blast-radius for parallelism (contract block above)
   - `code-reviewer.md` — blast-radius per changed file (contract block above)
   - `developer.md` — dependents before any rename/refactor (contract block above)
-  - `memory-controller.md` — replace "must have checked code-graph.json" with `[GRAPH: ...]` marker requirement
   - Add `## Graph Query Contract` block to each of the 4 reasoning agents (text above)
 
 ## F3.8-F3.12 — Telemetry surface (LLM-consumable)
@@ -177,7 +166,6 @@ Budget: 150ms; output ≤ 20 lines (never raw event data). Inject the output int
 ```markdown
 ## Observability & "See the Unseen"
 
-- **Expose codebase dependencies & blast radius:** Before proposing any changes, query the code/doc graphs using query_graph.js and report blast radius, dependents, or unreachable code to the user.
 - **Surface hidden token costs & telemetry:** Check recent telemetry using telemetry_surface.js and warn the user of hot-paths or high token costs if they exceed historical baselines.
 - **Expose hidden assumptions:** Every plan or diagnostic must list "unseen assumptions" — things that are implicitly assumed but not verified.
 - **Enforce response identity:** Every response must begin with {icon} {Human Name}: so that agent transitions are never hidden.
@@ -258,12 +246,10 @@ a phantom.
 
 - [ ] `auto_graph.js check` returns status in < 500ms on ≤30k files (single-pass cached walk); modifying any file in `src/` or `artifacts/output/` flips `[OK]` → `[STALE]`; `build --background` never blocks a session
 - [ ] `/design`, `/develop`, `/retro` each trigger exactly one rebuild at their specified step (verified via tagged entries in `state/graph-builds.log`)
-- [ ] `query_graph.js code blast-radius src/auth/login.ts` returns a structured response (extends the Phase 1 script; no `graph_query.js` duplicate exists)
 - [ ] `telemetry_surface.js session` returns ≤ 20 lines, runs in ≤ 150ms (no string-spread mangling)
 - [ ] `/status` output includes "## Telemetry (last 7 days)"
 - [ ] `/retro` digest includes top 3 hot paths
 - [ ] `npm test` passes, including `test_catalog_parity.js` (derive-from-disk; docs updated in Phase 4 so it passes at done-when — no "expected to fail" line remains), `test_session_latency.js` (F3.21), `test_qa_gate.mjs`, `test_satisfaction.mjs`
-- [ ] `query_graph.js` used by 4 reasoning agents (architect, tech-lead, code-reviewer, developer)
 - [ ] `memory-controller` enforces `[GRAPH: ...]` marker for API-related claims (via `fidelity_check.js` rule or grep-test)
 - [ ] All agents (looped over `.agents/agents/`) have "See the Unseen" directive + response identity formatting
 - [ ] `@data-analyst` has access to `data_analyzer.js` and `dashboard_generator.js` (specs committed to 03d-phase-2-implementation-specs.md §17 before implementation)
@@ -281,8 +267,6 @@ a phantom.
 ### Rollback plan
 
 If Phase 3 breaks:
-- **Graph auto-build:** remove the Step 0 graph freshness check from `memory-controller.md`. Agents can still invoke `/code-graph` and `/doc-graph` manually.
-- **Graph query API:** if `query_graph.js` returns incorrect results, agents fall back to reading `code-graph.json` directly (the raw JSON still exists).
 - **Telemetry:** remove step 0.4 from `memory-controller.md`. Telemetry data is still written by `swarm_telemetry.js`; only the surface layer is removed.
 - **Catalog parity test:** if the test is too noisy, move it from `npm test` to a manual `npm run test:catalog` until counts stabilize.
 

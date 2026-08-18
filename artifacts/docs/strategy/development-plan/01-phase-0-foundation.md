@@ -664,8 +664,6 @@ Currently a 5-step outline. Add:
 
 Currently a thin pointer. Add:
 - When to use the graph (cross-file refactors, understanding blast radius)
-- Output schema (what's in `code-graph.json`)
-- Self-healing wrapper invocation (`ensure_graph.js` with mtime check)
 - Read-only query patterns
 
 #### F0.18 — `memory/SKILL.md` (44 → 80+ lines)

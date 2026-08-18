@@ -53,8 +53,6 @@ If measurement plan exists:
 node .agents/scripts/orchestrator_state.js complete --agent data-analyst --artifact 03-strategy/measurement-plan.md
 ```
 
-After all: `node .agents/scripts/ensure_graph.js doc`
-
 ## Memory closeout
 ```
 @memory-controller session-write

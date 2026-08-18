@@ -49,6 +49,8 @@ npx vespyr --yes --target /path/to/my-project --harness opencode,claude
 /validate-idea   →   /explore-idea   →   /design   →   /develop   →   /launch
 ```
 
+涵盖从 `/validate-idea`、`/design`、`/round-table` 到 `/motion`、`/develop`、`/launch`、`/customize-skill` 和 `/create-skill` 等 42 个端到端工作流（全部通过 CI 校验符合 [agentskills.io](https://agentskills.io) 智能体技能规范）。
+
 > **初次使用 Vespyr？** 跟随[快速上手指南](Guide/cn/getting-started.md)逐步学习。
 
 ---
@@ -106,14 +108,12 @@ validate → explore → design → plan → develop → launch → iterate → 
 
 ## 🧩 核心功能
 
-- **43 个标准合规技能与斜杠命令** — 从 `/validate-idea`、`/design`、`/round-table` 到 `/motion`、`/develop`、`/launch`、`/code-graph`、`/customize-skill` 和 `/create-skill`（全部通过 CI 校验符合 [agentskills.io](https://agentskills.io) 智能体技能规范）
-- **结构图谱** — 代码图谱映射依赖，文档图谱映射可追溯性。智能体直接查询而无需 grep。
 - **安全与完整性引擎** — 已签名的 SHA-256 清单校验（`vespyr verify`）、供应链安全审计（`vespyr audit`）、封闭权限注册表与 T3 数据信任边界准入控制。
 - **智能体自定义** — 双文件 TOML 合并。升级时你的覆盖配置保持不变。
 - **多平台支持** — 兼容 OpenCode、Claude Code、Cursor、Windsurf、Copilot、Kiro、Aider、Google Antigravity。
 - **11 阶段流水线** — 带强制执行。无越序执行。
 
-[完整技能目录 →](Guide/cn/skills-and-workflows.md) · [图谱配置 →](Guide/cn/structural-graphs.md) · [自定义 →](Guide/cn/configuration.md)
+[完整技能目录 →](Guide/cn/skills-and-workflows.md) · [自定义 →](Guide/cn/configuration.md)
 
 ---
 

@@ -1,6 +1,6 @@
-# 6. Reference
+# 5. Reference
 
-> [← Back to Guide](index.md) | [Previous: Structural Graphs](structural-graphs.md)
+> [← Back to Guide](index.md) | [Previous: Skills & Workflows](skills-and-workflows.md)
 
 ## Agent Architecture
 
@@ -84,13 +84,22 @@ artifacts/memory/
 ├── blockers-and-risks.md         # Active blockers
 ├── pending-questions/            # Open questions by topic
 ├── agent-notes/                  # Per-agent observations
-├── archive/                      # Compacted old entries (NDJSON index)
-└── structural/                   # Code-graph.json + doc-graph.json
+└── archive/                      # Compacted old entries (NDJSON index)
 ```
 
 ### Compaction
 
 When a memory file exceeds 200 lines, the memory controller compacts it — summarizing resolved entries, archiving them to the NDJSON index, and keeping the file lean. Search the archive with `/memory`.
+
+## Vespyr Core DNA: "No Yes-Men in the Swarm"
+
+The Core DNA is the unconditional operating system for every session:
+- **Anti-Sycophancy & Socratic Default:** A yes-man agent is an engine defect. Agents state objective facts, uncover boundary blindspots, and force critical thinking around trade-offs before decisions lock in.
+- **Prohibition of Functional Sycophancy ("Preach Then Comply"):** Emitting scary verbal warnings (*"This will cause battery drain and latency"*) and then immediately drafting implementation blueprints, option menus, or compromise workarounds for a flawed premise is strictly prohibited.
+- **The Mandatory Verdict Gate (`[KILL]` | `[PIVOT]` | `[PASS]`):**
+  - **`[KILL]`:** Fatal trade-offs or unvalidated vanity features. **Zero-Blueprint-on-KILL Invariant:** agents are strictly forbidden from generating implementation plans, architecture diagrams, or compromise option menus for a killed idea.
+  - **`[PIVOT]`:** Valid underlying intent, but broken/bloated mechanism. Propose the zero-cost primitive.
+  - **`[PASS]`:** Meets all domain invariants with verified empirical proof.
 
 ## Socratic Stance
 
