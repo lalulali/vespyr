@@ -62,7 +62,7 @@ All 20 agents operate under a **closed permission registry** (`bash`, `edit`, `g
 Content enters the agent system through classified boundaries defined in `validate_matrix.js`:
 
 - **`loader-enforced`**: Memory reads (`memory_filter.js` T3 boundary parsing), step output contracts, agent frontmatter parsers.
-- **`gated`**: File modifications (`edit`), subprocess execution (`bash`), external web fetching (`webfetch`), signed manifest verification (`vespyr verify`).
+- **`gated`**: File modifications (`edit`), subprocess execution (`bash`), external web fetching (`webfetch`), manifest verification (`vespyr verify`).
 - **`deferred`**: Third-party external unstructured data (sandboxing).
 
 ### 🛡️ Non-Negotiable T2/T3 Discipline Principle
@@ -182,7 +182,7 @@ Memory search scans entries at load time for prompt-injection patterns (`ignore 
 The repository provides built-in integrity tooling:
 
 ```bash
-# Verify integrity of .agents/ against signed SHA-256 manifest
+# Verify integrity of .agents/ against pinned SHA-256 manifest
 npx vespyr verify
 
 # Run supply-chain security and content integrity scanner

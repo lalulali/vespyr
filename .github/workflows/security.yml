@@ -1,0 +1,72 @@
+name: Security & Integrity Gate
+
+# 02f F1.54 / §10 — scanner + corpus + integrity suite as a CI gate.
+# No `pull_request_target` (injection vector, plan §10); fork PRs run with
+# read-only permissions and zero secrets.
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - '.agents/**'
+      - 'bin/**'
+      - 'eval/security/**'
+      - 'artifacts/docs/strategy/development-plan/security/**'
+      - '.github/workflows/security.yml'
+  pull_request:
+    branches: [main, master]
+    paths:
+      - '.agents/**'
+      - 'bin/**'
+      - 'eval/security/**'
+      - 'artifacts/docs/strategy/development-plan/security/**'
+      - '.github/workflows/security.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  security-suite:
+    name: Security suite (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # ≥2 OS incl. Windows per 02f §10 cross-platform claim
+        os: [ubuntu-latest, windows-latest]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Red-team corpus invariants
+        run: node .agents/scripts/check_corpus_invariants.js
+
+      - name: Security & integrity test suite (fault injection, frontmatter whitelist, P8 matrix, T3 loader, verify contract, held-out recall, mutation eval)
+        run: node .agents/scripts/test_security_suite.js
+
+      - name: Scanner corpus contract (positive exits 1 / negative exits 0)
+        shell: bash
+        run: |
+          set -e
+          SPEC=artifacts/docs/strategy/development-plan/security/audit-spec.json
+          node .agents/scripts/security-scan.js --dir eval/security/corpus/negative --spec "$SPEC" --json > /dev/null
+          echo "negative corpus clean (exit 0) ✓"
+          if node .agents/scripts/security-scan.js --dir eval/security/corpus/positive --spec "$SPEC" --json > /dev/null; then
+            echo "positive corpus MUST exit 1"; exit 1
+          fi
+          echo "positive corpus findings detected (exit 1) ✓"
+
+      - name: Repo-wide NEW-FINDINGS-ONLY gate (02f DoD #8)
+        run: node .agents/scripts/check_new_findings.js
+
+      - name: R47 drift monitor self-test
+        shell: bash
+        run: |
+          node .agents/scripts/drift_monitor.js --init --force
+          node .agents/scripts/drift_monitor.js

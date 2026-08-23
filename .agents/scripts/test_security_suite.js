@@ -90,6 +90,50 @@ runTest('Fault-Injection Contract: FAULT-4 Explicit Fault Flag (Exit 2)', () => 
   }
 });
 
+// N-16 regression guard (Victor, post-fix audit): an unreadable FILE (not just
+// subtree) must fail closed — never silently skip and report clean.
+// N-17 (Nina, resolved): POSIX uses chmod 000; Windows maps that to READONLY
+// (file stays readable), so read access is denied via icacls instead. If
+// icacls is unavailable the test skips EXPLICITLY — a silent skip would be a
+// false pass.
+runTest('Fail-Closed Walker: chmod-000 file -> Exit 2', () => {
+  const os = require('os');
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'vespyr-f7-file-'));
+  const payload = path.join(tmp, 'payload.js');
+  try {
+    fs.writeFileSync(payload, 'eval(atob("Zm9v"))\n', 'utf8');
+    if (process.platform === 'win32') {
+      const { execSync } = require('child_process');
+      try {
+        // Deny Everyone read via ACL; remove inheritance so the deny sticks.
+        execSync(`icacls "${payload}" /inheritance:r /deny *S-1-1-0:(R)`, { stdio: 'pipe' });
+      } catch (e) {
+        console.log('SKIP (win32: icacls denial unavailable — N-17 fallback)');
+        passCount++;
+        return;
+      }
+    } else {
+      fs.chmodSync(payload, 0o000);
+    }
+    try {
+      execFileSync('node', [path.join(SCRIPTS_DIR, 'security-scan.js'), '--dir', tmp, '--spec', SPEC], { encoding: 'utf8', stdio: 'pipe' });
+      throw new Error('unreadable-file scan expected exit 2, got 0 (silent skip!)');
+    } catch (e) {
+      if (e.status !== 2) throw new Error(`expected exit 2, got ${e.status}`);
+    }
+  } finally {
+    try {
+      if (process.platform === 'win32') {
+        const { execSync } = require('child_process');
+        execSync(`icacls "${payload}" /reset`, { stdio: 'pipe' });
+      } else {
+        fs.chmodSync(payload, 0o644);
+      }
+    } catch (e) { /* best-effort cleanup */ }
+    fs.rmSync(tmp, { recursive: true, force: true });
+  }
+});
+
 // 3. Frontmatter & Permission Whitelist
 runTest('Agent Frontmatter Schema & Permission Whitelist (validate_frontmatter.js)', () => {
   execFileSync('node', [path.join(SCRIPTS_DIR, 'validate_frontmatter.js')], { cwd: ROOT, encoding: 'utf8' });
@@ -113,10 +157,86 @@ runTest('Memory Filter T3 Delimiter & Admission Control (memory_filter.js)', () 
   }
 });
 
-// 6. CLI Commands: vespyr manifest and vespyr verify
-runTest('CLI Signed-Manifest Generation & Verification (bin/cli.js verify)', () => {
-  execFileSync('node', [CLI, 'manifest'], { cwd: ROOT, encoding: 'utf8' });
-  execFileSync('node', [CLI, 'verify'], { cwd: ROOT, encoding: 'utf8' });
+// 6. CLI Manifest Verification Contract — isolated temp tree, NO tautology.
+// (2026-08-23 re-audit: the old test regenerated the repo manifest then
+// verified against it — it cannot fail on a tampered tree, and it rewrote
+// the committed at-rest baseline as a side effect.)
+runTest('CLI Manifest Verification Contract (fail-closed bootstrap, tamper, extra-file)', () => {
+  const os = require('os');
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'vespyr-verify-contract-'));
+  try {
+    const agentsDir = path.join(tmp, '.agents');
+    fs.mkdirSync(agentsDir);
+    fs.writeFileSync(path.join(agentsDir, 'a.md'), 'clean content\n', 'utf8');
+    fs.mkdirSync(path.join(agentsDir, 'sub'));
+    fs.writeFileSync(path.join(agentsDir, 'sub', 'b.md'), 'more clean content\n', 'utf8');
+
+    // Baseline generation is explicit-only (N-12): `manifest` is the sole writer.
+    execFileSync('node', [CLI, 'manifest', '--target', tmp], { encoding: 'utf8' });
+    if (!fs.existsSync(path.join(agentsDir, 'manifest.json'))) throw new Error('manifest not generated');
+
+    // 6a. Clean verify → exit 0
+    execFileSync('node', [CLI, 'verify', '--target', tmp, '--json'], { encoding: 'utf8' });
+
+    // 6b. Missing manifest → exit 2 (FAULT-5, fail-closed bootstrap — never auto-generate)
+    const savedManifest = fs.readFileSync(path.join(agentsDir, 'manifest.json'), 'utf8');
+    fs.unlinkSync(path.join(agentsDir, 'manifest.json'));
+    try {
+      execFileSync('node', [CLI, 'verify', '--target', tmp, '--json'], { encoding: 'utf8' });
+      throw new Error('missing-manifest verify expected exit 2, got 0 (fail-open bootstrap!)');
+    } catch (e) {
+      if (e.status !== 2) throw new Error(`missing-manifest expected exit 2, got ${e.status}`);
+    }
+    if (fs.existsSync(path.join(agentsDir, 'manifest.json'))) {
+      throw new Error('FAIL-CLOSED violated: verify wrote a manifest during failed verification');
+    }
+    fs.writeFileSync(path.join(agentsDir, 'manifest.json'), savedManifest, 'utf8');
+
+    // 6c. Tampered file → exit 1
+    fs.appendFileSync(path.join(agentsDir, 'a.md'), 'tampered\n', 'utf8');
+    try {
+      execFileSync('node', [CLI, 'verify', '--target', tmp, '--json'], { encoding: 'utf8' });
+      throw new Error('tampered verify expected exit 1, got 0');
+    } catch (e) {
+      if (e.status !== 1) throw new Error(`tampered expected exit 1, got ${e.status}`);
+    }
+    fs.writeFileSync(path.join(agentsDir, 'a.md'), 'clean content\n', 'utf8');
+
+    // 6d. Extra planted file not in manifest → exit 1 (N-14a)
+    fs.writeFileSync(path.join(agentsDir, 'planted.md'), 'unlisted payload\n', 'utf8');
+    try {
+      execFileSync('node', [CLI, 'verify', '--target', tmp, '--json'], { encoding: 'utf8' });
+      throw new Error('extra-file verify expected exit 1, got 0');
+    } catch (e) {
+      if (e.status !== 1) throw new Error(`extra-file expected exit 1, got ${e.status}`);
+    }
+    fs.unlinkSync(path.join(agentsDir, 'planted.md'));
+
+    // 6e. N-14 scope extension: root-scope file (bin/cli.js) tampering fails
+    // verify — the verifier must be able to attest its own binary.
+    fs.mkdirSync(path.join(tmp, 'bin'));
+    fs.writeFileSync(path.join(tmp, 'bin', 'cli.js'), 'console.log("verifier")\n', 'utf8');
+    execFileSync('node', [CLI, 'manifest', '--target', tmp], { encoding: 'utf8' }); // explicit re-baseline includes files_root
+    execFileSync('node', [CLI, 'verify', '--target', tmp, '--json'], { encoding: 'utf8' }); // clean state passes
+    fs.appendFileSync(path.join(tmp, 'bin', 'cli.js'), '// tampered\n', 'utf8');
+    try {
+      execFileSync('node', [CLI, 'verify', '--target', tmp, '--json'], { encoding: 'utf8' });
+      throw new Error('root-scope tamper expected exit 1, got 0');
+    } catch (e) {
+      if (e.status !== 1) throw new Error(`root-scope tamper expected exit 1, got ${e.status}`);
+    }
+
+    // 6f. Corrupt manifest → exit 2 (FAULT-4 preserved)
+    fs.writeFileSync(path.join(agentsDir, 'manifest.json'), '{not json', 'utf8');
+    try {
+      execFileSync('node', [CLI, 'verify', '--target', tmp, '--json'], { encoding: 'utf8' });
+      throw new Error('corrupt-manifest verify expected exit 2, got 0');
+    } catch (e) {
+      if (e.status !== 2) throw new Error(`corrupt-manifest expected exit 2, got ${e.status}`);
+    }
+  } finally {
+    fs.rmSync(tmp, { recursive: true, force: true });
+  }
 });
 
 // 7. Held-Out Evaluation Dataset
@@ -139,6 +259,11 @@ runTest('Held-Out Recall Evaluation (eval/security/held_out/)', () => {
 // 8. Adversarial Mutation Evaluation
 runTest('Adversarial Mutation Runner (test_security_mutation.js)', () => {
   execFileSync('node', [path.join(SCRIPTS_DIR, 'test_security_mutation.js')], { cwd: ROOT, encoding: 'utf8' });
+});
+
+// 9. NEW-FINDINGS-ONLY repo gate (02f DoD #8)
+runTest('NEW-FINDINGS-ONLY Gate vs frozen baseline (check_new_findings.js)', () => {
+  execFileSync('node', [path.join(SCRIPTS_DIR, 'check_new_findings.js')], { cwd: ROOT, encoding: 'utf8' });
 });
 
 console.log(`\n========================================`);

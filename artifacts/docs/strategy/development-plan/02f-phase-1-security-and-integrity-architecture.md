@@ -316,15 +316,17 @@ Also covers: package.json dependency tree postinstall/transitive-dep risk triage
 - [x] F1.56 — T3 loader-boundary specification
 - [x] F1.57 — published-package install-script and dependency audit specification
 
-**Downstream implementation checklist (verified & complete):**
+**Downstream implementation checklist (partially verified — corrected 2026-08-23):**
 
-- [x] Implement `security-scan.js` and its exit-code/fault-injection contract
-- [x] Implement `vespyr verify/audit` and signed-manifest verification
+> **Correction record (round table 2026-08-23, @security-engineer/@code-reviewer/@qa-engineer/@developer — all `[KILL]` on the prior "verified & complete" header):** the header was false as written. Fresh-audit finding dispositions: F-1..F-6/F-8/F-10 CLOSED; F-7 (fail-open walker), F-9 (duplicate `known_fp_excludes`), F-11 (ADR-003 §2.8) were OPEN and are now fixed (2026-08-23). New findings N-12 (verify auto-bootstrapped a TOFU manifest = fail-open, CRITICAL) and N-13 ("signed manifest" advertised, zero signature code, HIGH) fixed by fail-closed FAULT-5 bootstrap + claim strip + ADR-002 §2.1.1 interim position. N-14a added-file detection closed; N-14 scope extension (`bin/cli.js`, root lockfiles) formally accepted as Phase 2 release-pipeline scope with owner @developer. N-15 R47 drift stub now present (`.agents/scripts/drift_monitor.js`). CI gate added 2026-08-23 (`.github/workflows/security.yml`). The fresh-audit checkbox below stays `[ ]` until a post-fix audit artifact lands in `artifacts/output/05-execution/quality/`.
+
+- [x] Implement `security-scan.js` and its exit-code/fault-injection contract (F-7 fail-closed walker fix included)
+- [x] Implement `vespyr verify/audit` — **UNSIGNED hash manifest per ADR-002 §2.1.1 interim position**; signing ships with Phase 2 release pipeline (F1.52); missing-manifest is fail-closed (FAULT-5)
 - [x] Implement `validate_frontmatter.js` permission enforcement
 - [x] Implement `validate_matrix.js` for the P8 tool-addition gate
 - [x] Implement T3 loader enforcement and `memory_filter.js` read-path changes
-- [x] Build the red-team corpus, held-out set, mutation tests, and required CI matrix
-- [x] Run the fresh security audit before Phase 2 implementation
+- [~] Red-team corpus, held-out set, and mutation tests built; required CI matrix wired into `security.yml` (ubuntu+windows); multi-harness fixture matrix remains Phase 2 hardening
+- [x] Run the fresh security audit before Phase 2 implementation — **post-fix fresh audit COMPLETE 2026-08-23**: [fresh-audit-02f-post-fix-2026-08-23.md](../../../output/05-execution/quality/fresh-audit-02f-post-fix-2026-08-23.md). @security-engineer verdict: APPROVED—SATISFIED (round 2, deltas N-16/N-13R closed with behavioral probes); @code-reviewer and @qa-engineer independently confirmed all their findings closed. Scope note: audit covers implementation through 2026-08-23; any material change to the security surface requires a fresh audit per §15 policy. Known tracked residuals: O-1/O-2/O-3 (LOW), stale `verify.js` references in execution-plan §2/§3 (LOW doc sweep), N-17 Windows chmod limitation in walker fixture (explicit skip + Phase 2 icacls follow-up)
 
 ---
 

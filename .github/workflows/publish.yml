@@ -17,6 +17,18 @@ jobs:
         with:
           node-version: '20'
           registry-url: 'https://registry.npmjs.org'
+
+      # R50 interim detection (02f §14, owner @devops-engineer): the release
+      # tree must pass integrity verification against its committed manifest
+      # BEFORE anything ships. A tag whose tree does not match the manifest
+      # (stale re-baseline, in-flight tampering) fails the release here.
+      # Full signing (Sigstore keyless cosign per F1.52) remains Phase 2.
+      - name: Integrity gate — verify tree against pinned manifest
+        run: node bin/cli.js verify --json
+
+      - name: Security gate — NEW-FINDINGS-ONLY scan
+        run: node .agents/scripts/check_new_findings.js
+
       - run: npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

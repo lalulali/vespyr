@@ -108,12 +108,20 @@ function splitPathList(str) {
 // Walker
 // ---------------------------------------------------------------------------
 
+// F-7 (Victor): unreadable subtrees/files are a FAIL-CLOSED condition, not a
+// silent skip — a chmod-000 directory hiding payload content must never yield
+// "clean — 0 findings". ENOENT stays tolerable (optional roots / files
+// vanishing mid-walk); every other error code is collected here and main()
+// converts it to exit 2 with a FAULT listing.
+const walkFaults = [];
+
 function walk(dir, fileList = [], base = dir) {
   let entries;
   try {
     entries = fs.readdirSync(dir, { withFileTypes: true });
   } catch (e) {
-    return fileList; // missing dirs are not failures for optional roots
+    if (e.code !== 'ENOENT') walkFaults.push({ path: dir, op: 'readdir', code: e.code || String(e) });
+    return fileList;
   }
   for (const ent of entries) {
     const full = path.join(dir, ent.name);
@@ -128,21 +136,28 @@ function walk(dir, fileList = [], base = dir) {
       if (ent.isSymbolicLink()) {
         fileList.push({ full, rel: path.relative(base, full), symlink: true });
       } else if (ent.isDirectory()) {
-        const gitConfig = path.join(full, 'config');
-        if (fs.existsSync(gitConfig)) {
-          // F-10 (Victor): lstat the .git/config path — a symlinked .git/config
-          // must be checked by INJ-SYMLINK, not silently read.
-          const lstatd = fs.lstatSync(gitConfig);
-          fileList.push({ full: gitConfig, rel: path.relative(base, gitConfig), symlink: lstatd.isSymbolicLink() });
-        }
-        const hooksDir = path.join(full, 'hooks');
-        if (fs.existsSync(hooksDir) && fs.statSync(hooksDir).isDirectory()) {
-          for (const h of fs.readdirSync(hooksDir)) {
-            if (h === 'README.sample') continue;
-            const hFull = path.join(hooksDir, h);
-            const hLstat = fs.lstatSync(hFull);
-            fileList.push({ full: hFull, rel: path.relative(base, hFull), symlink: hLstat.isSymbolicLink() });
+        // O-2 (Victor): every syscall in this branch is guarded — a hostile or
+        // unreadable hooks dir must land in walkFaults (exit 2), not throw an
+        // uncaught error whose exit code collides with the findings code.
+        try {
+          const gitConfig = path.join(full, 'config');
+          if (fs.existsSync(gitConfig)) {
+            // F-10 (Victor): lstat the .git/config path — a symlinked .git/config
+            // must be checked by INJ-SYMLINK, not silently read.
+            const lstatd = fs.lstatSync(gitConfig);
+            fileList.push({ full: gitConfig, rel: path.relative(base, gitConfig), symlink: lstatd.isSymbolicLink() });
           }
+          const hooksDir = path.join(full, 'hooks');
+          if (fs.existsSync(hooksDir) && fs.statSync(hooksDir).isDirectory()) {
+            for (const h of fs.readdirSync(hooksDir)) {
+              if (h === 'README.sample') continue;
+              const hFull = path.join(hooksDir, h);
+              const hLstat = fs.lstatSync(hFull);
+              fileList.push({ full: hFull, rel: path.relative(base, hFull), symlink: hLstat.isSymbolicLink() });
+            }
+          }
+        } catch (e) {
+          walkFaults.push({ path: full, op: 'git-inspect', code: e.code || String(e) });
         }
       }
       continue;
@@ -332,6 +347,18 @@ function main() {
 
   // Walk the tree
   const files = walk(rootDir);
+
+  // F-7: any unreadable subtree/file discovered during the walk is a tool
+  // failure — exit 2 with a FAULT listing, never a silent partial scan.
+  if (walkFaults.length > 0) {
+    return failClosed(
+      `unreadable paths skipped would invalidate a clean result (${walkFaults.length}): ` +
+        walkFaults.slice(0, 10).map((f) => `${f.path} [${f.op} ${f.code}]`).join('; ') +
+        (walkFaults.length > 10 ? `; …+${walkFaults.length - 10} more` : ''),
+      jsonMode
+    );
+  }
+
   const findings = [];
 
   for (const file of files) {
@@ -368,6 +395,9 @@ function main() {
     try {
       content = fs.readFileSync(file.full, 'utf8');
     } catch (e) {
+      // F-7: ENOENT = file vanished mid-walk (tolerated); anything else
+      // (EACCES/EPERM/EISDIR…) is a tool failure, collected for exit 2.
+      if (e.code !== 'ENOENT') walkFaults.push({ path: file.full, op: 'read', code: e.code || String(e) });
       continue;
     }
     if (content.indexOf('\0') !== -1) continue;
@@ -482,6 +512,19 @@ function main() {
         });
       }
     }
+  }
+
+  // N-16 (Victor, post-fix audit): the read loop above also accumulates
+  // walkFaults (chmod-000 FILES land here, not in readdir). Re-check AFTER
+  // processing — a fault discovered mid-read must still fail closed, never
+  // degrade to "clean — 0 findings".
+  if (walkFaults.length > 0) {
+    return failClosed(
+      `unreadable paths skipped would invalidate a clean result (${walkFaults.length}): ` +
+        walkFaults.slice(0, 10).map((f) => `${f.path} [${f.op} ${f.code}]`).join('; ') +
+        (walkFaults.length > 10 ? `; …+${walkFaults.length - 10} more` : ''),
+      jsonMode
+    );
   }
 
   // Dedup: canonical dedup key (rule-id, file-path, line, first-seen-SHA) + normalized finding hash

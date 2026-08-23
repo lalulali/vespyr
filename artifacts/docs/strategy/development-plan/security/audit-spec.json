@@ -132,13 +132,7 @@
       "pattern": "[A-Za-z0-9+/]{40,}={0,2}|(\\\\x[0-9a-fA-F]{2}){16,}",
       "severity": "medium",
       "mode": "regex",
-      "known_fp_excludes": [
-        "**/package-lock.json",
-        "**/package.json",
-        "**/.agents/package-lock.json",
-        "**/*.lock"
-      ],
-      "known_fp_note": "npm integrity fields (sha512-...) and lockfile hashes are legitimate base64 blobs; excluded as documented known-FP class (02f §10, Nina FP budget)",
+      "known_fp_note": "npm integrity fields (sha512-...) and lockfile hashes are legitimate base64 blobs; excluded as documented known-FP class (02f §10, Nina FP budget). Path exclusions live ONLY in the top-level known_fp_excludes block — F-9 fix 2026-08-23: the former rule-level duplicate here was dead config that had already diverged; single source of truth is top-level.",
       "known_fp_classes": [
         "camelCase-acronym word runs joined by single / (e.g. Substitute/Combine/Adapt)",
         "URL fragments with repeated slashes or dots (file://, raw.githubusercontent.com)",

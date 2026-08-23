@@ -1,7 +1,7 @@
 {
   "version": "2.0.7",
-  "generated_at": "2026-08-23T14:13:39.262Z",
-  "file_count": 311,
+  "generated_at": "2026-08-23T16:22:15.902Z",
+  "file_count": 314,
   "files": {
     ".gitignore": "02be8395c2a0b6cdfcf971daa5689776e2d98cc43603b22a45d8c2bd78c13772",
     "GUARDRAILS.md": "9f88a8643286f0c2248a013a349b6c77190c212ff7dcc861767c10c500b671c6",
@@ -77,10 +77,12 @@
     "scripts/add-step-tracker-calls.js": "4333d496541395d3a68f10c927c9b440d09deff6f0fea22c19bb7638c1f0c1f1",
     "scripts/archive_manager.js": "a04aa89da84f16cd387ab886d64523caa06e2b74edd7f96453fabd32c0bb6740",
     "scripts/check_corpus_invariants.js": "f9bedde2b6cddac1b0bdfd120b9808cda002d583cb3c330c53cb3e8ea2495b22",
+    "scripts/check_new_findings.js": "f41e3cb8d67e9fc09d01fffda218d3cf057656581dc18e65f38cfa5221f8396d",
     "scripts/compaction_guard.js": "b5626e7354d4e1355922dd01cd378c84d8736676a5de87bd6518835553fa8723",
     "scripts/compile_skills.js": "bd83ba0dab73ce0fa0cbbda16245d698e183c8dd5b78483dafcaab44fc05fb22",
     "scripts/dedupe_validator.js": "1b7195574bd08cadceefd8aa3ab505306e3444fb4a07123d6a362bb28b038512",
     "scripts/delegation_audit.js": "2e3f13a75ba21a59df85992c837a8a01f6426f4f110a43a54be7df85f3faaa47",
+    "scripts/drift_monitor.js": "38ed9a091b99d66aafd56908f48e127e8f9b9f620f9434c0612a3d7b9f3f8cdc",
     "scripts/fix-squads.js": "e80ce990bb7b33e83fa55dc2115ceb99de794b12e3b2e0552998f3eb1d6fe802",
     "scripts/hot_path_analyzer.js": "ba3c35a20d53d97dc9af9f532d25e912cf3655b91ea7c4cf71e369396a51c572",
     "scripts/lib/frontmatter.js": "b1c1b80ce2308d42f21b3e1c404f545c3721aab4cdda8e19b1bb4679b593c49d",
@@ -96,7 +98,7 @@
     "scripts/orchestrator_state.js": "bf3b9af8a6edc13333e7b20cf665991aa3b30941cc64439f4346e75220ea1736",
     "scripts/pipeline_simulator.js": "bbbe55d43841f4474616ddec20fda2a9731a4f99698ed86c0f2a9f68a92abc91",
     "scripts/resolve_agents.js": "3133e4a5d270ac1ed52f000f00376537e90bba9910beee161b99deb13e69a20f",
-    "scripts/security-scan.js": "2e4d8ec8c424f25128e64d84ae9f0249379dbe8e0f5dc0249ed4b0c438a8f6c4",
+    "scripts/security-scan.js": "d87b756c1dc9808603e3fe3bf4cf0b047832417fd04f5c89d79b75b6ffd2c1bd",
     "scripts/session_checkpoint.js": "9b5f1787740efd10ed6bdd630c7f1ecca303623dab36700ab7bb02b32fcd8f68",
     "scripts/session_start.js": "bfecfe50917eea85383abada29fb6be6dd6d35529237873a4bff65a0a58b6bac",
     "scripts/spec_check.js": "564653ee43133e7b07188ce1b97a24f5a21712437fa30317487b15aea6f01f49",
@@ -105,7 +107,7 @@
     "scripts/swarm_telemetry.js": "c5b049ba3edff9f20d850cbc5465e3917b50589196ff93c328fa768e0d2c7e50",
     "scripts/sync-entry-points.js": "d0644d31d3c26a2ceebb0c5347025722c1a3df053bd06142cb014d313486f0d3",
     "scripts/test_security_mutation.js": "0423f0569b50dab39e750c8961645b842610adeadb2bb9d6f0fc8c48c0fe1527",
-    "scripts/test_security_suite.js": "347f8670ecffba2178bd1e142972c425aeb70d3d4fc2a14dbd9dfa65050e2294",
+    "scripts/test_security_suite.js": "4f503991e9fd9e3fa4b9e65cce50399db587973ad44a5c94cf7f72b06db9f851",
     "scripts/token_profiler.js": "92262175d1b0b1e97f45d50a8cd505facefc030078cf39b7480072fac502c5df",
     "scripts/validate_frontmatter.js": "34b98ca013cc376b428a109575217085a56683982265491772c4dae4bcea6ed5",
     "scripts/validate_matrix.js": "13a0754668b67e8d6949fbdbae8be3c0495db3377f24fd5d9e706a4ccc7cd15b",
@@ -256,7 +258,8 @@
     "skills/validate-idea/steps/step-07a-handoff.md": "69d2432082a009d8ea26d9a003bdeba86ff13fb3a85f1a2233a6836796fb133d",
     "skills/validation-patterns/SKILL.md": "582187921130692b1f2b3d98d5a1e8332a18c105e730c99ac86c5796a7abbc15",
     "skills/validation-patterns/methods.csv": "b713633037bcbb5db2362d5421ae2c5316f46ca9b83b60da3ce5b4fc5bd4b75d",
-    "skills.md": "5391a2bb04df6b9b4a9b9f17ed69d21ebedc7a05f3c0d308cb12a097db04b30f",
+    "skills.md": "5dfbe6c701bfde4e45caf43c5879b358f952d13b9744a1296434b683b83aa90f",
+    "state/drift-history.json": "b628056ab4c003d7215afbe444b45868e19f5c0e66d17659f24385084b83a296",
     "templates/architecture/adr-template.md": "be2caf81d319e7aba03d6f621d3170a23bd3af9b8f458a50d64939c2b5f45fa8",
     "templates/architecture/model-approved-for-production.md": "0b6b5d6480d9f4f9348957f9ccb96a84bd3c577f8ddc10ebb635ca8720c34020",
     "templates/discovery/discovery-report.md": "c9bfb5fdf80217dbbd34aa2bfad501410a0d2975808c3b44e827f973ec9aeb9b",
@@ -314,5 +317,8 @@
     "templates/system/opencode.json.template": "e935f22b60830d6b5700d6eb1ac9a08554ec49b9990e91e221d2658575917223",
     "templates/system/vespyr-steering.md.canonical": "5b1cf16bab0df26bb7f3bfb22b496ad972903f5546c74aded8a2a3f94d0c1fb2",
     "workflow.md": "453ce8769d898aa6e0e8f7a3ab5bf6ffc4f751866c4999de9557ccd9ae674e0a"
+  },
+  "files_root": {
+    "bin/cli.js": "5868aac6c88ba9776515693e648388b97962cb5717b57ac57eb195ca57b568fc"
   }
 }

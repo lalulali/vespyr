@@ -33,11 +33,14 @@ jobs:
       - name: Run test suite
         run: npm test
 
-      - name: Verify scripts are executable
+      - name: Verify scripts are loadable (syntax check — no blind `|| true`)
+        # F-4 (Scout, fresh audit 2026-08-23): the old loop swallowed every
+        # failure with `|| true`, including security-scan.js FAULT exits.
+        # This is a LOAD check only; behavioral gates live in security.yml.
         run: |
           for script in .agents/scripts/*.js; do
             echo "Checking: $script"
-            node "$script" || true
+            node --check "$script"
           done
 
       - name: Check telemetry baseline

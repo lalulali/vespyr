@@ -108,7 +108,7 @@ validate → explore → design → plan → develop → launch → iterate → 
 
 - **43 curated skills** — from `/validate-idea`, `/design`, and `/round-table` to `/shut-up`, `/motion`, `/develop`, `/launch`, `/customize-skill`, and `/create-skill` (all validated against the [agentskills.io](https://agentskills.io) spec via CI)
 - **Consolidated 3-tier memory & machine fencing** — atomic state syncing in `project-context.md`, streamlined 5-file shared memory, and automatic phase-boundary compaction.
-- **Security & integrity engine** — signed SHA-256 manifest verification (`vespyr verify`), supply-chain audit (`vespyr audit`), closed permission registry, and T3 data trust boundary admission control.
+- **Security & integrity engine** — pinned SHA-256 manifest verification (`vespyr verify`; unsigned interim — accidental-drift detection only, see ADR-002 §2.1.1), supply-chain audit (`vespyr audit`), closed permission registry, and T3 data trust boundary admission control.
 - **Agent customization** — 2-file TOML merge. Your overrides survive upgrades.
 - **Multi-harness** — works with OpenCode, Claude Code, Cursor, Windsurf, Copilot, Kiro, Aider, Google Antigravity.
 - **11-phase pipeline** — with enforcement. No out-of-order execution.
@@ -120,7 +120,7 @@ validate → explore → design → plan → develop → launch → iterate → 
 ## 🔒 Integrity & Security Tooling
 
 ```bash
-# Verify integrity of .agents/ against signed SHA-256 manifest
+# Verify integrity of .agents/ against pinned SHA-256 manifest
 npx vespyr verify
 
 # Run supply-chain security and content integrity scanner

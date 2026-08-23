@@ -91,7 +91,7 @@ If you see errors, check that:
 You can verify the supply-chain integrity and security compliance of your installation:
 
 ```bash
-# Verify .agents/ integrity against signed SHA-256 manifest
+# Verify .agents/ integrity against pinned SHA-256 manifest
 npx vespyr verify
 
 # Run supply-chain security and content integrity scanner

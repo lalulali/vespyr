@@ -126,6 +126,6 @@ All 20 agents operate under a closed permission model (`bash`, `edit`, `glob`, `
 - Built-in admission control quenches and quarantines prompt injection patterns before they enter active agent context.
 
 Integrity tooling commands:
-- `npx vespyr verify` — Validates signed SHA-256 manifest integrity.
+- `npx vespyr verify` — Validates pinned SHA-256 manifest integrity (unsigned interim: detects accidental drift; adversarial tampering requires release signing per ADR-002 §2.1.1).
 - `npx vespyr audit` — Runs supply-chain and content integrity scanning.
 - `npx vespyr manifest` — Recomputes and emits `.agents/manifest.json`.

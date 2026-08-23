@@ -2257,11 +2257,24 @@ function generateManifestData(targetDir) {
 		}
 	}
 	walk(agentsTarget, "");
+	// N-14 scope extension (closed 2026-08-23): §5.2 puts the verifier binary
+	// itself and root lockfiles in manifest scope. Recorded under `files_root`,
+	// keyed relative to targetDir. Optional paths (no lockfile in a scaffold)
+	// are simply absent — verify checks them only when present.
+	const filesRoot = {};
+	const ROOT_SCOPE = ["bin/cli.js", "package-lock.json"];
+	for (const relPath of ROOT_SCOPE) {
+		const full = path.join(targetDir, relPath);
+		if (fs.existsSync(full) && fs.statSync(full).isFile()) {
+			filesRoot[relPath] = hashFile(full);
+		}
+	}
 	return {
 		version: VERSION,
 		generated_at: new Date().toISOString(),
 		file_count: Object.keys(files).length,
 		files,
+		files_root: filesRoot,
 	};
 }
 
@@ -2269,7 +2282,7 @@ function performGenerateManifest(targetDir, flags) {
 	const manifestPath = path.join(targetDir, ".agents", "manifest.json");
 	const manifestData = generateManifestData(targetDir);
 	if (dryRun) {
-		logDry(`Would write signed manifest to ${manifestPath} (${manifestData.file_count} files)`);
+		logDry(`Would write manifest to ${manifestPath} (${manifestData.file_count} files)`);
 		return;
 	}
 	fs.writeFileSync(manifestPath, JSON.stringify(manifestData, null, 2) + "\n", "utf8");
@@ -2286,52 +2299,48 @@ function performVerify(targetDir, flags) {
 	const manifestPath = path.join(agentsTarget, "manifest.json");
 	const jsonMode = flags.json;
 
-	if (!fs.existsSync(agentsTarget)) {
+	const failClosed = (message) => {
 		if (jsonMode) {
-			console.log(JSON.stringify({ exit: 2, error: ".agents directory missing" }));
+			process.stdout.write(JSON.stringify({ exit: 2, fault: message }) + "\n");
 		} else {
-			console.error("FAIL-CLOSED: .agents directory not found");
+			console.error(`FAIL-CLOSED: ${message}`);
 		}
-		process.exit(2);
+		process.exitCode = 2;
+	};
+
+	if (!fs.existsSync(agentsTarget)) {
+		failClosed(".agents directory not found");
+		return;
 	}
 
+	// N-12 (Victor, fresh audit 2026-08-23): a MISSING manifest is fail-closed.
+	// Auto-generating from the current tree verifies the tree against itself —
+	// a tampered tree plus a deleted manifest passes clean (TOFU with no OOB
+	// check, violating DoD #13/#17). Baselines are created ONLY via the
+	// explicit `vespyr manifest` command with a human-reviewed diff.
 	if (!fs.existsSync(manifestPath)) {
-		try {
-			const manifestData = generateManifestData(targetDir);
-			fs.writeFileSync(manifestPath, JSON.stringify(manifestData, null, 2) + "\n", "utf8");
-		} catch (e) {
-			if (jsonMode) {
-				console.log(JSON.stringify({ exit: 2, error: `Manifest missing or unreadable: ${e.message}` }));
-			} else {
-				console.error(`FAIL-CLOSED: Manifest missing or unreadable: ${e.message}`);
-			}
-			process.exit(2);
-		}
+		failClosed(
+			"FAULT-5: manifest missing (.agents/manifest.json) — refusing to verify without a pinned baseline. Create one explicitly via `vespyr manifest` and review the diff."
+		);
+		return;
 	}
 
 	let manifest;
 	try {
 		manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
 	} catch (e) {
-		if (jsonMode) {
-			console.log(JSON.stringify({ exit: 2, error: `FAULT-4: Corrupt manifest: ${e.message}` }));
-		} else {
-			console.error(`FAIL-CLOSED: FAULT-4: Corrupt manifest (${e.message})`);
-		}
-		process.exit(2);
+		failClosed(`FAULT-4: Corrupt manifest (${e.message})`);
+		return;
 	}
 
 	if (!manifest || typeof manifest.files !== "object") {
-		if (jsonMode) {
-			console.log(JSON.stringify({ exit: 2, error: "FAULT-4: Invalid manifest schema" }));
-		} else {
-			console.error("FAIL-CLOSED: FAULT-4: Invalid manifest schema");
-		}
-		process.exit(2);
+		failClosed("FAULT-4: Invalid manifest schema");
+		return;
 	}
 
 	const mismatches = [];
 	const missing = [];
+	const extra = [];
 	let verifiedCount = 0;
 
 	for (const [relPath, expectedHash] of Object.entries(manifest.files)) {
@@ -2349,16 +2358,79 @@ function performVerify(targetDir, flags) {
 		}
 	}
 
-	const isClean = mismatches.length === 0 && missing.length === 0;
+	// N-14 scope extension (closed 2026-08-23): verify files_root entries
+	// (bin/cli.js, root lockfiles). Present in manifest but missing/modified
+	// on disk = verification failure.
+	const rootMismatches = [];
+	const rootMissing = [];
+	if (manifest.files_root && typeof manifest.files_root === "object") {
+		for (const [relPath, expectedHash] of Object.entries(manifest.files_root)) {
+			const full = path.join(targetDir, relPath);
+			if (!fs.existsSync(full)) {
+				rootMissing.push(relPath);
+				continue;
+			}
+			const buffer = fs.readFileSync(full);
+			const actualHash = crypto.createHash("sha256").update(buffer).digest("hex");
+			if (actualHash !== expectedHash) {
+				rootMismatches.push({ path: relPath, expected: expectedHash, actual: actualHash });
+			} else {
+				verifiedCount++;
+			}
+		}
+	}
+
+	// N-14a (Scout/Victor): iterating manifest.files alone is blind to PLANTED
+	// files absent from the manifest. Reverse-walk the tree with the same
+	// exclusion set as generateManifestData so anything unlisted fails verify.
+	const MANIFEST_EXCLUSIONS = new Set([".DS_Store", "node_modules", ".git", "manifest.json", ".vespyr-manifest.json"]);
+	let walkFault = null;
+	const walkExtra = (dir, rel) => {
+		let entries;
+		try {
+			entries = fs.readdirSync(dir, { withFileTypes: true });
+		} catch (e) {
+			// O-1 (Victor): an unreadable directory during verification is a
+			// tool fault, not an "extra file" — fail closed, never exit 1.
+			walkFault = `unreadable directory during verification: ${rel || ".agents/"} (${e.code || e.message})`;
+			return;
+		}
+		for (const ent of entries) {
+			if (MANIFEST_EXCLUSIONS.has(ent.name)) continue;
+			const full = path.join(dir, ent.name);
+			const relPath = rel ? `${rel}/${ent.name}` : ent.name;
+			if (ent.isDirectory()) {
+				walkExtra(full, relPath);
+			} else if (!Object.prototype.hasOwnProperty.call(manifest.files, relPath)) {
+				extra.push({ path: relPath, detail: "not in manifest" });
+			}
+		}
+	};
+	walkExtra(agentsTarget, "");
+
+	// O-1: unreadable directory surfaced by the reverse-walk = fail closed.
+	if (walkFault) {
+		failClosed(walkFault);
+		return;
+	}
+
+	const isClean =
+		mismatches.length === 0 &&
+		missing.length === 0 &&
+		extra.length === 0 &&
+		rootMismatches.length === 0 &&
+		rootMissing.length === 0;
 
 	if (jsonMode) {
-		console.log(
+		process.stdout.write(
 			JSON.stringify({
 				exit: isClean ? 0 : 1,
 				verified: verifiedCount,
 				missing,
 				mismatches,
-			}, null, 2)
+				extra,
+				files_root: { missing: rootMissing, mismatches: rootMismatches },
+			}, null, 2) + "\n"
 		);
 	} else {
 		if (isClean) {
@@ -2372,10 +2444,22 @@ function performVerify(targetDir, flags) {
 				console.error(`[FAIL] ${mismatches.length} hash mismatch(es):`);
 				for (const m of mismatches) console.error(`  - tampered/modified: ${m.path}`);
 			}
+			if (extra.length > 0) {
+				console.error(`[FAIL] ${extra.length} file(s) not in manifest:`);
+				for (const m of extra) console.error(`  - unplanted/unlisted: ${m.path}${m.detail ? ` (${m.detail})` : ""}`);
+			}
+			if (rootMissing.length > 0) {
+				console.error(`[FAIL] ${rootMissing.length} root-scope file(s) missing:`);
+				for (const m of rootMissing) console.error(`  - missing: ${m}`);
+			}
+			if (rootMismatches.length > 0) {
+				console.error(`[FAIL] ${rootMismatches.length} root-scope hash mismatch(es):`);
+				for (const m of rootMismatches) console.error(`  - tampered/modified: ${m.path}`);
+			}
 		}
 	}
 
-	process.exit(isClean ? 0 : 1);
+	process.exitCode = isClean ? 0 : 1;
 }
 
 function performAudit(targetDir, flags) {
@@ -2450,7 +2534,7 @@ vespyr v${VERSION} — AI Agent Team Installer & Integrity Engine
 Usage: npx vespyr [command] [options]
 
 Commands:
-  verify               Verify integrity of .agents/ against signed manifest
+  verify               Verify integrity of .agents/ against pinned manifest
   audit                Run supply-chain security and content integrity scan
   manifest             Generate .agents/manifest.json checksums file
 
