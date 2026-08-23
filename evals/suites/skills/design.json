@@ -1,0 +1,39 @@
+{
+  "suite": "skills/design",
+  "description": "Product Design & Delivery Prep Skills",
+  "benchmarks": [
+    {
+      "id": "SKILL-DESIGN",
+      "skill": "design",
+      "name": "PRD to Screen Spec Flow",
+      "dimension": "a11y_design",
+      "assertContains": [
+        "Screen States",
+        "Interactions",
+        "Components"
+      ]
+    },
+    {
+      "id": "SKILL-MOTION",
+      "skill": "motion",
+      "name": "Motion Spec & Animation Handoff",
+      "dimension": "a11y_design",
+      "assertContains": [
+        "Duration",
+        "Easing",
+        "Trigger"
+      ]
+    },
+    {
+      "id": "SKILL-VALIDATION-PATTERNS",
+      "skill": "validation-patterns",
+      "name": "Validation Pattern Catalog Selection",
+      "dimension": "prd_completeness",
+      "assertContains": [
+        "Pattern",
+        "Hypothesis",
+        "Success Metric"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+{
+  "suite": "skills/delivery",
+  "description": "Execution, Implementation & Quality Skills",
+  "benchmarks": [
+    {
+      "id": "SKILL-DEVELOP",
+      "skill": "develop",
+      "name": "7-Step Develop Loop",
+      "dimension": "code_quality",
+      "assertContains": [
+        "Step 1",
+        "Implementation",
+        "Verification",
+        "Session Complete"
+      ]
+    },
+    {
+      "id": "SKILL-PLAN",
+      "skill": "plan",
+      "name": "Standalone Execution Plan",
+      "dimension": "prd_completeness",
+      "assertContains": [
+        "Tasks",
+        "Dependencies",
+        "Estimates"
+      ]
+    },
+    {
+      "id": "SKILL-REVIEW",
+      "skill": "review",
+      "name": "Standalone Code Review",
+      "dimension": "code_quality",
+      "assertContains": [
+        "Audit",
+        "Findings",
+        "Recommendations"
+      ]
+    },
+    {
+      "id": "SKILL-TEST",
+      "skill": "test",
+      "name": "QA Report Generation",
+      "dimension": "code_quality",
+      "assertContains": [
+        "Test Execution",
+        "Pass/Fail",
+        "Coverage"
+      ]
+    },
+    {
+      "id": "SKILL-LAUNCH",
+      "skill": "launch",
+      "name": "Launch Checklist & Verification",
+      "dimension": "code_quality",
+      "assertContains": [
+        "Readiness Gate",
+        "Smoke Tests",
+        "Rollback Plan"
+      ]
+    }
+  ]
+}

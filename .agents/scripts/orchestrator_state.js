@@ -391,7 +391,7 @@ function recordTelemetry(eventType, fields) {
     if (fields.phase) parts.push(`--phase ${fields.phase}`);
     if (fields.data) parts.push(`--data '${JSON.stringify(fields.data)}'`);
     require('child_process').execSync(
-      `node "${telemetryScript}" record ${parts.join(' ')}`,
+      `"${process.execPath}" "${telemetryScript}" record ${parts.join(' ')}`,
       { stdio: 'ignore' }
     );
   } catch (e) {

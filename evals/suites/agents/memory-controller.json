@@ -1,0 +1,31 @@
+{
+  "suite": "agents/memory-controller",
+  "description": "Benchmarks for Memory Controller Tier 1/2/3 operations and machine state preservation",
+  "benchmarks": [
+    {
+      "id": "AGENT-MEMORY-01",
+      "agent": "memory-controller",
+      "name": "Memory Tier 1/2/3 Context Loading",
+      "dimension": "memory_adherence",
+      "prompt": "Load project context for developer working on authentication refactoring.",
+      "assertContains": [
+        "project-context",
+        "active-decisions",
+        "session-write"
+      ],
+      "minTokens": 30
+    },
+    {
+      "id": "AGENT-MEMORY-02",
+      "agent": "memory-controller",
+      "name": "Machine State Fence Preservation",
+      "dimension": "memory_adherence",
+      "prompt": "Update runtime state in project-context.md without clobbering BEGIN MACHINE STATE block.",
+      "assertContains": [
+        "BEGIN MACHINE STATE",
+        "END MACHINE STATE"
+      ],
+      "minTokens": 30
+    }
+  ]
+}

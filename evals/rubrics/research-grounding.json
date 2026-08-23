@@ -1,0 +1,39 @@
+{
+  "dimension": "research_grounding",
+  "name": "Research & Factual Grounding Rubric",
+  "description": "Evaluates factual precision, real source citation resolution, and zero hallucinated statistics.",
+  "passThreshold": 4,
+  "criteria": [
+    {
+      "id": "RG-1",
+      "name": "Explicit Citations Present",
+      "weight": 2,
+      "requiredPatterns": [
+        "\\[\\d+\\]|\\[source:|\\[ref:"
+      ]
+    },
+    {
+      "id": "RG-2",
+      "name": "No Fabricated Authority Claims",
+      "weight": 2,
+      "prohibitedPatterns": [
+        "source: unverified but probably",
+        "according to secret internal data"
+      ]
+    },
+    {
+      "id": "RG-3",
+      "name": "Clear Quantitative Evidence",
+      "weight": 1,
+      "minWordCount": 50
+    },
+    {
+      "id": "RG-4",
+      "name": "Competitor or Market Context Provided",
+      "weight": 1,
+      "requiredPatterns": [
+        "market|competitor|industry|tam|sam|benchmark|alternative"
+      ]
+    }
+  ]
+}

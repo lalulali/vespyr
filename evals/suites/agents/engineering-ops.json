@@ -1,0 +1,90 @@
+{
+  "suite": "agents/engineering-ops",
+  "description": "Benchmarks for Engineering & Ops personas (@security-engineer, @performance-engineer, @ml-ai-engineer, @ml-ai-ops, @devops-engineer, @technical-writer)",
+  "benchmarks": [
+    {
+      "id": "AGENT-SECURITY-01",
+      "agent": "security-engineer",
+      "name": "STRIDE Threat Model & Security Audit",
+      "dimension": "code_quality",
+      "prompt": "Perform STRIDE threat modeling on public file upload webhook endpoint.",
+      "assertContains": [
+        "Spoofing",
+        "Tampering",
+        "Information Disclosure",
+        "Mitigation"
+      ],
+      "minTokens": 50
+    },
+    {
+      "id": "AGENT-PERF-01",
+      "agent": "performance-engineer",
+      "name": "Database Query Bottleneck & p95 Latency Profiling",
+      "dimension": "code_quality",
+      "prompt": "Analyze slow Postgres query log and propose index and caching strategy.",
+      "assertContains": [
+        "EXPLAIN",
+        "Index",
+        "p95",
+        "Cache"
+      ],
+      "minTokens": 50
+    },
+    {
+      "id": "AGENT-MLAI-01",
+      "agent": "ml-ai-engineer",
+      "name": "RAG Pipeline & Retrieval Evaluation Design",
+      "dimension": "code_quality",
+      "prompt": "Design hybrid vector and keyword retrieval pipeline with reciprocal rank fusion.",
+      "assertContains": [
+        "RAG",
+        "Chunking",
+        "Embedding",
+        "Reranking"
+      ],
+      "minTokens": 50
+    },
+    {
+      "id": "AGENT-MLAIOPS-01",
+      "agent": "ml-ai-ops",
+      "name": "Model Drift Monitoring & Serving Runbook",
+      "dimension": "code_quality",
+      "prompt": "Write runbook for handling data drift alerts in production LLM inference pipeline.",
+      "assertContains": [
+        "Drift",
+        "Alert",
+        "Fallback",
+        "Rollback"
+      ],
+      "minTokens": 50
+    },
+    {
+      "id": "AGENT-DEVOPS-01",
+      "agent": "devops-engineer",
+      "name": "GitHub Actions CI/CD Pipeline Configuration",
+      "dimension": "code_quality",
+      "prompt": "Design GitHub Actions workflow for linting, testing, and Docker image publishing.",
+      "assertContains": [
+        "workflow",
+        "jobs",
+        "steps",
+        "actions/checkout"
+      ],
+      "minTokens": 50
+    },
+    {
+      "id": "AGENT-TECHWRITER-01",
+      "agent": "technical-writer",
+      "name": "OpenAPI Spec & Developer Integration Guide",
+      "dimension": "prd_completeness",
+      "prompt": "Write OpenAPI 3.0 specification for authentication and token refresh endpoints.",
+      "assertContains": [
+        "openapi: 3.0",
+        "paths:",
+        "responses:",
+        "schemas:"
+      ],
+      "minTokens": 50
+    }
+  ]
+}

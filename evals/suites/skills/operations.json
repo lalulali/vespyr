@@ -1,0 +1,61 @@
+{
+  "suite": "skills/operations",
+  "description": "Post-Launch Operations & Analytics Skills",
+  "benchmarks": [
+    {
+      "id": "SKILL-ITERATE",
+      "skill": "iterate",
+      "name": "Post-Launch Feature Iteration",
+      "dimension": "prd_completeness",
+      "assertContains": [
+        "Telemetry Analysis",
+        "Hypothesis",
+        "Change Scope"
+      ]
+    },
+    {
+      "id": "SKILL-INCIDENT",
+      "skill": "incident",
+      "name": "Incident Triage & Mitigation",
+      "dimension": "code_quality",
+      "assertContains": [
+        "Severity",
+        "Mitigation",
+        "Post-Mortem"
+      ]
+    },
+    {
+      "id": "SKILL-RETRO",
+      "skill": "retro",
+      "name": "Post-Cycle Retro & Memory Compaction",
+      "dimension": "memory_adherence",
+      "assertContains": [
+        "Lessons Learned",
+        "Compaction",
+        "Action Items"
+      ]
+    },
+    {
+      "id": "SKILL-ANALYZE-DATA",
+      "skill": "analyze-data",
+      "name": "Exploratory Data Analysis Co-pilot",
+      "dimension": "research_grounding",
+      "assertContains": [
+        "Dataset",
+        "Distribution",
+        "Insights"
+      ]
+    },
+    {
+      "id": "SKILL-SPRINT-STATUS",
+      "skill": "sprint-status",
+      "name": "Sprint Status Kanban Mirror",
+      "dimension": "memory_adherence",
+      "assertContains": [
+        "Sprint",
+        "Phase",
+        "Status"
+      ]
+    }
+  ]
+}

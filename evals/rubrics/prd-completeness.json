@@ -1,0 +1,40 @@
+{
+  "dimension": "prd_completeness",
+  "name": "PRD & Planning Completeness Rubric",
+  "description": "Evaluates problem clarity, acceptance criteria testability, and task scoping.",
+  "passThreshold": 4,
+  "criteria": [
+    {
+      "id": "PRD-1",
+      "name": "Structured Problem Statement",
+      "weight": 2,
+      "requiredPatterns": [
+        "problem|context|objective|motivation|goal"
+      ]
+    },
+    {
+      "id": "PRD-2",
+      "name": "Testable Acceptance Criteria",
+      "weight": 2,
+      "requiredPatterns": [
+        "given|when|then|acceptance criteria|verification|checklist|\\- \\[ \\]"
+      ]
+    },
+    {
+      "id": "PRD-3",
+      "name": "Explicit Out-of-Scope Boundaries",
+      "weight": 1,
+      "requiredPatterns": [
+        "out of scope|non-goals|boundaries|exclusions|omissions"
+      ]
+    },
+    {
+      "id": "PRD-4",
+      "name": "Granular Sizing (1-4 Hour Rule)",
+      "weight": 1,
+      "requiredPatterns": [
+        "task|breakdown|estimation|hours|phase|step"
+      ]
+    }
+  ]
+}

@@ -293,6 +293,52 @@ describe('Test 4: createLinkOrCopy()', () => {
     assert.ok(fs.existsSync(path.join(dest, 'file.txt')));
     assert.strictEqual(fs.readFileSync(path.join(dest, 'file.txt'), 'utf8'), 'relative copy test');
   });
+
+  it('should fall back to directory copy when symlink fails with EPERM', () => {
+    const source = path.join(tmpDir, 'source-dir');
+    const link = path.join(tmpDir, 'fallback-link-dir');
+    fs.mkdirSync(source);
+    fs.writeFileSync(path.join(source, 'nested.txt'), 'nested content');
+
+    const origSymlinkSync = fs.symlinkSync;
+    try {
+      fs.symlinkSync = () => {
+        const err = new Error('operation not permitted');
+        err.code = 'EPERM';
+        throw err;
+      };
+
+      createLinkOrCopy(source, link, 'dir', 'symlink');
+
+      assert.ok(fs.existsSync(link));
+      assert.ok(fs.existsSync(path.join(link, 'nested.txt')));
+      assert.strictEqual(fs.readFileSync(path.join(link, 'nested.txt'), 'utf8'), 'nested content');
+    } finally {
+      fs.symlinkSync = origSymlinkSync;
+    }
+  });
+
+  it('should fall back to file copy when symlink fails with EPERM', () => {
+    const source = path.join(tmpDir, 'source-file.txt');
+    const link = path.join(tmpDir, 'fallback-link-file.txt');
+    fs.writeFileSync(source, 'file content');
+
+    const origSymlinkSync = fs.symlinkSync;
+    try {
+      fs.symlinkSync = () => {
+        const err = new Error('operation not permitted');
+        err.code = 'EPERM';
+        throw err;
+      };
+
+      createLinkOrCopy(source, link, 'file', 'symlink');
+
+      assert.ok(fs.existsSync(link));
+      assert.strictEqual(fs.readFileSync(link, 'utf8'), 'file content');
+    } finally {
+      fs.symlinkSync = origSymlinkSync;
+    }
+  });
 });
 
 describe('Test 11: handleConflict()', () => {
@@ -1127,6 +1173,37 @@ describe('Test 18: Kiro Harness Scaffolding & Migration', () => {
     assert.strictEqual(steeringStat.isSymbolicLink(), false);
     assert.ok(steeringStat.isDirectory());
     assert.ok(fs.existsSync(path.join(legacySteeringLink, 'vespyr-steering.md')));
+  });
+
+  it('should scaffold both .kiro/steering and .kiro/skills via copy fallback when symlink throws EPERM', async () => {
+    const { performReconfigure } = require('../bin/cli.js');
+
+    const agentsTarget = path.join(tmpDir, '.agents');
+    fs.mkdirSync(path.join(agentsTarget, 'skills', 'test-skill'), { recursive: true });
+    fs.writeFileSync(path.join(agentsTarget, 'skills', 'test-skill', 'SKILL.md'), '# Test Skill');
+    fs.writeFileSync(path.join(agentsTarget, '.vespyr-version'), JSON.stringify({ version: VERSION }));
+    fs.writeFileSync(path.join(tmpDir, 'AGENTS.md'), '# AGENTS Guide');
+
+    const origSymlinkSync = fs.symlinkSync;
+    try {
+      fs.symlinkSync = () => {
+        const err = new Error('operation not permitted');
+        err.code = 'EPERM';
+        throw err;
+      };
+
+      await performReconfigure(tmpDir, { harnesses: ['kiro'], yes: true });
+
+      const kiroDir = path.join(tmpDir, '.kiro');
+      const steeringAgentsPath = path.join(kiroDir, 'steering', 'vespyr-steering.md');
+      const skillsDir = path.join(kiroDir, 'skills');
+
+      assert.ok(fs.existsSync(steeringAgentsPath), 'steering document must exist');
+      assert.ok(fs.existsSync(skillsDir), 'skills directory must exist');
+      assert.ok(fs.existsSync(path.join(skillsDir, 'test-skill', 'SKILL.md')), 'copied skill file must exist');
+    } finally {
+      fs.symlinkSync = origSymlinkSync;
+    }
   });
 });
 

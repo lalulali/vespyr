@@ -5,11 +5,19 @@
 > **Themes:** T3 (Artifact rigor), T4 (Harness contracts), T8 (UTTERLY SATISFIED culture)
 > **Goal:** Make the graph a first-class tool (auto-build, query API), make telemetry a first-class surface (LLM-consumable digests), prove catalog consistency, give all agents "See the Unseen" observability directives, and make satisfaction health visible without turning it into a vanity score.
 
+## Sub-Plans & Execution Architecture
+
+Phase 3 is divided into two dedicated implementation sub-plans:
+- **`04a-phase-3-observability-engine.md`**: Core OpenTelemetry distributed span engine, macro-telemetry surface (`telemetry_surface.js`), 7-day memory controller snapshots, and graph query API.
+- **`04b-phase-3-observability-ui-miniapp.md`**: Zero-dependency local web dashboard and CLI tool (`vespyr web` / `vespyr dashboard`), modular installer options (`--with-dashboard`), and real-time SSE trace DAG waterfall viewer.
+
 ## What changed from the original
 
 | Item | Original | This file | Why |
 |---|---|---|---|
 | F1.27-F1.28 (build-wiki) | Phase 1 (v2.0) | **Moved to Phase 7** | Consolidated into dedicated PKM & Knowledge Engine phase (`09-phase-7-pkm-knowledge-engine.md`). |
+| F3.8-F3.12 (Observability Engine) | Monolithic Phase 3 | **Detailed in `04a`** | Bifurcated runtime span emission and macro-telemetry surface from Phase 1. |
+| F3.21-F3.23 (Web Dashboard) | Unspecified / CLI-only | **Detailed in `04b`** | Added local-first `vespyr web` CLI tool and modular installer options. |
 
 ## F3.1-F3.5 — Graph auto-build at 5 lifecycle moments
 
@@ -107,20 +115,70 @@ Cost: 1 query. Without it: break the build, then re-grep and fix in a second pas
   - `developer.md` — dependents before any rename/refactor (contract block above)
   - Add `## Graph Query Contract` block to each of the 4 reasoning agents (text above)
 
-## F3.8-F3.12 — Telemetry surface (LLM-consumable)
+## F3.8-F3.12 — Telemetry Surface & Distributed Span Observability (LLM-Consumable & Machine-Verifiable)
 
-**Source:** Evolution §1.9 | **Theme:** T3
+**Source:** Evolution §1.9, Round Table 2026-08-21 | **Theme:** T3 | **Cross-Reference:** Epic 02l (`02l-phase-1-observability-biomarkers-and-small-model-harness.md`)
 
-**Problem:** `swarm_telemetry.js` writes to telemetry on every event, but nothing reads it. No skill surfaces "what's the cost so far?" or "which agent is the bottleneck?" The data is written into a void.
+**Problem:** `swarm_telemetry.js` currently writes unstructured, unindexed event logs (`tokens: 0`, `duration_ms: null` in `artifacts/telemetry/events-*.ndjson`). Evaluating workflow health currently forces a human to open markdown documents and read them line-by-line. This is unscalable and provides zero machine-verifiable feedback.
 
-**Target:** Make telemetry a first-class surface that 4 consumers see automatically:
-1. Every session start — `@memory-controller` loads last 7 days' summary
-2. Every skill's end — orchestrator surfaces "tokens used this skill: N (vs. baseline M)"
-3. The `/status` skill — adds a "Telemetry" section
-4. The `/retro` skill — Step 1 includes a "hot path" digest
+**Target:** Upgrade telemetry from passive log-dumping into an **OpenTelemetry-compatible distributed span pipeline** (`artifacts/telemetry/spans-*.ndjson`) and a first-class machine-verifiable surface that 4 consumers see automatically:
+1. Every session start — `@memory-controller` loads last 7 days' summary (<150ms)
+2. Every skill's end — orchestrator surfaces "tokens used this skill: N (vs. baseline M)" and automated biomarker pass/fail
+3. The `/status` skill — adds a "Telemetry & Biomarkers" section
+4. The `/retro` skill — Step 1 includes a "hot path" and token cost digest
 
-**Memory-controller session-start integration (canonical step 0.4 — the full
-order table lives in 03 F2.14; earlier drafts numbered this "Step 0.5"):**
+**Distributed Span Schema (`artifacts/telemetry/spans-YYYY-MM-DD.ndjson`):**
+
+```typescript
+interface VespyrTelemetrySpan {
+  trace_id: string;            // UUID identifying the end-to-end task execution
+  span_id: string;             // UUID identifying this specific agent step
+  parent_span_id: string | null;
+  timestamp: string;           // ISO 8601 UTC
+  session_id: string;
+  workflow: string;            // e.g. "discovery/validate-idea", "delivery/develop"
+  agent_persona: string;       // e.g. "architect", "developer", "qa-engineer"
+  model: {
+    provider: string;          // e.g. "anthropic", "google", "ollama"
+    model_id: string;          // e.g. "gemini-2.0-flash", "claude-3-5-sonnet"
+    temperature: number;
+  };
+  usage: {
+    prompt_tokens: number;
+    completion_tokens: number;
+    total_tokens: number;
+    cost_usd: number;
+  };
+  duration_ms: number;
+  tier0_evaluation: {
+    executed: boolean;
+    passed: boolean;
+    checks: Array<{
+      type: "markdown_ast" | "json_schema" | "eslint" | "unit_tests" | "token_ceiling";
+      status: "PASS" | "FAIL";
+      details?: string;
+    }>;
+  };
+  biomarkers: {
+    scr: number;               // Schema Compliance Ratio (1.0 = 100%)
+    msha: number;              // Markdown Section Header Adherence (1.0 = 100%)
+    placeholder_density: number;// % of lines containing TODO/TBD (0.0 = 0%)
+    pci: number;               // Premature Convergence Index (0.0 target)
+    srsr: number;              // Sycophantic Rubber-Stamp Rate (0.0 target)
+    scope_drift: number;       // Scope Drift Score (0.0 target)
+  };
+  error: { code: string; message: string } | null;
+}
+```
+
+**The 5 Hard Telemetry Invariants:**
+- `INV-TEL-01` (Zero Blind Execution): Non-null trace_id, duration_ms, and exact token counts on every span.
+- `INV-TEL-02` (Deterministic Gate Contract): Mandatory Tier 0 AST/schema assertion before disk commit.
+- `INV-TEL-03` (Zero Human-in-the-Loop Biomarker Gate): Workflow success requires all biomarkers (SCR=1.0, placeholder_density=0.0, PCI=0.0) to pass. Zero line-by-line human reading required.
+- `INV-TEL-04` (Regression Tripwire): CI failure (Exit Code 2) on >15% token inflation or pass rate drop vs `evals/baseline.json`.
+- `INV-TEL-05` (Model-Tier Invariant): Tier B frontier models mandated for `@architect`, `@founder`, and `@security-engineer`.
+
+**Memory-controller session-start integration (canonical step 0.4 — the full order table lives in 03 F2.14; earlier drafts numbered this "Step 0.5"):**
 
 ```markdown
 ### Step 0.4: Telemetry snapshot
@@ -131,11 +189,11 @@ After the graph check, invoke (via the shared session_bootstrap.js spawn):
 Budget: 150ms; output ≤ 20 lines (never raw event data). Inject the output into the loaded context under a "## Recent Telemetry" heading. This gives the agent cost awareness before it starts spending tokens.
 ```
 
-- [ ] F3.8 — Create `.agents/scripts/telemetry_surface.js` (~130 lines): **fix the spread bug from the first draft** (array-spread, not string-spread, when slicing lines — a string spread yields characters and mangles the digest). **Implementation code:** See `03d-phase-2-implementation-specs.md` §7
-- [ ] F3.9 — Update `memory-controller.md`: add step 0.4 (text above). Inject ≤20 lines under "## Recent Telemetry". Budget 150ms (not "<1s" — the <1s claim was contradicted by the 200ms allocation in README §13; one number now: 150ms via session_bootstrap.js).
-- [ ] F3.10 — Update `status/SKILL.md`: add "Surface telemetry" step. Append "## Telemetry (last 7 days)" with total tokens, top 3 agents by cost, top 3 events by frequency.
+- [ ] F3.8 — Create `.agents/scripts/telemetry_surface.js` (~130 lines): **fix the spread bug from the first draft** (array-spread, not string-spread, when slicing lines — a string spread yields characters and mangles the digest). Supports `session`, `hot-paths`, `summary`, and `compare`. **Implementation code:** See `03d-phase-2-implementation-specs.md` §7
+- [ ] F3.9 — Update `memory-controller.md`: add step 0.4 (text above). Inject ≤20 lines under "## Recent Telemetry". Budget 150ms via session_bootstrap.js.
+- [ ] F3.10 — Update `status/SKILL.md`: add "Surface telemetry" step. Append "## Telemetry (last 7 days)" with total tokens, top 3 agents by cost, top 3 events by frequency, and biomarker pass rates.
 - [ ] F3.11 — Update `retro/SKILL.md` Step 1: also run `telemetry_surface.js hot-paths`, include top 3 in digest.
-- [ ] F3.12 — Update `orchestrator_state.js`: after every `recordTelemetry('agent_invoke', ...)`, surface cost via `telemetry_surface.js compare` — **throttled to once per skill step** (a per-event subprocess spawn is a hot-path tax). Print `[COST] <agent> (<phase>): <one-line>`. Wrap in try/catch; never block.
+- [ ] F3.12 — Update `orchestrator_state.js`: after every `recordTelemetry('agent_invoke', ...)`, surface cost and biomarker status via `telemetry_surface.js compare` — **throttled to once per skill step**. Print `[COST] <agent> (<phase>): <one-line> [BIOMARKERS: PASS]`. Wrap in try/catch; never block.
 
 ## F3.13-F3.14 — Catalog parity test (derive from disk, don't hardcode)
 

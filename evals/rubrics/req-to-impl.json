@@ -1,0 +1,31 @@
+{
+  "dimension": "req_to_impl",
+  "name": "Requirements-to-Implementation Accuracy Rubric",
+  "description": "Evaluates trace fidelity from requirements to code with zero scope creep.",
+  "passThreshold": 4,
+  "criteria": [
+    {
+      "id": "RTI-1",
+      "name": "Full User Story AC Traceability",
+      "weight": 2,
+      "requiredPatterns": [
+        "spec|requirement|story|implement|criteria"
+      ]
+    },
+    {
+      "id": "RTI-2",
+      "name": "Zero Undocumented Scope Creep",
+      "weight": 2,
+      "prohibitedPatterns": [
+        "also added an unrequested feature",
+        "speculative framework rewrite"
+      ]
+    },
+    {
+      "id": "RTI-3",
+      "name": "Clean Diff Footprint",
+      "weight": 1,
+      "minWordCount": 40
+    }
+  ]
+}

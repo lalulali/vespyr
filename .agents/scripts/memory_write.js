@@ -66,10 +66,47 @@ function countWords(text) {
   return text.trim().split(/\s+/).filter(Boolean).length;
 }
 
+const SECRET_PATTERNS = [
+  { name: 'AWS Access Key', regex: /\b(AKIA|ABIA|ACCA|ASIA)[0-9A-Z]{16}\b/g },
+  { name: 'GitHub Token', regex: /\b(ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9_]{36,255}\b/g },
+  { name: 'Private Key', regex: /-----BEGIN [^-]*(?:PRIVATE KEY|SECRET KEY)[^-]*-----[\s\S]*?-----END [^-]*(?:PRIVATE KEY|SECRET KEY)[^-]*-----/g },
+  { name: 'JWT Token', regex: /\beyJ[A-Za-z0-9-_=]{10,}\.[A-Za-z0-9-_=]{10,}\.[A-Za-z0-9-_.+/=]*\b/g },
+  { name: 'API Key Assignment', regex: /(?:api[_-]?key|secret|password|bearer|auth[_-]?token)\s*[:=]\s*['"][A-Za-z0-9\-_.~+/=]{16,}['"]/gi }
+];
+
+function scrubSecrets(text) {
+  let clean = text;
+  for (const { name, regex } of SECRET_PATTERNS) {
+    clean = clean.replace(regex, `[REDACTED_SECRET: ${name}]`);
+  }
+  return clean;
+}
+
+const INJECTION_PATTERNS = [
+  { id: 'INJ-PROMPT', re: /ignore\s+(all\s+|any\s+)?(previous|prior|earlier)\s+instructions|disregard\s+(all\s+|any\s+)?(previous|prior)\s+instructions|forget\s+(all\s+|any\s+)?(previous|prior)\s+instructions/i },
+  { id: 'INJ-ROLE', re: /you\s+are\s+now\s+(the\s+)?(system|root|superuser)|act\s+as\s+(the\s+)?system\b|new\s+system\s+prompt:/i },
+  { id: 'INJ-TOOL', re: /<(invoke|use_mcp_tool|execute_command|tool_use|antml:invoke)[^>]*>/i },
+];
+
+function sanitizeContent(text) {
+  let clean = text
+    .replace(/<\|im_start\|>|<\|im_end\|>|\[SYSTEM DIRECTIVE\]/gi, '')
+    .replace(/<!--[\s\S]*?-->/g, '')
+    .replace(/[\u200B\u200C\uFEFF\u202E]/g, '');
+  for (const pat of INJECTION_PATTERNS) {
+    if (pat.re.test(clean)) {
+      clean = clean.replace(pat.re, '[SANITIZED_INSTRUCTION_OVERRIDE]');
+    }
+  }
+  return clean;
+}
+
 function buildEntry({ domain, title, agent, content, status, refs, date }) {
+  const sanitizedContent = scrubSecrets(sanitizeContent(content.trim()));
+  const sanitizedTitle = scrubSecrets(sanitizeContent(title.trim()));
   const lines = [
-    `### [${domain}] ${title} [date: ${date}] [agent: ${agent}]`,
-    content.trim(),
+    `### [${domain}] ${sanitizedTitle} [date: ${date}] [agent: ${agent}]`,
+    sanitizedContent,
     `**Status:** ${status}`,
   ];
   if (refs) lines.push(`**References:** ${refs}`);
@@ -81,7 +118,7 @@ function runDedupeValidator(filePath, title) {
   const script = path.join(SCRIPTS_DIR, 'dedupe_validator.js');
   if (!fs.existsSync(script)) return { duplicate: false };
   try {
-    const out = execFileSync('node', [script, '--target', filePath, '--title', title], {
+    const out = execFileSync(process.execPath, [script, '--target', filePath, '--title', title], {
       encoding: 'utf8',
       cwd: process.cwd()
     });
@@ -96,7 +133,7 @@ function runCompactionGuard(filePath) {
   const script = path.join(SCRIPTS_DIR, 'compaction_guard.js');
   if (!fs.existsSync(script)) return;
   try {
-    execFileSync('node', [script, '--file', filePath], {
+    execFileSync(process.execPath, [script, '--file', filePath], {
       encoding: 'utf8',
       cwd: process.cwd(),
       stdio: ['pipe', 'pipe', 'inherit']
@@ -211,4 +248,19 @@ Allowed domains: ${[...VALID_DOMAINS].join(', ')}`);
   }));
 }
 
-main();
+if (require.main === module) {
+  main();
+}
+
+module.exports = {
+  scrubSecrets,
+  sanitizeContent,
+  buildEntry,
+  countWords,
+  runDedupeValidator,
+  runCompactionGuard,
+  SECRET_PATTERNS,
+  INJECTION_PATTERNS,
+  VALID_DOMAINS,
+  ALLOWED_FILES
+};

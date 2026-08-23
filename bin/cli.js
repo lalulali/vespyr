@@ -32,41 +32,26 @@ const HARNESS_OPTIONS = [
 		description: "scaffolds .claude -> .agents symlink + CLAUDE.md",
 	},
 	{
-		id: "cursor",
-		label: "Cursor Rules",
-		description: "scaffolds .cursor/rules/*.mdc rules with metadata",
-	},
-	{
-		id: "github",
-		label: "GitHub Copilot & CLI",
-		description: "scaffolds .github/agents/*.yml compiled rules",
-	},
-	{
-		id: "windsurf",
-		label: "Windsurf",
-		description:
-			"scaffolds .windsurf/workflows symlink & .windsurfrules symlink",
-	},
-	{
 		id: "kiro",
 		label: "Kiro Steering & Skills",
 		description: "scaffolds .kiro/steering/vespyr-steering.md & .kiro/skills/ symlink",
 	},
-	{
-		id: "antigravity",
-		label: "Google Antigravity",
-		description: "scaffolds .agents configuration shims for Antigravity",
-	},
-	{
-		id: "gemini",
-		label: "Gemini CLI",
-		description: "scaffolds Gemini CLI instructions & system context",
-	},
-	{
-		id: "aider",
-		label: "Aider",
-		description: "scaffolds .aider.conf.yml and pre-prompt instructions",
-	},
+	// {
+	// 	id: "cursor",
+	// 	label: "Cursor Rules",
+	// 	description: "scaffolds .cursor/rules/*.mdc rules with metadata",
+	// },
+	// {
+	// 	id: "github",
+	// 	label: "GitHub Copilot & CLI",
+	// 	description: "scaffolds .github/agents/*.yml compiled rules",
+	// },
+	// {
+	// 	id: "windsurf",
+	// 	label: "Windsurf",
+	// 	description:
+	// 		"scaffolds .windsurf/workflows symlink & .windsurfrules symlink",
+	// },
 ];
 
 let createdLinks = [];
@@ -313,10 +298,11 @@ function createLinkOrCopy(target, linkPath, type = "dir", method = "symlink") {
 		return;
 	}
 
+	const sourcePath = path.isAbsolute(target)
+		? target
+		: path.resolve(path.dirname(linkPath), target);
+
 	if (method === "copy") {
-		const sourcePath = path.isAbsolute(target)
-			? target
-			: path.resolve(path.dirname(linkPath), target);
 		if (type === "dir") {
 			fs.cpSync(sourcePath, linkPath, { recursive: true });
 		} else {
@@ -328,9 +314,14 @@ function createLinkOrCopy(target, linkPath, type = "dir", method = "symlink") {
 				const stat = fs.lstatSync(linkPath);
 				if (stat.isSymbolicLink()) {
 					const existing = fs.readlinkSync(linkPath);
+					const normExisting = existing.replace(/\\/g, "/");
+					const normTarget = target.replace(/\\/g, "/");
+					const normRel = path.relative(path.dirname(linkPath), target).replace(/\\/g, "/");
+					const normSource = sourcePath.replace(/\\/g, "/");
 					if (
-						existing === target ||
-						existing === path.relative(path.dirname(linkPath), target)
+						normExisting === normTarget ||
+						normExisting === normRel ||
+						normExisting === normSource
 					) {
 						return;
 					}
@@ -341,16 +332,28 @@ function createLinkOrCopy(target, linkPath, type = "dir", method = "symlink") {
 		}
 
 		try {
-			fs.symlinkSync(target, linkPath, type);
+			const symlinkType = (process.platform === "win32" && type === "dir") ? "junction" : type;
+			const symlinkTarget = (process.platform === "win32" && symlinkType === "junction")
+				? sourcePath
+				: target;
+
+			fs.symlinkSync(symlinkTarget, linkPath, symlinkType);
 			createdLinks.push(linkPath);
 		} catch (err) {
 			if (
-				err.code === "EPERM" &&
-				type === "file" &&
+				err.code === "EPERM" ||
+				err.code === "EACCES" ||
+				err.code === "UNKNOWN" ||
+				err.code === "EXDEV" ||
 				process.platform === "win32"
 			) {
-				fs.copyFileSync(target, linkPath);
-				logWarn(`Symlink failed, copied file instead: ${linkPath}`);
+				if (type === "dir") {
+					fs.cpSync(sourcePath, linkPath, { recursive: true });
+					logWarn(`Symlink failed (${err.code || "unsupported"}), copied directory instead: ${linkPath}`);
+				} else {
+					fs.copyFileSync(sourcePath, linkPath);
+					logWarn(`Symlink failed (${err.code || "unsupported"}), copied file instead: ${linkPath}`);
+				}
 			} else {
 				throw err;
 			}
@@ -1097,15 +1100,17 @@ function handleConflict(linkPath, name, targetDir, method = "symlink") {
 		const stat = fs.lstatSync(linkPath);
 		if (stat.isSymbolicLink()) {
 			const target = fs.readlinkSync(linkPath);
+			const normTarget = target.replace(/\\/g, "/");
+			const home = os.homedir().replace(/\\/g, "/");
 			if (
 				method === "symlink" &&
-				(target === ".agents" ||
-					target.endsWith("/.agents") ||
-					target.includes(".agents/") ||
-					target === path.join(os.homedir(), ".agents") ||
-					target === path.join(os.homedir(), ".agents", "skills") ||
-					target === path.join(os.homedir(), ".agents", "agents") ||
-					target === path.join(os.homedir(), ".agents", "GUARDRAILS.md"))
+				(normTarget === ".agents" ||
+					normTarget.endsWith("/.agents") ||
+					normTarget.includes(".agents/") ||
+					normTarget === `${home}/.agents` ||
+					normTarget === `${home}/.agents/skills` ||
+					normTarget === `${home}/.agents/agents` ||
+					normTarget === `${home}/.agents/GUARDRAILS.md`)
 			) {
 				return;
 			}
@@ -1986,6 +1991,28 @@ function uninstallHarnesses(targetDir, harnesses, isGlobal) {
 		if (h === "kiro") {
 			const kiroTargetDir = getPath("kiro", ".kiro");
 			if (fs.existsSync(kiroTargetDir)) {
+				const skillsDir = path.join(kiroTargetDir, "skills");
+				if (fs.existsSync(skillsDir)) {
+					try {
+						const stat = fs.lstatSync(skillsDir);
+						if (stat.isSymbolicLink()) {
+							fs.unlinkSync(skillsDir);
+						} else {
+							const skillsSrcDir = path.join(AGENTS_SRC, "skills");
+							if (fs.existsSync(skillsSrcDir)) {
+								const coreSkills = fs.readdirSync(skillsSrcDir);
+								for (const skill of coreSkills) {
+									const skillPath = path.join(skillsDir, skill);
+									if (fs.existsSync(skillPath)) {
+										fs.rmSync(skillPath, { recursive: true, force: true });
+									}
+								}
+							}
+							removeDirIfEmpty(skillsDir);
+						}
+					} catch (e) {}
+				}
+
 				const steeringDir = path.join(kiroTargetDir, "steering");
 				if (fs.existsSync(steeringDir)) {
 					try {
@@ -1993,6 +2020,10 @@ function uninstallHarnesses(targetDir, harnesses, isGlobal) {
 						if (stat.isSymbolicLink()) {
 							fs.unlinkSync(steeringDir);
 						} else {
+							const vespyrSteering = path.join(steeringDir, "vespyr-steering.md");
+							if (fs.existsSync(vespyrSteering)) {
+								fs.unlinkSync(vespyrSteering);
+							}
 							const agentsSrcDir = path.join(AGENTS_SRC, "agents");
 							if (fs.existsSync(agentsSrcDir)) {
 								const coreAgents = fs
@@ -2137,11 +2168,10 @@ async function executeMigration(targetDir) {
 	}
 
 	try {
-		fs.symlinkSync(".agents", opencodePath, "dir");
-		createdLinks.push(opencodePath);
-		log(`  Created .opencode -> .agents symlink`);
+		createLinkOrCopy(".agents", opencodePath, "dir", "symlink");
+		log(`  Created .opencode -> .agents link`);
 	} catch (e) {
-		logWarn(`Could not create .opencode symlink: ${e.message}`);
+		logWarn(`Could not create .opencode link: ${e.message}`);
 	}
 
 	updatePathsInDir(agentsPath);
@@ -2166,7 +2196,7 @@ function performSyncDocs(targetDir) {
 
 	if (fs.existsSync(syncScript)) {
 		const { execSync } = require("child_process");
-		execSync(`node "${syncScript}"`, { cwd: targetDir, stdio: "inherit" });
+		execSync(`"${process.execPath}" "${syncScript}"`, { cwd: targetDir, stdio: "inherit" });
 
 		const validateScript = path.join(
 			targetDir,
@@ -2175,7 +2205,7 @@ function performSyncDocs(targetDir) {
 			"validate_frontmatter.js",
 		);
 		if (fs.existsSync(validateScript)) {
-			execSync(`node "${validateScript}"`, {
+			execSync(`"${process.execPath}" "${validateScript}"`, {
 				cwd: targetDir,
 				stdio: "inherit",
 			});

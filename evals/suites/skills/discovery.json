@@ -1,0 +1,72 @@
+{
+  "suite": "skills/discovery",
+  "description": "Discovery and Problem Definition Skills",
+  "benchmarks": [
+    {
+      "id": "SKILL-VALIDATE-IDEA",
+      "skill": "validate-idea",
+      "name": "Validate Idea Socratic Gate",
+      "dimension": "sycophantic_premature_convergence",
+      "assertContains": [
+        "Verdict",
+        "Assumptions",
+        "Risk"
+      ]
+    },
+    {
+      "id": "SKILL-VALIDATE-GAME",
+      "skill": "validate-game-idea",
+      "name": "Validate Game Idea Core Loop",
+      "dimension": "sycophantic_premature_convergence",
+      "assertContains": [
+        "Core Loop",
+        "Market",
+        "Verdict"
+      ]
+    },
+    {
+      "id": "SKILL-UNPACK-PROBLEM",
+      "skill": "unpack-problem",
+      "name": "Unpack Problem Root Analysis",
+      "dimension": "prd_completeness",
+      "assertContains": [
+        "Problem Definition",
+        "User Impact",
+        "Root Cause"
+      ]
+    },
+    {
+      "id": "SKILL-ROOT-CAUSE",
+      "skill": "root-cause",
+      "name": "5-Whys & Fishbone Diagram",
+      "dimension": "prd_completeness",
+      "assertContains": [
+        "5 Whys",
+        "Root Cause",
+        "Action Item"
+      ]
+    },
+    {
+      "id": "SKILL-SHAPE-UP",
+      "skill": "shape-up",
+      "name": "Shape Up Appetite & Boundaries",
+      "dimension": "prd_completeness",
+      "assertContains": [
+        "Appetite",
+        "Boundaries",
+        "Rabbit Holes"
+      ]
+    },
+    {
+      "id": "SKILL-BRAINSTORMING",
+      "skill": "brainstorming",
+      "name": "Brainstorming Method Application",
+      "dimension": "prd_completeness",
+      "assertContains": [
+        "SCAMPER",
+        "Ideas",
+        "Prioritization"
+      ]
+    }
+  ]
+}

@@ -14,9 +14,10 @@
 const fs = require('fs');
 const path = require('path');
 
-const MEMORY_DIR = path.join(process.cwd(), 'artifacts', 'memory');
-const ARCHIVE_DIR = path.join(MEMORY_DIR, 'archive');
-const SESSION_DIR = path.join(MEMORY_DIR, 'session-summaries');
+function getMemoryDir() { return path.join(process.cwd(), 'artifacts', 'memory'); }
+function getArchiveDir() { return path.join(getMemoryDir(), 'archive'); }
+function getSessionDir() { return path.join(getMemoryDir(), 'session-summaries'); }
+function getQuarantineDir() { return path.join(getMemoryDir(), 'quarantine'); }
 
 /**
  * Phase 1.3 — Auto-create guard.
@@ -28,11 +29,12 @@ const SESSION_DIR = path.join(MEMORY_DIR, 'session-summaries');
  * the JSON output that callers parse.
  */
 function ensureSessionSummaryFiles() {
-  if (!fs.existsSync(SESSION_DIR)) {
-    try { fs.mkdirSync(SESSION_DIR, { recursive: true }); } catch (e) { return; }
+  const sessionDir = getSessionDir();
+  if (!fs.existsSync(sessionDir)) {
+    try { fs.mkdirSync(sessionDir, { recursive: true }); } catch (e) { return; }
   }
 
-  const latestPath = path.join(SESSION_DIR, 'latest.md');
+  const latestPath = path.join(sessionDir, 'latest.md');
   if (!fs.existsSync(latestPath)) {
     try {
       fs.writeFileSync(latestPath, [
@@ -50,7 +52,7 @@ function ensureSessionSummaryFiles() {
     } catch (e) { /* non-blocking */ }
   }
 
-  const historyPath = path.join(SESSION_DIR, 'history.md');
+  const historyPath = path.join(getSessionDir(), 'history.md');
   if (!fs.existsSync(historyPath)) {
     try {
       fs.writeFileSync(historyPath, [
@@ -304,8 +306,6 @@ function scoreSection(section, keywords, now) {
   return score;
 }
 
-const QUARANTINE_DIR = path.join(MEMORY_DIR, 'quarantine');
-
 const INJECTION_PATTERNS = [
   { id: 'INJ-PROMPT', re: /ignore\s+(all\s+|any\s+)?(previous|prior|earlier)\s+instructions|disregard\s+(all\s+|any\s+)?(previous|prior)\s+instructions|forget\s+(all\s+|any\s+)?(previous|prior)\s+instructions/i },
   { id: 'INJ-ROLE', re: /you\s+are\s+now\s+(the\s+)?(system|root|superuser)|act\s+as\s+(the\s+)?system\b|new\s+system\s+prompt:/i },
@@ -322,10 +322,11 @@ function checkAdmissionControl(text) {
 }
 
 function quarantineEntry(entry, reason) {
-  if (!fs.existsSync(QUARANTINE_DIR)) {
-    try { fs.mkdirSync(QUARANTINE_DIR, { recursive: true }); } catch (e) { /* non-blocking */ }
+  const quarantineDir = getQuarantineDir();
+  if (!fs.existsSync(quarantineDir)) {
+    try { fs.mkdirSync(quarantineDir, { recursive: true }); } catch (e) { /* non-blocking */ }
   }
-  const logFile = path.join(QUARANTINE_DIR, 'quarantine-log.json');
+  const logFile = path.join(quarantineDir, 'quarantine-log.json');
   const record = {
     timestamp: new Date().toISOString(),
     file: entry.file,
@@ -373,9 +374,10 @@ function filterMemory(agent, task, maxResults) {
   const tier2Set = new Set(profile.tier2 || []);
 
   // Read all memory files (not just tier2 — tier3 scans everything)
+  const memoryDir = getMemoryDir();
   const memoryFiles = [];
-  if (fs.existsSync(MEMORY_DIR)) {
-    for (const f of fs.readdirSync(MEMORY_DIR)) {
+  if (fs.existsSync(memoryDir)) {
+    for (const f of fs.readdirSync(memoryDir)) {
       if (f.endsWith('.md') && !f.startsWith('session-')) {
         memoryFiles.push(f);
       }
@@ -383,7 +385,7 @@ function filterMemory(agent, task, maxResults) {
   }
 
   for (const file of memoryFiles) {
-    const filePath = path.join(MEMORY_DIR, file);
+    const filePath = path.join(memoryDir, file);
     if (!fs.existsSync(filePath)) continue;
     try {
       const content = fs.readFileSync(filePath, 'utf8');
@@ -451,8 +453,9 @@ function filterMemory(agent, task, maxResults) {
 // JSON entry object per line. Legacy format is index.json: a single JSON
 // object with an `entries` array. NDJSON is preferred; JSON is the fallback.
 function searchArchive(query, maxResults = 5) {
-  const ndjsonFile = path.join(ARCHIVE_DIR, 'index.ndjson');
-  const jsonFile = path.join(ARCHIVE_DIR, 'index.json');
+  const archiveDir = getArchiveDir();
+  const ndjsonFile = path.join(archiveDir, 'index.ndjson');
+  const jsonFile = path.join(archiveDir, 'index.json');
 
   if (!fs.existsSync(ndjsonFile) && !fs.existsSync(jsonFile)) {
     return { error: 'Archive is empty — no entries have been compacted yet.' };
@@ -532,7 +535,7 @@ function searchArchive(query, maxResults = 5) {
 
 // CLI
 function prefetchPatterns(agent, phase) {
-  const patternsFile = path.join(MEMORY_DIR, 'patterns-and-conventions.md');
+  const patternsFile = path.join(getMemoryDir(), 'patterns-and-conventions.md');
   if (!fs.existsSync(patternsFile)) {
     console.log('[PREFETCH] no patterns file');
     return;
@@ -607,4 +610,20 @@ Agents: ${Object.keys(AGENT_PROFILES).join(', ')}`);
   }
 }
 
-main();
+if (require.main === module) {
+  main();
+}
+
+module.exports = {
+  filterMemory,
+  searchArchive,
+  prefetchPatterns,
+  extractKeywords,
+  parseSections,
+  scoreSection,
+  checkAdmissionControl,
+  formatT3Block,
+  ensureSessionSummaryFiles,
+  AGENT_PROFILES,
+  SYNONYMS
+};

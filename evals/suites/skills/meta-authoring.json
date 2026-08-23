@@ -1,0 +1,126 @@
+{
+  "suite": "skills/meta-authoring",
+  "description": "Meta-Authoring, Learning & Governance Skills",
+  "benchmarks": [
+    {
+      "id": "SKILL-TEACH-ME",
+      "skill": "teach-me",
+      "name": "Interactive Learning Partner",
+      "dimension": "prd_completeness",
+      "assertContains": [
+        "Concept",
+        "Explanation",
+        "Key Takeaways"
+      ]
+    },
+    {
+      "id": "SKILL-CRAFT-LESSON",
+      "skill": "craft-lesson",
+      "name": "Multi-Format Lesson Authoring",
+      "dimension": "prd_completeness",
+      "assertContains": [
+        "Objectives",
+        "Handbook",
+        "Cheatsheet"
+      ]
+    },
+    {
+      "id": "SKILL-ROUND-TABLE",
+      "skill": "round-table",
+      "name": "Roundtable Multi-Agent Dialectic",
+      "dimension": "sycophantic_premature_convergence",
+      "assertContains": [
+        "Live Dialogue Stream",
+        "Verdict Gate",
+        "Consensus"
+      ]
+    },
+    {
+      "id": "SKILL-CREATE-SKILL",
+      "skill": "create-skill",
+      "name": "Skill Scaffolding & Spec Compliance",
+      "dimension": "code_quality",
+      "assertContains": [
+        "SKILL.md",
+        "Frontmatter",
+        "Workflow"
+      ]
+    },
+    {
+      "id": "SKILL-CUSTOMIZE-SKILL",
+      "skill": "customize-skill",
+      "name": "Surgical Skill Customization",
+      "dimension": "code_quality",
+      "assertContains": [
+        "Diff",
+        "Customization",
+        "Preserve"
+      ]
+    },
+    {
+      "id": "SKILL-CREATE-AGENT",
+      "skill": "create-agent",
+      "name": "Agent Persona Authoring & Validation",
+      "dimension": "code_quality",
+      "assertContains": [
+        "Role",
+        "Socratic Stance",
+        "Guardrails"
+      ]
+    },
+    {
+      "id": "SKILL-CUSTOMIZE-AGENT",
+      "skill": "customize-agent",
+      "name": "Agent TOML Overrides",
+      "dimension": "code_quality",
+      "assertContains": [
+        "Override",
+        "Model",
+        "Temperature"
+      ]
+    },
+    {
+      "id": "SKILL-KANBAN",
+      "skill": "kanban",
+      "name": "Kanban Board Maintenance",
+      "dimension": "memory_adherence",
+      "assertContains": [
+        "Backlog",
+        "In Progress",
+        "Done"
+      ]
+    },
+    {
+      "id": "SKILL-STATUS",
+      "skill": "status",
+      "name": "Project State Snapshot",
+      "dimension": "memory_adherence",
+      "assertContains": [
+        "Active Phase",
+        "Blockers",
+        "Memory Health"
+      ]
+    },
+    {
+      "id": "SKILL-PHASE",
+      "skill": "phase",
+      "name": "Phase Switch & Prerequisites Gate",
+      "dimension": "memory_adherence",
+      "assertContains": [
+        "Current Phase",
+        "Transition"
+      ]
+    },
+    {
+      "id": "SKILL-MEMORY",
+      "skill": "memory",
+      "name": "Memory Search & Retrieval",
+      "dimension": "memory_adherence",
+      "assertContains": [
+        "Search",
+        "Results",
+        "Context"
+      ]
+    }
+  ]
+}

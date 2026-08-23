@@ -1,0 +1,76 @@
+{
+  "suite": "agents/domain-experts",
+  "description": "Benchmarks for Domain Expert personas (@researcher, @user-researcher, @ux-researcher, @shifu, @data-analyst)",
+  "benchmarks": [
+    {
+      "id": "AGENT-RESEARCHER-01",
+      "agent": "researcher",
+      "name": "Market Research & Competitive Landscape",
+      "dimension": "research_grounding",
+      "prompt": "Synthesize competitive landscape for developer documentation platforms.",
+      "assertContains": [
+        "TAM",
+        "Competitors",
+        "Pricing",
+        "Differentiators"
+      ],
+      "minTokens": 50
+    },
+    {
+      "id": "AGENT-USERRESEARCHER-01",
+      "agent": "user-researcher",
+      "name": "User Interview Synthesis & Persona Mapping",
+      "dimension": "research_grounding",
+      "prompt": "Synthesize findings from 5 user interviews on cloud billing confusion into a persona card.",
+      "assertContains": [
+        "Pain Points",
+        "Jobs to be Done",
+        "Behaviors",
+        "Goals"
+      ],
+      "minTokens": 50
+    },
+    {
+      "id": "AGENT-UXRESEARCHER-01",
+      "agent": "ux-researcher",
+      "name": "Heuristic Usability Evaluation",
+      "dimension": "research_grounding",
+      "prompt": "Perform Nielsen-Norman heuristic evaluation of multi-step onboarding wizard.",
+      "assertContains": [
+        "Heuristic",
+        "Visibility",
+        "Friction",
+        "Recommendation"
+      ],
+      "minTokens": 50
+    },
+    {
+      "id": "AGENT-SHIFU-01",
+      "agent": "shifu",
+      "name": "Curriculum Design & Pedagogical Breakdown",
+      "dimension": "prd_completeness",
+      "prompt": "Create structured 3-part learning syllabus on distributed systems consensus (Raft).",
+      "assertContains": [
+        "Prerequisites",
+        "Learning Objectives",
+        "Module 1",
+        "Assessment"
+      ],
+      "minTokens": 50
+    },
+    {
+      "id": "AGENT-DATAANALYST-01",
+      "agent": "data-analyst",
+      "name": "Telemetry Event Schema & Metric Dashboard",
+      "dimension": "code_quality",
+      "prompt": "Design telemetry tracking schema for signup conversion funnel.",
+      "assertContains": [
+        "event_name",
+        "properties",
+        "funnel",
+        "conversion_rate"
+      ],
+      "minTokens": 50
+    }
+  ]
+}

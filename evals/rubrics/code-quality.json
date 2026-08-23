@@ -1,0 +1,41 @@
+{
+  "dimension": "code_quality",
+  "name": "Code Quality & Correctness Rubric",
+  "description": "Evaluates implementation correctness, clean interfaces, and error handling.",
+  "passThreshold": 4,
+  "criteria": [
+    {
+      "id": "CQ-1",
+      "name": "Syntactically Valid Implementation",
+      "weight": 2,
+      "requiredPatterns": [
+        "function|class|const|let|def|import|export|module"
+      ]
+    },
+    {
+      "id": "CQ-2",
+      "name": "Comprehensive Error Handling",
+      "weight": 2,
+      "requiredPatterns": [
+        "try|catch|throw|error|handle|fallback|recover|except"
+      ]
+    },
+    {
+      "id": "CQ-3",
+      "name": "Clean Abstractions & No Side Effects",
+      "weight": 1,
+      "prohibitedPatterns": [
+        "TODO: implement later",
+        "FIXME: broken hack"
+      ]
+    },
+    {
+      "id": "CQ-4",
+      "name": "Co-located Unit Tests",
+      "weight": 1,
+      "requiredPatterns": [
+        "test|assert|expect|describe|it\\("
+      ]
+    }
+  ]
+}

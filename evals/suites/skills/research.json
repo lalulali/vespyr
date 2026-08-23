@@ -1,0 +1,84 @@
+{
+  "suite": "skills/research",
+  "description": "Market, User & UX Research Skills",
+  "benchmarks": [
+    {
+      "id": "SKILL-EXPLORE-IDEA",
+      "skill": "explore-idea",
+      "name": "Explore Idea Evidence Synthesis",
+      "dimension": "research_grounding",
+      "assertContains": [
+        "Market Analysis",
+        "Competitors",
+        "Findings"
+      ]
+    },
+    {
+      "id": "SKILL-EXPLORE-GAME",
+      "skill": "explore-game-idea",
+      "name": "Explore Game Genre Research",
+      "dimension": "research_grounding",
+      "assertContains": [
+        "Genre Trends",
+        "Audience",
+        "Mechanics"
+      ]
+    },
+    {
+      "id": "SKILL-RESEARCH-PLAN",
+      "skill": "research-plan",
+      "name": "2-Part Interview Guide Construction",
+      "dimension": "research_grounding",
+      "assertContains": [
+        "Goals",
+        "Profile Questions",
+        "Behavioral Questions"
+      ]
+    },
+    {
+      "id": "SKILL-EMPATHY-MAP",
+      "skill": "empathy-map",
+      "name": "Empathy Map Quadrants",
+      "dimension": "research_grounding",
+      "assertContains": [
+        "Says",
+        "Thinks",
+        "Does",
+        "Feels"
+      ]
+    },
+    {
+      "id": "SKILL-JOURNEY-MAP",
+      "skill": "journey-map",
+      "name": "Journey Touchpoint & Friction Mapping",
+      "dimension": "research_grounding",
+      "assertContains": [
+        "Touchpoints",
+        "Emotional State",
+        "Friction"
+      ]
+    },
+    {
+      "id": "SKILL-JTBD",
+      "skill": "jtbd",
+      "name": "Jobs to be Done & HMW Canvas",
+      "dimension": "prd_completeness",
+      "assertContains": [
+        "Job Statement",
+        "Outcome",
+        "How Might We"
+      ]
+    },
+    {
+      "id": "SKILL-DISCOVERY-REPORT",
+      "skill": "discovery-report",
+      "name": "Unified Discovery Synthesis",
+      "dimension": "research_grounding",
+      "assertContains": [
+        "Executive Summary",
+        "Usability Score",
+        "Next Steps"
+      ]
+    }
+  ]
+}

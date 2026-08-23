@@ -67,7 +67,7 @@ function pipelineNext() {
   // Best-effort: reuse the orchestrator's next-action command.
   const { execSync } = require('child_process');
   try {
-    const out = execSync('node .agents/scripts/orchestrator_state.js next', {
+    const out = execSync(`"${process.execPath}" .agents/scripts/orchestrator_state.js next`, {
       encoding: 'utf8',
       stdio: ['ignore', 'pipe', 'ignore'],
       timeout: 10000

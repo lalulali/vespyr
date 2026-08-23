@@ -58,7 +58,8 @@ const STOP_WORDS = new Set([
   'the', 'a', 'an', 'is', 'are', 'was', 'were', 'for', 'to', 'of', 'in', 'on', 'at', 'by',
   'with', 'from', 'that', 'this', 'it', 'be', 'as', 'or', 'and', 'but', 'not', 'have', 'has',
   'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'can', 'its',
-  'their', 'our', 'your', 'my', 'we', 'they', 'he', 'she', 'i', 'you'
+  'their', 'our', 'your', 'my', 'we', 'they', 'he', 'she', 'i', 'you', 'implement',
+  'add', 'create', 'build', 'fix', 'update', 'change', 'make', 'work', 'need', 'want', 'using', 'via'
 ]);
 
 // Domain-specific keyword importance weights
@@ -114,31 +115,42 @@ function ngramSimilarity(text1, text2) {
   return union.size === 0 ? 0 : intersection.size / union.size;
 }
 
+function areSynonyms(w1, w2) {
+  if (w1 === w2) return 1.0;
+  if (SYNONYMS[w1] && SYNONYMS[w1].includes(w2)) return 0.8;
+  if (SYNONYMS[w2] && SYNONYMS[w2].includes(w1)) return 0.8;
+  return 0;
+}
+
 function weightedOverlap(words1, words2) {
-  const map1 = expandSynonyms(words1);
-  const map2 = expandSynonyms(words2);
+  if (words1.length === 0 || words2.length === 0) return 0;
 
-  let overlapScore = 0;
-  let totalWeight = 0;
-
-  // Check overlap in both directions
-  for (const [word, count1] of map1) {
-    const weight = KEYWORD_WEIGHTS[word] || 1.0;
-    totalWeight += weight * count1;
-    if (map2.has(word)) {
-      const count2 = map2.get(word);
-      overlapScore += weight * Math.min(count1, count2);
+  let score1 = 0, weight1 = 0;
+  for (const w1 of words1) {
+    const w = KEYWORD_WEIGHTS[w1] || 1.0;
+    weight1 += w;
+    let best = 0;
+    for (const w2 of words2) {
+      const match = areSynonyms(w1, w2);
+      if (match > best) best = match;
     }
+    score1 += w * best;
   }
 
-  for (const [word, count2] of map2) {
-    const weight = KEYWORD_WEIGHTS[word] || 1.0;
-    if (!map1.has(word)) {
-      totalWeight += weight * count2;
+  let score2 = 0, weight2 = 0;
+  for (const w2 of words2) {
+    const w = KEYWORD_WEIGHTS[w2] || 1.0;
+    weight2 += w;
+    let best = 0;
+    for (const w1 of words1) {
+      const match = areSynonyms(w1, w2);
+      if (match > best) best = match;
     }
+    score2 += w * best;
   }
 
-  return totalWeight === 0 ? 0 : overlapScore / totalWeight;
+  const totalWeight = weight1 + weight2;
+  return totalWeight === 0 ? 0 : (score1 + score2) / totalWeight;
 }
 
 function computeSimilarity(title1, title2) {
@@ -161,8 +173,8 @@ function computeSimilarity(title1, title2) {
   const exactSim = exactUnion.size === 0 ? 0 : exactIntersection.size / exactUnion.size;
 
   // Combined score: weighted average
-  // Word similarity is most important, but n-grams catch spelling variants and phrases
-  const score = (wordSim * 0.5) + (ngramSim * 0.25) + (exactSim * 0.25);
+  // Word similarity is most important, while n-grams and exact matches catch phrases/variants
+  const score = (wordSim * 0.70) + (ngramSim * 0.15) + (exactSim * 0.15);
 
   return Math.min(1.0, score);
 }
@@ -264,4 +276,16 @@ function main() {
   console.log(JSON.stringify(result, null, 2));
 }
 
-main();
+if (require.main === module) {
+  main();
+}
+
+module.exports = {
+  dedupeCheck,
+  computeSimilarity,
+  weightedOverlap,
+  ngramSimilarity,
+  expandSynonyms,
+  tokenize,
+  extractHeadersFromMarkdown
+};

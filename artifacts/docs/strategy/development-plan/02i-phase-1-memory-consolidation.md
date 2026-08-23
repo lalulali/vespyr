@@ -215,11 +215,121 @@ When `node .agents/scripts/orchestrator_state.js advance` is called to transitio
 
 ---
 
-## 10. Sign-Off
+## 11. Post-02i Architecture: Self-Learning Engine & Memory Security Governance (Round Table 2026-08-19)
 
-**@founder (Elena):** APPROVED — SATISFIED (2026-08-14). Scope: authoritative project-context.md front gate with zero memory fragmentation.  
-**@architect (Vera):** APPROVED — SATISFIED (2026-08-14). Scope: fenced machine block in project-context.md preventing split-brain corruption; <500 token budget on patterns-and-conventions.md.  
-**@tech-lead (Grant):** APPROVED — SATISFIED (2026-08-14). Scope: atomic write locks and structured state injection rather than brittle raw markdown regex rewrites.  
-**@qa-engineer (Nina):** APPROVED — SATISFIED (2026-08-14). Scope: idempotent migration fixtures with rollback protection and structural compaction diff checks.  
-**@memory-controller (Mnemos):** APPROVED — SATISFIED (2026-08-14). Scope: streamlined 3-tier memory protocol without ghost directories.
+**Context & Trigger:** Round Table architectural alignment with `@ml-ai-engineer` (Kai), `@architect` (Vera), and `@security-engineer` (Victor). Codifies how Vespyr executes non-parametric continual self-learning across sessions without prompt drift, Model Autophagy Disorder (MAD), or security poisoning.
+
+### 11.1 The 3-Tier Progressive Cache Hierarchy
+
+Learning operates via non-parametric context optimization and trajectory distillation rather than runtime prompt mutation:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Tier 1: Core System Invariants (<300 tokens)                │
+│ File: artifacts/memory/project-context.md (Stack, Phase)    │
+└──────────────────────────────┬──────────────────────────────┘
+                               │ Pre-fetches
+┌──────────────────────────────▼──────────────────────────────┐
+│ Tier 2: Domain & Role Patterns (<500 tokens)                │
+│ Files: lessons-learned.md, active-decisions.md              │
+└──────────────────────────────┬──────────────────────────────┘
+                               │ On-demand query
+┌──────────────────────────────▼──────────────────────────────┐
+│ Tier 3: Episodic Archive & Task Traces (<500 tokens)        │
+│ Files: session-summaries/latest.md, archive/index.ndjson    │
+└─────────────────────────────────────────────────────────────┘
+```
+
+- **Context Budget Ceiling:** Total injected memory context is strictly capped under **1,000 tokens**, eliminating "Lost in the Middle" attention degradation and context dilution.
+- **Pattern Pre-Fetching:** On session start, `@memory-controller` pre-fetches only the Tier 2/3 heuristics relevant to the active agent's domain (`@developer` loads coding patterns; `@architect` loads ADRs; `@security-engineer` loads trust boundaries).
+
+### 11.2 The 5-Stage Trajectory Distillation Pipeline
+
+```
+[Agent Action] ──► [Execution Result]
+                          │
+                          ▼
+            [Stage 1: Deterministic Verification Gate]
+            ├─ Compiler / Test Runner (Exit Code 0)
+            ├─ Spec Linter (spec_check.js)
+            └─ AST Assertions (Only verified actions proceed)
+                          │
+             ┌────────────┴────────────┐
+             ▼                         ▼
+         [PASS]                      [FAIL]
+   (Golden Trajectory)         (Error Signature)
+             │                         │
+             └────────────┬────────────┘
+                          ▼
+          [Stage 2: Socratic Reflection & Distillation]
+          - Root Cause + Generalized Invariant + Countermeasure
+          - Conversational filler & transient debris filtered out
+                          │
+                          ▼
+          [Stage 3: Deduplication & Compaction Guard]
+          - Checks active-decisions.md & lessons-learned.md
+          - Merges recurring patterns (hit counter increment)
+                          │
+                          ▼
+          [Stage 4: Epistemic Memory Commit]
+          - Secret scrubbing + Prompt injection sanitization
+          - Appends structured Markdown entry via @memory-controller
+                          │
+                          ▼
+          [Stage 5: Just-In-Time Progressive Injection]
+          - Retrieved as passive T3 data in subsequent sessions
+```
+
+### 11.3 Memory Security Governance & Pre-Write Pipeline
+
+To prevent **Persistent Sleeper Exploits** (adversarial instructions injected into memory from untrusted external data), every write to `artifacts/memory/` passes through a deterministic security pipeline:
+
+1. **Deterministic Secret Scrubber (OWASP LLM02):** High-entropy regex scanners redact API keys, JWTs, AWS credentials (`AKIA*`), and private keys before writing to disk (`[REDACTED_SECRET]`).
+2. **Instruction-Stripping Sanitizer:** Strips prompt-injection delimiters (`<|im_start|>`, `[SYSTEM DIRECTIVE]`, `System:`), role-override instructions, and hidden markdown tags (`<!-- ... -->`).
+3. **Strict Provenance Attestation:** All entries must contain valid metadata headers (`[agent: @<name>]`, `[date: YYYY-MM-DD]`, `[domain: <TAG>]`). Unattributed writes are rejected.
+4. **Trust Hierarchy Precedence:**
+   $$\text{Tier 0 (Root Guardrails)} \gg \text{Tier 1 (Project State)} \gg \text{User Input} \gg \text{Tier 2 (Conventions)} \gg \text{Tier 3 (Learned Memory)}$$
+5. **Passive Context Encapsulation:** Injected memory is wrapped in explicit safety boundaries (`<HISTORICAL_MEMORY_DATA trust_level="T3_PASSIVE_DATA">`) instructing the LLM to treat memory strictly as reference facts, never as executable instructions.
+
+---
+
+## 12. Sign-Off & Verification Status
+
+**02i execution status: COMPLETE — ALL TASKS & POST-02i HARDENINGS VERIFIED (2026-08-19).**
+
+**Sign-Off Record:**
+- **@founder (Elena):** APPROVED — SATISFIED (2026-08-14). Scope: authoritative `project-context.md` front gate with zero memory fragmentation.
+- **@architect (Vera):** APPROVED — SATISFIED (2026-08-19). Scope: 3-tier progressive cache, fenced machine block in `project-context.md`, `<1,000` token budget ceiling, and atomic file locking.
+- **@tech-lead (Grant):** APPROVED — SATISFIED (2026-08-14). Scope: atomic write locks (`memory_write.js`), idempotent migration fixtures, and structured state injection.
+- **@qa-engineer (Nina):** APPROVED — SATISFIED (2026-08-14). Scope: idempotent migration fixtures with rollback protection and structural compaction diff checks.
+- **@security-engineer (Victor):** APPROVED — SATISFIED (2026-08-19). Scope: write-time credential scrubbing (`scrubSecrets`), injection sanitization (`sanitizeContent`), and passive T3 context encapsulation.
+- **@ml-ai-engineer (Kai):** APPROVED — SATISFIED (2026-08-19). Scope: 3-signal mathematical deduplication ensemble ($S_{\text{word}}, S_{\text{ngram}}, S_{\text{exact}}$) and 5-stage trajectory distillation lifecycle.
+- **@memory-controller (Mnemos):** APPROVED — SATISFIED (2026-08-19). Scope: streamlined 3-tier memory protocol without ghost directories.
+
+---
+
+## 13. Master Execution Checklist & TODOs
+
+### Phase 1 Memory Consolidation (Core Tasks)
+- [x] **Task 1.1:** Update `orchestrator_state.js` for atomic state writes within machine block fences.
+- [x] **Task 1.2:** Implement stack and git branch auto-detection in `orchestrator_state.js`.
+- [x] **Task 1.3:** Add phase-boundary compaction trigger in `orchestrator_state.js advance`.
+- [x] **Task 1.4:** Update `memory_filter.js` for 3-tier consolidated layout (<1,000 tokens).
+- [x] **Task 2.1:** Author `migrate_memory_v2.js` merging `agent-notes/` into `patterns-and-conventions.md`.
+- [x] **Task 2.2:** Purge `pending-questions/`, `session-checkpoints/`, and legacy `agent-notes/`.
+- [x] **Task 2.3:** Update `bin/cli.js` `scaffoldArtifacts()` for 6-file memory layout.
+- [x] **Task 3.1:** Scrub all 20 `.agents/agents/*.md` personas of dead memory folder paths.
+- [x] **Task 3.2:** Update `.agents/skills/` step files to reference streamlined memory layout.
+- [x] **Task 3.3:** Update documentation (`AGENTS.md`, `workflow.md`, `skills.md`).
+- [x] **Task 3.4:** Author deterministic migration test fixtures & concurrent write stress tests.
+
+### Post-02i Security & Self-Learning Invariants
+- [x] **Task 11.1:** Implement pre-write secret scrubbing (`scrubSecrets()`) in `memory_write.js`.
+- [x] **Task 11.2:** Implement prompt injection & instruction-stripping sanitization (`sanitizeContent()`).
+- [x] **Task 11.3:** Implement 3-signal similarity ensemble ($S_{\text{word}}, S_{\text{ngram}}, S_{\text{exact}}$) in `dedupe_validator.js`.
+- [x] **Task 11.4:** Wrap injected context in passive T3 data boundaries (`<HISTORICAL_MEMORY_DATA>`).
+- [x] **Task 11.5:** Implement zero-loss archival sharding to `artifacts/memory/archive/index.ndjson`.
+
+
+
 

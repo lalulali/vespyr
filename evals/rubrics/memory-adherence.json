@@ -1,0 +1,31 @@
+{
+  "dimension": "memory_adherence",
+  "name": "Memory & Workflow Adherence Rubric",
+  "description": "Evaluates memory persistence fidelity, token budget ceilings (<500 tok), and machine state preservation.",
+  "passThreshold": 4,
+  "criteria": [
+    {
+      "id": "MEM-1",
+      "name": "Session Persistence Protocol Followed",
+      "weight": 2,
+      "requiredPatterns": [
+        "session-write|session_start|orchestrator_state|memory_filter|active-decisions|lessons-learned"
+      ]
+    },
+    {
+      "id": "MEM-2",
+      "name": "Machine State Fence Preservation",
+      "weight": 2,
+      "prohibitedPatterns": [
+        "clobbered BEGIN MACHINE STATE",
+        "deleted runtime state"
+      ]
+    },
+    {
+      "id": "MEM-3",
+      "name": "Lean Memory Footprint",
+      "weight": 1,
+      "minWordCount": 30
+    }
+  ]
+}

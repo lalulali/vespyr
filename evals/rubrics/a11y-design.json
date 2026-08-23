@@ -1,0 +1,32 @@
+{
+  "dimension": "a11y_design",
+  "name": "Design & A11y Adherence Rubric",
+  "description": "Evaluates screen state matrix coverage and WCAG accessibility standards.",
+  "passThreshold": 4,
+  "criteria": [
+    {
+      "id": "A11Y-1",
+      "name": "Screen State Completeness",
+      "weight": 2,
+      "requiredPatterns": [
+        "empty|loading|error|success|state"
+      ]
+    },
+    {
+      "id": "A11Y-2",
+      "name": "WCAG AA Contrast & Semantics",
+      "weight": 2,
+      "requiredPatterns": [
+        "wcag|aria|contrast|keyboard|focus|label|semantic"
+      ]
+    },
+    {
+      "id": "A11Y-3",
+      "name": "Consistent Design Token Usage",
+      "weight": 1,
+      "requiredPatterns": [
+        "token|color|spacing|typography|theme"
+      ]
+    }
+  ]
+}

@@ -3,14 +3,23 @@
   "version": "2.0.7",
   "description": "AI agent team installer — 20 specialized personas for product development",
   "bin": {
-    "vespyr": "bin/cli.js"
+    "vespyr": "bin/cli.js",
+    "vespyr-eval": "bin/vespyr-eval.js"
   },
   "files": [
     "bin/",
-    ".agents/"
+    ".agents/",
+    "tools/",
+    "evals/"
   ],
   "scripts": {
-    "test": "node --test tests/test_cli.js",
+    "test": "node --test tests/test_cli.js tests/test_eval_harness.js tests/test_memory_consolidation.js",
+    "eval": "node bin/vespyr-eval.js run",
+    "eval:agents": "node bin/vespyr-eval.js run --suite agents/core-swarm",
+    "eval:skills": "node bin/vespyr-eval.js run --suite skills/delivery",
+    "eval:tier0": "node bin/vespyr-eval.js run --tier0",
+    "eval:invariants": "node bin/vespyr-eval.js run --suite invariants/grill-me-spcp",
+    "eval:baseline": "node bin/vespyr-eval.js record-baseline",
     "sync-docs": "node bin/cli.js --sync-docs",
     "validate:frontmatter": "node .agents/scripts/validate_frontmatter.js",
     "worktree:create": "node .agents/scripts/worktree.js create",
