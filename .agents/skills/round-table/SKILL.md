@@ -47,7 +47,7 @@ No-Subagent Harness Fallback: when the active harness cannot spawn subagents, pe
 
 ## Stage-Aware Agent Selection
 
-Select 2-4 agents whose expertise matches the user's topic or the current stage of development. 
+Select 2-5 agents whose expertise matches the user's topic or the current stage of development. 
 
 ### Recommended Rosters by Phase
 
@@ -87,8 +87,12 @@ Roundtable discussions enforce true perspective collision where agents are manda
 
 ### Phase 1: Position Stating (Scatter & Verdict Gate)
 - **Unconditioned parallel subagent dispatch** (no anchor bias, unconditioned priors).
-- **Prompt Sanitization Rule:** The orchestrator MUST prompt each panelist to evaluate the premise against first principles and issue an explicit **Verdict: `[KILL]`, `[PIVOT]`, or `[PASS]`**. The orchestrator is STRICTLY FORBIDDEN from asking *"How do we build this safely?"* or *"What is the blueprint if the user insists?"*
-- **Zero-Blueprint-on-KILL:** Any agent issuing `[KILL]` must state the technical autopsy and stop. They are forbidden from drafting compromise options or implementation workarounds.
+- **Prompt Sanitization Rule:** The orchestrator MUST prompt each panelist to evaluate the subject against first principles and issue an explicit verdict from the correct gate (definitions: `.agents/references/vespyr-dna.md`):
+  - **Decision Gate — proposals, ideas, designs under stress-test:** `[PASS]` / `[PIVOT]` / `[KILL]`.
+  - **Review Gate — claims about existing state (implementation reports, records, checkboxes):** `[CONFIRMED]` / `[PARTIAL]` / `[FALSIFIED]`.
+  
+  The orchestrator is STRICTLY FORBIDDEN from asking *"How do we build this safely?"* or *"What is the blueprint if the user insists?"*
+- **Zero-Blueprint-on-KILL / Zero-Consumption-on-FALSIFIED:** An agent issuing `[KILL]` states the technical autopsy and stops — no compromise options or implementation workarounds. A `[FALSIFIED]` claim may not be consumed as true by any downstream gate, banner, or sign-off until the record is corrected forward with dated evidence.
 - Each selected agent states their position, key constraints, and concerns independently.
 
 ### Phase 2: Targeted Pairwise Cross-Examination (Exchange & Attack)
@@ -120,7 +124,7 @@ When the user replies, questions, or steers the conversation in subsequent turns
 
 2. **Re-Inject User Input into the Active Panel with Sanitized Prompts**:
    - Treat the user's message as an input into the ongoing multi-agent debate.
-   - **In native subagent mode**: Pass the user's latest inquiry and prior context to the panel subagents for independent evaluation under the `[KILL / PIVOT / PASS]` Verdict Gate.
+   - **In native subagent mode**: Pass the user's latest inquiry and prior context to the panel subagents for independent evaluation under the applicable gate — Decision (`[KILL]`/`[PIVOT]`/`[PASS]`) for proposals, Review (`[FALSIFIED]`/`[PARTIAL]`/`[CONFIRMED]`) for claims about existing state.
    - **In `--solo` mode**: Continue roleplaying each panelist sequentially under their explicit headers (e.g. `### @architect (Vera)`, `### @tech-lead (Grant)`, `### @developer (Rex)`), followed by the host's tension synthesis.
 
 3. **Panelists Directly Engage, Challenge & Debate**:

@@ -15,7 +15,7 @@
 
 | Differentiator | Cost Impact | Quality Impact |
 |---|---|---|
-| **Socratic methodology depth** — every agent declares what it challenges. `/grill-me` runs a 7+1-branch decision tree. | Catches hidden assumptions *before* code is written — preventing expensive rewrites. | Architectural conflicts and edge cases surfaced by design, not caught in review. |
+| **Socratic methodology depth** — every agent declares what it challenges. `/grill-me` runs an eight-move interrogation frame. | Catches hidden assumptions *before* code is written — preventing expensive rewrites. | Architectural conflicts and edge cases surfaced by design, not caught in review. |
 | **3-tier progressive memory** — context loads in tiers (core → agent-specific → task-relevant), with proactive pattern pre-fetch. | No context bloat from loading everything. No amnesia from loading nothing. | Agents get relevant past decisions, patterns, and risks without context window flooding. |
 
 ---

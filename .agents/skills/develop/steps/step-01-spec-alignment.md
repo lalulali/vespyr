@@ -1,4 +1,7 @@
 ---
+
+> **Intent gate:** if the spec's premise is ambiguous, conflicting, or drives multi-day work, escalate to `/grill-me` before alignment continues (Intent Escalation Ladder Level 3 — `vespyr-dna.md`). Single clarifying questions stay at Levels 0–2.
+
 step: 1
 name: Spec Alignment & Read Check
 prerequisites:

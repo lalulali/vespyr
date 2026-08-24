@@ -2,6 +2,7 @@
 
 const fs = require("fs");
 const path = require("path");
+const { detectStack } = require("./lib/detector.js");
 const os = require("os");
 const readline = require("readline");
 
@@ -449,7 +450,7 @@ function transpileCursorMDC(agentsDir, outputDir) {
 	}
 }
 
-function scaffoldArtifacts(targetDir, projectName, userNickname = "User") {
+function scaffoldArtifacts(targetDir, projectName, userNickname = "User", stack = null) {
 	const artifactsDir = path.join(targetDir, "artifacts");
 	if (fs.existsSync(artifactsDir)) {
 		log("  Existing artifacts/ found, skipping.");
@@ -503,7 +504,7 @@ function scaffoldArtifacts(targetDir, projectName, userNickname = "User") {
 
 ## [CORE]
 Project: ${projectName} (startup)
-Stack: None
+Stack: ${stack || "None"}
 Phase: validation
 Sprint: none
 Blockers: 0
@@ -513,7 +514,7 @@ User Nickname: ${userNickname}
 
 <!-- BEGIN MACHINE STATE -->
 ## [RUNTIME STATE]
-- Stack: None
+- Stack: ${stack || "None"}
 - Git Branch: none
 - Active Phase: validation
 - Active Sprint: none
@@ -531,7 +532,7 @@ _(auto-populated on every session by @memory-controller / orchestrator_state.js)
 - **Created**: ${isoDate}
 
 ## Technical
-- **Stack**: None (Starting from scratch)
+- **Stack**: ${stack ? stack : "None (Starting from scratch)"}
 - **Architecture**: Not yet defined
 - **Constraints**: None recorded
 
@@ -1588,8 +1589,14 @@ async function performFreshInstall(targetDir, flags) {
 	writeVersionFile(targetDir);
 	writeManifest(targetDir);
 
-	const projectName = path.basename(targetDir);
-	scaffoldArtifacts(targetDir, projectName, userNickname);
+	const projectName = flags.projectName || path.basename(targetDir);
+	if (flags.userNickname) {
+		userNickname =
+			flags.userNickname.replace(/[^a-zA-Z0-9\s\-_.]/g, "") || "User";
+	}
+	const resolvedStack = flags.stack || detectStack(targetDir);
+	log(`  Stack: ${resolvedStack}${flags.stack ? " (--stack)" : " (auto-detected)"}`);
+	scaffoldArtifacts(targetDir, projectName, userNickname, resolvedStack);
 	installGitHook(targetDir);
 	bootstrapRootDocs(targetDir, projectName, selections);
 	performSyncDocs(targetDir);

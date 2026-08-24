@@ -1103,7 +1103,7 @@ The skill checks what artifacts exist and adapts — no mode selector needed:
 1. **Context Scan** — detect existing artifacts, load memory, set context variables (`hasValidation`, `hasResearch`, `isReshape`). Routes subsequent step depth.
 2. **Intake & Structure** — parse user's input (any format: doc, notes, pitch, verbal) into a structured draft with: problem statement, proposed solution, target user, key assumptions, scope boundaries, constraints.
 3. **Gap Analysis** — completeness check (who/what/why/how/what-not), assumption audit (verified/plausible/unverified), dependency scan, scope creep detector. Cross-references research findings if available. Outputs gap report with severity (blocker/should-fix/nice-to-know).
-4. **Stress-Test** — focused Socratic stress-test with 5 areas: viability, edge cases, scope vs. value, risk surface, competition with status quo. Lighter than `/grill-me` (no 7+1 branch tree, escape hatch after 3 questions). One question at a time.
+4. **Stress-Test** — focused Socratic stress-test with 5 areas: viability, edge cases, scope vs. value, risk surface, competition with status quo. Lighter than `/grill-me` (no eight-move interrogation frame, escape hatch after 3 questions). One question at a time.
 5. **Decision Alignment** — resolve every open gap/finding into a decision or explicit deferral. Each deferral has: reason, unblock condition, tracking location. Writes to `active-decisions.md`.
 6. **Handoff** — write `artifacts/output/01-discovery/shaped-brief.md`. Route: if all assumptions verified → `design`; if unverified assumptions need research → `explore-idea`; if fundamental viability concern → `validate-idea`.
 

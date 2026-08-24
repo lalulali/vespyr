@@ -574,7 +574,8 @@ These skills form the backbone of the product and game development lifecycle. Sk
 | Skill | Phase | Primary Agents | Key Output / Description |
 |-------|-------|----------------|--------------------------|
 | `brainstorming` | Any | @founder, @product-designer | 60-method ideation catalog (SCAMPER, Six Hats, Starbursting, etc.) |
-| `grill-me` | Pre-design | Harness / Any | Relentless 7+1 branch Socratic alignment and stress-testing interview |
+| `grill-me` | Pre-design | Harness / Any | Relentless eight-move universal Socratic stress-test — any plan, program, or decision |
+| `shut-up` | Execution / Any | Harness / Any | One-shot silent execution mode — zero unsolicited critique, ultra-minimal output |
 
 ### 8.4 Data & Analytics
 

@@ -16,6 +16,7 @@
  */
 
 const fs = require('fs');
+const { writeFileSync: atomicWriteFileSync, writeJsonSync: atomicWriteJson } = require('./lib/fs_atomic.js');
 const path = require('path');
 
 const SCHEMA_VERSION = '1.0';
@@ -40,10 +41,9 @@ function readJson(filePath) {
 }
 
 function writeJsonAtomic(filePath, data) {
-  ensureDir(filePath);
-  const tempPath = filePath + '.tmp';
-  fs.writeFileSync(tempPath, JSON.stringify(data, null, 2) + '\n', 'utf8');
-  fs.renameSync(tempPath, filePath);
+  // Delegates to the shared crash-safe helper (02h WS-5): tmp+rename with
+  // EXDEV/EPERM fallback and temp cleanup on failure.
+  atomicWriteJson(filePath, data);
 }
 
 function validateSchema(data) {
@@ -242,7 +242,7 @@ function mergeIndexes(oursPath, theirsPath, outPath) {
       created: merged.created,
       last_updated: merged.last_updated
     });
-    fs.writeFileSync(outPath, header + '\n', 'utf8');
+    atomicWriteFileSync(outPath, header + '\n');
     for (const entry of merged.entries) {
       fs.appendFileSync(outPath, JSON.stringify(entry) + '\n', 'utf8');
     }
@@ -305,7 +305,7 @@ function appendNdjson(filePath, entry) {
   // Write header if file doesn't exist
   if (!fs.existsSync(filePath)) {
     const header = JSON.stringify({ schema_version: SCHEMA_VERSION, created: new Date().toISOString().split('T')[0], last_updated: new Date().toISOString().split('T')[0] }) + '\n';
-    fs.writeFileSync(filePath, header, 'utf8');
+    atomicWriteFileSync(filePath, header);
   }
 
   // Append entry as single line
@@ -369,7 +369,7 @@ function migrateJsonToNdjson(fromPath, toPath) {
   }) + '\n';
 
   ensureDir(toPath);
-  fs.writeFileSync(toPath, header, 'utf8');
+  atomicWriteFileSync(toPath, header);
 
   // Write each entry as a line
   for (const entry of entries) {

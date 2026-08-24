@@ -107,7 +107,7 @@ Every reasoning agent has a `## Socratic Stance` section declaring:
 - **What "change my mind" looks like** — what evidence it accepts
 - **When to escalate** — when to bring in another agent
 
-The `/grill-me` skill runs a 7+1-branch decision tree that stress-tests every assumption before a single line of code is written. It's not adversarial — it's structured skepticism backed into every agent.
+The `/grill-me` skill runs an eight-move interrogation frame that stress-tests every assumption before anything is committed. It's not adversarial — it's structured skepticism backed into every agent.
 
 ## Core Behavioral Guidelines
 

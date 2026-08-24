@@ -36,6 +36,7 @@
 'use strict';
 
 const fs = require('fs');
+const { writeFileSync: atomicWriteFileSync } = require('./lib/fs_atomic.js');
 const path = require('path');
 const { execFileSync } = require('child_process');
 
@@ -229,7 +230,7 @@ Allowed domains: ${[...VALID_DOMAINS].join(', ')}`);
   // Initialize file with a header if it doesn't exist
   if (!fs.existsSync(filePath)) {
     const header = `# ${path.basename(file, '.md').replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}\n\n`;
-    fs.writeFileSync(filePath, header, 'utf8');
+    atomicWriteFileSync(filePath, header);
   }
 
   fs.appendFileSync(filePath, '\n' + entry, 'utf8');

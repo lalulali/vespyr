@@ -117,7 +117,7 @@ Skills are invoked via `/skill-name` or by referencing `.agents/skills/[name]/SK
 
 ### 🧭 Swarm Co-Pilot & Challenge
 - **`/help-me`**: Conversational project navigator and recommended slash command router.
-- **`/grill-me`**: Relentless 7+1 branch Socratic alignment and stress-testing interview.
+- **`/grill-me`**: Relentless eight-move universal Socratic stress-testing interview.
 - **`/humanize`**: AI-writing tell detector and style normalizer.
 - **`/elicitation`**: 98-method deep critique and refinement flow (Socratic, pre-mortem, red-team).
 - **`/round-table`**: Orchestrated multi-agent panel discussions across development stages.

@@ -29,6 +29,8 @@ If entering from `explore-idea`, all research artifacts should exist. If any are
 These personas are invoked by step files. The router declares them so the agent knows which reasoning personas are active for this skill before loading steps.
 
 ## Harness adherence (non-negotiable)
+> **Intent gate:** entering Create mode on an unvalidated idea at a commitment gate (budget/headcount/calendar about to be committed)? Escalate to `/grill-me` first (Intent Escalation Ladder Level 3 — `vespyr-dna.md`). Ordinary ambiguities stay at Levels 0–2.
+
 - Follow the step sequence for the selected mode exactly. Do NOT skip steps or reorder them.
 - Each step file is a contract. Read it fully before executing. Step files override general guidelines.
 - Mode detection is automatic. The router decides create/edit/validate. Do NOT ask the user which mode unless the intent is genuinely ambiguous.

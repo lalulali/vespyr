@@ -13,7 +13,7 @@
     "evals/"
   ],
   "scripts": {
-    "test": "node --test tests/test_cli.js tests/test_eval_harness.js tests/test_memory_consolidation.js",
+    "test": "node tests/run-all.js",
     "eval": "node bin/vespyr-eval.js run",
     "eval:agents": "node bin/vespyr-eval.js run --suite agents/core-swarm",
     "eval:skills": "node bin/vespyr-eval.js run --suite skills/delivery",

@@ -4,7 +4,7 @@ All notable changes to the Vespyr project will be documented in this file.
 
 ---
 
-## [2.0.7] - 2026-08-18
+## [2.0.7] - 2026-08-24
 
 ### Core DNA & Anti-Sycophancy Hardening
 - Codified **Prohibition of Functional Sycophancy ("Preach Then Comply")**: strictly forbidden from emitting cautionary warnings while still generating implementation plans, options, or workarounds for a flawed premise.
@@ -28,6 +28,54 @@ All notable changes to the Vespyr project will be documented in this file.
 - **Single Live Cursor:** Designated `artifacts/memory/session-summaries/latest.md` as the single authoritative rolling live cursor.
 - **Swarm Reference Scrubbing:** Updated all 20 agent personas, skill steps, templates, CLI scaffolder, and reference documentation to remove dead memory paths.
 - **Verification Harness:** Added `tests/test_memory_consolidation.js` with 81/81 automated tests passing across the suite.
+
+### Security & Integrity Implementation (02f Downstream)
+- Implemented **fail-closed `vespyr verify`** with FAULT-5 bootstrap semantics (missing manifest → exit 2, zero side effects), unsigned pinned-manifest interim position per ADR-002 §2.1.1, and added-file detection via reverse-walk.
+- Shipped `.agents/scripts/check_new_findings.js` — the first mechanical enforcement of the NEW-FINDINGS-ONLY gate (DoD #8) against a frozen, scanner-hash-pinned baseline corpus (`125` findings).
+- Added `.github/workflows/security.yml`: scanner + corpus + fault-injection suite on an ubuntu+windows matrix, no `pull_request_target`, read-only fork PR tokens.
+- Landed `validate_frontmatter.js` permission-whitelist enforcement and `validate_matrix.js` (P8 tool-addition gate).
+- Implemented T3 loader-boundary enforcement and `memory_filter.js` read-path changes (provenance-tagged reads, instruction-pattern rejection with quarantine + alert fallback).
+- Added `drift_monitor.js` (R47 hash-history drift detection stub) over the `.agents/` baseline.
+- Fresh post-fix security audit **APPROVED—SATISFIED** (2026-08-23): all blocking findings closed with behavioral probes; tracked residuals owned and dated.
+
+### Evaluation Framework
+- Added an extensible evaluation framework (`bin/vespyr-eval.js`): rubric-driven suites, test fixtures, and a CLI runner (`npm run eval*`) covering agents, skills, and invariants — including the `grill-me-spcp.json` adversarial trap suite.
+
+### Harness & Engine Features
+- Kiro harness scaffolding (steering emission + `.kiro/skills` symlink) and automated root-doc regeneration from canonical templates.
+- Manifest-based agent management and TOML parser overhaul (inline tables, multiline arrays) enabling custom agent declarations.
+- Agent permission-control system with security principles mandated across personas.
+
+### Record Integrity Recovery & Governance (Epic 02m)
+- Round-table forensic audits **falsified ~54 falsely-stamped checkboxes** across Phase-1 dev plans; 02g's "EXECUTED" stamp was `[KILL]`ed via git archaeology (an honest PARTIALLY-EXECUTED state had been silently reverted inside a mislabeled typo-fix commit).
+- Adopted the **mechanical-evidence standard**: every checkbox carries an adjacent reproducible command; closure banners prohibited until reconciliation; binding single-writer execution mandate.
+- Corrected 02h's completion record forward with a `[FALSIFIED]` banner and VOID-ab-initio notice on its birth-committed sign-offs; captured and reverted a live concurrent-session manifest clobber (R56).
+- Authored and git-tracked `02m-phase-1-record-integrity-recovery.md` (previously invisible to archaeology — R57).
+
+### Verdict Vocabulary Split — Decision Gate vs Review Gate
+- Split the single Verdict Gate into the **Decision Gate** (`[PASS]` proceed | `[PIVOT]` redirect | `[KILL]` abandon-and-find-another) for ideas/proposals and the **Review Gate** (`[CONFIRMED]` | `[PARTIAL]` | `[FALSIFIED]`) for claims about existing state — decision vocabulary applied to a claim audit read as "kill the epic" when only the claim died.
+- Codified the **Zero-Consumption-on-FALSIFIED Invariant** alongside Zero-Blueprint-on-KILL across all six DNA-surface documents; fixtures now fail if superseded single-gate wording resurfaces anywhere.
+
+### `/grill-me` v3.0 — Universal Interrogation Frame
+- Replaced engineering-instance branches with **eight universal interrogation moves** (Premise & Purpose → Reduction & Scope Lock), each instantiated at runtime against the subject's own ground-truth material — software remains the default worked example; non-software subjects (training programs, strategies, decisions) are first-class.
+- Added **Step 0 Subject Framing** (mandatory ground-truth exploration + move instantiation before any question) and the **disposition ledger**: every move ends `EXAMINED (n)` or `SKIPPED — reason`; no third state, so coverage is auditable after the conversation.
+- Operating model codified: *rigid about coverage, flexible about conversation.* Swept 12 stale "7+1-branch" references across live documentation.
+
+### Intent Escalation Ladder
+- Codified four-level elicitation routing in `vespyr-dna.md` (Level 0 silent ground-truth → Level 1 clarifying question → Level 2 batched clarifications → Level 3 full `/grill-me` at commitment gates), referenced from every entry-point document.
+- Annotated explicit `/grill-me` intent gates in `/develop` spec-alignment and `/design` Create-mode intake.
+
+### Test Infrastructure Hardening
+- Added `tests/run-all.js`, a discovery runner executing **both** repo test conventions (`tests/test_*.js` and `test/**/*.test.js`) — the orphaned-fixture failure class (five fixtures invisible to CI, one failing red at HEAD) is structurally eliminated; wired as `npm test` with CI path-triggers extended to both trees.
+- Fixed the graph-deprecation guard (case-sensitive allowlist missed `CHANGELOG.md`) and extended its scan set to `.template` files, surfacing and removing stale `code-graph`/`doc-graph` permissions from `opencode.json.template`.
+- Replaced tautological/unfalsifiable fixtures with verifiable structural contracts (`shut-up` mock-token-counting removed; `round-table` self-substring simulation removed).
+- New suites: `test/cli/packaging.test.js` (real `npm pack --dry-run` audit + zero-missing-module require proof), `test/lib/engine-lib.test.js` (behavioral `fs_atomic`/`workspace`/`frontmatter` contracts incl. failure-path residue checks), `test/skills/grill-me.test.js`. Suite total: **145/145 passing** (up from 103).
+
+### CLI Modernization Completion (02h Residue Batch)
+- Wired previously-dead headless flags end-to-end: `--project-name`, `--user-nickname`, and `--stack` now populate generated `project-context.md`; `--stack` overrides `detectStack()` auto-detection, which is now integrated into init (multi-language manifest matrix).
+- Completed engine-script library adoption: all six named scripts consume `.agents/scripts/lib/fs_atomic.js` (zero raw `writeFileSync` remain); `archive_manager.js` gains Windows-safe EXDEV/EPERM fallback and temp cleanup.
+- Closed `/shut-up` registration gaps (`workflow.md` + template permissions).
+- Authored the 02h §10 residue remediation plan: per-harness libraries behind a static adapter registry (`bin/lib/harnesses/<shape>.js`), update-mode `.bak-${YYYYMMDD}` backups, Windows OS matrix, identity.js adoption — pending execution.
 
 ---
 

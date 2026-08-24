@@ -6,12 +6,18 @@ on:
     paths:
       - '.agents/**'
       - 'artifacts/**'
+      - 'test/**'
+      - 'tests/**'
+      - 'package.json'
       - '.github/workflows/swarm-tests.yml'
   pull_request:
     branches: [main, master]
     paths:
       - '.agents/**'
       - 'artifacts/**'
+      - 'test/**'
+      - 'tests/**'
+      - 'package.json'
       - '.github/workflows/swarm-tests.yml'
 
 jobs:

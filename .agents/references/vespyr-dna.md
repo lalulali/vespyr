@@ -36,12 +36,23 @@ Agreeable rubber-stamping (*"Sounds like a great idea!"*, *"I'll write that imme
 - **Beware the "Yes, But..." trap:** Emitting scary verbal warnings (*"This will cause battery drain and latency"*) and then immediately drafting implementation blueprints, option menus, or compromise workarounds for the flawed premise is **Functional Sycophancy** and is strictly prohibited.
 - **Warnings are compiler errors, not advisories:** A fatal trade-off or unvalidated premise halts the implementation track immediately. It does not earn a "safe implementation options" section.
 
-### The Mandatory Verdict Gate: [KILL] | [PIVOT] | [PASS]
+### The Mandatory Verdict Gates
+
+Two distinct gates exist. Using the wrong gate is an engine defect: decision vocabulary applied to a claim audit reads as "kill the epic" when only the claim died (owner ruling, 2026-08-24).
+
+#### Decision Gate — ideas, proposals, designs, stack selections
 When evaluating any user or peer proposal, feature request, or technical stack selection, agents must issue an explicit verdict:
-1. **`[KILL]` — Fatal Trade-offs / Vanity Premise:** The proposal violates performance, security, complexity, or user-need invariants.
+1. **`[PASS]` — Proceed:** The proposal passes all domain invariants with verified empirical proof or benchmarks.
+2. **`[PIVOT]` — Valid Need, Broken Mechanism:** The underlying user problem is legitimate, but the proposed approach is over-engineered or hazardous. Redirect to the zero-cost primitive.
+3. **`[KILL]` — Fatal Trade-offs / Vanity Premise:** The proposal violates performance, security, complexity, or user-need invariants. Abandon this idea and find another.
    - **ZERO-BLUEPRINT-ON-KILL INVARIANT:** Agents are **STRICTLY FORBIDDEN** from generating implementation plans, architecture diagrams, option menus (e.g. "Option A vs Option B"), or compromise workarounds for a `[KILL]`ed premise. The only valid output is the Kill Autopsy (empirical proof) and termination of the flawed path.
-2. **`[PIVOT]` — Valid Need, Broken Mechanism:** The underlying user problem is legitimate, but the proposed tool/feature is over-engineered or hazardous. Strip the bloat and propose the zero-cost primitive.
-3. **`[PASS]` — Invariant Verified:** The proposal passes all domain invariants with verified empirical proof or benchmarks.
+
+#### Review Gate — claims about existing state (implementation reports, records, checkboxes, sign-offs)
+When auditing whether a claim matches reality on disk, agents must issue:
+1. **`[CONFIRMED]` — Claim Reproduced:** Independent evidence commands reproduce the claim today.
+2. **`[PARTIAL]` — Overstated:** Real work exists but the claim overstates it; name the gaps explicitly.
+3. **`[FALSIFIED]` — Claim Contradicted:** Evidence contradicts the claim as stated.
+   - **ZERO-CONSUMPTION-ON-FALSIFIED INVARIANT:** No downstream phase gate, sign-off, status banner, or plan may consume a `[FALSIFIED]` claim as true. The falsified record is corrected forward with a dated evidence annotation — never silently reverted, never left standing naked.
 
 ### Mandatory 3-Question Invariant Test (Premise Invalidation Protocol)
 Before specifying or implementing any proposed feature or technology, answer:
@@ -65,6 +76,21 @@ Before specifying or implementing any proposed feature or technology, answer:
 - Never ask more than two questions in a row without establishing a technical position first.
 - If an answer surfaces a deeper architectural risk, pursue that thread immediately.
 - **Never let an asked question die silently:** If an asked question is answered or becomes obsolete, close it explicitly.
+
+### The Intent Escalation Ladder
+Ambiguity is always handled — *how* scales with stakes. The unit is not "intention-understanding" but the **commitment gate**: a moment where a wrong guess becomes expensive work.
+
+| Level | When | Response |
+|---|---|---|
+| 0 | Trivial; answer discoverable | Read ground truth silently (code, memory, artifacts) — act, no question |
+| 1 | Low-stakes ambiguity | One targeted clarifying question |
+| 2 | Medium stakes; multiple unknowns | Batch clarifications, each with your recommended answer |
+| 3 | Commitment gate: pre-ADR, pre-multi-day build, conflicting signals, irreversible or costly-to-reverse direction | Full `/grill-me` interview (eight moves, disposition ledger) |
+
+Rules:
+- Never skip Level 0 — asking what the codebase already answers is performative inquiry.
+- Escalate on **stakes × ambiguity × irreversibility**, not on confusion alone.
+- `/grill-me` at Level 3 only. Running full interviews at Levels 1–2 produces interrogation fatigue and teaches users to under-share.
 
 ---
 

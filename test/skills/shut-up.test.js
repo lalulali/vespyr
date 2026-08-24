@@ -16,11 +16,15 @@ describe('Skill /shut-up verification fixture', () => {
     assert.ok(body.length > 50);
   });
 
-  it('verifies output brevity (<100 tokens schema constraint)', () => {
-    // Simulated /shut-up response
-    const mockOutput = "```diff\n+export const isValidEmail = (email) => /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email);\n```\nDone: Added isValidEmail regex to auth helper.";
-    const estimatedTokens = Math.ceil(mockOutput.split(/\s+/).length * 1.3);
-    assert.ok(estimatedTokens < 100, `Estimated tokens (${estimatedTokens}) should be strictly < 100 tokens`);
+  it('pins the <100-token output ceiling and schema contract in the skill instructions', () => {
+    // Scope honesty: the token ceiling is an LLM-behavior property verified by
+    // eval suites, not by token-counting a hardcoded mock (that was a
+    // tautology). What IS mechanically verifiable is that the SKILL.md pins
+    // the ceiling and the allowed-output schema.
+    const content = fs.readFileSync(skillPath, 'utf8');
+    assert.ok(/100\s*(output\s*)?tokens/i.test(content), 'Must pin the <100 output-token ceiling');
+    assert.ok(/diff|file tool calls|shell command/i.test(content), 'Schema contract must name allowed output forms');
+    assert.ok(!/mockOutput/.test(fs.readFileSync(__filename, 'utf8').split('Scope honesty')[0]), 'no self-referential mocks');
   });
 
   it('asserts destructive confirmation gate rule is present in instructions', () => {

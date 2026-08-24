@@ -236,10 +236,9 @@
   },
   {
     "name": "grill-me",
-    "description": "Runs a 7+1-branch Socratic decision tree that stress-tests requirements, specs, and architecture choices one assumption at a time — until you can articulate the decision tree in writing. Output is a decision log that survives the conversation. Use when you want to be grilled on a plan, design, or idea before committing.",
+    "description": "Relentless Socratic stress-test interview that uncovers truth and surfaces unseen risks in ANY plan, design, program, strategy, or decision — software or not. Runs an eight-move interrogation frame with dynamic ordering and auditable coverage. Use when you want to be grilled on anything before committing.",
     "prerequisites": [
-      "A concrete artifact to interrogate (plan, spec, architecture, hypothesis, design)",
-      "If no artifact exists, run /validate-idea first to produce a brief"
+      "A concrete artifact to interrogate (plan, spec, architecture, hypothesis, design, curriculum, proposal)"
     ],
     "outputs": [
       "artifacts/memory/active-decisions.md",

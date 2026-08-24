@@ -2,6 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { writeFileSync: atomicWriteFileSync } = require('./lib/fs_atomic.js');
 
 const ROOT = path.resolve(__dirname, '..', '..');
 const CANONICAL_PATH = path.join(ROOT, '.agents', 'templates', 'system', 'AGENTS.md.canonical');
@@ -69,7 +70,7 @@ function main() {
       continue;
     }
 
-    fs.writeFileSync(outPath, content, 'utf-8');
+    atomicWriteFileSync(outPath, content);
     console.log(`OK: ${path.relative(ROOT, outPath)} (dotfolder: ${target.dotfolder})`);
   }
 

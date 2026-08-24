@@ -51,8 +51,10 @@ function scanDirectory(dir) {
     const stat = fs.statSync(full);
     if (stat.isDirectory()) {
       violations = violations.concat(scanDirectory(full));
-    } else if (stat.isFile() && (full.endsWith('.js') || full.endsWith('.md') || full.endsWith('.canonical') || full.endsWith('.json'))) {
-      if (ignoredFiles.some(ign => full.includes(ign))) continue;
+    } else if (stat.isFile() && ['.js', '.md', '.canonical', '.json', '.template'].some(ext => full.endsWith(ext))) {
+      // Case-insensitive ignore matching: the allowlist must not silently miss
+      // real files due to filename casing (CHANGELOG.md vs changelog.md).
+      if (ignoredFiles.some(ign => full.toLowerCase().includes(ign.toLowerCase()))) continue;
       const content = fs.readFileSync(full, 'utf8');
       for (const pattern of forbiddenPatterns) {
         if (content.includes(pattern)) {

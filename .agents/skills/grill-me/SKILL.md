@@ -1,107 +1,97 @@
 ---
 name: grill-me
-description: Runs a 7+1-branch Socratic decision tree that stress-tests requirements, specs, and architecture choices one assumption at a time — until you can articulate the decision tree in writing. Output is a decision log that survives the conversation. Use when you want to be grilled on a plan, design, or idea before committing.
+description: Relentless Socratic stress-test interview that uncovers truth and surfaces unseen risks in ANY plan, design, program, strategy, or decision — software or not. Runs an eight-move interrogation frame with dynamic ordering and auditable coverage. Use when you want to be grilled on anything before committing.
 metadata:
-  version: "2.0"
-  last_updated: "2026-07-10"
+  version: "3.0"
+  last_updated: "2026-08-24"
 ---
 
-# Grill-Me — Socratic Stress-Test Loop
+# Grill-Me — Universal Socratic Stress-Test
 
 ## What this skill does
 
-Runs a relentless Socratic interview, branch by branch, until the user can articulate the decision tree in writing. Every assumption gets challenged. Every trade-off gets documented. The output is a decision log that survives the conversation.
+Runs a relentless Socratic interview over any plan, design, program, strategy, or decision — code or curriculum, product or policy. Eight interrogation moves guarantee nothing load-bearing goes unexamined; dynamic conversation order keeps the interview humane. Every move ends explicitly dispositioned in a decision log that survives the session.
+
+**Operating model: rigid about coverage, flexible about conversation.** The frame is a checklist the interviewer clears — not a script the user endures.
 
 ## When to use
 
-- User says "grill me on this plan/architecture/spec/idea"
-- Before /validate-idea exits the loop phase
+- User says "grill me on this …" — a plan, architecture, spec, training program, business idea, hiring decision, migration, launch, policy
+- Before `/validate-idea` exits the loop phase
 - Before any ADR is written (forces decisions to be explicit)
-- After /design produces a PRD (sanity check before /develop)
+- After `/design` produces a PRD (sanity check before `/develop`)
+- Before committing budget, headcount, or calendar to any non-software program
 
 ## When NOT to use
 
-- For open-ended brainstorming (use /validate-idea first)
-- For technical debugging (use /incident instead)
-- For retrospective analysis (use /retro instead)
+- For open-ended brainstorming (use `/validate-idea` first)
+- For technical debugging (use `/incident` instead)
+- For retrospective analysis (use `/retro` instead)
 
 ## Prerequisites
 
-- A concrete artifact to interrogate (plan, spec, architecture, hypothesis, design)
-- If no artifact exists, run /validate-idea first to produce a brief
+- A concrete artifact to interrogate (plan, spec, architecture, hypothesis, design, curriculum, proposal)
+- Its **ground-truth material** — for software: the actual codebase; for anything else: existing documents, data, metrics, prior attempts, audience information. If none exists, ask for the closest thing before starting; a grill without ground truth is opinions trading punches.
 
-## The 7+1 decision tree
+## The eight moves
 
-1. **Product requirements** — who is the user, what job are they hiring this for, how will we know it worked?
-   - *"If the user couldn't use this feature at all, what would they do instead?"*
-   - *"Is this solving a real pain point or a hypothetical one?"*
-   - *"What behavior change are we trying to drive — and is this the simplest way to drive it?"*
+Each move is an interrogation **function**, not an engineering artifact. The software probes below are the default worked example — before interviewing, instantiate every move in the subject's own terms (Step 0).
 
-2. **Architecture trade-offs** — what did we choose, what did we reject, why is the chosen option reversible (or not)?
-   - *"If we had to rip this out in 6 months, how painful would that be?"*
-   - *"What's the one alternative you considered and rejected — and why specifically?"*
-   - *"Does this decision lock us into any vendor, pattern, or constraint we can't escape?"*
+| # | Move | Function | Default probes (software) |
+|---|---|---|---|
+| 1 | **Premise & Purpose** | Is the underlying need real — measured or assumed? Is this an XY distraction? | *"If the user couldn't use this feature at all, what would they do instead?"* · *"Real pain point or hypothetical?"* · *"What's the underlying problem the stated solution masks?"* |
+| 2 | **Mechanism & Structure** | How exactly does this cause the outcome? Where are the seams and boundaries? | *"If we ripped this out in 6 months, how painful?"* · *"Does this reach across a layer it shouldn't know about?"* · *"Which alternative did you reject, and why specifically?"* |
+| 3 | **State & Consistency** | What must stay true throughout — and where can it corrupt? | *"What becomes inconsistent if this crashes midway?"* · *"What invariant must hold after every operation, and what restores it?"* · *"Which data-shape/timing/ordering assumption is still unverified?"* |
+| 4 | **Consequences & Second-Order Effects** | What else moves when this moves? | *"Which 3 places have the highest blast radius — dependents checked?"* · *"What happens when the dependency is down 30 min? A day?"* · *"What existing behavior changes — intentionally or accidentally?"* |
+| 5 | **Adversarial & Exposure** | What can attack, game, abuse, or leak through this? | *"Where does untrusted input enter — every path escaped/parameterized?"* · *"What secrets/PII could reach logs, errors, responses?"* · *"What's the auth check on every action — including 'internal-only' ones?"* |
+| 6 | **Failure & Recovery** | When it breaks mid-flight, what then? | *"How would we know it's going badly before users tell us?"* · *"Is there a retry/idempotency story — or can retries duplicate effects?"* · *"Crash mid-operation: clean resume, manual repair, or corruption?"* |
+| 7 | **Cost & Sustainability** | Marginal cost at 10x and 100x — sustainable? | *"Cost per unit/request/user at 100x volume?"* · *"What ongoing maintenance burden does this create?"* · *"If this lands 3x late, what's cut first?"* |
+| 8 | **Reduction & Scope Lock** | Can 80% of the value ship in a day? Who actually asked for the rest? | *"Smallest increment that still delivers value — and how long?"* · *"Which part is speculative just-in-case engineering — who requested it?"* · *"What metric proves it was worth building?"* |
 
-3. **Edge cases** — what happens at N=0, N=∞, at the failure mode of every external dependency?
-   - *"What happens when the external API is down for 30 minutes? An hour? A day?"*
-   - *"What does the empty state look like — and is it intentional or an oversight?"*
-   - *"What's the maximum input size this needs to handle — and what breaks first when we exceed it?"*
+### Worked instantiation — a training program (non-software)
 
-4. **Codebase logic** — where does this touch existing code, what does it assume, what assumptions are still unverified?
-   - *"Which 3 files have the highest blast radius from this change — have you checked their dependents?"*
-   - *"What existing behavior does this change — intentionally or accidentally?"*
-   - *"Is there an assumption about data shape, timing, or ordering that hasn't been verified in the actual code?"*
-
-5. **Cost & timeline** — what does this cost, what's the rollback plan, what's the off-ramp if it's wrong?
-   - *"If this takes 3x longer than estimated, what's the first thing we cut?"*
-   - *"What's the smallest increment we can ship that still delivers value — and how long does that take?"*
-   - *"What ongoing maintenance cost does this introduce?"*
-
-6. **Risks** — what's the worst plausible outcome, what's the second-worst, how do we detect each?
-   - *"If this goes badly, how will we know before users tell us?"*
-   - *"What's the blast radius if this fails — does it take down other systems or is it contained?"*
-   - *"Is there a compliance, legal, or regulatory angle we haven't considered?"*
-
-7. **Success criteria** — what does done look like, measured how, by when, for whom?
-   - *"What metric moves when this ships — and by how much is considered success vs. failure?"*
-   - *"Who declares this 'done' — and do they agree on what 'done' means?"*
-   - *"What's the counter-metric — the thing we're willing to sacrifice for this improvement?"*
-
-8. **Open floor** — what haven't we covered? Any concern, observation, or request that doesn't fit branches 1-7. The user sets the topic; you drill into it with the same Socratic rigor as a formal branch.
-   - *"What's the one thing you're still worried about that we haven't discussed?"*
-   - *"If you were the person inheriting this 6 months from now, what would you wish we'd documented?"*
-   - *"Is there a stakeholder or team we haven't consulted whose input would change this?"*
+| Move | Instantiated question |
+|---|---|
+| 1 Premise & Purpose | Is the skills gap measured, or assumed? Who says training solves it rather than better tooling or hiring? |
+| 2 Mechanism & Structure | Does this module sequence actually *cause* retention — or just attendance? |
+| 3 State & Consistency | Which prerequisite chains break when a learner misses a week? |
+| 4 Consequences | What workload lands on learners' teams? What expectations do managers raise post-certification? |
+| 5 Adversarial & Exposure | How does assessment gaming, proxy attendance, or content leakage manifest — and what detects it? |
+| 6 Failure & Recovery | The instructor drops out; a cohort falls three weeks behind. What's the recovery path? |
+| 7 Cost & Sustainability | Per-learner marginal cost — does quality survive a 10x cohort? |
+| 8 Reduction & Scope Lock | Would a 1-day workshop plus a reference doc deliver 80% of the outcome? |
 
 ## Workflow
 
-### Step 1: Scope lock
+### Step 0: Subject framing (mandatory — no questions before this is done)
 
-Ask the user which branch to start at. Default: 1 (Product requirements). Recommend starting at 1 unless the user has already articulated the user/job-to-be-done clearly.
+1. Identify the subject type and stakes (reversible? who is exposed?)
+2. Gather the ground-truth material and **explore it before asking anything** — code for software, materials/data/prior attempts otherwise
+3. Instantiate all eight moves in the subject's own terms — one line each — and write them into the decision-log header. *You cannot silently skip a move you were forced to instantiate first.*
+4. Ask the user: *"What worries you most about this?"* — their answer opens the interview and is diagnostic data in itself
 
-After branches 1-7 are exhausted, always offer branch 8 (Open floor) before moving to the consistency check.
+### Step 1: Order selection
+
+Open at the user's hottest concern (it maps to one of the eight moves). Then steer toward the highest-risk moves still unexamined. **Sequence follows the conversation; coverage never does.**
 
 ### Step 2: Question loop
 
-For each open question in the active branch:
+For each open question in the active move:
 1. Ask the question, ONE at a time
 2. Provide your recommended answer with reasoning
 3. Wait for the user's response (recommend / counter / refine)
 4. Update the running decision log
 
-**Stop asking questions in a branch when:**
-- All open questions are resolved, OR
-- The user explicitly says "skip the rest of this branch"
+**Proportional depth:** a low-stakes move closes in ONE honest exchange. High-stakes moves get the full drill. Depth is set by blast radius, not by remaining curiosity.
 
-**Move to the next branch when:**
-- The current branch is exhausted, OR
-- The user says "next branch"
+**Stop asking in a move when:** resolved, or the user says "move on."
 
-### Step 3: Decision log
+### Step 3: Decision log + disposition ledger
 
-After each resolved question, write to artifacts/memory/active-decisions.md:
+After each resolved question, write to `artifacts/memory/active-decisions.md`:
 
 ```
-## AD-YYYY-MM-DD — <branch> — <decision title>
+## AD-YYYY-MM-DD — <move> — <decision title>
 
 **Decision:** <the resolved choice, one line>
 
@@ -114,31 +104,38 @@ After each resolved question, write to artifacts/memory/active-decisions.md:
 
 One entry per resolved question. Keep entries terse — the log is read back in Step 4.
 
-### Step 4: Cross-branch consistency check
+**Disposition ledger (coverage contract):** the log header lists all eight moves, each ending in exactly one state:
+- **EXAMINED (n questions)** — probed and resolved
+- **SKIPPED — reason** — e.g., *"SKIPPED — subject has no external attack surface; internal-only material"*
 
-After all 7+1 branches are exhausted, scan the decision log for contradictions:
-- Does branch 3 (edge cases) contradict branch 1 (product requirements)?
-- Does branch 6 (risks) invalidate branch 2 (architecture trade-offs)?
-- Does branch 7 (success criteria) require something branch 5 (cost) didn't budget for?
-- Does branch 8 (open floor) surface anything that invalidates decisions from branches 1-7?
+No third state exists. Skipping with a reason is knowledge; a silently dropped move is a blind spot that survives the session.
 
-If contradictions found, present them to the user and ask which branch to revisit.
+### Step 4: Cross-move consistency check
+
+After all eight moves are dispositioned, scan the log for contradictions:
+- Does a Mechanism conclusion contradict the Premise findings?
+- Does a Failure & Recovery answer invalidate a Structure choice?
+- Does Cost rule out something Consequences assumed?
+- Did any Skipped move become load-bearing mid-interview?
+
+If contradictions surface, present them and ask which move to revisit.
 
 ### Step 5: Lock + handoff
 
 Append a summary block to `artifacts/output/{current-phase}/grill-me-decisions.md` with:
 - Date
-- Branches covered
+- Subject type + instantiation table (or link to it)
+- Disposition ledger: examined/skipped counts with skip reasons
 - Number of decisions resolved
-- Cross-branch contradictions found
-- Handoff recommendation (e.g., "ready for /design" or "needs /validate-idea first")
+- Cross-move contradictions found
+- Handoff recommendation (e.g., "ready for /design", "ready to author syllabus", "needs /validate-idea first")
 
-> **Path note:** `{current-phase}` maps to the active phase directory under `artifacts/output/` (e.g., `03-strategy`, `04-architecture`, `05-planning`). If the active phase is unknown, use `artifacts/memory/grill-me-decisions.md` as fallback.
+> **Path note:** `{current-phase}` maps to the active phase directory under `artifacts/output/`. If unknown, fall back to `artifacts/memory/grill-me-decisions.md`.
 
 ## Output artifacts
 
-- artifacts/memory/active-decisions.md (running decision log)
-- artifacts/output/{current-phase}/grill-me-decisions.md (final summary)
+- `artifacts/memory/active-decisions.md` (running decision log + disposition ledger)
+- `artifacts/output/{current-phase}/grill-me-decisions.md` (final summary)
 
 ## State machine integration
 
@@ -147,7 +144,9 @@ At end: run `node .agents/scripts/orchestrator_state.js complete --agent founder
 
 ## Anti-patterns to avoid
 
-- **Do not ask multiple questions at once.** The interview loses its depth if you bundle.
-- **Do not recommend the user's first answer uncritically.** "That's interesting — what if the opposite is true?" is more useful than "yes, that works."
-- **Do not skip branches because they feel settled.** The user often hasn't articulated the obvious-to-them decision; making it explicit catches conflicts later.
-- **Do not let the user ramble into a different branch mid-question.** Gently redirect: "Good point — let's park that and circle back when we hit branch 5."
+- **Do not recite the moves in fixed order like a checklist.** Rigidity belongs in the coverage ledger, not the room.
+- **Do not let a move die silently.** Unasked ≠ skipped. A skip needs a logged reason or it hasn't happened.
+- **Do not ask multiple questions at once.** The interview loses depth if you bundle.
+- **Do not recommend the user's first answer uncritically.** *"That's interesting — what if the opposite is true?"* beats "yes, that works."
+- **Do not soften a probe to keep the mood warm.** The DNA applies double here: the interviewer's job is the uncomfortable question.
+- **Do not grill without ground truth.** No material, no interview — go collect it first.

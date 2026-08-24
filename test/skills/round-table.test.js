@@ -15,10 +15,11 @@ describe('Dialectic /round-table Protocol Fixtures', () => {
     assert.ok(content.includes('Phase 4: Synthesis Gate & Irreconcilable Trade-Off Escalation'), 'Must contain Phase 4 Synthesis/ADR Gate');
   });
 
-  it('enforces Verdict Gate, Zero-Blueprint-on-KILL, and Prompt Sanitization', () => {
+  it('enforces Decision/Review Gate selection, Zero-Blueprint-on-KILL + Zero-Consumption-on-FALSIFIED, and Prompt Sanitization', () => {
     const content = fs.readFileSync(roundTablePath, 'utf8');
-    assert.ok(content.includes('Verdict: `[KILL]`, `[PIVOT]`, or `[PASS]`'), 'Must specify Verdict Gate');
-    assert.ok(content.includes('Zero-Blueprint-on-KILL'), 'Must specify Zero Blueprint on Kill');
+    assert.ok(content.includes('**Decision Gate — proposals, ideas, designs under stress-test:** `[PASS]` / `[PIVOT]` / `[KILL]`'), 'Must specify Decision Gate verdicts');
+    assert.ok(content.includes('**Review Gate — claims about existing state (implementation reports, records, checkboxes):** `[CONFIRMED]` / `[PARTIAL]` / `[FALSIFIED]`'), 'Must specify Review Gate verdicts');
+    assert.ok(content.includes('Zero-Blueprint-on-KILL / Zero-Consumption-on-FALSIFIED'), 'Must specify both companion invariants');
     assert.ok(content.includes('Prompt Sanitization Rule'), 'Must specify Prompt Sanitization');
   });
 
@@ -34,14 +35,16 @@ describe('Dialectic /round-table Protocol Fixtures', () => {
     assert.ok(content.includes('Concession Justification Requirement'), 'Must require empirical concession justification');
   });
 
-  it('simulates anti-sycophantic collision evaluation', () => {
-    const round1Stances = [
-      { agent: '@architect', stance: 'Layer 0 decoupling via event streams' },
-      { agent: '@developer', stance: 'Direct function calls to minimize abstraction overhead' }
-    ];
-
-    const tensionDetected = round1Stances[0].stance.includes('Layer 0') && round1Stances[1].stance.includes('Direct function calls');
-    assert.strictEqual(tensionDetected, true, 'Cross-examination must detect tension between decoupled architecture vs direct call simplicity');
+  it('declares pairwise critique and concession machinery as enforcement requirements', () => {
+    // Scope honesty: enforcement behavior runs at orchestrator runtime with
+    // live subagents; a static fixture cannot "simulate" it without being
+    // unfalsifiable. The mechanical contract is that the protocol text
+    // mandates Phase-2 critique before synthesis and evidence-backed
+    // concessions.
+    const content = fs.readFileSync(roundTablePath, 'utf8');
+    assert.ok(content.includes('Phase 2: Targeted Pairwise Cross-Examination'), 'pairwise attack phase mandated');
+    assert.ok(content.includes('[CONCESSION: reason]'), 'concession format pinned');
+    assert.ok(content.includes('Maximum 2 exchange rounds'), 'bounded iterations pinned');
   });
 
   it('enforces Multi-Turn Dialectic Continuity and Zero User Deference', () => {

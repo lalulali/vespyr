@@ -254,7 +254,7 @@ function readState() {
       const projectContextFile = path.join(memoryDir, 'project-context.md');
       if (!fs.existsSync(projectContextFile)) {
         const content = `# Project Context\n\n## [CORE]\nProject: ${name} (startup)\nStack: None\nPhase: ${state.current_phase}\nSprint: none\nBlockers: 0\n\n## [IDENTITY]\nUser Nickname: User\n`;
-        fs.writeFileSync(projectContextFile, content, 'utf8');
+        atomicWriteFileSync(projectContextFile, content, 'utf8');
       }
       return state;
     } catch (e) {
@@ -746,7 +746,7 @@ function main() {
       const projectContextFile = path.join(memoryDir, 'project-context.md');
       if (fs.existsSync(memoryDir)) {
         let content = `# Project Context\n\n## [CORE]\nProject: ${name} (${type})\nStack: None\nPhase: ${state.current_phase}\nSprint: none\nBlockers: 0\n\n## [IDENTITY]\nUser Nickname: User\n`;
-        fs.writeFileSync(projectContextFile, content, 'utf8');
+        atomicWriteFileSync(projectContextFile, content, 'utf8');
       }
 
       console.log(JSON.stringify({ success: true, project: name, type, state_file: STATE_FILE }));

@@ -16,6 +16,7 @@
  */
 
 const fs = require('fs');
+const { writeFileSync: atomicWriteFileSync } = require('./lib/fs_atomic.js');
 const path = require('path');
 
 const PROJECT_ROOT = process.cwd();
@@ -54,7 +55,7 @@ function writeAudit(entries) {
   try {
     const dir = path.dirname(AUDIT_FILE);
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    fs.writeFileSync(AUDIT_FILE, JSON.stringify(entries, null, 2));
+    atomicWriteFileSync(AUDIT_FILE, JSON.stringify(entries, null, 2));
   } catch {
     // Silent fail — tracking must never block agent work
   }
@@ -275,7 +276,7 @@ function cmdAudit(args) {
   try {
     const dir = path.dirname(REPORT_FILE);
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    fs.writeFileSync(REPORT_FILE, report);
+    atomicWriteFileSync(REPORT_FILE, report);
     console.log(`Audit report written to: artifacts/output/step-audit-report.md`);
   } catch (e) {
     console.error('Failed to write report:', e.message);
