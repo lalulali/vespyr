@@ -17,8 +17,6 @@ describe('NPX Package Files Manifest Audit', () => {
     const binLibDir = path.join(__dirname, '..', '..', 'bin', 'lib');
     assert.strictEqual(fs.existsSync(binLibDir), true);
     assert.strictEqual(fs.existsSync(path.join(binLibDir, 'detector.js')), true);
-    assert.strictEqual(fs.existsSync(path.join(binLibDir, 'prompts.js')), true);
-    assert.strictEqual(fs.existsSync(path.join(binLibDir, 'transpilers.js')), true);
   });
 
   it('verifies bin/cli.js is executable and can be required as a module', () => {

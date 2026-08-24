@@ -84,125 +84,6 @@ describe('Test 1: parseFrontmatter()', () => {
   });
 });
 
-describe('Test 2: transpileCopilotYAML()', () => {
-  let tmpDir;
-
-  beforeEach(() => {
-    tmpDir = makeTempDir();
-  });
-
-  afterEach(() => {
-    cleanTempDir(tmpDir);
-  });
-
-  it('should transpile a single agent to YAML', () => {
-    const agentsDir = path.join(tmpDir, 'agents');
-    const outputDir = path.join(tmpDir, 'output');
-    fs.mkdirSync(agentsDir);
-    fs.writeFileSync(path.join(agentsDir, 'founder.md'), '---\ndescription: "Validates ideas"\n---\n# Founder Body');
-
-    transpileCopilotYAML(agentsDir, outputDir);
-
-    const yml = fs.readFileSync(path.join(outputDir, 'founder.yml'), 'utf8');
-    assert.ok(yml.includes('name: founder'));
-    assert.ok(yml.includes('description: "Validates ideas"'));
-    assert.ok(yml.includes('instructions: |'));
-    assert.ok(yml.includes('  # Founder Body'));
-  });
-
-  it('should transpile 21 agents', () => {
-    const agentsDir = path.join(tmpDir, 'agents');
-    const outputDir = path.join(tmpDir, 'output');
-    fs.mkdirSync(agentsDir);
-
-    for (let i = 0; i < 21; i++) {
-      fs.writeFileSync(path.join(agentsDir, `agent${i}.md`), `---\ndescription: "Agent ${i}"\n---\nBody ${i}`);
-    }
-
-    transpileCopilotYAML(agentsDir, outputDir);
-
-    const files = fs.readdirSync(outputDir).filter(f => f.endsWith('.yml'));
-    assert.strictEqual(files.length, 21);
-  });
-
-  it('should handle agent with no description', () => {
-    const agentsDir = path.join(tmpDir, 'agents');
-    const outputDir = path.join(tmpDir, 'output');
-    fs.mkdirSync(agentsDir);
-    fs.writeFileSync(path.join(agentsDir, 'agent.md'), '---\nname: test\n---\nBody');
-
-    transpileCopilotYAML(agentsDir, outputDir);
-
-    const yml = fs.readFileSync(path.join(outputDir, 'agent.yml'), 'utf8');
-    assert.ok(yml.includes('description: ""'));
-  });
-
-  it('should escape quotes in description', () => {
-    const agentsDir = path.join(tmpDir, 'agents');
-    const outputDir = path.join(tmpDir, 'output');
-    fs.mkdirSync(agentsDir);
-    fs.writeFileSync(path.join(agentsDir, 'agent.md'), '---\ndescription: She said "hello"\n---\nBody');
-
-    transpileCopilotYAML(agentsDir, outputDir);
-
-    const yml = fs.readFileSync(path.join(outputDir, 'agent.yml'), 'utf8');
-    assert.ok(yml.includes('description: "She said \\"hello\\""'));
-  });
-});
-
-describe('Test 3: transpileCursorMDC()', () => {
-  let tmpDir;
-
-  beforeEach(() => {
-    tmpDir = makeTempDir();
-  });
-
-  afterEach(() => {
-    cleanTempDir(tmpDir);
-  });
-
-  it('should transpile a single agent to MDC', () => {
-    const agentsDir = path.join(tmpDir, 'agents');
-    const outputDir = path.join(tmpDir, 'output');
-    fs.mkdirSync(agentsDir);
-    fs.writeFileSync(path.join(agentsDir, 'founder.md'), '---\ndescription: "Validates ideas"\n---\n# Founder Body');
-
-    transpileCursorMDC(agentsDir, outputDir);
-
-    const mdc = fs.readFileSync(path.join(outputDir, 'founder.mdc'), 'utf8');
-    assert.ok(mdc.includes('---'));
-    assert.ok(mdc.includes('description: "Validates ideas"'));
-    assert.ok(mdc.includes('globs: "*"'));
-    assert.ok(mdc.includes('alwaysApply: false'));
-    assert.ok(mdc.includes('# Founder Body'));
-  });
-
-  it('should transpile 21 agents', () => {
-    const agentsDir = path.join(tmpDir, 'agents');
-    const outputDir = path.join(tmpDir, 'output');
-    fs.mkdirSync(agentsDir);
-
-    for (let i = 0; i < 21; i++) {
-      fs.writeFileSync(path.join(agentsDir, `agent${i}.md`), `---\ndescription: "Agent ${i}"\n---\nBody ${i}`);
-    }
-
-    transpileCursorMDC(agentsDir, outputDir);
-
-    const files = fs.readdirSync(outputDir).filter(f => f.endsWith('.mdc'));
-    assert.strictEqual(files.length, 21);
-  });
-
-  it('should skip missing source files', () => {
-    const agentsDir = path.join(tmpDir, 'agents');
-    const outputDir = path.join(tmpDir, 'output');
-    fs.mkdirSync(agentsDir);
-
-    transpileCursorMDC(agentsDir, outputDir);
-
-    assert.ok(!fs.existsSync(path.join(outputDir, '404.mdc')));
-  });
-});
-
 describe('Test 4: createLinkOrCopy()', () => {
   let tmpDir;
 
@@ -214,8 +95,9 @@ describe('Test 4: createLinkOrCopy()', () => {
     cleanTempDir(tmpDir);
   });
 
-  it('should create directory symlink on macOS/Linux', () => {
-    if (process.platform === 'win32') return;
+  it('should create directory symlink on macOS/Linux', { skip: process.platform === 'win32' ? 'POSIX symlink fixture setup (named limitation, 02h §10 WS-C)' : false }, () => {
+    // Named limitation (02h §10 WS-C): fixture setup requires POSIX symlink semantics;
+    // on Windows runners this test is intentionally absent (see swarm-tests matrix).
 
     const source = path.join(tmpDir, 'source');
     const link = path.join(tmpDir, 'link');
@@ -228,8 +110,9 @@ describe('Test 4: createLinkOrCopy()', () => {
     assert.strictEqual(fs.readlinkSync(link), source);
   });
 
-  it('should create file symlink on macOS/Linux', () => {
-    if (process.platform === 'win32') return;
+  it('should create file symlink on macOS/Linux', { skip: process.platform === 'win32' ? 'POSIX symlink fixture setup (named limitation, 02h §10 WS-C)' : false }, () => {
+    // Named limitation (02h §10 WS-C): fixture setup requires POSIX symlink semantics;
+    // on Windows runners this test is intentionally absent (see swarm-tests matrix).
 
     const source = path.join(tmpDir, 'source.txt');
     const link = path.join(tmpDir, 'link.txt');
@@ -241,8 +124,9 @@ describe('Test 4: createLinkOrCopy()', () => {
     assert.ok(stat.isSymbolicLink());
   });
 
-  it('should skip if symlink already exists with same target', () => {
-    if (process.platform === 'win32') return;
+  it('should skip if symlink already exists with same target', { skip: process.platform === 'win32' ? 'POSIX symlink fixture setup (named limitation, 02h §10 WS-C)' : false }, () => {
+    // Named limitation (02h §10 WS-C): fixture setup requires POSIX symlink semantics;
+    // on Windows runners this test is intentionally absent (see swarm-tests matrix).
 
     const source = path.join(tmpDir, 'source');
     const link = path.join(tmpDir, 'link');
@@ -1062,6 +946,14 @@ describe('Test 17: End-to-End Installation, Update, Reconfiguration, and Uninsta
     const contextFile = path.join(memoryDir, 'project-context.md');
     fs.writeFileSync(contextFile, `# Project Context\n\n## Identity\n- **Project Name**: temp\n- **User Nickname**: Christian\n`);
 
+    // Customize a shipped file BEFORE update so the .bak-YYYYMMDD machinery
+    // has something to preserve (02h §10 B3 E2E clause).
+    // NOTE: must be a file that still exists in the incoming AGENTS_SRC so
+    // the update actually overwrites it (backup-on-overwrite semantics).
+    const customizedFile = path.join(agentsTarget, 'GUARDRAILS.md');
+    fs.writeFileSync(customizedFile, 'user-customized guardrails content');
+    assert.ok(fs.existsSync(path.join(process.cwd(), '.agents', 'GUARDRAILS.md')), 'precondition: GUARDRAILS.md ships in AGENTS_SRC');
+
     // 2. Run performUpdate to update from v1.6.0 (simulated) to latest version
     const { performUpdate } = require('../bin/cli.js');
     await performUpdate(tmpDir, { yes: true });
@@ -1069,6 +961,12 @@ describe('Test 17: End-to-End Installation, Update, Reconfiguration, and Uninsta
     // Verify it updated the version file and kept the files
     const newVersion = JSON.parse(fs.readFileSync(path.join(agentsTarget, '.vespyr-version'), 'utf8'));
     assert.strictEqual(newVersion.version, VERSION);
+
+    // Verify B1: customized file preserved as .bak-YYYYMMDD with verbatim content
+    const today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+    const bakFile = `${customizedFile}.bak-${today}`;
+    assert.strictEqual(fs.existsSync(bakFile), true, 'customized file must be backed up as .bak-YYYYMMDD');
+    assert.strictEqual(fs.readFileSync(bakFile, 'utf8'), 'user-customized guardrails content');
 
     // 3. Run performReconfigure to select opencode and claude
     const opencodePath = path.join(tmpDir, '.opencode');

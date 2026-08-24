@@ -11,7 +11,8 @@ describe('NPX packaging & manifest verification', () => {
   const packed = spawnSync('npm', ['pack', '--dry-run', '--json'], {
     cwd: repoRoot,
     encoding: 'utf8',
-    timeout: 120000
+    timeout: 120000,
+    shell: process.platform === 'win32'
   });
 
   it('npm pack --dry-run succeeds and emits parseable JSON', () => {
@@ -27,8 +28,6 @@ describe('NPX packaging & manifest verification', () => {
       'bin/cli.js',
       'bin/vespyr-eval.js',
       'bin/lib/detector.js',
-      'bin/lib/prompts.js',
-      'bin/lib/transpilers.js',
       '.agents/scripts/orchestrator_state.js',
       '.agents/scripts/lib/fs_atomic.js',
       '.agents/skills/shut-up/SKILL.md',
@@ -46,12 +45,46 @@ describe('NPX packaging & manifest verification', () => {
     const modules = [
       '../../bin/cli.js',
       '../../bin/lib/detector.js',
-      '../../bin/lib/prompts.js',
-      '../../bin/lib/transpilers.js'
+      '../../bin/lib/state.js',
+      '../../bin/lib/link-utils.js',
+      '../../bin/lib/logger.js',
+      '../../bin/lib/harnesses/index.js'
     ];
     for (const m of modules) {
       const mod = require(m);
       assert.ok(mod !== null && mod !== undefined, `${m} must export something`);
+    }
+  });
+  it('dead-module gate: every bin/lib module has at least one inbound require', () => {
+    // A4 gate: structurally prevents the "helpers exist but nothing imports
+    // them" failure class found in the 2026-08-24 audit.
+    const fsMod = require('fs');
+    const pathMod = require('path');
+    const binLib = path.join(repoRoot, 'bin', 'lib');
+    const scanDir = (dir, acc = []) => {
+      for (const e of fsMod.readdirSync(dir, { withFileTypes: true })) {
+        const full = pathMod.join(dir, e.name);
+        if (e.isDirectory()) scanDir(full, acc);
+        else if (e.isFile() && e.name.endsWith('.js')) acc.push(full);
+      }
+      return acc;
+    };
+    const modules = scanDir(binLib);
+    const sources = [path.join(repoRoot, 'bin', 'cli.js'), ...modules];
+    const inbound = new Map(modules.map((m) => [m, 0]));
+    for (const src of sources) {
+      const text = fsMod.readFileSync(src, 'utf8');
+      for (const m of text.matchAll(/require\((['"])(.+?)\1/g)) {
+        let spec = m[2];
+        if (!spec.startsWith('./') && !spec.startsWith('../')) continue;
+        const resolved = pathMod.resolve(pathMod.dirname(src), spec);
+        if (inbound.has(resolved) && resolved !== src) {
+          inbound.set(resolved, inbound.get(resolved) + 1);
+        }
+      }
+    }
+    for (const [mod, count] of inbound) {
+      assert.ok(count > 0, `orphaned module: ${pathMod.relative(repoRoot, mod)} has zero inbound requires`);
     }
   });
 });

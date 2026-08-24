@@ -4,7 +4,8 @@ const fs = require('fs');
 const path = require('path');
 const { writeFileSync: atomicWriteFileSync } = require('./lib/fs_atomic.js');
 
-const ROOT = path.resolve(__dirname, '..', '..');
+const { findWorkspaceRoot } = require('./lib/workspace');
+const ROOT = findWorkspaceRoot(__dirname);
 const CANONICAL_PATH = path.join(ROOT, '.agents', 'templates', 'system', 'AGENTS.md.canonical');
 const FALLBACK_CANONICAL = path.join(ROOT, '.agents', 'templates', 'system', 'agent.md.canonical');
 const CANONICAL = fs.existsSync(CANONICAL_PATH) ? CANONICAL_PATH : FALLBACK_CANONICAL;

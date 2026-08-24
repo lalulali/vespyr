@@ -472,3 +472,16 @@ If Hermes adds per-tool model selection, map:
 **@architect (Vera):** PENDING — External harness integration architecture review.  
 **@tech-lead (Grant):** PENDING — Execution scheduled for v2.1.  
 **@qa-engineer (Nina):** PENDING — Cross-harness smoke testing suite.
+
+
+---
+
+## Deferred Shape Research Intake (2026-08-24)
+
+Owner scoping decision: **Cursor and Windsurf move into this plan** for proper per-harness research before any reimplementation. Effective immediately in the v2.0.7 CLI:
+
+- Both shapes are **no longer installable** — adapters stripped to `legacyCleanupOnly` (detect + surgical uninstall only), so pre-existing installs remain cleanable.
+- Their previous emitters (`transpileCursorMDC`, `transpileCopilotYAML`) were **cut** per 02m C2=B (stale formats; no remaining consumers).
+- Recoverable reference implementations: git history, commit prior to this change (bin/lib/harnesses/cursor.js, windsurf.js install methods).
+
+**Intake checklist for each shape before it may re-enter the installer:** mechanism research against current vendor docs (emitter vs native-read vs config-file), functional smoke matrix, autocomplete/picker visibility caveat check (cf. Copilot field evidence 2026-08-24), uninstall semantics.

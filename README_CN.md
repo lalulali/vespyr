@@ -112,7 +112,7 @@ validate → explore → design → plan → develop → launch → iterate → 
 - **整合的三级记忆与机器状态栅栏** — `project-context.md` 原子状态自动同步、精简的 5 文件共享记忆与阶段边界自动归档压缩。
 - **安全与完整性引擎** — 已签名的 SHA-256 清单校验（`vespyr verify`）、供应链安全审计（`vespyr audit`）、封闭权限注册表与 T3 数据信任边界准入控制。
 - **智能体自定义** — 双文件 TOML 合并。升级时你的覆盖配置保持不变。
-- **多平台支持** — 兼容 OpenCode、Claude Code、Cursor、Windsurf、Copilot、Kiro、Aider、Google Antigravity。
+- **多平台支持** — 对 OpenCode、Claude Code、Kiro、GitHub Copilot 提供一等安装支持；通用 `.agents/` 存储可被 Aider、Google Antigravity、Codex 直接读取。
 - **11 阶段流水线** — 带强制执行。无越序执行。
 
 [完整技能目录 →](Guide/cn/skills-and-workflows.md) · [自定义 →](Guide/cn/configuration.md)

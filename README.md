@@ -110,7 +110,7 @@ validate → explore → design → plan → develop → launch → iterate → 
 - **Consolidated 3-tier memory & machine fencing** — atomic state syncing in `project-context.md`, streamlined 5-file shared memory, and automatic phase-boundary compaction.
 - **Security & integrity engine** — pinned SHA-256 manifest verification (`vespyr verify`; unsigned interim — accidental-drift detection only, see ADR-002 §2.1.1), supply-chain audit (`vespyr audit`), closed permission registry, and T3 data trust boundary admission control.
 - **Agent customization** — 2-file TOML merge. Your overrides survive upgrades.
-- **Multi-harness** — works with OpenCode, Claude Code, Cursor, Windsurf, Copilot, Kiro, Aider, Google Antigravity.
+- **Multi-harness** — first-class installs for OpenCode, Claude Code, Kiro, and GitHub Copilot; the universal `.agents/` store is read directly by Aider, Google Antigravity, and Codex.
 - **11-phase pipeline** — with enforcement. No out-of-order execution.
 
 [Complete skills catalog →](Guide/en/skills-and-workflows.md) · [Customization →](Guide/en/configuration.md)

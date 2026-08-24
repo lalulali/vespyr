@@ -47,11 +47,21 @@ function updateUserNickname(nickname, root = null) {
   let content = fs.readFileSync(ctxPath, 'utf8');
 
   if (content.includes('## [IDENTITY]')) {
-    content = content.replace(/(##\s*\[IDENTITY\][\s\S]*?)(User Nickname:\s*[^\r\n]+|-\s*\*\*User Nickname\*\*:\s*[^\r\n]+)/i, `$1User Nickname: ${cleanNickname}`);
+    // Header block inside ## [IDENTITY]
+    content = content.replace(
+      /(##\s*\[IDENTITY\][\s\S]*?)(User Nickname:\s*[^\r\n]+)/i,
+      `$1User Nickname: ${cleanNickname}`,
+    );
   } else {
-    // Append identity section
     content = content.trim() + `\n\n## [IDENTITY]\nUser Nickname: ${cleanNickname}\n`;
   }
+
+  // Dual-block contract (T5.4/D2): keep EVERY markdown-list occurrence in
+  // sync as well, wherever it appears.
+  content = content.replace(
+    /(-\s+\*\*User Nickname\*\*:\s*)([^\r\n]*)/gi,
+    `$1${cleanNickname}`,
+  );
 
   writeFileSync(ctxPath, content, 'utf8');
 }
