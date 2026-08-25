@@ -1,6 +1,6 @@
 {
   "version": "2.0.7",
-  "generated_at": "2026-08-24T17:51:16.539Z",
+  "generated_at": "2026-08-24T19:09:20.579Z",
   "file_count": 314,
   "files": {
     ".gitignore": "02be8395c2a0b6cdfcf971daa5689776e2d98cc43603b22a45d8c2bd78c13772",
@@ -79,7 +79,7 @@
     "scripts/check_corpus_invariants.js": "f9bedde2b6cddac1b0bdfd120b9808cda002d583cb3c330c53cb3e8ea2495b22",
     "scripts/check_new_findings.js": "f41e3cb8d67e9fc09d01fffda218d3cf057656581dc18e65f38cfa5221f8396d",
     "scripts/compaction_guard.js": "b5626e7354d4e1355922dd01cd378c84d8736676a5de87bd6518835553fa8723",
-    "scripts/compile_skills.js": "bd83ba0dab73ce0fa0cbbda16245d698e183c8dd5b78483dafcaab44fc05fb22",
+    "scripts/compile_skills.js": "da1fb72d196c11ce1747b1e10df9f42fb4c50e5307de9f7dd05fbf408fa1e3df",
     "scripts/dedupe_validator.js": "1b7195574bd08cadceefd8aa3ab505306e3444fb4a07123d6a362bb28b038512",
     "scripts/delegation_audit.js": "2e3f13a75ba21a59df85992c837a8a01f6426f4f110a43a54be7df85f3faaa47",
     "scripts/drift_monitor.js": "38ed9a091b99d66aafd56908f48e127e8f9b9f620f9434c0612a3d7b9f3f8cdc",
@@ -95,7 +95,7 @@
     "scripts/merge_customization.js": "290cf44fe16c8422ada0b004ec4b0e781e5bd1ecc27047f448f45c04a0fc7b85",
     "scripts/migrate-frontmatter-v2.js": "298e5a207436377491323b9aa07e32e3858fb48e5a3ccd020da693f22110382e",
     "scripts/migrate_memory_v2.js": "a29738abaec0aed2f2f75fc4dec010e9c32761752dec0a7998e9d982cae4b773",
-    "scripts/orchestrator_state.js": "7a48cfb9504d6eca9bc48fe28832e2f1c8fb9d0c25736307bf277746a22c4d4e",
+    "scripts/orchestrator_state.js": "5a6b694bd8e57954630ab1b1689ba544c613a1fda385080e9366755ab756624a",
     "scripts/pipeline_simulator.js": "bbbe55d43841f4474616ddec20fda2a9731a4f99698ed86c0f2a9f68a92abc91",
     "scripts/resolve_agents.js": "3133e4a5d270ac1ed52f000f00376537e90bba9910beee161b99deb13e69a20f",
     "scripts/security-scan.js": "d87b756c1dc9808603e3fe3bf4cf0b047832417fd04f5c89d79b75b6ffd2c1bd",
@@ -316,7 +316,7 @@
     "templates/system/agent.md.canonical": "5b3f9a1530459f3f68965de119d00713a626c716a6ae13620824299f777d817d",
     "templates/system/opencode.json.template": "53443ae3f08da79b330a27ba099b68a7638f977c6bbc1485d1b8e3249723a0ae",
     "templates/system/vespyr-steering.md.canonical": "5b8af57807a7b34e17cda442afcd9b05eb31167135cd94c5f7f68e261586d58f",
-    "workflow.md": "7bf32d8eb0ca46555946387a34538ff3982ba4636b313ad34c50ea381d222f0b"
+    "workflow.md": "b2bd5097cdcef9c27ec82458c2aaca8ca1b9328d11c17e5dd76dfda429d29f52"
   },
   "files_root": {
     "bin/cli.js": "19508bf0fb476fab4ff2a8e2f844c63febf3e2875ed090950352f7d38643c198"

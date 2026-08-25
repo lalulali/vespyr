@@ -484,6 +484,8 @@ Incremental extraction by domain. NOT a big-bang rewrite: each step must leave t
 
 **Stop-rule:** if Windows debugging exceeds 3.5h, stop, record the failing delta as a named limitation with owner, and move on — the matrix is hardening, not a Phase-gate blocker.
 
+> **[PREMISE CORRECTION — 2026-08-25, owner]** The original Windows concern was a false positive: Chris's failure report traced to **company-admin permission blocking** (Windows restricts raw symlink creation without Developer Mode/elevation), misread at the time as a CLI defect. Consequences: (a) no Windows-specific CLI bug is on record; (b) `createLinkOrCopy`'s EPERM→copy fallback is *validated as necessary* by this exact environment class and stays; (c) the C1–C3 matrix REMAINS IN CI per owner ruling (2026-08-25: "keep it") — regression insurance for that fallback path and the POSIX-only fixtures; priority downgraded but retained; (d) the three named POSIX-only fixture skips stay accurate as written (they describe fixture mechanics, not a product defect).
+
 ### WS-D — lib adoption sweep leftovers (closes T5.4 consumer gap alongside A3) — ~1h
 
 | ID | Task | Est | Depends on |

@@ -104,6 +104,44 @@ function extractPrerequisites(text) {
   return prereqs;
 }
 
+
+// ============================== R0.2 DELEGATION LINT ==============================
+// 02m R0.2 (rebuilt 2026-08-25, owner-adjusted scope): the @reader/@writer/
+// @executor personas were REMOVED from the engine — any live reference is a
+// dead handle that silently no-ops on every harness. Fail-closed: violations
+// block catalog compilation.
+const BANNED_DELEGATION_HANDLES = ['@reader', '@writer', '@executor'];
+
+function lintDelegationReferences(skillsDir) {
+  const violations = [];
+  const bannedRe = new RegExp('@(?:' + BANNED_DELEGATION_HANDLES.map((h) => h.slice(1)).join('|') + ')\\b');
+  const scanFile = (filePath, rel) => {
+    const lines = fs.readFileSync(filePath, 'utf8').split('\n');
+    for (let i = 0; i < lines.length; i++) {
+      // NOTE: no allowlist needed — '@technical-writer' cannot match the
+      // @-anchored pattern, and a mixed-line escape hatch would suppress
+      // genuine violations sharing a line with the string.
+      const hit = lines[i].match(bannedRe);
+      if (hit) {
+        violations.push(`${rel}:${i + 1}: ${hit[0]}`);
+      }
+    }
+  };
+  for (const item of fs.readdirSync(skillsDir).sort()) {
+    const skillDir = path.join(skillsDir, item);
+    if (!fs.statSync(skillDir).isDirectory()) continue;
+    const skillFile = path.join(skillDir, 'SKILL.md');
+    if (fs.existsSync(skillFile)) scanFile(skillFile, `.agents/skills/${item}/SKILL.md`);
+    const stepsDir = path.join(skillDir, 'steps');
+    if (fs.existsSync(stepsDir)) {
+      for (const step of fs.readdirSync(stepsDir).sort()) {
+        if (step.endsWith('.md')) scanFile(path.join(stepsDir, step), `.agents/skills/${item}/steps/${step}`);
+      }
+    }
+  }
+  return violations;
+}
+
 function compileSkills() {
   if (!fs.existsSync(SKILLS_DIR)) {
     console.error(`Skills directory not found: ${SKILLS_DIR}`);
@@ -134,11 +172,18 @@ function compileSkills() {
     }
   }
 
+  const violations = lintDelegationReferences(SKILLS_DIR);
+  if (violations.length > 0) {
+    console.error(`✗ delegation lint: ${violations.length} dead-handle reference(s):`);
+    for (const v of violations) console.error(`  - ${v}`);
+    process.exit(1);
+  }
+
   const outputDir = path.dirname(OUTPUT_FILE);
   if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true });
-
   fs.writeFileSync(OUTPUT_FILE, JSON.stringify(catalog, null, 2), 'utf8');
   console.log(`✓ Compiled ${catalog.length} skills → ${OUTPUT_FILE}`);
+  console.log(`✓ delegation lint: zero removed-persona handles (@reader/@writer/@executor)`);
 }
 
 if (require.main === module) compileSkills();

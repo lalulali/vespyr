@@ -75,7 +75,7 @@ All notable changes to the Vespyr project will be documented in this file.
 - Wired previously-dead headless flags end-to-end: `--project-name`, `--user-nickname`, and `--stack` now populate generated `project-context.md`; `--stack` overrides `detectStack()` auto-detection, which is now integrated into init (multi-language manifest matrix).
 - Completed engine-script library adoption: all six named scripts consume `.agents/scripts/lib/fs_atomic.js` (zero raw `writeFileSync` remain); `archive_manager.js` gains Windows-safe EXDEV/EPERM fallback and temp cleanup.
 - Closed `/shut-up` registration gaps (`workflow.md` + template permissions).
-- Authored the 02h §10 residue remediation plan: per-harness libraries behind a static adapter registry (`bin/lib/harnesses/<shape>.js`), update-mode `.bak-${YYYYMMDD}` backups, Windows OS matrix, identity.js adoption — pending execution.
+- Authored the 02h §10 residue remediation plan: per-harness libraries behind a static adapter registry (`bin/lib/harnesses/<shape>.js`), update-mode `.bak-${YYYYMMDD}` backups, Windows OS matrix, identity.js adoption — pending execution. *(Executed same window; final suite state recorded under Test Infrastructure Hardening above.)*
 
 ---
 

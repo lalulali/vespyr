@@ -82,7 +82,8 @@
 | ID | Task | Est | Depends on |
 |---|---|---|---|
 | R0.1 | PRELUDE — adopt mechanical-evidence stamping rules repo-wide (evidence command adjacent to every box; closure stamping prohibited until post-reconciliation; attestation lines per commit batch) | 0.5h | — |
-| R0.2 | PRELUDE — F1.69 rebuild: delegation lint in `compile_skills.js` (ban trio-invocation syntax, whitelist persona-marking, flag missing delegation-path line where skill retains delegation semantics) + fixtures | 3h | R0.1 |
+| R0.2 ✅ | PRELUDE — F1.69 rebuild **EXECUTED 2026-08-25 (owner-adjusted scope: trio personas removed outright, so no persona-marking whitelist needed)** — fail-closed lint in `compile_skills.js` bans `@reader/@writer/@executor` across every SKILL.md + steps/*.md; planted-violation probe exits 1 with file:line, clean tree exits 0; wired into default compile path so CI/spec flows inherit it.
+  - **Evidence (2026-08-25, working tree — awaiting owner commit):** `node .agents/scripts/compile_skills.js` → '✓ Compiled 42 skills' + '✓ delegation lint: zero removed-persona handles'; planted `.agents/skills/shut-up/steps/__lint_probe.md` containing '@writer' → exit 1 naming the file:line; removed → exit 0. Initial anchor bug (`\b@writer\b` never matches — @ is a non-word char) caught by the probe itself before any stamp. **Correction (2026-08-25, Scout):** an earlier session note claimed `.agents/state/` absent so `delegation_audit.js` could not run — false: the dir exists (`drift-history.json`) and the script executes via fallback; it is *informational-only* until R1.10 rewrites it (its fallback also counts historical mentions as activity). `DELEGATION_HANDLES` there stays untouched for that rebuild. **Integrity re-pin:** manifest.json regenerated same day for compile_skills.js/orchestrator_state.js edits per 02f re-baseline rule; `node bin/cli.js verify` → all 315 files OK. | 3h→1h actual | R0.1 |
 | R1.1 | Author single-writer execution discipline section (this doc §7.1 becomes binding; mirror one-line rule into GUARDRAILS pointer note via session log, no other file edits) | 1h | — |
 | R1.2 | Untracked-artifact sweep: `git status --porcelain` inventory; commit ADR-005 + verified-canonical siblings with message listing each | 1.5h | — |
 | R1.3 | Rewrite 02g §7.3 to truthful status quoting `dcf028e`'s PARTIALLY EXECUTED accounting; add dated correction banner | 1h | — |
@@ -141,6 +142,8 @@ Done when **all** pass:
 
 | # | Risk | Likelihood | Impact | Mitigation |
 |---|---|---|---|---|
+- **Bonus fix (2026-08-25):** `orchestrator_state.js` `ensureGraph()` referenced `ensureScript` — undefined since 02h WS-1 deleted the graph scripts. Dead remnant + its three call sites and `ensure-graph` CLI subcommand removed; status/session-write verified post-surgery.
+
 | R56 | Concurrent-session clobbering of shared working-tree state | High (observed 08-08..08-18) | High | Single-writer mandate (binding); commit-per-item cadence; worktree convention for future lanes |
 | R57 | Untracked-artifact blindness — canonical records invisible to git archaeology | High (ADR-005 case) | Medium | WS-E commit sweep; pre-close `git status` gate in every epic checklist |
 | R58 | Doc-marketing drift ahead of tested capability | Medium | Medium | WS-B matrix tied to registry truth; R0.2 lint extended to harness-count claims post-v2 |

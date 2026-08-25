@@ -1009,7 +1009,7 @@ describe('Test 17: End-to-End Installation, Update, Reconfiguration, and Uninsta
   });
 });
 
-describe('Test 18: Kiro Harness Scaffolding & Migration', () => {
+describe('Test 18: Kiro Harness Scaffolding & Migration', { skip: process.platform === 'win32' ? 'fixtures create raw symlinks (named limitation, 02h §10 WS-C skip manifest)' : false }, () => {
   let tmpDir;
 
   beforeEach(() => {

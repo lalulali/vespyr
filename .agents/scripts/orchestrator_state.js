@@ -399,28 +399,6 @@ function recordTelemetry(eventType, fields) {
   }
 }
 
-// Ensure a structural graph is fresh, recording the result as telemetry.
-// Never throws — graph failures must not block orchestration.
-function ensureGraph(type) {
-  if (!fs.existsSync(ensureScript)) return null;
-  try {
-    const stdout = require('child_process').execFileSync(
-      'node', [ensureScript, type],
-      { encoding: 'utf8', cwd: PROJECT_ROOT }
-    );
-    const result = JSON.parse(stdout);
-    recordTelemetry('graph_status', {
-      data: { graph: type, ...result }
-    });
-    return result;
-  } catch (e) {
-    recordTelemetry('graph_status', {
-      data: { graph: type, status: 'failed', error: e.message, stderr: e.stderr ? e.stderr.toString() : null }
-    });
-    return null;
-  }
-}
-
 function createInitialState(name, type) {
   const defaultPhases = {
     validation: { status: 'pending', started_at: null, completed_at: null, agents: ['founder'] },
@@ -719,17 +697,6 @@ function main() {
   const cmd = args[0];
 
   try {
-    if (cmd === 'ensure-graph') {
-      const type = args[1];
-      if (!['code', 'doc'].includes(type)) {
-        console.error('Usage: orchestrator_state.js ensure-graph <code|doc>');
-        process.exit(2);
-      }
-      const result = ensureGraph(type);
-      if (!result) process.exit(1);
-      console.log(JSON.stringify(result, null, 2));
-      return;
-    }
 
     if (cmd === 'init') {
       let name = 'Untitled';
@@ -756,9 +723,6 @@ function main() {
         data: { action: 'init', project: name, type }
       });
 
-      // Seed the doc-graph on project init so traceability is available
-      // from the very first skill call.
-      ensureGraph('doc');
     }
 
     if (cmd === 'status') {
@@ -890,14 +854,6 @@ function main() {
         phase: resolveCurrentPhase(state),
         data: { tokens, duration_ms: durationMs, artifact, version }
       });
-
-      // Code-modifying agents should refresh the code-graph so the next
-      // consumer (architect, tech-lead, developer) reads a current graph
-      // instead of a stale one.
-      const codeModifyingAgents = new Set(['developer', 'architect', 'tech-lead']);
-      if (codeModifyingAgents.has(agent)) {
-        ensureGraph('code');
-      }
 
       console.log(JSON.stringify({ success: true, agent, artifact, version, tokens, duration_ms: durationMs }));
     }

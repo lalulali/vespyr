@@ -737,8 +737,6 @@ The **pipeline state machine** (`node .agents/scripts/orchestrator_state.js`) is
 | User wants to switch phases | `orchestrator_state.js set-phase --phase X` | Advance with proper logging |
 | Cross-team change needed | `orchestrator_state.js file-cr --from X --to Y --target Z --issue "..."` | Block advancement until resolved |
 | Project initialization | `orchestrator_state.js init --name "X" --type Y` | First-run setup |
-| Graph refresh (code) | `orchestrator_state.js ensure-graph code` | Force refresh code-graph |
-| Graph refresh (doc) | `orchestrator_state.js ensure-graph doc` | Force refresh doc-graph |
 
 ### Auto-firing side effects
 
