@@ -31,7 +31,7 @@ const SPEC = path.join(
 );
 const BASELINE =
   process.env.BASELINE_FILE ||
-  path.join(ROOT, 'eval', 'security', 'corpus', 'baseline-repo-2026-08-23.json');
+  path.join(ROOT, 'eval', 'security', 'corpus', 'baseline-repo-2026-08-25.json');
 
 function main() {
   if (!fs.existsSync(BASELINE)) {
