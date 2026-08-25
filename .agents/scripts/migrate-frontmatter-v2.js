@@ -100,7 +100,7 @@ const AGENT_DATA = {
 };
 
 function parseFrontmatter(content) {
-  const match = content.match(/^---\n([\s\S]*?)\n---/);
+  const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
   if (!match) return { fm: '', bodyStart: 0 };
   return { fm: match[1], bodyStart: match[0].length };
 }

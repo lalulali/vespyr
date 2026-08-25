@@ -6,7 +6,7 @@ const path = require('path');
 const AGENTS_DIR = path.resolve(__dirname, '..', 'agents');
 
 function parseFrontmatter(content) {
-  const match = content.match(/^---\n[\s\S]*?\n---\n?/);
+  const match = content.match(/^---\r?\n[\s\S]*?\r?\n---\r?\n?/);
   if (!match) return { body: content, start: 0 };
   return { body: content.slice(match[0].length), start: match[0].length, fmBlock: match[0] };
 }

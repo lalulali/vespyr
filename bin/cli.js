@@ -82,14 +82,16 @@ const {
 
 const { handleConflict, createLinkOrCopy } = linkUtils;
 function detectRepository() {
-	const { execSync } = require("child_process");
+	const { execFileSync } = require("child_process");
 	try {
-		const inRepo = execSync("git rev-parse --is-inside-work-tree 2>/dev/null", {
+		const inRepo = execFileSync("git", ["rev-parse", "--is-inside-work-tree"], {
 			encoding: "utf8",
+			stdio: ["ignore", "pipe", "ignore"],
 		}).trim();
 		if (inRepo !== "true") return "Not a git repository (local folder)";
-		const remote = execSync("git config --get remote.origin.url 2>/dev/null", {
+		const remote = execFileSync("git", ["config", "--get", "remote.origin.url"], {
 			encoding: "utf8",
+			stdio: ["ignore", "pipe", "ignore"],
 		}).trim();
 		return remote || "Local git repository (no remote)";
 	} catch {
