@@ -262,7 +262,7 @@ describe('Suite: Memory Fix Loop Regressions (2026-08-25)', () => {
 		const { withLock } = require(path.join(REPO_ROOT, '.agents', 'scripts', 'lib', 'lock.js'));
 
 		// Simulate a SIGKILLed-unreaped holder: pid alive (kill(pid,0) ok),
-		// heartbeat frozen in the past beyond LIVE_HEARTBEAT_STALE_MS.
+		// lock held beyond MAX_HOLD_MS (60s).
 		const zombie = spawn(process.execPath, ['-e', 'setTimeout(()=>{},30000)'], { stdio: 'ignore' });
 		try {
 			fs.mkdirSync(lockPath, { recursive: true });
