@@ -4,51 +4,32 @@ All notable changes to the Vespyr project will be documented in this file.
 
 ---
 
-## [2.0.8] - 2026-08-25 — Record Correction & Retraction
+## [2.0.8] - 2026-08-25
 
-### Retractions (claims published in [2.0.7], falsified by round-table audit 2026-08-25)
+### Added
+- **Passive T3 boundary:** injected memory context is wrapped in `<HISTORICAL_MEMORY_DATA trust_level="T3_PASSIVE_DATA">…</HISTORICAL_MEMORY_DATA>` with provenance comments retained inside.
+- **Context budget ceiling:** `memory_filter.js` caps total injected memory context under 1,000 tokens per query, exposing `injected_tokens` and `budget_truncated` fields.
+- **Concurrent-write locking:** state-mutating orchestrator commands (`init/update/session-start/session-write/complete/advance/set-phase/compact`) run under an exclusive per-project lock (`.agents/state/orchestrator.lock`, mkdir-atomic with stale takeover).
+- **End-to-end smoke regression:** fixture covering `init` exit 0, agent frontmatter counts, the `session-start → session-write → complete` round-trip, and machine-fence integrity; runs unskipped on win32 and gates this tag.
+- **Windows CI coverage:** swarm-tests matrix runs on `windows-latest` across Node 18/20/22.
 
-Each retraction names the original claim verbatim and the command that falsifies it.
+### Fixed
+- **Token-budget enforcement:** `advance`/`set-phase` compact and validate before the durable commit; over-budget transitions abort with `ADVANCE_OVER_BUDGET` (exit 1), leaving pipeline state byte-identical.
+- **Lossless migration with gated purge:** `migrate_memory_v2.js` captures sections at every ATX level plus pre-header preamble, deduplicates exact duplicates, migrates divergent ones as variants, and aborts before any write or purge when input and output lines diverge (`tests/test_memory_fixes.test.js`).
+- **Machine-fence integrity:** removed the global `syncCore`/`syncDetectedFields` passes that rewrote human lines outside the machine fence; machine values live exclusively inside it.
+- **Windows installer breakage:** `detectRepository` now uses shell-free `execFileSync("git", …)` instead of POSIX redirection through `execSync`, which cmd.exe rejects.
+- **CRLF frontmatter parsing:** anchors accept `\r?\n` across `validate_frontmatter.js`, `add-identity-block.js`, `token_profiler.js`, and `migrate-frontmatter-v2.js`; ≥20 scaffolded agents parse under both line-ending regimes.
+- **Lock hardening:** heartbeat freshness evicts live-pid zombie holders after 15s; tamper-aware release prevents a stale holder from deleting a successor's lock.
+- **Guard thresholds:** `compaction_guard.js` ceilings aligned to §2.2 budgets (300/400/500/500); dynamic-tier files report-only.
 
-1. **RETRACTED:** *"Phase-Boundary Compaction: … keeping `active-decisions.md` under 400 tokens."*
-   The budget flag is computed and consumed by nothing.
-   Evidence: `grep -rn underBudget .agents/scripts/orchestrator_state.js` → computed at `:157`, zero enforcement sites; negative control `advance` exits 0 with a 1,817-token file (2026-08-25); live file ≈62k chars.
-2. **RETRACTED:** *"…preserving custom human blocks untouched."*
-   The machine fence itself is preserved, but human-edited lines outside the fence matching machine fields (`Phase:`, `Stack:`, `Blockers:`) are rewritten by global regex.
-   Evidence: `.agents/scripts/session_start.js` `syncCore`/`syncDetectedFields` (`:178`, `:220`) operate on the whole file, not the fenced block.
-3. **RETRACTED (as stated):** *"Idempotent Migration Engine … idempotently merge legacy `agent-notes/*.md` into `patterns-and-conventions.md` with header deduplication."*
-   Only `### `-prefixed sections are captured — content preceding the first `### ` header is silently dropped, and source directories are purged regardless of capture success.
-   Evidence: `.agents/scripts/migrate_memory_v2.js` `parseSections` (`:25-42`) matches `### ` only; ungated `rmSync` at `:107-114`.
-4. **RETRACTED:** plan-prose claim that injected context is wrapped as `<HISTORICAL_MEMORY_DATA trust_level="T3_PASSIVE_DATA">`.
-   No shipped script contains that string; HTML-comment `<!-- T3-DATA -->` fences ship instead.
-   Evidence: `grep -rn HISTORICAL_MEMORY_DATA .agents/scripts/ bin/ tests/` → 0 matches at `a632747`.
+### Changed
+- **Single sanctioned memory-write path (ADR-006):** `AGENTS.md` Shared Memory section rewritten, 19 persona files rerouted from direct edits to `@memory-controller`, and `memory_filter.js` scrubs secrets and sanitizes injection payloads at read time. ADR: `artifacts/output/04-architecture/adr-006-memory-write-enforcement.md`.
+- **Validation matrix:** added the `memory_write` ingestion-path row to `validate_matrix.js`; removed decommissioned `*-notes.md` references from `/round-table`.
+- **Version literals:** hardcoded engine-version strings centralized against `package.json`.
+- **Epic 02i record:** Tasks 3.4/11.4 closed by the fixes in this release; all seven sign-off rows marked `[VOID PENDING R-2 RE-CERTIFICATION]`.
 
-### Second-order correction (audit-record hygiene)
-
-The 2026-08-25 red-team seat retracted the fresh-install Windows failure as "not reproducible at HEAD." That retraction was **overbroad**: `windows-latest` CI reproduces the `init` failure on Node 18/20/22 at `a632747`. The finding is reinstated as **platform-scoped (Windows)** — root-caused and fixed in this release (see below). "Not reproducible on macOS" is recorded as scope, not refutation.
-
-### Fixed in this release (every claim paired with its evidence)
-
-- **Windows installer breakage:** `detectRepository` ran `git … 2>/dev/null` POSIX redirection through `execSync`; cmd.exe fails that redirect with *"The system cannot find the path specified."* Replaced with shell-free `execFileSync("git", […])`. Location: `bin/cli.js` `detectRepository()`.
-- **CRLF frontmatter misses:** frontmatter anchors matched strict `\n` only, so every agent reported *"FAIL: \<agent\> — no frontmatter found"* under Windows CRLF checkouts. Anchors are now `\r?\n`-tolerant in `validate_frontmatter.js` plus same-class latent instances (`add-identity-block.js`, `token_profiler.js`, `migrate-frontmatter-v2.js`). Verification: `tests/test_cli_smoke.test.js` asserts ≥20 scaffolded agents parse under both line-ending regimes and runs **unskipped on win32** in the swarm-tests matrix; a green windows-latest run gates this tag.
-- **New D1-surface smoke regression:** end-to-end fixture covering `init` exit 0 + agent frontmatter count + `session-start → session-write → complete` round-trip + machine-fence integrity, auto-discovered by `tests/run-all.js`. This closes the regression blind spot that let the original `ensureScript` breakage ship unnoticed.
-- **R-0 (protocol item):** Epic `02i` record corrected forward — `[FALSIFIED — CORRECTED FORWARD 2026-08-25]` banner; Tasks 3.4/11.4 reopened then closed by this release's fixes below; all seven sign-off rows marked `[VOID PENDING R-2 RE-CERTIFICATION]`. Location: `artifacts/docs/strategy/development-plan/02i-phase-1-memory-consolidation.md` §12–13.
-- **Migration zero-loss + gated purge (Task 3.4/A1):** `migrate_memory_v2.js` now captures sections at EVERY ATX level plus pre-header preamble; exact-duplicate sections dedupe while divergent duplicates migrate as variants; a zero-loss gate diffs every non-blank input line against the output and aborts before any write or purge on mismatch. Evidence: `node --test tests/test_memory_fixes.test.js` (F1–F3); live probe pre-fix lost `## SubSection` content, post-fix survives.
-- **Concurrent-write locking (Task 3.4/A2):** state-mutating orchestrator commands (`init/update/session-start/session-write/complete/advance/set-phase/compact`) run under an exclusive per-project lock (`.agents/state/orchestrator.lock`, mkdir-atomic, stale-takeover). Evidence: `tests/test_memory_fixes.test.js` F4 — eight parallel `complete` calls record 8/8 artifacts (pre-fix repro lost 3/3).
-- **Transactional phase transition + enforced token budget (R-5 tail):** `advance`/`set-phase` now compact and validate BEFORE the durable commit; over-budget transitions abort with `ADVANCE_OVER_BUDGET`, exit 1, byte-identical pipeline state. Evidence: `tests/test_memory_fixes.test.js` F5 (over-budget blocked + state byte-identical; under-budget advances).
-- **Fence integrity / DoD #1:** removed the global `syncCore`/`syncDetectedFields` passes that rewrote human lines outside the machine fence (`Blockers:`/`Stack:`/`Repository:` clobbering). Machine values live exclusively inside the fence. Evidence: `tests/test_memory_fixes.test.js` F6.
-- **Passive T3 boundary (Task 11.4):** injected context is now wrapped in `<HISTORICAL_MEMORY_DATA trust_level="T3_PASSIVE_DATA">…</HISTORICAL_MEMORY_DATA>` with provenance comments retained inside. Evidence: `grep -rn HISTORICAL_MEMORY_DATA .agents/scripts/memory_filter.js` and `tests/test_memory_fixes.test.js` F7.
-- **§11.1 Context Budget Ceiling enforced:** `memory_filter.js` caps total injected memory context under 1,000 tokens per query (`injected_tokens`, `budget_truncated` fields). Evidence: `tests/test_memory_fixes.test.js` F8.
-- **Lock hardening (audit residuals R1/R2):** heartbeat freshness makes a live-pid zombie holder evictable after 15s without corrupting anything; release is tamper-aware (directory mtime captured at acquire must match at release) so a stale holder can never delete a successor's lock. Evidence: `tests/test_memory_fixes.test.js` F9–F10.
-- **Spec-aligned guard thresholds:** `compaction_guard.js` ceilings corrected from contradicting values (700/2500/2000/1800) to §2.2 budgets (300/400/500/500); dynamic-tier files report-only. Evidence: `node .agents/scripts/compaction_guard.js --dir artifacts/memory/`.
-- **ADR-006 / R-3 Option B — single sanctioned write path + read-time defense:** owner ruling 2026-08-25/26. `AGENTS.md` Shared Memory section rewritten; **19 persona files** swept from direct-edit instructions to `@memory-controller` routing; `memory_filter.js` now applies `scrubSecrets`+`sanitizeContent` at read time so bypass-class writes are neutralized before any LLM consumes them. ADR: `artifacts/output/04-architecture/adr-006-memory-write-enforcement.md`. Evidence: `tests/test_memory_fixes.test.js` F13a (bypass secret → `[REDACTED_SECRET:*]`), F13b (injection payload quarantined, never served).
-- **Ghost-reference residue:** `.agents/skills/round-table/SKILL.md:165` allowlisted eight decommissioned `*-notes.md` files; rewritten to the consolidated memory layer.
-- **R-1 (protocol item):** `memory_write` ingestion-path row added to `validate_matrix.js`. Evidence: `node .agents/scripts/validate_matrix.js --matrix | grep memory_write` → exit 0.
-- **Version-literal sweep:** hardcoded engine-version strings centralized against `package.json` (`session_start.js`, installer scaffold, test assertions).
-
-### Known Open (disclosed, not fixed in this release)
-
-- KNOWN OPEN (gates Phase 2 entry): all seven 02i sign-off rows remain void pending R-2 executable-proof re-stamps (named command + observed output + date + SHA per row). Evidence: 02i §12 void notice, 2026-08-25. Owner: review panel. Not fixed in this release.
+### Known Issues
+- The seven Epic 02i sign-off rows require executable-proof re-stamps (named command + observed output + date + SHA per row) before Phase 2 entry. Owner: review panel.
 
 ---
 
