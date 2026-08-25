@@ -163,7 +163,7 @@ To ensure seamless collaboration across different agent steps and avoid context 
    - Load context: `Run the memory-controller to load the latest state for [task]`
    - Update decisions: `Run the memory-controller to write [decision] to active decisions`
 2. **For General Terminal/File-Writing Environments**:
-   Directly view or modify the standard markdown memory files using your standard file read/edit tools.
+   Route ALL memory writes through `@memory-controller` / `.agents/scripts/memory_write.js` (`orchestrator_state.js session-write`). Direct file edits to `artifacts/memory/**` bypass the memory security pipeline (secret scrubbing, injection sanitization, provenance attestation, dedupe) and are prohibited. Reads may use standard file tools; writes may not.
 
 ### 👤 User Identity
 

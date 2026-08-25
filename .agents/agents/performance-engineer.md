@@ -141,7 +141,7 @@ Refreshes `project-context.md` [CORE] (Phase/Blockers) and appends a Session Act
 - **Session start** (on entry, before loading context):
   `node .agents/scripts/orchestrator_state.js session-start --agent performance-engineer --domain performance --goal "{one-line goal}"`
 - **Read memory**: read `artifacts/memory/project-context.md` and `artifacts/memory/session-summaries/latest.md` directly with your read tool.
-- **Write memory entries**: append to `artifacts/memory/*.md` directly with your edit/write tool, following the entry formats in the blocks below.
+- **Write memory entries**: route ALL writes through `@memory-controller write` / `orchestrator_state.js session-write` — direct file edits to `artifacts/memory/**` bypass the security pipeline and are prohibited. Entry formats: see the blocks below.
 - **Session summary** (on completion): `node .agents/scripts/orchestrator_state.js session-write --agent performance-engineer --worked-on "..." --decisions "..." --next-step "..." --blockers none`
 - **Pipeline complete** (after all writes): `node .agents/scripts/orchestrator_state.js complete --agent performance-engineer --artifact <relative-path>`
 

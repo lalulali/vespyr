@@ -13,6 +13,10 @@
 
 const fs = require('fs');
 const path = require('path');
+// Read-time defense-in-depth: content that bypassed the write-time
+// pipeline (direct edits, hookless harnesses, human hand-edits) is
+// neutralized HERE before any LLM consumes it.
+const { scrubSecrets, sanitizeContent } = require('./memory_write.js');
 
 function getMemoryDir() { return path.join(process.cwd(), 'artifacts', 'memory'); }
 function getArchiveDir() { return path.join(getMemoryDir(), 'archive'); }
@@ -435,7 +439,11 @@ function filterMemory(agent, task, maxResults) {
   let injectedTokens = 0;
   let budgetTruncated = false;
   for (const s of allSections.slice(0, max)) {
-    const previewText = s.body.split(/(?<=[.!?])\s+/).slice(0, 3).join(' ');
+    // Read-time defense: neutralize secrets/injections from any
+    // bypass-class write BEFORE wrapping and returning to the LLM.
+    const previewText = sanitizeContent(
+      scrubSecrets(s.body.split(/(?<=[.!?])\s+/).slice(0, 3).join(' '))
+    );
     const provenanceDate = s.date || 'legacy-backfill-2026-08-08';
     const t3Block = formatT3Block(s.file, previewText, s.tier2 ? 'T2' : 'T3', provenanceDate);
     const cost = estTokens(t3Block);

@@ -25,6 +25,7 @@ const ASCII_ART = `
 const {
 	ADAPTERS: HARNESS_ADAPTERS,
 	HARNESS_OPTIONS,
+	REGISTRY: HARNESS_REGISTRY,
 	getAdapter: getHarnessAdapter,
 } = require("./lib/harnesses/index.js");
 
@@ -707,15 +708,10 @@ async function performUninstall(targetDir) {
 	// 2. Surgically cleanup .agents directory
 	surgicallyCleanupAgentsDir(agentsTarget);
 
-	// 3. Clean up all harness files/folders surgically
-	const allHarnesses = [
-		"opencode",
-		"claude",
-		"cursor",
-		"github",
-		"windsurf",
-		"kiro",
-	];
+	// 3. Clean up all harness files/folders surgically.
+	// Registry-driven (02m): never hardcode the list here — a new adapter
+	// must be swept on uninstall without touching this function.
+	const allHarnesses = Object.keys(HARNESS_REGISTRY);
 	uninstallHarnesses(targetDir, allHarnesses, isGlobal);
 
 	// 4. Delete core root documents

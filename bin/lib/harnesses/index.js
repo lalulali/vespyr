@@ -23,6 +23,13 @@ const path = require("path");
 // Active shapes (owner scope, 2026-08-24): installable + iterated.
 const ADAPTERS = [opencode, claude, github, kiro];
 
+// NOTE — Codex: intentionally NO adapter.
+// Current Codex natively reads root AGENTS.md and scans $REPO_ROOT/.agents/
+// skills (+ ~/.agents/skills); `.codex/` is a legacy location it no longer
+// needs. With zero emission required there is nothing to install, so Codex
+// support is implicit in the canonical `.agents/` store — do not re-add an
+// option without a real emission target (`.codex/*` is NOT one).
+
 // Legacy shapes: NOT installable; retained only for detect + uninstall sweeps
 // of pre-existing installs. Redesign lives in 03c after per-harness research.
 const LEGACY_CLEANUP_ADAPTERS = [cursor, windsurf];

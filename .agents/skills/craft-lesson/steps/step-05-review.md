@@ -47,13 +47,13 @@ Present the final completion report to the user with direct clickable links to a
 **Explanation Style:** {Beginner | Intermediate | Expert}
 
 #### Generated Deliverables:
-- 🗺️ **Master Knowledge Map**: [knowledge-map.md](file:///Users/christianhadianto/Documents/TechSmith/vespyr/artifacts/output/teaching/knowledge-map.md)
-- 📋 **Course Syllabus**: [syllabus.md](file:///Users/christianhadianto/Documents/TechSmith/vespyr/artifacts/output/teaching/syllabus.md)
-- 📚 **Student Handbook**: [handbook.md](file:///Users/christianhadianto/Documents/TechSmith/vespyr/artifacts/output/teaching/handbook.md)
-- ⚡ **Quick Reference Cheatsheet**: [cheatsheet.md](file:///Users/christianhadianto/Documents/TechSmith/vespyr/artifacts/output/teaching/cheatsheet.md)
-- 🎙️ **Presentation Outline**: [presentation.md](file:///Users/christianhadianto/Documents/TechSmith/vespyr/artifacts/output/teaching/presentation.md)
-- 📦 **Online Class Package**: [class/](file:///Users/christianhadianto/Documents/TechSmith/vespyr/artifacts/output/teaching/class/)
-- 🎬 **Video Script**: [video-script.md](file:///Users/christianhadianto/Documents/TechSmith/vespyr/artifacts/output/teaching/video-script.md)
+- 🗺️ **Master Knowledge Map**: [knowledge-map.md](artifacts/output/teaching/knowledge-map.md)
+- 📋 **Course Syllabus**: [syllabus.md](artifacts/output/teaching/syllabus.md)
+- 📚 **Student Handbook**: [handbook.md](artifacts/output/teaching/handbook.md)
+- ⚡ **Quick Reference Cheatsheet**: [cheatsheet.md](artifacts/output/teaching/cheatsheet.md)
+- 🎙️ **Presentation Outline**: [presentation.md](artifacts/output/teaching/presentation.md)
+- 📦 **Online Class Package**: [class/](artifacts/output/teaching/class/)
+- 🎬 **Video Script**: [video-script.md](artifacts/output/teaching/video-script.md)
 
 *Quality certification complete. All artifacts derive from a unified Master Knowledge Map.*
 ```
