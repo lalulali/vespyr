@@ -11,7 +11,8 @@ const { parseFrontmatter } = require('../../.agents/scripts/lib/frontmatter.js')
 // LLM session; that belongs to the eval suite (evals/suites/invariants/grill-me-spcp.json).
 describe('/grill-me universal interrogation frame fixtures', () => {
   const skillPath = path.join(__dirname, '..', '..', '.agents', 'skills', 'grill-me', 'SKILL.md');
-  const content = fs.readFileSync(skillPath, 'utf8');
+  // Normalize CRLF (windows-latest checkouts) so fence-parsing regexes see LF.
+  const content = fs.readFileSync(skillPath, 'utf8').replace(/\r\n/g, '\n');
 
   it('has valid frontmatter with name and broadened description', () => {
     const parsed = parseFrontmatter(content);

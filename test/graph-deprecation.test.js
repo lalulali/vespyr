@@ -48,7 +48,16 @@ function scanDirectory(dir) {
   for (const item of entries) {
     if (['node_modules', '.git', '.gemini', 'structural'].includes(item)) continue;
     const full = path.join(dir, item);
-    const stat = fs.statSync(full);
+    // Windows checkouts without core.symlinks materialize git symlinks as
+    // dangling links (e.g. eval corpus inj-symlink-escape) — statSync throws
+    // ENOENT. Skip what cannot be statted; scan what can.
+    let stat;
+    try {
+      stat = fs.lstatSync(full);
+      if (stat.isSymbolicLink()) continue;
+    } catch {
+      continue;
+    }
     if (stat.isDirectory()) {
       violations = violations.concat(scanDirectory(full));
     } else if (stat.isFile() && ['.js', '.md', '.canonical', '.json', '.template'].some(ext => full.endsWith(ext))) {
