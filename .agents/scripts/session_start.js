@@ -91,7 +91,7 @@ function detectEngineVersion() {
       if (pkg.version) return pkg.version;
     }
   } catch {}
-  return '2.0.7';
+  return '2.0.8';
 }
 
 function detectStack() {
@@ -146,7 +146,7 @@ function generateMachineStateBlock({ stack, branch, phase, sprint, blockers, ver
     `- Active Phase: ${phase || 'validation'}`,
     `- Active Sprint: ${sprint || 'none'}`,
     `- Blocker Status: ${blockerText}`,
-    `- Engine Version: ${version || '2.0.7'}`,
+    `- Engine Version: ${version || '2.0.8'}`,
     '<!-- END MACHINE STATE -->'
   ].join('\n');
 }
@@ -300,9 +300,11 @@ function syncProjectContext({ agent, domain, goal, ensureMarker = false, recordM
   const machineBlock = generateMachineStateBlock({ stack, branch, phase, sprint, blockers, version });
   updated = spliceMachineState(updated, machineBlock);
 
-  // Sync legacy CORE & detected fields for full backward compatibility
-  updated = syncCore(updated, phase, blockers);
-  updated = syncDetectedFields(updated, repository, stack);
+  // DoD #1 fix (2026-08-25): legacy syncCore/syncDetectedFields passes ran
+  // globally and destroyed human lines outside the fence matching machine
+  // shapes (e.g. `Blockers: 7` → 0, `Stack:` overwritten). Machine truth now
+  // lives exclusively inside the fence via generateMachineStateBlock; human
+  // content outside the fence is never rewritten.
 
   const marker = `- ${stamp} @${agent} — ${domain || 'work'}` + (goal ? `: ${goal}` : '');
 

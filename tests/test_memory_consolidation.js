@@ -1,6 +1,6 @@
 /**
  * test_memory_consolidation.js — Comprehensive Test Suite for Epic 02i
- * Memory Consolidation & Lifecycle Architecture (Vespyr 2.0.7)
+ * Memory Consolidation & Lifecycle Architecture (Vespyr)
  *
  * Tests:
  * 1. Machine Fence Synchronization & Atomic Writes
@@ -14,6 +14,7 @@ const { describe, it, beforeEach, afterEach } = require('node:test');
 const assert = require('node:assert');
 const fs = require('fs');
 const path = require('path');
+const PKG = require('../package.json');
 const os = require('os');
 
 const {
@@ -41,14 +42,14 @@ function cleanTempDir(dir) {
 describe('Epic 02i: Memory Consolidation & Lifecycle Architecture', () => {
 
   describe('Suite 1: Machine Fence Splicing & State Synchronization', () => {
-    it('should generate a valid machine state block with 2.0.7 defaults', () => {
+    it(`should generate a valid machine state block with ${PKG.version} defaults`, () => {
       const block = generateMachineStateBlock({
         stack: 'JavaScript',
         branch: 'main',
         phase: 'validation',
         sprint: 'none',
         blockers: 0,
-        version: '2.0.7'
+        version: PKG.version
       });
 
       assert.ok(block.includes('<!-- BEGIN MACHINE STATE -->'));
@@ -58,7 +59,7 @@ describe('Epic 02i: Memory Consolidation & Lifecycle Architecture', () => {
       assert.ok(block.includes('- Active Phase: validation'));
       assert.ok(block.includes('- Active Sprint: none'));
       assert.ok(block.includes('- Blocker Status: 0 active blockers'));
-      assert.ok(block.includes('- Engine Version: 2.0.7'));
+      assert.ok(block.includes(`- Engine Version: ${PKG.version}`));
       assert.ok(block.includes('<!-- END MACHINE STATE -->'));
     });
 
@@ -70,7 +71,7 @@ describe('Epic 02i: Memory Consolidation & Lifecycle Architecture', () => {
         phase: 'planning',
         sprint: 'sprint-1',
         blockers: 1,
-        version: '2.0.7'
+        version: PKG.version
       });
 
       const spliced = spliceMachineState(original, block);
@@ -86,7 +87,7 @@ describe('Epic 02i: Memory Consolidation & Lifecycle Architecture', () => {
         phase: 'execution',
         sprint: 'sprint-1',
         blockers: 0,
-        version: '2.0.7'
+        version: PKG.version
       });
       const reSpliced = spliceMachineState(spliced, updatedBlock);
       assert.ok(reSpliced.includes('- Active Phase: execution'));
@@ -94,9 +95,9 @@ describe('Epic 02i: Memory Consolidation & Lifecycle Architecture', () => {
       assert.ok(reSpliced.includes('Do not touch this text.'));
     });
 
-    it('should detect engine version as 2.0.7', () => {
+    it('should detect engine version matching package.json', () => {
       const version = detectEngineVersion();
-      assert.strictEqual(version, '2.0.7');
+      assert.strictEqual(version, PKG.version);
     });
   });
 
@@ -134,7 +135,10 @@ describe('Epic 02i: Memory Consolidation & Lifecycle Architecture', () => {
 
     it('should migrate agent-notes into patterns-and-conventions and purge ghost directories', () => {
       const result = migrateMemory();
-      assert.strictEqual(result.migrated_entries, 2);
+      // Union semantics (A1 fix): file-title headers (#) migrate alongside
+      // ### sections — 4 sections total across the two source files.
+      assert.strictEqual(result.migrated_entries, 4);
+      assert.strictEqual(result.loss_check, 'pass');
       assert.ok(result.purged_directories.includes('agent-notes'));
       assert.ok(result.purged_directories.includes('pending-questions'));
       assert.ok(result.purged_directories.includes('session-checkpoints'));
@@ -145,16 +149,20 @@ describe('Epic 02i: Memory Consolidation & Lifecycle Architecture', () => {
       assert.ok(!fs.existsSync(path.join(memoryDir, 'session-checkpoints')));
 
       const patterns = fs.readFileSync(path.join(memoryDir, 'patterns-and-conventions.md'), 'utf8');
+      assert.ok(patterns.includes('# Developer Notes'), 'file-title header must survive (A1)');
+      assert.ok(patterns.includes('# QA Notes'), 'file-title header must survive (A1)');
       assert.ok(patterns.includes('Test Note 1'));
       assert.ok(patterns.includes('Test Note 2'));
     });
 
     it('should be completely idempotent when executed multiple times', () => {
       const firstRun = migrateMemory();
-      assert.strictEqual(firstRun.migrated_entries, 2);
+      assert.strictEqual(firstRun.migrated_entries, 4);
+      assert.strictEqual(firstRun.loss_check, 'pass');
 
       const secondRun = migrateMemory();
       assert.strictEqual(secondRun.migrated_entries, 0);
+      assert.strictEqual(secondRun.loss_check, 'pass (nothing to migrate)');
       assert.strictEqual(secondRun.purged_directories.length, 0);
     });
   });

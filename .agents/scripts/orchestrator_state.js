@@ -30,6 +30,7 @@ const fs = require('fs');
 const path = require('path');
 
 const { writeFileSync: atomicWriteFileSync, writeJsonSync, readJsonSync } = require('./lib/fs_atomic.js');
+const { withLock } = require('./lib/lock.js');
 const { syncProjectContext } = require('./session_start.js');
 
 const STATE_FILE = path.join(process.cwd(), 'artifacts', 'output', 'pipeline-state.json');
@@ -687,13 +688,7 @@ const USAGE = `Usage:
   node orchestrator_state.js validate --phase planning
   node orchestrator_state.js --help | usage | -h`;
 
-function main() {
-  const args = process.argv.slice(2);
-  if (args.length === 0 || args[0] === '--help' || args[0] === '-h' || args[0] === 'usage') {
-    console.log(USAGE);
-    process.exit(0);
-  }
-
+function mainDispatch(args) {
   const cmd = args[0];
 
   try {
@@ -1075,10 +1070,30 @@ function main() {
         timestamp: new Date().toISOString()
       });
       state.last_updated = new Date().toISOString();
-      writeState(state);
 
-      // Phase boundary compaction
+      // R-5 transactional ordering (fixed 2026-08-25): compact + validate
+      // BEFORE the durable commit. A budget violation aborts the transition
+      // with zero partial phase-state writes; compaction itself is content
+      // hygiene on active-decisions.md and persists independently.
       const compactionResult = compactActiveDecisions();
+      if (!compactionResult.underBudget) {
+        recordTelemetry('phase_transition', {
+          phase: targetPhase,
+          data: { action: 'advance', from: currentPhase, to: targetPhase, blocked: 'OVER_BUDGET', compaction: compactionResult }
+        });
+        console.log(JSON.stringify({
+          success: false,
+          error: 'ADVANCE_OVER_BUDGET',
+          from: currentPhase,
+          to: targetPhase,
+          tokens: compactionResult.tokens,
+          budget: 400,
+          hint: 'Compact or archive artifacts/memory/active-decisions.md below 400 tokens, then retry.'
+        }));
+        process.exit(1);
+      }
+
+      writeState(state);
 
       // Sync project context
       try {
@@ -1144,10 +1159,28 @@ function main() {
       });
 
       state.last_updated = new Date().toISOString();
-      writeState(state);
 
-      // Phase boundary compaction
+      // R-5 transactional ordering (fixed 2026-08-25): see advance — compact
+      // + budget-validate BEFORE the durable commit.
       const compactionResult = compactActiveDecisions();
+      if (!compactionResult.underBudget) {
+        recordTelemetry('phase_transition', {
+          phase,
+          data: { action: 'set-phase', from: oldPhase, to: phase, blocked: 'OVER_BUDGET', compaction: compactionResult }
+        });
+        console.log(JSON.stringify({
+          success: false,
+          error: 'SET_PHASE_OVER_BUDGET',
+          from: oldPhase,
+          to: phase,
+          tokens: compactionResult.tokens,
+          budget: 400,
+          hint: 'Compact or archive artifacts/memory/active-decisions.md below 400 tokens, then retry.'
+        }));
+        process.exit(1);
+      }
+
+      writeState(state);
 
       // Sync back to project-context.md
       try {
@@ -1182,6 +1215,28 @@ function main() {
   } catch (e) {
     console.error(JSON.stringify({ success: false, error: e.message }));
     process.exit(1);
+  }
+}
+
+// Commands that read-modify-write pipeline-state.json / memory files run
+// under a per-project exclusive lock (A2, Task 3.4/A2 — 2026-08-25), so
+// concurrent agent sessions can no longer lose updates last-writer-wins.
+const MUTATING_COMMANDS = new Set([
+  'init', 'update', 'session-start', 'session-write', 'complete',
+  'advance', 'set-phase', 'compact', 'sync-context'
+]);
+
+function main() {
+  const args = process.argv.slice(2);
+  if (args.length === 0 || args[0] === '--help' || args[0] === '-h' || args[0] === 'usage') {
+    console.log(USAGE);
+    process.exit(0);
+  }
+  if (MUTATING_COMMANDS.has(args[0])) {
+    const lockPath = path.join(process.cwd(), '.agents', 'state', 'orchestrator.lock');
+    withLock(lockPath, () => mainDispatch(args));
+  } else {
+    mainDispatch(args);
   }
 }
 
