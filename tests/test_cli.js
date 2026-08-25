@@ -451,7 +451,7 @@ describe('Test 7: scaffoldArtifacts()', () => {
     const ctx = fs.readFileSync(path.join(memoryDir, 'project-context.md'), 'utf8');
     assert.ok(ctx.includes('<!-- BEGIN MACHINE STATE -->'));
     assert.ok(ctx.includes('<!-- END MACHINE STATE -->'));
-    assert.ok(ctx.includes('Engine Version: 2.0.7'));
+    assert.ok(ctx.includes(`Engine Version: ${require("../package.json").version}`));
   });
 });
 

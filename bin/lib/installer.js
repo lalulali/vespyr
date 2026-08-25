@@ -8,6 +8,7 @@ const fs = require("fs");
 const os = require("os");
 const path = require("path");
 const { R } = require("./state.js");
+const PKG = require("../../package.json");
 const linkUtils = require("./link-utils.js");
 const { detectStack } = require("./detector.js");
 const {
@@ -115,7 +116,7 @@ User Nickname: ${userNickname}
 - Active Phase: validation
 - Active Sprint: none
 - Blocker Status: 0 active blockers
-- Engine Version: 2.0.7
+- Engine Version: ${PKG.version}
 <!-- END MACHINE STATE -->
 
 ## Session Activity
