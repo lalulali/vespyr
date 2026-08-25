@@ -11,12 +11,14 @@ const path = require('path');
  *  - Missing/corrupt owner.json => stolen only after ACQUIRE_GRACE_MS
  *    (a holder may legitimately be mid-acquire).
  *  - Dead pid                   => always stolen.
- *  - Live pid, heartbeat frozen longer than LIVE_HEARTBEAT_STALE_MS (60s)
- *    => stolen (covers the SIGKILLed-unreaped zombie class, Vera R2).
- *      NOTE: setInterval heartbeats cannot fire while a holder executes a
- *      long SYNCHRONOUS critical section (Vera N3), so the live-pid stale
- *      threshold is deliberately 60s — generous above any legitimate
- *      orchestrator mutation, far below an indefinite wedge.
+ *  - Live pid, lock held longer than MAX_HOLD_MS (60s) => stolen (covers
+ *    the SIGKILLed-unreaped zombie class, Vera R2).
+ *      NOTE (Vera N3): timer-based heartbeats cannot fire while a holder
+ *      executes a long SYNCHRONOUS critical section, so liveness-by-
+ *      heartbeat is impossible by construction. The 60s value is a
+ *      MAXIMUM HOLD DURATION — generous above any legitimate orchestrator
+ *      mutation, far below an indefinite wedge. Do not add >60s sync
+ *      sections; refactor instead.
  *  - Release is ownership-checked AND tamper-aware: the directory mtime
  *      captured at acquire must match at release, so a stale holder can
  *      never delete a successor's replaced lock (Vera R1).
@@ -26,7 +28,7 @@ const path = require('path');
  * Scope: per-project (lock lives under <cwd>/.agents/state/).
  */
 const ACQUIRE_GRACE_MS = 2000;
-const LIVE_HEARTBEAT_STALE_MS = 60000;
+const MAX_HOLD_MS = 60000; // max section duration before a waiter may steal
 const DEFAULT_TIMEOUT_MS = 30000;
 const RETRY_DELAY_MS = 50;
 
@@ -89,7 +91,7 @@ function takeStale(lockPath) {
   } else if (!pidAlive(owner.pid)) {
     stale = true;
   } else {
-    stale = Date.now() - owner.ts > LIVE_HEARTBEAT_STALE_MS;
+    stale = Date.now() - owner.ts > MAX_HOLD_MS;
   }
   if (stale) {
     fs.rmSync(lockPath, { recursive: true, force: true });
