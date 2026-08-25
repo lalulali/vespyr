@@ -162,7 +162,7 @@ After the discussion ends, verify any claim that a file or artifact changed agai
    Blockers: {unresolved disagreements or "none"}
    ```
 
-3. Optionally write role-specific notes only to the currently supported allowlisted files: `developer-notes.md`, `architect-notes.md`, `tech-lead-notes.md`, `product-manager-notes.md`, `qa-notes.md`, `designer-notes.md`, `ml-ai-notes.md`, or `performance-notes.md`. If a contributing persona has no allowlisted note file, put the insight in `active-decisions.md` or the session summary instead. Do not invent agent-note paths.
+3. Optionally write role-specific insights to the consolidated memory layer: code/architecture patterns → `artifacts/memory/patterns-and-conventions.md`, QA lessons and gotchas → `artifacts/memory/lessons-learned.md`, binding decisions → `artifacts/memory/active-decisions.md`. Role-siloed `*-notes.md` files were decommissioned by Epic 02i; never invent agent-note paths.
 
 ## Exit
 

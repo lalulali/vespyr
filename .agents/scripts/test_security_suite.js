@@ -146,14 +146,42 @@ runTest('P8 Tool-Addition & Ingestion Matrix Gate (validate_matrix.js)', () => {
 
 // 5. Memory T3 Loader & Admission Control
 runTest('Memory Filter T3 Delimiter & Admission Control (memory_filter.js)', () => {
-  const out = execFileSync('node', [path.join(SCRIPTS_DIR, 'memory_filter.js'), '--agent', 'developer', '--task', 'authentication'], { cwd: ROOT, encoding: 'utf8' });
-  const parsed = JSON.parse(out);
-  if (!Array.isArray(parsed.results) || parsed.results.length === 0) {
-    throw new Error('Memory filter returned empty results');
-  }
-  const sample = parsed.results[0];
-  if (!sample.t3_block || !sample.t3_block.includes('<!-- T3-DATA:')) {
-    throw new Error('T3 delimiter block missing from memory result');
+  // Self-contained fixture: memory_filter resolves artifacts/memory/ under
+  // cwd, and the repo's live artifacts/memory is UNTRACKED — a fresh CI
+  // checkout has none (run 32825787864: "Memory filter returned empty
+  // results"). Seed an isolated workspace instead of depending on it.
+  const os = require('os');
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'vespyr-t3-filter-'));
+  const oldCwd = process.cwd();
+  try {
+    const memDir = path.join(tmp, 'artifacts', 'memory');
+    fs.mkdirSync(memDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(memDir, 'project-context.md'),
+      '# Project Context\n\n## [IDENTITY]\nUser Nickname: Test\n',
+      'utf8'
+    );
+    fs.writeFileSync(
+      path.join(memDir, 'active-decisions.md'),
+      '### [SECURITY] Authentication token handling [date: 2026-08-25] [agent: @security-engineer]\n' +
+        'Authentication secrets are scrubbed via scrubSecrets before any memory write; tokens never appear in logs.\n' +
+        '**Status:** active\n',
+      'utf8'
+    );
+
+    process.chdir(tmp);
+    const out = execFileSync('node', [path.join(SCRIPTS_DIR, 'memory_filter.js'), '--agent', 'developer', '--task', 'authentication'], { encoding: 'utf8' });
+    const parsed = JSON.parse(out);
+    if (!Array.isArray(parsed.results) || parsed.results.length === 0) {
+      throw new Error('Memory filter returned empty results');
+    }
+    const sample = parsed.results[0];
+    if (!sample.t3_block || !sample.t3_block.includes('<!-- T3-DATA:')) {
+      throw new Error('T3 delimiter block missing from memory result');
+    }
+  } finally {
+    process.chdir(oldCwd);
+    fs.rmSync(tmp, { recursive: true, force: true });
   }
 });
 

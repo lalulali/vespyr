@@ -93,9 +93,30 @@ function main() {
   if (fs.existsSync(BASELINE)) {
     const baseline = JSON.parse(fs.readFileSync(BASELINE, 'utf8'));
     const cur = JSON.parse(run1.out);
-    const key = (f) => [f.rule, f.path, f.line || 0, f.detail.slice(0, 80)];
-    if (JSON.stringify(cur.findings.map(key)) !== JSON.stringify(baseline.findings.map(key))) {
-      failures.push('corpus-root scan: findings differ from frozen baseline-2026-08-10.json');
+    // INJ-SYMLINK details embed the OS-resolved symlink target
+    // (/private/etc/passwd on macOS firmlink vs /etc/passwd on Linux vs
+    // <unresolvable> on Windows) — environment-dependent by construction,
+    // so cross-environment comparison keys on rule|path|line only. The
+    // platform-local value is still covered by the byte-identical double-run
+    // determinism check above.
+    const key = (f) =>
+      f.rule === 'INJ-SYMLINK'
+        ? JSON.stringify([f.rule, f.path, f.line || 0])
+        : JSON.stringify([f.rule, f.path, f.line || 0, f.detail.slice(0, 80)]);
+    // Order-insensitive set comparison: readdir order is filesystem-dependent
+    // (APFS vs ext4 vs NTFS), so sequence equality would fail honest clones.
+    const curKeys = cur.findings.map(key).map((k) => JSON.stringify(k)).sort();
+    const baseKeys = baseline.findings.map(key).map((k) => JSON.stringify(k)).sort();
+    if (JSON.stringify(curKeys) !== JSON.stringify(baseKeys)) {
+      const curSet = new Set(curKeys);
+      const baseSet = new Set(baseKeys);
+      const onlyCur = curKeys.filter((k) => !baseSet.has(k)).slice(0, 5);
+      const onlyBase = baseKeys.filter((k) => !curSet.has(k)).slice(0, 5);
+      failures.push(
+        'corpus-root scan: findings differ from frozen baseline-2026-08-10.json' +
+        ` (only-in-current[${onlyCur.length}]: ${onlyCur.join(' | ') || '—'}` +
+        `; only-in-baseline[${onlyBase.length}]: ${onlyBase.join(' | ') || '—'})`
+      );
     }
   }
 

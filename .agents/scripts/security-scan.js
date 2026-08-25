@@ -145,7 +145,7 @@ function walk(dir, fileList = [], base = dir) {
             // F-10 (Victor): lstat the .git/config path — a symlinked .git/config
             // must be checked by INJ-SYMLINK, not silently read.
             const lstatd = fs.lstatSync(gitConfig);
-            fileList.push({ full: gitConfig, rel: path.relative(base, gitConfig), symlink: lstatd.isSymbolicLink() });
+            fileList.push({ full: gitConfig, rel: path.relative(base, gitConfig), symlink: lstatd.isSymbolicLink(), vcsMeta: true });
           }
           const hooksDir = path.join(full, 'hooks');
           if (fs.existsSync(hooksDir) && fs.statSync(hooksDir).isDirectory()) {
@@ -153,7 +153,7 @@ function walk(dir, fileList = [], base = dir) {
               if (h === 'README.sample') continue;
               const hFull = path.join(hooksDir, h);
               const hLstat = fs.lstatSync(hFull);
-              fileList.push({ full: hFull, rel: path.relative(base, hFull), symlink: hLstat.isSymbolicLink() });
+              fileList.push({ full: hFull, rel: path.relative(base, hFull), symlink: hLstat.isSymbolicLink(), vcsMeta: true });
             }
           }
         } catch (e) {
@@ -406,6 +406,13 @@ function main() {
 
     for (const { rule, re, isT0, matchers } of rules) {
       if (rule.mode === 'lstat') continue; // handled above
+
+      // VCS metadata (.git/config, .git/hooks/*) is runner/tooling surface,
+      // not repo content: content-mode rules (INJ-OBFUSC etc.) must never
+      // scan it — GH Actions' own checkout credential produced a CI-only
+      // INJ-OBFUSC (runs 32825787864/32826395949). GH-1 parse-mode keeps its
+      // explicit routing below.
+      if (file.vcsMeta && rule.mode !== 'parse') continue;
 
       // Path scoping
       let pathMatches = false;
