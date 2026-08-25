@@ -232,4 +232,88 @@ describe('Suite: Memory Fix Loop Regressions (2026-08-25)', () => {
 		assert.ok(block.trim().endsWith('</HISTORICAL_MEMORY_DATA>'), 'closing trust boundary missing');
 		assert.ok(block.includes('<!-- T3-DATA:'), 'provenance comment retained inside boundary');
 	});
+
+	it('F8: injected context is capped under the 1,000-token §11.1 ceiling', () => {
+		const memDir = path.join(tmpDir, 'artifacts', 'memory');
+		fs.mkdirSync(memDir, { recursive: true });
+		fs.writeFileSync(path.join(memDir, 'project-context.md'), '# Project Context\n\n## [IDENTITY]\nUser Nickname: Test\n');
+		// 15 matching entries x ~120 tokens each ≈ 1,800 tokens demanded.
+		const entries = Array.from({ length: 15 }, (_, i) =>
+			`### [SECURITY] Authentication decision ${i} [date: 2026-08-25] [agent: @security-engineer]\n` +
+			`Authentication ruling ${i}: ` + 'token scrubbing rationale words '.repeat(12) +
+			'\n**Status:** active\n'
+		).join('\n');
+		fs.writeFileSync(path.join(memDir, 'active-decisions.md'), entries);
+
+		process.chdir(tmpDir);
+		const out = JSON.parse(execFileSync(process.execPath, [MEMORY_FILTER, '--agent', 'developer', '--task', 'authentication'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }));
+		process.chdir(oldCwd);
+
+		assert.strictEqual(out.injected_budget_tokens, 1000);
+		assert.ok(out.injected_tokens <= 1000, `injected_tokens must respect ceiling (got ${out.injected_tokens})`);
+		assert.strictEqual(out.budget_truncated, true, 'oversized demand must be reported as truncated');
+		assert.ok(out.results.length < 15, 'results must be truncated to fit budget');
+		assert.ok(out.results[0].t3_block.includes('<HISTORICAL_MEMORY_DATA trust_level="T3_PASSIVE_DATA">'), 'boundary intact on truncated results');
+	});
+
+	it('F9: lock evicts a LIVE-pid holder with stale heartbeat (zombie class)', () => {
+		const { spawn } = require('child_process');
+		const lockPath = path.join(tmpDir, '.agents', 'state', 'orchestrator.lock');
+		const { withLock } = require(path.join(REPO_ROOT, '.agents', 'scripts', 'lib', 'lock.js'));
+
+		// Simulate a zombie: live process, but owner.json heartbeat frozen in
+		// the past beyond DEFAULT_STALE_MS (15000).
+		const zombie = spawn(process.execPath, ['-e', 'setTimeout(()=>{},30000)'], { stdio: 'ignore' });
+		try {
+			fs.mkdirSync(lockPath, { recursive: true });
+			fs.writeFileSync(
+				path.join(lockPath, 'owner.json'),
+				JSON.stringify({ pid: zombie.pid, ts: Date.now() - 20000 })
+			);
+			let executed = false;
+			const t0 = Date.now();
+			withLock(lockPath, () => {
+				executed = true;
+				const owner = JSON.parse(fs.readFileSync(path.join(lockPath, 'owner.json'), 'utf8'));
+				assert.strictEqual(owner.pid, process.pid, 'successor must own the lock inside the section');
+			}, { timeoutMs: 5000 });
+			assert.ok(executed, 'critical section must run after zombie eviction');
+			assert.ok(Date.now() - t0 < 4900, 'zombie eviction should not wait out the full timeout');
+			zombie.kill();
+		} catch (e) {
+			zombie.kill();
+			throw e;
+		}
+	});
+
+	it('F10: release never deletes a successor-replaced lock (R1 tamper guard)', () => {
+		const lockPath = path.join(tmpDir, '.agents', 'state', 'orchestrator.lock');
+		const { withLock } = require(path.join(REPO_ROOT, '.agents', 'scripts', 'lib', 'lock.js'));
+
+		let deletedByStaleHolder = false;
+		withLock(lockPath, () => {
+			const acquiredMtime = fs.statSync(lockPath).mtimeMs;
+			// Successor takes over while we "hold": replaces dir + owner.
+			fs.rmSync(lockPath, { recursive: true, force: true });
+			fs.mkdirSync(lockPath, { recursive: true });
+			fs.writeFileSync(
+				path.join(lockPath, 'owner.json'),
+				JSON.stringify({ pid: process.pid + 999999, ts: Date.now() })
+			);
+			// Replicate withLock's release decision verbatim:
+			const owner = (() => {
+				try { return JSON.parse(fs.readFileSync(path.join(lockPath, 'owner.json'), 'utf8')); } catch { return null; }
+			})();
+			let mtimeNow = null;
+			try { mtimeNow = fs.statSync(lockPath).mtimeMs; } catch {}
+			const oursByPid = owner !== null && owner.pid === process.pid;
+			const oursByMtime = owner === null && mtimeNow === acquiredMtime;
+			if ((oursByPid || oursByMtime) && mtimeNow === acquiredMtime) {
+				fs.rmSync(lockPath, { recursive: true, force: true });
+				deletedByStaleHolder = true;
+			}
+		});
+		assert.strictEqual(deletedByStaleHolder, false, 'stale holder must not delete a successor-owned replaced lock');
+		assert.ok(fs.existsSync(path.join(lockPath, 'owner.json')), 'successor lock must survive');
+	});
 });

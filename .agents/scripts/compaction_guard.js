@@ -10,14 +10,19 @@
 const fs = require('fs');
 const path = require('path');
 
+// Thresholds aligned to Epic 02i §2.2 spec (2026-08-25): the previous
+// in-file values (700/2500/2000/1800) contradicted the plan and were flagged
+// by two audit rounds as "guard ceilings contradicting spec".
+// Dynamic-tier files (blockers-and-risks, session-summaries) carry no hard
+// budget per §2.2 — null tokens means report-only, never a violation.
 const THRESHOLDS = {
-  'project-context.md': { words: 500, tokens: 700 },
-  'active-decisions.md': { words: 1800, tokens: 2500 },
-  'patterns-and-conventions.md': { words: 1500, tokens: 2000 },
-  'lessons-learned.md': { words: 1300, tokens: 1800 },
-  'blockers-and-risks.md': { words: 900, tokens: 1200 },
-  'teaching-style.md': { words: 600, tokens: 800 },
-  'session-summaries/latest.md': { words: 600, tokens: 800 }
+  'project-context.md': { words: 225, tokens: 300 },
+  'active-decisions.md': { words: 300, tokens: 400 },
+  'patterns-and-conventions.md': { words: 375, tokens: 500 },
+  'lessons-learned.md': { words: 375, tokens: 500 },
+  'blockers-and-risks.md': { words: null, tokens: null },
+  'teaching-style.md': { words: null, tokens: null },
+  'session-summaries/latest.md': { words: null, tokens: null }
 };
 
 function countWords(content) {
@@ -38,6 +43,18 @@ function checkFile(filePath, thresholds) {
   const tokens = estimateTokens(words);
   const wordThreshold = thresholds.words;
   const tokenThreshold = thresholds.tokens;
+
+  // Dynamic-tier files (null thresholds): report usage, never a violation.
+  if (wordThreshold === null || tokenThreshold === null) {
+    return {
+      words,
+      tokens,
+      word_threshold: null,
+      token_threshold: null,
+      status: 'DYNAMIC',
+      action: 'none'
+    };
+  }
 
   let status = 'OK';
   if (words > wordThreshold) {

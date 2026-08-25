@@ -426,10 +426,26 @@ function filterMemory(agent, task, maxResults) {
     return 0;
   });
 
-  const results = allSections.slice(0, max).map(s => {
+  // §11.1 Context Budget Ceiling: total injected memory context is capped
+  // under 1,000 tokens ("Lost in the Middle" / context-dilution defense).
+  const INJECTED_BUDGET_TOKENS = 1000;
+  const estTokens = (text) => Math.round(text.trim().split(/\s+/).filter(Boolean).length / 0.75);
+
+  const results = [];
+  let injectedTokens = 0;
+  let budgetTruncated = false;
+  for (const s of allSections.slice(0, max)) {
     const previewText = s.body.split(/(?<=[.!?])\s+/).slice(0, 3).join(' ');
     const provenanceDate = s.date || 'legacy-backfill-2026-08-08';
-    return {
+    const t3Block = formatT3Block(s.file, previewText, s.tier2 ? 'T2' : 'T3', provenanceDate);
+    const cost = estTokens(t3Block);
+    // Always return at least one result; stop before exceeding the ceiling.
+    if (results.length > 0 && injectedTokens + cost > INJECTED_BUDGET_TOKENS) {
+      budgetTruncated = true;
+      break;
+    }
+    injectedTokens += cost;
+    results.push({
       header: s.header,
       file: s.file,
       score: s.score,
@@ -437,9 +453,9 @@ function filterMemory(agent, task, maxResults) {
       isCritical: s.isCritical,
       tier2: s.tier2 || false,
       preview: previewText,
-      t3_block: formatT3Block(s.file, previewText, s.tier2 ? 'T2' : 'T3', provenanceDate)
-    };
-  });
+      t3_block: t3Block
+    });
+  }
 
   return {
     agent,
@@ -448,6 +464,9 @@ function filterMemory(agent, task, maxResults) {
     tier2_files: profile.tier2 || [],
     total_sections_scanned: sectionsScanned,
     results_returned: results.length,
+    injected_tokens: injectedTokens,
+    injected_budget_tokens: INJECTED_BUDGET_TOKENS,
+    budget_truncated: budgetTruncated,
     quarantined_count: quarantined.length,
     quarantined_entries: quarantined,
     results
