@@ -39,6 +39,7 @@ const CANONICAL_MATRIX = {
   },
   ingestion_paths: {
     memory_read: { classification: 'loader-enforced', rationale: 'T3 boundary parsing and prompt-injection rejection in memory_filter.js.' },
+    memory_write: { classification: 'gated', rationale: 'Agent memory-write path gated by provenance attestation (--agent/--domain/--status header enforcement), secret scrubbing + injection sanitization, dedupe_validator admission check, and ALLOWED_FILES whitelist bounded to artifacts/memory/ (memory_write.js pipeline).' },
     step_output: { classification: 'loader-enforced', rationale: 'Schema validation and citation enforcement in validate_frontmatter.js.' },
     agent_frontmatter: { classification: 'loader-enforced', rationale: 'YAML parser and closed permission registry in validate_frontmatter.js.' },
     subagent_transcript: { classification: 'gated', rationale: 'Inter-agent communication gated by subagent orchestration contracts.' }
