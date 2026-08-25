@@ -1,6 +1,6 @@
 {
   "version": "2.0.8",
-  "generated_at": "2026-08-25T11:37:10.832Z",
+  "generated_at": "2026-08-25T11:59:04.465Z",
   "file_count": 315,
   "files": {
     ".gitignore": "02be8395c2a0b6cdfcf971daa5689776e2d98cc43603b22a45d8c2bd78c13772",
@@ -88,7 +88,7 @@
     "scripts/lib/frontmatter.js": "b1c1b80ce2308d42f21b3e1c404f545c3721aab4cdda8e19b1bb4679b593c49d",
     "scripts/lib/fs_atomic.js": "c0b84c29e4c514c280873286b00df5a3d8ad2438a0afe26580471bf8c82d5165",
     "scripts/lib/identity.js": "5654838bfa82dece075aaa6761d9b5a13b16db4bf814cf85c17a01f548572425",
-    "scripts/lib/lock.js": "71844be836b8ed2f220a4d78d6ebd24908ab173f00f29d70a9e5d3780dffed6a",
+    "scripts/lib/lock.js": "4be2c2fa3644c91ee2e0fd5442605d598b36af04a1b850e7c0942d5237f0ec0f",
     "scripts/lib/workspace.js": "7072cf2054f82ee8b6970424bc4b91e97162d3d1d28f9e7044a89b2cefd2565d",
     "scripts/match_methods.js": "3c6aaf6d0b7ba59c363ac1f776383ce8e4f1b0d951aec8ab600ff7b3f8c1c9f4",
     "scripts/memory_filter.js": "3dc964bc1dd410722564db4568266c2b2b188a2f9a94f77d9f8c46a209529d29",

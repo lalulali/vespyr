@@ -5,25 +5,30 @@ const path = require('path');
  * Cross-process mutual exclusion for orchestrator state mutations.
  *
  * Mechanism: exclusive directory creation (fs.mkdirSync is atomic on POSIX
- * and Windows) + owner metadata (pid/timestamp) kept fresh by an in-hold
- * heartbeat.
+ * and Windows) + owner metadata (pid/timestamp).
  *
- * Takeover rules (hardened twice):
- *   v1 -> v2: acquire-grace for missing/corrupt owner.json (holder may be
- *        mid-acquire), PID-liveness check, ownership-checked release.
- *   v2 -> v3: heartbeat freshness — a LIVE pid whose heartbeat is stale is
- *        evictable (covers zombie/unreaped holders, Vera residual R2); and
- *        release compares directory mtime against the value captured at
- *        acquire so an externally-tampered or successor-replaced lock is
- *        never deleted by a stale holder (Vera residual R1).
+ * Takeover rules (v4, hardened across three audit rounds):
+ *  - Missing/corrupt owner.json => stolen only after ACQUIRE_GRACE_MS
+ *    (a holder may legitimately be mid-acquire).
+ *  - Dead pid                   => always stolen.
+ *  - Live pid, heartbeat frozen longer than LIVE_HEARTBEAT_STALE_MS (60s)
+ *    => stolen (covers the SIGKILLed-unreaped zombie class, Vera R2).
+ *      NOTE: setInterval heartbeats cannot fire while a holder executes a
+ *      long SYNCHRONOUS critical section (Vera N3), so the live-pid stale
+ *      threshold is deliberately 60s — generous above any legitimate
+ *      orchestrator mutation, far below an indefinite wedge.
+ *  - Release is ownership-checked AND tamper-aware: the directory mtime
+ *      captured at acquire must match at release, so a stale holder can
+ *      never delete a successor's replaced lock (Vera R1).
+ *  - fn MUST be synchronous; a thenable return throws TypeError loudly
+ *      (an async fn would unlock while still running — Vera N4).
  *
  * Scope: per-project (lock lives under <cwd>/.agents/state/).
  */
-const ACQUIRE_GRACE_MS = 2000;      // mkdir done, owner.json maybe pending
-const DEFAULT_STALE_MS = 15000;     // heartbeat older than this => evictable
+const ACQUIRE_GRACE_MS = 2000;
+const LIVE_HEARTBEAT_STALE_MS = 60000;
 const DEFAULT_TIMEOUT_MS = 30000;
 const RETRY_DELAY_MS = 50;
-const HEARTBEAT_MS = 5000;
 
 function sleep(ms) {
   Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
@@ -37,11 +42,12 @@ function readOwner(lockPath) {
   }
 }
 
+/** Atomic owner write (tmp + rename) — torn reads cannot fabricate a
+ *  missing/corrupt owner for takeStale (Vera N5). */
 function writeOwner(lockPath, pid) {
-  fs.writeFileSync(
-    path.join(lockPath, 'owner.json'),
-    JSON.stringify({ pid, ts: Date.now() })
-  );
+  const tmp = path.join(lockPath, `owner.json.tmp.${process.pid}.${Date.now()}`);
+  fs.writeFileSync(tmp, JSON.stringify({ pid, ts: Date.now() }));
+  fs.renameSync(tmp, path.join(lockPath, 'owner.json'));
 }
 
 function dirAgeMs(lockPath) {
@@ -75,14 +81,6 @@ function tryAcquire(lockPath) {
   }
 }
 
-/**
- * Takeover decision:
- *  - no/corrupt owner  => stolen only after ACQUIRE_GRACE_MS (mid-acquire)
- *  - dead pid          => always stolen
- *  - live pid          => stolen only if heartbeat is stale (zombie class);
- *                         a fresh heartbeat is never executed against —
- *                         waiters time out fail-closed instead.
- */
 function takeStale(lockPath) {
   const owner = readOwner(lockPath);
   let stale;
@@ -91,7 +89,7 @@ function takeStale(lockPath) {
   } else if (!pidAlive(owner.pid)) {
     stale = true;
   } else {
-    stale = Date.now() - owner.ts > DEFAULT_STALE_MS;
+    stale = Date.now() - owner.ts > LIVE_HEARTBEAT_STALE_MS;
   }
   if (stale) {
     fs.rmSync(lockPath, { recursive: true, force: true });
@@ -102,9 +100,10 @@ function takeStale(lockPath) {
 
 /**
  * Runs fn() while holding an exclusive lock. Throws LOCK_TIMEOUT on timeout
- * (fail-closed: callers abort rather than run unserialized).
+ * (fail-closed) and TypeError if fn is asynchronous (contract: critical
+ * sections are synchronous; an async fn would unlock while still running).
  * @param {string} lockPath lock directory path (resolved against cwd)
- * @param {() => any} fn critical section
+ * @param {() => any} fn synchronous critical section
  * @param {{timeoutMs?:number}} [opts]
  */
 function withLock(lockPath, fn, opts = {}) {
@@ -125,22 +124,10 @@ function withLock(lockPath, fn, opts = {}) {
     sleep(RETRY_DELAY_MS + Math.floor(Math.random() * 25));
   }
 
-  // Heartbeat: prove liveness to concurrent waiters. unref'd so it never
-  // keeps the process alive past the critical section.
-  const heartbeat = setInterval(() => {
-    try {
-      const o = readOwner(lockPath);
-      if (o && o.pid === process.pid) writeOwner(lockPath, process.pid);
-    } catch {}
-  }, HEARTBEAT_MS);
-  if (typeof heartbeat.unref === 'function') heartbeat.unref();
-
+  let result;
   try {
-    return fn();
+    result = fn();
   } finally {
-    clearInterval(heartbeat);
-    // Ownership-checked, tamper-aware release: delete only if the lock is
-    // still ours by BOTH pid and the mtime we captured at acquire.
     const owner = readOwner(lockPath);
     let mtimeNow = null;
     try { mtimeNow = fs.statSync(lockPath).mtimeMs; } catch {}
@@ -150,6 +137,14 @@ function withLock(lockPath, fn, opts = {}) {
       try { fs.rmSync(lockPath, { recursive: true, force: true }); } catch {}
     }
   }
+
+  if (result && typeof result.then === 'function') {
+    throw new TypeError(
+      'withLock: fn returned a thenable — critical sections must be synchronous ' +
+      '(the lock is already released; refactor fn to complete synchronously).'
+    );
+  }
+  return result;
 }
 
 module.exports = { withLock };

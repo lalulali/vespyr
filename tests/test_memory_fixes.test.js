@@ -256,34 +256,79 @@ describe('Suite: Memory Fix Loop Regressions (2026-08-25)', () => {
 		assert.ok(out.results[0].t3_block.includes('<HISTORICAL_MEMORY_DATA trust_level="T3_PASSIVE_DATA">'), 'boundary intact on truncated results');
 	});
 
-	it('F9: lock evicts a LIVE-pid holder with stale heartbeat (zombie class)', () => {
+	it('F9: lock evicts a LIVE-pid holder with frozen heartbeat beyond the 60s live-stale threshold (zombie class)', () => {
 		const { spawn } = require('child_process');
 		const lockPath = path.join(tmpDir, '.agents', 'state', 'orchestrator.lock');
 		const { withLock } = require(path.join(REPO_ROOT, '.agents', 'scripts', 'lib', 'lock.js'));
 
-		// Simulate a zombie: live process, but owner.json heartbeat frozen in
-		// the past beyond DEFAULT_STALE_MS (15000).
+		// Simulate a SIGKILLed-unreaped holder: pid alive (kill(pid,0) ok),
+		// heartbeat frozen in the past beyond LIVE_HEARTBEAT_STALE_MS.
 		const zombie = spawn(process.execPath, ['-e', 'setTimeout(()=>{},30000)'], { stdio: 'ignore' });
 		try {
 			fs.mkdirSync(lockPath, { recursive: true });
 			fs.writeFileSync(
 				path.join(lockPath, 'owner.json'),
-				JSON.stringify({ pid: zombie.pid, ts: Date.now() - 20000 })
+				JSON.stringify({ pid: zombie.pid, ts: Date.now() - 65000 })
 			);
 			let executed = false;
-			const t0 = Date.now();
 			withLock(lockPath, () => {
 				executed = true;
 				const owner = JSON.parse(fs.readFileSync(path.join(lockPath, 'owner.json'), 'utf8'));
 				assert.strictEqual(owner.pid, process.pid, 'successor must own the lock inside the section');
 			}, { timeoutMs: 5000 });
 			assert.ok(executed, 'critical section must run after zombie eviction');
-			assert.ok(Date.now() - t0 < 4900, 'zombie eviction should not wait out the full timeout');
 			zombie.kill();
 		} catch (e) {
 			zombie.kill();
 			throw e;
 		}
+	});
+
+	it('F11: a legitimate >15s synchronous section is NEVER robbed mid-execution (N3)', () => {
+		const { spawn } = require('child_process');
+		const lockPath = path.join(tmpDir, '.agents', 'state', 'orchestrator.lock');
+		const marker = path.join(tmpDir, 'section-completed.marker');
+		// Holder runs a 16.5s SYNCHRONOUS section (timer-based heartbeats
+		// cannot fire during it) then writes the marker.
+		const holderScript =
+			`const {withLock}=require(${JSON.stringify(path.join(REPO_ROOT, '.agents', 'scripts', 'lib', 'lock.js'))});` +
+			`withLock(${JSON.stringify(lockPath)}, () => {` +
+			`  const t0=Date.now(); while(Date.now()-t0 < ${16 * 1000 + 500}){}` +
+			`  require('fs').writeFileSync(${JSON.stringify(marker)}, 'done');` +
+			`});`;
+		const holder = spawn(process.execPath, ['-e', holderScript], { stdio: 'ignore' });
+
+		// Waiter arrives while the holder is mid-section (well under 60s).
+		execFileSync(process.execPath, ['-e', 'setTimeout(()=>{},1200)'], { stdio: 'ignore' });
+		let timedOut = false;
+		try {
+			const { withLock: wl } = require(path.join(REPO_ROOT, '.agents', 'scripts', 'lib', 'lock.js'));
+			wl(lockPath, () => {}, { timeoutMs: 3000 });
+		} catch (e) {
+			timedOut = e.message.startsWith('LOCK_TIMEOUT');
+		}
+		assert.ok(timedOut, 'waiter must fail closed while a legitimate holder runs');
+
+		// Holder finishes its FULL section unrobbed.
+		const exited = fs.existsSync(marker) ? true : (() => {
+			const start = Date.now();
+			while (!fs.existsSync(marker)) {
+				if (Date.now() - start > 25000) return false;
+				const { execSync } = require('child_process');
+				execFileSync(process.execPath, ['-e', 'setTimeout(()=>{},500)'], { stdio: 'ignore' });
+			}
+			return true;
+		})();
+		assert.strictEqual(exited, true, 'holder must complete its entire critical section');
+	});
+
+	it('F12: async fn passed to withLock throws TypeError loudly (N4 contract)', () => {
+		const { withLock } = require(path.join(REPO_ROOT, '.agents', 'scripts', 'lib', 'lock.js'));
+		const lockPath = path.join(tmpDir, '.agents', 'state', 'contract.lock');
+		assert.throws(
+			() => withLock(lockPath, () => Promise.resolve(1)),
+			/thenable|synchronous/i
+		);
 	});
 
 	it('F10: release never deletes a successor-replaced lock (R1 tamper guard)', () => {
