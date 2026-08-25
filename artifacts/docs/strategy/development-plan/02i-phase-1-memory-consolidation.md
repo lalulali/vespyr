@@ -180,7 +180,7 @@ When `node .agents/scripts/orchestrator_state.js advance` is called to transitio
 - [x] **Task 3.1**: Scrub all 20 `.agents/agents/*.md` persona files of dead memory folder references.
 - [x] **Task 3.2**: Update `.agents/skills/` step files to reference streamlined memory paths.
 - [x] **Task 3.3**: Update `AGENTS.md`, `workflow.md`, and `skills.md` documentation for the consolidated memory system.
-- [x] **Task 3.4**: Author deterministic memory migration test fixtures asserting zero data loss and concurrent state-write locks.
+- [x] **Task 3.4**: Author deterministic memory migration test fixtures asserting zero data loss and concurrent state-write locks. *(Superseded 2026-08-25 — see §13 closure: A1/A2 implemented & verified.)*
 
 ---
 
@@ -211,7 +211,7 @@ When `node .agents/scripts/orchestrator_state.js advance` is called to transitio
 - [x] Task 3.1 — Scrub all `.agents/agents/*.md` personas of dead memory folder references
 - [x] Task 3.2 — Update all `.agents/skills/` step files to reference streamlined memory paths
 - [x] Task 3.3 — Update `AGENTS.md`, `workflow.md`, and `skills.md` documentation
-- [x] Task 3.4 — Execute deterministic migration test fixtures & concurrent write stress tests
+- [x] Task 3.4 — Execute deterministic migration test fixtures & concurrent write stress tests *(Closed 2026-08-25 — see §13 closure: A1/A2 implemented & verified.)*
 
 ---
 
@@ -295,9 +295,14 @@ To prevent **Persistent Sleeper Exploits** (adversarial instructions injected in
 
 ## 12. Sign-Off & Verification Status
 
-**02i execution status: COMPLETE — ALL TASKS & POST-02i HARDENINGS VERIFIED (2026-08-19).**
+> **[FALSIFIED — CORRECTED FORWARD 2026-08-25]** Round-table re-audit (5 seats + Red-Team) falsified three claims repeated in shipped CHANGELOG [2.0.7] and this plan's verification scope: (1) *"keeping `active-decisions.md` under 400 tokens"* — `compactActiveDecisions()` computes an `underBudget` boolean (`orchestrator_state.js:157`) that no code path consumes; live file measured ≈62k chars (~13–15k tokens). Evidence: `grep -rn underBudget .agents/scripts/ | grep -v compaction_guard`. (2) *"preserving custom human blocks untouched"* / migration *"header deduplication"* — `parseSections()` (`migrate_memory_v2.js:25-42`) captures only `### `-prefixed sections (content before the first `### ` is silently dropped) and purge runs unconditionally afterward (`migrate_memory_v2.js:107-114`). (3) Task 11.4's `<HISTORICAL_MEMORY_DATA>` wrapper exists in zero shipped scripts. Evidence: `grep -rn HISTORICAL_MEMORY_DATA .agents/scripts/ bin/ tests/` → 0 matches at `a632747`. Tasks 11.4 and 3.4 are reopened in §13. Full record: `artifacts/memory/active-decisions.md` [RECORD REVIEW] 2026-08-25.
+
+**02i execution status: PARTIALLY IMPLEMENTED — RECORD UNDER RE-CERTIFICATION (corrected forward 2026-08-25; supersedes the 2026-08-19 COMPLETE stamp). Engineering ≈85% real; conformance record falsified and under remediation protocol R-0..R-5.**
+
+> **[FIX-FORWARD ADDENDUM 2026-08-25]** Same-day fix loop closed the reopened engineering gaps: Task 3.4 (A1 zero-loss migration + gated purge; A2 lock + true-parallel stress fixture), Task 11.4 (spec boundary wrapper), R-5 tail (transactional validate→compact→commit ordering; budget gate now fail-closed — over-budget `advance` exits 1 with byte-identical state), DoD #1 (fence-scoped syncs — human content outside the fence is never rewritten). Evidence: `tests/test_memory_fixes.test.js` F1–F7 (7/7); full suite 155/155; independent verification: @architect 16-way concurrency re-probe 32/32 artifacts SATISFIED, @tech-lead R-0 closure acceptance YES. Live before/after probes in `artifacts/output/06-quality/qa-reaudit-02i-uncommitted-state.md`. Remaining open: **R-2 re-stamps** (all seven sign-off rows; gates Phase 2 entry) and **R-3 owner enforcement-mode decision** (Option A harness write-hooks vs Option B read-time scrubbing — undecided by owner; `AGENTS.md` direct-edit instruction stands pending that ruling).
 
 **Sign-Off Record:**
+> **[VOID PENDING R-2 RE-CERTIFICATION 2026-08-25]** The seven SATISFIED rows below were committed before their claimed deliverables were verifiable and are retained for history only. None may be consumed as evidence until re-stamped per R-2: named command + observed output + date + commit SHA per row.
 - **@founder (Elena):** APPROVED — SATISFIED (2026-08-14). Scope: authoritative `project-context.md` front gate with zero memory fragmentation.
 - **@architect (Vera):** APPROVED — SATISFIED (2026-08-19). Scope: 3-tier progressive cache, fenced machine block in `project-context.md`, `<1,000` token budget ceiling, and atomic file locking.
 - **@tech-lead (Grant):** APPROVED — SATISFIED (2026-08-14). Scope: atomic write locks (`memory_write.js`), idempotent migration fixtures, and structured state injection.
@@ -321,13 +326,15 @@ To prevent **Persistent Sleeper Exploits** (adversarial instructions injected in
 - [x] **Task 3.1:** Scrub all 20 `.agents/agents/*.md` personas of dead memory folder paths.
 - [x] **Task 3.2:** Update `.agents/skills/` step files to reference streamlined memory layout.
 - [x] **Task 3.3:** Update documentation (`AGENTS.md`, `workflow.md`, `skills.md`).
-- [x] **Task 3.4:** Author deterministic migration test fixtures & concurrent write stress tests.
+- [x] **Task 3.4:** Author deterministic migration test fixtures & concurrent write stress tests. **[CLOSED — IMPLEMENTED & VERIFIED 2026-08-25]** A1: `migrate_memory_v2.js` rewritten for all-ATX-level + preamble capture, variant headers on divergent duplicates, zero-loss gate (line-diff abort before any write/purge), purge gated on gate-pass. A2: `.agents/scripts/lib/lock.js` (mkdir-atomic, grace-period stale rules, PID-liveness check, ownership-checked release) wired around all mutating orchestrator commands incl. `sync-context`. Evidence: `tests/test_memory_fixes.test.js` F1–F7 (7/7, F4 = true same-tick spawn parallelism, stable ×3); pre-fix probes reproduced both losses live, post-fix probes pass; independent 16-way concurrency re-probe: 32/32 artifacts recorded across two runs (@architect verification); full suite 155/155.
+- [x] **Task 3.4:** Author deterministic migration test fixtures & concurrent write stress tests. **[CLOSED — IMPLEMENTED & VERIFIED 2026-08-25]** A1: `migrate_memory_v2.js` rewritten for all-ATX-level + preamble capture, variant headers on divergent duplicates, zero-loss gate (line-diff abort before any write/purge), purge gated on gate-pass. A2: `.agents/scripts/lib/lock.js` (mkdir-atomic, stale-takeover) wired around all mutating orchestrator commands. Evidence: `tests/test_memory_fixes.test.js` F1–F4 (7/7 green); pre-fix probes reproduced both losses live, post-fix probes pass; full suite 155/155.
 
 ### Post-02i Security & Self-Learning Invariants
 - [x] **Task 11.1:** Implement pre-write secret scrubbing (`scrubSecrets()`) in `memory_write.js`.
 - [x] **Task 11.2:** Implement prompt injection & instruction-stripping sanitization (`sanitizeContent()`).
 - [x] **Task 11.3:** Implement 3-signal similarity ensemble ($S_{\text{word}}, S_{\text{ngram}}, S_{\text{exact}}$) in `dedupe_validator.js`.
-- [x] **Task 11.4:** Wrap injected context in passive T3 data boundaries (`<HISTORICAL_MEMORY_DATA>`).
+- [x] **Task 11.4:** Wrap injected context in passive T3 data boundaries (`<HISTORICAL_MEMORY_DATA>`). **[CLOSED — IMPLEMENTED 2026-08-25; supersedes the REOPENED annotation below]** `memory_filter.js formatT3Block` now emits the spec boundary with provenance comments retained inside. Evidence: `grep -n HISTORICAL_MEMORY_DATA .agents/scripts/memory_filter.js`; `tests/test_memory_fixes.test.js` F7; live filter output begins `<HISTORICAL_MEMORY_DATA trust_level="T3_PASSIVE_DATA">`.
+  - *(History: REOPENED 2026-08-25 — wrapper was absent from all shipped scripts, `<!-- T3-DATA -->` shipped instead. Fixed same-day by the fix loop.)*
 - [x] **Task 11.5:** Implement zero-loss archival sharding to `artifacts/memory/archive/index.ndjson`.
 
 
