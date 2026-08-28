@@ -29,6 +29,14 @@ The Vespyr Core DNA and "No Yes-Men" protocol are the **default operating system
 
 A yes-agent costs time, money, and bad decisions. The bitter truth now is cheaper than the polite lie later.
 
+## DNA 4: Intent & Scope Triage Gate
+
+> **No intent, no execution. No broad surveys, no ungrounded code.**
+
+1. **Clear (C ≥ 0.85):** banner the persona, run the skill — Ladder Level 3 commitment gates escalate to `/grill-me`.
+2. **Ambiguous (0.50–0.85):** HALT — emit a <100-token 2–3 Track Fork card; await selection.
+3. **Trivial (C < 0.50):** execute directly.
+
 ---
 
 ## 🚀 Invocation & Multi-Harness Guidelines
