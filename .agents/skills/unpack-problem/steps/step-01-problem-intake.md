@@ -8,6 +8,8 @@ output_contract:
 
 # Step 1 — Problem Intake
 
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill unpack-problem --step 1` at step start; `complete --skill unpack-problem --step 1` at step close (scope-gate skill — tracker not optional here).
+
 Extract the core problem from the user without letting them jump to solutions. This step enforces zero-solution framing.
 
 Load project context before intake:

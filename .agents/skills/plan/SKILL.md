@@ -86,11 +86,15 @@ Worktrees are tracked in `.agents/state/loop-state.json`.
 
 ## Workflow
 
+**Step 0 — Scope Gate (non-skippable):** anchor scope first via `steps/step-00-scope-and-decision-anchoring.md`; `step_tracker.js` exits 1 if Step 1 begins without a locked track.
+
 ### Step 1: Load context
 
 ```
 @memory-controller load tech-lead [execution planning from specs]
 ```
+
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill plan --step 1` at step start; `complete --skill plan --step 1` at step close (scope-gate skill — tracker not optional here).
 
 ### Step 2: Review specs
 

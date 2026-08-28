@@ -3,16 +3,22 @@
  * Step Tracker — Step-level audit breadcrumbs for Vespyr
  *
  * Reads .agents/config.yaml for step_tracking mode:
- *   off     — exits immediately, 0 output, 0 files written
+ *   off     — write commands exit silently (no stdout/audit); EXCEPT the Step-0 scope gate (stderr + exit 1 on bypass) and scope-lock (records gate state)
  *   silent  — writes breadcrumb to step-audit.json, no stdout
  *   verbose — writes breadcrumb + prints one-liner to stdout
  *
  * Usage:
  *   node step_tracker.js begin --skill shape-up --step 2 [--agent founder]
  *   node step_tracker.js complete --step 2 [--skill shape-up]
+ *   node step_tracker.js scope-lock --skill develop --track "<track-name>" [--agent NAME]
  *   node step_tracker.js status [--skill shape-up]
  *   node step_tracker.js audit --skill shape-up
  *   node step_tracker.js audit --all
+ *
+ * Step 0 scope gate (02k): skills that ship step-00-scope-and-decision-anchoring.md
+ * reject any `begin --step 1+` with exit code 1 until a scope_lock entry exists
+ * for the skill. Enforced in ALL tracking modes — a bypassed gate is a
+ * correctness failure, not telemetry. `scope-lock` is recordable in every mode.
  */
 
 const fs = require('fs');
@@ -118,6 +124,55 @@ function readStepSequence(skill) {
     return a.label.localeCompare(b.label);
   });
   return steps;
+}
+
+// ---------------------------------------------------------------------------
+// Step 0 scope gate (02k) — deterministic enforcement
+// ---------------------------------------------------------------------------
+function skillStepsDir(skill) {
+  let stepsDir = path.join(PROJECT_ROOT, '.agents', 'skills', skill, 'steps');
+  if (!fs.existsSync(stepsDir)) {
+    const parts = skill.split('-');
+    if (parts.length >= 2) {
+      const baseDir = path.join(PROJECT_ROOT, '.agents', 'skills', parts.slice(0, -1).join('-'), 'steps');
+      if (fs.existsSync(baseDir)) return baseDir;
+    }
+  }
+  return fs.existsSync(stepsDir) ? stepsDir : null;
+}
+
+function requiresScopeLock(skill) {
+  const dir = skillStepsDir(skill);
+  if (!dir) return false;
+  return fs.readdirSync(dir).filter(f => f.endsWith('.md')).some(f => {
+    const raw = fs.readFileSync(path.join(dir, f), 'utf8');
+    const fm = raw.match(/^---\r?\n([\s\S]+?)\r?\n---/);
+    return !!fm && /^step:\s*0\b/m.test(fm[1]);
+  });
+}
+
+function enforceScopeGate(skill, step, mode) {
+  const num = parseInt(String(step).replace(/[a-z]/i, ''), 10);
+  if (!skill || !(num >= 1) || !requiresScopeLock(skill)) return;
+  const base = skill.includes('-') ? skill.split('-').slice(0, -1).join('-') : null;
+  const locked = readAudit().some(e =>
+    e.type === 'scope_lock' && (e.skill === skill || (base && e.skill === base))
+  );
+  if (!locked) {
+    console.error('[ERROR] Step 0 Scope Gate bypassed. Scope must be locked before Step 1 execution.');
+    console.error(`Fix: node .agents/scripts/step_tracker.js scope-lock --skill ${skill} --track "<track-name>"`);
+    process.exit(1);
+  }
+}
+
+function cmdScopeLock(args, mode) {
+  const { skill, track, agent = 'unknown' } = args;
+  if (!skill || !track) {
+    console.error('step_tracker: --skill and --track are required for scope-lock');
+    process.exit(1);
+  }
+  appendAudit({ type: 'scope_lock', skill, track, agent, ts: new Date().toISOString() });
+  if (mode === 'verbose') console.log(`🔒 Scope locked: ${skill} — track "${track}"`);
 }
 
 // ---------------------------------------------------------------------------
@@ -293,21 +348,29 @@ const mode = config.step_tracking || 'off';
 
 // No command → show usage regardless of mode (human error, not an agent call)
 if (!command) {
-  console.error('step_tracker: no command given. Use begin, complete, status, or audit.');
-  console.error('Usage: node step_tracker.js <begin|complete|status|audit> [--skill NAME] [--step N] [--agent NAME]');
+  console.error('step_tracker: no command given. Use begin, complete, scope-lock, status, or audit.');
+  console.error('Usage: node step_tracker.js <begin|complete|scope-lock|status|audit> [--skill NAME] [--step N] [--track NAME] [--agent NAME]');
   process.exit(1);
 }
 
-// In off mode, only allow audit/status (read-only commands). For write commands, exit immediately.
-if (mode === 'off' && !['audit', 'status'].includes(command)) {
+// Deterministic Step 0 scope gate — enforced in ALL modes (incl. off), before
+// the off-mode early exit: a bypassed gate is a correctness failure.
+if (command === 'begin' && args.skill && args.step) {
+  enforceScopeGate(args.skill, args.step, mode);
+}
+
+// In off mode, only allow audit/status (read-only) and scope-lock (the record
+// the gate depends on). Other write commands exit immediately.
+if (mode === 'off' && !['audit', 'status', 'scope-lock'].includes(command)) {
   process.exit(0);
 }
 
 switch (command) {
-  case 'begin':    cmdBegin(args, mode); break;
-  case 'complete': cmdComplete(args, mode); break;
-  case 'status':   cmdStatus(args); break;
-  case 'audit':    cmdAudit(args); break;
+  case 'begin':      cmdBegin(args, mode); break;
+  case 'complete':   cmdComplete(args, mode); break;
+  case 'scope-lock': cmdScopeLock(args, mode); break;
+  case 'status':     cmdStatus(args); break;
+  case 'audit':      cmdAudit(args); break;
   default:
     console.error(`step_tracker: unknown command "${command}". Use begin, complete, status, or audit.`);
     process.exit(1);

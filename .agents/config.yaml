@@ -4,7 +4,7 @@
 # Edit manually — never generated or overwritten by orchestrator_state.js.
 
 # Step Tracker — controls step-level audit breadcrumbs
-# off     — script called but exits immediately; 0 output, 0 files written (default)
+# off     — write commands exit silently (default); the Step-0 scope gate still errors+exits 1 on bypass, and scope-lock still records gate state
 # silent  — writes breadcrumbs to artifacts/output/step-audit.json; no agent output
 # verbose — writes breadcrumbs + prints one-liner to agent stdout per step transition
 step_tracking: off

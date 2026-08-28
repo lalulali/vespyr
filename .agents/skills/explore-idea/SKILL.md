@@ -38,6 +38,8 @@ Before starting, check for a validation brief:
 
 ## Workflow steps
 
+**Step 0 — Scope Gate (non-skippable):** anchor scope first via `steps/step-00-scope-and-decision-anchoring.md`; `step_tracker.js` exits 1 if Step 1 begins without a locked track.
+
 ### Phase 1: Synthesize (skip if validation brief exists)
 
 **grill-me offer (Path B only — no validation brief):** Before synthesizing, ask the user:

@@ -9,6 +9,8 @@ output_contract:
 
 # Step 1 — Synthesize
 
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill explore-idea --step 1` at step start; `complete --skill explore-idea --step 1` at step close (scope-gate skill — tracker not optional here).
+
 Synthesize the concept into a structured brief. Skip this step if a validation brief, shaped brief, or problem-space brief already exists (Paths A, C, D).
 
 ## Workflow

@@ -21,6 +21,8 @@ First, detect the user's intent:
 If unclear, ask: "Are you starting a new idea, refining an existing brief, or stress-testing it?"
 
 ## Mode routing + steps
+**Step 0 — Scope Gate (non-skippable):** anchor scope first via `steps/step-00-scope-and-decision-anchoring.md`; the selected mode is the locked track. `step_tracker.js` exits 1 if Step 1 begins without a locked track.
+
 - **Create** → `steps/step-01a-session-setup.md` → ... → `07-handoff.md` (7 steps: session setup, input analysis, idea framing, stress-test R1, stress-test R2, GO/PIVOT/KILL, handoff)
 - **Edit** → `steps/step-01b-load-existing.md` → ... → `05-finalize.md` (5 steps: load, identify gaps, revise, stress-test, finalize)
 - **Validate** → `steps/step-01c-open-questions.md` → ... → `05-lock-handoff.md` (5 steps: open questions, 7-branch tree, cross-branch check, decision log, lock & handoff)

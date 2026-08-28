@@ -37,6 +37,7 @@ If unclear, present the three modes and ask.
 - Each step file is a contract. Read it fully before executing.
 
 ## Step sequence
+0. **Scope & Decision Anchoring** (non-skippable gate) → `steps/step-00-scope-and-decision-anchoring.md` — `step_tracker.js` exits 1 if Step 1 begins without a locked track
 1. **Problem Intake** → `steps/step-01-problem-intake.md` — intake pain points, enforce zero-solution framing
 2. **Analysis Execution** → `steps/step-02-analysis-execution.md` — run or prompt modular sub-skills based on selected mode
 3. **Synthesis & Ideation** → `steps/step-03-synthesis-ideation.md` — map problem findings to candidate solution concepts

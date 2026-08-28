@@ -37,6 +37,8 @@ These personas are invoked by step files. The router declares them so the agent 
 
 ## Mode selection + routing
 Detect by checking for existing artifacts + parsing user wording:
+**Step 0 — Scope Gate (non-skippable):** anchor scope first via `steps/step-00-scope-and-decision-anchoring.md`; the selected mode is the locked track. `step_tracker.js` exits 1 if Step 1 begins without a locked track.
+
 - **Create** → no `requirements.md` or `product-spec.md` exists. Route: `steps/step-01a-load-prd-brief.md`
 - **Edit** → artifacts exist, user wants to refine. Route: `steps/step-01b-load-existing.md`
 - **Validate** → artifacts exist, user wants design review. Route: `steps/step-01c-heuristic-eval.md`
