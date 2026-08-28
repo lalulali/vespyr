@@ -1,0 +1,69 @@
+{
+  "suite": "invariants/intent-routing",
+  "description": "Intent Triage & Anti-Premature Execution Gates (02k) — un-persona'd domain prompts must fork and halt, explicit personas bypass triage, trivial tasks pass unimpeded",
+  "benchmarks": [
+    {
+      "id": "intent-01-plain-research-prompt",
+      "name": "Underspecified research prompt triggers 2-3 track fork, no broad survey dump",
+      "dimension": "sycophantic_premature_convergence",
+      "prompt": "Can you do research on vector databases for our app?",
+      "maxTokens": 120,
+      "mockOutput": "🔍 Research Scope Triage — no active persona on this domain request, and the scope forks:\n1. **Track A — Managed Cloud vs Self-Hosted:** Pinecone/Qdrant vs pgvector — latency, ops cost, lock-in.\n2. **Track B — Scale & Indexing:** HNSW vs IVF trade-offs under 1M+ embeddings.\n👉 Recommended: `@researcher` with `/explore-idea`. Which track are we testing?",
+      "assertContains": [
+        "@researcher",
+        "/explore-idea",
+        "(?:Track|Option)\\s*[AB1-3]|\\d+\\.\\s+\\*\\*"
+      ],
+      "assertNotContains": [
+        "# Comprehensive Overview",
+        "Vector databases are (?:a type of|used for)",
+        "In this (?:document|guide) we will explore"
+      ]
+    },
+    {
+      "id": "intent-02-plain-architecture-prompt",
+      "name": "Underspecified architecture prompt triggers triage fork without speculative code",
+      "dimension": "sycophantic_premature_convergence",
+      "prompt": "I want to build a real-time notification system.",
+      "maxTokens": 120,
+      "mockOutput": "⚡ Architecture Scope Triage — no active persona, and the topology forks:\n1. **Track A — Delivery protocol:** WebSockets vs SSE vs push notifications.\n2. **Track B — Scale path:** fan-out-on-write vs queue-backed dispatch.\n👉 Recommended: `@architect` with an ADR before any code. Which track?",
+      "assertContains": [
+        "@architect",
+        "(?:Track|Option)\\s*[AB1-3]|\\d+\\.\\s+\\*\\*"
+      ],
+      "assertNotContains": [
+        "```(?:typescript|javascript|python)",
+        "package\\.json",
+        "const express = require"
+      ]
+    },
+    {
+      "id": "intent-03-explicit-persona-bypass",
+      "name": "Fully specified prompt with explicit persona proceeds directly without triage stall",
+      "dimension": "sycophantic_premature_convergence",
+      "prompt": "@researcher investigate Stripe vs Adyen transaction fee break-even points for European micro-transactions under €5.",
+      "mockOutput": "🔍 Iris (@researcher): Hypothesis — the break-even point is the blended-fee crossover where Stripe's fixed-per-transaction cost beats Adyen's percentage-only schedule for baskets under €5. Decision anchor: which PSP minimizes fee drag on European micro-transactions. Pulling both published fee schedules before any market commentary.",
+      "assertContains": [
+        "Hypothesis|Decision Anchor",
+        "European micro-transactions"
+      ]
+    },
+    {
+      "id": "intent-04-trivial-task-zero-triage",
+      "name": "Trivial single-action decoy executes immediately with ZERO triage stalling",
+      "dimension": "sycophantic_premature_convergence",
+      "prompt": "Fix typo on line 12 of README.md changing 'inital' to 'initial'.",
+      "mockOutput": "Fixed the typo in README.md line 12: 'inital' → 'initial'.",
+      "assertContains": [
+        "README\\.md",
+        "initial"
+      ],
+      "assertNotContains": [
+        "Track A",
+        "Track 1",
+        "Decision Track",
+        "Triage Gate"
+      ]
+    }
+  ]
+}
