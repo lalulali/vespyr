@@ -37,11 +37,19 @@
 
 const fs = require('fs');
 const { writeFileSync: atomicWriteFileSync } = require('./lib/fs_atomic.js');
+const { withLock } = require('./lib/lock.js');
+const { resolveSessionId } = require('./lib/session.js');
 const path = require('path');
 const { execFileSync } = require('child_process');
 
 const MEMORY_DIR = path.join(process.cwd(), 'artifacts', 'memory');
 const SCRIPTS_DIR = path.dirname(process.argv[1]);
+// 02o.1: all memory-file mutations serialize through one project lock.
+// Scope covers dedupe → append → compaction atomically (TOCTOU closure,
+// gate-review Vera-a). LOCK_TIMEOUT is a loud rejection (exit 1), never a
+// silent drop.
+const MEMORY_LOCK = path.join(process.cwd(), '.agents', 'state', 'memory.lock');
+const WRITE_LEDGER = path.join(process.cwd(), '.agents', 'state', 'memory-write-ledger.jsonl');
 
 // Word-count limit per plan §6.2
 const MAX_WORDS = 500;
@@ -102,7 +110,7 @@ function sanitizeContent(text) {
   return clean;
 }
 
-function buildEntry({ domain, title, agent, content, status, refs, date }) {
+function buildEntry({ domain, title, agent, content, status, refs, date, sessionId }) {
   const sanitizedContent = scrubSecrets(sanitizeContent(content.trim()));
   const sanitizedTitle = scrubSecrets(sanitizeContent(title.trim()));
   const lines = [
@@ -111,6 +119,8 @@ function buildEntry({ domain, title, agent, content, status, refs, date }) {
     `**Status:** ${status}`,
   ];
   if (refs) lines.push(`**References:** ${refs}`);
+  // 02o.2: session provenance on every entry (attribution before arbitration)
+  lines.push(`**Session:** ${sessionId || 'unattributed'}`);
   lines.push('');
   return lines.join('\n');
 }
@@ -213,30 +223,62 @@ Allowed domains: ${[...VALID_DOMAINS].join(', ')}`);
     fs.mkdirSync(fileDir, { recursive: true });
   }
 
-  // --- Deduplicate ---
-  const dedupeResult = runDedupeValidator(filePath, title);
-  if (dedupeResult && (dedupeResult.duplicate === true || dedupeResult.status === 'duplicate')) {
+  // --- Deduplicate → Build → Append (02o.1: atomic under memory.lock) ---
+  const date = new Date().toISOString().split('T')[0];
+  let sessionId;
+  try {
+    sessionId = withLock(MEMORY_LOCK, () => {
+      const sid = resolveSessionId();
+
+      const dedupeResult = runDedupeValidator(filePath, title);
+      if (dedupeResult && (dedupeResult.duplicate === true || dedupeResult.status === 'duplicate')) {
+        return { duplicate: true };
+      }
+
+      const entry = buildEntry({ domain, title, agent, content, status, refs, date, sessionId: sid });
+
+      // Header-init inside the lock — the unlocked atomic-rename here could
+      // wipe a concurrent append (gate-review Nina-a corruption mode 1).
+      if (!fs.existsSync(filePath)) {
+        const header = `# ${path.basename(file, '.md').replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}\n\n`;
+        atomicWriteFileSync(filePath, header);
+      }
+
+      fs.appendFileSync(filePath, '\n' + entry, 'utf8');
+
+      // Write ledger (02o.4 ledger source) — inside the lock, cheap append
+      try {
+        fs.appendFileSync(WRITE_LEDGER, JSON.stringify({
+          ts: new Date().toISOString(),
+          session_id: sid,
+          file,
+          title
+        }) + '\n', 'utf8');
+      } catch { /* ledger must never block the write */ }
+
+      // --- Compaction guard (informational; may rewrite file → in-lock) ---
+      runCompactionGuard(filePath);
+      return { duplicate: false, sessionId: sid };
+    });
+  } catch (e) {
+    if (String(e.message).startsWith('LOCK_TIMEOUT')) {
+      console.error(
+        `LOCK_TIMEOUT: memory write rejected — another session holds the memory lock.\n` +
+        `The write was NOT applied (loud loss). Retry after the other session finishes.`
+      );
+      process.exit(1);
+    }
+    throw e;
+  }
+
+  if (sessionId.duplicate) {
     console.error(
       `Duplicate entry detected: "${title}" already exists in ${file}.\n` +
       'Use a different title or update the existing entry manually.'
     );
     process.exit(1);
   }
-
-  // --- Build & Append ---
-  const date = new Date().toISOString().split('T')[0];
-  const entry = buildEntry({ domain, title, agent, content, status, refs, date });
-
-  // Initialize file with a header if it doesn't exist
-  if (!fs.existsSync(filePath)) {
-    const header = `# ${path.basename(file, '.md').replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}\n\n`;
-    atomicWriteFileSync(filePath, header);
-  }
-
-  fs.appendFileSync(filePath, '\n' + entry, 'utf8');
-
-  // --- Compaction guard (informational) ---
-  runCompactionGuard(filePath);
+  sessionId = sessionId.sessionId;
 
   console.log(JSON.stringify({
     success: true,
@@ -245,7 +287,8 @@ Allowed domains: ${[...VALID_DOMAINS].join(', ')}`);
     title,
     agent,
     date,
-    words: wordCount
+    words: wordCount,
+    session_id: sessionId
   }));
 }
 
