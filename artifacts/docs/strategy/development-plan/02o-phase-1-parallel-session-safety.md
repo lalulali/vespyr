@@ -73,14 +73,16 @@
 
 ---
 
-## 5. Definition of Done
+## 5. Definition of Done — **EXECUTED 2026-08-28, evidence-stamped**
 
-1. **Zero-loss parallel writes:** the N-writer probe passes (8 concurrent writers, all entries survive, lock serializes).
-2. **No last-writer-wins state:** `latest.md` is derived; the engine contains no direct-write path to it.
-3. **Full attribution:** every new memory row carries `session_id`.
-4. **Collision is loud:** interleaved writers produce a detection warning naming both sessions.
-5. **Falsifiable eval:** the parallel-safety suite fails when the lock is bypassed (proven by a planted-bypass probe, R0.2 pattern).
-6. **Protocol codified:** GUARDRAILS section + dev-plan README index live; existing suite green (168+ tests).
+1. [x] **Zero-loss parallel writes:** 8 concurrent writers in sandbox → 8/8 entries, exact-once, header intact, ledger complete (`tests/test_parallel_memory.test.js` DoD#1 case; probe run evidence in session log).
+2. [x] **No last-writer-wins state:** exactly ONE `latest.md` write site remains under `.agents/scripts/**` — the sanctioned derived regeneration (`lib/session.js:117`); orchestrator direct overwrite removed; `memory_filter.js` regenerates-on-read when missing (grep evidence 2026-08-28).
+3. [x] **Full attribution:** every memory entry carries `**Session:**` (8/8 in probe); history rows carry `- Session:`; ledger rows carry `session_id` (window hash `w-<sha1(hostname:ppid)[0:12]>` or `VESPYR_SESSION_ID`).
+4. [x] **Collision is loud:** forced two-window ledger probe → exit 1 naming both sessions; real-tree run clean (exit 0); telemetry event hook emits `memory_collision` to `artifacts/telemetry/events-*.ndjson` (02l span integration point).
+5. [x] **Falsifiable verification:** planted-bypass probe (stub pass-through lock + widened rename window — structural, not timing-dependent) reproduces lost-entry/torn-structure corruption; suite fails if the lock is not load-bearing. Deliberate deviation from the plan's `parallel-safety.json` sketch: a mockOutput eval JSON would repeat the 02m tautology — the named node test IS the deterministic verification (08-23 rule: script + named test).
+6. [x] **Protocol codified:** GUARDRAILS "Parallel Session Protocol" section live; Plan Registry in development-plan/README.md = allocation record (36/36 registered, `check_plan_reservation.js` + named test).
+
+**Suite:** `tests/run-all.js` → 171/171 (two consecutive runs, includes 02i memory-fix suites F1–F10 + test_cli + the 3 new 02o tests). **Manifest:** re-pinned, `bin/cli.js verify` → 334+ files OK.
 
 ---
 
