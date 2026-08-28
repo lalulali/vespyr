@@ -128,8 +128,18 @@ When an agent discovers an issue with an upstream artifact (spec gap, implementa
 
 ## Step Tracking
 
-- Most step files include `begin` and `complete` calls to `node .agents/scripts/step_tracker.js`; step-tracker is optional in analysis-heavy skills (`test`, `iterate`, `unpack-problem`, `explore-idea`). Agents must run the calls directly.
+- Most step files include `begin` and `complete` calls to `node .agents/scripts/step_tracker.js`; step-tracker is optional in analysis-heavy skills (`test`, `iterate`). Agents must run the calls directly.
+- **Scope-gate skills (`develop`, `plan`, `design`, `validate-idea`, `explore-idea`, `unpack-problem`):** the tracker is NOT optional there — Step 0 (`scope-lock` + `begin`/`complete --step 0`) and the first `begin --step 1` are mandatory. `step_tracker.js` exits 1 if Step 1 begins without a locked track.
 - The tracker reads `.agents/config.yaml` for `step_tracking` mode (`off` | `silent` | `verbose`). In `off` mode the script exits immediately — 0 output, 0 files written.
 - **Never skip the tracker calls** even when `step_tracking` is `off`. The script self-governs based on config — skipping calls breaks audit continuity when the user later enables tracking.
 - Drift warnings are soft — the tracker logs them but never blocks. Continue the step regardless.
 - To inspect step compliance: `node .agents/scripts/step_tracker.js audit --skill {skill}` → writes `artifacts/output/step-audit-report.md`.
+
+## Anti-Premature Execution, Scope Clarification & Ban on Broad Fallbacks
+
+- **No Silent Scope Broadening:** When an incoming task or research topic lacks a defined business objective, target hypothesis, or technical boundary, agents MUST NOT default to a "catch-all" horizontal summary or speculative implementation.
+- **Hypothesis-Decision Anchoring:** Every research, planning, or architectural task must state:
+  1. *What specific business decision or engineering constraint does this inform?*
+  2. *What is the falsifiable hypothesis or boundary condition?*
+- **The 2–3 Track Fork UX Standard:** Clarification requests must not interrogate the user with endless open-ended questions. Agents must formulate 2–3 concrete, mutually distinct execution tracks and ask the user to select one.
+- **Zero Artifact Scaffolding on Underspecified Scope:** Writing markdown deliverables to `artifacts/output/` is strictly prohibited until the scope track is confirmed.
