@@ -6,7 +6,10 @@
 
 **Relationship to 02l (observability):** complementary layers. 02o is the **lock** (prevents damage); 02l is the **camera** (records what happened). 02o ships independently on the 02i lock primitive; after 02l lands, its spans (`session_id`, `trace_id`, parent/child propagation) upgrade 02o's collision detection from timestamp-heuristic to trace-verified. Integration point recorded in 02o.4; not a build dependency. This plan also implements the "single-owner rule for shared schemas/scripts" recommended by the 2026-08-23 review of 02l.
 
-**Gate Reviews:** PENDING — roundtable to be scheduled before execution; owner (Chris) approves scope.
+**Gate Reviews:** **[GATE CLEARED 2026-08-28]** — compact roundtable, 3 seats, all `[PIVOT]` (no KILL): amendments below incorporated into the plan text before execution. Owner approval: Chris ruled 02o before 02l (active-decisions.md [OWNER] 2026-08-28).
+- **@architect [PIVOT]:** session identity via pid is defective (memory_write.js is a fresh process per write) → session-state file `.agents/state/session-current.json` (written by session-start, read by writers, `unattributed` fallback, harness env-var preferred where present). 02o.2 must also amend the docs that instruct direct `latest.md` overwrites (`.agents/agents/memory-controller.md:321,408`, `.agents/skills/round-table/SKILL.md:167`) — those instructions ARE writer paths. Root-cause correction: orchestrator mutating commands already hold a global lock (orchestrator_state.js:1224-1237, since 02i) — the 2026-08-28 clobber went through persona-instructed direct writes, not the pipeline. Lock must scope dedupe+append atomically (TOCTOU).
+- **@tech-lead [PIVOT]:** `memory_filter.js:44,62` writes latest.md/history.md on every READ — that write path must be removed and 4 consumers migrated (witness.js, session_checkpoint.js, delegation_audit.js, compaction_guard.js). Re-estimate: ~11h total. Reorder: provenance (02o.3) before derived view (02o.2). 02o.4 relocated OUT of security-owned drift_monitor.js into a new `collision_detector.js`. 02o.5 needs a named reservation-check script + test. 02o.6 adds lock-timeout rejection semantics + failure-path eval. Regression set: test_memory_fixes F4/F9/F10, test_memory_consolidation, test_cli, run-all ≥168.
+- **@qa-engineer [PIVOT]:** 8-writer probe must assert 4 corruption modes (lost entry / duplicate / torn structure / exact-once membership), spawn()-parallel per test_memory_fixes F4 precedent; memory_write.js header-init atomic-rename can wipe a concurrent append (verified unlocked today). Falsifiability spelled out: sandbox copy of scripts, stub lock.js pass-through, re-run probe, assert ≥1 corruption mode trips under bypass. DoD #2 = grep-invariant test (no writeFileSync/appendFileSync targeting latest.md under .agents/scripts/**) + behavioral regeneration check.
 
 ---
 
@@ -46,27 +49,27 @@
 
 ---
 
-## 3. Root Cause: The 2026-08-28 Collision (verified)
+## 3. Root Cause: The 2026-08-28 Collision (corrected forward per gate review)
 
-1. Two sessions, one working tree, zero mutual exclusion → interleaved writes to `artifacts/memory/session-summaries/latest.md` (last-writer-wins by design).
-2. Dev-plan filenames are allocated by convention only → concurrent session renumbered 02k/02m/02n mid-execution; cross-references in other plans/memory went stale instantly.
-3. Uncommitted trees make attribution impossible → cannot tell which session produced which byte; commit-per-build-item was skipped.
-4. No detection: the collision was discovered by a human reading diffs, not by the engine.
+1. Two sessions, one working tree, zero mutual exclusion on the paths that matter. **Corrected:** the orchestrator's own mutating commands (session-write etc.) have been globally locked since 02i (`orchestrator_state.js:1224-1237`) — the collision came through the UNLOCKED paths: persona/skill docs instructing agents to hand-write `latest.md` (`memory-controller.md:321,408`, `round-table/SKILL.md:167`), `memory_filter.js` writing `latest.md`/`history.md` on every read, and `memory_write.js` (no lock; header-init atomic-rename can wipe a concurrent append).
+2. Dev-plan filenames allocated by convention only → concurrent renumbering made cross-references stale instantly.
+3. Uncommitted trees make attribution impossible.
+4. No detection: discovered by a human reading diffs, not by the engine.
 
 ---
 
-## 4. Build Items (8h)
+## 4. Build Items (11.5h, amended per gate review — order fixed: provenance before derived view)
 
 | ID | Task | Est | Verify |
 |---|---|---|---|
-| 02o.1 | Lock coverage: audit all shared-state writers; wire `lib/lock.js` around `memory_write.js`, `orchestrator_state.js session-write`, step-audit appends where missing | 1h | Parallel probe: 8 concurrent `memory_write.js` processes → all entries present, zero corruption |
-| 02o.2 | `latest.md` becomes a generated view: `session_start.js` derives it from the last `history.md` entry; `orchestrator_state.js session-write` appends history only; direct latest.md writes removed | 1.5h | `latest.md` matches history tail after regeneration; no code path writes it directly |
-| 02o.3 | Session provenance: `session_id` (hostname+pid+boot hash) stamped into every memory entry and session row via the sanctioned pipeline | 1h | Every new entry carries `session_id`; grep-verified |
-| 02o.4 | Collision detection: `drift_monitor.js` detects two session_ids on one shared file inside the window → warning + guidance; emits telemetry event (02l span hook point) | 1.5h | Forced interleaved-write probe → warning logged with both session_ids |
-| 02o.5 | GUARDRAILS "Parallel Session Protocol" (one epic per window; worktree-per-session for true parallel; commit-per-build-item; plan-number reservation via committed stub + README index) | 1h | Section live; index updated |
-| 02o.6 | Evals + tests: `evals/suites/invariants/parallel-safety.json` + N-writer regression test in `tests/` | 1.5h | Suite passes; suite fails when lock is bypassed (falsifiability check) |
+| 02o.1 | Lock `memory_write.js`: dedupe+append atomic under the global lock (lib/lock.js); step-audit appends under lock; lock-timeout rejection = loud loss + exit 1 (never silent) | 1.5h | 8-writer parallel probe → 4 corruption modes asserted absent |
+| 02o.2 | Session provenance: `session_start.js` writes `.agents/state/session-current.json`; writers read it (env-var preferred, `unattributed` fallback); `session_id` stamped in memory entries + session rows | 1.5h | Every new entry carries session_id; grep-verified |
+| 02o.3 | Derived latest.md: REMOVE `memory_filter.js` write paths (:44,62); remove orchestrator session-write latest.md write; `session_start.js` regenerates from history tail (byte-format identical); migrate consumers (witness.js, session_checkpoint.js, delegation_audit.js, compaction_guard.js); amend the doc instructions that hand-write it (memory-controller.md:321,408; round-table/SKILL.md:167) | 2.5h | grep-invariant: no writeFileSync/appendFileSync targeting latest.md under .agents/scripts/**; delete latest.md → session-start regenerates |
+| 02o.4 | New `collision_detector.js` (NOT security-owned drift_monitor.js): ledger of file→session→ts from memory writes; two session_ids on one shared file inside window → warning naming both + telemetry event hook (02l span point) | 2.5h | Forced two-writer probe → both session_ids named in warning |
+| 02o.5 | GUARDRAILS "Parallel Session Protocol" + dev-plan README reservation index + named reservation-check script + test | 1.5h | Section + script + test live |
+| 02o.6 | Evals/tests: 4-mode parallel corruption test (spawn-parallel, F4 precedent) in tests/; falsifiability = sandbox script copy + stub lock.js pass-through + rerun probe + assert ≥1 corruption mode trips; failure-path eval (lock timeout → exit 1) | 2h | Suite fails under planted bypass |
 
-**Total: 8h serial.** Single-writer execution; commit-per-build-item mandatory.
+**Total: 11.5h serial.** Single-writer execution; commit-per-build-item mandatory. Regression gate per item: `tests/run-all.js` green (≥168), specifically test_memory_fixes F4/F9/F10, test_memory_consolidation, test_cli.
 
 ---
 
