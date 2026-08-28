@@ -489,8 +489,9 @@
     "description": "Orchestrates group discussions between Vespyr agents, enabling natural multi-agent conversations where each agent is a real subagent with independent thinking. Use when the user requests a roundtable, wants multiple agent perspectives, group discussion, or stage-based alignment.",
     "prerequisites": [],
     "outputs": [
-      "artifacts/memory/active-decisions.md",
-      "artifacts/memory/session-summaries/latest.md"
+      "artifacts/memory/patterns-and-conventions.md",
+      "artifacts/memory/lessons-learned.md",
+      "artifacts/memory/active-decisions.md"
     ],
     "key_agents": [
       "@founder",
@@ -512,8 +513,7 @@
       "@shifu",
       "@ml-ai-engineer",
       "@ml-ai-ops",
-      "@agent-a",
-      "@agent-b"
+      "@round-table"
     ]
   },
   {

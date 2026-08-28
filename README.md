@@ -18,6 +18,8 @@
 | **Socratic methodology depth** — every agent declares what it challenges. `/grill-me` runs an eight-move interrogation frame. | Catches hidden assumptions *before* code is written — preventing expensive rewrites. | Architectural conflicts and edge cases surfaced by design, not caught in review. |
 | **3-tier progressive memory** — context loads in tiers (core → agent-specific → task-relevant), with proactive pattern pre-fetch. | No context bloat from loading everything. No amnesia from loading nothing. | Agents get relevant past decisions, patterns, and risks without context window flooding. |
 
+**Intent & Scope Triage Gate (DNA 4):** un-persona'd domain requests are intercepted before execution — ambiguous prompts halt and receive a 2–3 Track Fork card with recommended `@agent` / `/skill` handles; trivial tasks pass unimpeded.
+
 ---
 
 ## ⚡ Quick Start
