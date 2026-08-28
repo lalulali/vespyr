@@ -31,6 +31,7 @@ const path = require('path');
 
 const { writeFileSync: atomicWriteFileSync, writeJsonSync, readJsonSync } = require('./lib/fs_atomic.js');
 const { withLock } = require('./lib/lock.js');
+const { resolveSessionId, regenerateLatest } = require('./lib/session.js');
 const { syncProjectContext } = require('./session_start.js');
 
 const STATE_FILE = path.join(process.cwd(), 'artifacts', 'output', 'pipeline-state.json');
@@ -949,25 +950,15 @@ function mainDispatch(args) {
       state.last_updated = new Date().toISOString();
       writeState(state);
 
-      // Append to session-summaries/latest.md (overwrite) and history.md (append)
+      // 02o.3: history.md is the append-only log; latest.md is derived.
+      // The direct latest.md overwrite here was the last-writer-wins hazard
+      // behind the 2026-08-28 collision.
       const sessionDir = path.join(process.cwd(), 'artifacts', 'memory', 'session-summaries');
       if (!fs.existsSync(sessionDir)) fs.mkdirSync(sessionDir, { recursive: true });
 
       const ts = new Date();
       const pad = (n) => String(n).padStart(2, '0');
       const date = `${ts.getFullYear()}-${pad(ts.getMonth() + 1)}-${pad(ts.getDate())} ${pad(ts.getHours())}:${pad(ts.getMinutes())}`;
-      const latestContent = [
-        `# Session Summary (latest)`,
-        ``,
-        `## Last Session`,
-        `- **Date:** ${date}`,
-        `- **Agent:** @${agent}`,
-        `- **Worked on:** ${workedOn || '(not specified)'}`,
-        `- **Decisions:** ${decisions || 'none'}`,
-        `- **Next step:** ${nextStep || '(not specified)'}`,
-        `- **Blockers:** ${blockers}`,
-        ``
-      ].join('\n');
 
       const historyEntry = [
         ``,
@@ -976,11 +967,12 @@ function mainDispatch(args) {
         `- Decisions: ${decisions || 'none'}`,
         `- Next step: ${nextStep || '(not specified)'}`,
         `- Blockers: ${blockers}`,
+        `- Session: ${resolveSessionId()}`,
       ].join('\n');
 
       try {
-        atomicWriteFileSync(path.join(sessionDir, 'latest.md'), latestContent, 'utf8');
         fs.appendFileSync(path.join(sessionDir, 'history.md'), historyEntry + '\n', 'utf8');
+        regenerateLatest();
       } catch (e) {
         console.error('Warning: Could not write session summary files: ' + e.message);
       }

@@ -164,7 +164,7 @@ After the discussion ends, verify any claim that a file or artifact changed agai
    **Status:** active
    ```
 
-2. **Write a session summary to `artifacts/memory/session-summaries/latest.md`** (via `@memory-controller session-write`):
+2. **Write a session summary** (via `@memory-controller session-write`; this appends to `history.md` — `latest.md` regenerates from it automatically, never write it directly):
 
    ```
    Agent: @round-table

@@ -22,6 +22,8 @@
 const fs = require('fs');
 const path = require('path');
 const { writeFileSync: atomicWriteFileSync } = require('./lib/fs_atomic.js');
+const { withLock } = require('./lib/lock.js');
+const { ensureSessionCurrent, regenerateLatest } = require('./lib/session.js');
 
 const PROJECT_CONTEXT = path.join(process.cwd(), 'artifacts', 'memory', 'project-context.md');
 const PIPELINE_STATE = path.join(process.cwd(), 'artifacts', 'output', 'pipeline-state.json');
@@ -356,7 +358,13 @@ if (require.main === module) {
   }
   try {
     const result = syncProjectContext(out);
-    console.log(JSON.stringify({ success: true, ...result }));
+    // 02o.2/02o.3: explicit session record + derived latest.md repair
+    let session_id = null;
+    try { session_id = ensureSessionCurrent(out.agent); } catch { /* non-blocking */ }
+    try {
+      withLock(path.join(process.cwd(), '.agents', 'state', 'latest.lock'), () => { regenerateLatest(); });
+    } catch { /* non-blocking */ }
+    console.log(JSON.stringify({ success: true, session_id, ...result }));
   } catch (e) {
     console.error(JSON.stringify({ error: e.message }));
     process.exit(1);

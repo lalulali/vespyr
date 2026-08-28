@@ -17,6 +17,9 @@ const path = require('path');
 // pipeline (direct edits, hookless harnesses, human hand-edits) is
 // neutralized HERE before any LLM consumes it.
 const { scrubSecrets, sanitizeContent } = require('./memory_write.js');
+// 02o.3: latest.md is a derived view of history.md — repaired on read, never
+// hand-seeded here.
+const { regenerateLatest } = require('./lib/session.js');
 
 function getMemoryDir() { return path.join(process.cwd(), 'artifacts', 'memory'); }
 function getArchiveDir() { return path.join(getMemoryDir(), 'archive'); }
@@ -38,24 +41,6 @@ function ensureSessionSummaryFiles() {
     try { fs.mkdirSync(sessionDir, { recursive: true }); } catch (e) { return; }
   }
 
-  const latestPath = path.join(sessionDir, 'latest.md');
-  if (!fs.existsSync(latestPath)) {
-    try {
-      fs.writeFileSync(latestPath, [
-        '# Session Summary (latest)',
-        '',
-        '## Last Session',
-        '- **Date:** none',
-        '- **Agent:** @none',
-        '- **Worked on:** No sessions recorded yet.',
-        '- **Decisions:** none',
-        '- **Next step:** Initialize project memory.',
-        '- **Blockers:** none',
-        ''
-      ].join('\n'), 'utf8');
-    } catch (e) { /* non-blocking */ }
-  }
-
   const historyPath = path.join(getSessionDir(), 'history.md');
   if (!fs.existsSync(historyPath)) {
     try {
@@ -74,6 +59,14 @@ function ensureSessionSummaryFiles() {
         ''
       ].join('\n'), 'utf8');
     } catch (e) { /* non-blocking */ }
+  }
+
+  // 02o.3: latest.md derives from history.md — regenerate when missing,
+  // never seed a placeholder (the old hand-written seed here was a
+  // last-writer-wins hazard).
+  const latestPath = path.join(sessionDir, 'latest.md');
+  if (!fs.existsSync(latestPath)) {
+    try { regenerateLatest(); } catch (e) { /* non-blocking */ }
   }
 }
 

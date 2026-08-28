@@ -318,9 +318,9 @@ Format results:
 
 Required fields from caller: worked on (1-2 sentences), decisions (max 5 bullets), next step (1 sentence), blockers (or "none").
 
-Format and write to `artifacts/memory/session-summaries/latest.md` (overwrite) and append to `history.md`.
+Append the summary to `history.md` through the pipeline. `latest.md` is a **generated view** rebuilt from the last `history.md` entry by `session_start.js` (02o.3) — never write it directly.
 
-Keep `latest.md` under 600 words. Summarize if caller provides more.
+Keep the history entry under 600 words. Summarize if caller provides more.
 
 ---
 
@@ -405,7 +405,7 @@ Persona-specific rules:
 - **Always delegate** scoring to `memory_filter.js` — never score manually
 - **Always delegate** archive writes to `archive_manager.js append-ndjson`
 - **Always validate** write requests before persisting
-- **Always overwrite** `session-summaries/latest.md` — only one latest summary
+- **Never write** `session-summaries/latest.md` directly — it is generated from `history.md` (02o.3); append to `history.md` only
 - **Always append** to `session-summaries/history.md` — never overwrite
 - **Report token estimates** with every load operation
 
