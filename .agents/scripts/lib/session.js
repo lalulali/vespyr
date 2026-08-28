@@ -1,10 +1,16 @@
 /**
  * lib/session.js — Session identity + derived latest.md (02o)
  *
- * Session identity primitive (gate-review amended): a per-session id CANNOT
- * come from pid (memory_write.js is a fresh process per write). Resolution
- * order: VESPYR_SESSION_ID env → .agents/state/session-current.json →
- * 'unattributed'.
+ * Session identity (gate-review amended twice — execution note 2026-08-28):
+ * a per-session id CANNOT come from pid (memory_write.js is a fresh process
+ * per write), and a shared session-current.json would merge two PARALLEL
+ * windows into one identity — exactly the hazard 02o exists to catch.
+ * Resolution order:
+ *   1. VESPYR_SESSION_ID env (harness-provided, explicit)
+ *   2. `w-<hash(hostname:ppid)>` — stable per terminal/harness window,
+ *      distinct per window, zero coordination (ppid = the harness process
+ *      every script invocation from that window shares)
+ * 'unattributed' only if both fail (practically never).
  *
  * latest.md is a DERIVED VIEW of append-only history.md — never a
  * hand-written second source of truth. regenerateLatest() rebuilds it from
@@ -18,14 +24,21 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const os = require('os');
 const { writeFileSync: atomicWriteFileSync } = require('./fs_atomic.js');
 
 const STATE_DIR = path.join(process.cwd(), '.agents', 'state');
 const SESSION_CURRENT = path.join(STATE_DIR, 'session-current.json');
 const SESSION_DIR = path.join(process.cwd(), 'artifacts', 'memory', 'session-summaries');
 
+function windowSessionId() {
+  const h = crypto.createHash('sha1').update(`${os.hostname()}:${process.ppid}`).digest('hex');
+  return `w-${h.slice(0, 12)}`;
+}
+
 function resolveSessionId() {
   if (process.env.VESPYR_SESSION_ID) return process.env.VESPYR_SESSION_ID;
+  try { return windowSessionId(); } catch { /* fall through */ }
   try {
     const j = JSON.parse(fs.readFileSync(SESSION_CURRENT, 'utf8'));
     if (j && j.session_id) return j.session_id;

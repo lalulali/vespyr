@@ -23,6 +23,7 @@
 
 const fs = require('fs');
 const { writeFileSync: atomicWriteFileSync } = require('./lib/fs_atomic.js');
+const { withLock } = require('./lib/lock.js');
 const path = require('path');
 
 const PROJECT_ROOT = process.cwd();
@@ -68,9 +69,16 @@ function writeAudit(entries) {
 }
 
 function appendAudit(entry) {
-  const entries = readAudit();
-  entries.push(entry);
-  writeAudit(entries);
+  // 02o.1: read-modify-write of the audit JSON is a shared-state mutation —
+  // serialize through a dedicated lock. Tracking must never block agent
+  // work, so lock failures are swallowed (audit loss beats workflow loss).
+  try {
+    withLock(path.join(PROJECT_ROOT, '.agents', 'state', 'stepaudit.lock'), () => {
+      const entries = readAudit();
+      entries.push(entry);
+      writeAudit(entries);
+    });
+  } catch { /* non-blocking by contract */ }
 }
 
 // ---------------------------------------------------------------------------
