@@ -1,6 +1,5 @@
 # macOS
 **/.DS_Store
-
 # Node.js
 node_modules/
 npm-debug.log*
@@ -8,7 +7,6 @@ yarn-debug.log*
 yarn-error.log*
 package-lock.json
 yarn.lock
-
 # AI scratchpads, logs, and ephemeral data
 artifacts/telemetry/
 artifacts/memory/
@@ -17,7 +15,6 @@ artifacts/output/
 *.scratch.md
 *.tmp
 *.log
-
 # IDE
 .obsidian/
 .vscode/
@@ -25,20 +22,17 @@ artifacts/output/
 *.swp
 *.swo
 *~
-
 # Environment
 .env
 .env.local
 .env.*.local
-
 # Build outputs
 dist/
 build/
 coverage/
-
 # Temporary files within tracked directories should use *.tmp naming
 # and those ARE ignored by the rule above.
-
 temp/
 tmp/
 .agents/worktrees/
+.agents/state/

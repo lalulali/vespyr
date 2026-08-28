@@ -1145,6 +1145,24 @@ async function showActionMenu(targetDir, flags) {
 }
 
 async function main() {
+	// 02o.7: `vespyr worktree <create|list|remove> …` — delegate before flag
+	// parsing so parallel-session worktree management works from any directory.
+	if (process.argv[2] === "worktree") {
+		const { execFileSync } = require("child_process");
+		const script = path.join(__dirname, "..", ".agents", "scripts", "worktree.js");
+		try {
+			const out = execFileSync(process.execPath, [script, ...process.argv.slice(3)], {
+				cwd: process.cwd(),
+				encoding: "utf8",
+				stdio: ["pipe", "pipe", "inherit"],
+			});
+			process.stdout.write(out);
+			process.exit(0);
+		} catch (e) {
+			process.exit(e.status || 1);
+		}
+	}
+
 	const flags = parseFlags(process.argv);
 	setState({ dryRun: flags.dryRun });
 
@@ -1163,6 +1181,7 @@ Commands:
   verify               Verify integrity of .agents/ against pinned manifest
   audit                Run supply-chain security and content integrity scan
   manifest             Generate .agents/manifest.json checksums file
+  worktree <cmd>       Parallel-session worktrees: create <name> | list | remove <name> [--force]
 
 Options:
   --dry-run            Preview all actions without making changes

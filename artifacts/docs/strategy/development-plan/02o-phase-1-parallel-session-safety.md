@@ -58,7 +58,9 @@
 
 ---
 
-## 4. Build Items (11.5h, amended per gate review — order fixed: provenance before derived view)
+## 4. Build Items (11.5h + worktree automation addendum, amended per gate review — order fixed: provenance before derived view)
+
+> **Execution status (2026-08-28): 02o.1–02o.9 EXECUTED, evidence-stamped, committed per item.** Suite 173/173 (two consecutive runs). Rows 02o.7–02o.9 are the owner-approved worktree-automation addendum (option b).
 
 | ID | Task | Est | Verify |
 |---|---|---|---|
@@ -67,9 +69,12 @@
 | 02o.3 | Derived latest.md: REMOVE `memory_filter.js` write paths (:44,62); remove orchestrator session-write latest.md write; `session_start.js` regenerates from history tail (byte-format identical); migrate consumers (witness.js, session_checkpoint.js, delegation_audit.js, compaction_guard.js); amend the doc instructions that hand-write it (memory-controller.md:321,408; round-table/SKILL.md:167) | 2.5h | grep-invariant: no writeFileSync/appendFileSync targeting latest.md under .agents/scripts/**; delete latest.md → session-start regenerates |
 | 02o.4 | New `collision_detector.js` (NOT security-owned drift_monitor.js): ledger of file→session→ts from memory writes; two session_ids on one shared file inside window → warning naming both + telemetry event hook (02l span point) | 2.5h | Forced two-writer probe → both session_ids named in warning |
 | 02o.5 | GUARDRAILS "Parallel Session Protocol" + dev-plan README reservation index + named reservation-check script + test | 1.5h | Section + script + test live |
-| 02o.6 | Evals/tests: 4-mode parallel corruption test (spawn-parallel, F4 precedent) in tests/; falsifiability = sandbox script copy + stub lock.js pass-through + rerun probe + assert ≥1 corruption mode trips; failure-path eval (lock timeout → exit 1) | 2h | Suite fails under planted bypass |
+| 02o.6 | Evals/tests: 4-mode parallel corruption test (spawn-parallel, F4 precedent) in tests/; falsifiability = sandbox script copy + stub lock.js pass-through + rerun probe + assert ≥1 corruption mode trips; failure-path eval (lock timeout → exit 1) | 2h | ✅ `tests/test_parallel_memory.test.js` both cases green; bypass probe reproduces lost-entry/torn-structure structurally (widened rename window — not timing-dependent) |
+| 02o.7 | Worktree command: `vespyr worktree <create\|list\|remove>` (`.agents/scripts/worktree.js` + `bin/cli.js` hook). Post-create wiring: `<wt>/.agents/state` and `<wt>/artifacts/memory` symlinked to the PRIMARY checkout — locks, ledger and the swarm brain shared by construction; code isolated. Runtime state untracked (`.agents/state/` → .gitignore, drift-history.json untracked) | 1.5h | ✅ temp-repo test: create → links verified → memory write from worktree lands in primary store → remove cleans up |
+| 02o.8 | Busy-tree auto-offer in `session_start.js` (owner option **b**): ledger shows foreign-window writes ≤5 min → auto-create `auto-YYYYMMDD-HHmm` worktree + print `cd <path>`; offer-once per window (marker); `VESPYR_AUTO_WORKTREE=0` → advisory-only; skipped inside linked worktrees | 1h | ✅ temp-repo test: advisory + exactly one auto worktree; second run offers once only |
+| 02o.9 | Tests + docs: `tests/test_worktree.test.js` (create/shared-write/remove + auto-offer-once), GUARDRAILS protocol updated to the concrete command | 1h | ✅ both tests green in full suite |
 
-**Total: 11.5h serial.** Single-writer execution; commit-per-build-item mandatory. Regression gate per item: `tests/run-all.js` green (≥168), specifically test_memory_fixes F4/F9/F10, test_memory_consolidation, test_cli.
+**Total: 15h serial (11.5h + 3.5h worktree addendum).** Single-writer execution; commit-per-build-item mandatory. Regression gate per item: `tests/run-all.js` green (≥168), specifically test_memory_fixes F4/F9/F10, test_memory_consolidation, test_cli.
 
 ---
 

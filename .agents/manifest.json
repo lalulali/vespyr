@@ -1,10 +1,10 @@
 {
   "version": "2.0.8",
-  "generated_at": "2026-08-28T15:15:52.473Z",
+  "generated_at": "2026-08-28T15:35:58.381Z",
   "file_count": 336,
   "files": {
     ".gitignore": "02be8395c2a0b6cdfcf971daa5689776e2d98cc43603b22a45d8c2bd78c13772",
-    "GUARDRAILS.md": "a450669eb20738edeb191ad43902e60417558b3002c863ef84f771986c6c8bfe",
+    "GUARDRAILS.md": "995542a54ce329fd54448faf811c92ce30079096fc512eb0d178cf45dbc4201d",
     "TROUBLESHOOTING.md": "ded343db786ad56ace21878e6e4d20a3b7a8dcfe22f0bdd8d86b84ba9cdc38a2",
     "agents/architect.md": "938b639e19bf2060fc58fbb4b6fec2a6481e0281727ee4f529c9f88dd0e2014e",
     "agents/code-reviewer.md": "40585b3ac1a688dfb1d06641ad34d86142aae0e022089a0bd854017bacff814f",
@@ -115,7 +115,7 @@
     "scripts/roundtable_eval.js": "4cc895f454dabc9a597b7a37307fa31d9ef99eabae05b519fa1baf1ed397afcc",
     "scripts/security-scan.js": "0376606fc730ad43c55ef336587ed1b4bd6163d779c03c3ded5c956aa854ddfd",
     "scripts/session_checkpoint.js": "9b5f1787740efd10ed6bdd630c7f1ecca303623dab36700ab7bb02b32fcd8f68",
-    "scripts/session_start.js": "c33a19749be8f666dd75d5a03211e1cf35920163705b8f3cda7c48e6fc665c3f",
+    "scripts/session_start.js": "fa9893b88289c52a416b29fabb3046d28292fcec71e3cd70c3426c24513e07c4",
     "scripts/spec_check.js": "564653ee43133e7b07188ce1b97a24f5a21712437fa30317487b15aea6f01f49",
     "scripts/squads.js": "c96a887f5bf0957880e992180a6c3be821cfee4cca1028684ed7a5035916a9b0",
     "scripts/step_tracker.js": "939099fe61be3b84c9f3629843d5f8e6a67579b8427929ca5768f8404e885a4b",
@@ -127,7 +127,7 @@
     "scripts/validate_frontmatter.js": "01ab4497b6962e83ca43508fdc1e63f32ad00a4df25453bd89d5f211fe3608b6",
     "scripts/validate_matrix.js": "cf20565df8b268ba1ba4b0a34fa6726dd4ed6f2b5ce415a2b5ad124121afb392",
     "scripts/witness.js": "c39f0610112b3724f9e28ae241ea601f89a6a24dcde2a515bca4253b2ae350ff",
-    "scripts/worktree.js": "eaf4018b9496305623a7245b263f2fbde1c652b2ddeccf129382e3c24fbd38db",
+    "scripts/worktree.js": "7307327979e43e387230642da2d99fbd607947b2b269953a3cd12860a0e62e2e",
     "skills/analyze-data/SKILL.md": "6d4cd5800c223cd95f13e561395fa9d45c2bade0eaf2635aee6135a5770550c4",
     "skills/brainstorming/SKILL.md": "bf4c33d504a4bf6cf4608ce6d7dadd78b92c4b906125dce1ba997faa317575ab",
     "skills/brainstorming/methods.csv": "39d0179f31bd35714c1bf5b65dea0a74b2d145dadc5d28f2c40004550916d9f9",
@@ -180,7 +180,7 @@
     "skills/develop/steps/step-10-completion.md": "60d8f45aee96f225d3c2b1dd6612119731e744384e62ca9d3c1af2b3b21344c8",
     "skills/develop/templates/develop-state.md": "85c354670277234d7efa82c16dcf037f2de74d0eef74221d624b6a94205f0329",
     "skills/discovery-report/SKILL.md": "7606f782d228cb9601f67ea30af60f6a53c74c895c0cbaae0f9900f5bfc3e638",
-    "skills/elicitation/SKILL.md": "011a41d7e8dff4ef69cd3b85e19f16264b9dde8d3ea9ff96e750cf21676f631d",
+    "skills/elicitation/SKILL.md": "173252e7f6436a04132c7034132cfe7ebad0d81e2118575e091d7cd1ec7a9176",
     "skills/elicitation/methods.csv": "4ea652a35b750fb9f255522863e9000b5ac4cf2d64989ab40d122700fd97d153",
     "skills/empathy-map/SKILL.md": "84f2b649a4538ffd107a8fbd97c84e9309df22d367249b90e7052d9c24a894c9",
     "skills/explore-game-idea/SKILL.md": "193239cdc010f9fd1f16b2d3022aa3dbffcb8cc0a71e86cca3dc26b29b15e0a0",
@@ -341,6 +341,6 @@
     "workflow.md": "b2bd5097cdcef9c27ec82458c2aaca8ca1b9328d11c17e5dd76dfda429d29f52"
   },
   "files_root": {
-    "bin/cli.js": "82f3c07b6a9c7c4fd47cea29f05e0ae591f3dc27e19f7457ed1ce75280cbae9e"
+    "bin/cli.js": "985f320cf2827c598daf49520eafb742d44ccf95e0f4dbbb4a87db74dfce4c51"
   }
 }

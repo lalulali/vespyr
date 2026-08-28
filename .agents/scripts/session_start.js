@@ -356,6 +356,10 @@ if (require.main === module) {
     if (args[i] === '--domain') out.domain = args[i + 1];
     if (args[i] === '--goal') out.goal = args[i + 1];
   }
+  // 02o.8: busy-tree detection + auto-worktree (owner option b) — must run
+  // even when project-context sync fails (fresh clones). Advisory to stderr,
+  // never blocks the session.
+  try { require('./worktree.js').autoOffer({ agent: out.agent }); } catch { /* non-blocking */ }
   try {
     const result = syncProjectContext(out);
     // 02o.2/02o.3: explicit session record + derived latest.md repair

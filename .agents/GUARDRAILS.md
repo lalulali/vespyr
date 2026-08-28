@@ -133,7 +133,7 @@ When an agent discovers an issue with an upstream artifact (spec gap, implementa
 
 ## Parallel Session Protocol (02o)
 
-- **One epic per window.** Concurrent sessions must not execute build items over the same working tree. For true parallel work, use one `git worktree` per session and merge sequentially.
+- **One epic per window.** Concurrent sessions must not execute build items over the same working tree. For true parallel work run `npx vespyr worktree <name>` and start the next session inside the printed path — code is isolated (merge via git), memory + locks stay shared. `session_start` auto-offers a worktree when a busy tree is detected; set `VESPYR_AUTO_WORKTREE=0` for advisory-only.
 - **Shared memory writes are serialized.** `memory_write.js` takes the memory lock — a `LOCK_TIMEOUT` rejection means another session holds it; retry after it finishes. The rejection is loud (exit 1). Never work around it by hand-editing memory files.
 - **Attribution is mandatory.** Every memory write carries a session id (`w-<window hash>` or `VESPYR_SESSION_ID`). After any parallel windows run, `node .agents/scripts/collision_detector.js` MUST be run before sign-off — it names every memory file written by multiple sessions.
 - **`latest.md` is generated, never written.** It derives from append-only `history.md` (`session_start.js` rebuilds it). No session, persona, or skill may write it directly.

@@ -30,7 +30,7 @@ Every `NN[X]-*.md` file in this directory MUST have a row here; numbers are clai
 | `02l-phase-1-observability-biomarkers-and-small-model-harness.md` | Observability & biomarkers | Not started (after 02o, owner ruling) |
 | `02m-phase-1-intent-routing-and-anti-premature-execution.md` | Intent routing | Implemented + evidence-stamped (was 02k; re-homed) |
 | `02n-phase-1-record-integrity-recovery.md` | Record integrity recovery | Pending (last; formerly 02m) |
-| `02o-phase-1-parallel-session-safety.md` | Parallel session safety | Executing 2026-08-28 |
+| `02o-phase-1-parallel-session-safety.md` | Parallel session safety | Executed 2026-08-28 (incl. 02o.7–9 worktree automation) |
 | `03-phase-2-enablement.md` | Phase 2 enablement | Planned (v2.1) |
 | `03a-phase-2-mcp-integration-plan.md` | MCP integration | Planned |
 | `03b-phase-2-multi-agent-orchestration.md` | Multi-agent orchestration | Planned |
