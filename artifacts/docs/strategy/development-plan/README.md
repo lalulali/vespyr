@@ -1,8 +1,53 @@
 # Vespyr Development Plan
 
-> **Status:** v2.0 — Phase 1 in progress (Phase 0 = v1.7 dev, shipped; Phase 1 = v2.0.0, complete through 02e; next: 02f). This file is the single source of truth. If anything here conflicts with other docs in `strategy/`, this file wins.
+> **Status:** v2.0 — Phase 1 in progress. Executed: 02a–02j (02i re-certified 2026-08-26). 02k (round-table skill) WIP. 02o (parallel-session safety) executing 2026-08-28. Pending: 02l, then 02n record-integrity reconciliation (closure stamps deferred). **Resequenced 2026-08-28:** 02o before 02l (owner ruling); series renumbered same day — intent-routing 02k→02m, record-integrity 02m→02n, round-table skill inserted as 02k.
 > **Maintainer:** Chris (solo, AI-assisted)
 > **Created:** 2026-07-02 — consolidates and corrects the original strategy folder (7,330 lines → this folder)
+
+---
+
+## Plan Registry (allocation record — 02o.5)
+
+Every `NN[X]-*.md` file in this directory MUST have a row here; numbers are claimed by committing the file first. `node .agents/scripts/check_plan_reservation.js` enforces this.
+
+| File | Title | Status (2026-08-28) |
+|---|---|---|
+| `01-phase-0-foundation.md` | Phase 0 foundation | Shipped (v1.7) |
+| `01a-phase-0-framework-analysis.md` | Framework analysis | Shipped |
+| `01b-phase-0-risk-register.md` | Risk register | Live |
+| `02-phase-1-skills.md` | Phase 1 skills (parent) | In progress |
+| `02a-phase-1-step-tracker.md` | Step tracker | Audit pending (02n) |
+| `02b-phase-1-agent-memory-fix.md` | Agent memory fix | Audit pending (02n) |
+| `02c-phase-1-teaching-partner.md` | Teaching partner | Audit pending (02n) |
+| `02d-phase-1-ai-ready-team.md` | AI-ready team | Executed (verified 2026-08-08) |
+| `02e-phase-1-agentskills-standardization.md` | Skills standardization | Executed |
+| `02f-phase-1-security-and-integrity-architecture.md` | Security & integrity | Executed |
+| `02g-phase-1-harness-honesty.md` | Harness honesty | Executed (record corrected forward; 02n owns §7.3) |
+| `02h-phase-1-graph-shutup-and-cli.md` | Graph/shut-up/CLI | Executed 2026-08-25 |
+| `02i-phase-1-memory-consolidation.md` | Memory consolidation | Executed + re-certified 2026-08-26 |
+| `02j-phase-1-evals-and-agnostic-harness.md` | Evals & harness | Executed (fixture-tier caveat, 02m record) |
+| `02k-phase-1-round-table-skill.md` | Round-table skill | WIP (concurrent session) |
+| `02l-phase-1-observability-biomarkers-and-small-model-harness.md` | Observability & biomarkers | Not started (after 02o, owner ruling) |
+| `02m-phase-1-intent-routing-and-anti-premature-execution.md` | Intent routing | Implemented + evidence-stamped (was 02k; re-homed) |
+| `02n-phase-1-record-integrity-recovery.md` | Record integrity recovery | Pending (last; formerly 02m) |
+| `02o-phase-1-parallel-session-safety.md` | Parallel session safety | Executing 2026-08-28 |
+| `03-phase-2-enablement.md` | Phase 2 enablement | Planned (v2.1) |
+| `03a-phase-2-mcp-integration-plan.md` | MCP integration | Planned |
+| `03b-phase-2-multi-agent-orchestration.md` | Multi-agent orchestration | Planned |
+| `03c-phase-2-harness-integration.md` | Harness integration | Planned |
+| `03d-phase-2-implementation-specs.md` | Implementation specs | Planned |
+| `03e-phase-2-token-effective-mode.md` | Token-effective mode | Planned |
+| `03f-phase-2-mcp-implementation.md` | MCP implementation | Planned |
+| `03g-phase-2-self-learning-architecture.md` | Self-learning | Planned |
+| `03h-phase-2-release-signing.md` | Release signing | Planned |
+| `04-phase-3-observability.md` | Phase 3 observability | Planned (v2.2) |
+| `04a-phase-3-observability-engine.md` | Observability engine | Planned |
+| `04b-phase-3-observability-ui-miniapp.md` | Observability UI | Planned |
+| `05-phase-4-modularity.md` | Phase 4 modularity | Planned |
+| `06-phase-5-deeper-bench.md` | Phase 5 deeper bench | Planned |
+| `07-phase-6-loop-engineering.md` | Phase 6 loop engineering | Planned |
+| `08-cross-cutting-utter-satisfaction-dna.md` | Utter-satisfaction DNA | Cross-cutting |
+| `09-phase-7-pkm-knowledge-engine.md` | PKM knowledge engine | Planned (Phase 7) |
 
 ---
 

@@ -130,6 +130,15 @@ When an agent discovers an issue with an upstream artifact (spec gap, implementa
 
 - Most step files include `begin` and `complete` calls to `node .agents/scripts/step_tracker.js`; step-tracker is optional in analysis-heavy skills (`test`, `iterate`). Agents must run the calls directly.
 - **Scope-gate skills (`develop`, `plan`, `design`, `validate-idea`, `explore-idea`, `unpack-problem`):** the tracker is NOT optional there — Step 0 (`scope-lock` + `begin`/`complete --step 0`) and the first `begin --step 1` are mandatory. `step_tracker.js` exits 1 if Step 1 begins without a locked track.
+
+## Parallel Session Protocol (02o)
+
+- **One epic per window.** Concurrent sessions must not execute build items over the same working tree. For true parallel work, use one `git worktree` per session and merge sequentially.
+- **Shared memory writes are serialized.** `memory_write.js` takes the memory lock — a `LOCK_TIMEOUT` rejection means another session holds it; retry after it finishes. The rejection is loud (exit 1). Never work around it by hand-editing memory files.
+- **Attribution is mandatory.** Every memory write carries a session id (`w-<window hash>` or `VESPYR_SESSION_ID`). After any parallel windows run, `node .agents/scripts/collision_detector.js` MUST be run before sign-off — it names every memory file written by multiple sessions.
+- **`latest.md` is generated, never written.** It derives from append-only `history.md` (`session_start.js` rebuilds it). No session, persona, or skill may write it directly.
+- **Dev-plan numbers are reserved by committed stub.** Claim an epic number by committing its file first; the Plan Registry in `artifacts/docs/strategy/development-plan/README.md` is the allocation record. `node .agents/scripts/check_plan_reservation.js` must pass before any plan number is referenced.
+- **Commit per build item.** An uncommitted tree is unattributable state — what made the 2026-08-14 and 2026-08-28 collisions unrecoverable by git.
 - The tracker reads `.agents/config.yaml` for `step_tracking` mode (`off` | `silent` | `verbose`). In `off` mode the script exits immediately — 0 output, 0 files written.
 - **Never skip the tracker calls** even when `step_tracking` is `off`. The script self-governs based on config — skipping calls breaks audit continuity when the user later enables tracking.
 - Drift warnings are soft — the tracker logs them but never blocks. Continue the step regardless.
