@@ -46,7 +46,7 @@ All notable changes to the Vespyr project will be documented in this file.
 ### Dialectic /round-table Protocol Hardening
 - Mandated **Live Dialogue Stream Rendering**: orchestrators must output the visible, unvarnished back-and-forth dialogue between agents (`### @agent-a -> @agent-b`) before providing tension synthesis; pre-digesting debates into summary-only cards is prohibited.
 - Enforced **Subagent Dispatch Prompt Sanitization**: orchestrators must prompt subagents with raw verdict gates (`[KILL/PIVOT/PASS]`) and are prohibited from asking *"How do we make it work if the user insists?"*
-- Added comprehensive unit tests in `test/vespyr-dna.test.js` and `test/skills/round-table.test.js` (21 passing tests).
+- Added comprehensive unit tests in `tests/vespyr-dna.test.js` and `tests/skills/round-table.test.js` (21 passing tests).
 
 ### Memory Consolidation & Lifecycle Architecture
 - **Machine State Fencing & State Synchronization:** Injected atomic state fence `<!-- BEGIN MACHINE STATE -->` ... `<!-- END MACHINE STATE -->` into `artifacts/memory/project-context.md` with git branch, runtime version, sprint, and active blocker auto-detection, preserving custom human blocks untouched.
@@ -95,10 +95,10 @@ All notable changes to the Vespyr project will be documented in this file.
 - Annotated explicit `/grill-me` intent gates in `/develop` spec-alignment and `/design` Create-mode intake.
 
 ### Test Infrastructure Hardening
-- Added `tests/run-all.js`, a discovery runner executing **both** repo test conventions (`tests/test_*.js` and `test/**/*.test.js`) — the orphaned-fixture failure class (five fixtures invisible to CI, one failing red at HEAD) is structurally eliminated; wired as `npm test` with CI path-triggers extended to both trees.
+- Added `tests/run-all.js`, a discovery runner executing repo test conventions (`tests/test_*.js` and `tests/**/*.test.js`) — the orphaned-fixture failure class (five fixtures invisible to CI, one failing red at HEAD) is structurally eliminated; wired as `npm test` with CI path-triggers extended to both trees.
 - Fixed the graph-deprecation guard (case-sensitive allowlist missed `CHANGELOG.md`) and extended its scan set to `.template` files, surfacing and removing stale `code-graph`/`doc-graph` permissions from `opencode.json.template`.
 - Replaced tautological/unfalsifiable fixtures with verifiable structural contracts (`shut-up` mock-token-counting removed; `round-table` self-substring simulation removed).
-- New suites: `test/cli/packaging.test.js` (real `npm pack --dry-run` audit + zero-missing-module require proof), `test/lib/engine-lib.test.js` (behavioral `fs_atomic`/`workspace`/`frontmatter` contracts incl. failure-path residue checks), `test/skills/grill-me.test.js`. Suite total: **146/146 passing across 14 test files** (up from 103/3).
+- New suites: `tests/cli/packaging.test.js` (real `npm pack --dry-run` audit + zero-missing-module require proof), `tests/lib/engine-lib.test.js` (behavioral `fs_atomic`/`workspace`/`frontmatter` contracts incl. failure-path residue checks), `tests/skills/grill-me.test.js`. Suite total: **146/146 passing across 14 test files** (up from 103/3).
 
 ### CLI Modernization Completion (02h Residue Batch)
 - Wired previously-dead headless flags end-to-end: `--project-name`, `--user-nickname`, and `--stack` now populate generated `project-context.md`; `--stack` overrides `detectStack()` auto-detection, which is now integrated into init (multi-language manifest matrix).
@@ -117,9 +117,9 @@ All notable changes to the Vespyr project will be documented in this file.
   - **ADR-002: Install-Integrity Strategy** — specifies release-level signed aggregate SHA-256 manifests (signing lands with the Phase 2 release pipeline; the shipped CLI verifies an unsigned pinned manifest — ADR-002 §2.1.1), Sigstore/SLSA OIDC provenance, pre-settled key custody, and out-of-band bootstrap verification.
   - **ADR-003: Prompt-Injection Defense Design** — establishes scanner-first deny-by-default admission control, 11-category attack taxonomy (INJ-PROMPT, INJ-TOOL, INJ-SECRET, etc.), data-flow tracing, and documented known bypasses.
   - **ADR-004: Script/Hook Execution Policy** — enforces allowlist-by-default execution, zero-eval policy, Git hook/husky scan rules (GH-1), and tarball path-traversal/symlink escape guards.
-- Added human-readable [`supply-chain-audit-spec.md`](artifacts/docs/strategy/development-plan/security/supply-chain-audit-spec.md) and machine-readable [`audit-spec.json`](artifacts/docs/strategy/development-plan/security/audit-spec.json) containing dynamic adapter-registry pattern tables, pin-store schemas, and typed security rules.
+- Added human-readable [`supply-chain-audit-spec.md`](security/supply-chain-audit-spec.md) and machine-readable [`audit-spec.json`](security/audit-spec.json) containing dynamic adapter-registry pattern tables, pin-store schemas, and typed security rules.
 - Implemented prototype scanner [`.agents/scripts/security-scan.js`](.agents/scripts/security-scan.js) with 3-state exit contract (`0 = clean`, `1 = findings`, `2 = fail-closed / tool failure`), sliding Shannon entropy secret detection (threshold 2.6), and base64 heuristic false-positive suppression.
-- Built Red-Team evaluation harness in [`eval/security/corpus/`](eval/security/corpus/) with positive/negative fixture pairs, CI invariant checker [`.agents/scripts/check_corpus_invariants.js`](.agents/scripts/check_corpus_invariants.js), and frozen baseline [`baseline-2026-08-10.json`](eval/security/corpus/baseline-2026-08-10.json).
+- Built Red-Team evaluation harness in [`evals/security/corpus/`](evals/security/corpus/) with positive/negative fixture pairs, CI invariant checker [`.agents/scripts/check_corpus_invariants.js`](.agents/scripts/check_corpus_invariants.js), and frozen baseline [`baseline-2026-08-10.json`](evals/security/corpus/baseline-2026-08-10.json).
 - Conducted fresh security audit on `security-scan.js` producing findings report `findings-report-security-scan-f1-47.md` (11 findings triaged for Phase 2 entry gate).
 - Implemented and verified complete downstream security & integrity test suites (12/12 passing), hardened frontmatter permission parser, and synchronized all development documentation (READMEs, Guides, Quick Reference, TROUBLESHOOTING, and skill catalogs).
 ### Harness Honesty & Direct-I/O Execution (Epic 02g)

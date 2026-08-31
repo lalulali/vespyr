@@ -207,8 +207,8 @@ Every scanner rule maps to a label; every label has a rule or an explicit bypass
 
 Standalone audit spec producing two named handoff artifacts consumed by F1.47 (no re-derived patterns in scanner code):
 
-1. **`security/supply-chain-audit-spec.md`** (human-readable) — [supply-chain-audit-spec.md](security/supply-chain-audit-spec.md)
-2. **`audit-spec.json`** (machine-readable, importable by scan.js) — [audit-spec.json](security/audit-spec.json) containing:
+1. **`security/supply-chain-audit-spec.md`** (human-readable) — [supply-chain-audit-spec.md](../../../security/supply-chain-audit-spec.md)
+2. **`audit-spec.json`** (machine-readable, importable by scan.js) — [audit-spec.json](../../../security/audit-spec.json) containing:
    - **Adapter-registry pattern table:** harness dir → config files to inspect, derived from `bin/cli.js`'s per-harness adapter registry (opencode.json, `.claude/` settings, `.cursor/`, `.github/agents/`, `.windsurf/`, `.kiro/`, etc.) — **no hardcoded harness names anywhere**
    - **Pin-store schema:** name/version/hash/allowlist for npm + GitHub refs
    - **Typed rule set:** path, pattern, severity (imported by scan.js)
@@ -234,7 +234,7 @@ Also covers: package.json dependency tree postinstall/transitive-dep risk triage
 
 ## 10. Red-Team Corpus & CI Gate (F1.54)
 
-- **Corpus:** `eval/security/corpus/` with labeled attack categories — each a malicious skill/template/memory/harness-config file; negative fixtures (e.g., fake-harness name) that must NOT match. **Per-rule invariant: every rule has ≥1 positive + ≥1 negative fixture** (Nina)
+- **Corpus:** `evals/security/corpus/` with labeled attack categories — each a malicious skill/template/memory/harness-config file; negative fixtures (e.g., fake-harness name) that must NOT match. **Per-rule invariant: every rule has ≥1 positive + ≥1 negative fixture** (Nina)
 - **Fixture coverage (minimum):** hooks config (GH-1 installer), near-miss harness pattern-tables (harness-shaped name, different content), memory files (provenance injection), templates (instruction substitution), symlink (intra-repo allowed vs escape forbidden), Windows-style traversal (backslash/UNC), write-time secret fixture (high-entropy, gitignored), T3 duplicate-tag + provenance-forgery (future timestamp) fixtures (Nina)
 - **Trigger:** every PR touching `.agents/`, skills, templates, harness config, **`.opencode/`, workflow files, and the scanner itself** runs scanner + corpus. The gate is a **required check on main with branch protection** — not skippable. **No `pull_request_target`** (injection vector); fork PRs fail via read-only annotations with read-only tokens, zero secrets exposed (Nina)
 - **FP budget:** enforced as a **NEW-FINDINGS-ONLY** gate against a frozen baseline corpus; triage owner: @security-engineer + @tech-lead. **Denominator defined (Nina): FP rate := informational findings (rule hits labeled severity low OR documented known-FP class) ÷ (corpus files × harness shapes per run), measured on the frozen corpus only; new findings labeled and never auto-baselined** (Nina). Absolute ≤1% is informational, not a gate

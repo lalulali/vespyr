@@ -240,7 +240,7 @@ If the chunk is in the archive (was compacted), use search instead:
 
 **Fix:** Inspect `quarantine-log.json` to review the quarantined payload and matched rule pattern (e.g., prompt injection phrases like `ignore previous instructions`, fake role delimiters, or fake `<invoke>` calls). If the entry was a false positive from code documentation, sanitize or rephrase the entry in `active-decisions.md` or `lessons-learned.md`.
 
-**Prevention:** Never include raw unsanitized prompt injection attack strings directly in persistent memory files without wrapping them in explanatory code blocks or using quarantine-exempt test corpus locations (`eval/security/corpus/`).
+**Prevention:** Never include raw unsanitized prompt injection attack strings directly in persistent memory files without wrapping them in explanatory code blocks or using quarantine-exempt test corpus locations (`evals/security/corpus/`).
 
 ---
 

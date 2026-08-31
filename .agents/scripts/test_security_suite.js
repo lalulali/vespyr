@@ -18,7 +18,7 @@ const path = require('path');
 const ROOT = path.resolve(__dirname, '..', '..');
 const SCRIPTS_DIR = path.join(ROOT, '.agents', 'scripts');
 const CLI = path.join(ROOT, 'bin', 'cli.js');
-const SPEC = path.join(ROOT, 'artifacts', 'docs', 'strategy', 'development-plan', 'security', 'audit-spec.json');
+const SPEC = path.join(ROOT, 'security', 'audit-spec.json');
 
 const SUITES = [];
 let passCount = 0;
@@ -268,9 +268,9 @@ runTest('CLI Manifest Verification Contract (fail-closed bootstrap, tamper, extr
 });
 
 // 7. Held-Out Evaluation Dataset
-runTest('Held-Out Recall Evaluation (eval/security/held_out/)', () => {
-  const heldOutPos = path.join(ROOT, 'eval', 'security', 'held_out', 'positive');
-  const heldOutNeg = path.join(ROOT, 'eval', 'security', 'held_out', 'negative');
+runTest('Held-Out Recall Evaluation (evals/security/held_out/)', () => {
+  const heldOutPos = path.join(ROOT, 'evals', 'security', 'held_out', 'positive');
+  const heldOutNeg = path.join(ROOT, 'evals', 'security', 'held_out', 'negative');
   
   // Positives must exit 1 (findings detected)
   try {

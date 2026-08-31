@@ -6,7 +6,6 @@ on:
     paths:
       - '.agents/**'
       - 'artifacts/**'
-      - 'test/**'
       - 'tests/**'
       - 'package.json'
       - '.github/workflows/swarm-tests.yml'
@@ -15,7 +14,6 @@ on:
     paths:
       - '.agents/**'
       - 'artifacts/**'
-      - 'test/**'
       - 'tests/**'
       - 'package.json'
       - '.github/workflows/swarm-tests.yml'

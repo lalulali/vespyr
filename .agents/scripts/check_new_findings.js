@@ -22,16 +22,12 @@ const ROOT = path.resolve(__dirname, '..', '..');
 const SCAN = path.join(__dirname, 'security-scan.js');
 const SPEC = path.join(
   ROOT,
-  'artifacts',
-  'docs',
-  'strategy',
-  'development-plan',
   'security',
   'audit-spec.json'
 );
 const BASELINE =
   process.env.BASELINE_FILE ||
-  path.join(ROOT, 'eval', 'security', 'corpus', 'baseline-repo-2026-08-25.json');
+  path.join(ROOT, 'evals', 'security', 'corpus', 'baseline-repo-2026-08-25.json');
 
 function main() {
   if (!fs.existsSync(BASELINE)) {

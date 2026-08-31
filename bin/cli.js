@@ -1090,7 +1090,7 @@ function performVerify(targetDir, flags) {
 
 function performAudit(targetDir, flags) {
 	const scanScript = path.join(__dirname, "..", ".agents", "scripts", "security-scan.js");
-	const defaultSpec = path.join(__dirname, "..", "artifacts", "docs", "strategy", "development-plan", "security", "audit-spec.json");
+	const defaultSpec = path.join(__dirname, "..", "security", "audit-spec.json");
 	const specPath = flags.spec || (fs.existsSync(defaultSpec) ? defaultSpec : null);
 
 	if (!specPath || !fs.existsSync(specPath)) {

@@ -1,14 +1,13 @@
 #!/usr/bin/env node
-// Discovers and runs every *.test.js fixture under tests/ and test/ so no
-// test file can be silently orphaned again (02h T1.4 evidence regime).
+// Discovers and runs every *.test.js fixture under tests/ (converged from test/ + tests/).
 const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
 
-const ROOTS = [__dirname, path.join(__dirname, '..', 'test')];
+const ROOTS = [__dirname];
 
-// Both repo conventions are discovered: tests/test_*.js (legacy prefix)
-// and test/**/**.test.js (node:test suffix).
+// Both naming conventions are discovered: tests/test_*.js (legacy prefix)
+// and tests/**/*.test.js (node:test suffix).
 function isTestFixture(name) {
   return name.endsWith('.test.js') || /^test_.+\.js$/.test(name);
 }
@@ -25,7 +24,7 @@ function collect(dir, acc = []) {
 
 const files = [...new Set(ROOTS.flatMap((root) => (fs.existsSync(root) ? collect(root) : [])))].sort();
 if (files.length === 0) {
-  console.error('run-all: no *.test.js fixtures found under tests/ or test/');
+  console.error('run-all: no *.test.js fixtures found under tests/');
   process.exit(2);
 }
 console.log(`run-all: executing ${files.length} test files:`);

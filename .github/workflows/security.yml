@@ -10,16 +10,16 @@ on:
     paths:
       - '.agents/**'
       - 'bin/**'
-      - 'eval/security/**'
-      - 'artifacts/docs/strategy/development-plan/security/**'
+      - 'evals/security/**'
+      - 'security/**'
       - '.github/workflows/security.yml'
   pull_request:
     branches: [main, master]
     paths:
       - '.agents/**'
       - 'bin/**'
-      - 'eval/security/**'
-      - 'artifacts/docs/strategy/development-plan/security/**'
+      - 'evals/security/**'
+      - 'security/**'
       - '.github/workflows/security.yml'
 
 permissions:
@@ -54,10 +54,10 @@ jobs:
         shell: bash
         run: |
           set -e
-          SPEC=artifacts/docs/strategy/development-plan/security/audit-spec.json
-          node .agents/scripts/security-scan.js --dir eval/security/corpus/negative --spec "$SPEC" --json > /dev/null
+          SPEC=security/audit-spec.json
+          node .agents/scripts/security-scan.js --dir evals/security/corpus/negative --spec "$SPEC" --json > /dev/null
           echo "negative corpus clean (exit 0) ✓"
-          if node .agents/scripts/security-scan.js --dir eval/security/corpus/positive --spec "$SPEC" --json > /dev/null; then
+          if node .agents/scripts/security-scan.js --dir evals/security/corpus/positive --spec "$SPEC" --json > /dev/null; then
             echo "positive corpus MUST exit 1"; exit 1
           fi
           echo "positive corpus findings detected (exit 1) ✓"

@@ -218,4 +218,4 @@ Every scanner rule maps to a taxonomy label (02f §7); every label has a rule **
 - `bin/cli.js` — harness adapter registry (`HARNESS_OPTIONS`, `detectInstalledHarnesses`, `harnessLinkMap`, `getGlobalPath`)
 - `package.json` — current manifest state (zero deps, zero install scripts, node >=18)
 - `opencode.json` — live T0 harness config in this repo (INJ-CONFIG scan target)
-- `artifacts/docs/strategy/development-plan/security/audit-spec.json` — machine-readable twin of this spec (the scanner's import)
+- `security/audit-spec.json` — machine-readable twin of this spec (the scanner's import, co-located in `security/`)

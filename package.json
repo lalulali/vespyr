@@ -10,7 +10,8 @@
     "bin/",
     ".agents/",
     "tools/",
-    "evals/"
+    "evals/",
+    "security/"
   ],
   "scripts": {
     "test": "node tests/run-all.js",

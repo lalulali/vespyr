@@ -2,7 +2,7 @@
 /**
  * check_corpus_invariants.js — CI gate for the security red-team corpus (02f F1.54).
  *
- * Verifies the per-rule fixture invariant declared in eval/security/corpus/README.md:
+ * Verifies the per-rule fixture invariant declared in evals/security/corpus/README.md:
  *   (a) every rule in audit-spec.json has >=1 positive + >=1 negative fixture,
  *   (b) a positive-only scan exits 1,
  *   (c) a negative-only scan exits 0,
@@ -18,8 +18,8 @@ const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..', '..');
 const SCANNER = path.join(ROOT, '.agents', 'scripts', 'security-scan.js');
-const SPEC = path.join(ROOT, 'artifacts', 'docs', 'strategy', 'development-plan', 'security', 'audit-spec.json');
-const CORPUS = path.join(ROOT, 'eval', 'security', 'corpus');
+const SPEC = path.join(ROOT, 'security', 'audit-spec.json');
+const CORPUS = path.join(ROOT, 'evals', 'security', 'corpus');
 const BASELINE = path.join(CORPUS, 'baseline-2026-08-10.json');
 
 function run(args) {
