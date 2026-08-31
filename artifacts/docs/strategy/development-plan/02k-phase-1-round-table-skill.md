@@ -110,3 +110,36 @@ Both are parked here deliberately; neither was requested nor review-approved.
 **Deviations & residuals:**
 - Invariant rule appended as rule 6 after actual rule 5 (Zero User Deference); SPC Gate is rule 4 — first edit attempt misanchored, corrected.
 - Flagged, not edited (out of plan scope): "Why This Matters" (L16) attributes diversity solely to subagent processes; the new tiered fallback achieves parity via firewalled calls. Candidate one-line amendment, deferred.
+
+---
+
+## Track A — Elicitation Skill Upgrade
+**Added:** 2026-08-28 · **Selected:** Track A (user, 2026-08-28) · **C's dogfood stage deferred, not killed** — run the upgraded elicitation on `/round-table` in a follow-up session as its first behavioral eval.
+**Estimated total:** 3 hours · **Assignee:** @developer · **Sequential** (single file + one script flag)
+
+**Premise:** `/elicitation` carries the same defect 02k cured in `/round-table` — Step 1/2 mandate in-context persona simulation ("dynamically simulate those personas"), the opinion-merging failure mode. D1–D4 transfer 1:1.
+
+### Scope
+**In:** tiered dispatch contract (native subagents → context-firewalled sequential → refusal for multi-persona on single-call harnesses), outcome markers, telemetry via `--tool` flag. **Out:** `methods.csv` schema (untouched — tiering overrides at SKILL.md level), `match_methods.js`, frontmatter (byte-identical, triggering must not drift), `communication_language` reference (L21 — undefined variable, flagged not fixed: no silent cleanup), round-table open items (unchanged: T003 dynamic, L16 residual, gated P3).
+
+### Added design decisions
+| # | Decision | Rationale |
+|---|---|---|
+| D5 | Outcome markers, not verdict gates: `[ELICITATION: <method> -> applied\|discarded\|refined]` | Elicitation produces artifacts, not decisions — Decision/Review gates don't apply; outcome traceability does |
+| D6 | Telemetry reuses `roundtable_eval.js log` with a new `--tool` flag (default `round-table`) | One log, no new script; tier modes (`native/solo/refused`) map 1:1 |
+| D7 | Single-persona methods legitimately run in-context | Self-critique is one perspective critiquing content — isolation is only required where independence is claimed (multi-persona) |
+
+### Task list
+| ID | Task | Est. (h) | Done |
+|---|---|---|---|
+| T101 | Elicitation SKILL.md: tiered dispatch section + rewrite 3 simulation sites (L46, L108, L151) + outcome-marker rule + activation telemetry call | 1.5 | [x] |
+| T102 | `roundtable_eval.js`: `--tool` flag on `log` (default `round-table`), header doc | 0.5 | [x] |
+| T103 | Verify: frontmatter md5 byte-identical (`fe481d31…`), stale-simulation grep (only intentional `--simulated` degraded label may survive), `node --check`, log smoke test with `--tool elicitation`, diff review | 0.5 | [x] |
+| T104 | Dynamic (runtime): dogfood run per deferred C — separate session | — | [ ] (deferred) |
+
+### Risks
+| Risk | Mitigation |
+|---|---|
+| Method descriptions in CSV embed persona instructions beyond SKILL.md's control | Grep confirmed clean today; tiering text explicitly overrides CSV guidance |
+| Refusal tier over-fires: elicitation is lightweight, full refusal may be disproportionate | D7 — single-persona methods always available in-context; only multi-persona independence claims gate on dispatch |
+| `--simulated` degraded mode becomes the default by habit | Label is mandatory in output; telemetry records the tier actually used |

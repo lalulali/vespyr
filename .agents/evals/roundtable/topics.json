@@ -1,0 +1,72 @@
+[
+  {
+    "id": "rt-001",
+    "topic": "Add real-time collaborative editing to the markdown note editor",
+    "premise_quality": "sound",
+    "expected_verdict_hint": null,
+    "expected_frictions": ["sync complexity vs. team size", "conflict-resolution scope creep", "infra cost vs. willingness to pay"]
+  },
+  {
+    "id": "rt-002",
+    "topic": "Migrate primary storage from PostgreSQL to MongoDB for schema flexibility",
+    "premise_quality": "sound",
+    "expected_verdict_hint": null,
+    "expected_frictions": ["relational invariants vs. document model", "migration downtime", "query-pattern lock-in"]
+  },
+  {
+    "id": "rt-003",
+    "topic": "Ship an LLM-powered meeting-notes summarization feature via a third-party API",
+    "premise_quality": "sound",
+    "expected_verdict_hint": null,
+    "expected_frictions": ["PII in prompts", "eval set before production", "latency ceiling vs. SLA"]
+  },
+  {
+    "id": "rt-004",
+    "topic": "Consolidate the three service repos into a monorepo",
+    "premise_quality": "sound",
+    "expected_verdict_hint": null,
+    "expected_frictions": ["CI pipeline runtime", "team ownership boundaries", "release coupling"]
+  },
+  {
+    "id": "rt-005",
+    "topic": "Add gamification (badges, streaks) to lift week-4 retention",
+    "premise_quality": "sound",
+    "expected_verdict_hint": null,
+    "expected_frictions": ["retention causality unproven", "brand/audience fit", "novelty-effect decay"]
+  },
+  {
+    "id": "rt-006",
+    "topic": "Self-host the vector database instead of the managed SaaS",
+    "premise_quality": "sound",
+    "expected_verdict_hint": null,
+    "expected_frictions": ["ops burden vs. cost delta at current scale", "backup/DR maturity", "team headcount"]
+  },
+  {
+    "id": "rt-007",
+    "topic": "Introduce a free tier to widen the top of the funnel",
+    "premise_quality": "sound",
+    "expected_verdict_hint": null,
+    "expected_frictions": ["support load from free users", "cannibalization of paid conversion", "abuse surfaces"]
+  },
+  {
+    "id": "rt-008",
+    "topic": "Rewrite the web frontend in a different framework to improve developer morale",
+    "premise_quality": "flawed",
+    "expected_verdict_hint": "KILL",
+    "expected_frictions": ["morale is not an architecture driver", "rewrite opportunity cost", "zero user-facing value"]
+  },
+  {
+    "id": "rt-009",
+    "topic": "Build offline-first sync into the mobile app before product-market fit",
+    "premise_quality": "flawed",
+    "expected_verdict_hint": "KILL",
+    "expected_frictions": ["premature scaling", "sync complexity before retention evidence", "opportunity cost vs. core loop"]
+  },
+  {
+    "id": "rt-010",
+    "topic": "Add a blockchain-based audit log to the enterprise plan",
+    "premise_quality": "flawed",
+    "expected_verdict_hint": "KILL",
+    "expected_frictions": ["append-only DB achieves the requirement", "no buyer demand evidenced", "operational cost with no differentiation"]
+  }
+]
