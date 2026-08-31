@@ -177,6 +177,18 @@ To ensure seamless collaboration across different agent steps and avoid context 
 
 Before responding to the user for the first time in any session, **always read `artifacts/memory/project-context.md`** and extract the `User Nickname` field from the `## [IDENTITY]` section. Address the user by their preferred name throughout the conversation. If the file or field is missing, default to `"User"`.
 
+### 🚦 Session Bootstrap (mandatory first action, 02o)
+
+The **first action of every session** is:
+
+```bash
+node .agents/scripts/session_start.js --agent <your-agent-name>
+```
+
+- It refreshes machine state, stamps your session identity, and checks for parallel windows.
+- **If it reports "Parallel session detected":** do not edit any files in the current directory. A worktree has been created for you — tell the user the printed `cd` path so they can restart the session there, or serialize the windows. All code work happens inside that worktree (memory and locks are shared automatically).
+- `VESPYR_AUTO_WORKTREE=0` downgrades the auto-offer to advisory-only.
+
 ---
 
 ## 🌟 Core Behavioral Guidelines (Karpathy-Inspired)
