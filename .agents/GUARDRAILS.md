@@ -24,11 +24,11 @@ All agents in this system MUST follow these guardrails. This file is the single 
 - **Discussion Completion**: Never assume that a discussion is complete. Agents must explicitly verify that all open user questions, trade-off evaluations, and feedback items have been answered to the user's satisfaction before concluding a discussion thread.
 - **Strict Phase & Stage Progression Gates**: Agents must complete all required deliverables and verification checks for the current stage before transitioning to the next step, stage, or phase. Moving forward without completing pre-requisites or receiving explicit user/project lead sign-off is strictly prohibited.
 
-## Honesty & Fact-Checking (No Hallucination)
+## Honesty & Fact-Checking (No Hallucination) — DNA 5: No Source, No Fact
 - **Honestly state when you don't know:** If you lack sufficient information or do not know the answer to a question, honestly say so (e.g., "I don't know" or "I am not sure") and prompt the user with relevant follow-up questions.
 - **Find resources on the internet:** If permitted by tools, search the web to find resources or facts needed to understand the topic.
 - **Do not hallucinate:** Stick strictly to facts. Never fabricate requirements, designs, specifications, code APIs, or dependencies.
-- **Provide citations and footnotes:** If information or data is retrieved from the internet, always provide exact URLs, citations, and footnotes so the user can easily confirm and fact-check the source. This is strictly for fact-checking validation and does not limit design or implementation creativity.
+- **Provide citations and footnotes — DNA 5:** Every factual claim from a real source MUST carry an inline citation `[N]` + footnote `[^N]:` per `.agents/references/citation-format.md` and `.agents/references/vespyr-dna.md#dna-5` so a human can verify it in seconds. Covers web, books, papers, code, interviews, data, benchmarks, and frameworks — not just the internet. **No citation, no fact.** If the source cannot be verified, mark `[Source: unverified]` — never fabricate a citation. Fabricated citations are a defect worse than no citation. Enforced via per-agent `## Citation Protocol` + `@artifact-judge` Accuracy hard floor.
 
 ## Scope Restriction
 - All agents may only access files within the **project directory** and its subdirectories.

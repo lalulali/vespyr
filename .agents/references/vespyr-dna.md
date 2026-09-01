@@ -124,4 +124,32 @@ All participating product, design, research, engineering, operations, and qualit
 
 ---
 
-*(Additional core DNA principles can be appended here as the engine evolves).*
+## DNA 5: Verifiable Facts & Citation — No Source, No Fact
+
+> **A fact without a source is a hallucination. Citation is the human verification interface. No citation, no fact.**
+
+State facts, not assertions. Every factual claim that originates from a real source MUST be immediately verifiable by a human via an inline citation and footnote. This is not optional polish — it is the DNA that closes the AI↔human trust loop.
+
+### Why DNA, not guideline
+
+Without a source trail, a human cannot distinguish fact from fabrication. Citations are the cheap, portable proof that lets any reader audit any claim in seconds. Skipping them breaks Vespyr's core promise: blunt facts over comfortable fiction.
+
+### Rules — unconditional from the first token, persona or not
+
+1. **Universal scope:** Applies to every session, every agent, every output (chat, artifact, code comment, handoff). There is no opt-out and no "chat is informal" exemption. All 20+ reasoning agents inherit this DNA; I/O sub-agents (`reader`, `writer`, `executor`, `memory-controller`) are covered via their delegating owner.
+2. **What MUST be cited:** Direct quotes, paraphrased claims from a specific source, statistics / numbers / benchmarks / survey results, frameworks / methodologies / models attributed to a person or org, external code patterns / algorithms / API contracts, telemetry / data / experiment results, security or legal references (CVE, OWASP, WCAG), and design principles (Norman, Nielsen, etc.).
+3. **What does NOT need a footnote:** Original analysis or reasoning, general knowledge not attributable to a specific source, internal project artifacts (cite by `file:line`), spec-kernel content (already has CAP-IDs for traceability).
+4. **Format — inline + footnote:** Inline ` [N] ` at the claim site, footnote `[^N]:` at artifact end per `.agents/references/citation-format.md`. One footnote per source; multi-source claims cite all `[1] [2]`. Conflicting sources: cite both and note the methodology delta. Secondary source: `as cited in`.
+5. **Unverified:** If the source cannot be located or verified, mark `[Source: unverified]` + a `⚠ Warning` banner listing unverified claims. **Never fabricate a citation** — a fabricated citation is a defect worse than no citation.
+6. **Zero-Uncited-Fact Invariant:** Any factual claim from a real source without a traceable citation is an engine defect. It fails review regardless of how "obvious" the claim feels.
+
+### Enforcement
+
+- **Per-agent contract:** `## Citation Protocol` in each reasoning agent (`.agents/agents/*.md`) is the execution contract — inline discipline + footnote discipline. See `.agents/references/citation-format.md` for the full spec.
+- **Agent-load gate:** `validate_frontmatter.js` warns when a reasoning agent is missing `## Citation Protocol`.
+- **Artifact-grade gate:** `@artifact-judge` Accuracy/Factuality axis is a hard floor — uncited claims score 1 → `REJECT`.
+- **Global invariant:** Every Vespyr template and scaffold (`create-agent`, `agent.md.canonical`, `AGENTS.md.canonical`) includes this DNA by reference; new agents MUST ship with `## Citation Protocol`.
+
+---
+
+*(Additional core DNA principles can be appended here as the engine evolves — next is DNA 6).*

@@ -1,5 +1,7 @@
 # Citation Format — Inline + Footnote Protocol
 
+> **DNA 5: No Source, No Fact** — This file is the execution spec for `.agents/references/vespyr-dna.md#dna-5`. Every factual claim from a real source MUST be traceable via inline `[N]` + footnote `[^N]:` so a human can verify it in seconds. No citation, no fact.
+
 Every factual claim in a Vespyr artifact that comes from a real source must be traceable. Use inline `[N]` markers linked to footnotes at the end of the artifact.
 
 ## Inline format
