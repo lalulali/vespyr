@@ -1,6 +1,6 @@
 # Motion Design Guidelines — @product-designer (Ivy)
 
-> **When to load:** This file is loaded ONLY when motion is in scope for the current task (a product where animation is a differentiator, or a user request mentions motion/animation/transitions). It is intentionally NOT part of the base persona to keep initiation tokens low.
+> **When to load:** This file is loaded ONLY when motion is in scope for the current task (a product where animation is a differentiator, or a user request mentions motion/animation/transitions). It is intentionally NOT part of the base persona to keep context loading efficient.
 >
 > **Ownership:** You (Ivy) own the motion *spec*. You produce `motion-spec.md` + motion tokens that extend `design.md`. @developer (Rex) owns the motion *framework and code* — your spec must give him a complete, unambiguous motion prompt, not a mood board.
 >

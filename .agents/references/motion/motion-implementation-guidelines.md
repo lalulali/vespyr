@@ -1,6 +1,6 @@
 # Motion Implementation Guidelines — @developer (Rex)
 
-> **When to load:** This file is loaded ONLY when the task involves implementing motion/animation (motion spec exists, or the task mentions transitions/animations). It is intentionally NOT part of the base persona to keep initiation tokens low.
+> **When to load:** This file is loaded ONLY when the task involves implementing motion/animation (motion spec exists, or the task mentions transitions/animations). It is intentionally NOT part of the base persona to keep context loading efficient.
 >
 > **Ownership:** You (Rex) own the motion *framework and code*. @product-designer (Ivy) owns the motion *spec* — implement the `motion-spec.md` motion prompts verbatim (durations, easings, choreography, reduced-motion fallbacks). Do not improvise timing; if a prompt is under-specified, ask Ivy.
 >

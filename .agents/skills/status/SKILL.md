@@ -36,7 +36,7 @@ This returns a health snapshot of all memory files — sizes, entry counts, arch
 
 ### Step 3: Load last session summary
 
-Read `artifacts/memory/session-summaries/latest.md` directly (it's ~100 tokens, safe to load in full).
+Read `artifacts/memory/session-summaries/latest.md` directly (it's concise, safe to load in full).
 
 ### Step 4: Check active blockers and CRs
 

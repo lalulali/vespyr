@@ -5,7 +5,7 @@
 > **Also appended to:** `artifacts/memory/session-summaries/history.md` (never overwrite)
 > **Read by:** `Mnemos (@memory-controller)` as part of Tier 1 context loading
 
-The session summary is the fastest path to cross-session continuity. It costs ~100 tokens to load and tells the next agent exactly where things stand — without re-reading all memory files.
+The session summary is the fastest path to cross-session continuity. It is concise to load and tells the next agent exactly where things stand — without re-reading all memory files.
 
 ---
 

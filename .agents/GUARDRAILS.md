@@ -60,7 +60,7 @@ All agents in this system MUST follow these guardrails. This file is the single 
 - At the end of any significant work session, invoke `@memory-controller session-write` with a brief summary of what was done, decisions made, next step, and new blockers.
 - Use the format in `.agents/templates/memory/session-summary-template.md`.
 - This is not optional for sessions that produce decisions or code — it is the primary mechanism for cross-session continuity.
-- The session summary costs ~100 tokens to load and saves the next agent from re-reading all memory files to understand where things stand.
+- The session summary is concise and saves the next agent from re-reading all memory files to understand where things stand.
 ## Merge Conflict Resolution
 
 > **Note:** `artifacts/memory/` is not git-tracked in default setup. The protocol below applies if memory files are placed under version control.

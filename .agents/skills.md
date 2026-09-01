@@ -141,7 +141,7 @@ All agents leverage the persistent memory system located in `artifacts/memory/` 
 
 ### Consolidated 5-File Memory Layout
 1. **`project-context.md`** — Static project basics, tech stack, and machine-fenced runtime state (`<!-- BEGIN MACHINE STATE -->`).
-2. **`active-decisions.md`** — Current architectural & product decisions ($<400$ token budget, auto-compacted on phase transitions).
+2. **`active-decisions.md`** — Current architectural & product decisions (auto-compacted on phase transitions).
 3. **`patterns-and-conventions.md`** — Established patterns, coding conventions, and cross-agent insights.
 4. **`lessons-learned.md`** — Non-obvious bugs, gotchas, and retrospective insights.
 5. **`blockers-and-risks.md`** — Active blockers and risk register.
@@ -152,13 +152,13 @@ All agents leverage the persistent memory system located in `artifacts/memory/` 
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│ Tier 1 — Core Context (~200 tokens)                          │
+│ Tier 1 — Core Context                                        │
 │ Project stack, active phase, blockers, recent session cursor │
 ├─────────────────────────────────────────────────────────────┤
-│ Tier 2 — Agent-Specific Patterns & Decisions (~300 tokens)   │
+│ Tier 2 — Agent-Specific Patterns & Decisions                 │
 │ Patterns, conventions, and decisions for active role         │
 ├─────────────────────────────────────────────────────────────┤
-│ Tier 3 — Scored Task Data (~500 tokens)                     │
+│ Tier 3 — Scored Task Data                                    │
 │ Keyword + recency scored chunks inside canonical T3 blocks  │
 └─────────────────────────────────────────────────────────────┘
 ```

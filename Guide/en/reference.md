@@ -63,11 +63,11 @@ Terminology is locked — no synonyms allowed. Full glossary at `.agents/referen
 
 ### 3-Tier Progressive Load
 
-| Tier | Contents | Size | When Loaded |
-|------|----------|------|-------------|
-| Tier 1 | Core context (stack, constraints) | ~200 tokens | Every agent invocation |
-| Tier 2 | Agent-specific patterns | ~300 tokens | On agent activation |
-| Tier 3 | Task-relevant results | ~500 tokens | On task assignment |
+| Tier | Contents | When Loaded |
+|------|----------|-------------|
+| Tier 1 | Core context (stack, constraints) | Every agent invocation |
+| Tier 2 | Agent-specific patterns | On agent activation |
+| Tier 3 | Task-relevant results | On task assignment |
 
 ### Pattern Pre-Fetch
 

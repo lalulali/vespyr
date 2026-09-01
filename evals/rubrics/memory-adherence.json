@@ -1,7 +1,7 @@
 {
   "dimension": "memory_adherence",
   "name": "Memory & Workflow Adherence Rubric",
-  "description": "Evaluates memory persistence fidelity, token budget ceilings (<500 tok), and machine state preservation.",
+  "description": "Evaluates memory persistence fidelity and machine state preservation.",
   "passThreshold": 4,
   "criteria": [
     {

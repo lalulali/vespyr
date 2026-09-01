@@ -35,7 +35,7 @@ A yes-agent costs time, money, and bad decisions. The bitter truth now is cheape
 > **No intent, no execution. No broad surveys, no ungrounded code.**
 
 1. **Clear (C ≥ 0.85):** banner the persona, run the skill — Ladder Level 3 commitment gates escalate to `/grill-me`.
-2. **Ambiguous (0.50–0.85):** HALT — emit a <100-token 2–3 Track Fork card; await selection.
+2. **Ambiguous (0.50–0.85):** HALT — emit a concise 2–3 Track Fork card; await selection.
 3. **Trivial (C < 0.50):** execute directly.
 
 ## DNA 5: Verifiable Facts & Citation — No Source, No Fact
@@ -272,7 +272,7 @@ Vespyr is defined by two differentiators that no other multi-agent framework com
 
 ### 2. 3-tier progressive memory
 
-**What it is:** Memory loads in three tiers: Tier 1 (core context, ~200 tokens), Tier 2 (agent-specific patterns, ~300 tokens), Tier 3 (task-relevant results, ~500 tokens). Plus a pattern pre-fetch step that promotes relevant Tier 2 patterns to the front of the context window before the full load.
+**What it is:** Memory loads in three tiers: Tier 1 (core context), Tier 2 (agent-specific patterns), Tier 3 (task-relevant results). Plus a pattern pre-fetch step that promotes relevant Tier 2 patterns to the front of the context window before the full load.
 
 **Why it matters:** Most frameworks either load everything (context bloat) or nothing (no continuity). Vespyr's progressive loading gives the agent exactly what it needs — relevant past decisions, patterns, and risks — without flooding the context window.
 

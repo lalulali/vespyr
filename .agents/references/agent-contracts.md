@@ -32,7 +32,7 @@ Motion is a **capability**, not a separate agent. Ownership (per the row entries
 - **`@tech-lead`** owns the motion *implementation handoff* — records `motion-handoff.md`, adds motion tasks to the approved execution plan, and routes the work into `/develop`.
 - **`@researcher`** owns motion *market/tech research* — competitive motion language + animation library landscape.
 - **`@ux-researcher`** owns motion *usability/accessibility research and final accessibility decisions* — perceived performance, cognitive load, vestibular/reduced-motion evidence, platform patterns.
-- Entry point: the `/motion` skill orchestrates research → spec → implementation handoff. `/develop` owns motion code and `/test` owns runtime certification. Knowledge lives in `.agents/references/motion/`, loaded on demand only — never inline, to keep initiation tokens low.
+- Entry point: the `/motion` skill orchestrates research → spec → implementation handoff. `/develop` owns motion code and `/test` owns runtime certification. Knowledge lives in `.agents/references/motion/`, loaded on demand only — never inline, to keep context loading efficient.
 
 ## Cross-cutting principles
 

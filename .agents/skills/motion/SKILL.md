@@ -10,7 +10,7 @@ metadata:
 
 ## What this skill does
 
-Runs the motion **design preflow**: **motion research → motion spec → implementation handoff**. It is the single entry point for motion planning and coordinates the research and design agents without duplicating the standard `/develop` and `/test` workflows. All domain knowledge lives in on-demand references so agent initiation tokens stay low.
+Runs the motion **design preflow**: **motion research → motion spec → implementation handoff**. It is the single entry point for motion planning and coordinates the research and design agents without duplicating the standard `/develop` and `/test` workflows. All domain knowledge lives in on-demand references so context loading stays efficient.
 
 **Previous skill:** `design` (produces the product spec + design.md that motion extends)
 **Next skill:** `develop` (owns implementation, code review, and runtime QA after the handoff)

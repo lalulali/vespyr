@@ -625,7 +625,7 @@ These skills form the backbone of the product and game development lifecycle. Sk
 
 ## 9. Shared Memory & Context
 
-All agents share a persistent memory layer in `artifacts/memory/`. Access is always through `@memory-controller` — never by reading files directly. This keeps token consumption at ~1,000 tokens per agent invocation instead of ~15,000.
+All agents share a persistent memory layer in `artifacts/memory/`. Access is always through `@memory-controller` — never by reading files directly. This keeps context loading efficient per agent invocation.
 
 ### Memory Architecture
 
@@ -638,7 +638,7 @@ artifacts/memory/
 ├── blockers-and-risks.md        # Dynamic: active blockers and their owners
 ├── teaching-style.md            # Dynamic: teaching preferences (for @shifu)
 ├── session-summaries/           # Cross-session continuity
-│   ├── latest.md                # Single authoritative live cursor (~100 tokens, Tier 1)
+│   ├── latest.md                # Single authoritative live cursor (Tier 1)
 │   └── history.md               # Full session log (append-only, never loaded directly)
 └── archive/                     # Compacted historical entries
     ├── index.ndjson             # Searchable index (auto-created on first compaction)
@@ -654,9 +654,9 @@ artifacts/memory/
 @memory-controller load [agent-type] [brief task description]
 ```
 The controller returns filtered context across three tiers:
-- **Tier 1** (~200 tokens): project name, stack, phase, sprint, blocker count, last session summary
-- **Tier 2** (~300 tokens): files specific to the agent's role
-- **Tier 3** (~500 tokens): chunks from any file scoring ≥ 2 against the task keywords
+- **Tier 1**: project name, stack, phase, sprint, blocker count, last session summary
+- **Tier 2**: files specific to the agent's role
+- **Tier 3**: chunks from any file scoring ≥ 2 against the task keywords
 
 **After completing work, every agent MUST:**
 ```
@@ -668,7 +668,7 @@ Use the format in `.agents/templates/memory/memory-entry-template.md`. The contr
 ```
 @memory-controller session-write [content]
 ```
-Use the format in `.agents/templates/memory/session-summary-template.md`. This writes to `session-summaries/latest.md` (overwrite) and appends to `session-summaries/history.md`. The next session loads this as part of Tier 1 — ~100 tokens of recent context.
+Use the format in `.agents/templates/memory/session-summary-template.md`. This writes to `session-summaries/latest.md` (overwrite) and appends to `session-summaries/history.md`. The next session loads this as part of Tier 1.
 
 **Memory Rules:**
 - **Never read memory files directly.** Always use `@memory-controller load`.

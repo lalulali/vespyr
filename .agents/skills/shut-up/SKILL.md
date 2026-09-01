@@ -14,12 +14,12 @@ One-shot runtime context modifier that executes requests directly and silently w
 
 ## Why This Skill Exists
 
-When the requirements and scope are already locked, unsolicited Socratic feedback, multi-paragraph architectural rationale, and pleasantries waste tokens and add friction. `/shut-up` switches the agent into an introverted, silent implementer mode.
+When the requirements and scope are already locked, unsolicited Socratic feedback, multi-paragraph architectural rationale, and pleasantries add friction. `/shut-up` switches the agent into an introverted, silent implementer mode.
 
 ## Invariant Rules & Schema
 
 1. **Runtime Context Only:** `/shut-up` MUST NOT write flags or state to `project-context.md` or `active-decisions.md`.
-2. **Output Token Ceiling:** Responses must strictly remain under **100 output tokens**.
+2. **Ultra-Minimal Output:** Responses must be ultra-minimal — direct edits and a single 1-line status summary only.
 3. **Schema Contract:** Output must contain ONLY:
    - Direct file edits (tool calls or diff blocks)
    - Exact shell command execution outputs

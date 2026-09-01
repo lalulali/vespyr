@@ -17,7 +17,7 @@ Confirm the user prompt states all three:
 
 ## 2. Decision Fork
 - **Unambiguous (C ≥ 0.85):** proceed to Step 1.
-- **Ambiguous / multi-track (0.50 ≤ C < 0.85):** HALT. Emit the 2–3 Track Fork card (<100 tokens) — e.g., MVP slice vs full epic vs spike-first. Each track names its recommended `@agent` + `/skill` handles. Wait for selection. Zero artifact scaffolding to `artifacts/output/` before selection (GUARDRAILS: Anti-Premature Execution).
+- **Ambiguous / multi-track (0.50 ≤ C < 0.85):** HALT. Emit the 2–3 Track Fork card — e.g., MVP slice vs full epic vs spike-first. Each track names its recommended `@agent` + `/skill` handles. Wait for selection. Zero artifact scaffolding to `artifacts/output/` before selection (GUARDRAILS: Anti-Premature Execution).
 - **Trivial single-action (C < 0.50):** execute directly — do not run this skill at all.
 
 ## 3. Satisfaction Checkpoint

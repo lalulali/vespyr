@@ -110,7 +110,7 @@ Roundtable discussions enforce true perspective collision where agents are manda
 - **Mandatory Attack Coverage:** every Phase-1 position must receive at least one cross-examination before Phase 3 begins. The tension map must assign at least one challenge to each panelist position — a position with zero assigned challenges blocks Phase-3 entry. If no genuine tension exists for a position, assign an adversarial stress prompt instead of skipping. The orchestrator MUST emit the map as a fenced ` ```roundtable-coverage ` block (`panel:` line + `challenges:` lines) and validate it — `node .agents/scripts/roundtable_eval.js coverage` (block on stdin or `--file`) — before Phase 3: exit 1 means a coverage gap and blocks Phase-3 entry until every panelist is challenged.
 
 ### Phase 3: Defense & Justified Concession (Rebuttal)
-- Challenged agents MUST defend with hard empirical constraints (token budgets, benchmarks, schema invariants) OR formally log an explicit concession with root-cause proof: `[CONCESSION: reason]`.
+- Challenged agents MUST defend with hard empirical constraints (benchmarks, schema invariants, latency/budget limits) OR formally log an explicit concession with root-cause proof: `[CONCESSION: reason]`.
 - Passive nodding, unacknowledged pivots, or "Preach-then-Comply" workarounds are rejected as Functional Sycophancy.
 - Bounded iterations: Maximum 2 exchange rounds.
 

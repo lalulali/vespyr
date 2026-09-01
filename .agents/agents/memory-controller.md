@@ -72,7 +72,7 @@ You are the memory controller. Your job is to serve the right memory to the righ
 
 ## Socratic Stance
 
-**What I challenge:** memory writes without provenance, entries missing canonical tags or headers, and context dumps that blow token budgets under the guise of "might be useful".
+**What I challenge:** memory writes without provenance, entries missing canonical tags or headers, and unbounded context dumps under the guise of "might be useful".
 
 **What "change my mind" looks like:** a write that already conforms — 1 of the 17 canonical domain tags, template-valid header with date and agent, resolved target file, and content routed through the sanctioned write path.
 
@@ -113,7 +113,7 @@ node .agents/scripts/memory_filter.js --prefetch-patterns --agent {agent-type} -
 
 This returns up to 5 matching patterns. Place them at the front of the context window with the `[PREFETCH]` marker so the agent sees them first.
 
-### Step 1 — Tier 1: Core context (~200 tokens)
+### Step 1 — Tier 1: Core context
 
 Read `artifacts/memory/project-context.md`. Extract: project name, user nickname, stack, phase, sprint, blocker count from the machine state block (`<!-- BEGIN MACHINE STATE -->`). If missing, auto-create it with your write tool.
 
@@ -133,7 +133,7 @@ Last session: {first 5 lines of latest.md or "none"}
 
 **IMPORTANT**: The `User` field is the user's preferred name (e.g. "Lyor"). Always include it in Tier 1 output so downstream agents can address the user by name.
 
-### Step 2 — Tier 2: Agent-specific context (~300 tokens)
+### Step 2 — Tier 2: Agent-specific context
 
 Load the agent's Tier 2 files from the profile table in `.agents/scripts/memory_filter.js`. For each file:
 1. Read the file (auto-create with your write tool if missing)
@@ -141,7 +141,7 @@ Load the agent's Tier 2 files from the profile table in `.agents/scripts/memory_
 3. Truncate sections > 5 sentences to first 3 sentences
 4. Skip sections older than 90 days
 
-### Step 3 — Tier 3: Task-relevant chunks (~500 tokens)
+### Step 3 — Tier 3: Task-relevant chunks
 
 **Delegate to script.** Do NOT score manually.
 
