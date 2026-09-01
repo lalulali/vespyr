@@ -31,6 +31,9 @@ Apply the premise challenge and framework test to the revised content. The revis
 ## Halt condition
 If revisions introduce a contradiction that can't be resolved in 2 rounds, escalate: the brief may need a full re-run in create mode.
 
+## SPC gate — before completing this step
+If the round was uniformly positive (no red flags surfaced, no assumption cracks), inject one adversarial counter-hypothesis question (see SKILL.md "Anti-sycophancy gate") and record the outcome before running the tracker-complete.
+
 ## Output
 Re-validated brief with stress-test results.
 

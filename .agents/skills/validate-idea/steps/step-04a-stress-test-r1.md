@@ -55,4 +55,7 @@ Red flag: "Need the full platform first." "Stripping it down removes differentia
 ## Halt condition
 If the user invokes the escape hatch after Q1+Q2, skip remaining Qs and proceed to step 05.
 
+## SPC gate — before completing this step
+If every answer this round was uniformly positive (no red flag surfaced, no push cracked an assumption), inject one adversarial counter-hypothesis question (see SKILL.md "Anti-sycophancy gate") and record the outcome before running the tracker-complete. A zero-friction round has tested nothing.
+
 > **Tracker:** `node .agents/scripts/step_tracker.js complete --skill validate-idea-create --step 4`

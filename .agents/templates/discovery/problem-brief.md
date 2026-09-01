@@ -42,3 +42,6 @@ audience: @product-manager, @founder, @user-researcher
 - [ ] `/validate-idea` — stress-test the selected concept
 - [ ] `/shape-up` — structure into a design-ready brief
 - [ ] `/explore-idea` — research market and competitors
+
+## Decision Gate
+`[GATE: PASS|PIVOT|KILL — <reason>]` — the routing decision on the selected solution concept. `[PASS]` ready to stress-test; `[PIVOT]` problem framing needs another pass; `[KILL]` problem not worth solving (document why). A brief without this gate is a document, not a decision.

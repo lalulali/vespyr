@@ -11,6 +11,9 @@ output_contract:
 
 Validate user needs against the research gathered so far. Depends on step 2b output.
 
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill explore-idea --step 2c` at step start; `complete --skill explore-idea --step 2c` at step close.
+> **Dispatch:** follow the tiered-dispatch contract in SKILL.md. By design, this agent consumes step 2b's output; it must not see 2a's output before forming its own findings.
+
 ## Workflow
 
 ### 2c.1 Load inputs

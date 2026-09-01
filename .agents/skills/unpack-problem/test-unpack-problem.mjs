@@ -95,7 +95,7 @@ if (step02) {
   assertIncludes(step02, 'Guided mode', 'Step 02 has Guided mode');
   assertIncludes(step02, 'Automated mode', 'Step 02 has Automated mode');
   assertIncludes(step02, 'Combination mode', 'Step 02 has Combination mode');
-  assertIncludes(step02, '[AUTO-DRAFT]', 'Step 02 labels automated drafts');
+  assertIncludes(step02, '[AUTO-DRAFT', 'Step 02 labels automated drafts');
   assertIncludes(step02, 'output_contract:', 'Step 02 has output_contract frontmatter');
 
   // F1.31 integration — must explicitly reference the 6 sub-skills

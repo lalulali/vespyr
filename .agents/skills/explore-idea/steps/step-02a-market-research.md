@@ -11,6 +11,9 @@ output_contract:
 
 Validate market potential for the concept. Runs in parallel with step 2b.
 
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill explore-idea --step 2a` at step start; `complete --skill explore-idea --step 2a` at step close.
+> **Dispatch:** follow the tiered-dispatch contract in SKILL.md (subagents → firewalled sequential calls → degraded in-context with explicit label). Receive only the validation/idea brief and this charter — never another research agent's output.
+
 ## Workflow
 
 ### 2a.1 Load input
@@ -32,7 +35,9 @@ Invoke `@researcher market` to validate market potential:
 
 ### 2a.3 Output
 
-Write `artifacts/output/02-research/market-analysis.md`.
+Write `artifacts/output/02-research/market-analysis.md`. End the file with a parseable verdict line — `MARKET VERDICT: GO|NO-GO — <reason>` — which Phase 3 (step-03) consumes as its gate input; a missing or malformed line is treated as `[FALSIFIED]` research there.
+
+Run immediately when complete: `node .agents/scripts/orchestrator_state.js complete --agent researcher --artifact 02-research/market-analysis.md`
 
 ## Memory closeout
 - `@memory-controller session-write` — record step 2a market research findings.

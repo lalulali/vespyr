@@ -26,10 +26,14 @@ A structured problem-exploration workspace. Unlike `/validate-idea` (which assum
 First, detect the user's intent:
 
 - **Guided mode** → The agent acts as an interactive facilitator, asking probing questions step-by-step. Best for users who want to think deeply through the problem.
-- **Automated mode** → The agent simulates user perspectives and auto-drafts all design thinking artifacts. Best for users who want rapid output to review.
+- **Automated mode** → The agent drafts all design thinking artifacts from simulated user perspectives. Best for users who want rapid output to review.
 - **Combination mode (default)** → The agent auto-drafts first, then leads structured review and refinement. Best for most users.
 
 If unclear, present the three modes and ask.
+
+## Simulated perspectives are hypotheses, never evidence
+
+Automated/combination modes draft empathy maps, journeys, and JTBD from *simulated* user perspectives. These are hypotheses to validate with real users — never present them as evidence. Every simulated artifact carries the `[AUTO-DRAFT: ...]` label (see step-02's dispatch ladder) plus its riskiest assumption, and multi-perspective drafting follows the dispatch ladder in `steps/step-02-analysis-execution.md` instead of roleplaying all segments in one context.
 
 ## Harness adherence (non-negotiable)
 - Follow the step sequence for the selected mode exactly. Do NOT skip steps.
@@ -41,7 +45,7 @@ If unclear, present the three modes and ask.
 1. **Problem Intake** → `steps/step-01-problem-intake.md` — intake pain points, enforce zero-solution framing
 2. **Analysis Execution** → `steps/step-02-analysis-execution.md` — run or prompt modular sub-skills based on selected mode
 3. **Synthesis & Ideation** → `steps/step-03-synthesis-ideation.md` — map problem findings to candidate solution concepts
-4. **Brief Generation** → `steps/step-04-brief-generation.md` — write problem-space-brief.md, compile discovery report
+4. **Brief Generation** → `steps/step-04-brief-generation.md` — write problem-space-brief.md (the discovery report is compiled separately by `/discovery-report` when the user wants a unified report)
 
 ## Output artifacts
 - `artifacts/output/02-research/problem-space-brief.md` — structured problem definition
@@ -70,6 +74,9 @@ Blockers: {unresolved problem areas or "none"}
 ```
 
 ## Handoff routing
+
+The brief ends with a Decision Gate on the selected solution concept — `[GATE: PASS|PIVOT|KILL — <reason>]` (protocol in `steps/step-04-brief-generation.md`). A brief without a gate is a document, not a decision.
+
 - Solution concept ready to test → load `/validate-idea`
 - Structured brief ready for specs → load `/shape-up`
 - Need market/competitor context → load `/explore-idea`

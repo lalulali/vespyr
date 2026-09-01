@@ -13,6 +13,15 @@ output_contract:
 Generate alternatives and deliver the verdict. This is the decision point.
 
 > **Tracker:** `node .agents/scripts/step_tracker.js begin --skill validate-idea-create --step 6`
+
+## Verdict contract
+
+The verdict is a parseable line: `GO / PIVOT / KILL — <one-line reason>`. GO requires every one of:
+- Demand evidence is behavioral (payment, expansion, panic-on-removal), not interest.
+- Status-quo cost is quantified (hours or dollars per week).
+- The narrowest wedge is shippable in days, not months.
+- No unresolved cross-round contradiction from step 05's premise challenge.
+
 ## Alternatives
 Generate 2-3 distinct approaches:
 
@@ -40,7 +49,7 @@ Rules:
 ## Verdict
 Based on diagnostic, premises, and alternatives, give ONE verdict:
 
-**GO** — Worth exploring. Demand evidence exists or the problem is clear enough to validate through research.
+**GO** — All four verdict-contract criteria met (behavioral demand evidence, quantified status-quo cost, days-shippable wedge, no unresolved contradiction). No partial credit: interest-not-behavior or unquantified cost makes GO unavailable — issue PIVOT.
 
 **PIVOT** — The core problem is real, but this approach is wrong. Propose a reframed direction. Re-run this skill with the revised framing.
 

@@ -40,6 +40,14 @@ Before starting, check for a validation brief:
 
 **Step 0 — Scope Gate (non-skippable):** anchor scope first via `steps/step-00-scope-and-decision-anchoring.md`; `step_tracker.js` exits 1 if Step 1 begins without a locked track.
 
+## Harness-Neutral Delegation (tiered dispatch)
+
+Research agents (2a, 2b, 2c) produce independent evidence. When the harness supports it, dispatch them as real subagents — each receives only the validation/idea brief and its own research charter, never another agent's findings (2c is the exception: it consumes 2b's output by design). Fallbacks:
+
+1. **Subagents available** → dispatch 2a and 2b as parallel independent subagents; 2c after 2b completes.
+2. **No subagents, but multiple isolated LLM calls possible** → context-firewalled sequential dispatch with the same data contract.
+3. **Single shared conversation context only** → run sequentially in-context, but label each artifact degraded: "researched in one context — cross-contamination possible; treat cross-references as weaker evidence."
+
 ### Phase 1: Synthesize (skip if validation brief exists)
 
 **grill-me offer (Path B only — no validation brief):** Before synthesizing, ask the user:
@@ -133,13 +141,17 @@ node .agents/scripts/orchestrator_state.js complete --agent user-researcher --ar
 ### Phase 3: Founder Review (gate)
 
 After all research completes, review findings against the brief:
-- Does the market validate the opportunity? (Check GO/NO-GO in market analysis)
+- Does the market validate the opportunity? (Check the `MARKET VERDICT: GO|NO-GO — <reason>` line at the end of market-analysis.md)
 - Does user research confirm the target persona and pain points?
 - Does competitive analysis reveal viable positioning?
 - **Cross-reference against the validation brief's premises** — do the premises still hold after research?
 
-**If research contradicts assumptions:**
-- @founder decides: **pivot** (revise brief and re-run Phase 2), **refine** (adjust scope), or **proceed with documented risk**
+**Anti-sycophancy gate (SPC):** if all three research artifacts are uniformly positive — no red flags, no disconfirming evidence, no competitive threat — the review has converged prematurely. Before issuing a verdict, run one adversarial pass: name the strongest reason this fails (from the research itself or first principles) and either refute it with evidence or record it as a documented risk. Uniformly rosy research is a red flag, not a green light.
+
+**If research contradicts assumptions**, issue a Decision Gate verdict as a parseable line `VERDICT: [PASS]|[PIVOT]|[KILL] — <reason>` (protocol detail in `steps/step-03-founder-review.md`):
+- `[PASS]` — premises hold; proceed. A qualified pass ("proceed with documented risk") requires the risk named in the brief with its evidence and a revisit trigger — never a silent pass.
+- `[PIVOT]` — revise brief and re-run Phase 2. A scope adjustment ("refine") is not a verdict — record it as an ADR entry, then re-issue the gate verdict.
+- `[KILL]` — research invalidates the concept; document why and stop (return to problem discovery via `/unpack-problem` if a better concept may exist).
 - Maximum 1 pivot before committing to a direction
 
 ## Output artifacts

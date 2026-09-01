@@ -873,6 +873,11 @@ function generateManifestData(targetDir) {
 		for (const ent of entries) {
 			if (ent.name === ".DS_Store" || ent.name === "node_modules" || ent.name === ".git") continue;
 			if (ent.name === "manifest.json" || ent.name === ".vespyr-manifest.json") continue;
+			// ADR-006: only top-level state/ is runtime-writable — excluded from both
+			// walks in lockstep. Compensating controls: ledger provenance, MEMORY_LOCK,
+			// anchor-swap symlink guard in verify's reverse-walk. Nested state-named
+			// entries stay visible to both walks.
+			if (rel === "" && ent.name === "state") continue;
 			const full = path.join(dir, ent.name);
 			const relPath = rel ? `${rel}/${ent.name}` : ent.name;
 			if (ent.isDirectory()) {
@@ -1009,6 +1014,8 @@ function performVerify(targetDir, flags) {
 	// N-14a (Scout/Victor): iterating manifest.files alone is blind to PLANTED
 	// files absent from the manifest. Reverse-walk the tree with the same
 	// exclusion set as generateManifestData so anything unlisted fails verify.
+	// ADR-006: `state` excluded in lockstep with generate — compensating controls
+	// are ledger provenance + MEMORY_LOCK + the anchor-swap symlink guard below.
 	const MANIFEST_EXCLUSIONS = new Set([".DS_Store", "node_modules", ".git", "manifest.json", ".vespyr-manifest.json"]);
 	let walkFault = null;
 	const walkExtra = (dir, rel) => {
@@ -1022,9 +1029,21 @@ function performVerify(targetDir, flags) {
 			return;
 		}
 		for (const ent of entries) {
-			if (MANIFEST_EXCLUSIONS.has(ent.name)) continue;
 			const full = path.join(dir, ent.name);
 			const relPath = rel ? `${rel}/${ent.name}` : ent.name;
+			// ADR-006 anchor-swap guard (before exclusions so an excluded name can
+			// never mask a symlink): exactly one declared symlink anchor (state/,
+			// the worktree shared-state link) is permitted; any other symlink inside
+			// .agents/ fails verify loudly.
+			if (ent.isSymbolicLink()) {
+				if (relPath === "state") continue;
+				extra.push({ path: relPath, detail: "undeclared symlink inside .agents/ (anchor-swap guard)" });
+				continue;
+			}
+			if (MANIFEST_EXCLUSIONS.has(ent.name)) continue;
+			// ADR-006: only top-level state/ is runtime-writable — excluded here;
+			// nested state-named entries stay visible to the walk.
+			if (rel === "" && ent.name === "state") continue;
 			if (ent.isDirectory()) {
 				walkExtra(full, relPath);
 			} else if (!Object.prototype.hasOwnProperty.call(manifest.files, relPath)) {

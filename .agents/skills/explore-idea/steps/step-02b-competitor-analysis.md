@@ -11,6 +11,9 @@ output_contract:
 
 Map the competitive landscape. Runs in parallel with step 2a.
 
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill explore-idea --step 2b` at step start; `complete --skill explore-idea --step 2b` at step close.
+> **Dispatch:** follow the tiered-dispatch contract in SKILL.md (subagents → firewalled sequential calls → degraded in-context with explicit label). Receive only the validation/idea brief and this charter — never another research agent's output. Your output feeds step 2c by design.
+
 ## Workflow
 
 ### 2b.1 Load input
@@ -33,6 +36,8 @@ Invoke `@researcher competitive` to map the landscape:
 ### 2b.3 Output
 
 Write `artifacts/output/02-research/competitive-analysis.md`.
+
+Run immediately when complete: `node .agents/scripts/orchestrator_state.js complete --agent researcher --artifact 02-research/competitive-analysis.md`
 
 ## Memory closeout
 - `@memory-controller session-write` — record step 2b competitor analysis findings.

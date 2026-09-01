@@ -186,7 +186,7 @@ node .agents/scripts/session_start.js --agent <your-agent-name>
 ```
 
 - It refreshes machine state, stamps your session identity, and checks for parallel windows.
-- **If it reports "Parallel session detected":** do not edit any files in the current directory. A worktree has been created for you — tell the user the printed `cd` path so they can restart the session there, or serialize the windows. All code work happens inside that worktree (memory and locks are shared automatically).
+- **If it reports "Parallel session detected":** do not edit any files in the current directory. A worktree has been created for you — tell the user the printed `cd` path so they can restart the session there, or serialize the windows. All code work happens inside that worktree (memory and locks are shared via declared symlinks in auto-offered worktrees only — manual `git worktree add` shares nothing; see ADR-006).
 - `VESPYR_AUTO_WORKTREE=0` downgrades the auto-offer to advisory-only.
 
 ---

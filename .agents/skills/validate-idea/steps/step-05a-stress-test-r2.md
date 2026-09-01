@@ -76,4 +76,7 @@ Score: 🟢 PASS / 🟡 WEAK / 🔴 FAIL.
 ## Output
 Qualified answers for all relevant Qs, synthesized value proposition, premise agreement, framework score.
 
+## SPC gate — before completing this step
+If the round was uniformly positive (no red flags surfaced, no assumption cracks), inject one adversarial counter-hypothesis question (see SKILL.md "Anti-sycophancy gate") and record the outcome before running the tracker-complete.
+
 > **Tracker:** `node .agents/scripts/step_tracker.js complete --skill validate-idea-create --step 5`

@@ -125,15 +125,6 @@ function scoreMethod(method, keywords) {
   return score;
 }
 
-// Fallback high-quality default methods if no/low matches
-const DEFAULT_METHODS = [
-  'First Principles Analysis',
-  'Critique and Refine',
-  'Pre-mortem Analysis',
-  '5 Whys Deep Dive',
-  'Steelmanning'
-];
-
 function main() {
   const args = process.argv.slice(2);
   let contextIndex = args.indexOf('--context');

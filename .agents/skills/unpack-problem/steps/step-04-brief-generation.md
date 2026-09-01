@@ -9,6 +9,8 @@ output_contract:
 
 # Step 4 — Brief Generation
 
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill unpack-problem --step 4` at step start; `complete --skill unpack-problem --step 4` at step close.
+
 `@product-manager` compiles the full problem-space brief and hands off to the next phase.
 
 ## Workflow
@@ -46,6 +48,7 @@ Write `artifacts/output/02-research/problem-space-brief.md` using the template a
 - **Intervention:** {what changes}
 - **Hypothesis:** {testable statement}
 - **Confidence:** {High/Med/Low}
+- **Verdict:** `[VERDICT: PASS|PIVOT|KILL]` — {one-line rationale from step 3d}
 
 ## Supporting Artifacts
 - [Root cause analysis](root-cause-analysis.md)
@@ -57,6 +60,9 @@ Write `artifacts/output/02-research/problem-space-brief.md` using the template a
 - [ ] `/validate-idea` — stress-test the selected concept
 - [ ] `/shape-up` — structure into a design-ready brief
 - [ ] `/explore-idea` — research market and competitors
+
+## Decision Gate
+[GATE: PASS|PIVOT|KILL — <reason>] — the selected concept's step-3 `[VERDICT:]` rolled up as the brief's final routing decision. Present the `[HANDOFF: ...]` marker alongside it in the handoff.
 ```
 
 ### 4b. Memory closeout
@@ -80,7 +86,9 @@ node .agents/scripts/orchestrator_state.js complete --agent product-manager --ar
 
 ## Handoff
 
-Present the brief to the user with a clear recommendation:
+The brief ends with a Decision Gate on the selected solution concept, recorded as a parseable marker before the handoff marker: `[GATE: PASS|PIVOT|KILL — <reason>]`. `[PASS]` = ready to stress-test; `[PIVOT]` = problem framing needs another pass (re-run steps 1-3); `[KILL]` = problem not worth solving — document why and stop. A brief without a gate is a document, not a decision.
+
+Present the brief to the user with a clear recommendation, recorded as a parseable marker — `[HANDOFF: validate-idea|shape-up|explore-idea]`:
 - "This concept is ready to test → I recommend loading `/validate-idea`"
 - "This needs more structure before design → I recommend loading `/shape-up`"
 - "We need market validation → I recommend loading `/explore-idea`"

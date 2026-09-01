@@ -4,7 +4,7 @@
  *
  * Hash-history drift monitor over the `.agents/` baseline: computes an
  * aggregate SHA-256 over every file under `.agents/` (manifest exclusions
- * apply), keeps a history in `.agents/state/drift-history.json`, and alerts
+ * apply), keeps a history in `artifacts/telemetry/drift-history.json`, and alerts
  * when the aggregate differs from the last recorded snapshot.
  *
  * DETECTION tripwire for at-rest drift (memory-poisoning persistence,
@@ -31,14 +31,14 @@ const crypto = require('crypto');
 
 const ROOT = path.resolve(__dirname, '..', '..');
 const AGENTS_DIR = path.join(ROOT, '.agents');
-const STATE_DIR = path.join(AGENTS_DIR, 'state');
-const HISTORY_FILE = path.join(STATE_DIR, 'drift-history.json');
+const TELEMETRY_DIR = path.join(ROOT, 'artifacts', 'telemetry');
+const HISTORY_FILE = path.join(TELEMETRY_DIR, 'drift-history.json');
 const MAX_HISTORY = 50;
 
-// Same exclusion set as generateManifestData() in bin/cli.js plus `state`
-// (the monitor's own history must be invisible to its own aggregate — a
-// self-referential baseline would report drift on every record).
-const EXCLUSIONS = new Set(['.DS_Store', 'node_modules', '.git', 'manifest.json', '.vespyr-manifest.json', 'state']);
+// Same exclusion set as bin/cli.js's manifest walks (which also exclude
+// top-level `state/` per ADR-006). The monitor's own history lives outside
+// .agents/ (artifacts/telemetry/), so it never enters the aggregate.
+const EXCLUSIONS = new Set(['.DS_Store', 'node_modules', '.git', 'manifest.json', '.vespyr-manifest.json']);
 
 let faulted = false;
 function failClosed(msg) {
@@ -58,6 +58,9 @@ function walkAggregate(dir, hashes) {
   }
   for (const ent of entries.sort((a, b) => a.name.localeCompare(b.name))) {
     if (EXCLUSIONS.has(ent.name)) continue;
+    // ADR-006: only the top-level state/ dir is excluded (runtime-writable);
+    // nested state-named entries must stay visible to the aggregate.
+    if (dir === AGENTS_DIR && ent.name === 'state') continue;
     const full = path.join(dir, ent.name);
     if (ent.isDirectory()) {
       walkAggregate(full, hashes);
@@ -129,7 +132,7 @@ function main() {
   }
 
   if (record) {
-    fs.mkdirSync(STATE_DIR, { recursive: true });
+    fs.mkdirSync(TELEMETRY_DIR, { recursive: true });
     history.snapshots.push({ timestamp: new Date().toISOString(), aggregate });
     while (history.snapshots.length > MAX_HISTORY) history.snapshots.shift();
     fs.writeFileSync(HISTORY_FILE, JSON.stringify(history, null, 2) + '\n', 'utf8');

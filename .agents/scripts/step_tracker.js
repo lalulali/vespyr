@@ -162,11 +162,25 @@ function requiresScopeLock(skill) {
 function enforceScopeGate(skill, step, mode) {
   const num = parseInt(String(step).replace(/[a-z]/i, ''), 10);
   if (!skill || !(num >= 1) || !requiresScopeLock(skill)) return;
-  const base = skill.includes('-') ? skill.split('-').slice(0, -1).join('-') : null;
-  const locked = readAudit().some(e =>
-    e.type === 'scope_lock' && (e.skill === skill || (base && e.skill === base))
-  );
-  if (!locked) {
+  const locks = readAudit().filter(e => e.type === 'scope_lock');
+  if (locks.some(e => e.skill === skill)) return;
+  // Mode-variant chains (e.g. validate-idea-create) may satisfy the gate via a
+  // base-skill lock ONLY when the locked track names this mode — 02k-era binding.
+  const hyphen = skill.lastIndexOf('-');
+  if (hyphen > 0) {
+    const base = skill.slice(0, hyphen);
+    const suffix = skill.slice(hyphen + 1).toLowerCase();
+    if (skillStepsDir(base)) {
+      const mismatch = locks.find(e => e.skill === base);
+      if (mismatch && String(mismatch.track).toLowerCase() === suffix) return;
+      if (mismatch) {
+        console.error(`[ERROR] Scope gate: base lock for '${base}' has track "${mismatch.track}", not mode '${suffix}' — ${skill} is not unlocked.`);
+        console.error(`Fix: node .agents/scripts/step_tracker.js scope-lock --skill ${base} --track "${suffix}"`);
+        process.exit(1);
+      }
+    }
+  }
+  if (!locks.some(e => e.skill === skill)) {
     console.error('[ERROR] Step 0 Scope Gate bypassed. Scope must be locked before Step 1 execution.');
     console.error(`Fix: node .agents/scripts/step_tracker.js scope-lock --skill ${skill} --track "<track-name>"`);
     process.exit(1);
