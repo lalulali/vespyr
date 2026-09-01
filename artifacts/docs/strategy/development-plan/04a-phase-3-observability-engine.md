@@ -8,82 +8,35 @@
 
 ### 1.1 The Phase 1 / Phase 3 Observability Boundary
 
-In accordance with the Round Table dialectic (2026-08-21), observability is cleanly bifurcated across project phases:
+In accordance with Round Table 2026-08-21 + 2026-09-01 Option A Thin Slice, observability is cleanly bifurcated (single-owner schema per `02l §5.1` / `tools/telemetry/schema.json`):
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
 │                        Observability Scope Allocation Across Phases                    │
+│                              (Option A Thin Slice)                                     │
 ├────────────────────────────────────────────────────────────────────────────────────────┤
-│  PHASE 1 (02l-Core: In-Session Gates & Distributed Spans)                              │
-│  • tools/eval/tier0-judge.js: Deterministic AST & Schema validation (<25ms, 0 tokens)  │
-│  • Programmatic Biomarkers: SCR=1.0, MSHA=1.0, Placeholder Density PD=0.0%           │
-│  • swarm_telemetry.js: OpenTelemetry distributed spans (spans-*.ndjson)                │
-│  • Terminal Quality Scorecard: Instant step-level feedback in CLI                      │
+│  PHASE 1 (02l Thin Slice — In-Session Gates & Minimal Spans)                           │
+│  • swarm_telemetry.js: Minimal OTel spans (spans-*.ndjson, captureUsage hybrid ~02l)  │
+│  • tools/eval/tier0-judge.js + biomarkers.js: RQS-D deterministic (<25ms,0tok)         │
+│  • RQS-D scorecard inline per skill-step (exact/estimated flag)                        │
+│  • Hybrid INV-TEL-01 (≥80% exact, estimated <20%, cost nullable)                       │
 ├────────────────────────────────────────────────────────────────────────────────────────┤
 │  PHASE 3a (04a: Macro-Telemetry Surface & Graph Observability)                         │
-│  • telemetry_surface.js: 7-day rolling cost digests, hot-path analysis, token heatmaps  │
-│  • Graph-Assisted Blast Radius: Query API for ADRs, topology, and refactor analysis    │
-│  • Memory Controller Step 0.4: Context injection of telemetry snapshot (<150ms)        │
-│  • Automated Model Profiling: Empirical Cost-per-Verified-Pass across model tiers      │
-│  • Socratic Anti-Sycophancy Scoring: Multi-agent PCI/SRSR evaluation                   │
+│  • telemetry_surface.js: 7-day rolling digests, hot-paths, token heatmaps (F3.8)       │
+│  • RQS-J shadow (SRSR/SDS G-Eval κ≥0.7) + pricing.json cost enrichment                │
+│  • Memory Controller Step 0.4: snapshot <150ms + Graph-Assisted Blast Radius            │
+│  • Graph query API for ADRs/topology + Empirical Cost-per-Verified-Pass               │
 └────────────────────────────────────────────────────────────────────────────────────────┘
 ```
+*Canonical span schema owned by `02l`; Phase 3 imports — no redefinition.*
 
 ---
 
 ## 2. Distributed Span Pipeline & OpenTelemetry Data Model
 
-### 2.1 Distributed Span Schema (`artifacts/telemetry/spans-YYYY-MM-DD.ndjson`)
+### 2.1 Distributed Span Schema (`artifacts/telemetry/spans-YYYY-MM-DD.ndjson`) — Canonical Import (Option A)
 
-```typescript
-interface VespyrTelemetrySpan {
-  trace_id: string;            // UUID identifying the end-to-end task execution
-  span_id: string;             // UUID identifying this specific agent step
-  parent_span_id: string | null; // Supports nested multi-agent DAGs
-  timestamp: string;           // ISO 8601 UTC
-  session_id: string;
-  workflow: string;            // e.g. "discovery/validate-idea", "delivery/develop"
-  agent_persona: string;       // e.g. "architect", "developer", "qa-engineer"
-  model: {
-    provider: string;          // e.g. "anthropic", "google", "ollama"
-    model_id: string;          // e.g. "gemini-2.0-flash", "claude-3-5-sonnet"
-    temperature: number;
-  };
-  usage: {
-    prompt_tokens: number;
-    completion_tokens: number;
-    total_tokens: number;
-    cost_usd: number;
-  };
-  duration_ms: number;
-  quality_scorecard: {
-    rqs_score: number;         // Composite Result Quality Score (0.0 to 1.0)
-    rating: "EXCELLENT" | "PASS" | "NEEDS_REPAIR" | "REJECTED";
-    biomarkers: {
-      scr: number;             // Schema Compliance Ratio (1.0 = 100%)
-      msha: number;            // Markdown Section Header Adherence (1.0 = 100%)
-      placeholder_density: number; // % lines with TODO/TBD (0.0 target)
-      pci: number;             // Premature Convergence Index (0.0 target)
-      srsr: number;            // Sycophantic Rubber-Stamp Rate (0.0 target)
-      scope_drift: number;     // Scope Drift Score (0.0 target)
-      ac_testability: number;  // Given/When/Then compliance ratio (1.0 target)
-    };
-  };
-  tier0_evaluation: {
-    executed: boolean;
-    passed: boolean;
-    checks: Array<{
-      type: "markdown_ast" | "json_schema" | "eslint" | "unit_tests" | "token_ceiling";
-      status: "PASS" | "FAIL";
-      details?: string;
-    }>;
-  };
-  error: {
-    code: string;
-    message: string;
-  } | null;
-}
-```
+> **Single-owner — do not redefine.** Canonical schema lives at `tools/telemetry/schema.json` owned by `02l §5.1` Option A Thin Slice. This section **imports** it: `const schema = require('../../tools/telemetry/schema.json')`. Minimal Phase-1 pipeline `02l` emits `spans-*.ndjson` with hybrid exactness (`usage.estimated`, `cost_usd: number | null` nullable, `quality_scorecard: { rqs_d_score, rqs_j_score: number | null }`, deterministic `scr/msha/placeholder_density/pci/ac_testability` + shadow `srsr/scope_drift nullable`). Phase-3 adds exact `cost_usd` enrichment via `pricing.json` and macro digests — see `02l §5.1` for full TypeScript; do not copy it here to avoid drift.
 
 ---
 
@@ -123,13 +76,13 @@ Makes the codebase and documentation dependency graphs queryable via typed subco
 
 ---
 
-## 5. The 5 Hard Telemetry Invariants
+## 5. The 5 Hard Telemetry Invariants (Hybrid — per 02l Option A, imported)
 
-1. **`INV-TEL-01` (Zero Blind Execution):** Every agent invocation, skill step, and subagent handoff MUST generate a valid span with a non-null `trace_id`, real `duration_ms`, and exact prompt/completion `tokens`. Zero-token logs are treated as engine faults.
-2. **`INV-TEL-02` (Deterministic Gate Contract):** Every output deliverable MUST pass Tier 0 static assertions before write-to-disk. A failure terminates the span with a structured error payload and blocks downstream execution.
-3. **`INV-TEL-03` (Zero Human-in-the-Loop Biomarker Gate):** A workflow is marked "successful" ONLY if the Result Quality Score meets $\text{RQS} \ge 85.0\%$ and all hard biomarkers (`PCI = 0.0`, `placeholder_density = 0.0`, `SCR = 1.0`) pass.
-4. **`INV-TEL-04` (Regression Tripwire):** If token spend exceeds baseline by $>15\%$ or pass rate drops by $>0\%$ on identical test suites in `evals/baseline.json`, CI fails with Exit Code 2.
-5. **`INV-TEL-05` (Model-Tier Invariant):** Subagents assigned to Layer-0 architecture, threat modeling, or strategic verdicts MUST use Tier B frontier models. Demoting these roles to Tier A triggers an immediate telemetry audit warning.
+1. **`INV-TEL-01` (Zero Blind Execution — Hybrid):** Every invocation MUST generate valid span with non-null `trace_id`, real `duration_ms`, and `usage.total_tokens`; prompt/completion exact where harness reports, `estimated=true` <20% window with retry child spans; `cost_usd` nullable Phase 1; <80% exact fails gate. Via `captureUsage()` at LLM call site + `session_bootstrap.js` propagation.
+2. **`INV-TEL-02` (Deterministic Gate Contract):** Every deliverable MUST pass Tier 0 RQS-D (SCR/MSHA/PD/PCI/AC <25ms, 0 tokens) before write-to-disk.
+3. **`INV-TEL-03` (Zero Human-in-the-Loop RQS-D Gate):** Workflow success requires `RQS-D ≥85%` and deterministic biomarkers (`PCI=0.0`, `PD=0.0`, `SCR=1.0`, `MSHA=1.0`) — RQS-J (SRSR/SDS) shadow only.
+4. **`INV-TEL-04` (Regression Tripwire — Retry-Aware):** CI Exit 2 if token sum (including retry spans) > baseline `evals/baseline.json` by >15% or pass drop >0%.
+5. **`INV-TEL-05` (Model-Tier Invariant):** Layer-0 architecture/threat verdicts MUST use Tier B; demotion triggers `TIER_DEMOTION` warning via `modelTierGuards.js`.
 
 ---
 
@@ -159,6 +112,8 @@ Makes the codebase and documentation dependency graphs queryable via typed subco
 
 ## 8. Sign-Off
 
-**@ml-ai-ops (Atlas):** APPROVED — Distributed span schema, macro-telemetry surface, and `INV-TEL-01..05` locked.  
-**@architect (Vera):** APPROVED — Graph query contracts and lifecycle triggers formalized.  
-**@qa-engineer (Nina):** APPROVED — Deterministic regression tripwires and DoD verification criteria validated.
+> **Status update (2026-09-01 — Option A alignment):** Prior APPROVED lines remain but now explicitly import canonical `02l` schema. Re-certification against `tools/telemetry/schema.json` import test deferred to 04a implementation; boundary (§1.1 table) locked to thin-slice.
+
+**@ml-ai-ops (Atlas):** APPROVED — Macro-telemetry surface imports `02l` canonical schema; hybrid `INV-TEL-01..05` locked (deferred re-check).  
+**@architect (Vera):** APPROVED — Graph contracts + Phase 1/3 boundary as Option A thin slice.  
+**@qa-engineer (Nina):** APPROVED — Deterministic RQS-D gates (Phase 1) vs RQS-J shadow (Phase 3) split validated.

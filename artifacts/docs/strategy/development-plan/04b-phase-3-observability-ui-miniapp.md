@@ -87,15 +87,18 @@ vespyr update --with-dashboard
 
 ---
 
-## 3. System Architecture & Zero-Cloud Invariants
+## 3. System Architecture & Zero-Cloud Invariants — Importing 02l Canonical Schema
+
+> **Canonical span schema:** `tools/telemetry/schema.json` owned by `02l §5.1` — this dashboard **imports** it (Phase-1 thin spans + Phase-3 enriched `cost_usd` + `rqs_d_score`/`rqs_j_score`). Do not duplicate the interface.
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
 │                          vespyr web Local-First Architecture                           │
+│                          (imports 02l canonical spans)                                   │
 ├────────────────────────────────────────────────────────────────────────────────────────┤
 │                                                                                        │
 │   [ Local Filesystem ]                                                                 │
-│   ├── artifacts/telemetry/spans-*.ndjson (Append-only trace stream)                    │
+│   ├── artifacts/telemetry/spans-*.ndjson (Append-only trace stream — 02l canonical)    │
 │   └── evals/baseline.json & evals/results/*.json (Benchmark results)                   │
 │             │                                                                          │
 │             │ fs.watch / Tail Reader                                                   │
@@ -111,7 +114,7 @@ vespyr update --with-dashboard
 │   ┌────────────────────────────────────────────────────────────────────────────────┐   │
 │   │               Local Single-Page App (Preact / Tailwind / WASM)                 │   │
 │   │   • Trace DAG Waterfall View (Multi-Agent parent/child timelines)              │   │
-│   │   • Biomarker Radar & Result Quality Score (RQS) Matrix                        │   │
+│   │   • Biomarker Radar: RQS-D hard gate + RQS-J shadow nullable                    │   │
 │   │   • Multi-Model Efficiency Frontier (Flash vs Sonnet Cost/Pass)                │   │
 │   │   • AST Error & Closed-Loop Compiler Repair Diff Viewer                        │   │
 │   └────────────────────────────────────────────────────────────────────────────────┘   │
@@ -124,7 +127,7 @@ vespyr update --with-dashboard
 ## 4. The 3 Non-Negotiable UI Invariants
 
 1. **`INV-UI-01` (Headless & CI Primacy):** The CLI (`vespyr-eval`) and headless scripts remain the **sole source of truth for release gates**. CI pipelines MUST never launch a browser or require the web dashboard. Deterministic exit codes (`0`, `1`, `2`) govern CI.
-2. **`INV-UI-02` (Dumb Read-Only Viewer):** The web dashboard contains **zero judging or evaluation math**. It is strictly a local visualization projection reading `artifacts/telemetry/spans-*.ndjson` and `evals/baseline.json`. All metrics (RQS, SCR, MSHA, PD) are computed in `tools/eval/lib/biomarkers.js`.
+2. **`INV-UI-02` (Dumb Read-Only Viewer):** The web dashboard contains **zero judging or evaluation math**. It is strictly a local visualization projection reading `artifacts/telemetry/spans-*.ndjson` (canonical `02l §5.1`) and `evals/baseline.json`. All metrics (RQS-D deterministic via `tools/eval/lib/biomarkers.js` + `tier0-judge.js`; RQS-J shadow via Phase 3 `tier1-judge.js`) are computed outside the UI.
 3. **`INV-UI-03` (Zero-Cloud Local-First Architecture):** 100% offline. Zero external databases, zero cloud dependencies, zero telemetry leaks, zero external CDN scripts.
 
 ---
@@ -136,14 +139,16 @@ vespyr update --with-dashboard
 - Visualizes step-by-step latency, token consumption (Prompt vs. Completion), and cost per subagent.
 - Live streaming updates via SSE as agents execute tasks in real time.
 
-### 5.2 Biomarker Radar & Quality Matrix
-- Visualizes the composite **Result Quality Score (RQS)** and its 6 constituent biomarkers:
-  - Schema Compliance Ratio (SCR: 100%)
-  - Markdown Section Header Adherence (MSHA: 100%)
-  - Placeholder Cleanliness (0.0% TODO/TBD)
-  - Premature Convergence Index (PCI: 0.00)
-  - Sycophantic Rubber-Stamp Rate (SRSR: 0.0%)
-  - Acceptance Criteria Given/When/Then Testability (100%)
+### 5.2 Biomarker Radar & Quality Matrix — RQS-D + RQS-J Shadow (per 02l Option A)
+- Visualizes **RQS-D** (deterministic hard gate, 5 biomarkers) + collapsed **RQS-J** shadow (nullable until κ≥0.7):
+  - [RQS-D] Schema Compliance Ratio (SCR: 100%)
+  - [RQS-D] Markdown Section Header Adherence (MSHA: 100%)
+  - [RQS-D] Placeholder Cleanliness (0.0% TODO/TBD)
+  - [RQS-D] Premature Convergence Index (PCI_det: 0.00)
+  - [RQS-D] Acceptance Criteria Given/When/Then Testability (100%)
+  - [RQS-J shadow] Sycophantic Rubber-Stamp Rate (SRSR: 0.0% — G-Eval, deferred)
+  - [RQS-J shadow] Scope Drift Score (SDS: 0.0% — deferred)
+- Reads `rqs_d_score` / `rqs_j_score` from canonical `tools/telemetry/schema.json` (`02l §5.1`); `rqs_j_score` null until pilot.
 
 ### 5.3 Multi-Model Quality & Cost Efficiency Matrix
 - Side-by-side Pareto frontier comparing models across identical benchmark tasks:

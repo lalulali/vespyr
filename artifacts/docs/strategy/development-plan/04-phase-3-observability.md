@@ -5,11 +5,13 @@
 > **Themes:** T3 (Artifact rigor), T4 (Harness contracts), T8 (UTTERLY SATISFIED culture)
 > **Goal:** Make the graph a first-class tool (auto-build, query API), make telemetry a first-class surface (LLM-consumable digests), prove catalog consistency, give all agents "See the Unseen" observability directives, and make satisfaction health visible without turning it into a vanity score.
 
-## Sub-Plans & Execution Architecture
+## Sub-Plans & Execution Architecture — Aligned to 02l Option A Thin Slice
 
-Phase 3 is divided into two dedicated implementation sub-plans:
-- **`04a-phase-3-observability-engine.md`**: Core OpenTelemetry distributed span engine, macro-telemetry surface (`telemetry_surface.js`), 7-day memory controller snapshots, and graph query API.
-- **`04b-phase-3-observability-ui-miniapp.md`**: Zero-dependency local web dashboard and CLI tool (`vespyr web` / `vespyr dashboard`), modular installer options (`--with-dashboard`), and real-time SSE trace DAG waterfall viewer.
+Phase 3 is divided into two dedicated implementation sub-plans that **import the 02l canonical span schema and defer, not duplicate, Phase-1 thin-slice work**:
+- **`04a-phase-3-observability-engine.md`**: Macro-telemetry surface (`telemetry_surface.js` session <150ms, 7-day digests, hot-paths), RQS-J semantic shadow (SRSR/SDS G-Eval κ≥0.7), and graph query API. **Imports** `tools/telemetry/schema.json` from `02l §5.1`; does not redefine spans.
+- **`04b-phase-3-observability-ui-miniapp.md`**: Zero-dependency local web dashboard and CLI tool (`vespyr web` / `vespyr dashboard`), modular installer options (`--with-dashboard`), and real-time SSE trace DAG waterfall viewer. Reads `tools/telemetry/schema.json` + `spans-*.ndjson` + `rqs_d_score`/`rqs_j_score` shadow.
+
+Single-owner registry: see `02l §11`.
 
 ## What changed from the original
 
@@ -119,64 +121,24 @@ Cost: 1 query. Without it: break the build, then re-grep and fix in a second pas
 
 **Source:** Evolution §1.9, Round Table 2026-08-21 | **Theme:** T3 | **Cross-Reference:** Epic 02l (`02l-phase-1-observability-biomarkers-and-small-model-harness.md`)
 
-**Problem:** `swarm_telemetry.js` currently writes unstructured, unindexed event logs (`tokens: 0`, `duration_ms: null` in `artifacts/telemetry/events-*.ndjson`). Evaluating workflow health currently forces a human to open markdown documents and read them line-by-line. This is unscalable and provides zero machine-verifiable feedback.
+**Problem:** `swarm_telemetry.js` currently writes unstructured, unindexed event logs (`tokens: 0`, `duration_ms: null` in `artifacts/telemetry/events-*.ndjson`). Evaluating workflow health currently forces a human to open markdown documents and read them line-by-line. This is unscalable and provides zero machine-verifiable feedback. **Option A note:** Phase-1 thin slice `02l` ships the minimal `spans-*.ndjson` pipeline + RQS-D gates (see `02l §5-6`); Phase 3 upgrades it into this macro surface — not a parallel replacement.
 
-**Target:** Upgrade telemetry from passive log-dumping into an **OpenTelemetry-compatible distributed span pipeline** (`artifacts/telemetry/spans-*.ndjson`) and a first-class machine-verifiable surface that 4 consumers see automatically:
+**Target:** Upgrade the thin `02l` span pipeline into a first-class macro surface that 4 consumers see automatically:
 1. Every session start — `@memory-controller` loads last 7 days' summary (<150ms)
 2. Every skill's end — orchestrator surfaces "tokens used this skill: N (vs. baseline M)" and automated biomarker pass/fail
 3. The `/status` skill — adds a "Telemetry & Biomarkers" section
 4. The `/retro` skill — Step 1 includes a "hot path" and token cost digest
 
-**Distributed Span Schema (`artifacts/telemetry/spans-YYYY-MM-DD.ndjson`):**
+**Distributed Span Schema (`artifacts/telemetry/spans-YYYY-MM-DD.ndjson`) — Canonical Import (Option A):**
 
-```typescript
-interface VespyrTelemetrySpan {
-  trace_id: string;            // UUID identifying the end-to-end task execution
-  span_id: string;             // UUID identifying this specific agent step
-  parent_span_id: string | null;
-  timestamp: string;           // ISO 8601 UTC
-  session_id: string;
-  workflow: string;            // e.g. "discovery/validate-idea", "delivery/develop"
-  agent_persona: string;       // e.g. "architect", "developer", "qa-engineer"
-  model: {
-    provider: string;          // e.g. "anthropic", "google", "ollama"
-    model_id: string;          // e.g. "gemini-2.0-flash", "claude-3-5-sonnet"
-    temperature: number;
-  };
-  usage: {
-    prompt_tokens: number;
-    completion_tokens: number;
-    total_tokens: number;
-    cost_usd: number;
-  };
-  duration_ms: number;
-  tier0_evaluation: {
-    executed: boolean;
-    passed: boolean;
-    checks: Array<{
-      type: "markdown_ast" | "json_schema" | "eslint" | "unit_tests" | "token_ceiling";
-      status: "PASS" | "FAIL";
-      details?: string;
-    }>;
-  };
-  biomarkers: {
-    scr: number;               // Schema Compliance Ratio (1.0 = 100%)
-    msha: number;              // Markdown Section Header Adherence (1.0 = 100%)
-    placeholder_density: number;// % of lines containing TODO/TBD (0.0 = 0%)
-    pci: number;               // Premature Convergence Index (0.0 target)
-    srsr: number;              // Sycophantic Rubber-Stamp Rate (0.0 target)
-    scope_drift: number;       // Scope Drift Score (0.0 target)
-  };
-  error: { code: string; message: string } | null;
-}
-```
+> **Single-owner — do not redefine.** Canonical schema lives at `tools/telemetry/schema.json` owned by `02l-phase-1-observability-biomarkers-and-small-model-harness.md §5.1` (Option A Thin Slice). This section **imports** via `require('../telemetry/schema.json')`; any drift copies violate `INV-TEL-01` hybrid. Phase 1 shape: `usage.cost_usd: number | null` (nullable, Phase 3 enriches via `pricing.json`), `usage.estimated: boolean` (<20% estimated, ≥80% exact coverage), `quality_scorecard: { rqs_d_score, rqs_j_score: number | null, rating derived from RQS-D }`, `biomarkers: { scr,msha,placeholder_density,pci,ac_testability: RQS-D deterministic; srsr,scope_drift: RQS-J shadow nullable }` — see `02l §5.1` for full TypeScript.
 
-**The 5 Hard Telemetry Invariants:**
-- `INV-TEL-01` (Zero Blind Execution): Non-null trace_id, duration_ms, and exact token counts on every span.
-- `INV-TEL-02` (Deterministic Gate Contract): Mandatory Tier 0 AST/schema assertion before disk commit.
-- `INV-TEL-03` (Zero Human-in-the-Loop Biomarker Gate): Workflow success requires all biomarkers (SCR=1.0, placeholder_density=0.0, PCI=0.0) to pass. Zero line-by-line human reading required.
-- `INV-TEL-04` (Regression Tripwire): CI failure (Exit Code 2) on >15% token inflation or pass rate drop vs `evals/baseline.json`.
-- `INV-TEL-05` (Model-Tier Invariant): Tier B frontier models mandated for `@architect`, `@founder`, and `@security-engineer`.
+**The 5 Hard Telemetry Invariants (Hybrid — per 02l Option A):**
+- `INV-TEL-01` (Zero Blind Execution — Hybrid): Non-null trace_id, real duration_ms, and usage.total_tokens; prompt/completion exact where harness reports, `estimated=true` allowed <20% window with retry child spans; `cost_usd` nullable in Phase 1; <80% exact fails gate.
+- `INV-TEL-02` (Deterministic Gate Contract): Mandatory Tier 0 RQS-D (SCR/MSHA/PD/PCI/AC <25ms, 0 tokens) assertion before disk commit.
+- `INV-TEL-03` (Zero Human-in-the-Loop RQS-D Gate): Workflow success requires `RQS-D ≥85%` and deterministic biomarkers (`SCR=1.0, MSHA=1.0, PD=0.0, PCI=0.0`) — RQS-J (SRSR/SDS) shadow only, never gates Phase 1.
+- `INV-TEL-04` (Regression Tripwire — Retry-Aware): CI Exit 2 on >15% token inflation (sum including retry spans) or pass drop vs `evals/baseline.json`.
+- `INV-TEL-05` (Model-Tier Invariant): Tier B frontier models mandated for `@architect`, `@founder`, and `@security-engineer` (enforced via `modelTierGuards.js`).
 
 **Memory-controller session-start integration (canonical step 0.4 — the full order table lives in 03 F2.14; earlier drafts numbered this "Step 0.5"):**
 
