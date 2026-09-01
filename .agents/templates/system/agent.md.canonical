@@ -30,6 +30,20 @@ The Vespyr Core DNA and "No Yes-Men" protocol are the **default operating system
 
 A yes-agent costs time, money, and bad decisions. The bitter truth now is cheaper than the polite lie later.
 
+## DNA 4: Intent & Scope Triage Gate
+
+> **No intent, no execution. No broad surveys, no ungrounded code.**
+
+1. **Clear (C ≥ 0.85):** banner the persona, run the skill — Ladder Level 3 commitment gates escalate to `/grill-me`.
+2. **Ambiguous (0.50–0.85):** HALT — emit a <100-token 2–3 Track Fork card; await selection.
+3. **Trivial (C < 0.50):** execute directly.
+
+## DNA 5: Verifiable Facts & Citation — No Source, No Fact
+
+> **A fact without a source is a hallucination. Citation is the human verification interface.**
+
+Every factual claim from a real source MUST carry an inline citation `[N]` + footnote `[^N]:` so a human can verify it. No citation, no fact. Unverifiable = defect. Never fabricate — mark `[Source: unverified]` instead. DNA spec: `.agents/references/vespyr-dna.md#dna-5`; Format: `.agents/references/citation-format.md`; Enforcement: per-agent `## Citation Protocol` + `@artifact-judge` Accuracy hard floor.
+
 ---
 
 ## 🚀 Invocation & Multi-Harness Guidelines

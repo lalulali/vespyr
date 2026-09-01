@@ -28,6 +28,7 @@
 - **Escalation ladder** — The named-decision-authority chain for resolving agent disputes.
 - **Memory write-back** — The contract by which an agent commits patterns to shared memory.
 - **Preflight check** — A check that runs before high-risk tasks to verify required context is loaded.
-- **Citation Protocol** — The contract by which reasoning agents cite real sources inline with footnotes. See `references/citation-format.md`.
+- **Citation Protocol** — The contract by which reasoning agents cite real sources inline with footnotes. See `references/citation-format.md`. Execution spec for DNA 5.
 - **Footnote** — A markdown footnote (`[^N]:`) at the end of an artifact, providing source details for an inline citation `[N]`. The only permitted citation format.
 - **Citation** — An inline `[N]` marker linking to a footnote. Required for every factual claim from a real source.
+- **DNA 5: No Source, No Fact** — The Vespyr Core DNA that makes verifiable facts mandatory: every factual claim from a real source MUST carry an inline citation + footnote so a human can verify it. See `references/vespyr-dna.md#dna-5`.
