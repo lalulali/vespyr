@@ -82,6 +82,7 @@ describe('NPX packaging & manifest verification', () => {
       '.agents/scripts/hot_path_analyzer.js',
       '.agents/scripts/token_profiler.js',
       '.agents/scripts/fix-squads.js',
+      '.agents/scripts/squads.js',
       '.agents/scripts/migrate-frontmatter-v2.js'
     ];
     for (const p of banned) {

@@ -13,7 +13,7 @@ In default subagent mode, never generate agent responses yourself — that's the
 
 ## Why This Matters
 
-Roundtable discussions yield genuinely independent perspectives. When one LLM roleplays multiple characters, their opinions tend to merge and feel performative. By spawning each agent as its own subagent process, you get real diversity of thought — agents that actually disagree, catch things others miss, and bring their authentic expertise to bear.
+Roundtable discussions yield genuinely independent perspectives. When one LLM roleplays multiple characters, their opinions tend to merge and feel performative. By spawning each agent as its own subagent process — or, on harnesses without subagents, as context-firewalled sequential LLM calls — you get real diversity of thought: agents that actually disagree, catch things others miss, and bring their authentic expertise to bear. The independence primitive is context isolation, not the process mechanism (see Harness-Neutral Delegation).
 
 ## Arguments
 

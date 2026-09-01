@@ -15,8 +15,9 @@
  *   node .agents/scripts/worktree.js remove <name> [--force]
  *
  * Shared-state wiring (post-create):
- *   <wt>/.agents/state   → primary .agents/state   (memory.lock, ledger, collision state)
- *   <wt>/artifacts/memory → primary artifacts/memory (the swarm brain)
+ *   <wt>/.agents/state       → primary .agents/state       (memory.lock, ledger, collision state)
+ *   <wt>/artifacts/memory    → primary artifacts/memory    (the swarm brain)
+ *   <wt>/artifacts/telemetry → primary artifacts/telemetry (drift history, eval telemetry — ADR-006)
  */
 
 'use strict';
@@ -99,14 +100,19 @@ function create(name, opts = {}) {
   // would break lock acquisition in the worktree).
   fs.mkdirSync(path.join(root, '.agents', 'state'), { recursive: true });
   fs.mkdirSync(path.join(root, 'artifacts', 'memory'), { recursive: true });
+  fs.mkdirSync(path.join(root, 'artifacts', 'telemetry'), { recursive: true });
 
-  // Shared state + memory: locks, ledger and the swarm brain live in the
-  // PRIMARY checkout. Without this wiring, two worktrees would lock
-  // independently and the 02o safety net would silently split in two.
+  // Shared state + memory + telemetry: locks, ledger, swarm brain and drift
+  // history live in the PRIMARY checkout. Without this wiring, two worktrees
+  // would lock independently and the 02o safety net would silently split in two.
+  // Telemetry (artifacts/telemetry) is shared so drift history stays consistent
+  // across worktrees after 02k-E relocation (ADR-006).
   const stateLink = path.join(wtPath, '.agents', 'state');
   const memLink = path.join(wtPath, 'artifacts', 'memory');
+  const telLink = path.join(wtPath, 'artifacts', 'telemetry');
   linkShared(path.join(root, '.agents', 'state'), stateLink);
   linkShared(path.join(root, 'artifacts', 'memory'), memLink);
+  linkShared(path.join(root, 'artifacts', 'telemetry'), telLink);
 
   return { name: n, path: wtPath, branch, stateLink, memLink };
 }

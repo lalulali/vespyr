@@ -11,5 +11,4 @@ validate_matrix.js
 pipeline_simulator.js
 hot_path_analyzer.js
 token_profiler.js
-fix-squads.js
 migrate-frontmatter-v2.js

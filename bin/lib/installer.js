@@ -83,15 +83,6 @@ function scaffoldArtifacts(targetDir, projectName, userNickname = "User", stack 
 		fs.mkdirSync(path.join(artifactsDir, dir), { recursive: true });
 	}
 
-	const agentsDir = path.join(targetDir, ".agents", "agents");
-	let agentCount = 20;
-	if (fs.existsSync(agentsDir)) {
-		const agentFiles = fs
-			.readdirSync(agentsDir)
-			.filter((f) => f.endsWith(".md"));
-		agentCount = agentFiles.length || 20;
-	}
-
 	const memoryPath = path.join(artifactsDir, "memory");
 	const isoDate = new Date().toISOString().split("T")[0];
 
@@ -133,10 +124,8 @@ _(auto-populated on every session by @memory-controller / orchestrator_state.js)
 - **Architecture**: Not yet defined
 - **Constraints**: None recorded
 
-## Team
-
-- **Operation Mode**: semi-autonomous
-- **Active Agents**: ${agentCount} agents
+## Operation Mode
+- **Default**: semi-autonomous
 
 ## Memory
 - **Lessons Learned**: None yet
