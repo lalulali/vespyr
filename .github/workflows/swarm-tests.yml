@@ -39,6 +39,21 @@ jobs:
       - name: Run test suite
         run: npm test
 
+  install-smoke:
+    name: Install smoke (real tarball, single leg)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Real-tarball install smoke (round-table 2026-08-31 clean-folder contract)
+        run: RUN_INSTALL_SMOKE=1 node --test tests/cli/install-smoke.test.js
+
       - name: Verify scripts are loadable (syntax check — no blind `|| true`)
         # F-4 (Scout, fresh audit 2026-08-23): the old loop swallowed every
         # failure with `|| true`, including security-scan.js FAULT exits.

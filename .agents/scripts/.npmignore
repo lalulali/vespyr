@@ -1,0 +1,15 @@
+# Repo/CI-only scripts — never shipped in the npm tarball
+# (round-table 2026-08-31: runtime closure verified; the excluded set is
+#  enforced by tests/cli/packaging.test.js negative-absence assertions)
+check_corpus_invariants.js
+check_new_findings.js
+check_plan_reservation.js
+test_security_mutation.js
+test_security_suite.js
+drift_monitor.js
+validate_matrix.js
+pipeline_simulator.js
+hot_path_analyzer.js
+token_profiler.js
+fix-squads.js
+migrate-frontmatter-v2.js

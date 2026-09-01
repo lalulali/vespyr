@@ -4,6 +4,15 @@ All notable changes to the Vespyr project will be documented in this file.
 
 ---
 
+## [Unreleased] - 2026-08-31
+
+### Clean installation folder (round-table: @devops-engineer, @developer, @security-engineer, @tech-lead)
+- **Tarball slimming:** `npm pack` payload cut 427 → 370 files (723KB → 680KB). Excluded repo/CI-only content: `.agents/state/**` (live `session-current.json` would have seeded every user's first session with the maintainer's session id — `lib/session.js` reuses existing ids), `evals/security/**` (red-team attack-fixture corpus + frozen baselines consumed only by non-shipping CI gates), `.agents/evals/**` (roundtable eval infrastructure relocated to `evals/roundtable/` so the installed `.agents/` folder stays eval-free), and 12 CI/authoring-only scripts in `.agents/scripts/` (check/drift/validate/test/pipeline/hot_path/token_profiler/fix-squads/migrate-frontmatter clusters). Also removed stray `.agents/skills/artifacts/**` copies of repo memory/output files (gitignored at any depth, so they shipped invisibly).
+- **Runtime closure verified:** `security-scan.js` + `security/audit-spec.json` ship (they are the `vespyr audit` runtime contract — FAULT-1 fail-closed); `add-*` authoring scripts, `dedupe_validator` (memory pipeline), `roundtable_eval`, `validate_frontmatter` (npm script) confirmed runtime-referenced and kept; `evals/baseline.json` + suites/rubrics/fixtures/meta-eval ship (`vespyr-eval` consumers).
+- **Mechanism:** top-level `files` array + per-directory `.npmignore` denylists (`.agents/state/`, `.agents/scripts/`, `evals/`). `roundtable_eval.js` `DEFAULT_TOPICS` repointed to `evals/roundtable/topics.json` (only `score --dir`, a dev path, reads it — no shipped skill invokes it; eval input moved out of `.agents/` to keep the installation folder clean). `.gitignore` exception added so `.agents/state/.npmignore` is tracked.
+- **Packaging contract hardened** (`tests/cli/packaging.test.js`): positive-closure list extended to 23 runtime paths; NEW negative-absence block fails the pack if any excluded file reappears.
+- **Real-tarball install smoke** (`tests/cli/install-smoke.test.js`): `npm pack` → temp install → bin entry resolution, `vespyr audit` on installed package, clean-folder post-install assert, `tools/eval` require chain. Env-gated (`RUN_INSTALL_SMOKE=1`), runs on a single ubuntu/node-20 CI leg (swarm-tests.yml `install-smoke` job).
+
 ## [2.0.8] - 2026-08-25
 
 ### Added

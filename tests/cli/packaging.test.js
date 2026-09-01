@@ -32,10 +32,60 @@ describe('NPX packaging & manifest verification', () => {
       '.agents/scripts/lib/fs_atomic.js',
       '.agents/skills/shut-up/SKILL.md',
       '.agents/skills/grill-me/SKILL.md',
+      '.agents/scripts/security-scan.js',
+      '.agents/scripts/roundtable_eval.js',
+      '.agents/scripts/validate_frontmatter.js',
+      '.agents/scripts/memory_write.js',
+      '.agents/scripts/dedupe_validator.js',
+      '.agents/scripts/add-identity-block.js',
+      'evals/roundtable/topics.json',
+      'evals/baseline.json',
+      'evals/suites/agents/core-swarm.json',
+      'evals/rubrics/prd-completeness.json',
+      'evals/fixtures/simple-js/index.js',
+      'evals/meta-eval/gold-standard.json',
+      'tools/eval/runner.js',
+      'security/audit-spec.json',
+      'security/supply-chain-audit-spec.md',
       'package.json'
     ];
     for (const p of required) {
       assert.ok(paths.has(p), `tarball must include ${p}`);
+    }
+  });
+
+  // Clean-folder contract (round-table 2026-08-31): repo/CI-only content must
+  // never ship — live session state, the attack-fixture corpus, roundtable
+  // eval fixtures, and the CI-only script cluster. A file appearing here
+  // fails the pack (allowlist-direction: new files in excluded dirs must be
+  // triaged, never silently shipped).
+  it('tarball excludes repo/CI-only content (negative absence)', () => {
+    const data = JSON.parse(packed.stdout);
+    const paths = new Set(data[0].files.map((f) => f.path));
+    const banned = [
+      '.agents/state/session-current.json',
+      'evals/roundtable/fixtures/coverage-pass.md',
+      'evals/roundtable/fixtures/coverage-fail.md',
+      'evals/roundtable/fixtures/transcripts/rt-003_native_1.md',
+      'evals/roundtable/README.md',
+      'evals/security/corpus/baseline-2026-08-10.json',
+      'evals/security/corpus/positive/inj-prompt.md',
+      'evals/security/held_out/positive/adv-prompt-override.md',
+      '.agents/scripts/test_security_suite.js',
+      '.agents/scripts/test_security_mutation.js',
+      '.agents/scripts/check_corpus_invariants.js',
+      '.agents/scripts/check_new_findings.js',
+      '.agents/scripts/check_plan_reservation.js',
+      '.agents/scripts/drift_monitor.js',
+      '.agents/scripts/validate_matrix.js',
+      '.agents/scripts/pipeline_simulator.js',
+      '.agents/scripts/hot_path_analyzer.js',
+      '.agents/scripts/token_profiler.js',
+      '.agents/scripts/fix-squads.js',
+      '.agents/scripts/migrate-frontmatter-v2.js'
+    ];
+    for (const p of banned) {
+      assert.ok(!paths.has(p), `tarball must NOT include ${p}`);
     }
   });
 

@@ -7,7 +7,7 @@
  *   node roundtable_eval.js score   --dir <transcripts-dir> [--topics <topics.json>] [--json]
  *   node roundtable_eval.js log     --mode <native|solo|refused> [--tool <name>] [--topic "..."] [--agents "@a,@b"] [--note "..."]
  *
- * Transcript contract (full spec: .agents/evals/roundtable/README.md):
+ * Transcript contract (full spec: evals/roundtable/README.md):
  *   - fenced block ```roundtable-coverage containing `panel:` and `challenges:` lines
  *   - per-panelist verdict lines [VERDICT: PASS|PIVOT|KILL|CONFIRMED|PARTIAL|FALSIFIED]
  *   - final outcome line [SYNTHESIS: PASS|PIVOT|KILL|ADR:<id>]
@@ -21,8 +21,9 @@ const fs = require('fs');
 const path = require('path');
 
 const PROJECT_ROOT = process.cwd();
-const STATE_LOG = path.join(PROJECT_ROOT, '.agents', 'state', 'roundtable-log.jsonl');
-const DEFAULT_TOPICS = path.join(PROJECT_ROOT, '.agents', 'evals', 'roundtable', 'topics.json');
+const RESULTS_DIR = path.join(PROJECT_ROOT, 'artifacts', 'evals', 'roundtable');
+const STATE_LOG = path.join(RESULTS_DIR, 'telemetry', 'log.jsonl');
+const DEFAULT_TOPICS = path.join(PROJECT_ROOT, 'evals', 'roundtable', 'topics.json');
 const DECISION_VERDICTS = ['PASS', 'PIVOT', 'KILL'];
 const ALL_VERDICTS = [...DECISION_VERDICTS, 'CONFIRMED', 'PARTIAL', 'FALSIFIED'];
 const MODES = ['native', 'solo', 'refused'];

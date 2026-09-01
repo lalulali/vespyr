@@ -11,6 +11,8 @@ yarn.lock
 artifacts/telemetry/
 artifacts/memory/
 artifacts/output/
+artifacts/evals/roundtable/runs/
+artifacts/evals/roundtable/telemetry/
 .opencode/logs/
 *.scratch.md
 *.tmp
@@ -36,3 +38,4 @@ temp/
 tmp/
 .agents/worktrees/
 .agents/state/
+!.agents/state/.npmignore

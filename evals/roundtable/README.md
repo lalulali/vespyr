@@ -7,8 +7,8 @@ Measures whether the `/round-table` protocol produces what it claims: independen
 | Piece | Path | Role |
 |---|---|---|
 | Validator/scorer/logger | `.agents/scripts/roundtable_eval.js` | live coverage gate + offline metrics + mode telemetry |
-| Gold topic set | `.agents/evals/roundtable/topics.json` | 10 stress-test topics, 3 with flawed premises |
-| This protocol | `.agents/evals/roundtable/README.md` | run procedure + metric definitions |
+| Gold topic set | `evals/roundtable/topics.json` | 10 stress-test topics, 3 with flawed premises |
+| This protocol | `evals/roundtable/README.md` | run procedure + metric definitions |
 
 ## Transcript contract
 
@@ -48,12 +48,16 @@ node .agents/scripts/roundtable_eval.js log --mode <native|solo|refused> --topic
 
 **No thresholds are enforced yet.** Baseline-first applies to the harness itself: record 3 native runs per topic, then set gates from observed distributions. Premature thresholds would be cargo cult.
 
+## Assets vs results (packaging rule)
+
+`.agents/` is the shipped package (see `manifest.json`): harness code, gold topics, fixtures, and this protocol are **assets** — they install with the engine. Everything the harness *produces at runtime* is a **result** and must never live under `.agents/` — results go to `artifacts/evals/roundtable/` (project-local, never packaged): baseline transcripts, score reports, and the telemetry log. A results file inside `.agents/` is a packaging leak: it ships your session data to every consumer on the next publish.
+
 ## Run procedure (baseline pass)
 
-1. For each of the 10 topics: run one native roundtable, save transcript to `runs/<topic>_native_<n>.md`, run `coverage` (must exit 0).
+1. For each of the 10 topics: run one native roundtable, save transcript to `artifacts/evals/roundtable/runs/<topic>_native_<n>.md`, run `coverage` (must exit 0).
 2. Repeat to 3 native runs per topic — verdict stability needs ≥3 samples.
-3. Solo comparison on a 3-topic subset (cost control): 2 solo runs each, saved as `<topic>_solo_<n>.md`.
-4. `score --dir runs/` — record the report. Gates are proposed only after this baseline exists.
+3. Solo comparison on a 3-topic subset (cost control): 2 solo runs each, saved as `artifacts/evals/roundtable/runs/<topic>_solo_<n>.md`.
+4. `score --dir artifacts/evals/roundtable/runs/` — record the report to `artifacts/evals/roundtable/`. Gates are proposed only after this baseline exists.
 
 ## Deferred (gated, do not pull forward)
 
