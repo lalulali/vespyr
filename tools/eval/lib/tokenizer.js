@@ -1,7 +1,8 @@
 /**
  * Deterministic Tokenizer Utility for vespyr-eval
- * Pinned standard for token ceiling assertions (<100 tokens under /shut-up)
- * and token spend telemetry.
+ * Measurement primitive for token telemetry (02l spans, baseline inflation
+ * tripwires). Not a Vespyr efficiency claim — per-benchmark ceilings, when a
+ * policy defines one, are asserted via the optional benchmark.maxTokens gate.
  */
 
 function countTokens(text) {

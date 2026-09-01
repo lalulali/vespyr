@@ -1,7 +1,9 @@
 /**
  * Tier 0: Deterministic Static Evaluation Judge (WS-1 Task 1.4)
- * Fail-fast, zero-token assertions: frontmatter validation, syntax/test execution,
- * token budget ceilings (<100 tokens under /shut-up), and mathematical SPC checks (SRSR, PCI, Zero-Blueprint-on-KILL).
+ * Fail-fast, no-LLM-call assertions: frontmatter validation, syntax/test execution,
+ * optional per-benchmark output caps (benchmark.maxTokens — only when a policy
+ * defines one; Vespyr itself asserts no numeric token ceiling), and mathematical
+ * SPC checks (SRSR, PCI, Zero-Blueprint-on-KILL).
  */
 
 const fs = require("fs");

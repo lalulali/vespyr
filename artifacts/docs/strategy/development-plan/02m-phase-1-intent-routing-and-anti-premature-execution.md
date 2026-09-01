@@ -1,11 +1,11 @@
-# Intent Triage, Autonomous Routing & Anti-Premature Execution Epic (02k)
+# Intent Triage, Autonomous Routing & Anti-Premature Execution Epic (02m — historic 02k)
 
-**Decision:** Formally codify and enforce a 4-layer defense architecture against un-persona'd generic AI execution, silent scope broadening, and premature implementation across the Vespyr multi-agent engine:
+**Decision:** Formally codify and enforce a 4-layer defense architecture (+ eval verification) against un-persona'd generic AI execution, silent scope broadening, and premature implementation across the Vespyr multi-agent engine:
 1. **Core DNA 4 ("The Intent & Scope Triage Gate / Anti-Assumed Execution"):** Add an unconditional invariant to `.agents/references/vespyr-dna.md` and `AGENTS.md`. If a request is ambiguous or multi-track ($0.50 \le C < 0.85$), halt and force the **2–3 Track Fork** card. If unambiguously specific ($C \ge 0.85$), directly adopt the specialist persona banner and execute.
-2. **Universal Guardrails (§22 Hardening in `.agents/GUARDRAILS.md`):** Explicitly outlaw "Broad Survey Fallbacks" and generic horizontal summary dumps. Mandate hypothesis-decision anchoring before data gathering or code drafting.
+2. **Universal Guardrails (Hardening in `.agents/GUARDRAILS.md` — plan label "§22" descriptive):** Explicitly outlaw "Broad Survey Fallbacks" and generic horizontal summary dumps. Mandate hypothesis-decision anchoring before data gathering or code drafting.
 3. **Multi-Harness Intent Routing Directive:** Establish harness-specific routing protocols ensuring that tool-capable harnesses (Antigravity, Claude Code, OpenCode) autonomously invoke specialized subagents/skills upon track confirmation, while context-mention harnesses (Cursor, Windsurf, Kiro) prompt the user with exact `@agent` / `/skill` handles.
 4. **Persona Socratic Stance Upgrades & Skill Step 0 Gating:** Update all 20 agent personas with explicit rejection of underspecified briefs, and mandate a non-skippable `step-00-scope-and-decision-anchoring.md` across core skills (`/explore-idea`, `/unpack-problem`, `/plan`, `/develop`, `/design`, `/validate-idea`), enforced deterministically by `step_tracker.js` (exit code 1 if bypassed).
-5. **`vespyr-eval` Benchmark Integration:** Add automated regression benchmarks in `evals/suites/intent-routing.json` (including false-positive decoy traps for trivial tasks) to deterministically verify that un-persona'd domain prompts trigger the triage gate while trivial single-action tasks pass unimpeded.
+5. **`vespyr-eval` Benchmark Integration:** Add automated regression benchmarks in `evals/suites/invariants/intent-routing.json` (including false-positive decoy traps for trivial tasks) to deterministically verify that un-persona'd domain prompts trigger the triage gate while trivial single-action tasks pass unimpeded.
 
 **Position:** Phase 1 (vespyr 2.0.0) sub-plan — authored as `02k` (12th); **re-homed to `02m` (13th) on 2026-08-28** when a concurrent session inserted `02k-phase-1-round-table-skill.md` and shifted the series. Current neighbors: after `02l-phase-1-observability-biomarkers-and-small-model-harness.md`, before `02n-phase-1-record-integrity-recovery.md` (formerly numbered `02m`). Task IDs below retain their historical `02k.N` labels.
 
@@ -66,7 +66,7 @@ A common misconception is that updating `.agents/agents/researcher.md` solves th
 │   └── Autonomous Persona & Skill Recommendation Invariant                              │
 │                                                                                        │
 │   Layer 2: Universal Guardrails (.agents/GUARDRAILS.md)                                │
-│   ├── §22 Expansion: Anti-Premature Execution & Scope Clarification                    │
+│   ├── Expansion: Anti-Premature Execution & Scope Clarification                        │
 │   ├── Total Ban on "Catch-All Horizontal Summaries" and Broad Dumps                    │
 │   └── The 2–3 Track Fork UX Protocol (Structured options vs open interrogation)        │
 │                                                                                        │
@@ -107,9 +107,9 @@ When a user request lacks an active persona/skill:
 
 ---
 
-### 3.2 Layer 2: Guardrails §22 Expansion (Specification)
+### 3.2 Layer 2: Guardrails Expansion (Specification)
 
-Update Section 22 of `.agents/GUARDRAILS.md`:
+Update `.agents/GUARDRAILS.md` (add named section `Anti-Premature Execution, Scope Clarification & Ban on Broad Fallbacks` — plan label "§22" is descriptive, no numbered §22 exists in file):
 
 ```markdown
 ## Anti-Premature Execution, Scope Clarification & Ban on Broad Fallbacks
@@ -156,7 +156,7 @@ Update the `## Socratic Stance` section of each persona to explicitly reject unc
 
 ---
 
-### 3.5 Layer 5: Skill Step 0 Mandatory Gates & Deterministic CLI Enforcement
+### 3.5 Layer 4 (cont.): Skill Step 0 Mandatory Gates & Deterministic CLI Enforcement
 
 All major multi-step skills must include a standardized, non-skippable **`step-00-scope-and-decision-anchoring.md`**:
 
@@ -177,9 +177,9 @@ All major multi-step skills must include a standardized, non-skippable **`step-0
 
 ## 4. `vespyr-eval` Benchmark Integration
 
-Add a dedicated evaluation suite to `vespyr-eval` (`evals/suites/intent-routing.json`) with robust regex pattern matching, negative boundary decoy traps, and calibrated 1-shot G-Eval anchors:
+Add a dedicated evaluation suite to `vespyr-eval` (`evals/suites/invariants/intent-routing.json`) with robust regex pattern matching, negative boundary decoy traps, and calibrated 1-shot G-Eval anchors:
 
-### 4.1 Benchmark Test Matrix (`evals/suites/intent-routing.json`)
+### 4.1 Benchmark Test Matrix (`evals/suites/invariants/intent-routing.json` — sketch; shipped suite uses 02j schema `assertContains`/`assertNotContains`, no token ceiling)
 
 ```json
 {
@@ -278,9 +278,9 @@ Add a dedicated evaluation suite to `vespyr-eval` (`evals/suites/intent-routing.
   - **Action:** Add `## DNA 4: Intent & Scope Triage Gate (Anti-Assumed Execution)` with the high-confidence direct adoption banner ($C \ge 0.85$) and the 2–3 Track Fork ($0.50 \le C < 0.85$).
   - **Verify:** Verify `AGENTS.md` and `vespyr-dna.md` contain identical DNA 4 definitions.
 
-- [ ] **Task 02k.2 — Guardrails §22 Expansion**
+- [ ] **Task 02k.2 — Guardrails Expansion (plan label "§22")**
   - **Files:** `.agents/GUARDRAILS.md`
-  - **Action:** Expand §22 to ban broad survey fallbacks, mandate hypothesis-decision anchors, and define the 2–3 Track Fork UX protocol.
+  - **Action:** Add named section `Anti-Premature Execution, Scope Clarification & Ban on Broad Fallbacks` to ban broad survey fallbacks, mandate hypothesis-decision anchors, and define the 2–3 Track Fork UX protocol.
   - **Verify:** Validate that `GUARDRAILS.md` explicitly forbids un-persona'd horizontal output dumps.
 
 ### Phase 2: Agent Persona Socratic Stances Upgrades
@@ -297,6 +297,7 @@ Add a dedicated evaluation suite to `vespyr-eval` (`evals/suites/intent-routing.
     - `.agents/skills/develop/SKILL.md` (+ step-00)
     - `.agents/skills/design/SKILL.md` (+ step-00)
     - `.agents/skills/validate-idea/SKILL.md` (+ step-00)
+    - `.agents/skills/plan/SKILL.md` (+ step-00 — omitted from original task list, added per Decision statement)
     - `.agents/scripts/step_tracker.js`
   - **Action:** Author `step-00-scope-and-decision-anchoring.md` and link in bootloaders. Update `step_tracker.js` to assert `scope_locked: true` before advancing past Step 0 (exit code 1 if bypassed).
   - **Verify:** Check that skill step tracking fails fast with Exit Code 1 if Step 0 is bypassed without `[SCOPE_LOCKED]`.
@@ -308,20 +309,20 @@ Add a dedicated evaluation suite to `vespyr-eval` (`evals/suites/intent-routing.
   - **Verify:** Verify all references match across English and Chinese docs.
 
 ### Phase 5: Automated Regression Benchmarking
-- [ ] **Task 02k.6 — Author `evals/suites/intent-routing.json`**
-  - **Files:** `evals/suites/intent-routing.json`
+- [ ] **Task 02k.6 — Author `evals/suites/invariants/intent-routing.json`**
+  - **Files:** `evals/suites/invariants/intent-routing.json`
   - **Action:** Scaffold test fixtures (including `intent-04` trivial task decoy trap) and assert Tier 0 regex pattern gates for un-persona'd requests.
   - **Verify:** Execute benchmark tests via `vespyr-eval` runner and achieve 100% pass rate.
 
 ---
 
-## 6. Definition of Done (DoD) for Epic 02k
+## 6. Definition of Done (DoD) for Epic 02k (historic 02m)
 
-1. **DNA 4 Active:** `vespyr-dna.md` and `AGENTS.md` contain `DNA 4: Intent & Scope Triage Gate`.
-2. **Guardrail Active:** `.agents/GUARDRAILS.md` §22 explicitly forbids broad survey fallbacks and mandates the 2–3 Track Fork.
+1. **DNA 4 Active:** `vespyr-dna.md` and `AGENTS.md` contain `DNA 4: Intent & Scope Triage Gate` (concise card, no token budget).
+2. **Guardrail Active:** `.agents/GUARDRAILS.md` named section `Anti-Premature Execution, Scope Clarification & Ban on Broad Fallbacks` exists and mandates the 2–3 Track Fork (plan label "§22" descriptive).
 3. **12+ Personas Hardened:** All reasoning personas explicitly declare their Socratic pushback against underspecified briefs.
-4. **Step 0 Enforced Deterministically:** `/explore-idea`, `/unpack-problem`, `/develop`, `/design`, and `/validate-idea` enforce `step-00-scope-and-decision-anchoring` with `step_tracker.js` exit code 1 validation.
-5. **Evals Verified:** `evals/suites/intent-routing.json` exists and executes with 0 failures across positive triage, single-track adoption, explicit bypass, and trivial decoy tests.
+4. **Step 0 Enforced Deterministically:** `/explore-idea`, `/unpack-problem`, `/develop`, `/design`, `/validate-idea`, and `/plan` enforce `step-00-scope-and-decision-anchoring` with `step_tracker.js` exit code 1 validation.
+5. **Evals Verified:** `evals/suites/invariants/intent-routing.json` exists and executes with 0 failures across positive triage, single-track adoption, explicit bypass, and trivial decoy tests (fixture-tier, structural regex only).
 6. **Memory Persisted:** Decision logged in `active-decisions.md`, session summary updated in `session-summaries/latest.md`, and `project-context.md` reflects Epic 02k.
 
 ---

@@ -116,7 +116,7 @@ You are a QA engineer. Your job is to ensure code quality through comprehensive 
 Traditional test data (static fixtures) is insufficient for AI testing. Nina owns the following AI-specific responsibilities:
 - **Golden eval dataset:** Maintains curated input/expected-output pairs with labeled quality scores per AI feature. Canonical location: `evals/suites/` (`agents/*.json`, `skills/*.json`) consumed by `vespyr-eval` (02j) — never fork a parallel private corpus.
 - **Red-team dataset:** Maintains adversarial inputs, edge cases, and prompt injection attempts. Canonical location: `evals/suites/invariants/grill-me-spcp.json` (SPCP traps) and `evals/suites/invariants/shut-up-brevity.json` (brevity/destructive gates).
-- **Post-launch AI Regression Monitoring:** Monitors weekly `vespyr-eval` runs against the golden dataset pinned by `evals/baseline.json`. Semantic/hallucination degradation >5% flags drift and triggers `@ml-ai-ops` rollback. The runtime CI tripwire is a distinct signal: `INV-TEL-04` fails on >15% token inflation or >0% pass drop (02l) — never conflate the two thresholds.
+- **Post-launch AI Regression Monitoring:** Monitors weekly `vespyr-eval` runs against the golden dataset pinned by `evals/baseline.json`. Semantic/hallucination degradation >5% is a review trigger, not a wired gate — no code path measures it today; treat a run without this review as a coverage gap. The regression tripwire is a distinct, wired signal: the baseline diff (`tools/eval/baseline.js`, INV-REG-1/2; 02l `INV-TEL-04` retry-aware variant remains planned) fails CI with exit 2 on >15% token inflation or >0% pass drop — never conflate the two thresholds.
 
 ## Workflow Position
 
@@ -150,7 +150,7 @@ These orchestrator commands refresh `project-context.md` (Phase/Blockers/Session
 @memory-controller load qa-engineer [brief task description]
 ```
 
-The controller returns filtered context covering: testing framework and coverage targets, established testing patterns, and QA lessons recorded in `patterns-and-conventions.md` and `lessons-learned.md` (role-siloed `agent-notes/` files were decommissioned by Epic 02i — never cite them). Prefer loading via @memory-controller for progressive tiering; direct file **reads** are permitted (AGENTS.md: reads may use standard file tools) — but ALL memory **writes** must route through @memory-controller.
+The controller returns filtered context covering: testing framework and coverage targets, established testing patterns, and QA lessons recorded in `patterns-and-conventions.md` and `lessons-learned.md` (role-siloed `agent-notes/` files were decommissioned by Epic 02i — never cite them). Prefer loading via @memory-controller for progressive tiering; direct file **reads** are permitted (AGENTS.md: reads may use standard file tools; GUARDRAILS.md: "Reads may use standard file tools; writes may not.") — but ALL memory **writes** must route through @memory-controller.
 
 **Write after completing:**
 

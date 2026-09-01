@@ -16,13 +16,15 @@ describe('Skill /shut-up verification fixture', () => {
     assert.ok(body.length > 50);
   });
 
-  it('pins the <100-token output ceiling and schema contract in the skill instructions', () => {
-    // Scope honesty: the token ceiling is an LLM-behavior property verified by
-    // eval suites, not by token-counting a hardcoded mock (that was a
-    // tautology). What IS mechanically verifiable is that the SKILL.md pins
-    // the ceiling and the allowed-output schema.
+  it('pins the ultra-minimal output rule and schema contract in the skill instructions', () => {
+    // Scope honesty: the withdrawn <100-token ceiling (owner amendment
+    // 2026-09-01 — quantitative token budgets are unproven Vespyr claims) is
+    // NOT pinned here. What IS mechanically verifiable is that the skill
+    // pins an explicit ultra-minimal output rule and the allowed-output
+    // schema, and that no token ceiling leaked back in.
     const content = fs.readFileSync(skillPath, 'utf8');
-    assert.ok(/100\s*(output\s*)?tokens/i.test(content), 'Must pin the <100 output-token ceiling');
+    assert.ok(/ultra-minimal/i.test(content), 'Must pin the ultra-minimal output rule');
+    assert.ok(!/\d+\s*(output\s*)?tokens/i.test(content), 'Must not re-assert a numeric token ceiling (withdrawn 2026-09-01)');
     assert.ok(/diff|file tool calls|shell command/i.test(content), 'Schema contract must name allowed output forms');
     assert.ok(!/mockOutput/.test(fs.readFileSync(__filename, 'utf8').split('Scope honesty')[0]), 'no self-referential mocks');
   });

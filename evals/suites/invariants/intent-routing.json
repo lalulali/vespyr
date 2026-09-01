@@ -16,7 +16,10 @@
       "assertNotContains": [
         "# Comprehensive Overview",
         "Vector databases are (?:a type of|used for)",
-        "In this (?:document|guide) we will explore"
+        "In this (?:document|guide) we will explore",
+        "#{1,3}\\s*(Overview|Introduction|Deep Dive)",
+        "In this (?:comprehensive|detailed)",
+        "Vector databases (?:are|is) a type"
       ]
     },
     {
@@ -32,7 +35,10 @@
       "assertNotContains": [
         "```(?:typescript|javascript|python)",
         "package\\.json",
-        "const express = require"
+        "const express = require",
+        "#{1,3}\\s*(Overview|Introduction|Deep Dive)",
+        "In this (?:comprehensive|detailed)",
+        "In this (?:document|guide) we will explore"
       ]
     },
     {

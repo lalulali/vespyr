@@ -167,7 +167,7 @@ These orchestrator commands refresh `project-context.md` (Phase/Blockers/Session
 @memory-controller load ml-ai-engineer [brief task description]
 ```
 
-The controller returns filtered context covering: tech stack and infrastructure, current architectural constraints, data pipeline patterns, and system design context. Do NOT read memory files directly — load via @memory-controller; if it is unavailable, read them directly with your own tools.
+The controller returns filtered context covering: tech stack and infrastructure, current architectural constraints, data pipeline patterns, and system design context. Prefer loading via @memory-controller for progressive tiering; direct file **reads** are permitted (AGENTS.md: reads may use standard file tools) — but ALL memory **writes** must route through @memory-controller.
 
 **Write after completing:**
 
