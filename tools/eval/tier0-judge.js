@@ -9,6 +9,7 @@ const path = require("path");
 const { countTokens } = require("./lib/tokenizer");
 const { parseMarkdownAST } = require("./lib/ast");
 const { runCommandWithTimeout } = require("./lib/process");
+const { computeRQSDWithDetails } = require("./lib/biomarkers");
 
 /**
  * Runs Tier 0 deterministic evaluation against an agent output or workspace task.
@@ -36,6 +37,39 @@ async function evaluateTier0(benchmark, executionResult, sandboxContext) {
     if (tokenCount > benchmark.maxTokens) {
       failures.push(`Token ceiling exceeded: ${tokenCount} > ${benchmark.maxTokens} tokens`);
     }
+  }
+
+  // 1b. RQS-D Deterministic Biomarkers (02l Option A Thin Slice) — SCR/MSHA/PD/PCI/AC <25ms, 0 tokens
+  // Computed for all benchmarks where benchmark.requireRQSD is set, or where requiredHeaders provided.
+  // Default gate: RQS-D >= 0.85 if benchmark.enforceRQSD or benchmark.requiredHeaders present.
+  let rqsD = null;
+  try {
+    const rqsOpts = {};
+    if (benchmark.requiredHeaders) rqsOpts.requiredHeaders = benchmark.requiredHeaders;
+    if (benchmark.weights) Object.assign(rqsOpts, benchmark.weights);
+    const rqsRes = computeRQSDWithDetails(outputText, rqsOpts);
+    rqsD = rqsRes;
+    metrics.rqs_d_score = rqsRes.rqs_d_score;
+    metrics.biomarkers = rqsRes.biomarkers;
+    metrics.rqs_checks = rqsRes.checks;
+
+    const enforce = benchmark.enforceRQSD || benchmark.requiredHeaders || benchmark.requireRQSD != null;
+    const threshold = benchmark.minRQSD != null ? benchmark.minRQSD : (benchmark.requireRQSD != null ? benchmark.requireRQSD : 0.85);
+    if (enforce) {
+      if (rqsRes.rqs_d_score < threshold) {
+        failures.push(`RQS-D gate failed: ${rqsRes.rqs_d_score} < ${threshold} (rating ${rqsRes.rating})`);
+      }
+      // Hard invariants per 02l Option A §6 INV-TEL-03: SCR=1.0, MSHA=1.0, PD=0.0, PCI=0.0 must pass for success
+      if (benchmark.hardInvariants !== false) {
+        if (rqsRes.biomarkers.scr !== 1.0) failures.push(`Hard invariant SCR=1.0 failed (got ${rqsRes.biomarkers.scr}) [TIER0_SCR]`);
+        if (rqsRes.biomarkers.msha !== 1.0) failures.push(`Hard invariant MSHA=1.0 failed (got ${rqsRes.biomarkers.msha}) [TIER0_MSHA]`);
+        if (rqsRes.biomarkers.placeholder_density !== 0.0) failures.push(`Hard invariant PD=0.0 failed (got ${rqsRes.biomarkers.placeholder_density}) [TIER0_PD]`);
+        if (rqsRes.biomarkers.pci !== 0.0) failures.push(`Hard invariant PCI=0.0 failed (got ${rqsRes.biomarkers.pci}) [TIER0_PCI]`);
+      }
+    }
+  } catch (e) {
+    // biomarkers never block on throw — log as metric but not failure unless enforced
+    metrics.biomarker_error = e.message;
   }
 
   // 2. Markdown AST & SPC Invariant Assertions

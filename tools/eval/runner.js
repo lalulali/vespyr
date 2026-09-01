@@ -273,6 +273,7 @@ async function executeBenchmark(benchmark, options = {}) {
       agent: benchmark.agent || null,
       skill: benchmark.skill || null,
       dimension: benchmark.dimension || "general",
+      modelTier: options.model || 'inherit',
       passed,
       tier0Passed: t0Result.pass,
       tier1Score: t1Result ? t1Result.score : (t0Result.pass ? 5.0 : 1.0),
@@ -327,6 +328,20 @@ async function runEvaluation(options = {}) {
   // Filter by skill if specified
   if (options.skill && options.skill !== "all") {
     allBenchmarks = allBenchmarks.filter(b => b.skill === options.skill);
+  }
+
+  // Model tier handling (02l Option A — thin: record model tier, no filtering unless suite declares model)
+  const modelTier = options.model && options.model !== 'inherit' ? options.model : 'inherit';
+  if (modelTier !== 'inherit') {
+    // If benchmarks declare requiredModelTier, filter; otherwise just tag results for diffing
+    const hasModelField = allBenchmarks.some(b => b.requiredModelTier || b.modelTier);
+    if (hasModelField) {
+      allBenchmarks = allBenchmarks.filter(b => {
+        const req = b.requiredModelTier || b.modelTier;
+        if (!req) return true;
+        return req === modelTier || req === 'any';
+      });
+    }
   }
 
   const total = allBenchmarks.length;

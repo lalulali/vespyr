@@ -70,7 +70,16 @@ jobs:
       - name: Check telemetry baseline
         run: |
           node .agents/scripts/swarm_telemetry.js baseline
-          node .agents/scripts/swarm_telemetry.js summary --days 1
+          node .agents/scripts/swarm_telemetry.js summary --days 7
+
+      - name: Verify span hybrid (INV-TEL-01 ≥80% exact, no zero-token)
+        run: node .agents/scripts/swarm_telemetry.js verify --days 7
+
+      - name: Verify single-owner span schema import (INV single-owner)
+        run: node --test tests/test_schema_single_owner.test.js
+
+      - name: Verify baseline regression tripwire (INV-TEL-04 >15% / pass drop → Exit 2)
+        run: node --test tests/test_baseline_regression_tripwire.test.js
 
       - name: Test merge conflict resolution
         # shell: bash — POSIX /tmp paths + echo redirection die under windows

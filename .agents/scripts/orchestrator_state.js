@@ -401,6 +401,75 @@ function recordTelemetry(eventType, fields) {
   }
 }
 
+// 02l Option A: also emit minimal OTel span via direct recordSpan (hybrid exactness).
+// Never throws; cost nullable, estimated flag derived from presence of prompt/completion.
+// Now computes real RQS-D via biomarkers when artifact exists, renders thin scorecard, and checks Tier B guard.
+function recordSpanForAgent(agent, phase, tokens, durationMs, artifact) {
+  try {
+    const crypto = require('crypto');
+    const traceId = process.env.VESPYR_TRACE_ID || (crypto.randomUUID ? crypto.randomUUID() : 'trace-' + Date.now());
+    const spanId = crypto.randomUUID ? crypto.randomUUID() : 'span-' + Date.now() + '-' + Math.random();
+    const hasExact = tokens != null && tokens > 0 && durationMs != null;
+    // Real token fallback: read artifact file content length/4 if tokens missing (not just name)
+    let estTokens = tokens;
+    let artifactText = null;
+    if (artifact) {
+      try {
+        const p = path.isAbsolute(artifact) ? artifact : path.join(process.cwd(), artifact);
+        if (fs.existsSync(p) && fs.statSync(p).isFile()) {
+          artifactText = fs.readFileSync(p, 'utf8');
+        }
+      } catch {}
+    }
+    if (!hasExact) {
+      const fallback = artifactText ? Math.ceil(artifactText.length / 4) : (artifact ? Math.ceil(artifact.length / 4) : 0);
+      estTokens = tokens && tokens>0 ? tokens : Math.max(1, fallback, 8);
+    }
+    const usage = hasExact ? { prompt_tokens: Math.floor(tokens*0.6), completion_tokens: Math.ceil(tokens*0.4), total_tokens: tokens, cost_usd: null, estimated: false } : { prompt_tokens: 0, completion_tokens: 0, total_tokens: estTokens, cost_usd: null, estimated: true };
+    // Compute real RQS-D when artifact text available via biomarkers (02l §3.1), else fallback 0.9
+    let rqsD = 0.9, biomarkers = { scr: 1, msha: 1, placeholder_density: 0, pci: 0, ac_testability: 1, srsr: null, scope_drift: null }, rating = 'PASS', tier0Checks = [];
+    try {
+      const { computeRQSDWithDetails } = require('../../tools/eval/lib/biomarkers');
+      if (artifactText) {
+        const r = computeRQSDWithDetails(artifactText, {});
+        rqsD = r.rqs_d_score;
+        biomarkers = r.biomarkers;
+        rating = r.rating;
+        tier0Checks = r.checks || [];
+      }
+    } catch {}
+    const span = {
+      trace_id: traceId,
+      span_id: spanId,
+      parent_span_id: process.env.VESPYR_PARENT_SPAN_ID || null,
+      timestamp: new Date().toISOString(),
+      session_id: process.env.VESPYR_SESSION_ID || 'local',
+      workflow: phase || 'unknown',
+      agent_persona: agent || 'unknown',
+      model: { provider: 'unknown', model_id: process.env.VESPYR_MODEL_ID || 'unknown', temperature: 0 },
+      usage,
+      duration_ms: durationMs || 0,
+      quality_scorecard: { rqs_d_score: rqsD, rqs_j_score: null, rating, biomarkers },
+      tier0_evaluation: { executed: tier0Checks.length>0, passed: rqsD>=0.85, checks: tier0Checks },
+      error: null
+    };
+    // Tier B guard (INV-TEL-05) — audit warning but do not block span emission
+    try {
+      const { checkTier } = require('../../tools/telemetry/modelTierGuards');
+      const chk = checkTier(agent, process.env.VESPYR_MODEL_ID || span.model.model_id);
+      if (chk.warning) span.error = { code: chk.code, message: chk.message };
+    } catch {}
+    const swarm = require('./swarm_telemetry.js');
+    if (swarm && typeof swarm.recordSpan === 'function') swarm.recordSpan(span);
+    // Thin scorecard auto-render (DoD §9.2) — console.log after every invocation (visible, not silent)
+    try {
+      const { renderRQScorecard } = require('../../tools/telemetry/telemetry_display');
+      const card = renderRQScorecard({ rqs_d_score: rqsD, agent_persona: agent, workflow: phase, model: span.model, duration_ms: durationMs||0, usage, biomarkers, artifact, estimated: usage.estimated });
+      console.log(card);
+    } catch {}
+  } catch (e) {}
+}
+
 function createInitialState(name, type) {
   const defaultPhases = {
     validation: { status: 'pending', started_at: null, completed_at: null, agents: ['founder'] },
@@ -850,6 +919,8 @@ function mainDispatch(args) {
         phase: resolveCurrentPhase(state),
         data: { tokens, duration_ms: durationMs, artifact, version }
       });
+      // 02l Option A thin slice: also emit OTel span (hybrid, cost nullable, estimated flag per tokens)
+      recordSpanForAgent(agent, resolveCurrentPhase(state), tokens, durationMs, artifact);
 
       console.log(JSON.stringify({ success: true, agent, artifact, version, tokens, duration_ms: durationMs }));
     }

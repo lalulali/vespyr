@@ -1,0 +1,87 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "tools/telemetry/schema.json",
+  "title": "VespyrTelemetrySpan — Option A Thin Slice (02l canonical, single-owner)",
+  "description": "Canonical distributed span schema owned by 02l §5.1 Option A. 04/04a/04b import via require('../../tools/telemetry/schema.json') — do not duplicate. Hybrid exactness: cost_usd nullable Phase 1, estimated flag <20%, rqs_j shadow nullable until κ≥0.7.",
+  "type": "object",
+  "required": ["trace_id", "span_id", "parent_span_id", "timestamp", "session_id", "workflow", "agent_persona", "model", "usage", "duration_ms", "quality_scorecard", "tier0_evaluation", "error"],
+  "properties": {
+    "trace_id": { "type": "string", "format": "uuid", "description": "UUID end-to-end task execution via session_bootstrap.js" },
+    "span_id": { "type": "string", "format": "uuid" },
+    "parent_span_id": { "type": ["string", "null"], "format": "uuid" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "session_id": { "type": "string" },
+    "workflow": { "type": "string", "examples": ["discovery/validate-idea", "delivery/develop"] },
+    "agent_persona": { "type": "string", "examples": ["architect", "developer", "qa-engineer"] },
+    "model": {
+      "type": "object",
+      "required": ["provider", "model_id", "temperature"],
+      "properties": {
+        "provider": { "type": "string", "examples": ["anthropic", "google", "ollama"] },
+        "model_id": { "type": "string", "examples": ["gemini-2.0-flash", "claude-3-5-sonnet"] },
+        "temperature": { "type": "number" }
+      }
+    },
+    "usage": {
+      "type": "object",
+      "required": ["prompt_tokens", "completion_tokens", "total_tokens", "cost_usd", "estimated"],
+      "properties": {
+        "prompt_tokens": { "type": "integer", "minimum": 0 },
+        "completion_tokens": { "type": "integer", "minimum": 0 },
+        "total_tokens": { "type": "integer", "minimum": 0 },
+        "cost_usd": { "type": ["number", "null"], "description": "nullable in Phase 1 thin slice; Phase 3 enriches via pricing.json" },
+        "estimated": { "type": "boolean", "description": "true only where harness lacks native usage reporting; must be <20% over 7-day window" }
+      }
+    },
+    "duration_ms": { "type": "number", "minimum": 0 },
+    "quality_scorecard": {
+      "type": "object",
+      "required": ["rqs_d_score", "rqs_j_score", "rating", "biomarkers"],
+      "properties": {
+        "rqs_d_score": { "type": "number", "minimum": 0, "maximum": 1, "description": "RQS-D deterministic (0-1) — hard gate ≥0.85" },
+        "rqs_j_score": { "type": ["number", "null"], "minimum": 0, "maximum": 1, "description": "RQS-J semantic shadow — null until κ≥0.7 pilot" },
+        "rating": { "type": "string", "enum": ["EXCELLENT", "PASS", "NEEDS_REPAIR", "REJECTED"], "description": "derived from rqs_d_score" },
+        "biomarkers": {
+          "type": "object",
+          "required": ["scr", "msha", "placeholder_density", "pci", "ac_testability", "srsr", "scope_drift"],
+          "properties": {
+            "scr": { "type": "number", "minimum": 0, "maximum": 1 },
+            "msha": { "type": "number", "minimum": 0, "maximum": 1 },
+            "placeholder_density": { "type": "number", "minimum": 0, "maximum": 1 },
+            "pci": { "type": "number", "minimum": 0, "maximum": 1 },
+            "ac_testability": { "type": "number", "minimum": 0, "maximum": 1 },
+            "srsr": { "type": ["number", "null"], "minimum": 0, "maximum": 1, "description": "RQS-J shadow, null until Tier B judge calibrated" },
+            "scope_drift": { "type": ["number", "null"], "minimum": 0, "maximum": 1 }
+          }
+        }
+      }
+    },
+    "tier0_evaluation": {
+      "type": "object",
+      "required": ["executed", "passed", "checks"],
+      "properties": {
+        "executed": { "type": "boolean" },
+        "passed": { "type": "boolean" },
+        "checks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["type", "status"],
+            "properties": {
+              "type": { "type": "string", "enum": ["markdown_ast", "json_schema", "eslint", "unit_tests", "token_ceiling"] },
+              "status": { "type": "string", "enum": ["PASS", "FAIL"] },
+              "details": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "error": {
+      "type": ["object", "null"],
+      "properties": {
+        "code": { "type": "string", "examples": ["TIER0_SCR", "TIER0_MSHA", "INSUFFICIENT_EXACT_COVERAGE", "TIER_DEMOTION"] },
+        "message": { "type": "string" }
+      }
+    }
+  }
+}

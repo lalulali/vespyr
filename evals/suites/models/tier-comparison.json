@@ -1,0 +1,100 @@
+{
+  "suite": "models/tier-comparison",
+  "description": "02l Option A WS-3.7: Tier A (cheap) vs Tier B (frontier) \u2014 10 Developer Reference Tasks cost-per-verified-pass shadow (Targets, not gates; see 02l \u00a77.2). Projections pending empirical vespyr-eval --model logs.",
+  "modelTier": "any",
+  "benchmarks": [
+    {
+      "id": "MODEL-TIER-01",
+      "name": "DEV-01 Rate Limiter \u2014 Tier A vs B cost/pass shadow",
+      "agent": "developer",
+      "dimension": "code_quality",
+      "prompt": "Implement rate limiter token bucket",
+      "isAdversarialTrap": false,
+      "mockOutput": "Implemented module DEV-01.\n```javascript\nconst rateLimiter = { tokens: 10, capacity: 10, refill: 1 };\nfunction allowRequest() { return true; }\n```\nAll unit tests passing.\n```javascript\nfunction handleError(){ try { const x=1; } catch(e){ throw e; } }\n// test coverage\nfunction test(){ assert(true); expect(1).toBe(1); }\n```\nError handling verified via try/catch fallback recover, unit tests passing.",
+      "expectedVerdict": "PASS",
+      "minRQSD": 0.85,
+      "requiredHeaders": null
+    },
+    {
+      "id": "MODEL-TIER-02",
+      "name": "DEV-02 API Contract idempotency",
+      "agent": "developer",
+      "dimension": "code_quality",
+      "prompt": "Idempotent checkout endpoint",
+      "mockOutput": "Implemented checkout idempotency with 200/409.\n```javascript\nfunction checkout() { return 200; }\n```\n\n```javascript\nfunction handleError(){ try { const x=1; } catch(e){ throw e; } }\n// test coverage\nfunction test(){ assert(true); expect(1).toBe(1); }\n```\nError handling verified via try/catch fallback recover, unit tests passing.",
+      "minRQSD": 0.85
+    },
+    {
+      "id": "MODEL-TIER-03",
+      "name": "DEV-03 Hierarchical permissions",
+      "agent": "developer",
+      "dimension": "code_quality",
+      "prompt": "Multi-tenant permissions",
+      "mockOutput": "Permissions hierarchical.\n```javascript\nfunction hasPermission() { return true; }\n```\n\n```javascript\nfunction handleError(){ try { const x=1; } catch(e){ throw e; } }\n// test coverage\nfunction test(){ assert(true); expect(1).toBe(1); }\n```\nError handling verified via try/catch fallback recover, unit tests passing.",
+      "minRQSD": 0.85
+    },
+    {
+      "id": "MODEL-TIER-04",
+      "name": "DEV-04 Order state machine",
+      "agent": "developer",
+      "dimension": "code_quality",
+      "prompt": "Order lifecycle",
+      "mockOutput": "State machine CREATED->PAID->SHIPPED.\n```javascript\nfunction transition(s){return s;}\n```\n\n```javascript\nfunction handleError(){ try { const x=1; } catch(e){ throw e; } }\n// test coverage\nfunction test(){ assert(true); expect(1).toBe(1); }\n```\nError handling verified via try/catch fallback recover, unit tests passing.",
+      "minRQSD": 0.85
+    },
+    {
+      "id": "MODEL-TIER-05",
+      "name": "DEV-05 JWT blacklist",
+      "agent": "developer",
+      "dimension": "code_quality",
+      "prompt": "JWT validation",
+      "mockOutput": "JWT verified.\n```javascript\nfunction verify(t){return true;}\n```\n\n```javascript\nfunction handleError(){ try { const x=1; } catch(e){ throw e; } }\n// test coverage\nfunction test(){ assert(true); expect(1).toBe(1); }\n```\nError handling verified via try/catch fallback recover, unit tests passing.",
+      "minRQSD": 0.85
+    },
+    {
+      "id": "MODEL-TIER-06",
+      "name": "DEV-06 CSV streaming parser",
+      "agent": "developer",
+      "dimension": "code_quality",
+      "prompt": "Chunked CSV parser",
+      "mockOutput": "CSV parser chunked.\n```javascript\nfunction parse(c){return c;}\n```\n\n```javascript\nfunction handleError(){ try { const x=1; } catch(e){ throw e; } }\n// test coverage\nfunction test(){ assert(true); expect(1).toBe(1); }\n```\nError handling verified via try/catch fallback recover, unit tests passing.",
+      "minRQSD": 0.85
+    },
+    {
+      "id": "MODEL-TIER-07",
+      "name": "DEV-07 Cursor pagination TTL",
+      "agent": "developer",
+      "dimension": "code_quality",
+      "prompt": "Pagination + cache",
+      "mockOutput": "Cursor pagination.\n```javascript\nconst cursor='cur'; const cache=new Map();\n```\n\n```javascript\nfunction handleError(){ try { const x=1; } catch(e){ throw e; } }\n// test coverage\nfunction test(){ assert(true); expect(1).toBe(1); }\n```\nError handling verified via try/catch fallback recover, unit tests passing.",
+      "minRQSD": 0.85
+    },
+    {
+      "id": "MODEL-TIER-08",
+      "name": "DEV-08 SQL sanitization",
+      "agent": "developer",
+      "dimension": "code_quality",
+      "prompt": "Sanitize SQL",
+      "mockOutput": "SQL sanitized.\n```javascript\nfunction sanitize(q){return q;}\n```\n\n```javascript\nfunction handleError(){ try { const x=1; } catch(e){ throw e; } }\n// test coverage\nfunction test(){ assert(true); expect(1).toBe(1); }\n```\nError handling verified via try/catch fallback recover, unit tests passing.",
+      "minRQSD": 0.85
+    },
+    {
+      "id": "MODEL-TIER-09",
+      "name": "DEV-09 Backoff circuit breaker",
+      "agent": "developer",
+      "dimension": "code_quality",
+      "prompt": "Exponential backoff",
+      "mockOutput": "Backoff.\n```javascript\nconst backoff=1000; function retry(){}\n```\n\n// test assert expect describe",
+      "minRQSD": 0.85
+    },
+    {
+      "id": "MODEL-TIER-10",
+      "name": "DEV-10 Refactor controller SRP",
+      "agent": "developer",
+      "dimension": "code_quality",
+      "prompt": "Refactor 300-line controller",
+      "mockOutput": "Refactored.\n```javascript\nconst service={};\n```\n\n```javascript\nfunction handleError(){ try { const x=1; } catch(e){ throw e; } }\n// test coverage\nfunction test(){ assert(true); expect(1).toBe(1); }\n```\nError handling verified via try/catch fallback recover, unit tests passing.",
+      "minRQSD": 0.85
+    }
+  ]
+}

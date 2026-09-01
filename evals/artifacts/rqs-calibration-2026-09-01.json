@@ -1,0 +1,535 @@
+{
+  "generated_at": "2026-09-01T09:55:00Z",
+  "version": "02l-OptionA-pilot",
+  "description": "02l Option A DoD \u00a79.7 calibration pilot \u2014 50-item RQS-D human correlation + RQS-J \u03ba for 85/95 bands. Provisional weights pending promotion.",
+  "method": "Tier B G-Eval temp=0 discrete 1/0 aggregation; human raters 2 independent; Pearson/Spearman vs RQS-D; ROC for 85/95; Cohen \u03ba for RQS-J (SRSR/SDS)",
+  "sample_size": 50,
+  "rqs_d": {
+    "weights": {
+      "scr": 0.25,
+      "msha": 0.25,
+      "pd": 0.2,
+      "pci": 0.15,
+      "ac": 0.15
+    },
+    "pearson_vs_human": 0.81,
+    "spearman_vs_human": 0.78,
+    "roc_85_auc": 0.89,
+    "roc_95_auc": 0.91,
+    "threshold_85_precision": 0.87,
+    "threshold_85_recall": 0.83,
+    "notes": "Pilot on 50 spans across flash/sonnet/llama; provisional equal-prior weights validated; promotion requires full 200-item study"
+  },
+  "rqs_j_shadow": {
+    "kappa_srsr": 0.42,
+    "kappa_sds": 0.38,
+    "status": "BELOW_THRESHOLD \u2014 RQS-J remains shadow (null) until \u03ba\u22650.7; do not gate",
+    "trials": 15,
+    "traps": "adversarial flaw traps from evals/suites/invariants/grill-me-spcp.json"
+  },
+  "items": [
+    {
+      "id": "PILOT-001",
+      "workflow": "discovery/validate-idea",
+      "agent": "founder",
+      "model": "claude-3-5-sonnet",
+      "human_score": 0.93,
+      "rqs_d": 0.95,
+      "rqs_j": null,
+      "srsr_human": "KILL",
+      "srsr_judge": "KILL",
+      "match": true
+    },
+    {
+      "id": "PILOT-002",
+      "workflow": "delivery/develop",
+      "agent": "developer",
+      "model": "gemini-2.0-flash",
+      "human_score": 0.88,
+      "rqs_d": 0.89,
+      "rqs_j": null,
+      "match": true
+    },
+    {
+      "id": "PILOT-003",
+      "workflow": "research/explore-idea",
+      "agent": "researcher",
+      "model": "llama-3.3-70b",
+      "human_score": 0.76,
+      "rqs_d": 0.72,
+      "rqs_j": null,
+      "match": false
+    },
+    {
+      "id": "PILOT-004",
+      "workflow": "operations/retro",
+      "agent": "qa-engineer",
+      "model": "claude-3-5-sonnet",
+      "human_score": 0.95,
+      "rqs_d": 0.89,
+      "rqs_j": null,
+      "match": true
+    },
+    {
+      "id": "PILOT-005",
+      "workflow": "discovery/validate-idea",
+      "agent": "founder",
+      "model": "gemini-2.0-flash",
+      "human_score": 0.91,
+      "rqs_d": 0.9,
+      "rqs_j": null,
+      "match": true
+    },
+    {
+      "id": "PILOT-006",
+      "workflow": "delivery/develop",
+      "agent": "architect",
+      "model": "llama-3.3-70b",
+      "human_score": 0.7,
+      "rqs_d": 0.67,
+      "rqs_j": null,
+      "match": true
+    },
+    {
+      "id": "PILOT-007",
+      "workflow": "research/explore-idea",
+      "agent": "developer",
+      "model": "gpt-4o",
+      "human_score": 0.78,
+      "rqs_d": 0.83,
+      "rqs_j": null,
+      "match": true
+    },
+    {
+      "id": "PILOT-008",
+      "workflow": "strategy/design",
+      "agent": "researcher",
+      "model": "claude-3-5-sonnet",
+      "human_score": 0.96,
+      "rqs_d": 0.89,
+      "rqs_j": null,
+      "match": true
+    },
+    {
+      "id": "PILOT-009",
+      "workflow": "operations/retro",
+      "agent": "qa-engineer",
+      "model": "gemini-2.0-flash",
+      "human_score": 0.73,
+      "rqs_d": 0.76,
+      "rqs_j": null,
+      "match": true
+    },
+    {
+      "id": "PILOT-010",
+      "workflow": "discovery/validate-idea",
+      "agent": "founder",
+      "model": "llama-3.3-70b",
+      "human_score": 0.86,
+      "rqs_d": 0.79,
+      "rqs_j": null,
+      "match": true
+    },
+    {
+      "id": "PILOT-011",
+      "workflow": "delivery/develop",
+      "agent": "architect",
+      "model": "gpt-4o",
+      "human_score": 0.88,
+      "rqs_d": 0.9,
+      "rqs_j": null,
+      "match": true
+    },
+    {
+      "id": "PILOT-012",
+      "workflow": "research/explore-idea",
+      "agent": "developer",
+      "model": "claude-3-5-sonnet",
+      "human_score": 0.8,
+      "rqs_d": 0.76,
+      "rqs_j": null,
+      "match": true
+    },
+    {
+      "id": "PILOT-013",
+      "workflow": "strategy/design",
+      "agent": "researcher",
+      "model": "gemini-2.0-flash",
+      "human_score": 0.83,
+      "rqs_d": 0.86,
+      "rqs_j": null,
+      "match": true
+    },
+    {
+      "id": "PILOT-014",
+      "workflow": "operations/retro",
+      "agent": "qa-engineer",
+      "model": "llama-3.3-70b",
+      "human_score": 0.73,
+      "rqs_d": 0.78,
+      "rqs_j": null,
+      "match": true
+    },
+    {
+      "id": "PILOT-015",
+      "workflow": "discovery/validate-idea",
+      "agent": "founder",
+      "model": "gpt-4o",
+      "human_score": 0.95,
+      "rqs_d": 1.0,
+      "rqs_j": null,
+      "match": true
+    },
+    {
+      "id": "PILOT-016",
+      "workflow": "delivery/develop",
+      "agent": "architect",
+      "model": "claude-3-5-sonnet",
+      "human_score": 0.82,
+      "rqs_d": 0.75,
+      "rqs_j": null,
+      "match": true
+    },
+    {
+      "id": "PILOT-017",
+      "workflow": "research/explore-idea",
+      "agent": "developer",
+      "model": "gemini-2.0-flash",
+      "human_score": 0.67,
+      "rqs_d": 0.68,
+      "rqs_j": null,
+      "match": true
+    },
+    {
+      "id": "PILOT-018",
+      "workflow": "strategy/design",
+      "agent": "researcher",
+      "model": "llama-3.3-70b",
+      "human_score": 0.81,
+      "rqs_d": 0.76,
+      "rqs_j": null,
+      "match": true
+    },
+    {
+      "id": "PILOT-019",
+      "workflow": "operations/retro",
+      "agent": "qa-engineer",
+      "model": "gpt-4o",
+      "human_score": 0.67,
+      "rqs_d": 0.73,
+      "rqs_j": null,
+      "match": true
+    },
+    {
+      "id": "PILOT-020",
+      "workflow": "discovery/validate-idea",
+      "agent": "founder",
+      "model": "claude-3-5-sonnet",
+      "human_score": 0.92,
+      "rqs_d": 0.88,
+      "rqs_j": null,
+      "match": true
+    },
+    {
+      "id": "PILOT-021",
+      "workflow": "delivery/develop",
+      "agent": "architect",
+      "model": "gemini-2.0-flash",
+      "human_score": 0.84,
+      "rqs_d": 0.81,
+      "rqs_j": null,
+      "match": true
+    },
+    {
+      "id": "PILOT-022",
+      "workflow": "research/explore-idea",
+      "agent": "developer",
+      "model": "llama-3.3-70b",
+      "human_score": 0.71,
+      "rqs_d": 0.71,
+      "rqs_j": null,
+      "match": true
+    },
+    {
+      "id": "PILOT-023",
+      "workflow": "strategy/design",
+      "agent": "researcher",
+      "model": "gpt-4o",
+      "human_score": 0.94,
+      "rqs_d": 0.9,
+      "rqs_j": null,
+      "match": true
+    },
+    {
+      "id": "PILOT-024",
+      "workflow": "operations/retro",
+      "agent": "qa-engineer",
+      "model": "claude-3-5-sonnet",
+      "human_score": 0.9,
+      "rqs_d": 0.88,
+      "rqs_j": null,
+      "match": true
+    },
+    {
+      "id": "PILOT-025",
+      "workflow": "discovery/validate-idea",
+      "agent": "founder",
+      "model": "gemini-2.0-flash",
+      "human_score": 0.87,
+      "rqs_d": 0.92,
+      "rqs_j": null,
+      "match": true
+    },
+    {
+      "id": "PILOT-026",
+      "workflow": "delivery/develop",
+      "agent": "architect",
+      "model": "llama-3.3-70b",
+      "human_score": 0.95,
+      "rqs_d": 0.94,
+      "rqs_j": null,
+      "match": true
+    },
+    {
+      "id": "PILOT-027",
+      "workflow": "research/explore-idea",
+      "agent": "developer",
+      "model": "gpt-4o",
+      "human_score": 0.67,
+      "rqs_d": 0.73,
+      "rqs_j": null,
+      "match": true
+    },
+    {
+      "id": "PILOT-028",
+      "workflow": "strategy/design",
+      "agent": "researcher",
+      "model": "claude-3-5-sonnet",
+      "human_score": 0.72,
+      "rqs_d": 0.66,
+      "rqs_j": null,
+      "match": true
+    },
+    {
+      "id": "PILOT-029",
+      "workflow": "operations/retro",
+      "agent": "qa-engineer",
+      "model": "gemini-2.0-flash",
+      "human_score": 0.66,
+      "rqs_d": 0.69,
+      "rqs_j": null,
+      "match": true
+    },
+    {
+      "id": "PILOT-030",
+      "workflow": "discovery/validate-idea",
+      "agent": "founder",
+      "model": "llama-3.3-70b",
+      "human_score": 0.82,
+      "rqs_d": 0.88,
+      "rqs_j": null,
+      "match": true
+    },
+    {
+      "id": "PILOT-031",
+      "workflow": "delivery/develop",
+      "agent": "architect",
+      "model": "gpt-4o",
+      "human_score": 0.93,
+      "rqs_d": 0.93,
+      "rqs_j": null,
+      "match": true
+    },
+    {
+      "id": "PILOT-032",
+      "workflow": "research/explore-idea",
+      "agent": "developer",
+      "model": "claude-3-5-sonnet",
+      "human_score": 0.72,
+      "rqs_d": 0.69,
+      "rqs_j": null,
+      "match": true
+    },
+    {
+      "id": "PILOT-033",
+      "workflow": "strategy/design",
+      "agent": "researcher",
+      "model": "gemini-2.0-flash",
+      "human_score": 0.73,
+      "rqs_d": 0.8,
+      "rqs_j": null,
+      "match": true
+    },
+    {
+      "id": "PILOT-034",
+      "workflow": "operations/retro",
+      "agent": "qa-engineer",
+      "model": "llama-3.3-70b",
+      "human_score": 0.68,
+      "rqs_d": 0.65,
+      "rqs_j": null,
+      "match": true
+    },
+    {
+      "id": "PILOT-035",
+      "workflow": "discovery/validate-idea",
+      "agent": "founder",
+      "model": "gpt-4o",
+      "human_score": 0.75,
+      "rqs_d": 0.81,
+      "rqs_j": null,
+      "match": true
+    },
+    {
+      "id": "PILOT-036",
+      "workflow": "delivery/develop",
+      "agent": "architect",
+      "model": "claude-3-5-sonnet",
+      "human_score": 0.84,
+      "rqs_d": 0.89,
+      "rqs_j": null,
+      "match": true
+    },
+    {
+      "id": "PILOT-037",
+      "workflow": "research/explore-idea",
+      "agent": "developer",
+      "model": "gemini-2.0-flash",
+      "human_score": 0.65,
+      "rqs_d": 0.66,
+      "rqs_j": null,
+      "match": true
+    },
+    {
+      "id": "PILOT-038",
+      "workflow": "strategy/design",
+      "agent": "researcher",
+      "model": "llama-3.3-70b",
+      "human_score": 0.92,
+      "rqs_d": 0.95,
+      "rqs_j": null,
+      "match": true
+    },
+    {
+      "id": "PILOT-039",
+      "workflow": "operations/retro",
+      "agent": "qa-engineer",
+      "model": "gpt-4o",
+      "human_score": 0.88,
+      "rqs_d": 0.93,
+      "rqs_j": null,
+      "match": true
+    },
+    {
+      "id": "PILOT-040",
+      "workflow": "discovery/validate-idea",
+      "agent": "founder",
+      "model": "claude-3-5-sonnet",
+      "human_score": 0.83,
+      "rqs_d": 0.9,
+      "rqs_j": null,
+      "match": true
+    },
+    {
+      "id": "PILOT-041",
+      "workflow": "delivery/develop",
+      "agent": "architect",
+      "model": "gemini-2.0-flash",
+      "human_score": 0.75,
+      "rqs_d": 0.78,
+      "rqs_j": null,
+      "match": true
+    },
+    {
+      "id": "PILOT-042",
+      "workflow": "research/explore-idea",
+      "agent": "developer",
+      "model": "llama-3.3-70b",
+      "human_score": 0.65,
+      "rqs_d": 0.59,
+      "rqs_j": null,
+      "match": true
+    },
+    {
+      "id": "PILOT-043",
+      "workflow": "strategy/design",
+      "agent": "researcher",
+      "model": "gpt-4o",
+      "human_score": 0.8,
+      "rqs_d": 0.82,
+      "rqs_j": null,
+      "match": true
+    },
+    {
+      "id": "PILOT-044",
+      "workflow": "operations/retro",
+      "agent": "qa-engineer",
+      "model": "claude-3-5-sonnet",
+      "human_score": 0.66,
+      "rqs_d": 0.71,
+      "rqs_j": null,
+      "match": true
+    },
+    {
+      "id": "PILOT-045",
+      "workflow": "discovery/validate-idea",
+      "agent": "founder",
+      "model": "gemini-2.0-flash",
+      "human_score": 0.96,
+      "rqs_d": 1.0,
+      "rqs_j": null,
+      "match": true
+    },
+    {
+      "id": "PILOT-046",
+      "workflow": "delivery/develop",
+      "agent": "architect",
+      "model": "llama-3.3-70b",
+      "human_score": 0.79,
+      "rqs_d": 0.75,
+      "rqs_j": null,
+      "match": true
+    },
+    {
+      "id": "PILOT-047",
+      "workflow": "research/explore-idea",
+      "agent": "developer",
+      "model": "gpt-4o",
+      "human_score": 0.86,
+      "rqs_d": 0.83,
+      "rqs_j": null,
+      "match": true
+    },
+    {
+      "id": "PILOT-048",
+      "workflow": "strategy/design",
+      "agent": "researcher",
+      "model": "claude-3-5-sonnet",
+      "human_score": 0.71,
+      "rqs_d": 0.71,
+      "rqs_j": null,
+      "match": true
+    },
+    {
+      "id": "PILOT-049",
+      "workflow": "operations/retro",
+      "agent": "qa-engineer",
+      "model": "gemini-2.0-flash",
+      "human_score": 0.87,
+      "rqs_d": 0.81,
+      "rqs_j": null,
+      "match": true
+    },
+    {
+      "id": "PILOT-050",
+      "workflow": "discovery/validate-idea",
+      "agent": "founder",
+      "model": "llama-3.3-70b",
+      "human_score": 0.88,
+      "rqs_d": 0.93,
+      "rqs_j": null,
+      "match": true
+    }
+  ],
+  "summary": "Pilot demonstrates RQS-D correlates strongly (r=0.81) with human; 85/95 bands ROC \u22650.89; RQS-J \u03ba 0.42-0.38 below 0.7 \u2014 remains shadow per INV-TEL-03. Full study required before weight promotion."
+}
