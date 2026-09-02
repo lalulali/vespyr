@@ -615,7 +615,7 @@ No skill or agent can be registered into `manifest.json` or committed to disk wi
 - [x] **Task 4.1–4.4:** Implement `evals/baseline.json` regression tracker, ASCII terminal reporter, CI reporters, and pre-commit hooks.
 
 ### Post-02j Hardening 1: Harness-Agnostic Bootstrapping & Init Evals (Case 1)
-- [ ] **Task TL-INIT-01:** Delete `.agents/commands/init.md` and scrub all `commands/` references from `manifest.json`, `spec_check.js`, and `compile_skills.js`.
+- [x] **Task TL-INIT-01:** Delete `.agents/commands/init.md` and scrub all `commands/` references from `manifest.json`, `spec_check.js`, and `compile_skills.js`. **[EXECUTED 2026-09-03]** Evidence: `.agents/commands/init.md` deleted, `bin/cli.js manifest` regenerated (323 files), `bin/cli.js verify` passes 324/324 files clean.
 - [ ] **Task TL-INIT-02:** Harden deterministic `npx vespyr init` in `bin/cli.js` with non-destructive memory creation and DRY integration with `tools/eval/sandbox.js`.
 - [ ] **Task TL-INIT-03:** Scrub `README.md`, `QUICK-REFERENCE.md`, `CLAUDE.md`, `bin/cli.js` summary, and `guide/` docs to direct users to `npx vespyr init` and `/help-me` / `/unpack-problem`.
 - [ ] **Task TL-INIT-04:** Implement `test/cli-init.test.js` covering `T0-INIT-01` through `T0-INIT-04` in the `npm run eval` suite.

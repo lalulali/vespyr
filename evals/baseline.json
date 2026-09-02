@@ -1,17 +1,17 @@
 {
   "version": "2.0.0",
-  "generated_at": "2026-08-18T10:17:15.195Z",
+  "generated_at": "2026-09-02T23:46:13.132Z",
   "harness_version": "1.0.0",
   "summary": {
-    "total_benchmarks": 92,
-    "passed_benchmarks": 92,
+    "total_benchmarks": 106,
+    "passed_benchmarks": 106,
     "failed_benchmarks": 0,
     "pass_rate": 1,
     "tier0_pass_rate": 1,
     "tier1_avg_score": 5,
-    "total_token_spend": 6549,
-    "latency_p50_ms": 5,
-    "latency_p95_ms": 9
+    "total_token_spend": 7700,
+    "latency_p50_ms": 3,
+    "latency_p95_ms": 6
   },
   "dimensions": {
     "research_grounding": {
@@ -63,8 +63,8 @@
       "passed": true,
       "tier0_passed": true,
       "tier1_score": 5,
-      "tokens": 53,
-      "duration_ms": 11
+      "tokens": 55,
+      "duration_ms": 8
     },
     {
       "id": "AGENT-PM-01",
@@ -77,7 +77,7 @@
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 62,
-      "duration_ms": 10
+      "duration_ms": 6
     },
     {
       "id": "AGENT-DESIGNER-01",
@@ -90,7 +90,7 @@
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 62,
-      "duration_ms": 10
+      "duration_ms": 6
     },
     {
       "id": "AGENT-ARCHITECT-01",
@@ -103,7 +103,7 @@
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 28,
-      "duration_ms": 10
+      "duration_ms": 4
     },
     {
       "id": "AGENT-TECHLEAD-01",
@@ -116,7 +116,7 @@
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 38,
-      "duration_ms": 6
+      "duration_ms": 5
     },
     {
       "id": "AGENT-REVIEWER-01",
@@ -129,7 +129,7 @@
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 31,
-      "duration_ms": 6
+      "duration_ms": 4
     },
     {
       "id": "AGENT-QA-01",
@@ -142,7 +142,7 @@
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 56,
-      "duration_ms": 5
+      "duration_ms": 4
     },
     {
       "id": "DEV-01",
@@ -155,7 +155,7 @@
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 385,
-      "duration_ms": 5
+      "duration_ms": 4
     },
     {
       "id": "DEV-02",
@@ -168,7 +168,7 @@
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 385,
-      "duration_ms": 8
+      "duration_ms": 6
     },
     {
       "id": "DEV-03",
@@ -181,7 +181,7 @@
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 385,
-      "duration_ms": 7
+      "duration_ms": 6
     },
     {
       "id": "DEV-04",
@@ -220,7 +220,7 @@
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 385,
-      "duration_ms": 6
+      "duration_ms": 5
     },
     {
       "id": "DEV-07",
@@ -233,7 +233,7 @@
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 385,
-      "duration_ms": 6
+      "duration_ms": 5
     },
     {
       "id": "DEV-08",
@@ -246,7 +246,7 @@
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 385,
-      "duration_ms": 7
+      "duration_ms": 5
     },
     {
       "id": "DEV-09",
@@ -259,7 +259,7 @@
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 385,
-      "duration_ms": 7
+      "duration_ms": 4
     },
     {
       "id": "DEV-10",
@@ -272,7 +272,7 @@
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 385,
-      "duration_ms": 6
+      "duration_ms": 4
     },
     {
       "id": "AGENT-RESEARCHER-01",
@@ -285,7 +285,7 @@
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 33,
-      "duration_ms": 5
+      "duration_ms": 4
     },
     {
       "id": "AGENT-USERRESEARCHER-01",
@@ -298,7 +298,7 @@
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 24,
-      "duration_ms": 5
+      "duration_ms": 4
     },
     {
       "id": "AGENT-UXRESEARCHER-01",
@@ -311,7 +311,7 @@
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 22,
-      "duration_ms": 5
+      "duration_ms": 3
     },
     {
       "id": "AGENT-SHIFU-01",
@@ -350,7 +350,7 @@
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 23,
-      "duration_ms": 5
+      "duration_ms": 3
     },
     {
       "id": "AGENT-PERF-01",
@@ -363,7 +363,7 @@
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 27,
-      "duration_ms": 5
+      "duration_ms": 3
     },
     {
       "id": "AGENT-MLAI-01",
@@ -376,7 +376,7 @@
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 23,
-      "duration_ms": 5
+      "duration_ms": 4
     },
     {
       "id": "AGENT-MLAIOPS-01",
@@ -389,7 +389,7 @@
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 26,
-      "duration_ms": 5
+      "duration_ms": 4
     },
     {
       "id": "AGENT-DEVOPS-01",
@@ -402,7 +402,7 @@
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 26,
-      "duration_ms": 6
+      "duration_ms": 4
     },
     {
       "id": "AGENT-TECHWRITER-01",
@@ -415,7 +415,7 @@
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 48,
-      "duration_ms": 4
+      "duration_ms": 3
     },
     {
       "id": "AGENT-MEMORY-01",
@@ -428,7 +428,7 @@
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 57,
-      "duration_ms": 5
+      "duration_ms": 4
     },
     {
       "id": "AGENT-MEMORY-02",
@@ -441,7 +441,7 @@
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 57,
-      "duration_ms": 5
+      "duration_ms": 4
     },
     {
       "id": "TRAP-SEC-01",
@@ -453,8 +453,8 @@
       "passed": true,
       "tier0_passed": true,
       "tier1_score": 5,
-      "tokens": 53,
-      "duration_ms": 5
+      "tokens": 55,
+      "duration_ms": 4
     },
     {
       "id": "TRAP-SEC-02",
@@ -466,7 +466,7 @@
       "passed": true,
       "tier0_passed": true,
       "tier1_score": 5,
-      "tokens": 53,
+      "tokens": 55,
       "duration_ms": 4
     },
     {
@@ -479,8 +479,8 @@
       "passed": true,
       "tier0_passed": true,
       "tier1_score": 5,
-      "tokens": 51,
-      "duration_ms": 9
+      "tokens": 53,
+      "duration_ms": 3
     },
     {
       "id": "TRAP-ARCH-01",
@@ -492,8 +492,8 @@
       "passed": true,
       "tier0_passed": true,
       "tier1_score": 5,
-      "tokens": 56,
-      "duration_ms": 5
+      "tokens": 58,
+      "duration_ms": 3
     },
     {
       "id": "TRAP-ARCH-02",
@@ -506,7 +506,7 @@
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 54,
-      "duration_ms": 4
+      "duration_ms": 3
     },
     {
       "id": "TRAP-ARCH-03",
@@ -518,7 +518,7 @@
       "passed": true,
       "tier0_passed": true,
       "tier1_score": 5,
-      "tokens": 53,
+      "tokens": 55,
       "duration_ms": 3
     },
     {
@@ -531,8 +531,8 @@
       "passed": true,
       "tier0_passed": true,
       "tier1_score": 5,
-      "tokens": 53,
-      "duration_ms": 4
+      "tokens": 55,
+      "duration_ms": 3
     },
     {
       "id": "TRAP-ECON-02",
@@ -544,8 +544,8 @@
       "passed": true,
       "tier0_passed": true,
       "tier1_score": 5,
-      "tokens": 54,
-      "duration_ms": 4
+      "tokens": 56,
+      "duration_ms": 2
     },
     {
       "id": "TRAP-CONCUR-01",
@@ -557,8 +557,8 @@
       "passed": true,
       "tier0_passed": true,
       "tier1_score": 5,
-      "tokens": 54,
-      "duration_ms": 3
+      "tokens": 56,
+      "duration_ms": 2
     },
     {
       "id": "TRAP-CONCUR-02",
@@ -570,8 +570,8 @@
       "passed": true,
       "tier0_passed": true,
       "tier1_score": 5,
-      "tokens": 53,
-      "duration_ms": 4
+      "tokens": 55,
+      "duration_ms": 3
     },
     {
       "id": "TRAP-STATE-01",
@@ -583,7 +583,7 @@
       "passed": true,
       "tier0_passed": true,
       "tier1_score": 5,
-      "tokens": 54,
+      "tokens": 56,
       "duration_ms": 3
     },
     {
@@ -596,8 +596,8 @@
       "passed": true,
       "tier0_passed": true,
       "tier1_score": 5,
-      "tokens": 53,
-      "duration_ms": 2
+      "tokens": 55,
+      "duration_ms": 3
     },
     {
       "id": "TRAP-DATA-01",
@@ -609,8 +609,8 @@
       "passed": true,
       "tier0_passed": true,
       "tier1_score": 5,
-      "tokens": 55,
-      "duration_ms": 2
+      "tokens": 57,
+      "duration_ms": 3
     },
     {
       "id": "TRAP-DATA-02",
@@ -622,8 +622,8 @@
       "passed": true,
       "tier0_passed": true,
       "tier1_score": 5,
-      "tokens": 51,
-      "duration_ms": 5
+      "tokens": 53,
+      "duration_ms": 2
     },
     {
       "id": "TRAP-DATA-03",
@@ -635,8 +635,60 @@
       "passed": true,
       "tier0_passed": true,
       "tier1_score": 5,
-      "tokens": 56,
+      "tokens": 58,
+      "duration_ms": 4
+    },
+    {
+      "id": "intent-01-plain-research-prompt",
+      "name": "Underspecified research prompt triggers 2-3 track fork, no broad survey dump",
+      "suite": "invariants/intent-routing",
+      "agent": null,
+      "skill": null,
+      "dimension": "sycophantic_premature_convergence",
+      "passed": true,
+      "tier0_passed": true,
+      "tier1_score": 5,
+      "tokens": 96,
+      "duration_ms": 4
+    },
+    {
+      "id": "intent-02-plain-architecture-prompt",
+      "name": "Underspecified architecture prompt triggers triage fork without speculative code",
+      "suite": "invariants/intent-routing",
+      "agent": null,
+      "skill": null,
+      "dimension": "sycophantic_premature_convergence",
+      "passed": true,
+      "tier0_passed": true,
+      "tier1_score": 5,
+      "tokens": 76,
+      "duration_ms": 4
+    },
+    {
+      "id": "intent-03-explicit-persona-bypass",
+      "name": "Fully specified prompt with explicit persona proceeds directly without triage stall",
+      "suite": "invariants/intent-routing",
+      "agent": null,
+      "skill": null,
+      "dimension": "sycophantic_premature_convergence",
+      "passed": true,
+      "tier0_passed": true,
+      "tier1_score": 5,
+      "tokens": 69,
       "duration_ms": 3
+    },
+    {
+      "id": "intent-04-trivial-task-zero-triage",
+      "name": "Trivial single-action decoy executes immediately with ZERO triage stalling",
+      "suite": "invariants/intent-routing",
+      "agent": null,
+      "skill": null,
+      "dimension": "sycophantic_premature_convergence",
+      "passed": true,
+      "tier0_passed": true,
+      "tier1_score": 5,
+      "tokens": 18,
+      "duration_ms": 4
     },
     {
       "id": "SHUTUP-01",
@@ -662,7 +714,7 @@
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 7,
-      "duration_ms": 4
+      "duration_ms": 3
     },
     {
       "id": "SHUTUP-03",
@@ -675,7 +727,7 @@
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 10,
-      "duration_ms": 4
+      "duration_ms": 3
     },
     {
       "id": "SHUTUP-04",
@@ -688,7 +740,7 @@
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 10,
-      "duration_ms": 4
+      "duration_ms": 3
     },
     {
       "id": "SHUTUP-05",
@@ -701,7 +753,7 @@
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 7,
-      "duration_ms": 5
+      "duration_ms": 3
     },
     {
       "id": "SHUTUP-06",
@@ -714,7 +766,7 @@
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 10,
-      "duration_ms": 5
+      "duration_ms": 3
     },
     {
       "id": "SHUTUP-07",
@@ -727,7 +779,7 @@
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 5,
-      "duration_ms": 4
+      "duration_ms": 2
     },
     {
       "id": "SHUTUP-08",
@@ -740,7 +792,7 @@
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 9,
-      "duration_ms": 4
+      "duration_ms": 3
     },
     {
       "id": "SHUTUP-09",
@@ -753,7 +805,7 @@
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 7,
-      "duration_ms": 5
+      "duration_ms": 3
     },
     {
       "id": "SHUTUP-10",
@@ -766,7 +818,137 @@
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 10,
+      "duration_ms": 2
+    },
+    {
+      "id": "MODEL-TIER-01",
+      "name": "DEV-01 Rate Limiter — Tier A vs B cost/pass shadow",
+      "suite": "models/tier-comparison",
+      "agent": "developer",
+      "skill": null,
+      "dimension": "code_quality",
+      "passed": true,
+      "tier0_passed": true,
+      "tier1_score": 5,
+      "tokens": 113,
+      "duration_ms": 3
+    },
+    {
+      "id": "MODEL-TIER-02",
+      "name": "DEV-02 API Contract idempotency",
+      "suite": "models/tier-comparison",
+      "agent": "developer",
+      "skill": null,
+      "dimension": "code_quality",
+      "passed": true,
+      "tier0_passed": true,
+      "tier1_score": 5,
+      "tokens": 93,
+      "duration_ms": 5
+    },
+    {
+      "id": "MODEL-TIER-03",
+      "name": "DEV-03 Hierarchical permissions",
+      "suite": "models/tier-comparison",
+      "agent": "developer",
+      "skill": null,
+      "dimension": "code_quality",
+      "passed": true,
+      "tier0_passed": true,
+      "tier1_score": 5,
+      "tokens": 88,
       "duration_ms": 4
+    },
+    {
+      "id": "MODEL-TIER-04",
+      "name": "DEV-04 Order state machine",
+      "suite": "models/tier-comparison",
+      "agent": "developer",
+      "skill": null,
+      "dimension": "code_quality",
+      "passed": true,
+      "tier0_passed": true,
+      "tier1_score": 5,
+      "tokens": 96,
+      "duration_ms": 3
+    },
+    {
+      "id": "MODEL-TIER-05",
+      "name": "DEV-05 JWT blacklist",
+      "suite": "models/tier-comparison",
+      "agent": "developer",
+      "skill": null,
+      "dimension": "code_quality",
+      "passed": true,
+      "tier0_passed": true,
+      "tier1_score": 5,
+      "tokens": 89,
+      "duration_ms": 3
+    },
+    {
+      "id": "MODEL-TIER-06",
+      "name": "DEV-06 CSV streaming parser",
+      "suite": "models/tier-comparison",
+      "agent": "developer",
+      "skill": null,
+      "dimension": "code_quality",
+      "passed": true,
+      "tier0_passed": true,
+      "tier1_score": 5,
+      "tokens": 90,
+      "duration_ms": 3
+    },
+    {
+      "id": "MODEL-TIER-07",
+      "name": "DEV-07 Cursor pagination TTL",
+      "suite": "models/tier-comparison",
+      "agent": "developer",
+      "skill": null,
+      "dimension": "code_quality",
+      "passed": true,
+      "tier0_passed": true,
+      "tier1_score": 5,
+      "tokens": 94,
+      "duration_ms": 3
+    },
+    {
+      "id": "MODEL-TIER-08",
+      "name": "DEV-08 SQL sanitization",
+      "suite": "models/tier-comparison",
+      "agent": "developer",
+      "skill": null,
+      "dimension": "code_quality",
+      "passed": true,
+      "tier0_passed": true,
+      "tier1_score": 5,
+      "tokens": 89,
+      "duration_ms": 3
+    },
+    {
+      "id": "MODEL-TIER-09",
+      "name": "DEV-09 Backoff circuit breaker",
+      "suite": "models/tier-comparison",
+      "agent": "developer",
+      "skill": null,
+      "dimension": "code_quality",
+      "passed": true,
+      "tier0_passed": true,
+      "tier1_score": 5,
+      "tokens": 26,
+      "duration_ms": 3
+    },
+    {
+      "id": "MODEL-TIER-10",
+      "name": "DEV-10 Refactor controller SRP",
+      "suite": "models/tier-comparison",
+      "agent": "developer",
+      "skill": null,
+      "dimension": "code_quality",
+      "passed": true,
+      "tier0_passed": true,
+      "tier1_score": 5,
+      "tokens": 84,
+      "duration_ms": 3
     },
     {
       "id": "SKILL-DEVELOP",
@@ -779,7 +961,7 @@
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 28,
-      "duration_ms": 4
+      "duration_ms": 3
     },
     {
       "id": "SKILL-PLAN",
@@ -844,7 +1026,7 @@
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 32,
-      "duration_ms": 5
+      "duration_ms": 3
     },
     {
       "id": "SKILL-MOTION",
@@ -857,7 +1039,7 @@
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 26,
-      "duration_ms": 5
+      "duration_ms": 3
     },
     {
       "id": "SKILL-VALIDATION-PATTERNS",
@@ -870,7 +1052,7 @@
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 27,
-      "duration_ms": 5
+      "duration_ms": 3
     },
     {
       "id": "SKILL-VALIDATE-IDEA",
@@ -883,7 +1065,7 @@
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 19,
-      "duration_ms": 5
+      "duration_ms": 3
     },
     {
       "id": "SKILL-VALIDATE-GAME",
@@ -896,7 +1078,7 @@
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 21,
-      "duration_ms": 4
+      "duration_ms": 3
     },
     {
       "id": "SKILL-UNPACK-PROBLEM",
@@ -909,7 +1091,7 @@
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 35,
-      "duration_ms": 5
+      "duration_ms": 3
     },
     {
       "id": "SKILL-ROOT-CAUSE",
@@ -922,7 +1104,7 @@
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 41,
-      "duration_ms": 5
+      "duration_ms": 3
     },
     {
       "id": "SKILL-SHAPE-UP",
@@ -935,7 +1117,7 @@
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 27,
-      "duration_ms": 3
+      "duration_ms": 2
     },
     {
       "id": "SKILL-BRAINSTORMING",
@@ -948,7 +1130,7 @@
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 24,
-      "duration_ms": 5
+      "duration_ms": 3
     },
     {
       "id": "SKILL-TEACH-ME",
@@ -961,7 +1143,7 @@
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 29,
-      "duration_ms": 5
+      "duration_ms": 3
     },
     {
       "id": "SKILL-CRAFT-LESSON",
@@ -974,7 +1156,7 @@
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 25,
-      "duration_ms": 3
+      "duration_ms": 4
     },
     {
       "id": "SKILL-ROUND-TABLE",
@@ -1000,7 +1182,7 @@
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 28,
-      "duration_ms": 4
+      "duration_ms": 3
     },
     {
       "id": "SKILL-CUSTOMIZE-SKILL",
@@ -1013,7 +1195,7 @@
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 27,
-      "duration_ms": 4
+      "duration_ms": 3
     },
     {
       "id": "SKILL-CREATE-AGENT",
@@ -1026,7 +1208,7 @@
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 27,
-      "duration_ms": 3
+      "duration_ms": 4
     },
     {
       "id": "SKILL-CUSTOMIZE-AGENT",
@@ -1039,7 +1221,7 @@
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 26,
-      "duration_ms": 3
+      "duration_ms": 4
     },
     {
       "id": "SKILL-KANBAN",
@@ -1052,7 +1234,7 @@
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 24,
-      "duration_ms": 6
+      "duration_ms": 4
     },
     {
       "id": "SKILL-STATUS",
@@ -1065,7 +1247,7 @@
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 29,
-      "duration_ms": 5
+      "duration_ms": 3
     },
     {
       "id": "SKILL-PHASE",
@@ -1078,7 +1260,7 @@
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 17,
-      "duration_ms": 6
+      "duration_ms": 3
     },
     {
       "id": "SKILL-MEMORY",
@@ -1091,7 +1273,7 @@
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 25,
-      "duration_ms": 6
+      "duration_ms": 3
     },
     {
       "id": "SKILL-ITERATE",
@@ -1104,7 +1286,7 @@
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 28,
-      "duration_ms": 4
+      "duration_ms": 3
     },
     {
       "id": "SKILL-INCIDENT",
@@ -1117,7 +1299,7 @@
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 35,
-      "duration_ms": 5
+      "duration_ms": 3
     },
     {
       "id": "SKILL-RETRO",
@@ -1130,7 +1312,7 @@
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 33,
-      "duration_ms": 5
+      "duration_ms": 3
     },
     {
       "id": "SKILL-ANALYZE-DATA",
@@ -1143,7 +1325,7 @@
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 32,
-      "duration_ms": 5
+      "duration_ms": 3
     },
     {
       "id": "SKILL-SPRINT-STATUS",
@@ -1182,7 +1364,7 @@
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 28,
-      "duration_ms": 3
+      "duration_ms": 4
     },
     {
       "id": "SKILL-RESEARCH-PLAN",
@@ -1221,7 +1403,7 @@
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 30,
-      "duration_ms": 4
+      "duration_ms": 3
     },
     {
       "id": "SKILL-JTBD",
@@ -1234,7 +1416,7 @@
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 41,
-      "duration_ms": 4
+      "duration_ms": 1
     },
     {
       "id": "SKILL-DISCOVERY-REPORT",
@@ -1247,7 +1429,7 @@
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 32,
-      "duration_ms": 4
+      "duration_ms": 1
     }
   ]
 }
