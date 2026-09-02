@@ -133,12 +133,13 @@ Cost: 1 query. Without it: break the build, then re-grep and fix in a second pas
 
 > **Single-owner — do not redefine.** Canonical schema lives at `tools/telemetry/schema.json` owned by `02l-phase-1-observability-biomarkers-and-small-model-harness.md §5.1` (Option A Thin Slice). This section **imports** via `require('../telemetry/schema.json')`; any drift copies violate `INV-TEL-01` hybrid. Phase 1 shape: `usage.cost_usd: number | null` (nullable, Phase 3 enriches via `pricing.json`), `usage.estimated: boolean` (<20% estimated, ≥80% exact coverage), `quality_scorecard: { rqs_d_score, rqs_j_score: number | null, rating derived from RQS-D }`, `biomarkers: { scr,msha,placeholder_density,pci,ac_testability: RQS-D deterministic; srsr,scope_drift: RQS-J shadow nullable }` — see `02l §5.1` for full TypeScript.
 
-**The 5 Hard Telemetry Invariants (Hybrid — per 02l Option A):**
+**The 6 Hard Telemetry Invariants (Hybrid & Multi-Day Continuity — per 02l Option A):**
 - `INV-TEL-01` (Zero Blind Execution — Hybrid): Non-null trace_id, real duration_ms, and usage.total_tokens; prompt/completion exact where harness reports, `estimated=true` allowed <20% window with retry child spans; `cost_usd` nullable in Phase 1; <80% exact fails gate.
 - `INV-TEL-02` (Deterministic Gate Contract): Mandatory Tier 0 RQS-D (SCR/MSHA/PD/PCI/AC <25ms, 0 tokens) assertion before disk commit.
 - `INV-TEL-03` (Zero Human-in-the-Loop RQS-D Gate): Workflow success requires `RQS-D ≥85%` and deterministic biomarkers (`SCR=1.0, MSHA=1.0, PD=0.0, PCI=0.0`) — RQS-J (SRSR/SDS) shadow only, never gates Phase 1.
 - `INV-TEL-04` (Regression Tripwire — Retry-Aware): CI Exit 2 on >15% token inflation (sum including retry spans) or pass drop vs `evals/baseline.json`.
 - `INV-TEL-05` (Model-Tier Invariant): Tier B frontier models mandated for `@architect`, `@founder`, and `@security-engineer` (enforced via `modelTierGuards.js`).
+- `INV-TEL-06` (Multi-Day Session & Trace Continuity): Continuous sessions spanning UTC date boundaries must stitch spans across `spans-*.ndjson` files via `session_id`; day rollovers auto-emit `session_resume` linkage.
 
 **Memory-controller session-start integration (canonical step 0.4 — the full order table lives in 03 F2.14; earlier drafts numbered this "Step 0.5"):**
 
@@ -151,7 +152,7 @@ After the graph check, invoke (via the shared session_bootstrap.js spawn):
 Budget: 150ms; output ≤ 20 lines (never raw event data). Inject the output into the loaded context under a "## Recent Telemetry" heading. This gives the agent cost awareness before it starts spending tokens.
 ```
 
-- [ ] F3.8 — Create `.agents/scripts/telemetry_surface.js` (~130 lines): **fix the spread bug from the first draft** (array-spread, not string-spread, when slicing lines — a string spread yields characters and mangles the digest). Supports `session`, `hot-paths`, `summary`, and `compare`. **Implementation code:** See `03d-phase-2-implementation-specs.md` §7
+- [ ] F3.8 — Create `.agents/scripts/telemetry_surface.js` (~130 lines): **fix the spread bug from the first draft** (array-spread, not string-spread, when slicing lines — a string spread yields characters and mangles the digest). Supports `session`, `hot-paths`, `summary`, and `compare`, with multi-day session span stitching by `session_id`. **Implementation code:** See `03d-phase-2-implementation-specs.md` §7
 - [ ] F3.9 — Update `memory-controller.md`: add step 0.4 (text above). Inject ≤20 lines under "## Recent Telemetry". Budget 150ms via session_bootstrap.js.
 - [ ] F3.10 — Update `status/SKILL.md`: add "Surface telemetry" step. Append "## Telemetry (last 7 days)" with total tokens, top 3 agents by cost, top 3 events by frequency, and biomarker pass rates.
 - [ ] F3.11 — Update `retro/SKILL.md` Step 1: also run `telemetry_surface.js hot-paths`, include top 3 in digest.

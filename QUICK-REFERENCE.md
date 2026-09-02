@@ -3,13 +3,13 @@
 ```
 VESPYR IDENTITY — 2 differentiators
 ────────────────────────────────────
-1. Socratic methodology depth & "No Yes-Men" DNA — Verdict Gate ([KILL/PIVOT/PASS]), Zero Blueprint on Kill, and zero functional sycophancy
+1. Socratic methodology depth & "No Yes-Men" DNA — Verdict Gate ([NO-GO/RESHAPE/GO]), Zero Blueprint on No-Go, and zero functional sycophancy
 2. 3-tier progressive memory — context loaded in tiers, not all-at-once or not-at-all
 
 ENTRY POINTS & WORKFLOWS
 ────────────────────────
 Entry points:   /unpack-problem      (problem-first exploration before solution ideation)
-                /validate-idea       (stress-test raw product concepts with GO/PIVOT/KILL)
+                /validate-idea       (stress-test raw product concepts with GO/RESHAPE/NO-GO)
                 /shape-up            (structure semi-cooked ideas into design-ready briefs)
                 /validate-game-idea  (stress-test game concepts before production)
 
@@ -93,7 +93,7 @@ CORE SKILL CATALOG
 ──────────────────────────────────────────────────
 Entry Points:
   /unpack-problem      Problem-first exploration before solution ideation
-  /validate-idea       Stress-test product concepts before research (GO/PIVOT/KILL)
+  /validate-idea       Stress-test product concepts before research (GO/RESHAPE/NO-GO)
   /shape-up            Structure semi-cooked ideas into design-ready briefs (zero prereqs)
   /validate-game-idea  Stress-test game concepts before production
 

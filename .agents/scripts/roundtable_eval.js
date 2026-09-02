@@ -9,8 +9,9 @@
  *
  * Transcript contract (full spec: evals/roundtable/README.md):
  *   - fenced block ```roundtable-coverage containing `panel:` and `challenges:` lines
- *   - per-panelist verdict lines [VERDICT: PASS|PIVOT|KILL|CONFIRMED|PARTIAL|FALSIFIED]
- *   - final outcome line [SYNTHESIS: PASS|PIVOT|KILL|ADR:<id>]
+ *   - per-panelist verdict lines [VERDICT: GO|RESHAPE|NO-GO|CONFIRMED|PARTIAL|FALSIFIED]
+ *   - final outcome line [SYNTHESIS: GO|RESHAPE|NO-GO|ADR:<id>]
+ *   - legacy PASS/PIVOT/KILL (pre 2026-09-02) normalize onto GO/RESHAPE/NO-GO
  *   - filename <topic>_<mode>_<run>.md with mode in {native, solo}
  *
  * Exit codes (coverage): 0 = all panelists challenged, 1 = coverage gap, 2 = missing/malformed block
@@ -24,7 +25,9 @@ const PROJECT_ROOT = process.cwd();
 const RESULTS_DIR = path.join(PROJECT_ROOT, 'artifacts', 'evals', 'roundtable');
 const STATE_LOG = path.join(RESULTS_DIR, 'telemetry', 'log.jsonl');
 const DEFAULT_TOPICS = path.join(PROJECT_ROOT, 'evals', 'roundtable', 'topics.json');
-const DECISION_VERDICTS = ['PASS', 'PIVOT', 'KILL'];
+const DECISION_VERDICTS = ['GO', 'RESHAPE', 'NO-GO'];
+const LEGACY_DECISION_VERDICTS = { PASS: 'GO', PIVOT: 'RESHAPE', KILL: 'NO-GO' };
+const normalizeVerdict = (v) => LEGACY_DECISION_VERDICTS[v] || v;
 const ALL_VERDICTS = [...DECISION_VERDICTS, 'CONFIRMED', 'PARTIAL', 'FALSIFIED'];
 const MODES = ['native', 'solo', 'refused'];
 
@@ -99,13 +102,16 @@ function cmdCoverage(flags) {
 }
 
 function extractVerdicts(text) {
-  const verdicts = [...text.matchAll(/\[VERDICT:\s*([A-Za-z]+)\]/g)].map((m) => m[1].toUpperCase());
-  const synthesisMatch = text.match(/\[SYNTHESIS:\s*([A-Za-z]+(?::[\w.-]+)?)\]/);
+  // Hyphen included: NO-GO is a canonical verdict token.
+  const raw = [...text.matchAll(/\[VERDICT:\s*([A-Za-z][A-Za-z-]*)\]/g)].map((m) => m[1].toUpperCase());
+  const synthesisMatch = text.match(/\[SYNTHESIS:\s*([A-Za-z][A-Za-z-]*(?::[\w.-]+)?)\]/);
+  const verdicts = raw.map((v) => normalizeVerdict(v));
   return {
     decision: verdicts.filter((v) => DECISION_VERDICTS.includes(v)),
     review: verdicts.filter((v) => ALL_VERDICTS.includes(v) && !DECISION_VERDICTS.includes(v)),
     unknownTags: verdicts.filter((v) => !ALL_VERDICTS.includes(v)),
-    synthesis: synthesisMatch ? synthesisMatch[1].toUpperCase() : null,
+    legacyTags: raw.filter((v) => LEGACY_DECISION_VERDICTS[v]).length,
+    synthesis: synthesisMatch ? normalizeVerdict(synthesisMatch[1].toUpperCase()) : null,
   };
 }
 
@@ -236,7 +242,7 @@ function cmdScore(flags) {
     for (const f of report.spcFlags) console.log(`  - ${f}`);
   }
   if (report.flawedPremiseCheck && report.flawedPremiseCheck.length) {
-    console.log('flawed-premise check (should trend KILL/PIVOT):');
+    console.log('flawed-premise check (should trend NO-GO/RESHAPE):');
     for (const p of report.flawedPremiseCheck) console.log(`  - ${p.topic}: observed ${p.observedSyntheses.join(', ') || 'none'}`);
   }
   const nonCompliant = rows.filter((r) => !r.coverageCompliant);

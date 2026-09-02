@@ -80,7 +80,7 @@ Skills are invoked via `/skill-name` or by referencing `.agents/skills/[name]/SK
 - **`/craft-lesson`**: Create multi-format educational materials (syllabus, handbook, cheatsheet, presentation, class, video script).
 
 ### 🔍 Discovery, Ideation & Problem Space
-- **`/validate-idea`**: Socratic concept stress-testing (GO / PIVOT / KILL).
+- **`/validate-idea`**: Socratic concept stress-testing (GO / RESHAPE / NO-GO).
 - **`/validate-game-idea`**: Game concept stress-testing before production.
 - **`/unpack-problem`**: Problem-first exploration before jumping to solution design.
 - **`/root-cause`**: Socratic 5-Whys and Fishbone root-cause analysis.

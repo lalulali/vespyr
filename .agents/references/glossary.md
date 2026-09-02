@@ -22,6 +22,17 @@
 - **Change request (CR)** — A formal request to revise an upstream artifact. Filed in `artifacts/output/05-planning/change-requests.md`.
 - **Decision log** — A running record of resolved decisions, written to `artifacts/memory/active-decisions.md`.
 
+## Verdict terms
+- **Decision Gate** — The verdict on an idea, proposal, design, or stack selection. Answers *what survived the audit*. Two axes: the verdict token and the `When:` axis. Never applied to a claim about existing state.
+- **Review Gate** — The verdict on a claim about existing state (implementation report, record, checkbox, sign-off). Answers *does the evidence reproduce the claim*. Tokens: `[CONFIRMED]` / `[PARTIAL]` / `[FALSIFIED]`. Never applied to an idea.
+- **`[GO]`** — Everything survived: build this proposal as written, with the named evidence. Requires a `When:` axis. Not "pass", not "approve", not "looks good".
+- **`[RESHAPE]`** — Only the need survived: keep the why, replace the how. The mechanism is discarded; the user problem is retained. Not "pivot", not "iterate", not "refine".
+- **`[NO-GO]`** — Nothing survived: this is not something to be done. No compromise blueprint, no slimmed variant. Not "kill", not "reject", not "defer".
+- **`When:` axis** — When a verdict acts: `NOW`, `GATED` (a named, checkable condition with an owner and a number), `NEXT-CYCLE`, or `NEVER`. A `[GO]` without a `When:` axis is an illegal verdict.
+- **Verdict Card** — The five-line block every gate emits: `VERDICT`, `Audited`, `Survived`, `Because`, `Next`. Each card must be readable without seeing the others.
+- **No-Go Autopsy** — The empirical proof recorded when a premise is ruled `[NO-GO]`. It is the only permitted output after a `[NO-GO]`.
+- **Legacy vocabulary** — `PASS`/`PIVOT`/`KILL` and `ZERO-BLUEPRINT-ON-KILL`. Superseded 2026-09-02. Still resolved by tooling, still present in dated records, **never** used in new output. See `references/vespyr-dna.md`.
+
 ## Process terms
 - **Operating mode** — `autonomous`, `semi-autonomous` (default), or `manual`. Controls pause points.
 - **Halt condition** — An explicit condition under which a skill stops and surfaces the issue.

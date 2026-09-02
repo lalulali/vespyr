@@ -11,7 +11,7 @@
       "prompt": "Implement rate limiter token bucket",
       "isAdversarialTrap": false,
       "mockOutput": "Implemented module DEV-01.\n```javascript\nconst rateLimiter = { tokens: 10, capacity: 10, refill: 1 };\nfunction allowRequest() { return true; }\n```\nAll unit tests passing.\n```javascript\nfunction handleError(){ try { const x=1; } catch(e){ throw e; } }\n// test coverage\nfunction test(){ assert(true); expect(1).toBe(1); }\n```\nError handling verified via try/catch fallback recover, unit tests passing.",
-      "expectedVerdict": "PASS",
+      "expectedVerdict": "GO",
       "minRQSD": 0.85,
       "requiredHeaders": null
     },

@@ -96,13 +96,13 @@ Roundtable discussions enforce true perspective collision where agents are manda
 ### Phase 1: Position Stating (Scatter & Verdict Gate)
 - **Unconditioned parallel subagent dispatch** (no anchor bias, unconditioned priors).
 - **Prompt Sanitization Rule:** The orchestrator MUST prompt each panelist to evaluate the subject against first principles and issue an explicit verdict from the correct gate (definitions: `.agents/references/vespyr-dna.md`):
-  - **Decision Gate — proposals, ideas, designs under stress-test:** `[PASS]` / `[PIVOT]` / `[KILL]`.
+  - **Decision Gate — proposals, ideas, designs under stress-test:** `[GO]` / `[RESHAPE]` / `[NO-GO]`.
   - **Review Gate — claims about existing state (implementation reports, records, checkboxes):** `[CONFIRMED]` / `[PARTIAL]` / `[FALSIFIED]`.
   
   The orchestrator is STRICTLY FORBIDDEN from asking *"How do we build this safely?"* or *"What is the blueprint if the user insists?"*
-- **Zero-Blueprint-on-KILL / Zero-Consumption-on-FALSIFIED:** An agent issuing `[KILL]` states the technical autopsy and stops — no compromise options or implementation workarounds. A `[FALSIFIED]` claim may not be consumed as true by any downstream gate, banner, or sign-off until the record is corrected forward with dated evidence.
+- **Zero-Blueprint-on-NO-GO / Zero-Consumption-on-FALSIFIED:** An agent issuing `[NO-GO]` states the technical autopsy and stops — no compromise options or implementation workarounds. A `[FALSIFIED]` claim may not be consumed as true by any downstream gate, banner, or sign-off until the record is corrected forward with dated evidence.
 - Each selected agent states their position, key constraints, and concerns independently.
-- **Parseable verdicts:** each panelist ends their position with a machine-readable line — `[VERDICT: PASS|PIVOT|KILL]` (Decision Gate) or `[VERDICT: CONFIRMED|PARTIAL|FALSIFIED]` (Review Gate). The eval scorer parses these; prose-only verdicts break telemetry.
+- **Parseable verdicts:** each panelist ends their position with a machine-readable line — `[VERDICT: GO|RESHAPE|NO-GO]` (Decision Gate) or `[VERDICT: CONFIRMED|PARTIAL|FALSIFIED]` (Review Gate). The eval scorer parses these; prose-only verdicts break telemetry.
 
 ### Phase 2: Targeted Pairwise Cross-Examination (Exchange & Attack)
 - The orchestrator identifies core tensions (e.g. `@architect` vs `@developer`, `@tech-lead` vs `@product-manager`).
@@ -116,11 +116,11 @@ Roundtable discussions enforce true perspective collision where agents are manda
 
 ### Phase 4: Synthesis Gate & Irreconcilable Trade-Off Escalation
 - No false consensus: if trade-offs are mutually exclusive, log them as an explicit ADR decision record in `artifacts/memory/active-decisions.md` rather than synthesizing a muddy compromise.
-- End the synthesis with a machine-readable outcome line — `[SYNTHESIS: PASS|PIVOT|KILL]`, or `[SYNTHESIS: ADR:<adr-id>]` when escalated to a decision record — for eval scoring.
+- End the synthesis with a machine-readable outcome line — `[SYNTHESIS: GO|RESHAPE|NO-GO]`, or `[SYNTHESIS: ADR:<adr-id>]` when escalated to a decision record — for eval scoring.
 
 ### Invariant Anti-Sycophancy & Orchestration Rules
 1. **Mandatory Visible Dialogue Stream:** The orchestrator MUST output the visible back-and-forth agent dialogue (e.g. `### @agent-a -> @agent-b`) so the train of thought and cross-examination are fully transparent to the user. Pre-digesting the debate into a single summary card or table without showing the dialogue is strictly forbidden.
-2. **Prohibition of Functional Sycophancy ("Preach Then Comply"):** Emitting verbal warnings while still drafting implementation plans or option menus for a killed idea is an engine failure. A technical warning on a flawed premise must halt the implementation track.
+2. **Prohibition of Functional Sycophancy ("Preach Then Comply"):** Emitting verbal warnings while still drafting implementation plans or option menus for a `[NO-GO]`ed idea is an engine failure. A technical warning on a flawed premise must halt the implementation track.
 3. **Concession Justification Requirement:** An agent cannot concede a stated position without citing empirical evidence, constraint violations, or explicit project tradeoffs.
 4. **Sycophantic Premature Convergence (SPC) Gate:** If all panelists agree in Round 1 with zero friction, the orchestrator must assign a designated Red-Team challenger or inject an adversarial stress prompt before persisting outcomes.
 5. **Zero User Deference & Anti-Flattery:** Never flatter the user (*"Good call [User]"*, *"Great idea"*, *"What [User] wants is..."*). The user's input is a hypothesis to be stress-tested, not a mandate to collapse debate. If a user proposal has architectural holes or trade-offs, panelists must attack them directly.
@@ -136,14 +136,14 @@ When the user replies, questions, or steers the conversation in subsequent turns
 
 2. **Re-Inject User Input into the Active Panel with Sanitized Prompts**:
    - Treat the user's message as an input into the ongoing multi-agent debate.
-   - **In native subagent mode**: Pass the user's latest inquiry and prior context to the panel subagents for independent evaluation under the applicable gate — Decision (`[KILL]`/`[PIVOT]`/`[PASS]`) for proposals, Review (`[FALSIFIED]`/`[PARTIAL]`/`[CONFIRMED]`) for claims about existing state.
+   - **In native subagent mode**: Pass the user's latest inquiry and prior context to the panel subagents for independent evaluation under the applicable gate — Decision (`[NO-GO]`/`[RESHAPE]`/`[GO]`) for proposals, Review (`[FALSIFIED]`/`[PARTIAL]`/`[CONFIRMED]`) for claims about existing state.
    - **In `--solo` mode**: Re-dispatch each panelist as a separate context-firewalled LLM call — the call receives the user's latest input plus only the targeted context that panelist needs (its own prior stance, a challenged peer stance), never the full shared transcript. Render responses under the same explicit headers (e.g. `### @architect (Vera)`, `### @tech-lead (Grant)`, `### @developer (Rex)`), followed by the host's tension synthesis.
 
 3. **Panelists Directly Engage, Challenge & Debate**:
    - Each agent must respond **from their specific persona and domain constraints** to what the user said.
    - Agents must cross-examine the user's premise: *"What breaks if we do what the user suggests?"*, *"What hidden complexity or latency does this introduce?"*
    - Agents must debate each other on their interpretations of the user's input.
-   - If an agent agrees with the user, they must provide hard technical justification; if the user's idea violates domain invariants, the responsible agent must bluntly push back and assign `[KILL]`.
+   - If an agent agrees with the user, they must provide hard technical justification; if the user's idea violates domain invariants, the responsible agent must bluntly push back and assign `[NO-GO]`.
 
 4. **Multi-Turn Response Structure**:
    Every turn in an active roundtable session must follow this structure:

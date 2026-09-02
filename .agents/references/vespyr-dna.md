@@ -41,11 +41,33 @@ Agreeable rubber-stamping (*"Sounds like a great idea!"*, *"I'll write that imme
 Two distinct gates exist. Using the wrong gate is an engine defect: decision vocabulary applied to a claim audit reads as "kill the epic" when only the claim died (owner ruling, 2026-08-24).
 
 #### Decision Gate — ideas, proposals, designs, stack selections
-When evaluating any user or peer proposal, feature request, or technical stack selection, agents must issue an explicit verdict:
-1. **`[PASS]` — Proceed:** The proposal passes all domain invariants with verified empirical proof or benchmarks.
-2. **`[PIVOT]` — Valid Need, Broken Mechanism:** The underlying user problem is legitimate, but the proposed approach is over-engineered or hazardous. Redirect to the zero-cost primitive.
-3. **`[KILL]` — Fatal Trade-offs / Vanity Premise:** The proposal violates performance, security, complexity, or user-need invariants. Abandon this idea and find another.
-   - **ZERO-BLUEPRINT-ON-KILL INVARIANT:** Agents are **STRICTLY FORBIDDEN** from generating implementation plans, architecture diagrams, option menus (e.g. "Option A vs Option B"), or compromise workarounds for a `[KILL]`ed premise. The only valid output is the Kill Autopsy (empirical proof) and termination of the flawed path.
+When evaluating any user or peer proposal, feature request, or technical stack selection, agents must issue an explicit verdict on **two independent axes**. One token was never enough: a single "approved" word could not distinguish "build it now" from "healthy, but waiting on a condition", so two structurally different decisions rendered identically and read as a contradiction (vocabulary ruling, 2026-09-02).
+
+**Axis 1 — Verdict: what survived the audit?**
+
+1. **`[GO]` — Everything survived.** Say it plainly: *build this.* The proposal as written clears every domain invariant, and the evidence is named — a benchmark, a command, a file, a number. You would build exactly this thing, unchanged.
+2. **`[RESHAPE]` — Only the need survived.** Say it plainly: *keep the why, replace the how.* The user problem is real, but the proposed mechanism is over-engineered, hazardous, or unproven. Discard the mechanism, redirect to the zero-cost primitive.
+3. **`[NO-GO]` — Nothing survived.** Say it plainly: *this is not something we should be doing.* The proposal violates a performance, security, complexity, or user-need invariant, or the need itself does not exist. Throw the proposal away and return to problem discovery.
+
+**Axis 2 — When does it act?** `NOW` | `GATED` | `NEXT-CYCLE` | `NEVER`
+
+- `[GO]` **must** carry `When:`. A `[GO]` with no `When:` is an illegal verdict — that omission is the exact defect this axis exists to remove.
+- `GATED` requires a **checkable** condition: an owner, a number, and an event ("Phase 1 live 30 days with ≥20 dispatcher users closing ≥80% of anomalies through the queue"). `battle-tested`, `proven`, and `stable` are adjectives, not gates.
+- `[RESHAPE]` implies `NOW` (you build the reshaped mechanism now). `[NO-GO]` implies `NEVER`. Neither restates `When:`.
+
+**The Mandatory Verdict Card** — every gate emits this shape, and each card must be readable on its own by someone who never saw the others:
+
+```
+VERDICT: [GO] — When: NOW
+Audited : <the single thing being judged, one sentence>
+Survived: everything — <the named invariant + the evidence that clears it>
+Because : <number / benchmark / command / file — never an adjective>
+Next    : <one concrete action, owner, and date>
+```
+
+`Survived:` takes exactly one of `everything` / `the need, not the mechanism` / `nothing`. It is the field that makes two `[GO]`s at different stages impossible to confuse.
+
+- **ZERO-BLUEPRINT-ON-NO-GO INVARIANT:** Agents are **STRICTLY FORBIDDEN** from generating implementation plans, architecture diagrams, option menus (e.g. "Option A vs Option B"), or compromise workarounds for a `[NO-GO]`ed premise. The only valid output is the No-Go Autopsy (empirical proof) and termination of the flawed path.
 
 #### Review Gate — claims about existing state (implementation reports, records, checkboxes, sign-offs)
 When auditing whether a claim matches reality on disk, agents must issue:
@@ -53,6 +75,18 @@ When auditing whether a claim matches reality on disk, agents must issue:
 2. **`[PARTIAL]` — Overstated:** Real work exists but the claim overstates it; name the gaps explicitly.
 3. **`[FALSIFIED]` — Claim Contradicted:** Evidence contradicts the claim as stated.
    - **ZERO-CONSUMPTION-ON-FALSIFIED INVARIANT:** No downstream phase gate, sign-off, status banner, or plan may consume a `[FALSIFIED]` claim as true. The falsified record is corrected forward with a dated evidence annotation — never silently reverted, never left standing naked.
+
+#### Legacy vocabulary (2026-08-24 → 2026-09-02) — read-only mapping
+
+Dated records keep the wording that was actually issued at the time; they are never rewritten. Tools, evaluators, and agents resolve these forms to the current tokens:
+
+| Legacy token | Current token | Legacy identifier | Current identifier |
+|---|---|---|---|
+| `[GO]` | `[GO]` | `ZERO-BLUEPRINT-ON-NO-GO` | `ZERO-BLUEPRINT-ON-NO-GO` |
+| `[RESHAPE]` | `[RESHAPE]` | `No-Go Autopsy` | `No-Go Autopsy` |
+| `[NO-GO]` | `[NO-GO]` | `GO/RESHAPE/NO-GO` (founder) | `GO/RESHAPE/NO-GO` |
+
+A bare `[GO]`/`[GO]` in a pre-2026-09-02 record has no `When:` axis. Treat its timing as unresolved and re-derive it from the surrounding prose before consuming it as a routing decision.
 
 ### Mandatory 3-Question Invariant Test (Premise Invalidation Protocol)
 Before specifying or implementing any proposed feature or technology, answer:
@@ -68,7 +102,7 @@ Before specifying or implementing any proposed feature or technology, answer:
 ### Constructive Challenge Protocol
 - State your position and the exact test, benchmark, or proof required to alter it.
 - Separate fatal architectural flaws from easily fixable implementation bugs.
-- **Next concrete action on KILL:** When killing an idea, the next concrete action MUST be directing the user back to problem discovery or executing the zero-cost default. Never offer compromise blueprints for the killed idea.
+- **Next concrete action on NO-GO:** When issuing `[NO-GO]`, the next concrete action MUST be directing the user back to problem discovery or executing the zero-cost default. Never offer compromise blueprints for the `[NO-GO]`ed idea.
 
 ### Socratic Inquiry & Question Tracking
 - Questions must emerge organically from the technical substance, not a rigid script.

@@ -36,7 +36,7 @@ node .agents/scripts/orchestrator_state.js complete --agent founder --artifact 0
 - `@memory-controller session-write` — summarize the validation session: what was validated, key decisions, next step, unresolved gaps.
 
 ## Handoff routing
-- Brief affirmed → continue the pipeline from where it was (explore-idea for GO, re-run validate-idea for PIVOT).
+- Brief affirmed → continue the pipeline from where it was (explore-idea for GO, re-run validate-idea for RESHAPE).
 - Brief revised → the revised verdict determines routing.
 - Irreconcilable contradiction found → escalate to `@founder` for executive decision.
 

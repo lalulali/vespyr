@@ -14,7 +14,7 @@ Vespyr is organized around an 11-phase pipeline. You don't need to memorize it â
 
 **1. Start with `/validate-idea`**
 
-Tell the founder agent about your product concept. It stress-tests with frameworks (Golden Circle, Pre-mortem, First Principles, Moat & Defensibility) and returns a GO/PIVOT/KILL verdict.
+Tell the founder agent about your product concept. It stress-tests with frameworks (Golden Circle, Pre-mortem, First Principles, Moat & Defensibility) and returns a GO/RESHAPE/NO-GO verdict.
 
 ```
 /validate-idea create "A collaborative whiteboard for remote teams"

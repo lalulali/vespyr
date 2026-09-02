@@ -27,7 +27,9 @@ describe('Vespyr Core DNA & Anti-Sycophancy Invariants', () => {
     assert.ok(content.includes('### The Mandatory Verdict Gates'), 'Must define the two-gate section');
     assert.ok(content.includes('#### Decision Gate — ideas, proposals, designs, stack selections'), 'Must define Decision Gate scope');
     assert.ok(content.includes('#### Review Gate — claims about existing state'), 'Must define Review Gate scope');
-    assert.ok(content.includes('ZERO-BLUEPRINT-ON-KILL INVARIANT'), 'Must define zero blueprint on kill');
+    assert.ok(content.includes('ZERO-BLUEPRINT-ON-NO-GO INVARIANT'), 'Must define zero blueprint on no-go');
+    assert.ok(content.includes('Legacy vocabulary'), 'Must map the superseded PASS/PIVOT/KILL tokens');
+    assert.ok(content.includes('Axis 2 — When does it act?'), 'Must define the When: axis');
     assert.ok(content.includes('ZERO-CONSUMPTION-ON-FALSIFIED INVARIANT'), 'Must define zero consumption on falsified');
     assert.ok(content.includes('Mandatory 3-Question Invariant Test'), 'Must define 3-question invariant test');
   });

@@ -31,7 +31,7 @@ node .agents/scripts/orchestrator_state.js complete --agent founder --artifact 0
 - `@memory-controller session-write` — summarize revisions, decisions, next step.
 
 ## Handoff
-- If verdict changed → route per the new verdict (GO → explore-idea, PIVOT → re-run validate-idea, KILL → stop).
+- If verdict changed → route per the new verdict (GO → explore-idea, RESHAPE → re-run validate-idea, NO-GO → stop).
 - If verdict unchanged → resume the pipeline from where it was.
 
 > **Tracker:** `node .agents/scripts/step_tracker.js complete --skill validate-idea-edit --step 5`

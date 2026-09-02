@@ -13,7 +13,7 @@ Halt condition for underspecified briefs. No mode routing or Step 1 work may beg
 Confirm the user prompt states all three:
 - **Concrete outcome** — the artifact or result this `/validate-idea` run produces
 - **Boundary constraints** — what is explicitly in and out of scope
-- **Target decision** — the GO/PIVOT/KILL decision this validation informs
+- **Target decision** — the GO/RESHAPE/NO-GO decision this validation informs
 
 ## 2. Decision Fork
 - **Unambiguous (C ≥ 0.85):** proceed to mode routing (create / edit / validate).

@@ -19,7 +19,7 @@ Write the shaped brief and hand off to the next skill.
 ## Handoff routing
 - **All assumptions verified/accepted:** → `design` (ready for specs).
 - **Unverified assumptions need validation or user requests research:** → `explore-idea` (open questions become research agenda).
-- **Fundamental viability concerns:** → `validate-idea` (needs GO/PIVOT/KILL).
+- **Fundamental viability concerns:** → `validate-idea` (needs GO/RESHAPE/NO-GO).
 
 ## State machine & Memory closeout
 ```bash

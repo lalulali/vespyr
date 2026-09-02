@@ -20,7 +20,7 @@ PHASE -1: VALIDATION
   │     └── @founder — Socratic diagnostic: stress-test idea before investing research/dev cycles
   │           │         Adapts by context: startup | company | personal
   │           │         Adapts by maturity: greenfield | brownfield
-  │           │         Produces: artifacts/output/01-discovery/validation-brief.md (GO/PIVOT/KILL)
+  │           │         Produces: artifacts/output/01-discovery/validation-brief.md (GO/RESHAPE/NO-GO)
   │           │
   │           ├── GO ───► Choose Entry Route:
   │           │           │
@@ -45,22 +45,22 @@ PHASE -1: VALIDATION
   │           │                            ▼
   │           │                        PHASE 5: DEVELOPMENT (develop skill)
   │           │
-  │           ├── PIVOT ──▶ Re-run Phase -1 with revised framing
+  │           ├── RESHAPE ──▶ Re-run Phase -1 with revised framing
   │           │
-  │           └── KILL ──▶ Stop. Brief documents why. Save research cycles.
+  │           └── NO-GO ──▶ Stop. Brief documents why. Save research cycles.
   │
   └── Game Track (validate-game-idea skill)
         └── @founder — Socratic diagnostic: stress-test game concept before investing production cycles
-              │         Produces: artifacts/output/01-discovery/validation-brief.md (GO/PIVOT/KILL)
+              │         Produces: artifacts/output/01-discovery/validation-brief.md (GO/RESHAPE/NO-GO)
               │
               ├── GO ──────────▼
               │          PHASE 0-1: DISCOVERY (explore-game-idea skill)
               │            └── @researcher, @user-researcher — genre market analysis, player research, competitive landscape
               │                  │         produces: artifacts/output/01-discovery/idea-brief.md
               │                  ▼
-              ├── PIVOT ──▶ Re-run Phase -1 with revised framing
+              ├── RESHAPE ──▶ Re-run Phase -1 with revised framing
               │
-              └── KILL ──▶ Stop. Brief documents why. Save production cycles.
+              └── NO-GO ──▶ Stop. Brief documents why. Save production cycles.
 ```
 
 ---
@@ -79,7 +79,7 @@ Set the operation mode in `artifacts/memory/project-context.md`. Default is **se
 
 | Phase | Primary Skill | Autonomous | Semi-autonomous | Manual |
 |-------|---------------|------------|----------------|--------|
-| **-1: Validation** | `validate-idea` / `validate-game-idea` | Auto-generate validation brief from context. Auto-decide GO/PIVOT/KILL based on available evidence. | Run diagnostic questions interactively. **Pause for GO/PIVOT/KILL verdict.** | Full Socratic session. Every question interactive. Human confirms each answer before next. |
+| **-1: Validation** | `validate-idea` / `validate-game-idea` | Auto-generate validation brief from context. Auto-decide GO/RESHAPE/NO-GO based on available evidence. | Run diagnostic questions interactively. **Pause for GO/RESHAPE/NO-GO verdict.** | Full Socratic session. Every question interactive. Human confirms each answer before next. |
 | **-0.5: Problem Exploration** | `unpack-problem` | Auto-unpack symptoms into root cause, empathy map, JTBD canvas, and HMW questions. | Run intake & 5 Whys analysis. **Pause for problem brief confirmation before ideation.** | Human co-explores problem space, empathy quadrants, and 5 Whys step-by-step. |
 | **-0.2: Idea Shaping** | `shape-up` | Auto-structure raw concepts through 6-step intake, gap analysis, and stress testing. | Run intake & gap analysis. **Pause for decision alignment & shaped brief approval.** | Human collaborates interactively on every shaping step and gap resolution. |
 | **0: Ideation & Brainstorming** | `brainstorming` | Auto-select top 3 methods from 60-method catalog and generate solution concepts. | Propose ideation methods. **Pause for human selection & concept review.** | Facilitate selected brainstorming method step-by-step with user. |
@@ -543,8 +543,8 @@ These skills form the backbone of the product and game development lifecycle. Sk
 
 | Skill | Phase | Primary Agents | Key Output / Description |
 |-------|-------|----------------|--------------------------|
-| `validate-idea` | -1 | @founder | Validation brief with GO/PIVOT/KILL verdict |
-| `validate-game-idea` | -1 | @founder | Game validation brief with GO/PIVOT/KILL verdict |
+| `validate-idea` | -1 | @founder | Validation brief with GO/RESHAPE/NO-GO verdict |
+| `validate-game-idea` | -1 | @founder | Game validation brief with GO/RESHAPE/NO-GO verdict |
 | `unpack-problem` | 0-1 | @product-manager, @user-researcher | Problem-first exploration before solution ideation (guided, automated, or combo) |
 | `explore-idea` | 0-1 | @founder, @researcher, @user-researcher | Validated idea brief, market analysis, personas |
 | `explore-game-idea` | 0-1 | @founder, @researcher, @user-researcher | Validated game brief, genre analysis, player personas |

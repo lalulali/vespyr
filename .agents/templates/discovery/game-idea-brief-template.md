@@ -57,7 +57,7 @@ Did any tool reveal a fatal flaw?
 
 - [ ] **No red flags** — Concept survives all tests
 - [ ] **Yellow flag** — Risks exist but are manageable with validation
-- [ ] **Red flag** — Fatal flaw identified; concept should be killed or pivoted
+- [ ] **Red flag** — Fatal flaw identified; concept is `[NO-GO]` or `[RESHAPE]`
 
 If red or yellow flag, explain:
 - What is the flaw?

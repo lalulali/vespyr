@@ -57,7 +57,7 @@ Load the selected method from `methods.csv`. Apply it step-by-step:
 
 ### Step 4: Gate and write outputs
 
-End the session with a Decision Gate on the strongest idea(s): `[PASS]` (ready to stress-test), `[PIVOT]` (promising but needs reshaping), or `[KILL]` (dominated by alternatives). A brainstorm that ends without a gate is a list, not a session.
+End the session with a Decision Gate on the strongest idea(s): `[GO]` (ready to stress-test), `[RESHAPE]` (promising but the mechanism needs rebuilding), or `[NO-GO]` (dominated by alternatives). A brainstorm that ends without a gate is a list, not a session.
 
 Write the session output — sharpened topic, method used, key ideas, gate verdict, open questions — to `artifacts/output/01-discovery/brainstorming-session.md`, then record to memory:
 
@@ -65,7 +65,7 @@ Write the session output — sharpened topic, method used, key ideas, gate verdi
 @memory-controller write active-decisions.md
 ### [BRAINSTORM] {method name} — {topic} [date: YYYY-MM-DD] [agent: @founder]
 {synthesized outputs, key ideas, decisions, open questions}
-Gate: {PASS/PIVOT/KILL} on {strongest idea}
+Gate: {GO/RESHAPE/NO-GO} on {strongest idea}
 **Status:** active
 ```
 

@@ -37,7 +37,7 @@ For each solution space, produce 1-3 candidate solution concepts. Each concept:
 - **Maps to a JTBD** — which job does this help with?
 - **Has a testable hypothesis** — "If we {do this}, then {this metric} will improve by {amount} because {reason}."
 - **Has a confidence level** — High/Med/Low based on strength of evidence
-- **Carries a per-concept Decision Gate verdict** — a parseable line `[VERDICT: PASS|PIVOT|KILL] — <one-line rationale>` on the concept's readiness to pursue. Per-concept verdicts roll up into the brief's single `[GATE: ...]` line at step 4; the two markers are distinct on purpose (candidate-level vs brief-level).
+- **Carries a per-concept Decision Gate verdict** — a parseable line `[VERDICT: GO|RESHAPE|NO-GO] — <one-line rationale>` on the concept's readiness to pursue. Per-concept verdicts roll up into the brief's single `[GATE: ...]` line at step 4; the two markers are distinct on purpose (candidate-level vs brief-level).
 
 Present concepts to the user. In guided/combination mode, report what each concept's evidence does and doesn't cover, then ask pointed questions tied to the weakest evidence (e.g., "concept 2's hypothesis has no baseline metric — what does {metric} measure today?").
 

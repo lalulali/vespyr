@@ -26,7 +26,7 @@ Confirm the brief sections are intact:
 - Proposed solution
 - Target user
 - Value proposition
-- Verdict (GO/PIVOT/KILL)
+- Verdict (GO/RESHAPE/NO-GO)
 
 If any core section is missing, flag it immediately — the brief may be corrupted or incomplete. In that case, recommend re-running in create mode.
 

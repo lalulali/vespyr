@@ -104,7 +104,7 @@ See `.agents/references/citation-format.md` for the full format spec.
 - Pricing model research needed
 
 **When to escalate:**
-- Market finding contradicts core product hypothesis → `@founder` (GO/PIVOT/KILL implications)
+- Market finding contradicts core product hypothesis → `@founder` (GO/RESHAPE/NO-GO implications)
 - Research requires primary user data (interviews, surveys) → `@user-researcher`
 - Technical feasibility research → `@architect`
 - Market too small or timing wrong → `@founder` (present evidence, let founder decide)

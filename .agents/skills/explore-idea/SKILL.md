@@ -148,10 +148,10 @@ After all research completes, review findings against the brief:
 
 **Anti-sycophancy gate (SPC):** if all three research artifacts are uniformly positive — no red flags, no disconfirming evidence, no competitive threat — the review has converged prematurely. Before issuing a verdict, run one adversarial pass: name the strongest reason this fails (from the research itself or first principles) and either refute it with evidence or record it as a documented risk. Uniformly rosy research is a red flag, not a green light.
 
-**If research contradicts assumptions**, issue a Decision Gate verdict as a parseable line `VERDICT: [PASS]|[PIVOT]|[KILL] — <reason>` (protocol detail in `steps/step-03-founder-review.md`):
-- `[PASS]` — premises hold; proceed. A qualified pass ("proceed with documented risk") requires the risk named in the brief with its evidence and a revisit trigger — never a silent pass.
-- `[PIVOT]` — revise brief and re-run Phase 2. A scope adjustment ("refine") is not a verdict — record it as an ADR entry, then re-issue the gate verdict.
-- `[KILL]` — research invalidates the concept; document why and stop (return to problem discovery via `/unpack-problem` if a better concept may exist).
+**If research contradicts assumptions**, issue a Decision Gate verdict as a parseable line `VERDICT: [GO]|[RESHAPE]|[NO-GO] — <reason>` (protocol detail in `steps/step-03-founder-review.md`):
+- `[GO]` — premises hold; proceed. A qualified go ("proceed with documented risk") requires the risk named in the brief with its evidence and a revisit trigger — never a silent pass.
+- `[RESHAPE]` — revise brief and re-run Phase 2. A scope adjustment ("refine") is not a verdict — record it as an ADR entry, then re-issue the gate verdict.
+- `[NO-GO]` — research invalidates the concept; document why and stop (return to problem discovery via `/unpack-problem` if a better concept may exist).
 - Maximum 1 pivot before committing to a direction
 
 ## Output artifacts

@@ -220,10 +220,10 @@ Based on diagnostic, premises, and alternatives, give ONE verdict:
 **GO** — Worth exploring. Demand evidence exists or the gap is clear enough to validate through prototyping.
 → Produce validation brief. Handoff to `product-exploration`.
 
-**PIVOT** — The core experience itch is real, but this approach is wrong.
+**RESHAPE** — The core experience itch is real, but this approach is wrong.
 → Propose a reframed direction. Re-run this skill with the revised framing.
 
-**KILL** — Doesn't survive scrutiny. No demand, no gap, premises don't hold.
+**NO-GO** — Doesn't survive scrutiny. No demand, no gap, premises don't hold.
 → Document why in the brief. Don't soften it. Kill early to save time.
 
 Every verdict includes one concrete **next action** — a specific real-world step, not "go research this."
@@ -238,9 +238,9 @@ Use the template: `.agents/templates/discovery/game-validation-brief-template.md
 
 **GO →** Load `explore-game-idea`. The validation brief replaces the concept brief — `@founder` uses it as input instead of synthesizing from scratch. Research agents focus on the open questions listed in the brief.
 
-**PIVOT →** Re-run `game-idea-validation` with the revised framing.
+**RESHAPE →** Re-run `game-idea-validation` with the revised framing.
 
-**KILL →** Stop. The brief documents why. Revisit only if new evidence emerges.
+**NO-GO →** Stop. The brief documents why. Revisit only if new evidence emerges.
 
 ## Guiding principles
 

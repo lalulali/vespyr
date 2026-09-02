@@ -19,6 +19,7 @@
     "description": "Select and apply brainstorming methods from a 60-method catalog — SCAMPER, Six Thinking Hats, Starbursting, and more",
     "prerequisites": [],
     "outputs": [
+      "artifacts/output/01-discovery/brainstorming-session.md",
       "artifacts/memory/active-decisions.md"
     ],
     "key_agents": [
@@ -159,8 +160,7 @@
     "key_agents": [
       "@architect",
       "@security-engineer",
-      "@qa-engineer",
-      "@developer"
+      "@qa-engineer"
     ]
   },
   {
@@ -611,13 +611,14 @@
     "name": "validate-idea",
     "description": "Stress-test product concepts before research. Supports create/edit/validate modes.",
     "prerequisites": [
-      "Edit mode: artifacts/output/01-discovery/idea-brief.md exists",
-      "Validate mode: artifacts/output/01-discovery/idea-brief.md exists",
+      "Edit mode: artifacts/output/01-discovery/idea-brief.md or validation-brief.md exists",
+      "Validate mode: artifacts/output/01-discovery/idea-brief.md or validation-brief.md exists",
       "Problem-first entry: artifacts/output/02-research/problem-space-brief.md from /unpack-problem is accepted as equivalent to idea-brief.md for create mode — the problem brief becomes the idea to validate"
     ],
     "outputs": [
       "artifacts/output/01-discovery/idea-brief.md",
-      "artifacts/output/02-research/problem-space-brief.md"
+      "artifacts/output/02-research/problem-space-brief.md",
+      "artifacts/output/01-discovery/validation-brief.md"
     ],
     "key_agents": [
       "@founder"

@@ -4,7 +4,7 @@ Each agent has a clear scope. Use this table to decide who to invoke. If a task 
 
 | Agent | Owns (does this) | Does NOT own (delegate up) |
 |---|---|---|
-| `@founder` | Strategic concept stress-testing, GO/PIVOT/KILL, scope disputes between PM and tech-lead | Tactical execution, code review, design |
+| `@founder` | Strategic concept stress-testing, GO/RESHAPE/NO-GO, scope disputes between PM and tech-lead | Tactical execution, code review, design |
 | `@product-manager` | PRD, user stories, kanban, success metrics, scope vs. business disputes | Architecture, code quality, design fidelity |
 | `@product-designer` | UX/UI specs, screen states, wireframes, design system tokens, **motion spec** (`motion-spec.md`), accessibility-aware design proposals | Backend logic, copy writing, market research, final accessibility decisions |
 | `@architect` | ADRs, system components, DDL/types, API contracts, tech debt catalog | Business logic, UI implementation, deployment |

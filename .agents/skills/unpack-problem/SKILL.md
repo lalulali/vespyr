@@ -75,7 +75,7 @@ Blockers: {unresolved problem areas or "none"}
 
 ## Handoff routing
 
-The brief ends with a Decision Gate on the selected solution concept — `[GATE: PASS|PIVOT|KILL — <reason>]` (protocol in `steps/step-04-brief-generation.md`). A brief without a gate is a document, not a decision.
+The brief ends with a Decision Gate on the selected solution concept — `[GATE: GO|RESHAPE|NO-GO — <reason>]` (protocol in `steps/step-04-brief-generation.md`). A brief without a gate is a document, not a decision.
 
 - Solution concept ready to test → load `/validate-idea`
 - Structured brief ready for specs → load `/shape-up`

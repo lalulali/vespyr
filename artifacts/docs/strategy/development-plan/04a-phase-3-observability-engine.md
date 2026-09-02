@@ -45,7 +45,7 @@ In accordance with Round Table 2026-08-21 + 2026-09-01 Option A Thin Slice, obse
 `telemetry_surface.js` transforms raw span streams into high-density, LLM-consumable and human-readable digests:
 
 ### 3.1 CLI Commands & Interfaces
-- `node .agents/scripts/telemetry_surface.js session`: Returns ≤20 lines of recent session spend, top agents by token usage, and biomarker pass rates.
+- `node .agents/scripts/telemetry_surface.js session`: Returns ≤20 lines of recent session spend, top agents by token usage, and biomarker pass rates, stitched across multi-day calendar boundaries using `session_id`.
 - `node .agents/scripts/telemetry_surface.js hot-paths`: Identifies the top 3 most expensive skills or step transitions in the last 7 days.
 - `node .agents/scripts/telemetry_surface.js compare --baseline evals/baseline.json`: Compares current execution metrics against historical baselines.
 
@@ -76,20 +76,21 @@ Makes the codebase and documentation dependency graphs queryable via typed subco
 
 ---
 
-## 5. The 5 Hard Telemetry Invariants (Hybrid — per 02l Option A, imported)
+## 5. The 6 Hard Telemetry Invariants (Hybrid & Multi-Day Continuity — per 02l Option A, imported)
 
 1. **`INV-TEL-01` (Zero Blind Execution — Hybrid):** Every invocation MUST generate valid span with non-null `trace_id`, real `duration_ms`, and `usage.total_tokens`; prompt/completion exact where harness reports, `estimated=true` <20% window with retry child spans; `cost_usd` nullable Phase 1; <80% exact fails gate. Via `captureUsage()` at LLM call site + `session_bootstrap.js` propagation.
 2. **`INV-TEL-02` (Deterministic Gate Contract):** Every deliverable MUST pass Tier 0 RQS-D (SCR/MSHA/PD/PCI/AC <25ms, 0 tokens) before write-to-disk.
 3. **`INV-TEL-03` (Zero Human-in-the-Loop RQS-D Gate):** Workflow success requires `RQS-D ≥85%` and deterministic biomarkers (`PCI=0.0`, `PD=0.0`, `SCR=1.0`, `MSHA=1.0`) — RQS-J (SRSR/SDS) shadow only.
 4. **`INV-TEL-04` (Regression Tripwire — Retry-Aware):** CI Exit 2 if token sum (including retry spans) > baseline `evals/baseline.json` by >15% or pass drop >0%.
 5. **`INV-TEL-05` (Model-Tier Invariant):** Layer-0 architecture/threat verdicts MUST use Tier B; demotion triggers `TIER_DEMOTION` warning via `modelTierGuards.js`.
+6. **`INV-TEL-06` (Multi-Day Session & Trace Continuity):** Continuous sessions spanning UTC date boundaries must stitch spans across `spans-*.ndjson` files via `session_id`; day rollovers auto-emit `session_resume` linkage.
 
 ---
 
 ## 6. Workstream Implementation Tasks & Sizing
 
 ### WS-1: Span Aggregation & Surface Digests (Budget: 6h)
-- [ ] **Task 04a.1 (2h)**: Build `.agents/scripts/telemetry_surface.js` with `session`, `hot-paths`, `summary`, and `compare` subcommands.
+- [ ] **Task 04a.1 (2h)**: Build `.agents/scripts/telemetry_surface.js` with `session`, `hot-paths`, `summary`, and `compare` subcommands, including multi-day span stitching across date shards via `session_id`.
 - [ ] **Task 04a.2 (1.5h)**: Integrate `telemetry_surface.js session` into `@memory-controller` step 0.4 (<150ms execution budget).
 - [ ] **Task 04a.3 (1.5h)**: Update `/status` and `/retro` skills to display 7-day rolling token digests and biomarker health tables.
 - [ ] **Task 04a.4 (1h)**: Update `orchestrator_state.js` to emit throttled per-step cost & biomarker alerts.
@@ -103,10 +104,10 @@ Makes the codebase and documentation dependency graphs queryable via typed subco
 
 ## 7. Definition of Done (DoD)
 
-1. `telemetry_surface.js session` executes in <150ms and injects clean ≤20-line summaries at session start.
+1. `telemetry_surface.js session` executes in <150ms, stitches multi-day sessions across date shards by `session_id`, and injects clean ≤20-line summaries at session start.
 2. `auto_graph.js` maintains fresh code and doc dependency graphs across all 5 lifecycle triggers.
 3. Graph query API responds in <100ms for blast radius and topology queries.
-4. All 5 Telemetry Invariants (`INV-TEL-01..05`) pass automated verification in CI.
+4. All 6 Telemetry Invariants (`INV-TEL-01..06`) pass automated verification in CI.
 
 ---
 

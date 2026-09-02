@@ -23,7 +23,7 @@ If unclear, ask: "Are you starting a new idea, refining an existing brief, or st
 ## Mode routing + steps
 **Step 0 — Scope Gate (non-skippable):** anchor scope first via `steps/step-00-scope-and-decision-anchoring.md`; the selected mode is the locked track. `step_tracker.js` exits 1 if Step 1 begins without a locked track.
 
-- **Create** → `steps/step-01a-session-setup.md` → ... → `steps/step-07a-handoff.md` (7 steps: session setup, input analysis, idea framing, stress-test R1, stress-test R2, GO/PIVOT/KILL, handoff)
+- **Create** → `steps/step-01a-session-setup.md` → ... → `steps/step-07a-handoff.md` (7 steps: session setup, input analysis, idea framing, stress-test R1, stress-test R2, GO/RESHAPE/NO-GO, handoff)
 - **Edit** → `steps/step-01b-load-existing.md` → ... → `steps/step-05b-finalize.md` (5 steps: load, identify gaps, revise, stress-test, finalize)
 - **Validate** → `steps/step-01c-open-questions.md` → ... → `steps/step-05c-lock-handoff.md` (5 steps: open questions, 7-branch tree, cross-branch check, decision log, lock & handoff)
 
@@ -34,7 +34,7 @@ If unclear, ask: "Are you starting a new idea, refining an existing brief, or st
 - Problem-first entry: `artifacts/output/02-research/problem-space-brief.md` from `/unpack-problem` is accepted as equivalent to `idea-brief.md` for create mode — the problem brief becomes the idea to validate
 
 ## Halt conditions
-- @founder issues KILL verdict (create mode)
+- @founder issues NO-GO verdict (create mode)
 - Cross-branch contradiction unresolved (validate mode)
 - Revision-round limits without convergence (edit mode): per-section rounds per `steps/step-03b-revise.md`, stress-test resolution rounds per `steps/step-04b-stress-test.md`
 
@@ -55,19 +55,19 @@ At end: run `node .agents/scripts/orchestrator_state.js complete --agent founder
 ```
 @memory-controller write active-decisions.md
 ### [PRODUCT] Idea validation verdict — {idea name} [date: YYYY-MM-DD] [agent: @founder]
-Verdict: GO / PIVOT / KILL
+Verdict: GO / RESHAPE / NO-GO
 Rationale: {1-2 sentences on why}
 Key assumptions validated: {list}
 **Status:** active
 
 @memory-controller session-write [agent: @founder]
 Worked on: Idea validation — {idea name}
-Decisions: Verdict: {GO/PIVOT/KILL}. {key rationale}
-Next step: {explore-idea if GO, pivot brief if PIVOT, stop if KILL}
+Decisions: Verdict: {GO/RESHAPE/NO-GO}. {key rationale}
+Next step: {explore-idea if GO, pivot brief if RESHAPE, stop if NO-GO}
 Blockers: {unresolved assumptions or "none"}
 ```
 
 ## Done when
 - Brief written to `artifacts/output/01-discovery/idea-brief.md` (create mode, pre-validation) and/or `artifacts/output/01-discovery/validation-brief.md` (canonical output — see `steps/step-07a-handoff.md`)
-- Verdict recorded (GO / PIVOT / KILL)
+- Verdict recorded (GO / RESHAPE / NO-GO)
 - Handoff to next phase is unambiguous

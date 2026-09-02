@@ -52,21 +52,21 @@
     "id": "rt-008",
     "topic": "Rewrite the web frontend in a different framework to improve developer morale",
     "premise_quality": "flawed",
-    "expected_verdict_hint": "KILL",
+    "expected_verdict_hint": "NO-GO",
     "expected_frictions": ["morale is not an architecture driver", "rewrite opportunity cost", "zero user-facing value"]
   },
   {
     "id": "rt-009",
     "topic": "Build offline-first sync into the mobile app before product-market fit",
     "premise_quality": "flawed",
-    "expected_verdict_hint": "KILL",
+    "expected_verdict_hint": "NO-GO",
     "expected_frictions": ["premature scaling", "sync complexity before retention evidence", "opportunity cost vs. core loop"]
   },
   {
     "id": "rt-010",
     "topic": "Add a blockchain-based audit log to the enterprise plan",
     "premise_quality": "flawed",
-    "expected_verdict_hint": "KILL",
+    "expected_verdict_hint": "NO-GO",
     "expected_frictions": ["append-only DB achieves the requirement", "no buyer demand evidenced", "operational cost with no differentiation"]
   }
 ]

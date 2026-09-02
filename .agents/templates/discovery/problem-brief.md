@@ -44,4 +44,4 @@ audience: @product-manager, @founder, @user-researcher
 - [ ] `/explore-idea` — research market and competitors
 
 ## Decision Gate
-`[GATE: PASS|PIVOT|KILL — <reason>]` — the routing decision on the selected solution concept. `[PASS]` ready to stress-test; `[PIVOT]` problem framing needs another pass; `[KILL]` problem not worth solving (document why). A brief without this gate is a document, not a decision.
+`[GATE: GO|RESHAPE|NO-GO — <reason>]` — the routing decision on the selected solution concept. `[GO]` ready to stress-test; `[RESHAPE]` problem framing needs another pass; `[NO-GO]` problem not worth solving (document why). A brief without this gate is a document, not a decision.

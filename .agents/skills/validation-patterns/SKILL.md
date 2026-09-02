@@ -14,7 +14,7 @@ Searches the 30-method validation catalog (`methods.csv`) and applies the best-f
 
 ## Persona delegation
 
-This skill delegates to `@founder`. The founder selects and executes the validation method. The skill file provides the method catalog and selection logic; `@founder` provides the GO/PIVOT/KILL judgment, challenge stance, and decision logging.
+This skill delegates to `@founder`. The founder selects and executes the validation method. The skill file provides the method catalog and selection logic; `@founder` provides the GO/RESHAPE/NO-GO judgment, challenge stance, and decision logging.
 
 ## When to use
 

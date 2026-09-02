@@ -24,8 +24,8 @@ Every recorded roundtable is a `.md` file named `<topic>_<mode>_<run>.md` (mode:
    - @security-engineer -> @ml-ai-engineer: <invalid invariant targeted>
    ```
    ````
-2. **Per-panelist verdict lines**: `[VERDICT: PASS|PIVOT|KILL]` (Decision Gate) or `[VERDICT: CONFIRMED|PARTIAL|FALSIFIED]` (Review Gate), as the final line of each position.
-3. **Outcome line** in Phase 4: `[SYNTHESIS: PASS|PIVOT|KILL]` or `[SYNTHESIS: ADR:<adr-id>]`.
+2. **Per-panelist verdict lines**: `[VERDICT: GO|RESHAPE|NO-GO]` (Decision Gate) or `[VERDICT: CONFIRMED|PARTIAL|FALSIFIED]` (Review Gate), as the final line of each position. Legacy `PASS|PIVOT|KILL` in pre-2026-09-02 transcripts normalizes onto `GO|RESHAPE|NO-GO`; dated transcripts are never rewritten.
+3. **Outcome line** in Phase 4: `[SYNTHESIS: GO|RESHAPE|NO-GO]` or `[SYNTHESIS: ADR:<adr-id>]`.
 
 ## Commands
 
@@ -42,7 +42,7 @@ node .agents/scripts/roundtable_eval.js log --mode <native|solo|refused> --topic
 |---|---|---|
 | Coverage compliance | share of transcripts whose `roundtable-coverage` block parses with zero unchallenged panelists | 1.0 — this one is a hard gate, not a trend |
 | Round-1 disagreement | per transcript: `1 − (modal verdict share)` over Decision-Gate verdicts | > 0 on sound premises; zero is an SPC advisory |
-| SPC flag | round-1 unanimity (disagreement = 0) | advisory only — **unanimous `[KILL]` on flawed-premise topics is correct behavior**, not sycophancy; read jointly with premise table |
+| SPC flag | round-1 unanimity (disagreement = 0) | advisory only — **unanimous `[NO-GO]` on flawed-premise topics is correct behavior**, not sycophancy; read jointly with premise table |
 | Verdict stability | across ≥3 native runs of one topic: share of runs matching the modal `[SYNTHESIS]` | establish baseline first; no gate until then |
 | Solo-vs-native divergence | share of solo runs whose `[SYNTHESIS]` differs from the topic's native modal synthesis | tracked, not gated — quantifies D3's "degraded" claim |
 

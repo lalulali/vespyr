@@ -37,10 +37,10 @@ Read:
 
 **SPC check — before issuing the verdict:** if all three research artifacts are uniformly positive (no red flags, no disconfirming evidence, no competitive threat), run one adversarial pass — name the strongest reason this fails and either refute it with evidence or record it as the risk in a qualified pass. Uniformly rosy research is a red flag, not a green light.
 
-**If research contradicts assumptions**, issue a Decision Gate verdict as a parseable line `VERDICT: [PASS]|[PIVOT]|[KILL] — <reason>`:
-- `[PIVOT]` — revise brief and re-run Phase 2
-- `[PASS]` — premises hold; proceed. A qualified pass (proceed despite residual risk) must name the risk in the brief with its supporting evidence and a revisit trigger — never a silent pass.
-- `[KILL]` — abandon the direction; return to problem discovery (`/unpack-problem`)
+**If research contradicts assumptions**, issue a Decision Gate verdict as a parseable line `VERDICT: [GO]|[RESHAPE]|[NO-GO] — <reason>`:
+- `[RESHAPE]` — revise brief and re-run Phase 2
+- `[GO]` — premises hold; proceed. A qualified go (proceed despite residual risk) must name the risk in the brief with its supporting evidence and a revisit trigger — never a silent pass.
+- `[NO-GO]` — abandon the direction; return to problem discovery (`/unpack-problem`)
 - A scope adjustment ("refine") is not a verdict — record it as an ADR entry in `artifacts/memory/active-decisions.md` (via `@memory-controller`) naming the trade-off, then re-issue the gate verdict.
 - Maximum 1 pivot before committing to a direction
 - A missing or malformed `MARKET VERDICT:` line in market-analysis.md is `[FALSIFIED]` input — re-dispatch Step 2a before deciding.

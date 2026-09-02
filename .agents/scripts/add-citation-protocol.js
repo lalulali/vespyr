@@ -42,7 +42,7 @@ const CITATION_EMPHASIS = {
   'security-engineer': '**Your emphasis:** Every vulnerability reference gets a CVE ID or OWASP reference.',
   'performance-engineer': '**Your emphasis:** Every latency benchmark references the measurement method + hardware.',
   'technical-writer': '**Your emphasis:** Every API claim references the source file:line or spec section.',
-  founder: '**Your emphasis:** Every market-sizing or competitive claim in the GO/PIVOT/KILL gets a source.',
+  founder: '**Your emphasis:** Every market-sizing or competitive claim in the GO/RESHAPE/NO-GO gets a source.',
   'product-manager': '**Your emphasis:** Every user need, JTBD claim, and market reference in the PRD gets a source.',
   'product-designer': '**Your emphasis:** Every design principle reference (Norman, Nielsen, etc.) gets a source.',
   'tech-lead': '**Your emphasis:** Every estimation benchmark or pattern reference gets a source.',

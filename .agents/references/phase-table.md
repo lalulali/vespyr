@@ -2,7 +2,7 @@
 
 | # | Folder | Phase Name | Primary Skill | Primary Agent | Gate |
 |---|--------|-----------|---------------|---------------|------|
-| -1 | (none) | Validation | `validate-idea` | `@founder` | GO/PIVOT/KILL |
+| -1 | (none) | Validation | `validate-idea` | `@founder` | GO/RESHAPE/NO-GO |
 | 0 | `01-discovery/` | Discovery | `explore-idea` | `@researcher` + `@user-researcher` | Brief sign-off |
 | 1 | `02-research/` | Research | (sub-skill of explore-idea) | parallel researchers | Quality gate |
 | 2 | `03-strategy/` | Strategy | `design` (PRD) | `@product-manager` | PRD approval |
@@ -18,4 +18,4 @@
 - Folder names use 2-digit zero-padded numbers (00, 01, ..., 09)
 - Phase numbers are 0-indexed (Phase 0 = Discovery)
 - The folder name does not always equal the phase number when 2 phases share a folder (e.g., 03-strategy contains both Phase 2 and Phase 3 outputs)
-- Validation (Phase -1) has no folder by design — it is a pre-phase gate, not a phase. Its output is a GO/PIVOT/KILL decision that seeds `01-discovery/idea-brief.md`, not a folder of its own.
+- Validation (Phase -1) has no folder by design — it is a pre-phase gate, not a phase. Its output is a GO/RESHAPE/NO-GO decision that seeds `01-discovery/idea-brief.md`, not a folder of its own.

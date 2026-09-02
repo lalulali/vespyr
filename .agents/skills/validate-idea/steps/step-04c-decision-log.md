@@ -30,7 +30,7 @@ Prioritize writing when:
 - A branch had a 🔴 score that was resolved
 - A cross-branch contradiction was reconciled
 - A premise was confirmed or rejected
-- The validation verdict (GO/PIVOT/KILL) was affirmed or changed
+- The validation verdict (GO/RESHAPE/NO-GO) was affirmed or changed
 
 ## Cardinality
 At least one decision per 🔴 branch. At least one decision per contradiction found.

@@ -98,7 +98,7 @@ Return a summary:
 
 ### Available Core Skills
 - `/unpack-problem` — Problem-first exploration before solution ideation
-- `/validate-idea` — Stress-test product concepts before research (GO/PIVOT/KILL)
+- `/validate-idea` — Stress-test product concepts before research (GO/RESHAPE/NO-GO)
 - `/validate-game-idea` — Stress-test game concepts before production
 - `/explore-idea` — Market, competitor, and user research
 - `/explore-game-idea` — Genre market and player research

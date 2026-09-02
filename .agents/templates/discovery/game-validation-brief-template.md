@@ -102,7 +102,7 @@
 
 ## Verdict
 
-**{GO | PIVOT | KILL}** — {rationale in 2-3 sentences. Be direct. Don't soften a KILL.}
+**{GO | RESHAPE | NO-GO}** — {rationale in 2-3 sentences. Be direct. Don't soften a NO-GO.}
 
 ---
 
@@ -125,4 +125,4 @@
 **Document info:**
 - Author: @founder
 - Date: {date}
-- Status: {Draft | GO for exploration | PIVOTED | KILLED}
+- Status: {Draft | GO for exploration | RESHAPE pending | NO-GO}

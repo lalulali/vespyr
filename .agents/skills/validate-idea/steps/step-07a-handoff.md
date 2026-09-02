@@ -34,7 +34,7 @@ node .agents/scripts/orchestrator_state.js complete --agent founder --artifact 0
 
 ## Handoff routing
 - **GO** → load `explore-idea`. The validation brief feeds into research. Research agents focus on the open questions listed in the brief.
-- **PIVOT** → re-run `validate-idea` with the revised framing.
-- **KILL** → stop. The brief documents why. Revisit only if new evidence emerges.
+- **RESHAPE** → re-run `validate-idea` with the revised framing.
+- **NO-GO** → stop. The brief documents why. Revisit only if new evidence emerges.
 
 > **Tracker:** `node .agents/scripts/step_tracker.js complete --skill validate-idea-create --step 7`

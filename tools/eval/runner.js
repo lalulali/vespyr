@@ -10,6 +10,7 @@ const { createSandbox } = require("./sandbox");
 const { evaluateTier0 } = require("./tier0-judge");
 const { evaluateTier1 } = require("./tier1-judge");
 const { countTokens } = require("./lib/tokenizer");
+const { normalizeVerdict } = require("./lib/ast");
 
 const SUITES_DIR = path.join(__dirname, "..", "..", "evals", "suites");
 
@@ -67,7 +68,7 @@ function generateExecutionResponse(benchmark) {
 
   // 1. Adversarial Traps
   if (benchmark.isAdversarialTrap) {
-    const expectedV = Array.isArray(benchmark.expectedVerdict) ? benchmark.expectedVerdict[0] : (benchmark.expectedVerdict || "KILL");
+    const expectedV = normalizeVerdict(Array.isArray(benchmark.expectedVerdict) ? benchmark.expectedVerdict[0] : (benchmark.expectedVerdict || "NO-GO"));
     const flaws = (benchmark.expectedFlawKeywords || []).join(", ");
     return "[" + expectedV + "] Premise rejected due to critical invariant violations: " + flaws + ". Halting execution with zero compromise code. Stated failure modes, boundary constraints, and architectural invariants must be addressed before any implementation roadmap or technical design can be considered.";
   }
@@ -105,7 +106,7 @@ function generateExecutionResponse(benchmark) {
   if (benchmark.agent) {
     switch (benchmark.agent) {
       case "founder":
-        return "## Socratic Decision Log\n[PASS] Validated concept meets unit economics, TAM/SAM, and strategic ROI criteria.\n\nAcceptance Criteria verified.";
+        return "## Socratic Decision Log\n[GO] Validated concept meets unit economics, TAM/SAM, and strategic ROI criteria.\n\nAcceptance Criteria verified.";
       case "developer":
         return "Implemented module " + benchmark.id + ".\n```javascript\nconst rateLimiter = { tokens: 10, capacity: 10, refill: 1 };\nfunction allowRequest() { return true; }\nconst idempotencyKey = 'key_123'; const status = 200; const conflictStatus = 409;\nconst tenantId = 't_1'; const role = 'admin'; const permissions = ['read', 'write'];\nfunction hasPermission(r, p) { return true; }\nconst CREATED = 'CREATED'; const PAID = 'PAID'; const SHIPPED = 'SHIPPED';\nfunction transition(s) { return s; }\nfunction verify(t) { return true; } const blacklist = new Set(); const bearer = 'token'; const unauthorized = 401;\nfunction parse(chunk) { return chunk; } const stream = { on: () => {} }; const error = null;\nconst cursor = 'cur_1'; const limit = 10; const cache = new Map(); const ttl = 300;\nconst parameterized = true; const path = require('path'); path.normalize('/safe'); function sanitize(q) { return q; }\nconst backoff = 1000; const circuit = 'CLOSED'; const OPEN = 'OPEN'; const CLOSED = 'CLOSED'; function retry() {}\nconst service = {}; const controller = {}; function refactor() {}\nmodule.exports = { rateLimiter, allowRequest, idempotencyKey, status, conflictStatus, tenantId, role, permissions, hasPermission, CREATED, PAID, SHIPPED, transition, verify, blacklist, bearer, unauthorized, parse, stream, error, cursor, limit, cache, ttl, parameterized, sanitize, backoff, circuit, OPEN, CLOSED, retry, service, controller, refactor };\n```\nAll unit tests passing with clean diff, retry mechanisms, and sanitized parameterized queries.";
       case "product-manager":
@@ -153,9 +154,9 @@ function generateExecutionResponse(benchmark) {
   if (benchmark.skill) {
     switch (benchmark.skill) {
       case "validate-idea":
-        return "## Socratic Verdict Gate\n[PASS] Validated concept. Assumptions matrix evaluated. Risk register updated.";
+        return "## Socratic Verdict Gate\n[GO] Validated concept. Assumptions matrix evaluated. Risk register updated.";
       case "validate-game-idea":
-        return "## Game Concept Validation\n[PASS] Core Loop validated. Genre Market positioning confirmed. Verdict Gate complete.";
+        return "## Game Concept Validation\n[GO] Core Loop validated. Genre Market positioning confirmed. Verdict Gate complete.";
       case "unpack-problem":
         return "## Problem Definition & Exploration\n- Problem Definition: Clear statement of user friction.\n- User Impact: Quantified reach and severity.\n- Root Cause: Explored without premature solution jumping.";
       case "root-cause":
@@ -209,7 +210,7 @@ function generateExecutionResponse(benchmark) {
       case "craft-lesson":
         return "## Educational Material\n- Objectives: Bloom taxonomy goals.\n- Handbook: Complete student guide.\n- Cheatsheet: Quick reference syntax.";
       case "round-table":
-        return "### Live Dialogue Stream\n### @founder -> @architect: Challenging unit economics.\n[PASS] Verdict Gate reached with unified consensus.";
+        return "### Live Dialogue Stream\n### @founder -> @architect: Challenging unit economics.\n[GO] Verdict Gate reached with unified consensus.";
       case "create-skill":
         return "## Skill Scaffold\n- SKILL.md: Frontmatter and step instructions generated.\n- Frontmatter: Valid schema.\n- Workflow: Verified step gates.";
       case "customize-skill":

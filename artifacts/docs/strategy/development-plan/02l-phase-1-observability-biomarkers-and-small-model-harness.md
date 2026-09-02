@@ -13,7 +13,7 @@
    - **Tier A (Cheap / Fast — Gemini Flash, Haiku, 8B–70B SLMs):** Bounded, single-turn transformations, schema formatting, micro-codegen wrapped in strict CFG constraints and closed-loop compiler repair (`N ≤ 2` via `tsc`/`eslint`/`vitest`).
    - **Tier B (Frontier Reasoning — Claude 3.5 Sonnet, GPT-4o, o1/o3-mini):** High-entropy synthesis, ADR authoring, threat modeling, and Tier 1 G-Eval judging (owns RQS-J).
 
-4. **The 5 Hard Telemetry Invariants (`INV-TEL-01..05` — Hybrid):** Enforce hybrid exact-token tracking, deterministic early aborts, RQS-D release gates, CI regression tripwires with retry awareness, and role-tier invariants. Cost is optional; exact-token coverage ≥80% is hard.
+4. **The 6 Hard Telemetry Invariants (`INV-TEL-01..06` — Hybrid & Multi-Day Continuity):** Enforce hybrid exact-token tracking, deterministic early aborts, RQS-D release gates, CI regression tripwires with retry awareness, role-tier invariants, and **multi-day session continuity (`INV-TEL-06`)** across UTC date-sharded logs (`spans-YYYY-MM-DD.ndjson`). Cost is optional; exact-token coverage ≥80% is hard.
 
 **Position:** Phase 1 (vespyr 2.0.0) sub-plan — 13th in the `02*` series, alongside `02j-phase-1-evals-and-agnostic-harness.md` and `02m-phase-1-intent-routing-and-anti-premature-execution.md` (re-homed from 02k), immediately prior to `03-phase-2-enablement.md`. **Phase 1 / Phase 3 boundary:** 02l owns in-session gates + span emission; `04-phase-3-observability.md` / `04a-phase-3-observability-engine.md` own macro-telemetry digests, graph observability, and `vespyr web` `04b`. Single-owner canonical span schema lives here; 04/04a import via `tools/telemetry/schema.json`.
 
@@ -262,7 +262,7 @@ interface VespyrTelemetrySpan {
 
 ---
 
-## 6. The 5 Hard Telemetry Invariants (Hybrid — Option A)
+## 6. The 6 Hard Telemetry Invariants (Hybrid & Multi-Day Continuity — Option A)
 
 1. **`INV-TEL-01` (Zero Blind Execution — Hybrid):** Every agent invocation, skill step, and subagent handoff MUST generate a valid span with non-null `trace_id`, real `duration_ms`, and `usage.total_tokens`. `prompt_tokens`/`completion_tokens` exact where harness reports; `estimated=true` allowed for <20% of 7-day window with separate retry-spans. `cost_usd` **nullable in Phase 1** (Phase 3 `04a` enriches via `pricing.json`). 7-day window with **<80% exact coverage** (`estimated=false`) fails gate — treats zero-token/estimated-heavy runs as engine faults. Implemented via `captureUsage()` callback at LLM call site + `session_bootstrap.js` trace injection (not `AsyncLocalStorage`).
 
@@ -273,6 +273,8 @@ interface VespyrTelemetrySpan {
 4. **`INV-TEL-04` (Regression Tripwire — Retry-Aware):** If `usage.total_tokens` (sum including retry child spans) exceeds `evals/baseline.json` baseline by `>15%` **or** pass rate drops by `>0%` on identical task suites, CI fails with Exit Code 2. Separate counter: retry-span count vs baseline; inflation from retries does not mask or excuse the tripwire — it **adds** to the inflation metric.
 
 5. **`INV-TEL-05` (Model-Tier Invariant):** Subagents assigned to Layer-0 architecture, threat modeling, or strategic verdicts MUST use Tier B frontier models (`@founder`, `@architect`, `@security-engineer`, `@tech-lead` synthesis). Demoting these roles to Tier A triggers an immediate telemetry audit warning (span `error.code = TIER_DEMOTION`) and blocks release when `orchestrator_state.js` enforces via `modelTierGuards.js`.
+
+6. **`INV-TEL-06` (Multi-Day Session & Trace Continuity):** In single continuous chat sessions spanning across UTC calendar boundaries (Day 1 → Day N), every span/event MUST carry `session_id` resolved from `.agents/state/session-current.json` (or `VESPYR_SESSION_ID`). When writing to a new daily file (`spans-YYYY-MM-DD.ndjson` / `events-YYYY-MM-DD.ndjson`), if `session_id` originated on a prior date, the recorder automatically emits a `session_resume` linkage marker into the new day's file linking back to the root session start, domain, and goal. All telemetry query and verification surfaces (`swarm_telemetry.js verify/summary --days N`, `telemetry_surface.js`) must stitch multi-day spans by `session_id` across daily files rather than treating calendar shards as isolated session boundaries. Raw polymorphic `events-*.ndjson` logging is deprecated in favor of canonical `spans-*.ndjson`.
 
 ---
 

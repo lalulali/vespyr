@@ -4,6 +4,17 @@ All notable changes to the Vespyr project will be documented in this file.
 
 ---
 
+## [Unreleased] - 2026-09-02
+
+### Decision Gate vocabulary: PASS/PIVOT/KILL → GO/RESHAPE/NO-GO (+ mandatory `When:` axis)
+- **Why:** the gate failed on comprehension, not logic. `PASS` answered "did it clear the bar" while `PIVOT`/`KILL` answered "what broke", so the three tokens sat on no single scale; and a bare `PASS` could not distinguish "build now" from "approved, waiting on a condition" — two `[PASS]`s in one roadmap review read as a contradiction.
+- **Two axes:** Axis 1 answers *what survived the audit* — `[GO]` everything / `[RESHAPE]` the need, not the mechanism / `[NO-GO]` nothing. Axis 2 answers *when does it act* — `NOW` | `GATED` | `NEXT-CYCLE` | `NEVER`, required on every `[GO]`. `GATED` demands an owner, a number and an event; "battle-tested" and "proven" are rejected as adjectives, not gates.
+- **Verdict Card:** every gate emits `VERDICT` / `Audited` / `Survived` / `Because` / `Next`, and each card must be readable without seeing the others.
+- **One vocabulary:** `@founder`, `/validate-idea`, `/validate-game-idea` and `/explore-game-idea` previously emitted a third form (`GO/PIVOT/KILL`); collapsed onto the DNA gate. `ZERO-BLUEPRINT-ON-KILL` → `ZERO-BLUEPRINT-ON-NO-GO`; `Kill Autopsy` → `No-Go Autopsy`. Locked definitions added to `references/glossary.md` (§Verdict terms), which had none — the reason the vocabulary drifted in the first place.
+- **Legacy records never rewritten:** `tools/eval/lib/ast.js` and `.agents/scripts/roundtable_eval.js` normalize `PASS|PIVOT|KILL` onto the canonical tokens, so pre-2026-09-02 transcripts, ADRs and memory entries still parse and score. A read-only mapping table lives in `references/vespyr-dna.md`.
+- **Two latent eval defects fixed** (see `lessons-learned.md`): `assertContains` values of the form `[KILL]` were being compiled as regexes, i.e. as character classes matching any of K/I/L — those invariant assertions had been no-ops; and the roundtable verdict extractor could not match a hyphenated token, which would have filed every `[VERDICT: NO-GO]` as an unknown tag.
+- **Deferred to owner:** `.agents/manifest.json` hashes are now stale for the edited `.agents/**` files; regeneration is left to the maintainer under the standing single-writer mandate.
+
 ## [Unreleased] - 2026-08-31
 
 ### Clean installation folder (round-table: @devops-engineer, @developer, @security-engineer, @tech-lead)

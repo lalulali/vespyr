@@ -36,7 +36,7 @@ Persist findings:
 - If pattern discovered: `@memory-controller write patterns-and-conventions.md` with `[SPIKE]` domain tag
 
 ## Halt condition
-Spike reveals a fundamental infeasibility. Escalate to `@founder` for GO/PIVOT/KILL.
+Spike reveals a fundamental infeasibility. Escalate to `@founder` for GO/RESHAPE/NO-GO.
 
 ## Delegation
 - **Memory:** @memory-controller for lessons, blockers, patterns
