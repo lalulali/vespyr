@@ -1,6 +1,6 @@
 {
   "name": "vespyr",
-  "version": "2.0.8",
+  "version": "2.0.9",
   "description": "AI agent team installer — 20 specialized personas for product development",
   "bin": {
     "vespyr": "bin/cli.js",

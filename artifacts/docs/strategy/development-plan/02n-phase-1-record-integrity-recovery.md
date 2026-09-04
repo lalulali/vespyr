@@ -25,6 +25,8 @@
 
 **Mandate (from Chris):** Mechanical re-verification of every dev-plan checkbox after proven systemic record corruption; recovery, not blame. Concurrent 02f+02g sessions over one working tree produced clobbered records; the sweep confirmed ~54 false boxes across 8 documents and a repo-wide governance hole (`utter-satisfaction.md` holds **zero** per-epic sign-off records).
 
+Update version to: 2.0.10
+
 ### 1.1 In scope
 
 | Item | Detail |

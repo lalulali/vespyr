@@ -16,7 +16,7 @@ Absorb everything before writing a single word:
 *   `artifacts/output/02-research/user-personas.md` — target users, pain points, journeys.
 
 ### Step 2: Draft the PRD & Handle Human Validation (Interactive Gate)
-Follow the PRD template (`.agents/templates/product/prd-template.md`). For the agent-facing contract, also produce the spec kernel (`templates/product/SPEC.md` + companions). Key rules:
+Follow the PRD template (`.agents/templates/product/prd-template.md`). For the agent-facing contract, also produce the spec kernel (`.agents/templates/product/SPEC.md` + companions). Key rules:
 *   **Audience:** Business stakeholders, executives, sales, marketing — NOT engineers.
 *   **Tone:** Strategic, narrative, persuasive. No implementation details.
 *   **Must include:**
@@ -27,7 +27,7 @@ Follow the PRD template (`.agents/templates/product/prd-template.md`). For the a
     *   Out-of-scope list (crucial for scope discipline).
     *   Risks and dependencies.
     *   Non-functional requirements (performance, security, accessibility).
-*   **Must reference:** A summary table of Functional Requirements (`FR-XXX`) mapping to strategic capabilities in Section 5.3.
+*   **Must reference:** A summary table of Functional Requirements (`FR-XXX`) mapping to strategic capabilities in Section 7.3.
     *   *Format & Granularity Check:* DO NOT list broad end-to-end user journeys (e.g. "Rina scans QR, completes form...") as stories. Instead, list separate Functional Requirements in the exact format:
         `FR: user can [activity]` followed by optional `- detail 1`, `- detail 2` using `<br>` tags in the table cell (e.g. `FR-001 | Must-have | FR: user can scan QR code to access form<br>- validate code uniqueness<br>- handle expired codes`).
 *   **Validation Check:** If operating in `semi-autonomous` mode (and not bypassed), you MUST pause here and ask the user to validate the PRD. Do not proceed to user stories until the PRD is approved.
@@ -38,7 +38,7 @@ Only AFTER the PRD is finalized and validated, generate the User Stories.
 *   **PRD & Spec Base:** What is written in the PRD is the absolute business base, and what is designed in the Product Spec is the absolute interaction base. 
 *   **Spec Alignment Rules:** The `@product-manager` must verify that every user story is structurally aligned with the screen designs, layouts, and interaction flows defined in `product-spec.md`.
 *   **AC Mapping:** All screen transitions, loading, success, empty, and error states documented in the product spec must be translated into explicit acceptance criteria (Happy, Unhappy, Edge) inside the user stories.
-*   **Traceability:** User Stories in `user-stories.md` must trace back explicitly to their corresponding Functional Requirement in the PRD (e.g., `Traces to PRD: Section 5.3: FR-001`). A single Functional Requirement (`FR-XXX`) can translate into one or more modular User Stories (`US-XXX`).
+*   **Traceability:** User Stories in `user-stories.md` must trace back explicitly to their corresponding Functional Requirement in the PRD (e.g., `Traces to PRD: Section 7.3: FR-001`). A single Functional Requirement (`FR-XXX`) can translate into one or more modular User Stories (`US-XXX`).
 
 Follow the user story template exactly (`.agents/templates/product/user-story-template.md`). Key rules:
 *   **Audience:** Engineering — developers, QA, architects, tech lead.
@@ -47,7 +47,7 @@ Follow the user story template exactly (`.agents/templates/product/user-story-te
     *   **Focus on Modular Capabilities:** Every user story must represent a single block of functionality. Slice multi-step user scenarios into separate, independent stories (e.g., separating input, payment, processing, and printing).
     *   **NO Persona Journeys:** Never use persona narrative scenarios or physical/subjective user contexts (e.g., "Event attendee ships purchase", "Budi completes form while walking") as user stories. Focus purely on system-level interactions (user action + system response).
     *   **Sprint Allocation:** Assign every story to a specific target Sprint (e.g., Sprint 1, Sprint 2).
-    *   **Traceability Sync:** Every User Story (`US-XXX`) in `user-stories.md` must map back to a Functional Requirement (`FR-XXX`) from Section 5.3 of the PRD (`requirements.md`) via its `Traces to PRD` field.
+    *   **Traceability Sync:** Every User Story (`US-XXX`) in `user-stories.md` must map back to a Functional Requirement (`FR-XXX`) from Section 7.3 of the PRD (`requirements.md`) via its `Traces to PRD` field.
 *   **Must include for every story:**
     *   Narrative (As a / I want / so that).
     *   Business requirement (stakeholder impact, value, priority rationale).

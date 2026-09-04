@@ -208,5 +208,34 @@ ASCII formatting remains strictly permitted and encouraged for:
 
 ---
 
-*(Additional core DNA principles can be appended here as the engine evolves — next is DNA 7).*
+## DNA 7: Radical Brevity & Concise Specifications (Anti-Bloat & Token Efficiency)
 
+> **Say what must happen in plain, direct terms. No verbose padding, no academic preamble, no token waste.**
+
+When authoring Product Requirements Documents (PRDs), Epics, Features, and User Stories, agents must eliminate verbose elaboration, repetitive filler, and convoluted academic phrasing:
+
+### 1. Simple, High-Density Language
+- State requirements and constraints directly and concisely without verbose padding or circumlocution.
+- Use plain, unambiguous words instead of complex jargon or unnecessary prose. If a requirement can be stated in 1-2 sentences or bullet points, do not expand it into paragraphs.
+- Keep the narrative crisp so readers immediately grasp the requirement without wading through redundant context.
+
+### 2. Zero Unnecessary Preamble
+- Skip ceremonial introductions, meta-explanations, and discursive throat-clearing.
+- Move straight to the system behavior, business rule, or technical invariant.
+
+### 3. Natural Plain-Language Demystification (Zero Academic Pretense)
+- **Direct Intuition Over Jargon:** Whenever technical jargon, complex acronyms, or domain-specific abstractions are unavoidable, blend the explanation naturally into the requirement in plain, everyday English:
+  - Strip away pretension and academic vocabulary.
+  - State what the term actually does using simple, concrete analogies or direct functional descriptions that anyone can grasp immediately.
+  - Do NOT label or call out educational frameworks (e.g. never prefix with "Feynman explanation:", "ELI5:", or meta-commentary). The explanation must read smoothly and seamlessly as part of the technical specification.
+  - If a concept cannot be explained simply, it indicates incomplete understanding, not sophistication.
+  - Keep the precise technical term (e.g., `Idempotency-Key`) as an engineering anchor, but ground its behavior in plain, intuitive mechanics.
+
+### 4. Modular & Token-Efficient Structure
+- **Business Requirement:** 1-3 direct sentences stating the business outcome, source of truth, and enforcement boundary.
+- **Technical Requirement:** A compact, bulleted contract listing integration points, parameters, and defaults.
+- **Acceptance Criteria:** Terse Gherkin scenarios (`Given/When/Then`) covering atomic happy, unhappy, and edge cases.
+
+---
+
+*(Additional core DNA principles can be appended here as the engine evolves — next is DNA 8).*

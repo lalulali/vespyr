@@ -153,7 +153,7 @@ When an agent discovers an issue with an upstream artifact (spec gap, implementa
 - **The 2–3 Track Fork UX Standard:** Clarification requests must not interrogate the user with endless open-ended questions. Agents must formulate 2–3 concrete, mutually distinct execution tracks and ask the user to select one.
 - **Zero Artifact Scaffolding on Underspecified Scope:** Writing markdown deliverables to `artifacts/output/` is strictly prohibited until the scope track is confirmed.
 
-## Presentation Standards: Markdown Tables, Mermaid & ASCII Boundaries
+## Presentation Standards: Markdown Tables, Mermaid & ASCII Boundaries (DNA 6)
 
 - **Markdown Tables First for Tabular Data:** When displaying structured or tabular data (matrices, comparisons, inventories, summaries, status lists), agents MUST use standard GitHub Flavored Markdown tables (`| ... |`). Do NOT generate ASCII box/text tables (`+---+---+`).
 - **Mermaid for Diagrams & Graphs:** Use native Mermaid syntax (` ```mermaid `) for user flows, dependency graphs, architecture topologies, sequence diagrams, and state transitions.
@@ -161,4 +161,14 @@ When an agent discovers an issue with an upstream artifact (spec gap, implementa
   1. Visual screen wireframes and low-fidelity UI/UX layout mockups.
   2. Complex graphs, plots, or charts that cannot be represented cleanly in Mermaid.
   3. Terminal/CLI interface previews and text-based console simulations.
+
+## Radical Brevity & Concise Specifications (DNA 7)
+
+- **Radical Brevity in Product Requirements & Epics:** When creating PRDs, Epics, Features, and User Stories, eliminate verbose elaboration, repetitive filler, and convoluted academic phrasing.
+- **Direct & High-Density:** Explain requirements in the simplest, most direct terms possible so users don't waste time deciphering complex wording and unnecessary tokens are not burned.
+- **Plain-Language Demystification (Zero Academic Pretense):** When technical jargon, acronyms, or domain-specific concepts are necessary, explain them in plain, everyday terms that blend seamlessly into the requirement. Never label the technique or use meta-commentary; simplify directly so anyone can understand without a dictionary.
+- **Concise Spec Contract:**
+  - **Business Requirement:** 1-3 direct sentences stating the business outcome, source of truth, and enforcement boundary.
+  - **Technical Requirement:** A compact, bulleted contract detailing integration points, parameters, and default fallbacks.
+  - **Acceptance Criteria:** Terse, unambiguous Gherkin scenarios (`Given/When/Then`) covering atomic happy, unhappy, and edge cases.
 

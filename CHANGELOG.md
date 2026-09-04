@@ -4,6 +4,22 @@ All notable changes to the Vespyr project will be documented in this file.
 
 ---
 
+## [2.0.9] - 2026-09-04
+
+### Radical Brevity & Concise Specifications (DNA 7)
+- **Concise Specifications Standard:** Mandated radical brevity when creating Product Requirements Documents (PRDs), Epics, Features, and User Stories. Prohibited verbose elaboration, repetitive filler, and convoluted academic phrasing to eliminate reading friction and save tokens.
+- **Feynman Technique for Jargon Demystification:** Required explaining unavoidable technical jargon, acronyms, and domain abstractions using simple, intuitive, plain-English analogies ("Explain Like I'm Five"). Emphasized that inability to explain simply indicates incomplete understanding, not sophistication.
+- **Modular Specification Contract:**
+  - *Business Requirement:* 1–3 direct sentences stating the business outcome, single source of truth, and server vs. client enforcement boundary.
+  - *Technical Requirement:* A compact, bulleted contract detailing API endpoints, parameters, and fallback rules.
+  - *Acceptance Criteria:* Terse Gherkin scenarios (`Given/When/Then`) covering atomic happy, unhappy, and edge cases.
+- **Template Restoration & Hardening:**
+  - Restored `.agents/templates/product/prd-template.md` (Product Requirements Document template) from git history with DNA 7 notices.
+  - Updated `.agents/templates/product/user-story-template.md` and `.agents/references/templates/user-story-instructions.md` with DNA 7 concise contracts and canonical example.
+- **Files updated:** Codified in `.agents/references/vespyr-dna.md` (DNA 7), `.agents/GUARDRAILS.md`, `.agents/templates/system/AGENTS.md.canonical`, `agent.md.canonical`, `AGENTS.md`, `agent.md`, `CLAUDE.md`, `.agents/agents/product-manager.md`, and test suite `tests/vespyr-dna.test.js`.
+
+---
+
 ## [2.0.8] - 2026-09-03
 
 ### Presentation & Structured Output Standards (DNA 6)

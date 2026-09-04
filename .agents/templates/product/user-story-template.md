@@ -14,7 +14,8 @@
 > **User Story Granularity & Content Standards:**
 > 1. **Modular Functional Focus:** User stories must represent single functional blocks of capability (e.g. "Location Auto-Detection" or "QRIS Payment Integration"), NOT multi-step persona journeys/scenarios (e.g. "Dropoff visitor skips queue" or "Event attendee ships purchase"). High-level user flows must be sliced into separate, granular stories.
 > 2. **Actionable & System-Verifiable:** Describe active interactions (user action + system response) without incorporating situational physical or emotional context.
-> 3. **Traceability & Alignment:** Story Priority must align with the corresponding Functional Requirement (`FR-XXX`) in Section 5.3 of the PRD (`requirements.md`). Target Sprints are assigned at the story level for agile execution. Every user story must explicitly populate its `Traces to PRD` field referencing the target Functional Requirement ID (e.g., `FR-001`).
+> 3. **Traceability & Alignment:** Story Priority must align with the corresponding Functional Requirement (`FR-XXX`) in Section 7.3 of the PRD (`requirements.md`). Target Sprints are assigned at the story level for agile execution. Every user story must explicitly populate its `Traces to PRD` field referencing the target Functional Requirement ID (e.g., `FR-001`).
+> 4. **Radical Brevity & Concise Language (DNA 7):** Eliminate verbose elaboration, repetitive filler, and complex jargon. Business requirements must be 1-3 direct sentences (outcome, single source of truth, enforcement boundary). Technical requirements must be a concise bulleted contract. Acceptance criteria must use clean, indented Gherkin syntax without narrative bloat.
 
 ---
 
@@ -75,14 +76,14 @@ Use this format for each modular functional capability under a Feature:
 - **Sprint:** Sprint [Number]
 - **Dependencies:** [Story IDs or external blocking events]
 - **Author:** @product-manager
-- **Traces to PRD:** Section X.Y: [Feature Name from requirements.md]
+- **Traces to PRD:** Section 7.3: FR-XXX [Feature Name from requirements.md]
 - **Traces to Product Spec:** [Screen Name, Flow ID, or Section ID inside product-spec.md]
 
 #### Business Requirement
-[Document stakeholder impact, value proposition, financial implications, success signal, and priority rationale as detailed in user-story-instructions.md]
+[1-3 direct, plain-language sentences stating the business outcome, single source of truth, and enforcement boundary. No verbose filler.]
 
 #### Technical Requirement
-[Document integration points, data requirements, performance/security constraints, state management, error handling, and ML strategy as detailed in user-story-instructions.md]
+[Compact bulleted list of integration points, data/flag rules, API behavior, error handling, and server vs. client boundaries.]
 
 #### Acceptance Criteria
 [Acceptance criteria must be testable, atomic, and formatted using multi-line Given/When/Then steps]

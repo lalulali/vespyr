@@ -104,7 +104,7 @@ User Stories are modular functional capabilities nested under a Feature. Every s
 - **Sprint:** [Target Sprint / e.g., Sprint 1]
 - **Dependencies:** [Story IDs or external blocking events]
 - **Author:** @product-manager
-- **Traces to PRD:** [Section reference inside requirements.md]
+- **Traces to PRD:** [Section reference inside requirements.md, e.g. Section 7.3: FR-001]
 - **Traces to Product Spec:** [Screen Name, Flow ID, or Section ID inside product-spec.md]
 
 #### 2.3.2 Narrative Title Header
@@ -112,22 +112,17 @@ The title of the User Story (H3 header) must represent the narrative directly in
 `### User Story: As a [type of user], I want [goal], so that [benefit / reason]`
 No separate Narrative section is needed, making the document extremely concise.
 
-#### 2.3.3 Business Requirements
-Explain the commercial and customer justification for the feature:
-*   **Stakeholder Impact:** Who benefits and how?
-*   **Value Proposition:** What pain is relieved or gain created?
-*   **Financial Implication:** Expected revenue driver, cost reduction, or risk mitigation.
-*   **Success Signal:** The measurable telemetry metric (defined with `@data-analyst`) indicating success.
-*   **Priority Rationale:** Business justification for the chosen priority level.
+#### 2.3.3 Business Requirements (DNA 7: Radical Brevity)
+Explain the commercial and customer justification concisely in 1–3 direct sentences:
+*   State the core business outcome, the single source of truth (e.g. user flag), and the enforcement boundary (server-side vs. client-side).
+*   **Zero filler:** Avoid verbose elaboration or repetitive justification. Keep it high-density so stakeholders and engineers immediately grasp the intent without reading complex wording.
 
-#### 2.3.4 Technical Requirements
-Exhaustive integration constraints for engineering:
-*   **Integration Points:** Associated internal APIs, databases, or external microservices.
-*   **Data Requirements:** Exact schemas, formats, inputs, and persistence destinations.
-*   **Performance Constraints:** Maximum allowed latency, concurrency, and throughput.
-*   **Security Constraints:** Authentication, permissions, encryption, and data masking guidelines.
-*   **State Management:** Ephemeral states vs. long-term database storage.
-*   **ML Integration (if applicable):** Specific model versions, latency limits (`AC-ML*`), and baseline accuracies.
+#### 2.3.4 Technical Requirements (DNA 7: Concise Contract)
+Provide a compact, bulleted list detailing technical constraints:
+*   Backend API behavior, parameters, and filtering logic
+*   Frontend rendering expectations (e.g. renders API response as-is, no client-side filtering)
+*   Session/auth level resolution vs. per-request resolution
+*   Explicit fallback and error-logging rules when inputs/flags are missing or null
 
 ---
 
@@ -154,7 +149,7 @@ Acceptance criteria must be atomic, unambiguous, and formatted using highly legi
 - **Sprint:** Sprint 3
 - **Dependencies:** US-000 (user auth system), Email service (external)
 - **Author:** @product-manager
-- **Traces to PRD:** Section 5.2: Password Reset Capability
+- **Traces to PRD:** Section 7.3: FR-002 Password Reset Capability
 - **Traces to Product Spec:** Section 3.1: Screen: Login, Flow: 2.1 Happy Path
 
 #### Business Requirement
@@ -263,6 +258,88 @@ Acceptance criteria must be atomic, unambiguous, and formatted using highly legi
 | Question | Impact | Owner | Status |
 | :--- | :--- | :--- | :--- |
 | Should we invalidate all existing sessions on password change? | Security | Security lead | Open |
+
+---
+
+### Canonical DNA 7 Concise User Story Example
+
+Use this format as the gold standard for radical brevity, token efficiency, and clear separation of business outcome, technical contract, and testable Gherkin acceptance criteria:
+
+```markdown
+##### User Story: As a retail user, I want to see only external payment methods so that I am not confused by Kasbon which I cannot use
+<!-- Redmine: User Story #7520 | Parent: #7516 -->
+
+**Business Requirement:**
+The system must completely hide Kasbon from retail users — not gray it out, not show it as unavailable. The user flag on the user record is the single source of truth for segment identification. This must be enforced server-side; the frontend renders based on the API response, not local logic.
+
+**Technical Requirement:**
+- Backend API (`getPaymentMethods`) must filter payment methods based on `user_type` flag before returning the list
+- `user_type = retail` → Kasbon excluded from response entirely
+- Frontend renders the list as returned — no client-side filtering of Kasbon
+- User flag must be resolved at session/auth level, not per-request
+- If user flag is missing or null → system defaults to retail behavior (no Kasbon shown) and logs an error
+
+**Acceptance Criteria:**
+
+```gherkin
+# Happy Path
+Scenario: Retail user sees only external payment methods on payment screen
+  Given a user with user_type = "retail" is authenticated
+  And the user has items in cart and proceeds to checkout
+  When the payment screen loads
+  Then the payment method list contains Virtual Account options
+  And the payment method list contains E-wallet options (GoPay, OVO, Dana, ShopeePay)
+  And the payment method list contains QRIS
+  And Kasbon is not present anywhere on the payment screen
+  And no "Kasbon unavailable" or grayed-out Kasbon entry is shown
+
+# Unhappy Path
+Scenario: User flag is missing or null on user record
+  Given a user whose user_type flag is null or missing
+  When the payment screen loads
+  Then the system defaults to retail behavior (no Kasbon shown)
+  And an error is logged for the missing user flag
+  And external payment methods are shown normally
+```
+
+##### User Story: As a retail user, I want to submit checkout payments safely so that I am never charged twice if my connection stutters or I tap twice
+<!-- Redmine: #7525 | Parent: #7516 -->
+
+**Business Requirement:**
+The system must guarantee zero double-charges. If a customer clicks "Pay" multiple times, or if their internet drops and retries the request, the user is charged exactly once and receives the same order confirmation. This must be strictly enforced on the server; the frontend cannot be trusted to prevent double-taps.
+
+**Technical Requirement:**
+- **Idempotency Contract:** Backend API (`POST /api/v1/checkout/pay`) requires an `Idempotency-Key` header (UUID generated once per checkout session). This key acts like a dry-cleaning ticket number: repeated requests with the same ticket return the existing receipt immediately without washing or charging again.
+- **Duplicate handling:**
+  - First request → charges the payment method and saves the receipt with the key.
+  - Repeated request with the same key → returns the existing receipt immediately; does not charge again.
+- **In-flight concurrent requests:** If a duplicate request arrives while the first is still processing, return HTTP 409 ("Payment already processing, please wait").
+- **External gateways:** Pass the same key to payment providers (Midtrans/Stripe) to prevent double-charging on provider retries.
+
+**Acceptance Criteria:**
+
+```gherkin
+# Happy Path
+Scenario: User taps pay once on a stable connection
+  Given a cart total of Rp 150.000 with a unique checkout session key
+  When the user submits the payment
+  Then the payment is processed for Rp 150.000
+  And an order confirmation receipt is returned
+
+# Unhappy / Edge Path (Duplicate Request Verification)
+Scenario: User double-clicks pay button rapidly
+  Given a payment request with key "order-key-999" is currently being processed
+  When a second request arrives with key "order-key-999" before the first finishes
+  Then the second request does not initiate a new charge
+  And the user is told the payment is already in progress
+
+Scenario: Network retries after successful charge
+  Given a payment with key "order-key-999" already succeeded and created Order #501
+  When the app retries sending key "order-key-999" due to a timeout
+  Then the payment provider is NOT charged a second time
+  And the system returns the original Order #501 confirmation
+```
+```
 
 ---
 

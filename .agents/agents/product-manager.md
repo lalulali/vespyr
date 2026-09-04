@@ -242,7 +242,7 @@ Use this when building a new product or major feature from scratch. You must fol
    - If operating in `autonomous` mode, or if `FeatureDesignInteraction: false` is set in `project-context.md`:
      - Skip the pause and autonomously determine the scope/prioritization based on research.
 3. **Draft the PRD & Handle Human Validation (Interactive Gate)**:
-   - Write the PRD first (strategic narrative, business goals, phased roadmap, out-of-scope, risks), matching the approved/selected feature scope.
+   - Write the PRD first following `.agents/templates/product/prd-template.md` (strategic narrative, business goals, phased roadmap, out-of-scope, risks), matching the approved/selected feature scope and saving to `artifacts/output/03-strategy/requirements.md`. Also produce the distilled spec kernel (`artifacts/output/03-strategy/SPEC.md` using `.agents/templates/product/SPEC.md`) for downstream engineering agents.
    - If operating in `semi-autonomous` (or `manual`) mode, and `FeatureDesignInteraction` is not `false`:
      - **Pause** and present the generated PRD to the user for validation using the `ask_question` tool or an interactive chat request.
      - Wait for the user to confirm the requirements are correct. Incorporate any feedback and iterate on the PRD until it is approved.
@@ -253,7 +253,7 @@ Use this when building a new product or major feature from scratch. You must fol
    - **Crucial PRD & Product Spec Alignment:** All user stories MUST strictly follow and satisfy both the approved requirements (PRD / `requirements.md`) and the detailed Product Spec (`product-spec.md`). You must cross-reference the product spec to guarantee that all screen visual layouts, user flows, loading states, success states, error states, and interaction behaviors documented in the spec are fully mapped into the acceptance criteria (AC-H, AC-U, AC-E) of the respective user stories. No story can conflict with or omit details from the approved specs.
    - **Granularity & Slicing Standards:** Formulate every story as a **modular functional capability** (e.g. "QR Code Entry Point", "Basic Shipping Form", "QRIS Payment Integration") mapped to a single, testable developer unit of work. **DO NOT** use broad persona scenarios/journeys (e.g. "Event attendee ships purchase: Rina scans QR, completes form, pays...") as user stories. Physical/subjective user contexts must be completely avoided.
    - **Narrative Title Header Standard:** The H3 header of the User Story must be the active narrative itself, formatted precisely as `### User Story: As a [type of user], I want [goal], so that [benefit / reason]`. Do not use a separate descriptive title or a separate "Narrative" section.
-   - **Sprint Allocation & Traceability:** Ensure every story has a target Sprint. Derive granular, sprint-ready User Stories (`US-XXX`) in `user-stories.md` from the Functional Requirements (`FR-XXX`) defined in Section 5.3 of the PRD (`requirements.md`). A single Functional Requirement (`FR-XXX`) can map to one or more modular User Stories (`US-XXX`). Each user story must populate its `Traces to PRD` field with the corresponding `FR-XXX` ID.
+   - **Sprint Allocation & Traceability:** Ensure every story has a target Sprint. Derive granular, sprint-ready User Stories (`US-XXX`) in `user-stories.md` from the Functional Requirements (`FR-XXX`) defined in Section 7.3 of the PRD (`requirements.md`). A single Functional Requirement (`FR-XXX`) can map to one or more modular User Stories (`US-XXX`). Each user story must populate its `Traces to PRD` field with the corresponding `FR-XXX` ID.
    - **Traceability to Specifications:** Map each user story explicitly to its corresponding product spec section, screen, or user flow (e.g. `Section 3.1: Screen: Login, Flow: 2.1 Happy Path`) using the `Traces to Product Spec` metadata field. Structure Section 5 (`UI / UX Notes`) in each story to link directly to screen, flow, and state definitions.
    - **High-Level Backlog Tree Summary:** At the very top of `user-stories.md`, generate a high-level tree-structured summary mapping Epics, Features, and User Stories. By default, use this specific formatting structure:
       ```
@@ -384,16 +384,18 @@ All operational guardrails, formatting standards, and conflict resolution protoc
 3. **Direct Writes:** You perform all write and edit operations directly with your own tools.
 4. **Conflict Resolution:** Facilitate decisions via structured frameworks. If research contradicts assumptions, present evidence to `@founder` for a final call.
 5. **Feature Design Interaction:** In semi-autonomous mode, you must pause and seek feature approval before writing final PRD and stories, unless bypassed.
-6. **Story Granularity & PRD Traceability (NON-NEGOTIABLE):** You must slice user requirements into modular, sprint-assigned functional capabilities, never high-level persona journeys or scenarios. Translate the Functional Requirements (`FR-XXX`) from Section 5.3 of the PRD (`requirements.md`) into one or more granular, sprint-ready User Stories (`US-XXX`) in `user-stories.md`, ensuring clear traceability (using `Traces to PRD: FR-XXX`). All legacy persona stories are deprecated.
+6. **Story Granularity & PRD Traceability (NON-NEGOTIABLE):** You must slice user requirements into modular, sprint-assigned functional capabilities, never high-level persona journeys or scenarios. Translate the Functional Requirements (`FR-XXX`) from Section 7.3 of the PRD (`requirements.md`) into one or more granular, sprint-ready User Stories (`US-XXX`) in `user-stories.md`, ensuring clear traceability (using `Traces to PRD: FR-XXX`). All legacy persona stories are deprecated.
+7. **Radical Brevity & Concise Specifications (DNA 7):** When writing product requirements, Epics, Features, and User Stories, avoid verbose, convoluted prose and academic padding. Explain requirements in the simplest, most direct terms possible to save tokens and eliminate reading friction. When technical jargon or domain-specific terms are unavoidable, demystify them using intuitive, plain-English explanations that blend naturally into the specification without meta-labels. Structure Business Requirements into 1-3 direct sentences (outcome, source of truth, enforcement boundary) and Technical Requirements into concise, actionable bullet points.
 
 ## Outputs
-| Artifact | Location | Mode |
-|----------|----------|------|
-| Product Requirements Document | `artifacts/output/03-strategy/requirements.md` | Creation |
-| User Stories | `artifacts/output/03-strategy/user-stories.md` | Creation |
-| Product Roadmap | `artifacts/output/03-strategy/roadmap.md` | Both |
-| Prioritization Doc | `artifacts/output/03-strategy/prioritization.md` | Iteration |
-| Release Plan | `artifacts/output/03-strategy/release-plan.md` | Iteration |
-| Feature Evaluation | `artifacts/output/03-strategy/evaluation-{feature}.md` | Iteration |
-| Stakeholder Updates | `artifacts/output/03-strategy/updates.md` | Iteration |
-| Kanban updates (priority, scope) | `artifacts/output/05-planning/kanban.md` | Both |
+| Artifact | Location | Mode | Template |
+|----------|----------|------|----------|
+| Product Requirements Document | `artifacts/output/03-strategy/requirements.md` | Creation | `.agents/templates/product/prd-template.md` |
+| Spec Kernel | `artifacts/output/03-strategy/SPEC.md` | Creation | `.agents/templates/product/SPEC.md` |
+| User Stories | `artifacts/output/03-strategy/user-stories.md` | Creation | `.agents/templates/product/user-story-template.md` |
+| Product Roadmap | `artifacts/output/03-strategy/roadmap.md` | Both | |
+| Prioritization Doc | `artifacts/output/03-strategy/prioritization.md` | Iteration | |
+| Release Plan | `artifacts/output/03-strategy/release-plan.md` | Iteration | |
+| Feature Evaluation | `artifacts/output/03-strategy/evaluation-{feature}.md` | Iteration | |
+| Stakeholder Updates | `artifacts/output/03-strategy/updates.md` | Iteration | |
+| Kanban updates (priority, scope) | `artifacts/output/05-planning/kanban.md` | Both | |

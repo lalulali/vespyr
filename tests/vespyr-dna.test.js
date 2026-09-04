@@ -42,6 +42,15 @@ describe('Vespyr Core DNA & Anti-Sycophancy Invariants', () => {
     assert.ok(content.includes('Permitted ASCII Boundaries'), 'Must define permitted ASCII boundaries');
   });
 
+  it('vespyr-dna.md defines DNA 7 Radical Brevity & Concise Specifications', () => {
+    const content = fs.readFileSync(dnaPath, 'utf8');
+    assert.ok(content.includes('DNA 7: Radical Brevity & Concise Specifications'), 'Must define DNA 7');
+    assert.ok(content.includes('Simple, High-Density Language'), 'Must mandate simple, high-density language');
+    assert.ok(content.includes('Zero Unnecessary Preamble'), 'Must mandate zero unnecessary preamble');
+    assert.ok(content.includes('Natural Plain-Language Demystification'), 'Must mandate plain-language demystification');
+    assert.ok(content.includes('Modular & Token-Efficient Structure'), 'Must mandate modular structure');
+  });
+
   filesToCheck.forEach(({ name, path: filePath }) => {
     it(`${name} contains Core DNA anti-sycophancy, two-gate verdict rules (no stale single-gate wording)`, () => {
       assert.ok(fs.existsSync(filePath), `${name} must exist`);
@@ -62,6 +71,12 @@ describe('Vespyr Core DNA & Anti-Sycophancy Invariants', () => {
       assert.ok(content.includes('Markdown table') || content.includes('Markdown Tables'), `${name} must require Markdown tables for tabular data`);
       assert.ok(content.includes('Mermaid'), `${name} must require Mermaid for diagrams`);
       assert.ok(content.includes('ASCII'), `${name} must define ASCII scope`);
+    });
+
+    it(`${name} contains radical brevity and concise specifications standards (DNA 7)`, () => {
+      const content = fs.readFileSync(filePath, 'utf8');
+      assert.ok(content.includes('DNA 7') || content.includes('Radical Brevity'), `${name} must mention DNA 7 or Radical Brevity`);
+      assert.ok(content.includes('Concise Specifications') || content.includes('verbose'), `${name} must mention concise specifications or avoiding verbose wording`);
     });
   });
 });

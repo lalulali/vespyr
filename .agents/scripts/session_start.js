@@ -93,7 +93,7 @@ function detectEngineVersion() {
       if (pkg.version) return pkg.version;
     }
   } catch {}
-  return '2.0.8';
+  return '2.0.9';
 }
 
 function detectStack() {
@@ -148,7 +148,7 @@ function generateMachineStateBlock({ stack, branch, phase, sprint, blockers, ver
     `- Active Phase: ${phase || 'validation'}`,
     `- Active Sprint: ${sprint || 'none'}`,
     `- Blocker Status: ${blockerText}`,
-    `- Engine Version: ${version || '2.0.8'}`,
+    `- Engine Version: ${version || '2.0.9'}`,
     '<!-- END MACHINE STATE -->'
   ].join('\n');
 }
