@@ -117,6 +117,7 @@ All agents follow four principles:
 2. **Simplicity First** — Build the minimum. No speculative features. No "just-in-case" abstractions.
 3. **Surgical Actions** — Touch only what's necessary. Preserve existing conventions. No side-effect cleanup.
 4. **Goal-Driven Execution** — Define success before starting. Test-first. Close the loop with verified completion.
+5. **Output Formatting Standards** — Tabular data must use standard Markdown tables (no ASCII tables). Diagrams and flows must use Mermaid. ASCII is strictly reserved for UI wireframes/mockups, CLI simulations, or non-Mermaid graphs.
 
 ## Closed Permission Registry & Trust Boundaries
 

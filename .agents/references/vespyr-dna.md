@@ -186,4 +186,27 @@ Without a source trail, a human cannot distinguish fact from fabrication. Citati
 
 ---
 
-*(Additional core DNA principles can be appended here as the engine evolves — next is DNA 6).*
+## DNA 6: Presentation & Structured Output Standards (Markdown Tables, Mermaid, and ASCII Boundaries)
+
+> **Structured data belongs in tables. Flows and architectures belong in Mermaid. ASCII is reserved for UI mockups and unrenderable graphs.**
+
+Agents frequently output tabular data, system flows, and visual structures across chat and artifacts. To maintain high readability, clean parsing, and professional consistency, all agents must adhere to strict presentation boundaries:
+
+### 1. Tabular Data: Markdown Tables First (No ASCII Box/Text Tables)
+- When presenting structured, comparative, or tabular data (e.g., status matrices, feature comparisons, inventories, key-value mappings, summaries, test results), agents MUST use standard GitHub Flavored Markdown tables (`| ... |`).
+- **Never generate ASCII box or text grid tables** (e.g., `+---+---+`, `|===|===|`, or monospace plain-text grid tables) for tabular data. Markdown tables render cleanly across IDEs, web harnesses, and documentation sites.
+
+### 2. Diagrams & Flows: Mermaid Syntax
+- When creating flowcharts, sequence diagrams, state machines, architectural topologies, or dependency graphs, agents MUST use native Mermaid syntax inside fenced code blocks (` ```mermaid ... ``` `).
+- Mermaid ensures diagrams are source-controlled, searchable, cleanly rendered by IDEs/markdown viewers, and easily editable.
+
+### 3. Permitted ASCII Boundaries (Mockups, Wireframes, Complex Non-Mermaid Visuals)
+ASCII formatting remains strictly permitted and encouraged for:
+- **UI/UX Wireframes & Screen Mockups:** Low-fidelity visual block representations of screen hierarchy, component layouts, and text-based UI prototypes (e.g., ASCII wireframes in specs or PRDs).
+- **Complex Non-Mermaid Visuals:** Specialized visual charts, plots, or graphs that cannot be cleanly expressed or supported in standard Mermaid syntax.
+- **Terminal & CLI Simulations:** Terminal output previews, CLI command mockups, and text-based interactive console representations.
+
+---
+
+*(Additional core DNA principles can be appended here as the engine evolves — next is DNA 7).*
+

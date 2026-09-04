@@ -782,3 +782,9 @@ These guardrails apply to **all agents** regardless of role or phase.
 - All agents may only access files within the current project workspace directory and its subdirectories.
 - **Never** access, read, or modify files outside the project folder (system directories, user home outside project, external drives, `~/.bashrc`, `/etc`, `/usr`, `C:\`, etc.).
 - All artifacts must be saved within the project's `artifacts/` directory or `.agents/` subdirectory.
+
+### Presentation Standards (DNA 6)
+- **Markdown Tables First:** Use standard Markdown tables (`| ... |`) for simple and tabular data — never ASCII text/box tables.
+- **Mermaid for Diagrams & Graphs:** Use Mermaid syntax for flowcharts, architectures, sequence diagrams, and dependency trees.
+- **Permitted ASCII Boundaries:** ASCII formatting is strictly preserved for UI/UX screen wireframes, CLI terminal simulation outputs, and complex visuals unsupported by Mermaid.
+

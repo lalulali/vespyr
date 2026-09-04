@@ -20,6 +20,8 @@
 
 **Intent & Scope Triage Gate (DNA 4):** un-persona'd domain requests are intercepted before execution — ambiguous prompts halt and receive a 2–3 Track Fork card with recommended `@agent` / `/skill` handles; trivial tasks pass unimpeded.
 
+**Presentation Standards (DNA 6):** structured and tabular data uses standard Markdown tables; flows and architecture diagrams use Mermaid; ASCII is strictly reserved for UI wireframes/mockups, CLI previews, and unrenderable graphs.
+
 ---
 
 ## ⚡ Quick Start

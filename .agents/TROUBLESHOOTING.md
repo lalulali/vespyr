@@ -244,6 +244,16 @@ If the chunk is in the archive (was compacted), use search instead:
 
 ---
 
+## Agents outputting ASCII tables instead of Markdown tables
+
+**Problem:** An agent outputs tabular data using monospace ASCII text box grids (`+---+---+`) instead of clean Markdown tables (`| ... |`).
+
+**Fix:** Remind the agent of DNA 6 and the Presentation Standards in `GUARDRAILS.md`. Tabular data must be formatted as standard GitHub Flavored Markdown tables. If a diagram or flow is needed, use Mermaid syntax. ASCII is strictly reserved for UI wireframes/mockups, CLI simulations, or complex non-Mermaid visuals.
+
+**Prevention:** All reasoning personas inherit DNA 6 from `vespyr-dna.md` and `GUARDRAILS.md` automatically.
+
+---
+
 *Canonical source files:*
 - *Workflow orchestration:* `workflow.md`
 - *Guardrails:* `GUARDRAILS.md`

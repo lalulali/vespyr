@@ -34,6 +34,14 @@ describe('Vespyr Core DNA & Anti-Sycophancy Invariants', () => {
     assert.ok(content.includes('Mandatory 3-Question Invariant Test'), 'Must define 3-question invariant test');
   });
 
+  it('vespyr-dna.md defines DNA 6 Presentation & Structured Output Standards', () => {
+    const content = fs.readFileSync(dnaPath, 'utf8');
+    assert.ok(content.includes('DNA 6: Presentation & Structured Output Standards'), 'Must define DNA 6');
+    assert.ok(content.includes('Markdown Tables First'), 'Must mandate Markdown tables for tabular data');
+    assert.ok(content.includes('Mermaid Syntax') || content.includes('Mermaid for Diagrams'), 'Must mandate Mermaid for diagrams/flows');
+    assert.ok(content.includes('Permitted ASCII Boundaries'), 'Must define permitted ASCII boundaries');
+  });
+
   filesToCheck.forEach(({ name, path: filePath }) => {
     it(`${name} contains Core DNA anti-sycophancy, two-gate verdict rules (no stale single-gate wording)`, () => {
       assert.ok(fs.existsSync(filePath), `${name} must exist`);
@@ -47,5 +55,14 @@ describe('Vespyr Core DNA & Anti-Sycophancy Invariants', () => {
       assert.ok(!content.includes('Enforce the Verdict Gate (`[KILL]` | `[PIVOT]` | `[PASS]`)'), `${name} still carries the superseded single-gate wording`);
       assert.ok(content.includes('FORBIDDEN') || content.includes('forbidden'), `${name} must mention forbidden blueprints`);
     });
+
+    it(`${name} contains presentation and output formatting standards (DNA 6)`, () => {
+      const content = fs.readFileSync(filePath, 'utf8');
+      assert.ok(content.includes('DNA 6') || content.includes('Output Formatting Standards'), `${name} must mention DNA 6 or Output Formatting Standards`);
+      assert.ok(content.includes('Markdown table') || content.includes('Markdown Tables'), `${name} must require Markdown tables for tabular data`);
+      assert.ok(content.includes('Mermaid'), `${name} must require Mermaid for diagrams`);
+      assert.ok(content.includes('ASCII'), `${name} must define ASCII scope`);
+    });
   });
 });
+

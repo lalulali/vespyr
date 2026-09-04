@@ -4,7 +4,13 @@ All notable changes to the Vespyr project will be documented in this file.
 
 ---
 
-## [Unreleased] - 2026-09-02
+## [2.0.8] - 2026-09-03
+
+### Presentation & Structured Output Standards (DNA 6)
+- **Markdown Tables First:** Mandated standard GitHub Flavored Markdown tables (`| ... |`) for simple and tabular data. Prohibited ASCII box/text tables (`+---+---+`) for tabular data to ensure clean parsing and responsive rendering across IDEs and Markdown viewers.
+- **Mermaid for Graphs & Diagrams:** Mandated Mermaid syntax (` ```mermaid `) for flowcharts, sequence diagrams, architectures, state machines, and dependency trees.
+- **Permitted ASCII Boundaries:** Codified explicit scope where ASCII remains allowed: screen hierarchy wireframes and UI/UX layout mockups, specialized visual charts/graphs that cannot be cleanly expressed in Mermaid, and CLI/terminal simulation outputs.
+- **Files updated:** Codified in `.agents/references/vespyr-dna.md` (DNA 6), `.agents/GUARDRAILS.md`, `.agents/templates/system/AGENTS.md.canonical`, `agent.md.canonical`, `AGENTS.md`, `agent.md`, `CLAUDE.md`, and test suite `tests/vespyr-dna.test.js`.
 
 ### Decision Gate vocabulary: PASS/PIVOT/KILL → GO/RESHAPE/NO-GO (+ mandatory `When:` axis)
 - **Why:** the gate failed on comprehension, not logic. `PASS` answered "did it clear the bar" while `PIVOT`/`KILL` answered "what broke", so the three tokens sat on no single scale; and a bare `PASS` could not distinguish "build now" from "approved, waiting on a condition" — two `[PASS]`s in one roadmap review read as a contradiction.
@@ -15,16 +21,12 @@ All notable changes to the Vespyr project will be documented in this file.
 - **Two latent eval defects fixed** (see `lessons-learned.md`): `assertContains` values of the form `[KILL]` were being compiled as regexes, i.e. as character classes matching any of K/I/L — those invariant assertions had been no-ops; and the roundtable verdict extractor could not match a hyphenated token, which would have filed every `[VERDICT: NO-GO]` as an unknown tag.
 - **Deferred to owner:** `.agents/manifest.json` hashes are now stale for the edited `.agents/**` files; regeneration is left to the maintainer under the standing single-writer mandate.
 
-## [Unreleased] - 2026-08-31
-
 ### Clean installation folder (round-table: @devops-engineer, @developer, @security-engineer, @tech-lead)
 - **Tarball slimming:** `npm pack` payload cut 427 → 370 files (723KB → 680KB). Excluded repo/CI-only content: `.agents/state/**` (live `session-current.json` would have seeded every user's first session with the maintainer's session id — `lib/session.js` reuses existing ids), `evals/security/**` (red-team attack-fixture corpus + frozen baselines consumed only by non-shipping CI gates), `.agents/evals/**` (roundtable eval infrastructure relocated to `evals/roundtable/` so the installed `.agents/` folder stays eval-free), and 12 CI/authoring-only scripts in `.agents/scripts/` (check/drift/validate/test/pipeline/hot_path/token_profiler/fix-squads/migrate-frontmatter clusters). Also removed stray `.agents/skills/artifacts/**` copies of repo memory/output files (gitignored at any depth, so they shipped invisibly).
 - **Runtime closure verified:** `security-scan.js` + `security/audit-spec.json` ship (they are the `vespyr audit` runtime contract — FAULT-1 fail-closed); `add-*` authoring scripts, `dedupe_validator` (memory pipeline), `roundtable_eval`, `validate_frontmatter` (npm script) confirmed runtime-referenced and kept; `evals/baseline.json` + suites/rubrics/fixtures/meta-eval ship (`vespyr-eval` consumers).
 - **Mechanism:** top-level `files` array + per-directory `.npmignore` denylists (`.agents/state/`, `.agents/scripts/`, `evals/`). `roundtable_eval.js` `DEFAULT_TOPICS` repointed to `evals/roundtable/topics.json` (only `score --dir`, a dev path, reads it — no shipped skill invokes it; eval input moved out of `.agents/` to keep the installation folder clean). `.gitignore` exception added so `.agents/state/.npmignore` is tracked.
 - **Packaging contract hardened** (`tests/cli/packaging.test.js`): positive-closure list extended to 23 runtime paths; NEW negative-absence block fails the pack if any excluded file reappears.
 - **Real-tarball install smoke** (`tests/cli/install-smoke.test.js`): `npm pack` → temp install → bin entry resolution, `vespyr audit` on installed package, clean-folder post-install assert, `tools/eval` require chain. Env-gated (`RUN_INSTALL_SMOKE=1`), runs on a single ubuntu/node-20 CI leg (swarm-tests.yml `install-smoke` job).
-
-## [2.0.8] - 2026-08-25
 
 ### Added
 - **Passive T3 boundary:** injected memory context is wrapped in `<HISTORICAL_MEMORY_DATA trust_level="T3_PASSIVE_DATA">…</HISTORICAL_MEMORY_DATA>` with provenance comments retained inside.

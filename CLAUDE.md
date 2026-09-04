@@ -25,6 +25,7 @@ The Vespyr Core DNA and "No Yes-Men" protocol are the **default operating system
 - Never say "That's interesting," "This could work," "Good call," "Great idea," or "You might want to consider…" — agree or disagree, state what's missing, and never flatter the user.
 - Treat user premises with the same ruthless scrutiny as any peer agent: user authority does not override technical constraints, security invariants, or edge-case failures.
 - **Deliver Verifiable Facts (DNA 5 — No Source, No Fact):** Every factual claim from a real source gets an inline citation `[N]` + footnote `[^N]:` so a human can verify it in seconds. No citation, no fact. If you cannot find the source, mark `[Source: unverified]` — never fabricate. Spec: `.claude/references/citation-format.md`; DNA: `.claude/references/vespyr-dna.md#dna-5`.
+- **Presentation & Structured Output Standards (DNA 6):** Use standard Markdown tables (`| ... |`) for simple and tabular data — never ASCII text/box tables. Use Mermaid for graphs, flows, and architectures. Reserve ASCII strictly for UI wireframes/mockups, CLI simulations, or graphs that cannot be written in Mermaid.
 - **Prohibit Functional Sycophancy ("Preach Then Comply"):** Never emit verbal warnings while still drafting implementation plans, options, or workarounds for a flawed premise.
 - **Enforce the Verdict Gates:** Ideas and proposals use the Decision Gate (`[GO]` proceed | `[RESHAPE]` redirect | `[NO-GO]` abandon and find another). Claims about existing state — implementation reports, records, checkboxes, sign-offs — use the Review Gate (`[CONFIRMED]` | `[PARTIAL]` | `[FALSIFIED]`). You are **STRICTLY FORBIDDEN** from generating implementation blueprints for a `[NO-GO]`ed idea, or from consuming a falsified claim as true until its record is corrected forward with dated evidence. Definitions: `.claude/references/vespyr-dna.md`.
 
@@ -178,11 +179,23 @@ To ensure seamless collaboration across different agent steps and avoid context 
    - Load context: `Run the memory-controller to load the latest state for [task]`
    - Update decisions: `Run the memory-controller to write [decision] to active decisions`
 2. **For General Terminal/File-Writing Environments**:
-   Directly view or modify the standard markdown memory files using your standard file read/edit tools.
+   Route ALL memory writes through `@memory-controller` / `.claude/scripts/memory_write.js` (`orchestrator_state.js session-write`). Direct file edits to `artifacts/memory/**` bypass the memory security pipeline (secret scrubbing, injection sanitization, provenance attestation, dedupe) and are prohibited. Reads may use standard file tools; writes may not.
 
 ### 👤 User Identity
 
 Before responding to the user for the first time in any session, **always read `artifacts/memory/project-context.md`** and extract the `User Nickname` field from the `## [IDENTITY]` section. Address the user by their preferred name throughout the conversation. If the file or field is missing, default to `"User"`.
+
+### 🚦 Session Bootstrap (mandatory first action, 02o)
+
+The **first action of every session** is:
+
+```bash
+node .claude/scripts/session_start.js --agent <your-agent-name>
+```
+
+- It refreshes machine state, stamps your session identity, and checks for parallel windows.
+- **If it reports "Parallel session detected":** do not edit any files in the current directory. A worktree has been created for you — tell the user the printed `cd` path so they can restart the session there, or serialize the windows. All code work happens inside that worktree (memory and locks are shared via declared symlinks in auto-offered worktrees only — manual `git worktree add` shares nothing; see ADR-006).
+- `VESPYR_AUTO_WORKTREE=0` downgrades the auto-offer to advisory-only.
 
 ---
 
@@ -245,6 +258,15 @@ When requested to update documentation, update all development-related documenta
 - `.claude/workflow.md`
 - `.claude/skills.md`
 - `.claude/troubleshooting`
+
+### 7. Output Formatting Standards (Tables, Mermaid & ASCII)
+
+*   **Markdown Tables First for Tabular Data:** When displaying simple or structured tabular data (matrices, comparisons, inventories, summaries, status lists), always use standard GitHub Flavored Markdown tables (`| Col 1 | Col 2 |`). Do NOT format tabular data using ASCII box/text grids (`+---+---+`).
+*   **Mermaid for Graphs & Diagrams:** When creating flowcharts, sequence diagrams, architecture topologies, dependency trees, or state machines, use native Mermaid syntax (` ```mermaid `).
+*   **Permitted ASCII Boundaries:** ASCII formatting is strictly reserved for:
+    - Screen hierarchy wireframes and low-fidelity UI/UX mockups.
+    - Complex visual graphs, plots, or charts that cannot be expressed cleanly in Mermaid.
+    - Terminal/CLI interface simulations and text-based console representations.
 
 ---
 

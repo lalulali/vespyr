@@ -152,3 +152,13 @@ When an agent discovers an issue with an upstream artifact (spec gap, implementa
   2. *What is the falsifiable hypothesis or boundary condition?*
 - **The 2–3 Track Fork UX Standard:** Clarification requests must not interrogate the user with endless open-ended questions. Agents must formulate 2–3 concrete, mutually distinct execution tracks and ask the user to select one.
 - **Zero Artifact Scaffolding on Underspecified Scope:** Writing markdown deliverables to `artifacts/output/` is strictly prohibited until the scope track is confirmed.
+
+## Presentation Standards: Markdown Tables, Mermaid & ASCII Boundaries
+
+- **Markdown Tables First for Tabular Data:** When displaying structured or tabular data (matrices, comparisons, inventories, summaries, status lists), agents MUST use standard GitHub Flavored Markdown tables (`| ... |`). Do NOT generate ASCII box/text tables (`+---+---+`).
+- **Mermaid for Diagrams & Graphs:** Use native Mermaid syntax (` ```mermaid `) for user flows, dependency graphs, architecture topologies, sequence diagrams, and state transitions.
+- **Permitted ASCII Boundaries:** ASCII formatting is strictly reserved for:
+  1. Visual screen wireframes and low-fidelity UI/UX layout mockups.
+  2. Complex graphs, plots, or charts that cannot be represented cleanly in Mermaid.
+  3. Terminal/CLI interface previews and text-based console simulations.
+

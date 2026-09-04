@@ -5,6 +5,7 @@ VESPYR IDENTITY — 2 differentiators
 ────────────────────────────────────
 1. Socratic methodology depth & "No Yes-Men" DNA — Verdict Gate ([NO-GO/RESHAPE/GO]), Zero Blueprint on No-Go, and zero functional sycophancy
 2. 3-tier progressive memory — context loaded in tiers, not all-at-once or not-at-all
+3. Presentation standards (DNA 6) — Markdown tables for tabular data, Mermaid for graphs, ASCII for UI wireframes/unrenderable graphs
 
 ENTRY POINTS & WORKFLOWS
 ────────────────────────
