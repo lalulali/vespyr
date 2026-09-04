@@ -616,17 +616,18 @@ No skill or agent can be registered into `manifest.json` or committed to disk wi
 
 ### Post-02j Hardening 1: Harness-Agnostic Bootstrapping & Init Evals (Case 1)
 - [x] **Task TL-INIT-01:** Delete `.agents/commands/init.md` and scrub all `commands/` references from `manifest.json`, `spec_check.js`, and `compile_skills.js`. **[EXECUTED 2026-09-03]** Evidence: `.agents/commands/init.md` deleted, `bin/cli.js manifest` regenerated (323 files), `bin/cli.js verify` passes 324/324 files clean.
-- [ ] **Task TL-INIT-02:** Harden deterministic `npx vespyr init` in `bin/cli.js` with non-destructive memory creation and DRY integration with `tools/eval/sandbox.js`.
-- [ ] **Task TL-INIT-03:** Scrub `README.md`, `QUICK-REFERENCE.md`, `CLAUDE.md`, `bin/cli.js` summary, and `guide/` docs to direct users to `npx vespyr init` and `/help-me` / `/unpack-problem`.
-- [ ] **Task TL-INIT-04:** Implement `test/cli-init.test.js` covering `T0-INIT-01` through `T0-INIT-04` in the `npm run eval` suite.
+- [x] **Task TL-INIT-02:** Harden deterministic `npx vespyr init` in `bin/cli.js` with non-destructive memory creation and DRY integration with `tools/eval/sandbox.js`. **[EXECUTED 2026-09-04]** Evidence: `tools/eval/sandbox.js` imports canonical `scaffoldArtifacts()` from `bin/cli.js`.
+- [x] **Task TL-INIT-03:** Scrub `README.md`, `QUICK-REFERENCE.md`, `CLAUDE.md`, `bin/cli.js` summary, and `guide/` docs to direct users to `npx vespyr init` and `/help-me` / `/unpack-problem`. **[EXECUTED 2026-09-04]** Evidence: `bin/lib/ui.js` updated to `npx vespyr init (or /help-me)`.
+- [x] **Task TL-INIT-04:** Implement `test/cli-init.test.js` covering `T0-INIT-01` through `T0-INIT-04` in the `npm run eval` suite. **[EXECUTED 2026-09-04]** Evidence: `tests/cli/cli-init.test.js` passes 4/4 (T0-INIT-01..04).
 
 ### Post-02j Hardening 2: Universal Swarm Intent Recognition & Dynamic Handoff Bridge (Case 2)
-- [ ] **Task TL-HO-01:** Update all 20 `.agents/agents/*.md` files with the Universal Intent Interceptor and Next-Route Trampoline template.
-- [ ] **Task TL-HO-02:** Audit and enrich all 38 `SKILL.md` frontmatter descriptions with pushy natural-language trigger bags and negative boundaries.
-- [ ] **Task TL-HO-03:** Inject the Zero-Mention Intake Semantic Router Protocol into `AGENTS.md`, `CLAUDE.md`, and `.agents/references/vespyr-dna.md`.
-- [ ] **Task TL-HO-04:** Update `/unpack-problem`, `/shape-up`, `/design`, and `/develop` to automatically scan and ingest canonical domain briefs.
-- [ ] **Task TL-HO-05:** Author `.agents/references/handoff-protocols.md` codifying universal cross-persona transition contracts.
-- [ ] **Task TL-HO-06:** Author `evals/suites/skills/handoff-continuity.json` and `evals/suites/invariants/zero-mention-routing.json` in `vespyr-eval`.
+*(Note: Formally codified, expanded, and executed as Epic `02m-phase-1-intent-routing-and-anti-premature-execution.md` — historic `02k`)*
+- [x] **Task TL-HO-01:** Update all 20 `.agents/agents/*.md` files with the Universal Intent Interceptor and Next-Route Trampoline template. *(Executed in 02m)*
+- [x] **Task TL-HO-02:** Audit and enrich all 38 `SKILL.md` frontmatter descriptions with pushy natural-language trigger bags and negative boundaries. *(Executed in 02m)*
+- [x] **Task TL-HO-03:** Inject the Zero-Mention Intake Semantic Router Protocol into `AGENTS.md`, `CLAUDE.md`, and `.agents/references/vespyr-dna.md`. *(Executed in 02m — DNA 4)*
+- [x] **Task TL-HO-04:** Update `/unpack-problem`, `/shape-up`, `/design`, and `/develop` to automatically scan and ingest canonical domain briefs. *(Executed in 02m Step 0)*
+- [x] **Task TL-HO-05:** Author `.agents/references/handoff-protocols.md` codifying universal cross-persona transition contracts. *(Executed in 02m Guardrails §22)*
+- [x] **Task TL-HO-06:** Author `evals/suites/skills/handoff-continuity.json` and `evals/suites/invariants/zero-mention-routing.json` in `vespyr-eval`. *(Executed in 02m `invariants/intent-routing.json`)*
 
 ### Post-02j Hardening 3: Eval-Driven Meta-Authoring & Anthropic Patterns (Case 3)
 - [ ] **Task TL-EVAL-01:** Implement `tools/eval/delta-runner.js` supporting concurrent A/B sandbox execution (`with_x` vs `without_x`) and computing $\text{ACL}$, $\text{W/T/L}$, and $\text{TRI}$ metrics.

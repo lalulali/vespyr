@@ -257,13 +257,15 @@ async function executeBenchmark(benchmark, options = {}) {
   const startTime = Date.now();
 
   try {
-    const executionOutput = await generateExecutionResponse(benchmark, options, sandbox);
+    const rawResult = await generateExecutionResponse(benchmark, options, sandbox);
+    const executionOutput = typeof rawResult === "object" && rawResult !== null ? (rawResult.output || rawResult.text || "") : String(rawResult || "");
+    const executionTokens = typeof rawResult === "object" && rawResult !== null ? rawResult.tokens : null;
 
     const executionResult = {
       output: executionOutput,
       stdout: executionOutput,
-      stderr: "",
-      exitCode: 0
+      stderr: (typeof rawResult === "object" && rawResult !== null && rawResult.stderr) || "",
+      exitCode: (typeof rawResult === "object" && rawResult !== null && rawResult.exitCode !== undefined) ? rawResult.exitCode : 0
     };
 
     // 2. Tier 0 Deterministic Evaluation
@@ -289,7 +291,7 @@ async function executeBenchmark(benchmark, options = {}) {
       passed,
       tier0Passed: t0Result.pass,
       tier1Score: t1Result ? t1Result.score : (t0Result.pass ? 5.0 : 1.0),
-      tokens: t0Result.metrics ? t0Result.metrics.tokens : countTokens(executionOutput),
+      tokens: executionTokens !== null ? executionTokens : (t0Result.metrics ? t0Result.metrics.tokens : countTokens(executionOutput)),
       durationMs,
       failures: t0Result.failures || [],
       t0Metrics: t0Result.metrics,
@@ -356,6 +358,11 @@ async function runEvaluation(options = {}) {
     }
   }
 
+  if (!options.executionAdapter) {
+    const { resolveAdapter } = require("./adapters");
+    options.executionAdapter = resolveAdapter(options);
+  }
+
   const total = allBenchmarks.length;
   const results = [];
   const concurrency = options.concurrency || 4;
@@ -408,7 +415,19 @@ async function runEvaluation(options = {}) {
   for (const dim of standardDimensions) {
     const dimResults = results.filter(r => r.dimension === dim);
     if (dimResults.length === 0) {
-      dimensions[dim] = { score: 5.0, pass_rate: 1.0 };
+      dimensions[dim] = {
+        score: 5.0,
+        pass_rate: 1.0,
+        srsr: 0.0,
+        pci: 0.0,
+        pbcr: 1.0,
+        hallucination_rate: 0.0,
+        build_pass_rate: 1.0,
+        test_pass_rate: 1.0,
+        scope_drift: 0.0,
+        script_fidelity: 1.0,
+        budget_violations: 0
+      };
       continue;
     }
 

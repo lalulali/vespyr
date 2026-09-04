@@ -8,6 +8,7 @@ const fs = require("fs");
 const path = require("path");
 const os = require("os");
 const { runCommandWithTimeout } = require("./lib/process");
+const { scaffoldArtifacts } = require("../../bin/cli");
 
 const activeSandboxes = new Set();
 
@@ -64,46 +65,16 @@ function createSandbox(options = {}) {
     copyRecursiveSync(options.fixturePath, tempDir);
   }
 
-  // Scaffolding mock memory layer so agent executions never mutate host memory
+  // Scaffolding mock memory layer using canonical installer scaffoldArtifacts (DRY Task TL-INIT-02)
+  scaffoldArtifacts(tempDir, "vespyr-eval-sandbox", "EvalTester", "JavaScript");
   const memoryDir = path.join(tempDir, "artifacts", "memory");
-  const sessionDir = path.join(memoryDir, "session-summaries");
-  const outputDir = path.join(tempDir, "artifacts", "output");
-  fs.mkdirSync(sessionDir, { recursive: true });
-  fs.mkdirSync(outputDir, { recursive: true });
-
-  const mockProjectContext = `# Project Context
-## [CORE]
-Project: vespyr-eval-sandbox
-Repository: Not a git repository (sandbox)
-Stack: JavaScript
-Phase: validation
-Sprint: none
-Blockers: 0
-
-## [IDENTITY]
-User Nickname: EvalTester
-
-<!-- BEGIN MACHINE STATE -->
-## [RUNTIME STATE]
-- Stack: JavaScript
-- Git Branch: none
-- Active Phase: validation
-- Active Sprint: none
-- Blocker Status: 0 active blockers
-- Engine Version: 2.0.7
-<!-- END MACHINE STATE -->
-`;
 
   const mockDecisions = `# Active Decisions
 ### [DECISION] Initial sandbox decision [date: 2026-08-18] [agent: @vespyr-eval]
 Sandbox environment active.
 **Status:** active
 `;
-
-  fs.writeFileSync(path.join(memoryDir, "project-context.md"), mockProjectContext);
   fs.writeFileSync(path.join(memoryDir, "active-decisions.md"), mockDecisions);
-  fs.writeFileSync(path.join(memoryDir, "patterns-and-conventions.md"), "# Patterns and Conventions\n- Standard pattern\n");
-  fs.writeFileSync(path.join(memoryDir, "lessons-learned.md"), "# Lessons Learned\n");
 
   const sanitizedEnv = {
     ...process.env,

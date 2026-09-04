@@ -1,11 +1,11 @@
 {
   "version": "2.0.8",
-  "generated_at": "2026-09-02T23:47:16.569Z",
+  "generated_at": "2026-09-04T02:21:50.967Z",
   "file_count": 323,
   "files": {
     ".gitignore": "02be8395c2a0b6cdfcf971daa5689776e2d98cc43603b22a45d8c2bd78c13772",
-    "GUARDRAILS.md": "83d572feb23c45ccedff20168c756ccfb4ad372ff9755d1efb97c2af6e54460c",
-    "TROUBLESHOOTING.md": "452bab270438aa0e9a9cf68f66cbb28494d4e8011433a463e1d618fc641c3703",
+    "GUARDRAILS.md": "91a68179928514a503541fbf24599d59ba2941e046156d28f926df7e44573cb8",
+    "TROUBLESHOOTING.md": "99a83a6aa4ccab07bae28715b3237a234b4bdb29b0cf629a2e6f3df3590fd509",
     "agents/architect.md": "938b639e19bf2060fc58fbb4b6fec2a6481e0281727ee4f529c9f88dd0e2014e",
     "agents/code-reviewer.md": "6426c0d17a34df3db2c7cddf565ec937bb3a308c1d3af6106b40f436597a0636",
     "agents/data-analyst.md": "91422d431db53403eb9584bc2d33fb16fcc09d4768696b7d322cdb58978971f9",
@@ -67,7 +67,7 @@
     "references/templates/product-spec-instructions.md": "3c8426d6a2092e43155a84bfd5a45c80ebbe2aac4f255cc75505f3a5d583595c",
     "references/templates/user-story-instructions.md": "3f9d51c25390be96b68d31db944a40aa597988ea4c5269067fbc58602503d8f8",
     "references/utter-satisfaction.md": "a53caf8c2b2869cf25c42cf8de99464a588c2acc4fbc8aafd1647f0a997b2e73",
-    "references/vespyr-dna.md": "f6156fb50c0ad2531774f9fad347466d429b59ffa77a6fdcb6d6c0302c793668",
+    "references/vespyr-dna.md": "69799dd3978a736835091207ceee116ed9a4a6fbab1061a98fde94c52880acc5",
     "scripts/.npmignore": "427e6f114211a5e8087b10a30120450e5cfbeeacca7a0d251e560380dc9539e2",
     "scripts/add-citation-protocol.js": "ac4466075c634f97779e36b4fead2b0ca39e6a9fe2236bf255b023228dfed037",
     "scripts/add-delegation-contract.js": "6e82c4587cab6b1106568fd650dcef66c1dae11c4ef6eb0d956ecc800b333255",
@@ -321,11 +321,11 @@
     "templates/spec-kernel-template.md": "4e3a55d7bd79becfa654d32fa34056555b15c7886e39e7b5e93c8127da5e1480",
     "templates/spec-law.md": "979b58ff5604eeafc079e1e6d15fd799bdb9353961f26ab8e8745cc2a98b34ba",
     "templates/step-file-template.md": "a9437f63f90df2b0bba86fc93a99748e0dd6c8ea78892b94749bf41b009a81ed",
-    "templates/system/AGENTS.md.canonical": "8a04671ae380b11939fd6c6e2f7496bb127e6cda1e1841fb4d3288b9c5dbd665",
-    "templates/system/agent.md.canonical": "8a04671ae380b11939fd6c6e2f7496bb127e6cda1e1841fb4d3288b9c5dbd665",
+    "templates/system/AGENTS.md.canonical": "3e4c81b73e96428532dab2a898cf22e8cd27c04de758715adac58b5377922701",
+    "templates/system/agent.md.canonical": "3e4c81b73e96428532dab2a898cf22e8cd27c04de758715adac58b5377922701",
     "templates/system/opencode.json.template": "53443ae3f08da79b330a27ba099b68a7638f977c6bbc1485d1b8e3249723a0ae",
     "templates/system/vespyr-steering.md.canonical": "6cb253bcdaaa3b7577c0a9638c4589556fd41026b8cad1a653d236f6f1174e81",
-    "workflow.md": "5976babbc9592996ef4daf9b457c7f56039977428536e0a9af6300a3df9bca42"
+    "workflow.md": "8168205efb96c7a5f99004acc5b8788fb368908bee570f5070fe2a845ca94f1c"
   },
   "files_root": {
     "bin/cli.js": "1ff8f0f7c5abf1916862834a78aa4bc36d78b9fb456f40b44089d24fefc7c19e"

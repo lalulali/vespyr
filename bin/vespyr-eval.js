@@ -33,6 +33,8 @@ Options:
   --agent, -a <name>         Filter benchmarks to specific agent persona (@founder, @developer, etc.)
   --skill, -k <name>         Filter benchmarks to specific skill workflow (/develop, /grill-me, etc.)
   --model, -m <model>        Force model tier (inherit, flash, pro, claude-3-5-sonnet)
+  --adapter <type>           Execution adapter (auto, mock, cli, openai, anthropic, gemini, ollama)
+  --cli <command>            Command string for CLI execution adapter
   --temp, -t <float>         Temperature for evaluation runs (default: 0.0)
   --concurrency, -c <int>    Number of concurrent worker sandboxes (default: 4)
   --baseline, -b <path>      Path to baseline.json (default: evals/baseline.json)
@@ -58,6 +60,8 @@ function parseArgs(args) {
     agent: "all",
     skill: "all",
     model: "inherit",
+    adapter: "auto",
+    cli: null,
     temp: 0.0,
     concurrency: 4,
     baseline: DEFAULT_BASELINE_PATH,
@@ -83,6 +87,10 @@ function parseArgs(args) {
       options.skill = args[++i].replace(/^\//, "");
     } else if (arg === "--model" || arg === "-m") {
       options.model = args[++i];
+    } else if (arg === "--adapter") {
+      options.adapter = args[++i];
+    } else if (arg === "--cli") {
+      options.cli = args[++i];
     } else if (arg === "--temp" || arg === "-t") {
       options.temp = parseFloat(args[++i]);
     } else if (arg === "--concurrency" || arg === "-c") {

@@ -51,11 +51,16 @@ function renderConsoleReport(runResults, diffReport = null) {
     for (const [dimKey, dimData] of Object.entries(runResults.dimensions)) {
       let special = "";
       if (dimKey === "sycophantic_premature_convergence") {
-        special = `SRSR: ${(dimData.srsr * 100).toFixed(1)}% | PCI: ${dimData.pci.toFixed(2)} | PBCR: ${(dimData.pbcr * 100).toFixed(1)}%`;
+        const srsr = typeof dimData.srsr === "number" ? dimData.srsr : 0.0;
+        const pci = typeof dimData.pci === "number" ? dimData.pci : 0.0;
+        const pbcr = typeof dimData.pbcr === "number" ? dimData.pbcr : 1.0;
+        special = `SRSR: ${(srsr * 100).toFixed(1)}% | PCI: ${pci.toFixed(2)} | PBCR: ${(pbcr * 100).toFixed(1)}%`;
       } else if (dimKey === "research_grounding") {
-        special = `Hallucination: ${(dimData.hallucination_rate * 100).toFixed(1)}%`;
+        const hRate = typeof dimData.hallucination_rate === "number" ? dimData.hallucination_rate : 0.0;
+        special = `Hallucination: ${(hRate * 100).toFixed(1)}%`;
       } else if (dimKey === "code_quality") {
-        special = `Build Pass: ${(dimData.build_pass_rate * 100).toFixed(1)}%`;
+        const bRate = typeof dimData.build_pass_rate === "number" ? dimData.build_pass_rate : 1.0;
+        special = `Build Pass: ${(bRate * 100).toFixed(1)}%`;
       }
       dimRows.push([
         dimKey,
