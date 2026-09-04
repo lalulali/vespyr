@@ -98,7 +98,7 @@ installed through `vespyr verify`-style hash checks (02f F1.42/F1.48 linkage) �
 an unsigned or drifted module file is rejected, not copied.
 
 - [ ] F4.1 — Create `.agents/manifests/install-modules.json` (~200 lines, structure above)
-- [ ] F4.2 — Create `.agents/scripts/install-modules.js` (~120 lines): `list`, `install <module-list>`, `remove <module-list>`, `--dry-run`. Reads manifest, resolves dependency closure (incl. required `io`), verifies content hashes before copying, writes `install-state.json` for safe uninstall. **Spec:** pending — `03d-phase-2-implementation-specs.md` §17
+- [ ] F4.2 — Create `.agents/scripts/install-modules.js` (~120 lines): `list`, `install <module-list>`, `remove <module-list>`, `--dry-run`. Reads manifest, resolves dependency closure (incl. required `io`), verifies content hashes before copying, writes `install-state.json` for safe uninstall. **Spec:** pending — `03e-phase-2-implementation-specs.md` §17
 - [ ] F4.3 — Add `install-modules` subcommand to `bin/cli.js`: `npx vespyr install-modules core,design`, `--list`, `--remove`, `--dry-run`
 
 ## F4.4-F4.5 — Language-specific rules (CSS-like specificity)
@@ -249,8 +249,8 @@ The example is a deliberately trivial project ("a CLI todo list") — the point 
 - [ ] Mark v1.x work as shipped
 - [ ] Mark v2.0 as "this plan" with link to development-plan/ folder
 - [ ] Add v3.0 backlog: agent marketplace, VS Code extension, Vespyr Cloud, multi-locale docs, language-specific reviewer agents, WDS persona handoff, critic consortium (v2.3+)
-- [ ] **Remove from v3.0 backlog (already shipping):** multi-agent parallelism via git worktrees (= Phase 0 T7.1b, v2.0) and MCP server-as-tool (= 03b M2, v2.1)
-- [ ] **Delete the 35-harness future table.** Replace with: "Additional harnesses added as community demand warrants. See `03c-phase-2-harness-integration.md` for OpenClaw (v2.3+, can enforce permissions) and Hermes (v2.3+, degraded mode)."
+- [ ] **Remove from v3.0 backlog (already shipping):** multi-agent parallelism via git worktrees (= Phase 0 T7.1b, v2.0) and MCP server-as-tool (= 03c M2, v2.1)
+- [ ] **Delete the 35-harness future table.** Replace with: "Additional harnesses added as community demand warrants. See `03d-phase-2-harness-integration.md` for OpenClaw (v2.3+, can enforce permissions) and Hermes (v2.3+, degraded mode)."
 
 ## F4.15 — Add CHANGELOG.md v2.0 entry
 

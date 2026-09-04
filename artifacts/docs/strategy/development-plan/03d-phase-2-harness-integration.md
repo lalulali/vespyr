@@ -458,7 +458,7 @@ If Hermes adds per-tool model selection, map:
 
 ## Completion Checklist
 
-**03c status: PLANNED (v2.1 Scope — Not Started).**
+**03d status: PLANNED (v2.1 Scope — Not Started).**
 
 - [ ] OpenClaw integration and sandbox permission isolation
 - [ ] Hermes Agent port (SKILL.md format and delegation adapters)

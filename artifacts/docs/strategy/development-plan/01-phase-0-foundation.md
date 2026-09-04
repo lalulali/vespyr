@@ -119,7 +119,7 @@ Three documents currently disagree on phase numbering. A canonical table elimina
   - Writes to `AGENTS.md`, `agent.md`, `CLAUDE.md`, and per-harness `AGENTS.md`
   - Validates each output is non-empty and contains canonical sections
 - [x] Hook `sync-entry-points.js` into `bin/cli.js init` command
-- [x] **Implementation code:** See `03d-phase-2-implementation-specs.md` §1
+- [x] **Implementation code:** See `03e-phase-2-implementation-specs.md` §1
 
 ### Problem
 `CLAUDE.md`, `agent.md`, `AGENTS.md` are three near-identical files (~168 lines each) with only minor path swaps (`.claude/` vs `.agents/`). They drift independently and are a maintenance burden.
@@ -364,7 +364,7 @@ This is a trivial change with outsized UX impact. BMAD does it, and once you see
   - Exit 0 if all 21 pass; exit 1 with file list if any fail
 - [x] Add `npm run validate:frontmatter` to `package.json`
 - [x] Wire into `bin/cli.js init`
-- [x] **Implementation code:** See `03d-phase-2-implementation-specs.md` §2
+- [x] **Implementation code:** See `03e-phase-2-implementation-specs.md` §2
 
 ### Problem
 There is no enforcement of the v2 frontmatter schema. A missing `icon` or a `name` that doesn't match the filename silently breaks routing and persona-prefixing.

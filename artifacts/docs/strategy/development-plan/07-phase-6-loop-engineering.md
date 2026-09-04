@@ -56,7 +56,7 @@ The user gives a verifiable stop condition (e.g., "all tests in test/auth pass a
   - Pause/resume/clear semantics: loop-state.json stores current iteration, last failure, next action
   - Hard limit: max 10 iterations per `/goal` invocation (configurable via `VESPYR_GOAL_MAX_ITERATIONS`)
   - Anti-patterns: uncheckable conditions ("make it good"), conditions the maker grades itself, no iteration limit
-- [ ] F6.2 — Create `.agents/scripts/goal_check.js` (~120 lines): `run <condition>`, `status`, `resume`, `clear`. Runs the verification command, captures exit code + output, writes result to `.agents/state/loop-state.json`. **Implementation code:** See `03d-phase-2-implementation-specs.md` §13
+- [ ] F6.2 — Create `.agents/scripts/goal_check.js` (~120 lines): `run <condition>`, `status`, `resume`, `clear`. Runs the verification command, captures exit code + output, writes result to `.agents/state/loop-state.json`. **Implementation code:** See `03e-phase-2-implementation-specs.md` §13
 - [ ] F6.3 — Create `.agents/agents/goal-verifier.md` (~80 lines): a narrow sub-agent that reads the verification output + stop condition and returns `DONE` or `NOT-DONE: <reason>`. It does NOT read the maker's code — it reads only the verification result. This is the structural safeguard: the agent that wrote the code is not the one grading "done." Mode: `subagent`. Capabilities: `read`. No write, no bash.
 - [ ] F6.4 — Add `goal` command to `bin/cli.js`: `vespyr goal <condition>` starts the loop, `vespyr goal status` shows current state, `vespyr goal resume` continues, `vespyr goal clear` resets
 
@@ -72,7 +72,7 @@ An automation = prompt + cadence + skill + environment. Runs on a schedule, does
   - Triage inbox: findings land in `artifacts/output/01-discovery/triage/<automation-name>/`
   - Archive: runs that find nothing are archived to `artifacts/output/01-discovery/triage/<automation-name>/archive/`
   - Anti-patterns: automations that modify code without a human review gate, automations that run all 21 agents, no cadence limit
-- [ ] F6.6 — Create `.agents/scripts/automation.js` (~180 lines): `create`, `list`, `run <id>`, `run-all`, `archive <id>`. Stores definitions in `.agents/state/automations.json`. `run` executes the prompt + skill, writes findings to triage inbox. **Implementation code:** See `03d-phase-2-implementation-specs.md` §14
+- [ ] F6.6 — Create `.agents/scripts/automation.js` (~180 lines): `create`, `list`, `run <id>`, `run-all`, `archive <id>`. Stores definitions in `.agents/state/automations.json`. `run` executes the prompt + skill, writes findings to triage inbox. **Implementation code:** See `03e-phase-2-implementation-specs.md` §14
 - [ ] F6.7 — Create starter automation: daily CI-failure triage
   - Prompt: "Read yesterday's CI failures from `.agents/state/ci-log.json` (or GitHub Actions API via MCP), summarize root causes, write findings to triage inbox"
   - Cadence: daily (cron `0 9 * * *` or GitHub Actions schedule)

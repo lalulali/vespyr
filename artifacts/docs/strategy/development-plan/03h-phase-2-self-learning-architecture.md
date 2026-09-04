@@ -1,4 +1,4 @@
-# Phase 2 — Self-Learning Swarm Architecture (03g)
+# Phase 2 — Self-Learning Swarm Architecture (03h)
 
 **Decision:** Establish an enterprise-grade, non-parametric continual self-learning engine for Vespyr. Reject autonomous runtime control-plane prompt mutation (`[KILL]`), while implementing a deterministic 5-stage trajectory distillation pipeline in the data plane (`artifacts/memory/`), hardened by write-time secret scrubbing, 3-signal mathematical deduplication, passive T3 context encapsulation, and zero-loss LSM-tree compaction.
 

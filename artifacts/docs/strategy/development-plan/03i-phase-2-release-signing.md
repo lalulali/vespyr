@@ -1,4 +1,4 @@
-# Release Signing & Manifest Freshness (03h) — F1.52 Execution Plan
+# Release Signing & Manifest Freshness (03i) — F1.52 Execution Plan
 
 **Status:** PLANNED (execution-ready; NOT started). Created 2026-08-23 from the 02f post-fix fresh audit residual.
 **Decision:** Cryptographic release signing is deferred out of Phase 1 — deliberately. The interim control chain (pinned unsigned manifest → fail-closed verify → NEW-FINDINGS gate → publish-time verify) ships in Phase 1 and detects accidental drift; adversarial tamper detection activates when this plan executes.

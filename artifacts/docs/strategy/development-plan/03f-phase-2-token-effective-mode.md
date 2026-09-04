@@ -310,7 +310,7 @@ shared satisfaction or release contract.
 
 ## Completion Checklist
 
-**03e status: PLANNED (v2.1 Scope — Not Started).**
+**03f status: PLANNED (v2.1 Scope — Not Started).**
 
 - [ ] Response Ladder architecture (L1–L4 token allocation)
 - [ ] Speech compression and concise mode toggles

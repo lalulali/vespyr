@@ -291,7 +291,7 @@ npx vespyr install-module reddit-mcp
 
 ## Completion Checklist
 
-**03a status: PLANNED (v2.1 Scope — Not Started).**
+**03b status: PLANNED (v2.1 Scope — Not Started).**
 
 - [ ] Core `@vespyr/mcp` tools implemented (`memory_search`, `session_diff`, `fidelity_check`, `task_history`, etc.)
 - [ ] Third-party MCP integration configured (Hound, Playwright, Git, shadcn, GitHub, Figma)

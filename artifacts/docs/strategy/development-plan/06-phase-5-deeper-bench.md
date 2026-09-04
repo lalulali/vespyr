@@ -3,7 +3,8 @@
 > **Release:** v2.2 (ALL tiers ship together — the earlier "T1 ships with v2.1 alongside Phase 2-4" claim was contradicted by this file's own Weeks 9-14 calendar and the v2.1 infra workload; the round-table resolved: T1 → v2.2. See the release-bundling decision in §What changed below and the v2.1/v2.2 scope notes in `05-phase-4-modularity.md` F4.11/F4.16 and `08-cross-cutting-utter-satisfaction-dna.md` §7)
 > **Calendar:** Weeks 9-14
 > **Themes:** T1 (Agent depth), T2 (Skill atomicity), T8 (UTTERLY SATISFIED culture)
-> **Goal:** Enrich the 23-persona bench (v2.0 shipped state) toward 45 personas and the 43-skill library to 62 skills. Add 3 new opt-in squads. Fill the gaps between v1.7's engineering core and broader product-team needs without fragmenting the shared satisfaction culture.
+> **Goal:** Enrich the 23-persona bench (v2.0 shipped state) toward 45 personas and the 43-skill library to 62 skills. Add 3 new opt-in squads. Fill the gaps between v1.7's engineering core and broader product-team needs without fragmenting the shared satisfaction culture.  
+> **Agency Skills Baseline:** Pre-configured by `03a-phase-2-external-skills-research-and-ingestion.md` — external consulting & agency workflows ingested during Phase 2 are inherited by Phase 5 specialists (`@finance-analyst`, `@accessibility-architect`, `@seo-specialist`, `@growth-marketer`, `@presentation-master`, etc.).
 
 ## What changed from the original
 

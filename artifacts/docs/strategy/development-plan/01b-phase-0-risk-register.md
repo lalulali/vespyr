@@ -10,10 +10,10 @@
 | # | Risk | Likelihood | Impact | Mitigation | Phase |
 |---|---|---|---|---|---|
 | R1 | Phase files silently rewrite the master plan (budget overruns, scope creep not reflected in master) | High | High | This `development-plan/` folder is the fix — single source of truth. No more phase files with different budgets than the master. | All |
-| R2 | Superseded docs still cited as source for implementation details | High | Medium | Code specs moved to `03d-phase-2-implementation-specs.md`. Superseded docs (`2.` and `3.`) should be moved to `_archive/`. | All |
+| R2 | Superseded docs still cited as source for implementation details | High | Medium | Code specs moved to `03e-phase-2-implementation-specs.md`. Superseded docs (`2.` and `3.`) should be moved to `_archive/`. | All |
 | R3 | Total time overruns the estimate | Medium | Medium | Each phase is independently shippable. If Phase 3 slips, ship Phases 0-2 as v2.0-rc2 and defer. | All |
 | R4 | Frontmatter v2 migration breaks external parsers | Low | Low | v1 fields still allowed (deprecated). v2 enforced at v2.0 release; v1 removed at v3.0. | 0 |
-| R5 | Hermes integration ships without disclosing degraded mode | Medium | High | `03c-phase-2-harness-integration.md` states the limitation in the header, not buried in a table. Hermes is deferred to v2.3+ and framed as a documented degraded mode under 03b's M3/M4. | v2.3+ |
+| R5 | Hermes integration ships without disclosing degraded mode | Medium | High | `03d-phase-2-harness-integration.md` states the limitation in the header, not buried in a table. Hermes is deferred to v2.3+ and framed as a documented degraded mode under 03c's M3/M4. | v2.3+ |
 
 ---
 

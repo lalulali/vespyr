@@ -1,8 +1,8 @@
-# Plan 03b — Cross-Harness Multi-Agent Orchestration
+# Plan 03c — Cross-Harness Multi-Agent Orchestration
 
 **Status:** Planned
 **Date:** 2026-07-22
-**Depends on:** Phase 0 (agent personas, delegation-pattern.md), Phase 2 hooks F2.1-F2.5 (lifecycle hooks for enforcement), Plan 03a §3a (MCP server — F3b.13 extends it), **F2.19-F2.22** (delegation logging — F3b.35 mode telemetry feeds F2.15.a-c), **F2.23-F2.28** (QA gate + validate_satisfaction.js — F3b.17/F3b.31/F3b.27 all wire into it), `08-cross-cutting-utter-satisfaction-dna.md` (§2.1 control plane), `03d-phase-2-implementation-specs.md` (canonical code; §16 for fixture tests). **Concurrent-edit alert:** F2.23, F2.28, F3b.27, and F3b.31 all modify `orchestrator_state.js` — implement sequentially in dependency order (F2.23 → F2.28 → F3b.27 → F3b.31) with one owner per edit.
+**Depends on:** Phase 0 (agent personas, delegation-pattern.md), Phase 2 hooks F2.1-F2.5 (lifecycle hooks for enforcement), Plan 03b §3a (MCP server — F3c.13 extends it), **F2.19-F2.22** (delegation logging — F3b.35 mode telemetry feeds F2.15.a-c), **F2.23-F2.28** (QA gate + validate_satisfaction.js — F3b.17/F3b.31/F3b.27 all wire into it), `08-cross-cutting-utter-satisfaction-dna.md` (§2.1 control plane), `03e-phase-2-implementation-specs.md` (canonical code; §16 for fixture tests). **Concurrent-edit alert:** F2.23, F2.28, F3b.27, and F3b.31 all modify `orchestrator_state.js` — implement sequentially in dependency order (F2.23 → F2.28 → F3b.27 → F3b.31) with one owner per edit.
 **Themes:** T4 (Harness contracts), T8 (UTTERLY SATISFIED culture)
 **Release:** v2.1
 **Agent list note:** all agent enums/registries below must be DERIVED from `validate_frontmatter.js` output (`.agents/agents/*.md`) at install time — the v2.0 shipped state is 23 agent files (incl. `@ml-ai-engineer`, `@ml-ai-ops`, `@shifu`); hardcoded 21-entry lists are retired. `ml-engineer` is a phantom name — `ml-ai-engineer` is canonical.
@@ -737,7 +737,7 @@ If Plan 03b breaks:
 
 ## Completion Checklist
 
-**03b status: PLANNED (v2.1 Scope — Not Started).**
+**03c status: PLANNED (v2.1 Scope — Not Started).**
 
 - [ ] Multi-harness capability detection matrix (M1-M4)
 - [ ] Native sub-agent adapters for Claude Code, VS Code Copilot, OpenCode

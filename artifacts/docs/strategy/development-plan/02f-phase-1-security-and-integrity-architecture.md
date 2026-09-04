@@ -116,7 +116,7 @@ The trust pipeline the controls operate on — boundary → surfaces → control
 | Install method | Integrity control |
 |---|---|
 | **npx (npm)** | `npm publish --provenance` (Sigstore/SLSA OIDC attestation); checksums manifest per release. Trust chain is explicit: registry SRI (`dist.integrity`) + Sigstore provenance pin the **tarball** → the signed manifest *inside* it is then trusted. Consumers run `npm audit signatures` (**audit/CI-time stage, not install-enforced — labeled as such**); installs pin **`npx vespyr@<exact-version>`** — `@latest` is a tag-move attack (R50). Canonical install command includes `--ignore-scripts` where supported. **Self-update channels must not bypass the exact-version pin** — any auto-update mechanism is either disabled or covered by the same controls (Axel residual). Zero install-scripts policy on the published package (F1.57) |
-| **GitHub clone** | Pin to signed tags + commit SHAs, never `main`; branch protection + CODEOWNERS on release paths; `git verify-tag` as release gate (codifies 03c-phase-2-harness-integration decision). `git verify-tag` limits visible: requires the signer's key in your keyring and does not stop moved tags — commit-SHA pinning is the actual control. GitHub tarballs are not byte-stable across regeneration: pin commit SHA + verify tree hash + guard extraction (symlink escape, traversal) |
+| **GitHub clone** | Pin to signed tags + commit SHAs, never `main`; branch protection + CODEOWNERS on release paths; `git verify-tag` as release gate (codifies 03d-phase-2-harness-integration.md). `git verify-tag` limits visible: requires the signer's key in your keyring and does not stop moved tags — commit-SHA pinning is the actual control. GitHub tarballs are not byte-stable across regeneration: pin commit SHA + verify tree hash + guard extraction (symlink escape, traversal) |
 | **skills.sh / curl-pipe** | If ever offered: version-pinned trivial script — download tarball → verify SHA-256 against release checksums → unpack. Zero eval of fetched content. Unpack path gets the same extraction guards as GitHub (GH-1-style: symlink escape, traversal). Third-party pipes that install Vespyr modules are covered by the same checks. Current position remains "not a distribution channel" (02e) |
 | **Module installs** | Second-order supply chain: pin versions, verify hashes, run the same audit on anything landing in `.agents/` |
 | **Lockfiles** | `package-lock.json` integrity fields are silently trusted by `npm ci` — lockfiles are in manifest scope and their diffs are human-reviewed (§5.2) (S15) |
@@ -267,7 +267,7 @@ Also covers: package.json dependency tree postinstall/transitive-dep risk triage
 | F1.54 | Red-team corpus + CI gate spec (§10): attack labels, trigger paths, per-rule pos/neg fixture invariant, held-out recall set + independent corpus mutation, NEW-FINDINGS-ONLY FP gate (denominator defined) + triage owner, multi-harness × multi-OS CI (`.claude/`, `.harness/`, `.opencode/` fixtures, per-shape parameterization, Windows junction handling), GH-1 counting protocol (N enforced, canonical dedup key: rule-id/file-path/line/first-seen-SHA + normalized finding hash), required-check branch protection, no pull_request_target, fork-PR read-only tokens, SARIF/JSON artifact persistence, corpus growth rules. **Timebox note (Grant): 5 sub-streams in 5h — treat as wire-up + smoke; deep corpus growth is a Phase 2 concern** | 5h | F1.47, F1.48 |
 | F1.56 | T3 loader-boundary parse/validate hook spec (load-time delimiter enforcement; Phase 1: admission-control parse + escalation + scan gate; per-path enforcement matrix from canonical inventory — tool grants/MCP list/subagent transcript handlers — with CI-enforced tool-addition gate; agent-side discipline line in personas, framed as complement) | 4h | F1.41, F1.43 |
 | F1.57 | Published-package install-script audit + transitive-dep review; zero-install-scripts policy | 2h | F1.55 |
-| F1.52 | Risk-register updates + cross-refs to 01b-phase-0-risk-register.md + 03d-phase-2-implementation-specs.md; release-pipeline handoff owner (**@devops-engineer + @security-engineer**; signer: Sigstore keyless cosign, fallback GPG key in CI secrets; CI fails when a release tag lacks a freshly generated manifest) | 3h | F1.48, F1.51 |
+| F1.52 | Risk-register updates + cross-refs to 01b-phase-0-risk-register.md + 03e-phase-2-implementation-specs.md; release-pipeline handoff owner (**@devops-engineer + @security-engineer**; signer: Sigstore keyless cosign, fallback GPG key in CI secrets; CI fails when a release tag lacks a freshly generated manifest) | 3h | F1.48, F1.51 |
 | F1.53 | DoD verification pass: link check, F-number audit, index update, @security-engineer sign-off | 2h | F1.52, F1.54 |
 
 **Total: 61h serial** (2+2+3+4+4+2+4+4+2+3+5+4+2+4+5+4+2+3+2; recommended single-author order = sum of all tasks).
@@ -287,7 +287,7 @@ Also covers: package.json dependency tree postinstall/transitive-dep risk triage
 
 - `02e-phase-1-agentskills-standardization.md` (format parity)
 - ADR index with ADR-001–004 registered; next free number: 005
-- `01b-phase-0-risk-register.md` + `03d-phase-2-implementation-specs.md`
+- `01b-phase-0-risk-register.md` + `03e-phase-2-implementation-specs.md`
 - The frontmatter-drift LESSON entry (memory)
 - Current `.agents/scripts/` inventory (feeds F1.47 allowlist + baseline)
 - `.agents/references/phase-table.md` + dev-plan journey mapping (position verification)
@@ -335,9 +335,9 @@ Also covers: package.json dependency tree postinstall/transitive-dep risk triage
 | Reference | Relationship |
 |---|---|
 | `01b-phase-0-risk-register.md` | Threat-model orphans + new risks (S-series surfaces) land here with owners; R16 (hooks), R18 (witness), R37 (migration) are adjacent |
-| `03d-phase-2-implementation-specs.md` | `vespyr verify`/scan.js/validate_frontmatter specs ultimately implement here; new scripts referenced from F1.47/F1.48 |
+| `03e-phase-2-implementation-specs.md` | `vespyr verify`/scan.js/validate_frontmatter specs ultimately implement here; new scripts referenced from F1.47/F1.48 |
 | `02e-phase-1-agentskills-standardization.md` | Skills spec compliance (frontmatter/schema) is the T1 validation layer this plan's T1 handling consumes |
-| `03c-phase-2-harness-integration.md` | Supply-chain pinning decision (curl from main → pinned tags) codified in §5.1 |
+| `03d-phase-2-harness-integration.md` | Supply-chain pinning decision (curl from main → pinned tags) codified in §5.1 |
 | `08-cross-cutting-utter-satisfaction-dna.md` | T8 gate: @security-engineer sign-off recorded before 02f closes (DoD #14) |
 | ADR index | 4 new ADRs (adr-001–004) registered — [ADR index](../../../output/04-architecture/README.md), next free: 005 |
 | **Release pipeline (F1.52)** | Manifest generation is Phase 2 tooling. Owner: **@devops-engineer + @security-engineer**. Signer: Sigstore keyless cosign (fallback: GPG key in CI secrets). CI fails when a release tag lacks a freshly generated manifest |

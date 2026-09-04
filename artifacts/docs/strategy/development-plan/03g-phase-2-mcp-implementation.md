@@ -2,15 +2,15 @@
 
 **Status:** Planned  
 **Date:** 2026-07-21  
-**Depends on:** `03a-phase-2-mcp-integration-plan.md` (Phase 1 foundation: `@vespyr/mcp` + 4 default servers)
+**Depends on:** `03b-phase-2-mcp-integration-plan.md` (Phase 1 foundation: `@vespyr/mcp` + 4 default servers)
 
 ---
 
 ## 1. Purpose
 
-Phase 1 gives every agent a baseline: structured memory, code graphs, web research, E2E testing, diffs, and LSP diagnostics. Phase 2 closes the gaps — MCP servers that give specific agents capabilities they currently lack entirely, or that `@executor` shell calls handle poorly.
+Phase 1 gives every agent a baseline: structured memory, code graphs, web research, E2E testing, diffs, and LSP diagnostics. Phase 2 closes the gaps — MCP servers that give specific agents capabilities they currently lack entirely.
 
-**Rule:** Only add an MCP server if at least 2 agents need it AND `@executor` can't provide the same capability with a one-liner.
+**Rule:** Only add an MCP server if at least 2 agents need it.
 
 **T8 rule:** MCP tools may provide evidence and validation, but no MCP server
 or tool may convert `BLOCKED`, `CHANGES REQUESTED`, stale sign-off, or missing
@@ -44,7 +44,7 @@ evidence into approval. The canonical validator remains the source of truth.
 
 ### I/O Sub-Agents — Not Applicable
 
-`@reader`, `@writer`, `@executor`, `@memory-controller` are narrow I/O executors. They don't reason or need tool enrichment. MCP is for the 13 reasoning agents.
+`@memory-controller` are narrow I/O executors. They don't reason or need tool enrichment. MCP is for the 13 reasoning agents.
 
 ---
 
@@ -176,7 +176,7 @@ npx vespyr install-mcp-phase2
 
 ## Completion Checklist
 
-**03f status: PLANNED (v2.1 Scope — Not Started).**
+**03g status: PLANNED (v2.1 Scope — Not Started).**
 
 - [ ] Security tool wrappers (`audit_dependencies`, `scan_secrets`)
 - [ ] Data query and documentation integrity wrappers (`query_data`, `check_docs`)

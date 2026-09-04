@@ -32,14 +32,15 @@ Every `NN[X]-*.md` file in this directory MUST have a row here; numbers are clai
 | `02n-phase-1-record-integrity-recovery.md` | Record integrity recovery | Pending (last; formerly 02m) |
 | `02o-phase-1-parallel-session-safety.md` | Parallel session safety | Executed 2026-08-28 (incl. 02o.7–9 worktree automation) |
 | `03-phase-2-enablement.md` | Phase 2 enablement | Planned (v2.1) |
-| `03a-phase-2-mcp-integration-plan.md` | MCP integration | Planned |
-| `03b-phase-2-multi-agent-orchestration.md` | Multi-agent orchestration | Planned |
-| `03c-phase-2-harness-integration.md` | Harness integration | Planned |
-| `03d-phase-2-implementation-specs.md` | Implementation specs | Planned |
-| `03e-phase-2-token-effective-mode.md` | Token-effective mode | Planned |
-| `03f-phase-2-mcp-implementation.md` | MCP implementation | Planned |
-| `03g-phase-2-self-learning-architecture.md` | Self-learning | Planned |
-| `03h-phase-2-release-signing.md` | Release signing | Planned |
+| `03a-phase-2-external-skills-research-and-ingestion.md` | External skills research & ingestion | Planned |
+| `03b-phase-2-mcp-integration-plan.md` | MCP integration | Planned |
+| `03c-phase-2-multi-agent-orchestration.md` | Multi-agent orchestration | Planned |
+| `03d-phase-2-harness-integration.md` | Harness integration | Planned |
+| `03e-phase-2-implementation-specs.md` | Implementation specs | Planned |
+| `03f-phase-2-token-effective-mode.md` | Token-effective mode | Planned |
+| `03g-phase-2-mcp-implementation.md` | MCP implementation | Planned |
+| `03h-phase-2-self-learning-architecture.md` | Self-learning | Planned |
+| `03i-phase-2-release-signing.md` | Release signing | Planned |
 | `04-phase-3-observability.md` | Phase 3 observability | Planned (v2.2) |
 | `04a-phase-3-observability-engine.md` | Observability engine | Planned |
 | `04b-phase-3-observability-ui-miniapp.md` | Observability UI | Planned |
@@ -59,7 +60,7 @@ This folder supersedes the following files in `strategy/`:
 |---|---|---|
 | `0. vespyr-master-roadmap.md` (546 lines) | Superseded | Consolidated into this README + phase files |
 | `1. framework_comparison_*.md` (412 lines) | Condensed | → `01a-phase-0-framework-analysis.md` |
-| `2. vespyr_evolution_plan.md` (2,375 lines) | Superseded | Code specs → `03d-phase-2-implementation-specs.md`; micro-tasks merged into phase files |
+| `2. vespyr_evolution_plan.md` (2,375 lines) | Superseded | Code specs → `03e-phase-2-implementation-specs.md`; micro-tasks merged into phase files |
 | `3. adoption-plan-*.md` (687 lines) | Superseded | Adoption matrix → this README §3; details merged into phase files |
 | `4. persona-skill-enrichment-plan.md` (1,190 lines) | Condensed | → `06-phase-5-deeper-bench.md` |
 | `ROADMAP.md` (442 lines) | Keep as public-facing | This README is the internal source; ROADMAP.md is the public mirror |
@@ -188,11 +189,11 @@ The original plan had scope creep and wrong priorities. Here's what changed:
 | **T7 Vespyr Identity** (3 differentiators) | Backlog (no timeline) | **Phase 0** (v2.0) | The moat ships first, not last. Without T7, v2.0 is all imports. |
 | **F0.23-F0.28** (critic infrastructure: multi-agent patterns, critic-review skill, 5 rubrics, patterns/critics frontmatter) | Phase 0 (v2.0) | **Deferred to v2.3+** | Speculative engineering. No critic personas exist until v2.2. The infrastructure has no consumers. Violates "Simplicity First." |
 | **F1.27-F1.28 / T1.28** (build-wiki & llm-wiki) | Phase 1 / Phase 3 / Phase 5 | **Moved to Phase 7** (v2.3) | Consolidated into dedicated PKM & Knowledge Engine exploration phase (`09-phase-7-pkm-knowledge-engine.md`). |
-| **Pre-Phase 0** (Hermes/OpenClaw integration) | v2.0 (6-10h) | **Deferred to v2.3+** | Scope creep for 2 non-top-8 harnesses. Folded into 03b's M1-M4 adapter work. OpenClaw prioritized above Hermes (can enforce permissions); security gate (Hunt.io) must pass first. See `03c-phase-2-harness-integration.md`. |
+| **Pre-Phase 0** (Hermes/OpenClaw integration) | v2.0 (6-10h) | **Deferred to v2.3+** | Scope creep for 2 non-top-8 harnesses. Folded into 03c's M1-M4 adapter work. OpenClaw prioritized above Hermes (can enforce permissions); security gate (Hunt.io) must pass first. See `03d-phase-2-harness-integration.md`. |
 | **35-harness future table** | ROADMAP.md (35 rows) | **Deleted** | Performative. A solo maintainer cannot port to 35 harnesses. Replaced with: "additional harnesses added as community demand warrants." |
 | **Critic consortium** (4 critic personas + consortium pattern + 3 loading modes + discriminated loading) | v2.1 (Phase 5 T1) | **Deferred to v2.3+** | 600 lines of spec for 4 personas with no consumers. Ship 1 critic + the skill first; add the other 3 if the first one gets used. |
-| **Hermes integration** (623-line plan) | Pre-Phase 0 (v2.0) | **v2.3+, degraded mode** | Hermes cannot enforce permission-denial (Vespyr's #1 moat) or route I/O to cheap models. Degraded experience. See `03c-phase-2-harness-integration.md`. |
-| **OpenClaw integration** (365-line plan) | Pre-Phase 0 (v2.0) | **v2.3+, prioritized above Hermes** | OpenClaw CAN enforce permissions via sandbox. Better fit. Security review required first (unconditional `VESPYR_OPENCLAW=off` default). See `03c-phase-2-harness-integration.md`. |
+| **Hermes integration** (623-line plan) | Pre-Phase 0 (v2.0) | **v2.3+, degraded mode** | Hermes cannot enforce permission-denial (Vespyr's #1 moat) or route I/O to cheap models. Degraded experience. See `03d-phase-2-harness-integration.md`. |
+| **OpenClaw integration** (365-line plan) | Pre-Phase 0 (v2.0) | **v2.3+, prioritized above Hermes** | OpenClaw CAN enforce permissions via sandbox. Better fit. Security review required first (unconditional `VESPYR_OPENCLAW=off` default). See `03d-phase-2-harness-integration.md`. |
 
 ---
 
@@ -275,7 +276,7 @@ The original docs had 5 different counts for T1 personas (14, 18, 18, 19, 25). T
 | /critic-review skill | 1 | Same. |
 | Multi-agent patterns reference | 1 | Same. |
 | Domain rubrics (research, user-research, ux, code, docs) | 5 | Same. |
-| OpenClaw / Hermes adapters (from `03c-phase-2-harness-integration.md`) | 2 | Folded into 03b M1-M4 adapter work; OpenClaw security gate (Hunt.io) must pass first. |
+| OpenClaw / Hermes adapters (from `03d-phase-2-harness-integration.md`) | 2 | Folded into 03c M1-M4 adapter work; OpenClaw security gate (Hunt.io) must pass first. |
 
 ### T1 personas (14 net-new; T1.10/T1.10b promoted to v2.0) — ship in v2.2
 
@@ -326,13 +327,15 @@ The "1-day ECC repackage" pattern is insufficient. Personas that don't clear eit
 | `02h-phase-1-graph-shutup-and-cli.md` | Structural graph cleanup, `/shut-up` concise mode, and CLI update safety |
 | `02i-phase-1-memory-consolidation.md` | Memory persistence consolidation, machine-fenced state blocks, and token bounding |
 | `02j-phase-1-evals-and-agnostic-harness.md` | Agent evals Horizon 1: dogfooding test matrix, deterministic gates, and G-Eval benchmarks |
-| `03-phase-2-enablement.md` | Phase 2: full hooks table, MCP tool signatures, self-learning 3-tier spec, QA hard gate |
-| `03a-phase-2-mcp-integration-plan.md` | MCP Integration: first-party + 3rd-party MCP servers, 17 tools |
-| `03b-phase-2-multi-agent-orchestration.md` | Multi-Agent Orchestration: solo/parallel mode, CLI orchestrator, structured output |
-| `03c-phase-2-harness-integration.md` | Harness integration: Hermes, OpenClaw, and cross-harness adapters |
-| `03d-phase-2-implementation-specs.md` | Full JS code specifications for Phase 2 scripts and test suites |
-| `03e-phase-2-token-effective-mode.md` | Quick Mode — token-effective discussion mode |
-| `03f-phase-2-mcp-implementation.md` | Model Context Protocol (MCP) implementation specs and tool wiring |
+| `03a-phase-2-external-skills-research-and-ingestion.md` | External Skills Research & Ingestion: automated discovery, consulting/agency practice skills, pre-install safety gate |
+| `03b-phase-2-mcp-integration-plan.md` | MCP Integration: first-party + 3rd-party MCP servers, 17 tools |
+| `03c-phase-2-multi-agent-orchestration.md` | Multi-Agent Orchestration: solo/parallel mode, CLI orchestrator, structured output |
+| `03d-phase-2-harness-integration.md` | Harness integration: Hermes, OpenClaw, and cross-harness adapters |
+| `03e-phase-2-implementation-specs.md` | Full JS code specifications for Phase 2 scripts and test suites |
+| `03f-phase-2-token-effective-mode.md` | Quick Mode — token-effective discussion mode |
+| `03g-phase-2-mcp-implementation.md` | Model Context Protocol (MCP) implementation specs and tool wiring |
+| `03h-phase-2-self-learning-architecture.md` | Self-learning architecture and instinct tracking |
+| `03i-phase-2-release-signing.md` | Release signing and artifact provenance |
 | `04-phase-3-observability.md` | Phase 3: graph query contracts per agent, See the Unseen directives, telemetry protocol |
 | `05-phase-4-modularity.md` | Phase 4: install-modules, rules/ directory structure, builder flows |
 | `06-phase-5-deeper-bench.md` | Phase 5: Deep bench persona charters and skill catalog expansions |
@@ -350,8 +353,8 @@ The "1-day ECC repackage" pattern is insufficient. Personas that don't clear eit
 4. **Work in order.** Phases are linearly dependent (0 → 1 → 2 → 3 → 4 → 5). Within a phase, F-items can be parallelized unless noted.
 5. **Tick the checkbox.** Each micro-task ends with `- [ ]`. The "Done when" block at the end of each phase is the gate to the next.
 6. **If a phase slips**, ship the previous phase's release as a valid intermediate. Phases 0, 1, 2 are independently shippable, but each still requires the T8 gate.
-7. **For implementation code**, see `03d-phase-2-implementation-specs.md` — it has the full JS specs for every new script.
-8. **For harness work**, see `03c-phase-2-harness-integration.md` — it has the honest assessments for Hermes and OpenClaw.
+7. **For implementation code**, see `03e-phase-2-implementation-specs.md` — it has the full JS specs for every new script.
+8. **For harness work**, see `03d-phase-2-harness-integration.md` — it has the honest assessments for Hermes and OpenClaw.
 
 ---
 

@@ -154,7 +154,7 @@ Done when **all** pass:
 |---|---|
 | `02g-phase-1-harness-honesty.md` | Source of standing KILL; §7.3 rewritten by R1.3; F1.69/F1.70 rebuilt here |
 | `02h-phase-1-graph-shutup-and-cli.md` | T4.4/§5.4 residue struck by R1.16; cli.js work coordinated |
-| `03c-phase-2-harness-integration.md` | Superseded as interim matrix source-of-truth by §3 here until tested matrix lands |
+| `03d-phase-2-harness-integration.md` | Superseded as interim matrix source-of-truth by §3 here until tested matrix lands |
 | `artifacts/memory/active-decisions.md` (2026-08-23) | KILL verdict, sweep results, emitter-reframe classification |
 | `bin/cli.js`, `bin/lib/transpilers.js` | Line-referenced touchpoints in WS-D |
 | `compile_skills.js`, `delegation_audit.js` | Lint host and measurement engine (R0.2/R1.10) |

@@ -1274,7 +1274,7 @@ risk is acceptable.
 
 ## Completion Checklist
 
-**03d status: PLANNED (v2.1 Reference Specs — Implementation Pending in Phase 2/3).**
+**03e status: PLANNED (v2.1 Reference Specs — Implementation Pending in Phase 2/3).**
 
 - [ ] Script specs §1–§17 authored and reviewed
 - [ ] Test fixtures T-GATE-1..9 and T-SAT-1..5 specified

@@ -53,7 +53,7 @@ Budget: 300ms; on timeout emit `[SKIPPED: graph check timed out]` and continue.
 After a rebuild completes, inject into the next context load: "Graph rebuilt: {files_indexed} code, {docs_indexed} doc files."
 ```
 
-- [ ] F3.1 — Create `.agents/scripts/auto_graph.js` (~160 lines): single-pass cached mtime walk (one walk per check, cache in `graph-last-built.json`, 24h re-walk, skip-list incl. vendor/build/.turbo/coverage), `check` < 500ms on ≤30k files, `build --background` detached mode. **Implementation code:** See `03d-phase-2-implementation-specs.md` §5
+- [ ] F3.1 — Create `.agents/scripts/auto_graph.js` (~160 lines): single-pass cached mtime walk (one walk per check, cache in `graph-last-built.json`, 24h re-walk, skip-list incl. vendor/build/.turbo/coverage), `check` < 500ms on ≤30k files, `build --background` detached mode. **Implementation code:** See `03e-phase-2-implementation-specs.md` §5
 - [ ] F3.2 — Update `memory-controller.md`: insert step 0.3 (graph freshness check) per the canonical order table in 03 F2.14 (text above; the older "Step 0" numbering is retired)
 - [ ] F3.3 — Update `code-graph/SKILL.md` and `doc-graph/SKILL.md`: add `## Auto-invocation triggers` section documenting the 5 lifecycle moments
 - [ ] F3.4 — Update 3 skills to invoke `auto_graph.js` at the right step:
@@ -152,7 +152,7 @@ After the graph check, invoke (via the shared session_bootstrap.js spawn):
 Budget: 150ms; output ≤ 20 lines (never raw event data). Inject the output into the loaded context under a "## Recent Telemetry" heading. This gives the agent cost awareness before it starts spending tokens.
 ```
 
-- [ ] F3.8 — Create `.agents/scripts/telemetry_surface.js` (~130 lines): **fix the spread bug from the first draft** (array-spread, not string-spread, when slicing lines — a string spread yields characters and mangles the digest). Supports `session`, `hot-paths`, `summary`, and `compare`, with multi-day session span stitching by `session_id`. **Implementation code:** See `03d-phase-2-implementation-specs.md` §7
+- [ ] F3.8 — Create `.agents/scripts/telemetry_surface.js` (~130 lines): **fix the spread bug from the first draft** (array-spread, not string-spread, when slicing lines — a string spread yields characters and mangles the digest). Supports `session`, `hot-paths`, `summary`, and `compare`, with multi-day session span stitching by `session_id`. **Implementation code:** See `03e-phase-2-implementation-specs.md` §7
 - [ ] F3.9 — Update `memory-controller.md`: add step 0.4 (text above). Inject ≤20 lines under "## Recent Telemetry". Budget 150ms via session_bootstrap.js.
 - [ ] F3.10 — Update `status/SKILL.md`: add "Surface telemetry" step. Append "## Telemetry (last 7 days)" with total tokens, top 3 agents by cost, top 3 events by frequency, and biomarker pass rates.
 - [ ] F3.11 — Update `retro/SKILL.md` Step 1: also run `telemetry_surface.js hot-paths`, include top 3 in digest.
@@ -242,7 +242,7 @@ or the number of approvals.
   `revalidation_required` flag. Coverage/evidence rows are derived from
   `validate_satisfaction.js` output (single source, no dual counting).
 - [ ] **F3.20** — Extend `telemetry_surface.js` and `/status` with a compact
-  satisfaction section (schema pinned in `03d-phase-2-implementation-specs.md` §16,
+  satisfaction section (schema pinned in `03e-phase-2-implementation-specs.md` §16,
   fixture tests T-SAT-1..5): active coverage, evidence completeness, unresolved
   blockers (with linked artifact paths), stale sign-offs, feedback resolution
   time, and escalation count. Never expose a single "agent quality score" as a
@@ -259,7 +259,7 @@ visible in status before launch and is linked to the blocking artifact
 but no F-item created it — a CI-enforced DoD with no implementing task ships as
 a phantom.
 
-- [ ] F3.21 — Create `tests/test_session_latency.js` (~80 lines): measures the 6 canonical session-start steps (03 F2.14 table) against their budgets — each ≤ budget, total < 1000ms, non-blocking steps emit `[SKIPPED]` on timeout. Owner: @tech-lead (budget) / @memory-controller (pipeline). Wire into `npm test` (F3.14). **Spec:** `03d-phase-2-implementation-specs.md` §16
+- [ ] F3.21 — Create `tests/test_session_latency.js` (~80 lines): measures the 6 canonical session-start steps (03 F2.14 table) against their budgets — each ≤ budget, total < 1000ms, non-blocking steps emit `[SKIPPED]` on timeout. Owner: @tech-lead (budget) / @memory-controller (pipeline). Wire into `npm test` (F3.14). **Spec:** `03e-phase-2-implementation-specs.md` §16
 
 ---
 
@@ -273,7 +273,7 @@ a phantom.
 - [ ] `npm test` passes, including `test_catalog_parity.js` (derive-from-disk; docs updated in Phase 4 so it passes at done-when — no "expected to fail" line remains), `test_session_latency.js` (F3.21), `test_qa_gate.mjs`, `test_satisfaction.mjs`
 - [ ] `memory-controller` enforces `[GRAPH: ...]` marker for API-related claims (via `fidelity_check.js` rule or grep-test)
 - [ ] All agents (looped over `.agents/agents/`) have "See the Unseen" directive + response identity formatting
-- [ ] `@data-analyst` has access to `data_analyzer.js` and `dashboard_generator.js` (specs committed to 03d-phase-2-implementation-specs.md §17 before implementation)
+- [ ] `@data-analyst` has access to `data_analyzer.js` and `dashboard_generator.js` (specs committed to 03e-phase-2-implementation-specs.md §17 before implementation)
 - [ ] Graph auto-build and query API functional
 - [ ] T8 satisfaction events emitted with `feedback_id` pairing; `/status` identifies missing evidence, blocked rows, and stale sign-offs without subjective scoring (T-SAT-1..5 pass)
 

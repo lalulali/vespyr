@@ -36,7 +36,7 @@
 | Behavioral changes to existing scripts (`orchestrator_state.js`, `delegation_audit.js`, `memory_filter.js`, …) | No existing script behavior changes in 02g. F1.69 is the explicit exception: an additive delegation lint hook in `compile_skills.js` only |
 | `CHANGELOG.md` historical entries | Historical record; 3 refs are factual statements about the past, not instructions |
 | `QUICK-REFERENCE.md` | Verified 0 references — already clean |
-| Harness adapters/install tooling (opencode.json, `.kiro/`, etc.) | Owned by 02f and 03c-phase-2-harness-integration |
+| Harness adapters/install tooling (opencode.json, `.kiro/`, etc.) | Owned by 02f and 03d-phase-2-harness-integration |
 | New I/O machinery or new sub-agents | Speculative; violates simplicity-first |
 
 ---
@@ -89,7 +89,7 @@ The first eight docs in the table sum to 50. `AGENTS.md` contributes 8 additiona
 - `delegation-policy.md` (`.agents/references/`) — governs the delegation log convention
 - `delegation_audit.js` — reads `.agents/state/delegation-log.json` (with fallbacks) — the measurement gate
 - `compile_skills.js` — existing skill compilation/lint hook the new delegation-path lint can attach to (F1.69)
-- `03c-phase-2-harness-integration.md` — source of truth for the supported-harness matrix; F1.71 verifies the default-capability claim against it rather than assuming every adapter exposes sub-agents
+- `03d-phase-2-harness-integration.md` — source of truth for the supported-harness matrix; F1.71 verifies the default-capability claim against it rather than assuming every adapter exposes sub-agents
 
 ---
 
@@ -222,7 +222,7 @@ Next clean IDs after 02f (which ended at F1.57). **Dependencies are explicit, no
 | `02i-phase-1-memory-consolidation.md` | Memory persistence consolidation, machine-fenced state blocks |
 | `02j-phase-1-evals-and-agnostic-harness.md` | Agent evals Horizon 1 dogfooding matrix |
 | `02e-phase-1-agentskills-standardization.md` | Skill frontmatter/schema — rewords must pass its validation |
-| `03c-phase-2-harness-integration.md` | Harness shapes + adapter registry (`bin/cli.js`) |
+| `03d-phase-2-harness-integration.md` | Harness shapes + adapter registry (`bin/cli.js`) |
 | `08-cross-cutting-utter-satisfaction-dna.md` | T8 gate: sign-off recorded before 02g closes |
 | `09-phase-7-pkm-knowledge-engine.md` | PKM knowledge engine integration |
 | ADR index | ADR-005 registered in `active-decisions.md` and architecture records |
