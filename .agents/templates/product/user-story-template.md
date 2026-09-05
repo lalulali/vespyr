@@ -4,8 +4,8 @@
 > **Feeds into:** Rex (@developer), Nina (@qa-engineer), Grant (@tech-lead), Nova (@data-analyst)
 > **Save to:** `artifacts/output/03-strategy/user-stories.md`
 
-**Version:** 2
-**Last changed:** 2026-05-20
+**Version:** 3
+**Last changed:** 2026-09-05
 
 > [!NOTE]
 > Detailed acceptance criteria guidelines, the canonical `US-001` password recovery example, formatting instructions, and dependency diagram guides are located in [.agents/references/templates/user-story-instructions.md](../references/templates/user-story-instructions.md). Refer to that document when generating user stories.
@@ -80,10 +80,10 @@ Use this format for each modular functional capability under a Feature:
 - **Traces to Product Spec:** [Screen Name, Flow ID, or Section ID inside product-spec.md]
 
 #### Business Requirement
-[1-3 direct, plain-language sentences stating the business outcome, single source of truth, and enforcement boundary. No verbose filler.]
+[1-3 direct, plain-language sentences stating the business outcome, single source of truth, and enforcement boundary. End with the measurable success signal (metric + target) where one exists. No verbose filler.]
 
 #### Technical Requirement
-[Compact bulleted list of integration points, data/flag rules, API behavior, error handling, and server vs. client boundaries.]
+[Compact bulleted list of integration points, data/flag rules, API behavior, error handling, and server vs. client boundaries. Add one line each for applicable perf/latency, security/auth, and state-handling constraints; omit when none apply.]
 
 #### Acceptance Criteria
 [Acceptance criteria must be testable, atomic, and formatted using multi-line Given/When/Then steps]

@@ -4,11 +4,24 @@ All notable changes to the Vespyr project will be documented in this file.
 
 ---
 
+## [2.0.10] - 2026-09-05
+
+### Design System Overhaul (consultant, taste & agency craft)
+- **Designer-as-consultant flow:** `design.md` (v1→v3) opens with taste extraction — 3-question interview, 2–3 proposed directions — plus anti-references and a no-tokens-before-taste gate. Wired into `@product-designer`'s Socratic stance and underspecified-briefs rule.
+- **Two-axis decision:** Product context (WHAT: Sleek Utility / Minimalist Tech / Modern Glassmorphism / Vibrant Brand-First / Conversion Storefront / Custom — drives density, motion budget, tone) × Craft style (HOW: 12-style menu — Minimalism, Maximalism, Brutalism, Neobrutalism, Skeuomorphism, Neumorphism, Glassmorphism, Bento Grid, Swiss, Editorial, Claymorphism, Y2K — or declared Custom). Persona (`product-designer.md`) and `step-05a-design-tokens.md` defer to it; the old Rigid/Creative split survives as the menu's Quiet/Loud grouping.
+- **Design rules, shelf & brief:** 8 mandatory UI principles, an inspiration shelf (starter: lafys.com, motionsites.ai, sceneai.art), and a paste-into-prompts design brief ending in a Signature moment.
+- **Anti-generic rule (mandatory):** default-model output (navy darks, violet→blue gradients, gradient-hero + three-cards formula) fails review. Dark surfaces are desaturated neutral greys (`#101114`–`#1e1e1e`, zero blue push); light AND dark token sets ship by default; every design names ONE differentiator.
+- **Agency mode:** sanctioned boundary-breaking for launch moments — Three.js/WebGL, Lenis + GSAP choreography, custom cursors — each with fallback + perf budget + MO-### reduced-motion plan. `product-spec.html` cap lifts in Agency mode; the demo must model its own reduced-motion fallback.
+- **Spec-template hardening:** `product-spec-template.md` gains a Motion column (MO-### trace), a Content & tone block with exact-state copy, and a `{context} × {style}` theme rubric. `SPEC.md` gains design-constraints item 0. Companion `user-journey.md` / `decision-log.md` gain filled examples.
+- **Story-template corrections:** `user-story-template.md` v2→v3; success-signal and NFR slots restored to Business/Technical requirements; canonical-example headings fixed to `###`.
+
+---
+
 ## [2.0.9] - 2026-09-04
 
 ### Radical Brevity & Concise Specifications (DNA 7)
 - **Concise Specifications Standard:** Mandated radical brevity when creating Product Requirements Documents (PRDs), Epics, Features, and User Stories. Prohibited verbose elaboration, repetitive filler, and convoluted academic phrasing to eliminate reading friction and save tokens.
-- **Feynman Technique for Jargon Demystification:** Required explaining unavoidable technical jargon, acronyms, and domain abstractions using simple, intuitive, plain-English analogies ("Explain Like I'm Five"). Emphasized that inability to explain simply indicates incomplete understanding, not sophistication.
+- **Plain-Language Demystification for Jargon:** Required explaining unavoidable technical jargon, acronyms, and domain abstractions using simple, intuitive, plain-English descriptions blended naturally into the specification without meta-labels. Emphasized that inability to explain simply indicates incomplete understanding, not sophistication.
 - **Modular Specification Contract:**
   - *Business Requirement:* 1–3 direct sentences stating the business outcome, single source of truth, and server vs. client enforcement boundary.
   - *Technical Requirement:* A compact, bulleted contract detailing API endpoints, parameters, and fallback rules.

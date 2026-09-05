@@ -17,17 +17,14 @@ Define visual design system: colors, typography, spacing, component states, resp
 ## Goal
 Produce `design.md` as the visual source of truth. Engineering agents read it at startup and implement to spec, not to guess.
 
-## Adaptive styling rubric
-`@product-designer` loads `.agents/references/designer-guidelines.md`, evaluates project context, and selects an approach:
+## Adaptive styling decision (two axes — owned by design.md)
+Work `.agents/templates/product/design.md` in order; do not re-decide here:
 
-- **Rigid/Structured** — utility dashboards, data tables, enterprise systems. Focus: grid rigidity, usability, density. (Söhne typography / Klim Type Foundry, DaisyUI / Tailwind)
-- **Out-of-the-Box/Creative** — creative sites, consumer apps, brand pages. Focus: visual impact, gradients, card glows, animations. (Haikei SVG rendering, Pangram Pangram / Displaay fonts)
+1. **Product context** — Sleek Utility / Minimalist Tech / Modern Glassmorphism / Vibrant Brand-First / Conversion Storefront / Custom (WHAT we're building; drives density, motion budget, tone).
+2. **Craft style** — ONE pick from the 12-style menu, or a declared Custom (HOW it looks; drives tokens).
+3. **Taste interview + anti-generic rule** — enforced before any token is written; light AND dark sets ship by default.
 
-Theme combinations:
-- Sleek Utility
-- Modern Glassmorphism
-- Minimalist Tech
-- Vibrant Brand-First
+`@product-designer` loads `.agents/references/designer-guidelines.md` for component libraries, fonts, and asset tooling (Söhne / Klim, DaisyUI / Tailwind, Haikei SVG, Pangram Pangram / Displaay) once context + style are set.
 
 ## design.md content
 `artifacts/output/03-strategy/design.md`:

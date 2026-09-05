@@ -11,7 +11,7 @@ paired_with: design.md (visual design system tokens), product-spec.html (visual 
 - **PRD reference:** `requirements.md` CAP-{N}
 - **User stories:** `user-stories.md`
 - **Design direction:** {2-3 sentence summary of the visual theme and UX approach}
-- **Theme rubric:** Sleek Utility / Modern Glassmorphism / Minimalist Tech / Vibrant Brand-First
+- **Theme rubric:** {product context} × {style menu # + name} (e.g. "Sleek Utility × Bento Grid")
 
 ## User flows
 
@@ -63,9 +63,17 @@ graph TD
 
 ## Interaction details
 
-| Trigger | Action | Success | Error | Loading |
-|---------|--------|---------|-------|---------|
-| {user action} | {system response} | {result} | {error handling} | {loading state} |
+| Trigger | Action | Success | Error | Loading | Motion |
+|---------|--------|---------|-------|---------|--------|
+| {user action} | {system response} | {result} | {error handling} | {loading state} | {MO-### from motion-spec.md, or —} |
+
+## Content & tone
+
+- **Voice:** {e.g. plain-spoken / warm / formal — 3 adjectives max, must match design.md brand inputs}
+- **Copy source:** {where each screen's strings live — inline below, or `content.md` companion}
+- **Empty state:** "{exact string}" — {tone note}
+- **Error state:** "{exact string}" — never blame the user, always name the recovery action
+- **Success state:** "{exact string}"
 
 ## Visual system
 

@@ -18,6 +18,7 @@ paired_with: prd-template.md (full stakeholder PRD for humans)
    - success: {how we know it works}
 
 ## 3. Constraints
+0. Design constraints — {theme, motion, and a11y bounds from `design.md`; the capability must not contradict the visual direction}
 1. {constraint} — why: {why this constraint exists}
 2. {constraint} — why: {why this constraint exists}
 

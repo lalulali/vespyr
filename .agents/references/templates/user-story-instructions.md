@@ -115,6 +115,7 @@ No separate Narrative section is needed, making the document extremely concise.
 #### 2.3.3 Business Requirements (DNA 7: Radical Brevity)
 Explain the commercial and customer justification concisely in 1–3 direct sentences:
 *   State the core business outcome, the single source of truth (e.g. user flag), and the enforcement boundary (server-side vs. client-side).
+*   State the measurable success signal (metric + target) in the final sentence where one exists — a capability without a success criterion is a wish, not a spec.
 *   **Zero filler:** Avoid verbose elaboration or repetitive justification. Keep it high-density so stakeholders and engineers immediately grasp the intent without reading complex wording.
 
 #### 2.3.4 Technical Requirements (DNA 7: Concise Contract)
@@ -123,6 +124,7 @@ Provide a compact, bulleted list detailing technical constraints:
 *   Frontend rendering expectations (e.g. renders API response as-is, no client-side filtering)
 *   Session/auth level resolution vs. per-request resolution
 *   Explicit fallback and error-logging rules when inputs/flags are missing or null
+*   Non-functional constraints that apply (perf/latency, security/auth, state handling) — one line each, only if applicable; omit the line when there is no constraint.
 
 ---
 
@@ -266,7 +268,7 @@ Acceptance criteria must be atomic, unambiguous, and formatted using highly legi
 Use this format as the gold standard for radical brevity, token efficiency, and clear separation of business outcome, technical contract, and testable Gherkin acceptance criteria:
 
 ```markdown
-##### User Story: As a retail user, I want to see only external payment methods so that I am not confused by Kasbon which I cannot use
+### User Story: As a retail user, I want to see only external payment methods so that I am not confused by Kasbon which I cannot use
 <!-- Redmine: User Story #7520 | Parent: #7516 -->
 
 **Business Requirement:**
@@ -302,7 +304,7 @@ Scenario: User flag is missing or null on user record
   And external payment methods are shown normally
 ```
 
-##### User Story: As a retail user, I want to submit checkout payments safely so that I am never charged twice if my connection stutters or I tap twice
+### User Story: As a retail user, I want to submit checkout payments safely so that I am never charged twice if my connection stutters or I tap twice
 <!-- Redmine: #7525 | Parent: #7516 -->
 
 **Business Requirement:**

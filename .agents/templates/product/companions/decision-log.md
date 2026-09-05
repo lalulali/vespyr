@@ -19,3 +19,11 @@ Canonical memory for this spec. Decisions made, alternatives rejected, rationale
 ---
 
 Append new decisions above. Never delete or modify prior entries. Mark superseded with `[SUPERSEDED]` and reference the replacement.
+
+## Filled example (delete or replace with the real first entry)
+
+### [SPEC] Hide Kasbon from retail users server-side [date: 2026-09-05]
+**What:** `getPaymentMethods` filters by `user_type` before responding; frontend renders as-is.
+**Why:** retail users cannot use Kasbon — showing it grayed out caused support tickets and confusion.
+**Alternatives considered:** client-side filtering (rejected — bypassable, duplicated logic); grayed-out entry (rejected — tested poorly in concept review).
+**Impact:** CAP-2 affected.
