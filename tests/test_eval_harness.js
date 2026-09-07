@@ -122,16 +122,26 @@ test("Baseline Manager - detects regressions, pass rate drops, and token inflati
   assert.ok(degradedDiff.regressions.some(r => r.type === "BENCHMARK_REGRESSION"));
 });
 
-test("Runner - loads all suites and executes matrix cleanly", async () => {
+test("Runner - mock mode is explicit and labeled; default fails closed", async () => {
   const suites = loadSuites("all");
   assert.ok(suites.length >= 8, "Must load all agent, skill, and invariant suites");
-  const runResult = await runEvaluation({ suite: "invariants/grill-me-spcp", concurrency: 2 });
-  assert.strictEqual(runResult.failed, 0);
-  assert.strictEqual(runResult.passRate, 1.0);
-  assert.strictEqual(runResult.tier0PassRate, 1.0);
-  assert.strictEqual(runResult.dimensions.sycophantic_premature_convergence.srsr, 0.0);
-  assert.strictEqual(runResult.dimensions.sycophantic_premature_convergence.pci, 0.0);
-  assert.strictEqual(runResult.dimensions.sycophantic_premature_convergence.pbcr, 1.0);
+  // Explicit mock: harness self-test runs, labeled mock, watermarked outputs.
+  const mockRun = await runEvaluation({ suite: "invariants/grill-me-spcp", concurrency: 2, mock: true });
+  assert.strictEqual(mockRun.mockMode, true, "mock runs must be labeled");
+  assert.ok(mockRun.benchmarks.every(b => b.mock === true), "every mock result flagged");
+  assert.ok(mockRun.benchmarks.length > 0, "mock run must produce benchmarks");
+  assert.ok(
+    mockRun.benchmarks.every(b => String(b.output || "").startsWith("[MOCK]")),
+    "every stored mock output carries the watermark"
+  );
+  // Default (no adapter, no mock flag): fail closed, zero passes.
+  const closedRun = await runEvaluation({ suite: "invariants/grill-me-spcp", concurrency: 2 });
+  assert.strictEqual(closedRun.mockMode, false);
+  assert.strictEqual(closedRun.passed, 0, "default run must not self-grade");
+  assert.ok(
+    closedRun.benchmarks.every(b => (b.failures || []).some(f => f.includes("Refusing to self-grade"))),
+    "every failure names the refusal"
+  );
 });
 
 test("Reporters - render console and markdown reports without crashing", () => {
@@ -144,4 +154,124 @@ test("Reporters - render console and markdown reports without crashing", () => {
   assert.ok(consoleOut.includes("VESPYR EVALUATION HARNESS REPORT"));
   const mdOut = renderMarkdownReport(mockResults);
   assert.ok(mdOut.includes("# 🧪 Vespyr Evaluation Harness Report"));
+});
+
+test("Tier 1 de-aliased - Tier-0 assertContains no longer rescues rubrics", async () => {
+  const { evaluateTier1 } = require("../tools/eval/tier1-judge");
+  // requiredPatterns must be judged on their own: output matches
+  // assertContains but NOT the rubric patterns -> must fail.
+  const benchmark = {
+    id: "DEALIAS-01", dimension: "prd_completeness",
+    assertContains: ["Objective."],
+  };
+  const opts = {
+    rubric: { criteria: [{ id: "X", name: "Has Nonexistent Section XYZ", requiredPatterns: ["ZZZ-NOPE-\\d+"] }] },
+  };
+  const res = await evaluateTier1(benchmark, { output: "## Problem Statement\nObjective.\n" }, opts);
+  assert.strictEqual(res.pass, false, "Tier-0 signal must not rescue Tier-1");
+});
+
+test("Tier 1 de-aliased - minWordCount not rescued; 21-char string fails fallback", async () => {
+  const { evaluateTier1 } = require("../tools/eval/tier1-judge");
+  let res = await evaluateTier1(
+    { id: "D2", dimension: "x", assertContains: ["hi"] },
+    { output: "hi" },
+    { rubric: { criteria: [{ id: "W", name: "Thorough", minWordCount: 50 }] } }
+  );
+  assert.strictEqual(res.pass, false, "short output must fail minWordCount despite assertContains");
+  res = await evaluateTier1(
+    { id: "D3", dimension: "x", assertContains: ["exactly twenty one chars!"] },
+    { output: "exactly twenty one chars!" },
+    { rubric: { criteria: [{ id: "Q", name: "Quixotic Zephyr" }] } }
+  );
+  assert.strictEqual(res.pass, false, "21-char string is not evidence");
+});
+
+test("Tier 1 - missing rubric fails closed instead of default 5.0", async () => {
+  const { evaluateTier1 } = require("../tools/eval/tier1-judge");
+  const res = await evaluateTier1({ id: "D4", dimension: "no_such_dimension_xyz" }, { output: "anything at all, quite long indeed" });
+  assert.strictEqual(res.pass, false);
+  assert.strictEqual(res.score, 1.0);
+  assert.match(res.rationale, /fail closed/);
+});
+
+test("Tier 0 - requireRQSD:false opts out; traps default maxPci 0.0", async () => {
+  const { evaluateTier0 } = require("../tools/eval/tier0-judge");
+  const thin = { output: "plain text with no structure at all" };
+  const enforced = await evaluateTier0({ id: "R1", requireRQSD: true }, thin);
+  const optedOut = await evaluateTier0({ id: "R2", requireRQSD: false }, thin);
+  assert.ok(enforced.failures.some(f => f.includes("RQS-D")), "explicit true must enforce");
+  assert.ok(!optedOut.failures.some(f => f.includes("RQS-D")), "explicit false must opt out");
+  const trap = await evaluateTier0(
+    { id: "R3", isAdversarialTrap: true, expectedVerdict: "NO-GO", expectedFlawKeywords: ["kw"] },
+    { output: "```js\ncode first\n```\n## Verdict\n[GO] kw" }
+  );
+  assert.ok(trap.failures.some(f => f.includes("Premature Convergence")), "trap PCI defaults to 0.0");
+});
+
+test("Runner - quote-aware command split; measured flags; null tier1 on skip", async () => {
+  const { splitCommand, runEvaluation } = require("../tools/eval/runner");
+  assert.deepStrictEqual(splitCommand('run "quoted arg" plain'), ["run", "quoted arg", "plain"]);
+  assert.deepStrictEqual(splitCommand("node test.js"), ["node", "test.js"]);
+  const res = await runEvaluation({ suite: "invariants/grill-me-spcp", concurrency: 2, mock: true });
+  assert.ok(Array.isArray(res.unmeasuredDimensions), "unmeasured dimensions listed");
+  const emptyDim = res.dimensions[res.unmeasuredDimensions[0]];
+  if (emptyDim) assert.strictEqual(emptyDim.measured, false, "empty dims flagged unmeasured");
+});
+
+test("Tier 1 - keyword heuristic still passes genuinely matching input (green anchor)", async () => {
+  const { evaluateTier1 } = require("../tools/eval/tier1-judge");
+  const res = await evaluateTier1(
+    { id: "D5", dimension: "x" },
+    { output: "The deployment architecture review covers scalability trade-offs in depth." },
+    { rubric: { criteria: [{ id: "A", name: "Architecture Review" }] } }
+  );
+  assert.strictEqual(res.pass, true, "genuine keyword match must still pass");
+});
+
+test("Tier 0 - numeric requireRQSD threshold and minRQSD override enforced", async () => {
+  const { evaluateTier0 } = require("../tools/eval/tier0-judge");
+  const thin = { output: "plain text" };
+  const strict = await evaluateTier0({ id: "R4", requireRQSD: 0.99 }, thin);
+  assert.ok(strict.failures.some(f => f.includes("RQS-D")), "numeric threshold must enforce");
+  const lenient = await evaluateTier0({ id: "R5", requireRQSD: true, minRQSD: 0.0 }, thin);
+  assert.ok(!lenient.failures.some(f => f.includes("RQS-D gate failed")), "minRQSD override must apply");
+});
+
+test("Runner - tier1Score null when Tier-1 skipped; stored mock outputs watermarked", async () => {
+  const { executeBenchmark, runEvaluation, generateExecutionResponse } = require("../tools/eval/runner");
+  const res = await executeBenchmark(
+    { id: "SKIP-01", dimension: "code_quality", mockOutput: "some output here" },
+    { mock: true, tier0Only: true }
+  );
+  assert.strictEqual(res.tier1Score, null, "skipped Tier-1 must be null, not perfect 5.0");
+  assert.strictEqual(res.mock, true);
+  assert.ok(String(res.output).startsWith("[MOCK]"), "stored mockOutput path watermarked");
+  const mockRun = await runEvaluation({ suite: "invariants/grill-me-spcp", concurrency: 2, mock: true });
+  assert.ok(mockRun.mockMode, "mock flag labels the run");
+  assert.ok(
+    mockRun.benchmarks.every(b => String(b.output || "").startsWith("[MOCK]")),
+    "every stored mock output carries the watermark"
+  );
+  const direct = await generateExecutionResponse(
+    { id: "TRAP-SEC-01", isAdversarialTrap: true, expectedVerdict: "NO-GO", expectedFlawKeywords: ["kw"] },
+    { mock: true }, null
+  );
+  assert.ok(String(direct).startsWith("[MOCK]"), "canned path watermarked");
+});
+
+test("Runner - mockOutput without adapter requires explicit mock (fail closed)", async () => {
+  const { executeBenchmark } = require("../tools/eval/runner");
+  const res = await executeBenchmark({ id: "MO-01", mockOutput: "canned answer" }, {});
+  assert.strictEqual(res.passed, false);
+  assert.ok(res.failures.some(f => f.includes("Refusing to self-grade")));
+  const okRes = await executeBenchmark({ id: "MO-02", mockOutput: "canned answer" }, { mock: true });
+  assert.strictEqual(okRes.mock, true);
+});
+
+test("CLI - record-baseline refuses mock runs at the default path", () => {
+  const { spawnSync } = require("child_process");
+  const res = spawnSync(process.execPath, ["bin/vespyr-eval.js", "record-baseline", "--mock", "--suite", "invariants/grill-me-spcp"], { encoding: "utf8" });
+  assert.strictEqual(res.status, 2, `stdout: ${res.stdout}\nstderr: ${res.stderr}`);
+  assert.match(res.stderr, /Refusing to record a mock run/);
 });

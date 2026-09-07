@@ -2,15 +2,15 @@ Roundtable on rt-010 (blockchain-based audit log for enterprise) — native run 
 
 ### @product-manager (Sarah)
 No enterprise buyer in the pipeline has asked for blockchain anything; the requirement underneath is tamper-evident audit trails.
-[VERDICT: KILL]
+[VERDICT: NO-GO]
 
 ### @ml-ai-engineer (Kai)
 Blockchain solves distributed trust between mutually distrusting parties — an enterprise audit log has one trusted party: us. Append-only table with hash chaining delivers the property.
-[VERDICT: KILL]
+[VERDICT: NO-GO]
 
 ### @security-engineer (Victor)
 Immutable audit storage is a real requirement; blockchain is the wrong and costlier mechanism. Key-signature append-only log meets SOC2 evidence needs.
-[VERDICT: KILL]
+[VERDICT: NO-GO]
 
 ```roundtable-coverage
 panel: @product-manager, @ml-ai-engineer, @security-engineer
@@ -21,4 +21,4 @@ challenges:
 ```
 
 Host synthesis: kill the blockchain mechanism; redirect to append-only hash-chained audit storage as a separate proposal.
-[SYNTHESIS: KILL]
+[SYNTHESIS: NO-GO]

@@ -1,16 +1,20 @@
+[MODE: solo — isolated calls, 3 seats]
+
 Roundtable on rt-003 — solo (context-firewalled sequential dispatch) run 1.
+
+[RED-TEAM: @security-engineer]
 
 ### @product-manager (Sarah)
 Retention wedge, narrow to team plans.
-[VERDICT: PIVOT]
+[VERDICT: RESHAPE]
 
 ### @ml-ai-engineer (Kai)
 Baseline-first, eval-gated.
-[VERDICT: PIVOT]
+[VERDICT: RESHAPE]
 
 ### @security-engineer (Victor)
 Redaction required, DPA sequencing.
-[VERDICT: PIVOT]
+[VERDICT: RESHAPE]
 
 ```roundtable-coverage
 panel: @product-manager, @ml-ai-engineer, @security-engineer
@@ -21,4 +25,4 @@ challenges:
 ```
 
 Host synthesis: conditional proceed.
-[SYNTHESIS: PIVOT]
+[SYNTHESIS: RESHAPE]

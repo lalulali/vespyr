@@ -50,14 +50,16 @@ async function evaluateTier1(benchmark, executionResult, options = {}) {
   const criteriaResults = [];
 
   if (!rubric || !rubric.criteria || !Array.isArray(rubric.criteria) || rubric.criteria.length === 0) {
-    // Default fallback pass if no specific rubric defined
+    // No rubric configured means unmeasured — fail closed instead of
+    // awarding a perfect default score (de-circularized: a missing rubric
+    // previously passed with 5.0, inflating every uncovered dimension).
     return {
       tier: 1,
-      pass: true,
-      score: 5.0,
+      pass: false,
+      score: 1.0,
       dimension,
       criteriaResults: [],
-      rationale: "Default pass (no rubric configured)"
+      rationale: "No rubric configured — unmeasured, fail closed"
     };
   }
 
@@ -78,10 +80,11 @@ async function evaluateTier1(benchmark, executionResult, options = {}) {
       passed = matchNone;
       rationale = matchNone ? "No prohibited patterns detected" : "Prohibited pattern detected";
     } else if (criterion.requiredPatterns && Array.isArray(criterion.requiredPatterns)) {
+      // Rubric patterns are judged on their own — the benchmark's Tier-0
+      // assertContains must NOT rescue Tier-1 (de-aliased: counting the same
+      // substring twice measured mock-author effort, not output quality).
       const matchAll = criterion.requiredPatterns.every(pat => new RegExp(pat, "i").test(outputText));
-      const benchmarkContainsPass = benchmark.assertContains && benchmark.assertContains.length > 0 &&
-        benchmark.assertContains.every(pat => new RegExp(pat, "i").test(outputText));
-      passed = matchAll || benchmarkContainsPass;
+      passed = matchAll;
       rationale = passed ? "Required structural criteria satisfied" : "Missing required structural criteria";
     } else if (criterion.minWordCount) {
       if (benchmark.maxTokens !== undefined) {
@@ -90,15 +93,16 @@ async function evaluateTier1(benchmark, executionResult, options = {}) {
         rationale = "Brevity ceiling active (exempt from minimum length)";
       } else {
         const wordCount = (outputText.match(/\w+/g) || []).length;
-        passed = wordCount >= criterion.minWordCount || (benchmark.assertContains && benchmark.assertContains.length > 0);
+        passed = wordCount >= criterion.minWordCount;
         rationale = `Word count: ${wordCount} (min: ${criterion.minWordCount})`;
       }
     } else {
-      // Default heuristic based on keyword matches or benchmark assertions
+      // Keyword heuristic on the criterion's own terms only — no
+      // assertContains rescue, no length pass-through. A 21-character string
+      // is not evidence of anything.
       const keywords = criterion.name.toLowerCase().split(/\s+/);
       const matches = keywords.filter(kw => kw.length > 3 && outputText.toLowerCase().includes(kw));
-      const benchmarkContainsPass = benchmark.assertContains && benchmark.assertContains.length > 0;
-      passed = matches.length > 0 || benchmarkContainsPass || outputText.length > 20;
+      passed = matches.length > 0;
       rationale = passed ? "Criterion heuristic satisfied" : "Heuristic check incomplete";
     }
 

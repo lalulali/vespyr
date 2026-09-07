@@ -52,12 +52,21 @@ node .agents/scripts/roundtable_eval.js log --mode <native|solo|refused> --topic
 
 `.agents/` is the shipped package (see `manifest.json`): harness code, gold topics, fixtures, and this protocol are **assets** — they install with the engine. Everything the harness *produces at runtime* is a **result** and must never live under `.agents/` — results go to `artifacts/evals/roundtable/` (project-local, never packaged): baseline transcripts, score reports, and the telemetry log. A results file inside `.agents/` is a packaging leak: it ships your session data to every consumer on the next publish.
 
+Tamper-evidence scope note (rt-012): manifest/verify covers `.agents/` only — `evals/` tampering (topics, fixtures, baselines) is invisible to that gate and must be caught by review + the score gate, not by manifest.
+
 ## Run procedure (baseline pass)
 
 1. For each of the 10 topics: run one native roundtable, save transcript to `artifacts/evals/roundtable/runs/<topic>_native_<n>.md`, run `coverage` (must exit 0).
 2. Repeat to 3 native runs per topic — verdict stability needs ≥3 samples.
 3. Solo comparison on a 3-topic subset (cost control): 2 solo runs each, saved as `artifacts/evals/roundtable/runs/<topic>_solo_<n>.md`.
-4. `score --dir artifacts/evals/roundtable/runs/` — record the report to `artifacts/evals/roundtable/`. Gates are proposed only after this baseline exists.
+4. `score --dir artifacts/evals/roundtable/runs/` — record the report to `artifacts/evals/roundtable/score-YYYY-MM-DD.json`. Gates are proposed only after this baseline exists.
+
+## Cost guidance + baselines (RT-P2-2)
+
+- **Cost per full run:** one native roundtable = 2–5 panelists × 4 phases of subagent calls. A full 36-transcript baseline is the most expensive eval in this repo — always pass `--model flash` (or the cheapest capable tier) for baseline collection runs unless the topic under test IS model quality.
+- **Smoke baseline (cheap, CI-suitable):** `score --dir evals/roundtable/fixtures/transcripts/` (canonical post-P1-14 fixtures, must exit 0) + the roundtable unit tests. This is what CI runs — it gates the harness, not live panels.
+- **Release baseline (expensive, manual):** the full 30-native + 6-solo procedure above, run pre-release by a human operator.
+- **Report filename convention:** `artifacts/evals/roundtable/score-YYYY-MM-DD.json` for suite reports; transcripts `runs/<topic>_<mode>_<n>.md`; never commit results under `evals/` (results are project-local) or `.agents/` (packaging leak — see above).
 
 ## Deferred (gated, do not pull forward)
 

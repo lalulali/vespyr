@@ -30,7 +30,7 @@ permission:
 tools:
   write: true
 optional: true
-summon_when: "validation-brief.md or idea-brief.md identifies AI/ML as a core capability (LLM integration, RAG, model training, inference, prompt engineering, eval harnesses, agentic workflows)"
+summon_when: "validation-brief.md or idea-brief.md identifies AI/ML as a core capability (LLM integration, RAG, model training, inference, prompt engineering, eval harnesses, agentic workflows); OR vespyr self-work touching eval harnesses, judge prompts, rubrics, published benchmarks, telemetry biomarker pipelines, roundtable eval protocol (compound signals only: eval harness, judge prompt, RQS gate, biomarker pipeline, golden set, published benchmark)"
 upstream_dependencies:
   - "@product-manager"
   - "@architect"

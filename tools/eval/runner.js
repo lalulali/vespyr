@@ -59,7 +59,15 @@ function loadSuites(suiteFilter = "all") {
 }
 
 /**
- * Generates an authentic execution response for benchmark evaluation
+ * Generates an execution response for benchmark evaluation.
+ *
+ * Fail-closed contract (de-circularized): canned fixtures (adversarial-trap
+ * echo, /shut-up strings, per-agent/per-skill templates, generic fallback)
+ * are ONLY served when the caller explicitly opts into mock mode
+ * (`options.mock === true`, i.e. `--adapter mock` / `--mock`). Without a
+ * real executionAdapter, an executionCommand, a benchmark mockOutput, or
+ * explicit mock mode, this THROWS instead of grading the harness against
+ * its own answer key. Mock outputs carry a `[MOCK]` watermark.
  */
 async function generateExecutionResponse(benchmark, options = {}, sandbox = null) {
   if (options.executionAdapter && typeof options.executionAdapter === "function") {
@@ -68,14 +76,45 @@ async function generateExecutionResponse(benchmark, options = {}, sandbox = null
   }
 
   if (sandbox && benchmark.executionCommand) {
-    const cmdParts = benchmark.executionCommand.split(" ");
+    const cmdParts = splitCommand(benchmark.executionCommand);
     const res = await sandbox.runCommand(cmdParts[0], cmdParts.slice(1));
     return res.stdout || res.output || res.stderr;
   }
 
   if (benchmark.mockOutput) {
-    return benchmark.mockOutput;
+    // Author-supplied fixture output: legitimate for hermetic tests, but it
+    // is still a mock — flag it unless a real adapter is executing.
+    // Watermarked like canned fixtures: judges match substrings, and a
+    // prefix preserves every match while marking provenance.
+    if (options.executionAdapter && typeof options.executionAdapter === "function") {
+      return benchmark.mockOutput;
+    }
+    if (options.mock === true) {
+      return "[MOCK] " + benchmark.mockOutput;
+    }
+    throw new Error(
+      `No execution path for benchmark ${benchmark.id}: mockOutput requires explicit ` +
+      `--mock/--adapter mock (fixture output is not a measurement). Refusing to self-grade.`
+    );
   }
+
+  if (options.mock !== true) {
+    throw new Error(
+      `No execution path for benchmark ${benchmark.id}: no executionAdapter, ` +
+      `no executionCommand, no mockOutput, and mock mode not enabled. ` +
+      `Pass --adapter <real-adapter> or explicit --mock/--adapter mock. ` +
+      `Refusing to self-grade.`
+    );
+  }
+
+  const canned = await cannedMockResponse(benchmark);
+  return "[MOCK] " + canned;
+}
+
+// Quote-aware splitter shared from lib/process.js (single source with tier0-judge).
+const { splitCommand } = require("./lib/process");
+
+async function cannedMockResponse(benchmark) {
 
   // 1. Adversarial Traps
   if (benchmark.isAdversarialTrap) {
@@ -280,6 +319,13 @@ async function executeBenchmark(benchmark, options = {}) {
     const durationMs = Date.now() - startTime;
     const passed = t0Result.pass && (t1Result ? t1Result.pass : true);
 
+    // Mock provenance: true unless a real model adapter executed OR a real
+    // sandboxed command produced the output. Canned fixtures and fixture
+    // mockOutput without an adapter are mocks, even when judgments pass.
+    const measuredExecution = !!(
+      (options.executionAdapter && typeof options.executionAdapter === "function") ||
+      (sandbox && benchmark.executionCommand)
+    );
     return {
       id: benchmark.id,
       name: benchmark.name || benchmark.id,
@@ -288,11 +334,13 @@ async function executeBenchmark(benchmark, options = {}) {
       skill: benchmark.skill || null,
       dimension: benchmark.dimension || "general",
       modelTier: options.model || 'inherit',
+      mock: !measuredExecution,
       passed,
       tier0Passed: t0Result.pass,
-      tier1Score: t1Result ? t1Result.score : (t0Result.pass ? 5.0 : 1.0),
+      tier1Score: t1Result ? t1Result.score : null,
       tokens: executionTokens !== null ? executionTokens : (t0Result.metrics ? t0Result.metrics.tokens : countTokens(executionOutput)),
       durationMs,
+      output: executionOutput,
       failures: t0Result.failures || [],
       t0Metrics: t0Result.metrics,
       t1Results: t1Result
@@ -310,6 +358,7 @@ async function executeBenchmark(benchmark, options = {}) {
       tier1Score: 1.0,
       tokens: 0,
       durationMs: Date.now() - startTime,
+      output: "",
       failures: [err.message]
     };
   } finally {
@@ -362,6 +411,12 @@ async function runEvaluation(options = {}) {
     const { resolveAdapter } = require("./adapters");
     options.executionAdapter = resolveAdapter(options);
   }
+  // Mock mode is explicit-only: `--adapter mock` / `--mock`. Auto-resolution
+  // with no keys yields NO adapter and NO mock — benchmarks fail closed
+  // instead of self-grading (de-circularized).
+  if (options.mock === undefined || options.mock === null) {
+    options.mock = (options.adapter || process.env.VESPYR_EVAL_ADAPTER || "").toLowerCase() === "mock";
+  }
 
   const total = allBenchmarks.length;
   const results = [];
@@ -394,11 +449,13 @@ async function runEvaluation(options = {}) {
 
   const totalTokens = results.reduce((sum, r) => sum + (r.tokens || 0), 0);
   const t1Scores = results.map(r => r.tier1Score).filter(s => typeof s === "number");
-  const tier1AvgScore = t1Scores.length > 0 ? Number((t1Scores.reduce((a, b) => a + b, 0) / t1Scores.length).toFixed(2)) : 5.0;
+  const tier1AvgScore = t1Scores.length > 0 ? Number((t1Scores.reduce((a, b) => a + b, 0) / t1Scores.length).toFixed(2)) : null;
+  const mockMode = results.length > 0 && results.every(r => r.mock === true);
 
   const durations = results.map(r => r.durationMs).sort((a, b) => a - b);
   const latencyP50 = durations.length > 0 ? durations[Math.floor(durations.length * 0.5)] : 0;
-  const latencyP95 = durations.length > 0 ? durations[Math.floor(durations.length * 0.95)] : 0;
+  // Nearest-rank P95: ceil(0.95*n)-th value (1-indexed), clamped.
+  const latencyP95 = durations.length > 0 ? durations[Math.min(durations.length - 1, Math.max(0, Math.ceil(durations.length * 0.95) - 1))] : 0;
 
   // Compute 7-dimension breakdowns & SPC metrics dynamically from benchmark results
   const standardDimensions = [
@@ -412,31 +469,24 @@ async function runEvaluation(options = {}) {
   ];
 
   const dimensions = {};
+  const unmeasuredDimensions = [];
   for (const dim of standardDimensions) {
     const dimResults = results.filter(r => r.dimension === dim);
     if (dimResults.length === 0) {
-      dimensions[dim] = {
-        score: 5.0,
-        pass_rate: 1.0,
-        srsr: 0.0,
-        pci: 0.0,
-        pbcr: 1.0,
-        hallucination_rate: 0.0,
-        build_pass_rate: 1.0,
-        test_pass_rate: 1.0,
-        scope_drift: 0.0,
-        script_fidelity: 1.0,
-        budget_violations: 0
-      };
+      // Unmeasured dimension: nulls, flagged — never a fabricated perfect.
+      // (Previous code reported score 5.0 / pass 1.0 for zero samples.)
+      unmeasuredDimensions.push(dim);
+      dimensions[dim] = { measured: false, score: null, pass_rate: null };
       continue;
     }
 
     const dimPassed = dimResults.filter(r => r.passed).length;
     const dimPassRate = Number((dimPassed / dimResults.length).toFixed(4));
     const dimScores = dimResults.map(r => r.tier1Score).filter(s => typeof s === "number");
-    const avgScore = dimScores.length > 0 ? Number((dimScores.reduce((a, b) => a + b, 0) / dimScores.length).toFixed(2)) : 5.0;
+    const avgScore = dimScores.length > 0 ? Number((dimScores.reduce((a, b) => a + b, 0) / dimScores.length).toFixed(2)) : null;
 
     const dimData = {
+      measured: true,
       score: avgScore,
       pass_rate: dimPassRate
     };
@@ -474,7 +524,9 @@ async function runEvaluation(options = {}) {
     totalTokens,
     latencyP50,
     latencyP95,
+    mockMode,
     dimensions,
+    unmeasuredDimensions,
     benchmarks: results
   };
 }
@@ -482,5 +534,7 @@ async function runEvaluation(options = {}) {
 module.exports = {
   loadSuites,
   executeBenchmark,
-  runEvaluation
+  runEvaluation,
+  generateExecutionResponse,
+  splitCommand
 };

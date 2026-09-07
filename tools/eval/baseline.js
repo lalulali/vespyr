@@ -32,13 +32,14 @@ function recordBaseline(runResults, customPath) {
     version: "2.0.0",
     generated_at: new Date().toISOString(),
     harness_version: "1.0.0",
+    mock_mode: runResults.mockMode === true,
     summary: {
       total_benchmarks: runResults.total || 0,
       passed_benchmarks: runResults.passed || 0,
       failed_benchmarks: runResults.failed || 0,
       pass_rate: runResults.passRate || 0,
       tier0_pass_rate: runResults.tier0PassRate || 0,
-      tier1_avg_score: runResults.tier1AvgScore || 0,
+      tier1_avg_score: runResults.tier1AvgScore ?? null,
       total_token_spend: runResults.totalTokens || 0,
       latency_p50_ms: runResults.latencyP50 || 0,
       latency_p95_ms: runResults.latencyP95 || 0

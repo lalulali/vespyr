@@ -1,0 +1,66 @@
+name: Roundtable Eval Harness
+
+# RT-P2-2: the harness gates itself in CI. Live LLM panels never run here —
+# CI verifies the harness machinery (unit tests + canonical fixtures through
+# the real score gate). Release baselines (30-native + 6-solo live debates)
+# stay manual per evals/roundtable/README.md ("Release baseline").
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - '.agents/scripts/roundtable_eval.js'
+      - '.agents/scripts/resolve_agents.js'
+      - '.agents/scripts/match_methods.js'
+      - '.agents/skills/round-table/**'
+      - '.agents/skills/brainstorming/**'
+      - '.agents/skills/elicitation/**'
+      - '.agents/references/roster-router.json'
+      - '.agents/references/degraded-mode-tiers.md'
+      - '.agents/references/step-0-sharpening.md'
+      - 'evals/roundtable/**'
+      - 'tests/test_roundtable_eval.test.js'
+      - 'tests/test_router.test.js'
+      - 'tests/test_brainstorm_routing.test.js'
+      - 'tests/test_skill_contracts.test.js'
+      - 'tests/test_match_methods.test.js'
+      - '.github/workflows/roundtable-eval.yml'
+  pull_request:
+    branches: [main, master]
+    paths:
+      - '.agents/scripts/roundtable_eval.js'
+      - '.agents/scripts/resolve_agents.js'
+      - '.agents/scripts/match_methods.js'
+      - '.agents/skills/round-table/**'
+      - '.agents/skills/brainstorming/**'
+      - '.agents/skills/elicitation/**'
+      - '.agents/references/roster-router.json'
+      - '.agents/references/degraded-mode-tiers.md'
+      - '.agents/references/step-0-sharpening.md'
+      - 'evals/roundtable/**'
+      - 'tests/test_roundtable_eval.test.js'
+      - 'tests/test_router.test.js'
+      - 'tests/test_brainstorm_routing.test.js'
+      - 'tests/test_skill_contracts.test.js'
+      - 'tests/test_match_methods.test.js'
+      - '.github/workflows/roundtable-eval.yml'
+  schedule:
+    - cron: '0 3 * * 1'
+
+jobs:
+  harness-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Roundtable unit tests
+        run: node --test tests/test_roundtable_eval.test.js tests/test_router.test.js tests/test_brainstorm_routing.test.js tests/test_skill_contracts.test.js tests/test_match_methods.test.js
+
+      - name: Score canonical fixtures (smoke baseline — must exit 0)
+        run: node .agents/scripts/roundtable_eval.js score --dir evals/roundtable/fixtures/transcripts/

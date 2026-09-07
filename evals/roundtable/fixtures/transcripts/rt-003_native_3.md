@@ -2,15 +2,15 @@ Roundtable on rt-003 (LLM meeting-notes summarization via third-party API) — n
 
 ### @product-manager (Sarah)
 Same retention-wedge thesis; narrower scope after prior friction.
-[VERDICT: PIVOT]
+[VERDICT: RESHAPE]
 
 ### @ml-ai-engineer (Kai)
 Latency ceiling undefined: summarization must beat manual reading time or the feature is negative value. p95 under 20s or cut scope to action-items only.
-[VERDICT: PIVOT]
+[VERDICT: RESHAPE]
 
 ### @security-engineer (Victor)
 Standing by the KILL unless the DPA is signed first; prompt-injection surface (meeting content is untrusted input) needs the T2/T3 data rule.
-[VERDICT: KILL]
+[VERDICT: NO-GO]
 
 ```roundtable-coverage
 panel: @product-manager, @ml-ai-engineer, @security-engineer

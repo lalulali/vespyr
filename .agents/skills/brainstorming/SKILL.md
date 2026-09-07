@@ -27,12 +27,7 @@ This skill delegates to `@founder`. The founder conducts the brainstorming sessi
 
 ### Step 1: Sharpen the topic (before any method)
 
-A brainstorm on a vague topic produces vague ideas. Before selecting a method:
-
-1. **Restate the target** — one sentence: what are we brainstorming, and what kind of output does the user need (ideas, risks, questions, alternatives)?
-2. **Surface the fuzz** — what is ambiguous, unstated, or assumed (max 5 concrete bullets: missing constraints, undefined success term, hidden audience)?
-3. **Emit the sharpened topic** — one precise sentence with explicit in/out-of-scope boundaries. If the topic is already precise, say so and move on — do not manufacture ambiguity.
-4. **Confirm with the user** — present the sharpened topic and wait for confirmation or edit. Only the confirmed statement drives method selection (pass it as `--context`).
+Sharpening follows the shared contract `.agents/references/step-0-sharpening.md` (restate / fuzz ≤5 / emit / confirm — no manufactured ambiguity). Brainstorming-specific: the restated target names the output kind needed (ideas, risks, questions, alternatives); the confirmed statement drives method selection (passed as `--context`).
 
 ### Step 2: Select method
 
@@ -49,15 +44,28 @@ Return the best-matching methods with relevance scores (up to 5; fewer if the ca
 Load the selected method from `methods.csv`. Apply it step-by-step:
 - Announce in 1-2 lines why this method fits the sharpened topic and what it will test
 - Explain the method's structure
+- **Specialist co-dispatch (mandatory on trigger):** if the sharpened topic touches AI/ML (ML model, LLM prompt, RAG, ML eval, inference, AI agent behavior), security (secrets, auth, PII, trust boundary), or performance (latency, inference/compute-at-scale cost, load), spawn the matching critique voice as a native subagent for Step 3 — `@ml-ai-engineer` (Kai) for AI/ML, `@security-engineer` (Victor) for security, `@performance-engineer` (Felix) for performance. Bare words (`model` as in data-model, `eval` as in generic evaluation, `cost` as in budget, `agent` as in support-agent workflow) do NOT trigger — the ML qualifier must be present. The specialist challenges outputs mid-method (failure modes, cost, eval design), it does not conduct. Founder remains conductor. Log the co-dispatch (`[CO-DISPATCH: @{seat} on {trigger}]`); a triggered-but-absent seat needs `[CO-DISPATCH-ABSENT: @{seat} — {one of: trigger-mentioned-but-out-of-scope | user-declined | solo-harness-no-subagents}]` in the session output, counted per rolling 10 alongside routing overrides.
+- Degraded dispatch (no subagents available) follows the shared contract `.agents/references/degraded-mode-tiers.md` — same tiers, `--simulated` exception rule, and telemetry as round-table and elicitation.
 - Walk through each step interactively
 - Record outputs (ideas, decisions, open questions)
 - Report "What this surfaced" in 2-3 bullets tied to the sharpened topic
-- **Anti-sycophancy gate (SPC):** if every generated idea is positive or agreeable — zero tension, zero risk, zero rejected assumptions — the session has converged prematurely. Before recording, apply a forced inversion pass (e.g., Reverse Brainstorming on the top idea: how would it fail?) and record the results alongside. Uniformly rosy output is an engine failure, not a success.
+- **Anti-sycophancy gate (SPC):** if every generated idea is positive or agreeable — zero tension, zero risk, zero rejected assumptions — the session has converged prematurely. Before recording, apply a forced inversion pass (e.g., Reverse Brainstorming on the top idea: how would it fail?) and record the results alongside. Uniformly rosy output is an engine failure, not a success. Every session MUST emit exactly one marker line before the Step-4 write: `[SPC: inversion-applied]` (inversion ran, results recorded) | `[SPC: rosy-absent — {quoted bullet id + rejected option | failure path | cost/risk tradeoff}]` (the cited bullet must contain a rejected option, an explicit failure path, or a quantified tradeoff — "risk: adoption may be slow" does not qualify; otherwise `inversion-applied` is mandatory) | `[SPC: skipped — {one of: user-explicit-override | fact-lookup-no-ideation | time-boxed-spike}]` (closed taxonomy; logged to the routing record; skips above ~20% over a rolling 10 sessions trigger the same revisit as routing overrides). A Step-4 write without the marker fails step completion.
 - Synthesize into actionable next steps
 
 ### Step 4: Gate and write outputs
 
 End the session with a Decision Gate on the strongest idea(s): `[GO]` (ready to stress-test), `[RESHAPE]` (promising but the mechanism needs rebuilding), or `[NO-GO]` (dominated by alternatives). A brainstorm that ends without a gate is a list, not a session.
+
+### Step 4b: Route the gated idea (mandatory on GO/RESHAPE — do not menu)
+
+The gate verdict locks FIRST — route from the locked verdict, never reshape the verdict to earn a panel. Then count distinct domain tensions in the "What this surfaced" bullets, quoting bullet ids (e.g. tensions from B1/B3):
+
+- **`[GO]` + ≥2 tensions, or `[RESHAPE]` spanning ≥2 domains** → roundtable (Discovery roster). Emit exactly: *"Top idea gated [{verdict}]. Next: roundtable with {n} open tensions (from bullets {ids}: {a} vs {b}). Reply 'grill-me instead' to go deep 1-on-1, or 'proceed' to start the roundtable."*
+- **`[GO]` single-bet, or `[RESHAPE]` confined to one domain (state the domain + reason)** → grill-me. Emit exactly: *"Top idea gated [{verdict}]. Next: grill-me on the single bet ({bet}). Reply 'roundtable instead' for a panel, or 'proceed' to start."*
+- **`[NO-GO]`** → archive + ledger. No build or follow-up routing (Zero-Blueprint rule blocks building, not talking — the user may still ask why it failed or re-propose with new evidence).
+- Cost is part of the choice, state it once: grill-me costs one interviewer call; roundtable costs 2–5 isolated seats plus cross-examination rounds (5–10× tokens and attention). Single-bet/reversible → grill-me; multi-stakeholder/irreversible → pay for the panel.
+- Pass `artifacts/output/01-discovery/brainstorming-session.md` path + the sharpened topic as the subject in either case. Grill-me = one mind going deep (proposer's conviction); roundtable = N independent minds colliding (what no single persona can think).
+- Log every override as `[ROUTING-OVERRIDE: default -> chosen -- reason]` in the session output and the `[BRAINSTORM]` memory entry (append-only routing record; owner `@tech-lead` counts markers per rolling 10 sessions alongside the router log). If overrides exceed ~20% over a rolling 10 sessions, the threshold rule gets revisited (recalibrate count vs kill default).
 
 Write the session output — sharpened topic, method used, key ideas, gate verdict, open questions — to `artifacts/output/01-discovery/brainstorming-session.md`, then record to memory:
 
@@ -73,7 +81,7 @@ Gate: {GO/RESHAPE/NO-GO} on {strongest idea}
 
 - Session output written to `artifacts/output/01-discovery/brainstorming-session.md`
 - Ideas and decisions written to `artifacts/memory/active-decisions.md`
-- Brainstorming feeds into subsequent skills (`/validate-idea`, `/shape-up`, `/design`)
+- Brainstorming feeds into subsequent skills (`/validate-idea`, `/shape-up`, `/design`, `/round-table` and `/grill-me` via Step 4b routing)
 
 ## State machine integration
 
@@ -85,3 +93,4 @@ At end: Run `node .agents/scripts/orchestrator_state.js complete --agent founder
 - Ideas ready for testing → load `/validate-idea`
 - Semi-structured plan → load `/shape-up`
 - Need market context → load `/explore-idea`
+- Stress-test a GO/RESHAPE idea with a panel → Step 4b routes to `/round-table` (multi-tension) or `/grill-me` (single-bet)

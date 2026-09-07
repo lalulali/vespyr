@@ -4,6 +4,18 @@ All notable changes to the Vespyr project will be documented in this file.
 
 ---
 
+## [Unreleased]
+
+### Roundtable subsystem overhaul (reviews + implementation, `artifacts/docs/review/07-roundtable.md`)
+- **Topic-tag router (RT-P1-1):** new `.agents/references/roster-router.json` (15 closed tags, versioned) auto-seats mandatory voices — including `@ml-ai-engineer` on eval/prompt/serving/data topics, closing the builder-only panel gap. `resolve_agents.js` gained executable `--topic` matching, `roster check` validation (untagged/over-cap/missing-mandatory rejected), frontmatter fixes (BOM, quote-strip, `temperature: 0`), and `reasoningParticipant` exclusion (`@memory-controller` never seated). Phase rosters rewritten to 2+summon defaults; Research merged into Discovery; Documentation quad killed.
+- **Scorer is a gate now (`roundtable_eval.js`):** exit 1 on coverage < 1.0 or flawed-hint contradiction; crash guards (missing file, file-as-dir, missing values); ADR-id case preserved with stability split; concessions/rounds counted; Review-verdict disagreement fallback; refused-run bucket; ROSTER-line observer check; log-vs-panel reconciliation; `session begin/update/status/close` panel state surviving compaction; log schema v2 (`--topic-id` validated, `--run-file`, `--model`, `--duration-s`); `overrides` audit with revisit trigger; solo disclosure markers + provisional 0.3 divergence threshold.
+- **Roundtable eval harness:** 13 topics (7 sound + 3 flawed + 2 Review-gate + 1 flawed-reshapeable), non-null falsifiable hints with `hint_status` debt flags, canonical-vocab fixtures + legacy dir, README cost/baselines/filename procedure, CI workflow (`.github/workflows/roundtable-eval.yml`) gating unit tests + fixture score. Baseline waves 1–5 recorded 21 transcripts (14 native + 7 solo, 46 concessions); solo-vs-native divergence 0/7 pairs.
+- **Brainstorming seam:** Step 4b threshold routing (roundtable on ≥2 tensions, grill-me on single bets, NO-GO archives) with override logging; roundtable brainstorm-artifact intake (validate-then-adopt); matcher IDF + floor + synonyms + golden set; SPC/skip markers with closed taxonomies; specialist co-dispatch; shared `degraded-mode-tiers.md` + `step-0-sharpening.md` contracts (also adopted by elicitation); elicitation marker parity.
+- **Eval-harness de-circularization (`tools/eval/`):** fail-closed mock gate (`--mock`/`--adapter mock` explicit or refuse-to-self-grade); `[MOCK]` watermarks + `mockMode` flags + console banner; Tier-1 de-aliased from Tier-0 (missing rubric fails closed); Tier-0 `requireRQSD:false` opt-out + trap `maxPci` default; unmeasured dimensions nulled + flagged; quote-aware command splitter shared via `lib/process.js`; `record-baseline` refuses mock runs at the default path; fabricated `evals/baseline.json` replaced by mock-labeled `evals/mock-baseline.json` (43/106 @ 3.36); packaging contract updated.
+- **Verification:** full suite green (365 tests); baseline waves scored with gate passing except retained negative controls, by design.
+
+---
+
 ## [2.0.10] - 2026-09-05
 
 ### Design System Overhaul (consultant, taste & agency craft)

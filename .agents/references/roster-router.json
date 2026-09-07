@@ -1,0 +1,319 @@
+{
+  "version": "1.0.0",
+  "owner": "@tech-lead",
+  "tiebreak": "@founder",
+  "source_of_truth": "artifacts/docs/review/07-roundtable.md sections 6, 8, 9",
+  "rules": {
+    "default_seats": 2,
+    "hard_cap": 5,
+    "hard_cap_native": 5,
+    "hard_cap_solo": 5,
+    "reserved_seat_2": "On tagged topics, seat 2 is a reserved non-builder observer (speaks on tag match + drift signal). Untagged topics seat owner + strongest dissenter.",
+    "override": "User override '<agent> instead/add' is honored and logged as [ROUTING-OVERRIDE: default -> chosen — reason]. Host-initiated deviation requires [ROUTER-DEVIATION: rule -> action — evidence].",
+    "revisit_threshold": "Deviation/override rate above ~20% over a rolling 10 sessions triggers a router review.",
+    "sunset": "Router defaults expire 30 days / 20 roundtables after adoption on process metrics (override rate, p50 routing time, dispute count). Veto triggers are permanent safety invariants.",
+    "measurement": "Owner @tech-lead counts [ROUTING-OVERRIDE]/[ROUTER-DEVIATION] markers across the last 10 roundtable transcripts and reports override rate, median rounds-to-synthesis, and dispute count in session-write. No new tooling — grep over transcripts.",
+    "precedence": "On any conflict between this file and SKILL.md prose, this file wins. SKILL.md phase rosters are cost-mode defaults; tag matches override them."
+  },
+  "tags": {
+    "eval": {
+      "description": "Evals, judges, benchmarks, rubrics, metric claims, baselines",
+      "mandatory": [
+        "ml-ai-engineer"
+      ],
+      "consulted": [
+        "qa-engineer",
+        "data-analyst"
+      ],
+      "keywords": [
+        "eval harness",
+        "benchmark",
+        "baseline",
+        "rubric",
+        "metric claim",
+        "accuracy claim",
+        "hallucination rate",
+        "golden set",
+        "biomarker",
+        "RQS gate",
+        "judge prompt",
+        "tier comparison",
+        "win rate"
+      ],
+      "excludes": [
+        "how much",
+        "cost of",
+        "invoice"
+      ]
+    },
+    "prompt": {
+      "description": "Prompts, RAG, retrieval, context engineering, agents, tool-calling",
+      "mandatory": [
+        "ml-ai-engineer"
+      ],
+      "consulted": [
+        "architect"
+      ],
+      "keywords": [
+        "prompt engineering",
+        "prompt design",
+        "RAG",
+        "retrieval",
+        "embedding",
+        "chunking",
+        "context window",
+        "tool calling",
+        "reasoning chain",
+        "system prompt"
+      ]
+    },
+    "security": {
+      "description": "Secrets, PII, threat models, auth, compliance, incidents",
+      "mandatory": [
+        "security-engineer"
+      ],
+      "consulted": [
+        "architect",
+        "developer"
+      ],
+      "keywords": [
+        "secret",
+        "PII",
+        "threat model",
+        "vulnerability",
+        "auth",
+        "injection",
+        "compliance",
+        "security audit",
+        "incident",
+        "breach"
+      ]
+    },
+    "performance": {
+      "description": "Latency, cost, load, profiling, caching",
+      "mandatory": [
+        "performance-engineer"
+      ],
+      "consulted": [
+        "architect",
+        "developer"
+      ],
+      "keywords": [
+        "latency",
+        "p99",
+        "p95",
+        "profiling",
+        "bottleneck",
+        "caching",
+        "load test",
+        "throughput",
+        "token cost"
+      ]
+    },
+    "architecture": {
+      "description": "ADRs, topology, contracts, tech debt",
+      "mandatory": [
+        "architect"
+      ],
+      "consulted": [
+        "tech-lead"
+      ],
+      "keywords": [
+        "ADR",
+        "topology",
+        "API contract",
+        "tech debt",
+        "system design",
+        "data model"
+      ]
+    },
+    "planning": {
+      "description": "Execution plans, estimation, coordination",
+      "mandatory": [
+        "tech-lead"
+      ],
+      "consulted": [
+        "product-manager"
+      ],
+      "keywords": [
+        "execution plan",
+        "estimation",
+        "sprint",
+        "task breakdown",
+        "dependencies",
+        "coordination"
+      ]
+    },
+    "product-scope": {
+      "description": "Scope disputes, priorities, kill decisions",
+      "mandatory": [
+        "product-manager",
+        "founder"
+      ],
+      "consulted": [
+        "architect"
+      ],
+      "keywords": [
+        "scope dispute",
+        "priorit",
+        "kill decision",
+        "roadmap",
+        "user stor",
+        "PRD"
+      ]
+    },
+    "tooling": {
+      "description": "CLI, installer, packaging, deterministic refactor",
+      "mandatory": [
+        "developer"
+      ],
+      "consulted": [
+        "tech-lead",
+        "devops-engineer"
+      ],
+      "keywords": [
+        "CLI",
+        "installer",
+        "packaging",
+        "refactor",
+        "symlink",
+        "harness adapter"
+      ]
+    },
+    "launch": {
+      "description": "Release, deploy, smoke, rollback",
+      "mandatory": [
+        "devops-engineer",
+        "qa-engineer"
+      ],
+      "consulted": [
+        "product-manager",
+        "technical-writer",
+        "ml-ai-ops"
+      ],
+      "keywords": [
+        "launch",
+        "release",
+        "deploy",
+        "ship",
+        "rollback",
+        "smoke test",
+        "go-live",
+        "go live",
+        "AI release",
+        "model promotion",
+        "shadow deploy"
+      ]
+    },
+    "data": {
+      "description": "Telemetry, funnels, dashboards, experiments",
+      "mandatory": [
+        "data-analyst"
+      ],
+      "consulted": [
+        "ml-ai-engineer"
+      ],
+      "keywords": [
+        "telemetry",
+        "funnel",
+        "dashboard",
+        "experiment",
+        "A/B",
+        "cohort",
+        "retention",
+        "instrumentation"
+      ]
+    },
+    "serving": {
+      "description": "Model serving, vector indexes, drift monitors, rollback policy, model promotion, shadow deploys, AI release eval gates",
+      "mandatory": [
+        "ml-ai-ops",
+        "ml-ai-engineer"
+      ],
+      "consulted": [
+        "devops-engineer"
+      ],
+      "keywords": [
+        "serving",
+        "vector index",
+        "drift monitor",
+        "rollback policy",
+        "model promotion",
+        "shadow deploy",
+        "AI release",
+        "inference cost"
+      ]
+    },
+    "discovery": {
+      "description": "Research, interviews, personas, JTBD, market analysis",
+      "mandatory": [
+        "user-researcher",
+        "researcher"
+      ],
+      "consulted": [
+        "product-manager"
+      ],
+      "keywords": [
+        "user research",
+        "interview",
+        "persona",
+        "JTBD",
+        "market",
+        "competitor",
+        "discovery"
+      ]
+    },
+    "design": {
+      "description": "UX/UI specs, wireframes, usability, accessibility",
+      "mandatory": [
+        "product-designer"
+      ],
+      "consulted": [
+        "ux-researcher"
+      ],
+      "keywords": [
+        "wireframe",
+        "UX",
+        "usability",
+        "accessibility",
+        "a11y",
+        "design system",
+        "screen states",
+        "motion spec"
+      ]
+    },
+    "review": {
+      "description": "Code review, quality gates, pattern audits",
+      "mandatory": [
+        "code-reviewer"
+      ],
+      "consulted": [
+        "qa-engineer"
+      ],
+      "keywords": [
+        "code review",
+        "quality gate",
+        "pattern audit",
+        "pull request"
+      ]
+    },
+    "docs": {
+      "description": "Manuals, API references, lessons, pedagogy",
+      "mandatory": [
+        "technical-writer"
+      ],
+      "consulted": [
+        "shifu"
+      ],
+      "keywords": [
+        "manual",
+        "API reference",
+        "user guide",
+        "lesson",
+        "curriculum",
+        "release notes",
+        "handbook"
+      ]
+    }
+  }
+}

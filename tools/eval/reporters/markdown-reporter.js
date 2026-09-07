@@ -23,17 +23,28 @@ function renderMarkdownReport(runResults, diffReport = null) {
     lines.push("|---|---|---|---|");
     for (const [dimKey, dimData] of Object.entries(runResults.dimensions)) {
       let special = "-";
-      if (dimKey === "sycophantic_premature_convergence") {
-        special = `**SRSR:** ${(dimData.srsr * 100).toFixed(1)}% | **PCI:** ${dimData.pci.toFixed(2)} | **PBCR:** ${(dimData.pbcr * 100).toFixed(1)}%`;
+      if (dimData.measured === false) {
+        special = "unmeasured — no samples";
+      } else if (dimKey === "sycophantic_premature_convergence") {
+        const srsr = typeof dimData.srsr === "number" ? dimData.srsr : null;
+        const pci = typeof dimData.pci === "number" ? dimData.pci : null;
+        const pbcr = typeof dimData.pbcr === "number" ? dimData.pbcr : null;
+        special = (srsr === null || pci === null || pbcr === null)
+          ? "unmeasured"
+          : `**SRSR:** ${(srsr * 100).toFixed(1)}% | **PCI:** ${pci.toFixed(2)} | **PBCR:** ${(pbcr * 100).toFixed(1)}%`;
       } else if (dimKey === "research_grounding") {
-        special = `Hallucination Rate: ${(dimData.hallucination_rate * 100).toFixed(1)}%`;
+        special = typeof dimData.hallucination_rate === "number"
+          ? `Hallucination Rate: ${(dimData.hallucination_rate * 100).toFixed(1)}%`
+          : "Hallucination Rate: N/A";
       } else if (dimKey === "code_quality") {
-        special = `Build Pass: ${(dimData.build_pass_rate * 100).toFixed(1)}%`;
+        special = typeof dimData.build_pass_rate === "number"
+          ? `Build Pass: ${(dimData.build_pass_rate * 100).toFixed(1)}%`
+          : "Build Pass: N/A";
       }
       lines.push("| " + [
         "`" + dimKey + "`",
-        dimData.score !== undefined ? dimData.score.toFixed(2) : "N/A",
-        dimData.pass_rate !== undefined ? (dimData.pass_rate * 100).toFixed(1) + "%" : "100.0%",
+        typeof dimData.score === "number" ? dimData.score.toFixed(2) : "N/A",
+        typeof dimData.pass_rate === "number" ? (dimData.pass_rate * 100).toFixed(1) + "%" : "N/A",
         special
       ].join(" | ") + " |");
     }

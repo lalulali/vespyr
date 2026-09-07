@@ -1,16 +1,18 @@
 Roundtable on rt-003 (LLM meeting-notes summarization via third-party API) — native run 2.
 
+[RED-TEAM: @security-engineer]
+
 ### @product-manager (Sarah)
 Feature is a retention wedge for team plans; scope to post-meeting email summaries.
-[VERDICT: PIVOT]
+[VERDICT: RESHAPE]
 
 ### @ml-ai-engineer (Kai)
 Extractive baseline plus API fallback, eval-gated before rollout.
-[VERDICT: PIVOT]
+[VERDICT: RESHAPE]
 
 ### @security-engineer (Victor)
 Redaction and DPA conditions are buildable; conditional pass.
-[VERDICT: PIVOT]
+[VERDICT: RESHAPE]
 
 ```roundtable-coverage
 panel: @product-manager, @ml-ai-engineer, @security-engineer
@@ -21,4 +23,4 @@ challenges:
 ```
 
 Host synthesis: conditional proceed with redaction, DPA, and eval gate.
-[SYNTHESIS: PIVOT]
+[SYNTHESIS: RESHAPE]

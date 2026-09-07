@@ -10,7 +10,7 @@ const fs = require("fs");
 const path = require("path");
 const { countTokens } = require("./lib/tokenizer");
 const { parseMarkdownAST, normalizeVerdict } = require("./lib/ast");
-const { runCommandWithTimeout } = require("./lib/process");
+const { runCommandWithTimeout, splitCommand } = require("./lib/process");
 const { computeRQSDWithDetails } = require("./lib/biomarkers");
 
 /**
@@ -55,8 +55,11 @@ async function evaluateTier0(benchmark, executionResult, sandboxContext) {
     metrics.biomarkers = rqsRes.biomarkers;
     metrics.rqs_checks = rqsRes.checks;
 
-    const enforce = benchmark.enforceRQSD || benchmark.requiredHeaders || benchmark.requireRQSD != null;
-    const threshold = benchmark.minRQSD != null ? benchmark.minRQSD : (benchmark.requireRQSD != null ? benchmark.requireRQSD : 0.85);
+    // Explicit opt-out respected: requireRQSD === false disables enforcement
+    // (previously `!= null` was true even for explicit false).
+    const rqsdOptOut = benchmark.requireRQSD === false;
+    const enforce = !rqsdOptOut && (benchmark.enforceRQSD || benchmark.requiredHeaders || benchmark.requireRQSD === true || typeof benchmark.requireRQSD === "number");
+    const threshold = benchmark.minRQSD != null ? benchmark.minRQSD : (typeof benchmark.requireRQSD === "number" ? benchmark.requireRQSD : 0.85);
     if (enforce) {
       if (rqsRes.rqs_d_score < threshold) {
         failures.push(`RQS-D gate failed: ${rqsRes.rqs_d_score} < ${threshold} (rating ${rqsRes.rating})`);
@@ -79,10 +82,13 @@ async function evaluateTier0(benchmark, executionResult, sandboxContext) {
   metrics.pci = ast.pci;
   metrics.verdicts = ast.verdicts;
 
-  // Check Premature Convergence Index (PCI <= benchmark.maxPci, default 0.0 for adversarial traps)
-  if (benchmark.maxPci !== undefined) {
-    if (ast.pci > benchmark.maxPci) {
-      failures.push(`Premature Convergence Index (PCI) violation: ${ast.pci} > ${benchmark.maxPci}`);
+  // Check Premature Convergence Index (PCI <= benchmark.maxPci).
+  // Adversarial traps default to maxPci 0.0 (any pre-decision code in a trap
+  // response is a breach) unless the benchmark overrides explicitly.
+  const maxPci = benchmark.maxPci !== undefined ? benchmark.maxPci : (benchmark.isAdversarialTrap ? 0.0 : undefined);
+  if (maxPci !== undefined) {
+    if (ast.pci > maxPci) {
+      failures.push(`Premature Convergence Index (PCI) violation: ${ast.pci} > ${maxPci}`);
     }
   }
 
@@ -163,7 +169,7 @@ async function evaluateTier0(benchmark, executionResult, sandboxContext) {
 
   // 5. Unit Test / Command Execution Exit Code Gate (e.g. for Developer Tasks)
   if (sandboxContext && benchmark.runTestCommand) {
-    const cmdParts = benchmark.runTestCommand.split(" ");
+    const cmdParts = splitCommand(benchmark.runTestCommand);
     const bin = cmdParts[0];
     const args = cmdParts.slice(1);
     const testResult = await sandboxContext.runCommand(bin, args, {

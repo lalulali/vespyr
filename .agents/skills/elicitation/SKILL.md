@@ -37,9 +37,7 @@ When invoked from another prompt or process:
 
 Multi-persona methods derive their value from genuinely independent critique. In-context roleplay of multiple specialists is the opinion-merging failure mode — it is prohibited as a substitute for dispatch.
 
-1. **Subagents available** → dispatch each persona as an independent subagent receiving: the artifact under critique, its persona file, and the method's focus. Never let one persona see another's critique before forming its own.
-2. **No subagents, but multiple isolated LLM calls possible** → context-firewalled sequential dispatch with the same data contract; cross-persona synthesis happens in the orchestrator, not in a shared context.
-3. **Single shared conversation context only** → single-persona methods run in-context (legitimate: one perspective critiquing content). Multi-persona methods are refused with the reason — unless the user explicitly insists on `--simulated`, which MUST be labeled degraded in the output: "single-context simulation — perspectives will converge."
+Degraded-mode policy lives in the shared contract `.agents/references/degraded-mode-tiers.md` (tiers, `--simulated` exception rule, telemetry) — this skill does not restate it. Elicitation-specific additions: dispatch each persona with the artifact under critique, its persona file, and the method's focus; cross-persona synthesis happens in the orchestrator, not in a shared context; single-persona methods may run in-context (one perspective critiquing content is legitimate).
 
 At activation, log the resolved tier:
 
@@ -51,12 +49,7 @@ node .agents/scripts/roundtable_eval.js log --mode <native|solo|refused> --tool 
 
 ### Step 0: Topic Sharpening (Mandatory — before any method)
 
-A critique of a vague target produces vague critique. Sharpen the topic before selecting methods.
-
-1. **Restate the target** — one sentence: what artifact/section/topic is under critique, and what question it is supposed to answer.
-2. **Surface the fuzz** — list what is ambiguous, unstated, or assumed in the topic (max 5 bullets, concrete: missing scope, undefined success term, hidden audience, unstated constraint). No generic filler.
-3. **Emit the sharpened topic** — one precise sentence the critique must answer, with explicit in-scope / out-of-scope boundaries. If the topic is already precise, say so and move on — do not manufacture ambiguity for ceremony.
-4. **Confirm with the user** — present the sharpened topic and HALT: "Correct, or edit?" Only the confirmed statement becomes the critique target. Use it as the telemetry `--topic` and as the Step 1 matching context.
+Sharpening follows the shared contract `.agents/references/step-0-sharpening.md` (restate / fuzz ≤5 / emit / confirm — no manufactured ambiguity, no generic filler). Elicitation-specific: the restated target names the artifact/section under critique plus the question it must answer; the confirmed statement becomes the critique target, the telemetry `--topic`, and the Step 1 matching context.
 
 ### Step 1: Method Registry Loading
 
@@ -130,7 +123,7 @@ Reply with a number (1-5) or method name to execute, **reshuffle** to get new op
 - Execute the selected method using its description from the CSV.
 - Adapt the method's complexity and output format based on the current context.
 - If the method requires multiple personas, dispatch them per the Harness-Neutral Delegation tiers — never in-context simulation of independent perspectives. Single-persona methods run in-context.
-- **CRITICAL:** End every method execution with a machine-readable outcome line — `[ELICITATION: <method-name> -> applied|discarded|refined]` — for telemetry parsing.
+- **CRITICAL:** End every method execution with a machine-readable outcome line — `[ELICITATION: <method-name> -> applied|discarded|refined]` — for telemetry parsing. A bare `discarded` is not allowed: discards carry a reason from the closed set with payload — `[ELICITATION: <method-name> -> discarded — {user-rejected | superseded-by-{other-method} | out-of-scope — "{quoted Step-0 boundary}"}]`. Skipped methods (never executed) are logged per session, not per method: `[ELICITATION-SKIPPED: <method-name> — {one of: user-explicit-override | no-applicable-method | time-boxed}]`, recorded in the session output ledger; owner `@tech-lead` counts skip markers per rolling 10 sessions, and skips above ~20% trigger the same revisit as routing overrides. Parity rule: elicitation skips meet the same bar as brainstorming SPC skips (closed taxonomy, logged, counted) — see RT-P2-5.
 - Apply the method creatively to the current section content being enhanced.
 - **Announce and report:** before executing, state in 1-2 lines why this method fits the sharpened topic and what it will test; after executing, report "What this revealed" in 2-3 bullets tied to the sharpened topic — not to the method's generic purpose.
 - Display the enhanced version showing what the method revealed or improved (with clear diffs or formatted text).

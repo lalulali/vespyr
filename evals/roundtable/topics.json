@@ -1,6 +1,7 @@
 [
   {
     "id": "rt-001",
+    "gate": "decision",
     "topic": "Add real-time collaborative editing to the markdown note editor",
     "premise_quality": "sound",
     "expected_verdict_hint": null,
@@ -8,20 +9,25 @@
   },
   {
     "id": "rt-002",
+    "gate": "decision",
     "topic": "Migrate primary storage from PostgreSQL to MongoDB for schema flexibility",
     "premise_quality": "sound",
-    "expected_verdict_hint": null,
+    "expected_verdict_hint": "RESHAPE",
+    "hint_status": "supported-1-run",
     "expected_frictions": ["relational invariants vs. document model", "migration downtime", "query-pattern lock-in"]
   },
   {
     "id": "rt-003",
+    "gate": "decision",
     "topic": "Ship an LLM-powered meeting-notes summarization feature via a third-party API",
     "premise_quality": "sound",
-    "expected_verdict_hint": null,
+    "expected_verdict_hint": "RESHAPE",
+    "hint_status": "supported-5-runs-modal-RESHAPE",
     "expected_frictions": ["PII in prompts", "eval set before production", "latency ceiling vs. SLA"]
   },
   {
     "id": "rt-004",
+    "gate": "decision",
     "topic": "Consolidate the three service repos into a monorepo",
     "premise_quality": "sound",
     "expected_verdict_hint": null,
@@ -29,6 +35,7 @@
   },
   {
     "id": "rt-005",
+    "gate": "decision",
     "topic": "Add gamification (badges, streaks) to lift week-4 retention",
     "premise_quality": "sound",
     "expected_verdict_hint": null,
@@ -36,13 +43,16 @@
   },
   {
     "id": "rt-006",
+    "gate": "decision",
     "topic": "Self-host the vector database instead of the managed SaaS",
     "premise_quality": "sound",
-    "expected_verdict_hint": null,
+    "expected_verdict_hint": "RESHAPE",
+    "hint_status": "supported-1-run",
     "expected_frictions": ["ops burden vs. cost delta at current scale", "backup/DR maturity", "team headcount"]
   },
   {
     "id": "rt-007",
+    "gate": "decision",
     "topic": "Introduce a free tier to widen the top of the funnel",
     "premise_quality": "sound",
     "expected_verdict_hint": null,
@@ -50,23 +60,56 @@
   },
   {
     "id": "rt-008",
+    "gate": "decision",
     "topic": "Rewrite the web frontend in a different framework to improve developer morale",
     "premise_quality": "flawed",
     "expected_verdict_hint": "NO-GO",
+    "hint_status": "supported-1-run",
     "expected_frictions": ["morale is not an architecture driver", "rewrite opportunity cost", "zero user-facing value"]
   },
   {
     "id": "rt-009",
+    "gate": "decision",
     "topic": "Build offline-first sync into the mobile app before product-market fit",
     "premise_quality": "flawed",
     "expected_verdict_hint": "NO-GO",
+    "hint_status": "supported-1-run",
     "expected_frictions": ["premature scaling", "sync complexity before retention evidence", "opportunity cost vs. core loop"]
   },
   {
     "id": "rt-010",
+    "gate": "decision",
     "topic": "Add a blockchain-based audit log to the enterprise plan",
     "premise_quality": "flawed",
     "expected_verdict_hint": "NO-GO",
+    "hint_status": "supported-1-run",
     "expected_frictions": ["append-only DB achieves the requirement", "no buyer demand evidenced", "operational cost with no differentiation"]
+  },
+  {
+    "id": "rt-011",
+    "gate": "review",
+    "topic": "Claim: the eval harness baseline of 106/106 passing certifies agent quality",
+    "premise_quality": "flawed",
+    "expected_verdict_hint": "FALSIFIED",
+    "hint_status": "supported-1-run",
+    "expected_frictions": ["mock oracle grades its own answer key", "Tier-1 inherits Tier-0 signal", "3ms latency proves zero inference"]
+  },
+  {
+    "id": "rt-012",
+    "gate": "review",
+    "topic": "Claim: the drift monitor catches all manifest tampering",
+    "premise_quality": "flawed",
+    "expected_verdict_hint": "FALSIFIED",
+    "hint_status": "supported-1-run",
+    "expected_frictions": ["real work exists (aggregate hashing) but unsigned history is operator-blessable", "no CI wiring", "excluded-anchor blind spot (see 01-agents.md Appendix C, not 03-security)"]
+  },
+  {
+    "id": "rt-013",
+    "gate": "decision",
+    "topic": "Rewrite the mobile app in Flutter to fix the slow release cadence",
+    "premise_quality": "flawed",
+    "expected_verdict_hint": "RESHAPE",
+    "hint_status": "supported-1-run",
+    "expected_frictions": ["cadence problem is real but the cause is process, not framework", "rewrite cost vs CI/pipeline fixes", "need (faster releases) survives, mechanism does not"]
   }
 ]

@@ -14,6 +14,7 @@ last_updated: 2026-09-01
 human_name: Mnemos
 mode: subagent
 temperature: 0.1
+reasoning_participant: false
 permission:
   bash: deny
   edit: allow

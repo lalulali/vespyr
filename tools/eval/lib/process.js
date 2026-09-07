@@ -6,6 +6,30 @@
 
 const { spawn } = require("child_process");
 
+/**
+ * Quote-aware command splitter: `run "quoted arg" plain` → ["run", "quoted arg", "plain"].
+ * The naive split(" ") broke quoted args and paths with spaces.
+ */
+function splitCommand(cmd) {
+  const parts = [];
+  let cur = "";
+  let quote = null;
+  for (const ch of String(cmd)) {
+    if (quote) {
+      if (ch === quote) quote = null;
+      else cur += ch;
+    } else if (ch === '"' || ch === "'") {
+      quote = ch;
+    } else if (/\s/.test(ch)) {
+      if (cur) { parts.push(cur); cur = ""; }
+    } else {
+      cur += ch;
+    }
+  }
+  if (cur) parts.push(cur);
+  return parts.length ? parts : [String(cmd)];
+}
+
 function runCommandWithTimeout(command, args, options = {}) {
   return new Promise((resolve) => {
     const timeoutMs = options.timeoutMs || 10000;
@@ -78,5 +102,6 @@ function runCommandWithTimeout(command, args, options = {}) {
 }
 
 module.exports = {
-  runCommandWithTimeout
+  runCommandWithTimeout,
+  splitCommand
 };

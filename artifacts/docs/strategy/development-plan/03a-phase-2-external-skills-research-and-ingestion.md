@@ -258,3 +258,10 @@ npx vespyr skill update
 **@architect (Vera):** PENDING — Review of ingestion pipeline and registry manifest architecture.  
 **@security-engineer (Victor):** PENDING — Review of 4-tier security filter and prompt injection safeguards.  
 **@tech-lead (Grant):** PENDING — Review of CLI commands and execution estimates.
+
+---
+
+## 9. Additional notes from Chris
+
+I saw this skills and it looks really promising: https://github.com/996pm/interaction-prd
+It would be a great adition for Sarah. But all documents are in Chinese

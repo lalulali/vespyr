@@ -25,7 +25,7 @@ Usage:
 
 Subcommands:
   run                Run benchmark test suites across agents and skills
-  record-baseline    Run benchmarks and record results to baseline.json
+  record-baseline    Run benchmarks and record results (refuses mock runs at the default path)
   diff               Compare latest evaluation run against baseline
 
 Options:
@@ -34,6 +34,9 @@ Options:
   --skill, -k <name>         Filter benchmarks to specific skill workflow (/develop, /grill-me, etc.)
   --model, -m <model>        Force model tier (inherit, flash, pro, claude-3-5-sonnet)
   --adapter <type>           Execution adapter (auto, mock, cli, openai, anthropic, gemini, ollama)
+  --mock                   Explicit mock mode: grade canned fixtures (watermarked [MOCK]).
+                           Without --mock/--adapter mock and without a real adapter,
+                           benchmarks FAIL CLOSED instead of self-grading.
   --cli <command>            Command string for CLI execution adapter
   --temp, -t <float>         Temperature for evaluation runs (default: 0.0)
   --concurrency, -c <int>    Number of concurrent worker sandboxes (default: 4)
@@ -62,6 +65,7 @@ function parseArgs(args) {
     model: "inherit",
     adapter: "auto",
     cli: null,
+    mock: false,
     temp: 0.0,
     concurrency: 4,
     baseline: DEFAULT_BASELINE_PATH,
@@ -89,6 +93,9 @@ function parseArgs(args) {
       options.model = args[++i];
     } else if (arg === "--adapter") {
       options.adapter = args[++i];
+    } else if (arg === "--mock") {
+      options.mock = true;
+      options.adapter = "mock";
     } else if (arg === "--cli") {
       options.cli = args[++i];
     } else if (arg === "--temp" || arg === "-t") {
@@ -134,6 +141,14 @@ async function main() {
     let diffReport = null;
 
     if (options.subcommand === "record-baseline") {
+      // A mock run must never become the production baseline silently:
+      // fixture-recall numbers are a self-test reference, not a quality
+      // reference. Explicit --baseline override = explicit intent.
+      if (runResults.mockMode && path.resolve(options.baseline) === path.resolve(DEFAULT_BASELINE_PATH)) {
+        console.error("Refusing to record a mock run as evals/baseline.json (would launder fixture-recall as quality evidence).");
+        console.error("Re-run with a real adapter, or pass an explicit --baseline <mock-baseline-path> for self-test references.");
+        process.exit(2);
+      }
       baseline = recordBaseline(runResults, options.baseline);
       diffReport = diffAgainstBaseline(runResults, baseline);
       console.log(`Successfully recorded new baseline to ${options.baseline}`);

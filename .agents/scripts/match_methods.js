@@ -95,9 +95,41 @@ const SYNONYMS = {
   'code': ['bug', 'developer', 'develop', 'refactor', 'test', 'review', 'technical'],
   'bug': ['code', 'debug', 'troubleshoot', 'reproduce'],
   'test': ['qa', 'validation', 'verify', 'robustness', 'boundary', 'edge'],
-  'risk': ['vulnerability', 'threat', 'security', 'failure', 'pre-mortem', 'mitigation'],
+  'risk': ['vulnerability', 'threat', 'security', 'failure', 'pre-mortem', 'premortem', 'mitigation', 'assumption'],
   'security': ['risk', 'threat', 'auth', 'vulnerability', 'hacker', 'audit'],
-  'research': ['market', 'competitor', 'user', 'persona', 'exploration', 'analysis']
+  'research': ['market', 'competitor', 'user', 'persona', 'exploration', 'analysis'],
+  // Ideation vocabulary (RT-P1-11): divergent-thinking terms that previously
+  // degraded to literal description matching.
+  'reframe': ['reframing', 'perspective', 'lens'],
+  'reframing': ['reframe', 'perspective'],
+  'diverge': ['divergent', 'ideation', 'brainstorm'],
+  'divergent': ['diverge', 'ideation'],
+  'converge': ['convergent', 'prioritize', 'decision'],
+  'constraint': ['constraints', 'limits', 'boundaries'],
+  'constraints': ['constraint', 'limits'],
+  'worst': ['worst-idea', 'reverse', 'pre-mortem', 'inversion'],
+  'analogy': ['analogies', 'metaphor'],
+  'analogies': ['analogy', 'metaphor'],
+  'metaphor': ['metaphors', 'analogy', 'analogies'],
+  'metaphors': ['metaphor', 'analogy'],
+  'provocation': ['provocations', 'assumption', 'challenge'],
+  'silent': ['quiet', 'anonymous', 'brainwriting'],
+  'anonymous': ['silent', 'brainwriting'],
+  'jtbd': ['jobs-to-be-done', 'job-to-be-done', 'job', 'persona', 'user'],
+  'job': ['jtbd', 'jobs-to-be-done', 'job-to-be-done'],
+  'story': ['stories', 'narrative', 'scenarios'],
+  'onboarding': ['new-user', 'first-run', 'activation'],
+  'idea': ['ideation', 'ideate', 'brainstorm'],
+  'ideas': ['ideation', 'ideate', 'brainstorm'],
+  'brainstorm': ['ideation', 'ideate', 'ideas'],
+  'decision': ['decide', 'prioritize', 'vote', 'consensus'],
+  'decide': ['decision', 'prioritize'],
+  'choice': ['decision', 'options'],
+  'group': ['collaborative', 'team'],
+  'team': ['collaborative', 'group'],
+  'process': ['facilitation', 'structured'],
+  'failure': ['risk', 'pre-mortem', 'premortem'],
+  'danger': ['risk']
 };
 
 function expandKeywords(tokens) {
@@ -110,20 +142,51 @@ function expandKeywords(tokens) {
   return expanded;
 }
 
-function scoreMethod(method, keywords) {
+function scoreMethod(method, keywords, idf) {
   let score = 0;
   const nameTokens = tokenize(method.method_name);
   const descTokens = tokenize(method.description);
   const catTokens = tokenize(method.category);
+  // Length normalization: long descriptions must not outscore precise ones
+  // on raw hit counts.
+  const descNorm = Math.sqrt(descTokens.length) || 1;
 
   keywords.forEach(kw => {
     if (nameTokens.includes(kw)) score += 4;
     if (catTokens.includes(kw)) score += 3;
-    if (descTokens.includes(kw)) score += 1;
+    if (descTokens.includes(kw)) {
+      // Rare terms discriminate; ubiquitous terms barely count. The default
+      // only fires on the unit-test path — in production the idf corpus
+      // covers every description token, so unknown terms can't reach here.
+      const w = idf && typeof idf.get === 'function' ? (idf.get(kw) ?? 1) : 1;
+      score += w / descNorm;
+    }
   });
 
   return score;
 }
+
+// Inverse document frequency over the method corpus: idf(t) = ln(N / (1+df)).
+// Computed once per run over name+description+category tokens.
+function computeIDF(methods) {
+  const df = new Map();
+  for (const m of methods) {
+    const terms = new Set([
+      ...tokenize(m.method_name),
+      ...tokenize(m.description),
+      ...tokenize(m.category),
+    ]);
+    for (const t of terms) df.set(t, (df.get(t) || 0) + 1);
+  }
+  const idf = new Map();
+  for (const [t, count] of df) idf.set(t, Math.log(methods.length / (1 + count)));
+  return idf;
+}
+
+// Floor below which a match is too weak to recommend at full width (RT-P1-11).
+// Only confidence gates the warning: a weak top score returns best-effort
+// top-1 with a stderr note; strong hits return quietly however many qualify.
+const MIN_SCORE = 2;
 
 function main() {
   const args = process.argv.slice(2);
@@ -166,18 +229,30 @@ function main() {
 
   const tokens = tokenize(context);
   const keywords = expandKeywords(tokens);
+  const idf = computeIDF(allMethods);
 
   const scored = allMethods.map(m => ({
     method: m,
-    score: scoreMethod(m, keywords)
+    score: scoreMethod(m, keywords, idf)
   }));
 
   scored.sort((a, b) => b.score - a.score);
-  const topMatches = scored.filter(s => s.score > 0).slice(0, topN).map(s => ({
+  const qualified = scored.filter(s => s.score >= MIN_SCORE);
+  // Confidence vs breadth are different signals (conceded incoherence, fixed):
+  // low confidence (weak top score) → best-effort top-1 WITH warning;
+  // low breadth (1-2 strong hits) → return them quietly, no warning.
+  // A strong singleton success must never warn.
+  const topScore = scored.length ? scored[0].score : 0;
+  const narrow = topScore < MIN_SCORE;
+  const picked = (narrow ? scored.slice(0, 1) : qualified).slice(0, topN);
+  if (narrow) {
+    console.error(`[match-methods] narrow match — returning ${picked.length} (top score ${Number(topScore.toFixed(2))} below floor ${MIN_SCORE})`);
+  }
+  const topMatches = picked.map(s => ({
     method_name: s.method.method_name,
     category: s.method.category,
     source: s.method.source,
-    score: s.score,
+    score: Number(s.score.toFixed(2)),
     description: s.method.description
   }));
 
@@ -192,5 +267,7 @@ module.exports = {
   parseCSV,
   tokenize,
   expandKeywords,
-  scoreMethod
+  scoreMethod,
+  computeIDF,
+  MIN_SCORE
 };

@@ -39,7 +39,11 @@ describe('NPX packaging & manifest verification', () => {
       '.agents/scripts/dedupe_validator.js',
       '.agents/scripts/add-identity-block.js',
       'evals/roundtable/topics.json',
-      'evals/baseline.json',
+      // NOTE(de-circularized): evals/baseline.json was removed — it recorded
+      // mock fixture-recall as quality evidence. The shipped reference is the
+      // explicitly mock-labeled evals/mock-baseline.json (mock_mode:true);
+      // the production path stays empty until a real-adapter run records it.
+      'evals/mock-baseline.json',
       'evals/suites/agents/core-swarm.json',
       'evals/rubrics/prd-completeness.json',
       'evals/fixtures/simple-js/index.js',

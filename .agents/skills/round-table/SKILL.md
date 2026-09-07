@@ -20,23 +20,18 @@ Roundtable discussions yield genuinely independent perspectives. When one LLM ro
 The roundtable skill accepts optional arguments:
 
 - `--model <model>` — Force all spawned participants to use a specific model when the active harness supports model selection (e.g. `--model flash`, `--model premium`). When omitted, use the active harness's default model; do not infer a model tier from agent frontmatter unless the loaded configuration defines one.
-- `--solo` — Run without spawning subagents, for harnesses that cannot spawn them but can issue multiple isolated LLM calls. Dispatch each persona as its own LLM call that receives only the user's topic, the loaded memory context, and that persona's file — never another agent's output. Phase 2+ cross-examination passes a targeted stance into the next agent's call, mirroring how subagent mode passes context between subagents. Announce solo mode on activation and disclose that its output is degraded relative to native mode. Speed alone is not a valid reason to collapse the panel into one shared context.
+- `--solo` — Run without spawning subagents, for harnesses that cannot spawn them but can issue multiple isolated LLM calls. Dispatch each persona as its own LLM call that receives only the user's topic, the loaded memory context, and that persona's file — never another agent's output. Phase 2+ cross-examination passes a targeted stance into the next agent's call, mirroring how subagent mode passes context between subagents. Announce solo mode on activation and disclose that its output is degraded relative to native mode. Speed alone is not a valid reason to collapse the panel into one shared context. Solo panels cap at 5 seats, same as native — the matcher enforces the cap and errors on overflow. Every solo transcript MUST open with a machine-readable marker line `[MODE: solo — isolated calls, {n} seats]` — marker-less solo transcripts fail verification (`roundtable_eval.js score` lists them under solo disclosure failures).
 
 ## Harness-Neutral Delegation
 
 Delegation path: reasoning → selected persona roles | direct-fallback
 
-Use the active harness's native subagent capability when it supports independent participants. Do not assume a particular command, API, or `@`-invocation syntax.
-
-No-Subagent Harness Fallback (tiered):
-1. **Subagents available** → native mode (default).
-2. **No subagents, but multiple isolated LLM calls possible** → run in `--solo` mode via context-firewalled sequential dispatch. Announce the mode, disclose the degraded-output risk, and note the fallback in the session summary. Never claim independent subagents were spawned.
-3. **Single shared conversation context only** → refuse to simulate. Later agents would anchor on earlier outputs, merging opinions into performative agreement — a simulated roundtable is worse than none. State this plainly and offer `--solo` only if the user explicitly insists, labeled degraded.
+Degraded-mode policy lives in the shared contract `.agents/references/degraded-mode-tiers.md` (tiers, `--simulated` exception rule, telemetry) — this skill does not restate it. Roundtable-specific additions: Phase 2+ cross-examination passes a targeted stance into the next agent's call, mirroring how subagent mode passes context between subagents; every solo transcript MUST open with `[MODE: solo — isolated calls, {n} seats]` (marker-less solo transcripts fail verification).
 
 ## On Activation
 
 1. **Parse arguments** — check for `--model` and `--solo` flags.
-2. **Resolve the agent roster** — read from `.agents/agents/` using the resolver. The resolver enumerates the available personas; filter the returned roster against the selected phase and topic yourself:
+2. **Resolve the agent roster** — read from `.agents/agents/` using the resolver. The resolver enumerates the available personas and marks `@memory-controller` with `reasoningParticipant: false` — never seat it as a reasoning participant. Then apply the Topic-Tag Router below against the user's topic — filter by table match, not by improvisation:
    ```bash
    node .agents/scripts/resolve_agents.js
    ```
@@ -46,30 +41,51 @@ No-Subagent Harness Fallback (tiered):
    node .agents/scripts/memory_filter.js --agent founder --task "round table discussion: {user's topic}"
    ```
    Store the returned context to inject into each subagent prompt.
+   **Brainstorm intake:** if the topic arrives with a `brainstorming-session.md` path (Step 4b routing), validate-then-adopt: run a 5-minute falsification check on the sharpened topic + tension map (wrong question? stale premises? missing tension?) before consuming it — the panel may RESHAPE-topic or bounce back to brainstorming with reasons. If it passes, use the sharpened topic as the debate subject plus its "What this surfaced" bullets as the initial tension map — do not re-sharpen from scratch, but still validate phase fit per Activation step 3 and flag drift.
 5. **Log the session mode** — once native/solo/refused is resolved (see fallback tiers), run:
    ```bash
    node .agents/scripts/roundtable_eval.js log --mode <native|solo|refused> --topic "{topic}" --agents "@a,@b"
    ```
    A refused roundtable logs `--mode refused` and stops — no welcome, no debate.
-6. **Welcome the user** — briefly introduce the roundtable mode (and if solo mode is active, disclose that solo output is degraded: isolated calls replace subagent independence). Show the recommended stage-based agent roster. Ask what topic or issue they would like to discuss.
+6. **Welcome the user** — briefly introduce the roundtable mode (and if solo mode is active, disclose that solo output is degraded: isolated calls replace subagent independence). Show the router-matched roster as a `ROSTER:` line and ask what topic or issue they would like to discuss.
 
 ## Stage-Aware Agent Selection
 
-Select 2-5 agents whose expertise matches the user's topic or the current stage of development. 
+Select 2-5 agents whose expertise matches the user's topic or the current stage of development.
 
-### Recommended Rosters by Phase
+### Topic-Tag Router (mandatory — replaces host improvisation)
 
-- **Validation (Phase -1)**: Summon `@founder`, `@product-manager`, and `@researcher`.
-- **Discovery (Phase 0)**: Summon `@founder`, `@researcher`, `@user-researcher`, and `@ux-researcher`.
-- **Research (Phase 1)**: Summon `@researcher`, `@user-researcher`, `@ux-researcher`, and `@founder`.
-- **Strategy (Phase 2)**: Summon `@product-manager`, `@founder`, `@product-designer`, and `@user-researcher`.
-- **Architecture (Phase 3)**: Summon `@architect`, `@tech-lead`, `@security-engineer`, and `@performance-engineer`.
-- **Planning (Phase 4)**: Summon `@tech-lead`, `@product-manager`, `@architect`, and `@devops-engineer`.
-- **Execution (Phase 5)**: Summon `@tech-lead`, `@developer`, `@qa-engineer`, and `@code-reviewer`.
-- **Launch (Phase 6)**: Summon `@devops-engineer`, `@product-manager`, `@qa-engineer`, and `@technical-writer`.
-- **Iteration (Phase 7)**: Summon `@product-manager`, `@data-analyst`, `@ux-researcher`, and `@performance-engineer`.
-- **Documentation (Phase 8)**: Summon `@technical-writer`, `@shifu`, `@architect`, and `@developer`.
-- **Retro (Phase 9)**: Summon `@product-manager`, `@tech-lead`, `@shifu`, and `@qa-engineer`.
+The closed, versioned tag table lives in `.agents/references/roster-router.json` (single source of truth; rationale: `artifacts/docs/review/07-roundtable.md` §6/§8/§9). Router procedure:
+
+1. Read `roster-router.json`; match the user's topic against tag descriptions (multiple tags may match). Executable matching (no improvisation):
+   ```bash
+   node .agents/scripts/resolve_agents.js --topic "eval harness judging agent prompts"
+   ```
+   Validate the proposed seats before dispatch — untagged seats beyond 2, missing mandatory seats, and over-cap rosters fail here, not mid-debate:
+   ```bash
+   node .agents/scripts/resolve_agents.js roster check --topic "..." --seats "@a,@b" [--mode native|solo]
+   ```
+   Record the validated `ROSTER:` line at the top of the transcript for auditability (future observer-voice checks join on it). List seats in seating order: the 2 core seats first, summoned specialists after — positions beyond 2 are audited as challengers.
+2. Auto-seat every `mandatory` agent of matching tags — no substitution, no host discretion.
+3. On tagged topics, seat 2 is a reserved non-builder observer (speaks on tag match + drift signal). Untagged topics seat owner + strongest dissenter.
+4. `consulted` agents join Phase 2 as challengers or are cited — never silent full seats by default.
+5. Emit a machine-checkable roster line before dispatch: `ROSTER: @a,@b[+@c: tag-name]` — every seat beyond 2 must name a router-table tag. Free-text tensions are rejected.
+6. User override (`<agent> instead/add`) is honored and logged as `[ROUTING-OVERRIDE: default → chosen — reason]`. Host-initiated deviation requires `[ROUTER-DEVIATION: rule → action — evidence]` and counts toward the >20%/10-session revisit threshold.
+7. Owner of this table: `@tech-lead` (mechanics). `@founder` settles ALL roster disputes; ties auto-resolve to the more-reversible roster with logged dissent.
+
+### Recommended Rosters by Phase (2+summon defaults)
+
+- **Validation (Phase -1)**: `@founder` + `@researcher`, summon `@product-manager` on GO, `@user-researcher` when humans must falsify.
+- **Discovery (Phase 0)**: `@researcher` + `@user-researcher`, summon `@founder`/`@ux-researcher`.
+- **Research (Phase 1)**: merged into Discovery — no standing roster (was a duplicate default).
+- **Strategy (Phase 2)**: `@product-manager` + `@founder` + `@product-designer` + `@user-researcher` (reference design; PM+designer duo acceptable cheap mode).
+- **Architecture (Phase 3)**: `@architect` + `@security-engineer`, summon `@tech-lead`/`@performance-engineer`; AI/security-tagged topics auto-seat the reserved non-builder seat.
+- **Planning (Phase 4)**: `@tech-lead` + `@product-manager`, summon `@architect`/`@devops-engineer` (duo acceptable cheap mode).
+- **Execution (Phase 5)**: `@developer` + `@code-reviewer` + `@qa-engineer` trio default; `@security-engineer` on injection/auth tags; `@tech-lead` summons on deadlock.
+- **Launch (Phase 6)**: `@devops-engineer` + `@qa-engineer`, summon `@product-manager`/`@technical-writer`; `@ml-ai-engineer` + `@ml-ai-ops` mandatory for AI releases with eval gate.
+- **Iteration (Phase 7)**: `@product-manager` + `@data-analyst` + `@ux-researcher` + `@performance-engineer`; rotate `@ml-ai-engineer` in for AI products.
+- **Documentation (Phase 8)**: no standing panel — on-demand `@technical-writer` + `@developer` duo, async otherwise.
+- **Retro (Phase 9)**: `@product-manager` + `@tech-lead`, summon `@qa-engineer`/`@shifu`/data on evidence; `@founder` kills sacred cows on L3 retros.
 
 ### Custom & Domain-Specific Cross-cutting Roles
 
@@ -112,7 +128,7 @@ Roundtable discussions enforce true perspective collision where agents are manda
 ### Phase 3: Defense & Justified Concession (Rebuttal)
 - Challenged agents MUST defend with hard empirical constraints (benchmarks, schema invariants, latency/budget limits) OR formally log an explicit concession with root-cause proof: `[CONCESSION: reason]`.
 - Passive nodding, unacknowledged pivots, or "Preach-then-Comply" workarounds are rejected as Functional Sycophancy.
-- Bounded iterations: Maximum 2 exchange rounds.
+- Bounded iterations: Maximum 2 exchange rounds. Each Phase 2+3 exchange round MUST open with a machine-readable marker (`[ROUND: 1]`, `[ROUND: 2]`) — a third round marker fails the bound check (`roundtable_eval.js score` lists it under round-bound violations).
 
 ### Phase 4: Synthesis Gate & Irreconcilable Trade-Off Escalation
 - No false consensus: if trade-offs are mutually exclusive, log them as an explicit ADR decision record in `artifacts/memory/active-decisions.md` rather than synthesizing a muddy compromise.
@@ -122,7 +138,7 @@ Roundtable discussions enforce true perspective collision where agents are manda
 1. **Mandatory Visible Dialogue Stream:** The orchestrator MUST output the visible back-and-forth agent dialogue (e.g. `### @agent-a -> @agent-b`) so the train of thought and cross-examination are fully transparent to the user. Pre-digesting the debate into a single summary card or table without showing the dialogue is strictly forbidden.
 2. **Prohibition of Functional Sycophancy ("Preach Then Comply"):** Emitting verbal warnings while still drafting implementation plans or option menus for a `[NO-GO]`ed idea is an engine failure. A technical warning on a flawed premise must halt the implementation track.
 3. **Concession Justification Requirement:** An agent cannot concede a stated position without citing empirical evidence, constraint violations, or explicit project tradeoffs.
-4. **Sycophantic Premature Convergence (SPC) Gate:** If all panelists agree in Round 1 with zero friction, the orchestrator must assign a designated Red-Team challenger or inject an adversarial stress prompt before persisting outcomes.
+4. **Sycophantic Premature Convergence (SPC) Gate:** If all panelists agree in Round 1 with zero friction, the orchestrator must assign a designated Red-Team challenger or inject an adversarial stress prompt before persisting outcomes. The assignment is machine-readable: emit `[RED-TEAM: @agent]` (or `[RED-TEAM: adversarial-prompt]` for the injected variant) in the transcript. Unanimous decision verdicts on sound-premise topics without a red-team marker fail the suite gate (`roundtable_eval.js score`); flawed-premise unanimity is exempt (expected).
 5. **Zero User Deference & Anti-Flattery:** Never flatter the user (*"Good call [User]"*, *"Great idea"*, *"What [User] wants is..."*). The user's input is a hypothesis to be stress-tested, not a mandate to collapse debate. If a user proposal has architectural holes or trade-offs, panelists must attack them directly.
 6. **Mandatory Attack Coverage:** no Phase-1 position ends a round unchallenged. The check is mechanical: count challenges in the tension map — one or more per panelist position, verified before Phase 3. Challenges must target unstated assumptions, boundary blindspots, or invalid invariants; performative surface challenges do not count toward coverage.
 
@@ -132,7 +148,8 @@ When the user replies, questions, or steers the conversation in subsequent turns
 
 1. **Roundtable Mode Stays Permanently Active**:
    - The orchestrator **MUST NEVER** drop character or collapse into a single AI assistant answering the user directly.
-   - Do not answer as a lone assistant. The panel remains assembled and actively debating until the user explicitly exits (`/exit`, `thanks`, `done`).
+   - Do not answer as a lone assistant. The panel remains assembled and actively debating until the user explicitly exits (explicit `/exit`, or a confirmed close — see Exit).
+   - **Panel state file (survives compaction):** on activation run `roundtable_eval.js session begin --topic "{topic}" --agents "@a,@b" [--mode native|solo]`; after every turn run `session update --turn {n} --phase {position|cross-exam|defense|synthesis} [--synthesis "{one-line}"]`; after compaction or context loss run `session status` and resume from the recorded turn/phase/members instead of restarting or collapsing — then rehydrate with `memory_filter.js` (recorded topic as task) and re-read the last transcript segment before continuing. The state file lives at `.agents/state/roundtable-current.json` (runtime cursor only — the durable record stays with `@memory-controller` per Persist Outcomes; the two systems are complementary, not competing); `session close` on clean exit.
 
 2. **Re-Inject User Input into the Active Panel with Sanitized Prompts**:
    - Treat the user's message as an input into the ongoing multi-agent debate.
@@ -153,7 +170,13 @@ When the user replies, questions, or steers the conversation in subsequent turns
 
 ## Persist Round Table Outcomes
 
-After the discussion ends, verify any claim that a file or artifact changed against the disk before recording it as fact. Then write key outcomes to memory:
+After the discussion ends, verify any claim that a file or artifact changed against the disk before recording it as fact — concrete command (run from the repo root, paths from the claim):
+
+```bash
+git status --porcelain -- {path} && git diff --stat -- {path}
+```
+
+A claim with no `porcelain` output is not a change — do not record it as one. For brand-new (untracked, `??`) files, `porcelain` is the verdict and `diff --stat` is expectedly silent — judge `porcelain`, and confirm content with a direct read. Then write key outcomes to memory:
 
 1. **Write decisions to `artifacts/memory/active-decisions.md`** (via `@memory-controller write`) with this header:
 
@@ -178,4 +201,11 @@ After the discussion ends, verify any claim that a file or artifact changed agai
 
 ## Exit
 
-When the user indicates they are finished (e.g., "thanks", "done", "exit"), persist outcomes, provide a brief wrap-up of the key takeaways — restating the degraded-output disclosure if solo mode ran — and return to normal operation.
+When the user explicitly exits (`/exit`) or confirms a close ("done — close it"), run this checklist in order — skipping any step is a checklist violation: record the skip with reason in session-write (auditable at the next session-start review):
+
+1. Persist outcomes (memory-controller write + session-write per above).
+2. Run `roundtable_eval.js session close`.
+3. Provide a brief wrap-up of the key takeaways — restating the degraded-output disclosure if solo mode ran.
+4. Return to normal operation.
+
+A bare "thanks" mid-debate is acknowledgement, not an exit: keep debating and confirm ("noted — shall I close the panel?") instead of closing.

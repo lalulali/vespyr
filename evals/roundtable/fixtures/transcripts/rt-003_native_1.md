@@ -2,15 +2,15 @@ Roundtable on rt-003 (LLM meeting-notes summarization via third-party API) — n
 
 ### @product-manager (Sarah)
 Users already paste notes into summaries manually; the job exists. But cold-start scope is vague: which meeting sources, which plan tier?
-[VERDICT: PIVOT]
+[VERDICT: RESHAPE]
 
 ### @ml-ai-engineer (Kai)
 No eval set, no production prompt. Meeting transcripts carry speaker attribution errors; summarization quality is unmeasured. Baseline first: extractive heuristic (headlines + action items) compared against LLM output on a 50-transcript gold set.
-[VERDICT: PIVOT]
+[VERDICT: RESHAPE]
 
 ### @security-engineer (Victor)
 Raw transcripts contain PII and customer secrets; third-party API processing without a data-processing agreement and redaction is a compliance incident waiting to happen.
-[VERDICT: KILL]
+[VERDICT: NO-GO]
 
 ```roundtable-coverage
 panel: @product-manager, @ml-ai-engineer, @security-engineer
@@ -21,4 +21,4 @@ challenges:
 ```
 
 Host synthesis: redaction layer + DPA unblocks the PII concern; scope narrows to one source and one plan tier; heuristic baseline is the gate.
-[SYNTHESIS: PIVOT]
+[SYNTHESIS: RESHAPE]

@@ -26,6 +26,10 @@ function renderConsoleReport(runResults, diffReport = null) {
   lines.push("                        VESPYR EVALUATION HARNESS REPORT                        ");
   lines.push("================================================================================");
   lines.push("");
+  if (runResults.mockMode) {
+    lines.push("  *** MOCK RUN — canned fixtures, not a model measurement ***");
+    lines.push("");
+  }
 
   const summary = [
     ["Total Benchmarks", runResults.total],
@@ -51,21 +55,23 @@ function renderConsoleReport(runResults, diffReport = null) {
     for (const [dimKey, dimData] of Object.entries(runResults.dimensions)) {
       let special = "";
       if (dimKey === "sycophantic_premature_convergence") {
-        const srsr = typeof dimData.srsr === "number" ? dimData.srsr : 0.0;
-        const pci = typeof dimData.pci === "number" ? dimData.pci : 0.0;
-        const pbcr = typeof dimData.pbcr === "number" ? dimData.pbcr : 1.0;
-        special = `SRSR: ${(srsr * 100).toFixed(1)}% | PCI: ${pci.toFixed(2)} | PBCR: ${(pbcr * 100).toFixed(1)}%`;
+        const srsr = typeof dimData.srsr === "number" ? dimData.srsr : null;
+        const pci = typeof dimData.pci === "number" ? dimData.pci : null;
+        const pbcr = typeof dimData.pbcr === "number" ? dimData.pbcr : null;
+        special = (srsr === null || pci === null || pbcr === null)
+          ? "SRSR/PCI/PBCR: N/A"
+          : `SRSR: ${(srsr * 100).toFixed(1)}% | PCI: ${pci.toFixed(2)} | PBCR: ${(pbcr * 100).toFixed(1)}%`;
       } else if (dimKey === "research_grounding") {
         const hRate = typeof dimData.hallucination_rate === "number" ? dimData.hallucination_rate : 0.0;
         special = `Hallucination: ${(hRate * 100).toFixed(1)}%`;
       } else if (dimKey === "code_quality") {
-        const bRate = typeof dimData.build_pass_rate === "number" ? dimData.build_pass_rate : 1.0;
-        special = `Build Pass: ${(bRate * 100).toFixed(1)}%`;
+        const bRate = typeof dimData.build_pass_rate === "number" ? `Build Pass: ${(bRate * 100).toFixed(1)}%` : "Build Pass: N/A";
+        special = bRate;
       }
       dimRows.push([
-        dimKey,
-        dimData.score !== undefined ? dimData.score.toFixed(2) : "N/A",
-        dimData.pass_rate !== undefined ? (dimData.pass_rate * 100).toFixed(1) + "%" : "100.0%",
+        dimKey + (dimData.measured === false ? " (unmeasured)" : ""),
+        typeof dimData.score === "number" ? dimData.score.toFixed(2) : "N/A",
+        typeof dimData.pass_rate === "number" ? (dimData.pass_rate * 100).toFixed(1) + "%" : "N/A",
         special
       ]);
     }
