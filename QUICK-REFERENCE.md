@@ -12,10 +12,8 @@ ENTRY POINTS & WORKFLOWS
 Entry points:   /unpack-problem      (problem-first exploration before solution ideation)
                 /validate-idea       (stress-test raw product concepts with GO/RESHAPE/NO-GO)
                 /shape-up            (structure semi-cooked ideas into design-ready briefs)
-                /validate-game-idea  (stress-test game concepts before production)
 
 Product flow:   Entry Point → /explore-idea → /shape-up → /design (/motion) → /plan → /develop → /launch → /iterate → /retro
-Games flow:     /validate-game-idea → /explore-game-idea → /design → /plan → /develop → /launch → /iterate → /retro
 
 Navigation:    /help-me [query]      (conversational navigator for project state)
 Stress-test:   /grill-me             (Socratic alignment / Q&A pressure test)
@@ -96,11 +94,9 @@ Entry Points:
   /unpack-problem      Problem-first exploration before solution ideation
   /validate-idea       Stress-test product concepts before research (GO/RESHAPE/NO-GO)
   /shape-up            Structure semi-cooked ideas into design-ready briefs (zero prereqs)
-  /validate-game-idea  Stress-test game concepts before production
 
 Lifecycle Workflows:
   /explore-idea        Market, competitor, and user research
-  /explore-game-idea   Genre market and player research
   /design              PRD, user stories, product specs
   /motion              Motion research, motion spec, handoff to /develop
   /plan                Standalone task breakdown & worktree execution planning

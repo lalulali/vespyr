@@ -28,7 +28,6 @@
       "discovery-report": "allow",
       "elicitation": "allow",
       "empathy-map": "allow",
-      "explore-game-idea": "allow",
       "explore-idea": "allow",
       "grill-me": "allow",
       "help-me": "allow",
@@ -55,7 +54,6 @@
       "teach-me": "allow",
       "test": "allow",
       "unpack-problem": "allow",
-      "validate-game-idea": "allow",
       "validate-idea": "allow",
       "validation-patterns": "allow"
     }

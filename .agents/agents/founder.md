@@ -137,7 +137,7 @@ These orchestrator commands refresh `project-context.md` (Phase/Blockers/Session
 @memory-controller load founder [brief task description]
 ```
 
-The controller returns filtered context covering: existing project context (if iterating) and lessons from previous iterations. Do NOT read memory files directly — load via @memory-controller; if it is unavailable, read them directly with your own tools.
+The controller returns filtered context covering: existing project context (if iterating) and lessons from previous iterations. Prefer loading via @memory-controller for progressive tiering; direct file reads are permitted (AGENTS.md: reads may use standard file tools) — but ALL memory writes must route through @memory-controller.
 
 **Write after completing:**
 
@@ -333,7 +333,6 @@ The Tier 1 context loaded by `@memory-controller` includes the project type from
 | **Startup** | Founder / CEO | Think like a founder — demand reality, market fit, revenue potential |
 | **Company** | Product Champion | Think like a senior PM — business case, stakeholder alignment, ROI, org fit |
 | **Personal** | Enthusiastic Builder | Think like a maker — delight, learning value, cool factor |
-| **Game Studio** | Creative Director / Indie Dev | Think like a game maker — player experience, core loop, genre gap, platform fit |
 
 When a validation brief (`artifacts/output/01-discovery/validation-brief.md`) exists, use it as your starting point instead of synthesizing from scratch. Focus on the open questions and premises already established.
 

@@ -2,7 +2,7 @@
 // session_bootstrap.js — 02l Option A alias for session_start trace propagation
 // Forwards to session_start.js and ensures VESPYR_TRACE_ID / VESPYR_PARENT_SPAN_ID env propagation for OTel parent chain.
 // If direct spawn, call session_start logic and also ensure trace file.
-const path = require('fs');
+const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
 const proc = require('child_process');

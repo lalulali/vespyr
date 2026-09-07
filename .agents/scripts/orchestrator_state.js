@@ -371,6 +371,8 @@ function printNextDashboard(state, action) {
 
 // Best-effort token estimate from file size: ~0.75 words per token on average.
 // Used only when the caller does not supply --tokens.
+// Single canonical estimator. recordSpanForAgent and estimateTokensFromFile
+// must both call countTokens() — no len/4, no floor-8.
 function estimateTokensFromFile(absPath) {
   try {
     if (!fs.existsSync(absPath)) return 0;
@@ -388,14 +390,11 @@ function recordTelemetry(eventType, fields) {
   if (!fs.existsSync(telemetryScript)) return;
   try {
     if (!fs.existsSync(TELEMETRY_DIR)) fs.mkdirSync(TELEMETRY_DIR, { recursive: true });
-    const parts = [`--type ${eventType}`];
-    if (fields.agent) parts.push(`--agent ${fields.agent}`);
-    if (fields.phase) parts.push(`--phase ${fields.phase}`);
-    if (fields.data) parts.push(`--data '${JSON.stringify(fields.data)}'`);
-    require('child_process').execSync(
-      `"${process.execPath}" "${telemetryScript}" record ${parts.join(' ')}`,
-      { stdio: 'ignore' }
-    );
+    const args = [telemetryScript, 'record', '--type', String(eventType)];
+    if (fields.agent) args.push('--agent', String(fields.agent));
+    if (fields.phase) args.push('--phase', String(fields.phase));
+    if (fields.data) args.push('--data', JSON.stringify(fields.data));
+    require('child_process').execFileSync(process.execPath, args, { stdio: 'ignore' });
   } catch (e) {
     // Silent fail
   }
@@ -410,7 +409,7 @@ function recordSpanForAgent(agent, phase, tokens, durationMs, artifact) {
     const traceId = process.env.VESPYR_TRACE_ID || (crypto.randomUUID ? crypto.randomUUID() : 'trace-' + Date.now());
     const spanId = crypto.randomUUID ? crypto.randomUUID() : 'span-' + Date.now() + '-' + Math.random();
     const hasExact = tokens != null && tokens > 0 && durationMs != null;
-    // Real token fallback: read artifact file content length/4 if tokens missing (not just name)
+    // Real token fallback: countTokens() on artifact file content when tokens missing (not just name)
     let estTokens = tokens;
     let artifactText = null;
     if (artifact) {
@@ -422,8 +421,8 @@ function recordSpanForAgent(agent, phase, tokens, durationMs, artifact) {
       } catch {}
     }
     if (!hasExact) {
-      const fallback = artifactText ? Math.ceil(artifactText.length / 4) : (artifact ? Math.ceil(artifact.length / 4) : 0);
-      estTokens = tokens && tokens>0 ? tokens : Math.max(1, fallback, 8);
+      const fallback = artifactText ? countTokens(artifactText) : 0;
+      estTokens = tokens && tokens > 0 ? tokens : Math.max(1, fallback);
     }
     const usage = hasExact ? { prompt_tokens: Math.floor(tokens*0.6), completion_tokens: Math.ceil(tokens*0.4), total_tokens: tokens, cost_usd: null, estimated: false } : { prompt_tokens: 0, completion_tokens: 0, total_tokens: estTokens, cost_usd: null, estimated: true };
     // Compute real RQS-D when artifact text available via biomarkers (02l §3.1), else fallback 0.9
@@ -832,8 +831,8 @@ function mainDispatch(args) {
       for (let i = 1; i < args.length; i += 2) {
         if (args[i] === '--agent') agent = args[i + 1];
         if (args[i] === '--artifact') artifact = args[i + 1];
-        if (args[i] === '--tokens') tokens = parseInt(args[i + 1], 10) || null;
-        if (args[i] === '--duration-ms') durationMs = parseInt(args[i + 1], 10) || null;
+        if (args[i] === '--tokens') { const v = parseInt(args[i + 1], 10); tokens = Number.isFinite(v) ? v : null; }
+        if (args[i] === '--duration-ms') { const v = parseInt(args[i + 1], 10); durationMs = Number.isFinite(v) ? v : null; }
         if (args[i] === '--next') nextStep = args[i + 1];
         if (args[i] === '--check-memory') { checkMemory = true; i -= 1; } // flag, no value
       }
@@ -894,12 +893,9 @@ function mainDispatch(args) {
         // project-context refresh is best-effort; never block completion on it
       }
 
-      // Session checkpoint: rolling cursor of in-progress state.
-      try {
-        writeCheckpoint({ event: 'complete', agent, artifact, next: nextStep });
-      } catch (e) {
-        // checkpoint write is best-effort
-      }
+      // Session checkpoint retired by Epic 02i (latest.md is the live cursor).
+      // Former writeCheckpoint() call removed — it referenced an undefined
+      // symbol and the stub writes nothing. See session_checkpoint.js header.
 
       // Memory enforcement check: warn if no session-write was recorded for this agent.
       if (checkMemory) {
@@ -954,6 +950,14 @@ function mainDispatch(args) {
       };
       state.last_updated = new Date().toISOString();
       writeState(state);
+
+      // CLI parity (P0-3): the direct-CLI path rebuilds latest.md on start;
+      // do the same here so both session-start paths converge on a fresh cursor.
+      try {
+        regenerateLatest();
+      } catch (e) {
+        // cursor rebuild is best-effort; never block session start on it
+      }
 
       // Refresh project-context.md (Phase / Blockers / Session Activity / footer)
       let result;
@@ -1286,7 +1290,7 @@ function mainDispatch(args) {
 // concurrent agent sessions can no longer lose updates last-writer-wins.
 const MUTATING_COMMANDS = new Set([
   'init', 'update', 'session-start', 'session-write', 'complete',
-  'advance', 'set-phase', 'compact', 'sync-context'
+  'advance', 'set-phase', 'compact', 'sync-context', 'file-cr'
 ]);
 
 function main() {

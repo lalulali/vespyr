@@ -20,9 +20,9 @@ Displays the current phase in the product pipeline, allows switching between pha
 
 | Phase | Skill | Key Output |
 |-------|-------|------------|
-| **-1: Validation** | `validate-idea` / `validate-game-idea` | Validation brief (GO/RESHAPE/NO-GO) |
-| **0: Discovery** | `explore-idea` / `explore-game-idea` | Idea brief |
-| **1: Research** | `explore-idea` / `explore-game-idea` | Market analysis, personas, competitive landscape |
+| **-1: Validation** | `validate-idea` | Validation brief (GO/RESHAPE/NO-GO) |
+| **0: Discovery** | `explore-idea` | Idea brief |
+| **1: Research** | `explore-idea` | Market analysis, personas, competitive landscape |
 | **2: Strategy** | `design` | PRD, user stories, product spec |
 | **3: Architecture** | `design` | ADRs |
 | **4: Planning** | `plan` | Execution plan, task estimates, Kanban |

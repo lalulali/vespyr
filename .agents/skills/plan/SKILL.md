@@ -82,11 +82,12 @@ For parallel development, each developer gets its own git worktree:
 node .agents/scripts/worktree.js create feature/T003
 ```
 
-Worktrees are tracked in `.agents/state/loop-state.json`.
+Track worktrees with `node .agents/scripts/worktree.js list` (no `loop-state.json` exists on disk).
 
 ## Workflow
 
 **Step 0 — Scope Gate (non-skippable):** anchor scope first via `steps/step-00-scope-and-decision-anchoring.md`; `step_tracker.js` exits 1 if Step 1 begins without a locked track.
+Intent triage at gate: Clear (C ≥ 0.85) runs the locked track; Ambiguous (0.50–0.85) halts to a 2–3 Track Fork; Trivial (C < 0.50) executes directly. Gate enforced in all `step_tracking` modes including `off` (DNA 4).
 
 ### Step 1: Load context
 

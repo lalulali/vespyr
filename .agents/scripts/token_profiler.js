@@ -75,7 +75,7 @@ function profileAgents(verbose = false) {
       lines: stats.lines,
       words: stats.words,
       tokens: stats.tokens,
-      model: fm.model || (fm.permission?.includes('allow') ? 'Premium' : 'Premium'),
+      model: (typeof fm.model === 'string' && fm.model !== '-' ? fm.model : 'Premium'),
       optional: fm.optional === 'true' || fm.optional === 'yes',
       description: fm.description || ''
     };

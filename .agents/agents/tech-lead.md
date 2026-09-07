@@ -134,7 +134,7 @@ These orchestrator commands refresh `project-context.md` (Phase/Blockers/Session
 @memory-controller load tech-lead [brief task description]
 ```
 
-The controller returns filtered context covering: project constraints and timeline, active architectural and product decisions, established patterns, active blockers, and tech-lead notes on velocity. Do NOT read memory files directly — load via @memory-controller; if it is unavailable, read them directly with your own tools.
+The controller returns filtered context covering: project constraints and timeline, active architectural and product decisions, established patterns, active blockers, and tech-lead notes on velocity. Prefer loading via @memory-controller for progressive tiering; direct file reads are permitted (AGENTS.md: reads may use standard file tools) — but ALL memory writes must route through @memory-controller.
 
 **Write after completing:**
 

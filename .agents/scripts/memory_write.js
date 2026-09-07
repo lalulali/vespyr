@@ -78,6 +78,12 @@ function countWords(text) {
 const SECRET_PATTERNS = [
   { name: 'AWS Access Key', regex: /\b(AKIA|ABIA|ACCA|ASIA)[0-9A-Z]{16}\b/g },
   { name: 'GitHub Token', regex: /\b(ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9_]{36,255}\b/g },
+  { name: 'Anthropic Key', regex: /\bsk-ant-[A-Za-z0-9\-_]{16,}\b/g },
+  { name: 'OpenAI Key', regex: /\bsk-[A-Za-z0-9]{16,}\b/g },
+  { name: 'Slack Token', regex: /\bxox[baprs]-[A-Za-z0-9\-_]{8,}\b/g },
+  { name: 'Stripe Key', regex: /\b(?:sk|rk|pk)_(?:live|test)_[A-Za-z0-9]{8,}\b/g },
+  { name: 'Env Assignment', regex: /^\s*(?:export\s+)?(?:API[_-]?KEY|SECRET|PASSWORD|TOKEN)\s*=\s*[A-Za-z0-9\-_.~+/=]{8,}\s*$/gmi },
+  { name: 'High Entropy', regex: /['"][A-Za-z0-9\-_.~+/=]{32,}['"]/g },
   { name: 'Private Key', regex: /-----BEGIN [^-]*(?:PRIVATE KEY|SECRET KEY)[^-]*-----[\s\S]*?-----END [^-]*(?:PRIVATE KEY|SECRET KEY)[^-]*-----/g },
   { name: 'JWT Token', regex: /\beyJ[A-Za-z0-9-_=]{10,}\.[A-Za-z0-9-_=]{10,}\.[A-Za-z0-9-_.+/=]*\b/g },
   { name: 'API Key Assignment', regex: /(?:api[_-]?key|secret|password|bearer|auth[_-]?token)\s*[:=]\s*['"][A-Za-z0-9\-_.~+/=]{16,}['"]/gi }
@@ -103,9 +109,7 @@ function sanitizeContent(text) {
     .replace(/<!--[\s\S]*?-->/g, '')
     .replace(/[\u200B\u200C\uFEFF\u202E]/g, '');
   for (const pat of INJECTION_PATTERNS) {
-    if (pat.re.test(clean)) {
-      clean = clean.replace(pat.re, '[SANITIZED_INSTRUCTION_OVERRIDE]');
-    }
+    clean = clean.replace(new RegExp(pat.re.source, pat.re.flags.includes('g') ? pat.re.flags : pat.re.flags + 'g'), '[SANITIZED_INSTRUCTION_OVERRIDE]');
   }
   return clean;
 }
@@ -118,7 +122,7 @@ function buildEntry({ domain, title, agent, content, status, refs, date, session
     sanitizedContent,
     `**Status:** ${status}`,
   ];
-  if (refs) lines.push(`**References:** ${refs}`);
+  if (refs) lines.push(`**References:** ${scrubSecrets(sanitizeContent(String(refs)))}`);
   // 02o.2: session provenance on every entry (attribution before arbitration)
   lines.push(`**Session:** ${sessionId || 'unattributed'}`);
   lines.push('');
@@ -209,6 +213,20 @@ Allowed domains: ${[...VALID_DOMAINS].join(', ')}`);
     process.exit(1);
   }
 
+  // Agent/status are interpolated raw into the entry header (buildEntry) — outside
+  // the content scrub path. Fail closed: attacker-controlled newlines here forge
+  // sections that parseSections re-parses as real entries (Victor R1, Wave 6).
+  agent = String(agent).replace(/^@+/, '');
+  if (!/^[A-Za-z0-9][A-Za-z0-9\-_]*$/.test(agent)) {
+    console.error(`Invalid --agent "${agent}". Use a plain agent name (letters, digits, -, _).`);
+    process.exit(1);
+  }
+  const VALID_STATUSES = new Set(['active', 'resolved', 'superseded', 'archived', 'complete', 'stale']);
+  if (!VALID_STATUSES.has(String(status))) {
+    console.error(`Invalid --status "${status}". Allowed: ${[...VALID_STATUSES].join(', ')}`);
+    process.exit(1);
+  }
+
   // Word count check
   const wordCount = countWords(content);
   if (wordCount > MAX_WORDS) {
@@ -233,6 +251,9 @@ Allowed domains: ${[...VALID_DOMAINS].join(', ')}`);
       const dedupeResult = runDedupeValidator(filePath, title);
       if (dedupeResult && (dedupeResult.duplicate === true || dedupeResult.status === 'duplicate')) {
         return { duplicate: true };
+      }
+      if (dedupeResult && dedupeResult.status === 'possible_duplicate') {
+        console.error(`Warning: possible duplicate of existing entry (score ${dedupeResult.score ?? 'n/a'}) — admitted with provenance.`);
       }
 
       const entry = buildEntry({ domain, title, agent, content, status, refs, date, sessionId: sid });

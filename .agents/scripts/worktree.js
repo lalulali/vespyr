@@ -222,7 +222,8 @@ if (require.main === module) {
       console.log(list().join('\n'));
     } else if (cmd === 'remove') {
       const force = args.includes('--force');
-      remove(args[1], { force, path: undefined });
+      const rPathIdx = args.indexOf('--path');
+      remove(args[1], { force, path: rPathIdx > -1 ? args[rPathIdx + 1] : undefined });
       console.log(`✓ worktree removed: ${args[1]}`);
     } else {
       console.log('Usage: node worktree.js <create <name> [--path dir] | list | remove <name> [--force]>');

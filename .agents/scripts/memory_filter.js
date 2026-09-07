@@ -13,6 +13,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { withLock } = require('./lib/lock.js');
 // Read-time defense-in-depth: content that bypassed the write-time
 // pipeline (direct edits, hookless harnesses, human hand-edits) is
 // neutralized HERE before any LLM consumes it.
@@ -332,11 +333,20 @@ function quarantineEntry(entry, reason) {
     preview: (entry.body || '').slice(0, 200)
   };
   let logs = [];
-  if (fs.existsSync(logFile)) {
-    try { logs = JSON.parse(fs.readFileSync(logFile, 'utf8')); } catch (e) { logs = []; }
+  // Locked RMW (Victor R2, Wave 6). Lock failure falls back to best-effort
+  // unlocked append: a lost log line beats a broken context load.
+  const appendLog = () => {
+    if (fs.existsSync(logFile)) {
+      try { logs = JSON.parse(fs.readFileSync(logFile, 'utf8')); } catch (e) { logs = []; }
+    }
+    logs.push(record);
+    try { fs.writeFileSync(logFile, JSON.stringify(logs, null, 2), 'utf8'); } catch (e) {}
+  };
+  try {
+    withLock(path.join(quarantineDir, 'quarantine.lock'), appendLog);
+  } catch (e) {
+    try { appendLog(); } catch {}
   }
-  logs.push(record);
-  try { fs.writeFileSync(logFile, JSON.stringify(logs, null, 2), 'utf8'); } catch (e) {}
   return record;
 }
 

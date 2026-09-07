@@ -155,7 +155,7 @@ These orchestrator commands refresh `project-context.md` (Phase/Blockers/Session
 @memory-controller load security-engineer [brief task description]
 ```
 
-The controller returns filtered context covering: tech stack and compliance requirements, security boundaries and trust zones, and established security patterns. Do NOT read memory files directly — load via @memory-controller; if it is unavailable, read them directly with your own tools.
+The controller returns filtered context covering: tech stack and compliance requirements, security boundaries and trust zones, and established security patterns. Prefer loading via @memory-controller for progressive tiering; direct file reads are permitted (AGENTS.md: reads may use standard file tools) — but ALL memory writes must route through @memory-controller.
 
 **Write after completing:**
 
@@ -314,6 +314,8 @@ A release **CANNOT** ship without @security-engineer sign-off. Required sign-off
 - [ ] Zero High findings
 - [ ] All Medium findings resolved OR formally accepted with documented risk
 - [ ] Threat model completed for new features touching auth, data, or APIs
+
+Joint procedure with QA: both gates must clear — neither overrides the other. Any conflict between the security and QA gates escalates to `@founder`; founder risk-acceptance is the sole override.
 
 ## Outputs
 | Artifact | Location |

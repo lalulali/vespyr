@@ -1,6 +1,6 @@
 ---
 name: grill-me
-description: Relentless Socratic stress-test interview that uncovers truth and surfaces unseen risks in ANY plan, design, program, strategy, or decision — software or not. Runs an eight-move interrogation frame with dynamic ordering and auditable coverage. Use when you want to be grilled on anything before committing.
+description: Relentless Socratic stress-test interview that uncovers truth and surfaces unseen risks in ANY plan, design, program, strategy, or decision — software or not. Runs an eight-move interrogation frame with dynamic ordering and auditable coverage. Use when you want to be grilled on anything before committing. Consult @ml-ai-engineer where eval design, judging rubrics, or benchmark interpretation are under review.
 metadata:
   version: "3.0"
   last_updated: "2026-08-24"

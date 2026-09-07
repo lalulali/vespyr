@@ -1,6 +1,6 @@
 ---
 name: elicitation
-description: 'Push the LLM to reconsider, refine, and improve its recent output. Use when user asks for deeper critique or mentions a known deeper critique method, e.g. socratic, first principles, pre-mortem, red team.'
+description: 'Push the LLM to reconsider, refine, and improve its recent output. Use when user asks for deeper critique or mentions a known deeper critique method, e.g. socratic, first principles, pre-mortem, red team. Consult @ml-ai-engineer where eval prompts or scored judgements are under review.'
 metadata:
   version: "1.0"
 ---

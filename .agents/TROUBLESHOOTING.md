@@ -93,9 +93,8 @@ Common issues and how to resolve them when running the agent system.
 
 **Fix:** Follow the conflict resolution ladder in `workflow.md`:
 1. Direct resolution between agents (24h)
-2. Tech Lead mediation (48h)
-3. Product Manager arbitration (72h)
-4. Founder decision (final)
+2. Tech Lead / Product Manager arbitration (48h)
+3. Founder decision (final)
 
 **Never** let conflicting outputs pass silently. Unresolved conflicts compound downstream.
 
@@ -230,7 +229,7 @@ If the chunk is in the archive (was compacted), use search instead:
   node bin/cli.js --sync-docs
   ```
 
-**Prevention:** Do not modify `.agents/agents/*.md` directly for configuration; use `.agents/custom/<agent>.toml` overrides and the `/customize-agent` workflow.
+**Prevention:** Do not modify `.agents/agents/*.md` directly for configuration; use `.agents/custom/<agent>.toml` overrides and the `/customize-agent` workflow. Note: per `custom/README.md` known gap, no runtime component loads `*.toml` yet — overrides are declarations awaiting consumption, not live behavior.
 
 ---
 

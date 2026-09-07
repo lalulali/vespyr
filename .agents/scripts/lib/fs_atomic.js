@@ -26,10 +26,20 @@ function writeFileSync(filePath, data, options = 'utf8') {
   try {
     fs.writeFileSync(tmpPath, data, options);
     try {
+      const fd = fs.openSync(tmpPath, 'r');
+      try { fs.fsyncSync(fd); } finally { fs.closeSync(fd); }
+    } catch {}
+    try {
       fs.renameSync(tmpPath, resolvedPath);
+      try {
+        const dfd = fs.openSync(dir, 'r');
+        try { fs.fsyncSync(dfd); } finally { fs.closeSync(dfd); }
+      } catch {}
     } catch (renameErr) {
-      // Fallback for Windows file locks or cross-device links (EXDEV)
+      // Fallback for Windows file locks or cross-device links (EXDEV).
+      // Copy is non-atomic: kept operational for Windows flows, flagged loudly.
       if (renameErr.code === 'EXDEV' || renameErr.code === 'EPERM' || renameErr.code === 'EBUSY') {
+        console.error(`Warning: non-atomic copy fallback for ${resolvedPath} (${renameErr.code}). Resolve cross-device layout for crash safety.`);
         fs.copyFileSync(tmpPath, resolvedPath);
         try { fs.unlinkSync(tmpPath); } catch {}
       } else {

@@ -23,6 +23,11 @@ const crypto = require('crypto');
 
 const TELEMETRY_DIR = path.join(process.cwd(), 'artifacts', 'telemetry');
 
+// Synthetic rows (labeled probes, simulator output) are stored but excluded
+// from agent aggregates — see hot_path_analyzer.js (same helper, kept local
+// to avoid a cross-module import cycle).
+const isSynthetic = (ev) => ev && ev.data && (ev.data.synthetic === true || ev.data.agent === 'qa-probe');
+
 // Ensure telemetry directory exists
 function ensureDir() {
   try {
@@ -97,6 +102,16 @@ function recordEvent(type, data) {
   const line = JSON.stringify(event) + '\n';
   try {
     fs.appendFileSync(getTodayFile(), line);
+  } catch (e) {
+    // Silent fail — telemetry must never block
+  }
+  // K-1(d): starvation signal. Append-only summon ledger (count at read time, never RMW).
+  try {
+    const agent = data && (data.agent || data.persona);
+    if ((type === 'agent_invoke' || type === 'session_start') && agent) {
+      const f = path.join(TELEMETRY_DIR, `summons-${new Date().toISOString().split('T')[0]}.ndjson`);
+      fs.appendFileSync(f, JSON.stringify({ ts: new Date().toISOString(), type, agent: String(agent).replace(/^@+/, '') }) + '\n');
+    }
   } catch (e) {
     // Silent fail — telemetry must never block
   }
@@ -256,9 +271,24 @@ function generateSummary(days = 7) {
     archive_search_avg_results: 0,
     archive_search_count: 0,
     agent_delegation_count: 0,
+    summons: {},
     context_feedback_positive: 0,
     context_feedback_total: 0
   };
+
+  // K-1(d): starvation signal. Count the append-only summon ledger per agent.
+  try {
+    const cutoff = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+    for (const f of fs.readdirSync(TELEMETRY_DIR).filter(f => /^summons-\d{4}-\d{2}-\d{2}\.ndjson$/.test(f))) {
+      for (const line of fs.readFileSync(path.join(TELEMETRY_DIR, f), 'utf8').split('\n')) {
+        if (!line.trim()) continue;
+        try {
+          const s = JSON.parse(line);
+          if (s.agent && new Date(s.ts) >= cutoff) stats.summons[s.agent] = (stats.summons[s.agent] || 0) + 1;
+        } catch {}
+      }
+    }
+  } catch {}
 
   for (const ev of events) {
     stats.by_type[ev.type] = (stats.by_type[ev.type] || 0) + 1;
@@ -332,7 +362,7 @@ function generateReport(days = 30) {
   const phases = {};
 
   for (const ev of events) {
-    if (ev.type === 'agent_invoke' && ev.data.phase && ev.data.agent) {
+    if (ev.type === 'agent_invoke' && ev.data.phase && ev.data.agent && !isSynthetic(ev)) {
       const phase = ev.data.phase;
       const agent = ev.data.agent;
       if (!phases[phase]) phases[phase] = {};

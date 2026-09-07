@@ -103,11 +103,11 @@ function simulateRun(projectName = 'Simulated Project', projectType = 'startup')
       const durationMs = variance(agent.duration_ms, 0.2);
 
       // Record agent invocation
-      const recordCmd = `node "${TELEMETRY_SCRIPT}" record --type agent_invoke --agent "${agent.name}" --phase "${phaseName}" --data '{"tokens":${totalTokens},"duration_ms":${durationMs},"memory_load":${variance(agent.memory_load, 0.1)},"template_tokens":${variance(agent.template_tokens, 0.1)}}'`;
+      const recordCmd = `node "${TELEMETRY_SCRIPT}" record --type agent_invoke --agent "${agent.name}" --phase "${phaseName}" --data '{"tokens":${totalTokens},"duration_ms":${durationMs},"memory_load":${variance(agent.memory_load, 0.1)},"template_tokens":${variance(agent.template_tokens, 0.1)},"synthetic":true}'`;
       execSync(recordCmd, { stdio: 'pipe' });
 
       // Record memory load event
-      const memCmd = `node "${TELEMETRY_SCRIPT}" record --type memory_load --data '{"agent":"${agent.name}","tokens":${variance(agent.memory_load, 0.1)},"phase":"${phaseName}"}'`;
+      const memCmd = `node "${TELEMETRY_SCRIPT}" record --type memory_load --data '{"agent":"${agent.name}","tokens":${variance(agent.memory_load, 0.1)},"phase":"${phaseName}","synthetic":true}'`;
       execSync(memCmd, { stdio: 'pipe' });
 
       console.log(`  @${agent.name}: ${totalTokens} tokens, ${durationMs}ms`);

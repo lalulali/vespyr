@@ -2,11 +2,12 @@
 /**
  * Session Checkpoint — rolling point-in-time cursor of an in-progress session.
  *
- * Unlike session-summaries/latest.md (a post-hoc wrap-up of an ENDED unit of
- * work), the checkpoint captures "where the cursor is RIGHT NOW" mid-loop.
- * It is auto-emitted by orchestrator_state.js at every state-changing
- * invocation (complete, session-start, session-write, set-phase, file-cr,
- * sync-context), so it stays fresh without requiring agent discipline.
+ * RETIRED by Epic 02i: session-summaries/latest.md is the single live cursor.
+ * This module is a deprecated stub (writeCheckpoint returns {deprecated:true},
+ * writes nothing). Callers must NOT invoke it; orchestrator_state.js no longer does.
+ * Historical note (pre-02i): the checkpoint captured "where the cursor is RIGHT NOW"
+ * mid-loop and was auto-emitted at every state-changing invocation. Both describe
+ * retired behavior — the stub below writes nothing.
  *
  * The file overwrites in place (bounded, ~150 tokens) so a long multi-turn
  * loop never accumulates noise — it is always just the latest cursor.

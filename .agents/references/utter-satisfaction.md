@@ -31,28 +31,31 @@ The protocol applies to these personas:
    escalation. A reply without resolution is not completion.
 4. **Verify the result.** Use tests, research evidence, benchmarks,
    walkthroughs, evaluation results, or other artifact-appropriate evidence.
-5. **Protect the gate.** Any active agent may block a handoff or release when
-   it has a specific, evidence-backed blocking concern.
+5. **Protect the gate.** Any active agent may record `BLOCKED` on a handoff or release when
+   it has a specific, evidence-backed reason.
 6. **Keep the record honest.** Never claim satisfaction, approval, or shipping
-   readiness when a blocking concern is unresolved.
+   readiness while a `BLOCKED` concern is unresolved.
 
 ## Satisfaction states
 
 Every active agent records one of these states in its handoff or release
 readiness record:
 
-| State | Meaning |
+| State | Meaning (plain) |
 |---|---|
-| `SATISFIED` | The agent's domain criteria are met, evidence is recorded, and no blocking concern remains. |
-| `CHANGES REQUESTED` | The agent found a correctable gap that must be addressed before satisfaction. |
-| `BLOCKED` | A critical issue, missing decision, missing evidence, or unresolved dependency prevents satisfaction. |
-| `NOT ACTIVATED` | The agent's domain is genuinely out of scope; the reason is recorded and does not imply approval. |
+| `SATISFIED` | My area is good: criteria met, evidence filed, no `BLOCKED` concern remains. |
+| `CHANGES REQUESTED` | Fix this gap, then I re-check: a correctable issue stops sign-off until addressed. |
+| `BLOCKED` | I cannot sign off: a critical issue, missing decision, missing evidence, or unresolved dependency stops the handoff. Name the reason. |
+| `NOT ACTIVATED` | Out of my scope: reason filed. Not approval. |
 
 `SATISFIED` does not mean flawless or unanimous. It means the agent has
-reviewed the available evidence, its blocking concerns are resolved, and any
+reviewed the available evidence, its `BLOCKED` concerns are resolved, and any
 remaining non-blocking risk is explicitly recorded and accepted by the
-authorized decision-maker. A `CONDITIONAL GO` is not shippable until its
-conditions are resolved and the affected agents re-confirm `SATISFIED`.
+authorized decision-maker. A `CONDITIONAL GO` (= `[GO] When:GATED`, see glossary) is not shippable until its
+conditions are resolved and the affected agents re-confirm `SATISFIED`. Progress words (`complete`, `done`, `approved`, `verified`) never substitute for these states.
+
+**Wording rule:** never write "blocking SATISFIED" / "blocking satisfied" (any capitalization).
+Write per-agent `BLOCKED: <reason>`, or cross-agent `Open before SATISFIED: <list>`. Rule-definition lines quoting the banned form are exempt.
 
 ## Collaboration loop
 
@@ -92,7 +95,7 @@ Use this compact record in handoff artifacts and review reports:
 ```markdown
 ### UTTERLY SATISFIED CHECK
 - Agent: @agent-name
-- State: SATISFIED | CHANGES REQUESTED | BLOCKED | NOT ACTIVATED
+- State: SATISFIED | CHANGES REQUESTED | BLOCKED | NOT ACTIVATED (never [GO]/[NO-GO] here — those are idea gates, not handoff states)
 - Evidence: artifact, test, benchmark, research result, or walkthrough
 - Feedback resolved: what changed or why the concern is closed
 - Residual risks: none, or risk with owner, mitigation, and acceptance
@@ -101,3 +104,20 @@ Use this compact record in handoff artifacts and review reports:
 
 > [!IMPORTANT]
 > **Where to write sign-off records** — This file is a static protocol reference. Never append execution sign-off records here. Write completed sign-off records to `artifacts/output/06-quality/sign-off-history.md`. Write in-progress review records inside the epic's own review report (e.g., `artifacts/docs/strategy/development-plan/<epic>.md`).
+
+### Owner handoff (when the blocker is the human)
+
+When `BLOCKED` resolves only by owner action, the record MUST ALSO include an owner card — written for a reader with zero session context:
+
+```markdown
+### OWNER CARD
+- Decision needed: one plain sentence naming the choice (no acronyms without inline meaning)
+- Why you: why agents cannot take it (permission lock, fork with no technical winner, human-gated baseline)
+- Options: each with effort + recommendation marked (or single patch pointer if no fork)
+- Exact patch/commands: repo-relative file paths (copy-pasteable from repo root) and commands — no archaeology required
+- If not: concrete consequence of leaving it
+- Decide by: date or next gate; if silent past it, default = <state exactly what happens: proceeds, stalls, or auto-escalates>
+- Revalidation trigger: what applied change unblocks the re-review
+```
+
+Rules: decision first, context second. Max 6 items per card — split the rest into a follow-up. The card is satisfied by a decision, not by reading the whole thread.

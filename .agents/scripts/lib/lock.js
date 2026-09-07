@@ -94,7 +94,13 @@ function takeStale(lockPath) {
     stale = Date.now() - owner.ts > MAX_HOLD_MS;
   }
   if (stale) {
-    fs.rmSync(lockPath, { recursive: true, force: true });
+    // Atomic steal: rename aside (atomic on same fs) instead of rm — two
+    // concurrent stealers cannot both win; loser gets ENOENT and retries.
+    const stolen = `${lockPath}.stolen.${process.pid}.${Date.now()}`;
+    try {
+      fs.renameSync(lockPath, stolen);
+      try { fs.rmSync(stolen, { recursive: true, force: true }); } catch {}
+    } catch { return false; }
     return true;
   }
   return false;

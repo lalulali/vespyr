@@ -14,17 +14,6 @@
       ]
     },
     {
-      "id": "SKILL-VALIDATE-GAME",
-      "skill": "validate-game-idea",
-      "name": "Validate Game Idea Core Loop",
-      "dimension": "sycophantic_premature_convergence",
-      "assertContains": [
-        "Core Loop",
-        "Market",
-        "Verdict"
-      ]
-    },
-    {
       "id": "SKILL-UNPACK-PROBLEM",
       "skill": "unpack-problem",
       "name": "Unpack Problem Root Analysis",

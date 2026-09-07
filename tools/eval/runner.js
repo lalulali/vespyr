@@ -205,8 +205,6 @@ async function cannedMockResponse(benchmark) {
     switch (benchmark.skill) {
       case "validate-idea":
         return "## Socratic Verdict Gate\n[GO] Validated concept. Assumptions matrix evaluated. Risk register updated.";
-      case "validate-game-idea":
-        return "## Game Concept Validation\n[GO] Core Loop validated. Genre Market positioning confirmed. Verdict Gate complete.";
       case "unpack-problem":
         return "## Problem Definition & Exploration\n- Problem Definition: Clear statement of user friction.\n- User Impact: Quantified reach and severity.\n- Root Cause: Explored without premature solution jumping.";
       case "root-cause":
@@ -217,8 +215,6 @@ async function cannedMockResponse(benchmark) {
         return "## Brainstorming Session\n- SCAMPER method applied.\n- Ideas: 10 structured concepts.\n- Prioritization: Effort vs impact matrix.";
       case "explore-idea":
         return "## Evidence-Backed Research\n- Market Analysis: Total addressable market trends.\n- Competitors: Competitive landscape mapping.\n- Findings: Key differentiators and opportunities. [1]";
-      case "explore-game-idea":
-        return "## Game Genre Research\n- Genre Trends: Steam & mobile telemetry.\n- Audience: Player persona mapping.\n- Mechanics: Core gameplay differentiators.";
       case "research-plan":
         return "## Comprehensive Research Plan\n- Goals: Study objectives.\n- Profile Questions: Demographics and tooling.\n- Behavioral Questions: Workflow observations.";
       case "empathy-map":

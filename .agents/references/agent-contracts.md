@@ -22,6 +22,8 @@ Each agent has a clear scope. Use this table to decide who to invoke. If a task 
 | `@ml-ai-ops` | Production serving, monitoring, rollback, LLM infrastructure | Model/prompt development, AI architecture |
 | `@devops-engineer` | CI/CD, cloud provisioning, monitoring, deployment, infra cost | Application code, security policy, product |
 | `@technical-writer` | User manuals, API specs, release notes, documentation site | Code, design, product copy |
+| `@shifu` | Learning paths, tutorials, syllabi, cheatsheets, video scripts, teaching sessions | Product strategy, code, design decisions |
+| `@memory-controller` | Memory reads/writes, context loading, compaction, archival, session summaries | Domain reasoning, task execution, quality judgments |
 
 ## Motion ownership
 

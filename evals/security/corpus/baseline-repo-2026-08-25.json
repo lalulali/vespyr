@@ -1,6 +1,6 @@
 {
   "date": "2026-08-25",
-  "note": "Frozen repo-wide baseline v3 (post 02i re-audit remediation: CRLF frontmatter fixes, detectRepository execFileSync, validate_matrix memory_write row; absorbs single post-freeze INJ-OBFUSC doc-prose FP at 02h:501 triaged human-reviewed). NEW-FINDINGS-ONLY gate (02f DoD #8). Matching: exact rule|path|line OR relocated rule|path|detail-hash (O-3). Extend ONLY via human-reviewed commit.",
+  "note": "Frozen repo-wide baseline v4 (2026-09-07, human-reviewed per owner approval 2026-09-07: absorbs 7 doc-prose FPs from 01-agents/03-security/07-roundtable reviews, rt-003 eval transcript, KILL-scoped-proposals — all audit/eval prose, zero payloads). Extends v3 (2026-08-25). Extend ONLY via human-reviewed commit.",
   "scanner_sha256_prefix": "d87b756c1dc98086",
   "exit": 1,
   "findings": [
@@ -1010,6 +1010,62 @@
       "path": "tests/test_memory_consolidation.js",
       "line": 234,
       "detail": "assert.ok(!scrubbed.includes('ghp_123456789012345678901234567890123456'));"
+    },
+    {
+      "rule": "INJ-OBFUSC",
+      "label": "INJ-OBFUSC",
+      "severity": "medium",
+      "path": "artifacts/docs/review/01-agents.md",
+      "line": 31,
+      "detail": "- **P1-15 Kai starvation (owner-reported 2026-09-05, reproduced).** Prompt-engineering work on vespyr almost never summo"
+    },
+    {
+      "rule": "INJ-OBFUSC",
+      "label": "INJ-OBFUSC",
+      "severity": "medium",
+      "path": "artifacts/docs/review/01-agents.md",
+      "line": 149,
+      "detail": "- **P0-3 Dual session-start paths, neither satisfies `--check-memory`.** Orchestrator `session-start:928-974` (writes `l"
+    },
+    {
+      "rule": "INJ-TOOL",
+      "label": "INJ-TOOL",
+      "severity": "high",
+      "path": "artifacts/docs/review/03-security.md",
+      "line": 43,
+      "detail": "Both spec files + scanner end-to-end; all 3 gates read; corpus FULLY enumerated and read (30 entries: 11 positive + 12 n"
+    },
+    {
+      "rule": "INJ-ROLE",
+      "label": "INJ-ROLE",
+      "severity": "medium",
+      "path": "artifacts/docs/review/03-security.md",
+      "line": 43,
+      "detail": "Both spec files + scanner end-to-end; all 3 gates read; corpus FULLY enumerated and read (30 entries: 11 positive + 12 n"
+    },
+    {
+      "rule": "INJ-OBFUSC",
+      "label": "INJ-OBFUSC",
+      "severity": "medium",
+      "path": "artifacts/docs/review/07-roundtable.md",
+      "line": 247,
+      "detail": "- **Shipped:** `session begin/update/status/close` in roundtable_eval.js (state: topic/members/mode/turn/phase/lastSynth"
+    },
+    {
+      "rule": "INJ-PROMPT",
+      "label": "INJ-PROMPT",
+      "severity": "high",
+      "path": "artifacts/evals/roundtable/runs/rt-003_native_1.md",
+      "line": 32,
+      "detail": "1. Untrusted input / prompt injection: Calendar invites, attendee names, shared-screen text, and pasted chat logs are at"
+    },
+    {
+      "rule": "INJ-OBFUSC",
+      "label": "INJ-OBFUSC",
+      "severity": "medium",
+      "path": "artifacts/output/proposals/01-agents-wave1/KILL-scoped-proposals.md",
+      "line": 10,
+      "detail": "- (a) Widen `ml-ai-engineer.md:32-33 summon_when`: add \"vespyr self-work touching prompts/judges/evals/rubrics/benchmark"
     }
   ]
 }

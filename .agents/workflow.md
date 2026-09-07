@@ -49,19 +49,8 @@ PHASE -1: VALIDATION
   │           │
   │           └── NO-GO ──▶ Stop. Brief documents why. Save research cycles.
   │
-  └── Game Track (validate-game-idea skill)
-        └── @founder — Socratic diagnostic: stress-test game concept before investing production cycles
-              │         Produces: artifacts/output/01-discovery/validation-brief.md (GO/RESHAPE/NO-GO)
-              │
-              ├── GO ──────────▼
-              │          PHASE 0-1: DISCOVERY (explore-game-idea skill)
-              │            └── @researcher, @user-researcher — genre market analysis, player research, competitive landscape
-              │                  │         produces: artifacts/output/01-discovery/idea-brief.md
-              │                  ▼
-              ├── RESHAPE ──▶ Re-run Phase -1 with revised framing
-              │
-              └── NO-GO ──▶ Stop. Brief documents why. Save production cycles.
 ```
+
 
 ---
 
@@ -79,11 +68,11 @@ Set the operation mode in `artifacts/memory/project-context.md`. Default is **se
 
 | Phase | Primary Skill | Autonomous | Semi-autonomous | Manual |
 |-------|---------------|------------|----------------|--------|
-| **-1: Validation** | `validate-idea` / `validate-game-idea` | Auto-generate validation brief from context. Auto-decide GO/RESHAPE/NO-GO based on available evidence. | Run diagnostic questions interactively. **Pause for GO/RESHAPE/NO-GO verdict.** | Full Socratic session. Every question interactive. Human confirms each answer before next. |
+| **-1: Validation** | `validate-idea` | Auto-generate validation brief from context. Auto-decide GO/RESHAPE/NO-GO based on available evidence. | Run diagnostic questions interactively. **Pause for GO/RESHAPE/NO-GO verdict.** | Full Socratic session. Every question interactive. Human confirms each answer before next. |
 | **-0.5: Problem Exploration** | `unpack-problem` | Auto-unpack symptoms into root cause, empathy map, JTBD canvas, and HMW questions. | Run intake & 5 Whys analysis. **Pause for problem brief confirmation before ideation.** | Human co-explores problem space, empathy quadrants, and 5 Whys step-by-step. |
 | **-0.2: Idea Shaping** | `shape-up` | Auto-structure raw concepts through 6-step intake, gap analysis, and stress testing. | Run intake & gap analysis. **Pause for decision alignment & shaped brief approval.** | Human collaborates interactively on every shaping step and gap resolution. |
 | **0: Ideation & Brainstorming** | `brainstorming` | Auto-select top 3 methods from 60-method catalog and generate solution concepts. | Propose ideation methods. **Pause for human selection & concept review.** | Facilitate selected brainstorming method step-by-step with user. |
-| **0-1: Discovery & Research** | `explore-idea` / `explore-game-idea` | All research agents run in parallel, auto-complete market, competitor, and user research. | Research runs autonomously. **Pause for human review at Phase 1→2 gate.** | Human reviews each research artifact before the next agent starts. |
+| **0-1: Discovery & Research** | `explore-idea` | All research agents run in parallel, auto-complete market, competitor, and user research. | Research runs autonomously. **Pause for human review at Phase 1→2 gate.** | Human reviews each research artifact before the next agent starts. |
 | **2: Strategy** | `design` | Auto-generate PRD, specs, user stories. | Draft features. **Pause for human selection & feedback.** Finalize PRD/user stories. **Pause for human spec approval.** | Human co-writes requirements and specs with agents. |
 | **3: Architecture (Optional)** | `develop` / `design` | Auto-generate ADRs if enabled. | **Optional Phase.** Pause to ask user: run `@architect` first or bypass directly to `@tech-lead`/`@developer`? | Human collaborates on ADRs if executed. |
 | **4: Planning & Kanban** | `plan` / `kanban` | `@product-manager` auto-seeds Kanban board. `@tech-lead` auto-generates `execution-plan.md` task breakdown and estimates. | **Kanban & Planning.** `@product-manager` seeds the Kanban board. `@tech-lead` breaks down user stories into developer-centric tasks (1-4h, dependencies). **Pause for human approval of the execution plan.** | Human collaborates on task slicing, estimates, and reviews the Kanban board. |
@@ -197,18 +186,17 @@ Before developers start, `@tech-lead` sets up the worktrees via `worktree.js`:
 # 1. Check if git worktrees are supported
 git worktree list 2>/dev/null && echo "WORKTREE_SUPPORTED" || echo "WORKTREE_NOT_SUPPORTED"
 
-# 2. Create worktrees for each developer (from the main working branch)
-BRANCH=$(git branch --show-current)
-node .agents/scripts/worktree.js create feat/${BRANCH}/task-1
-node .agents/scripts/worktree.js create feat/${BRANCH}/task-2
+# 2. Create worktrees for each developer (sibling dirs, `wt/` branches)
+node .agents/scripts/worktree.js create task-1
+node .agents/scripts/worktree.js create task-2
 # ... one per developer
 
 # 3. List active worktrees
 node .agents/scripts/worktree.js list
 ```
 
-**Worktree location:** `.agents/worktrees/feat/{base-branch}/task-{N}` — isolated within the project sandbox, tracked in `.agents/state/loop-state.json`.
-**Branch naming:** `feat/{base-branch}/task-{N}` — tracks which base branch and task.
+**Worktree location:** sibling `<repo>-wt-<name>/` via `node .agents/scripts/worktree.js create <name>` with shared-memory symlinks (see `worktree.js:101-115`).
+**Branch naming:** `wt/<name>`. There is no `.agents/worktrees/` tree and no `loop-state.json` on disk — do not follow the old paths.
 
 ### Task assignment
 
@@ -219,9 +207,9 @@ node .agents/scripts/worktree.js list
 
 | Developer | Worktree | Branch | Role | Tasks | Files touched |
 |---|---|---|---|---|---|---|
-| @developer-1 | .agents/worktrees/feat/main/task-1 | feat/main/task-1 | FE | Auth flow, login page | src/auth/*, src/pages/login.* |
-| @developer-2 | .agents/worktrees/feat/main/task-2 | feat/main/task-2 | BE | Dashboard API, charts | src/api/dashboard.*, src/components/chart.* |
-| @developer-3 | .agents/worktrees/feat/main/task-3 | feat/main/task-3 | Full-Stack | Notification system | src/notifications/*, src/services/notify.* |
+| @developer-1 | `<repo>-wt-task-1/` | `wt/task-1` | FE | Auth flow, login page | `src/auth/*`, `src/pages/login.*` |
+| @developer-2 | `<repo>-wt-task-2/` | `wt/task-2` | BE | Dashboard API, charts | `src/api/dashboard.*`, `src/components/chart.*` |
+| @developer-3 | `<repo>-wt-task-3/` | `wt/task-3` | Full-Stack | Notification system | `src/notifications/*`, `src/services/notify.*` |
 ```
 
 **Role tags** determine the developer's communication permissions:
@@ -251,18 +239,20 @@ After all developers complete their tasks, `@tech-lead` merges:
 
 ```bash
 # 1. Switch to main working branch
-git checkout $BRANCH
+git checkout main  # or your base branch
 
 # 2. Merge each developer's work (in dependency order if applicable)
-git merge feat/${BRANCH}/task-1 --no-ff -m "feat: auth flow and login page"
-git merge feat/${BRANCH}/task-2 --no-ff -m "feat: dashboard API and charts"
-git merge feat/${BRANCH}/task-3 --no-ff -m "feat: notification system"
+git merge wt/task-1 --no-ff -m "feat: auth flow and login page"
+git merge wt/task-2 --no-ff -m "feat: dashboard API and charts"
+git merge wt/task-3 --no-ff -m "feat: notification system"
 
 # 3. Run full test suite after all merges
 npm test  # or equivalent
 
-# 4. Clean up worktrees
-node .agents/scripts/worktree.js clean-all
+# 4. Clean up worktrees (one remove per worktree — no clean-all subcommand exists)
+node .agents/scripts/worktree.js remove task-1
+node .agents/scripts/worktree.js remove task-2
+node .agents/scripts/worktree.js remove task-3
 ```
 
 ### Conflict resolution
@@ -310,8 +300,12 @@ Every participating agent follows `.agents/references/utter-satisfaction.md`.
 An artifact is ready for handoff only when its active, relevant reviewers have
 returned `SATISFIED` with evidence, or when an unresolved issue has been
 escalated to the binding decision authority. `CHANGES REQUESTED` and `BLOCKED`
-states stop the handoff. After a material change, affected sign-offs must be
-revalidated.
+states stop the handoff (lowercase "blocking issue" in tables below is descriptive;
+only the recorded `BLOCKED` state stops movement). Progress words (`complete`, `approved`,
+`verified`) never substitute for a verdict. The launch deploy gate and the idea-validation
+gate share the `[GO]`/`[NO-GO]` family but are separate gates — each needs its own Verdict Card.
+After a material change, affected sign-offs must be
+revalidated. Questions and status lists take no gate token (see glossary "When NOT to emit a verdict"). Wording rule: never "blocking SATISFIED" / "blocking satisfied" (any capitalization) — write per-agent `BLOCKED: <reason>` or cross-agent `Open before SATISFIED: <list>`. Rule-definition lines quoting the banned form are exempt.
 
 ### Validation → Problem Unpacking / Idea Shaping / Discovery
 
@@ -320,7 +314,6 @@ revalidated.
 | @founder (validate-idea) | @product-manager / @user-researcher (unpack-problem) | `artifacts/output/01-discovery/validation-brief.md` | Must contain GO verdict, problem framing, target user, and key open questions for problem unpacking |
 | @founder (validate-idea) | @founder / @product-manager (shape-up) | `artifacts/output/01-discovery/validation-brief.md` | Must contain GO verdict, core concept, target user, and primary constraints |
 | @founder (validate-idea) | @researcher / @user-researcher (explore-idea) | `artifacts/output/01-discovery/validation-brief.md` | Must contain GO verdict, value proposition, target user, narrowest wedge, agreed premises, and open questions for exploration |
-| @founder (validate-game-idea) | @researcher / @user-researcher (explore-game-idea) | `artifacts/output/01-discovery/validation-brief.md` | Must contain GO verdict, value proposition, target player, core fun loop, agreed premises, and open questions for exploration |
 
 ### Problem Unpacking & Shaping → Brainstorming & Research
 
@@ -539,15 +532,13 @@ Vespyr organizes complex product building operations into 43 specialized skills.
 
 ### 8.1 Lifecycle Workflows & Idea Shaping Bridges
 
-These skills form the backbone of the product and game development lifecycle. Skills like `shape-up` and `unpack-problem` act both as lifecycle bridges between research and strategy (Phase 1→2) and as standalone entry points.
+These skills form the backbone of the product development lifecycle. Skills like `shape-up` and `unpack-problem` act both as lifecycle bridges between research and strategy (Phase 1→2) and as standalone entry points.
 
 | Skill | Phase | Primary Agents | Key Output / Description |
 |-------|-------|----------------|--------------------------|
 | `validate-idea` | -1 | @founder | Validation brief with GO/RESHAPE/NO-GO verdict |
-| `validate-game-idea` | -1 | @founder | Game validation brief with GO/RESHAPE/NO-GO verdict |
 | `unpack-problem` | 0-1 | @product-manager, @user-researcher | Problem-first exploration before solution ideation (guided, automated, or combo) |
 | `explore-idea` | 0-1 | @founder, @researcher, @user-researcher | Validated idea brief, market analysis, personas |
-| `explore-game-idea` | 0-1 | @founder, @researcher, @user-researcher | Validated game brief, genre analysis, player personas |
 | `shape-up` | 1-2 | @founder, @product-manager | Structures semi-cooked ideas into design-ready briefs. Dual: standalone or Phase 1→2 bridge |
 | `design` | 2-3 | @product-manager, @product-designer | PRD, user stories, screen specifications |
 | `motion` | 2-4 | @product-designer, @researcher, @ux-researcher, @tech-lead | On-demand motion research, motion spec, and explicit handoff to `/develop` |
@@ -755,7 +746,7 @@ If a skill produces an artifact without calling `complete`:
 - The code-graph is never refreshed after code-modifying work
 - Subsequent skills have no way to know what was already done
 
-Every workflow skill (`validate-idea`, `explore-idea`, `design`, `develop`, `launch`, `iterate`, `retro`, `incident`, and the `-game-idea` variants) has a "State Machine Integration" section that specifies exactly which `complete` calls to make. Follow it.
+Every workflow skill (`validate-idea`, `explore-idea`, `design`, `develop`, `launch`, `iterate`, `retro`, `incident`) has a "State Machine Integration" section that specifies exactly which `complete` calls to make. Follow it.
 
 ---
 

@@ -160,8 +160,13 @@ function requiresScopeLock(skill) {
 }
 
 function enforceScopeGate(skill, step, mode) {
-  const num = parseInt(String(step).replace(/[a-z]/i, ''), 10);
-  if (!skill || !(num >= 1) || !requiresScopeLock(skill)) return;
+  const raw = String(step ?? '');
+  if (!skill || !/^\d+[a-z]?$/i.test(raw)) {
+    console.error(`[ERROR] Step gate: invalid --step "${raw}" (expected N or Na).`);
+    process.exit(1);
+  }
+  const num = parseInt(raw, 10);
+  if (!(num >= 1) || !requiresScopeLock(skill)) return;
   const locks = readAudit().filter(e => e.type === 'scope_lock');
   if (locks.some(e => e.skill === skill)) return;
   // Mode-variant chains (e.g. validate-idea-create) may satisfy the gate via a
@@ -204,8 +209,14 @@ function parseArgs(argv) {
   const args = {};
   for (let i = 0; i < argv.length; i++) {
     if (argv[i].startsWith('--')) {
-      args[argv[i].slice(2)] = argv[i + 1] || true;
-      i++;
+      const key = argv[i].slice(2);
+      const next = argv[i + 1];
+      if (next === undefined || String(next).startsWith('--')) {
+        args[key] = true;
+      } else {
+        args[key] = next;
+        i++;
+      }
     }
   }
   return args;
@@ -248,6 +259,10 @@ function cmdBegin(args, mode) {
 
 function cmdComplete(args, mode) {
   const { skill, step, agent = 'unknown' } = args;
+  if (!skill) {
+    console.error('step_tracker: --skill is required for complete (prevents cross-skill misattribution).');
+    process.exit(1);
+  }
   if (!step) {
     if (mode === 'verbose') console.error('step_tracker: --step is required for complete');
     return;
@@ -311,9 +326,10 @@ function cmdAudit(args) {
     report += `| Step | Name | Status | Started | Duration | Issues |\n`;
     report += `|---|---|---|---|---|---|\n`;
 
-    // Build per-step status — iterate over labels from sequence + any stray entries
+    // Build per-step status — iterate over labels from sequence + any stray entries.
+    // scope_lock/drift_warning rows carry no step label and are excluded here.
     const seqLabels = sequence.map(s => s.label);
-    const entryLabels = skillEntries.map(e => String(e.step));
+    const entryLabels = skillEntries.filter(e => e.type === 'begin' || e.type === 'complete').map(e => String(e.step));
     const allLabels = [...new Set([...seqLabels, ...entryLabels])];
     allLabels.sort((a, b) => {
       const na = parseInt(a), nb = parseInt(b);
@@ -381,10 +397,15 @@ if (command === 'begin' && args.skill && args.step) {
   enforceScopeGate(args.skill, args.step, mode);
 }
 
-// In off mode, only allow audit/status (read-only) and scope-lock (the record
-// the gate depends on). Other write commands exit immediately.
-if (mode === 'off' && !['audit', 'status', 'scope-lock'].includes(command)) {
-  process.exit(0);
+// In off mode, audit/status/scope-lock run; begin/complete still enforce the
+// Step-0 gate (checked above) but skip breadcrumb writes. Unknown commands
+// always exit 1 regardless of mode.
+if (!['begin', 'complete', 'scope-lock', 'status', 'audit'].includes(command)) {
+  console.error(`step_tracker: unknown command "${command}". Use begin, complete, scope-lock, status, or audit.`);
+  process.exit(1);
+}
+if (mode === 'off' && ['begin', 'complete'].includes(command)) {
+  return; // gate already enforced; no breadcrumb write in off mode
 }
 
 switch (command) {

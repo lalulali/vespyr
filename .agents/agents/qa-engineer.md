@@ -313,6 +313,8 @@ Update `artifacts/output/05-planning/kanban.md` directly with your edit/write to
 - [ ] Exploratory testing completed with no critical findings
 - [ ] RQS-D ≥ 85% with hard deterministic biomarkers (`SCR=1.0`, `MSHA=1.0`, `PD=0.0`, `PCI=0.0`) per 02l `INV-TEL-03`; RQS-J (`SRSR`/`SDS`) reviewed as shadow only — it does not gate until the κ≥0.7 calibration pilot passes (`evals/artifacts/rqs-calibration-*.json`)
 
+Joint procedure with security: both gates must clear — neither overrides the other. Any conflict between the QA and security gates escalates to `@founder`; founder risk-acceptance is the sole override.
+
 ## AI-Ready Checklist (per AI feature, pre-release)
 Before any AI feature ships, Nina signs off on:
 - [ ] Eval harness integrated into CI pipeline for this feature

@@ -2,21 +2,21 @@
 
 > **Companion to:** `.agents/delegation-pattern.md` (cross-harness concept) — this file is the Vespyr-specific operational policy.
 
-**Rule:** Reasoning agents (developer, code-reviewer, architect, qa-engineer, etc.) delegate I/O to sub-agents by default. Direct I/O requires a `[DIRECT-IO-JUSTIFIED: ...]` line in the response.
+**Rule:** Reasoning agents do direct I/O via harness-native subagents where the harness supports them, direct calls where it does not. The `@reader`/`@writer`/`@executor` trio personas were deleted 2026-08-10 (02g re-scope) and MUST NOT be referenced as dispatch targets. `@memory-controller` remains the mandatory memory path.
 
 ## Task → Sub-agent mapping
 
 | Task type | Delegate to | Why |
 |---|---|---|
 | Read 1-3 small files (< 500 lines total) | direct | overhead exceeds benefit |
-| Read 1+ large file OR 4+ files | `@reader` | keeps main context lean |
-| Search codebase (grep/glob) | `@reader` | fast regex, condensed output |
+| Read 1+ large file OR 4+ files | harness subagent / direct | keeps main context lean |
+| Search codebase (grep/glob) | harness subagent / direct | fast regex, condensed output |
 | Write a single file < 50 lines | direct | overhead exceeds benefit |
-| Write 1+ file OR > 50 lines | `@writer` | atomic write, consistent format |
-| Refactor across N files | `@writer` (batch mode) | one transaction, N outputs |
-| Run any bash command | `@executor` | parses output, returns summary |
+| Write 1+ file OR > 50 lines | harness subagent / direct | atomic write, consistent format |
+| Refactor across N files | harness subagent (batch mode) / direct | one transaction, N outputs |
+| Run any bash command | harness execution / direct | parses output, returns summary |
 | Read/write memory files | `@memory-controller` | validates schema, enforces format |
-| Read/write skill/agent files | `@writer` | versioned, reviewable diff |
+| Read/write skill/agent files | direct (human-gated proposal only) | versioned, reviewable diff |
 
 ## Multi-developer worktree rules
 
@@ -38,7 +38,7 @@ Allowed for tiny, low-risk operations. The justification is logged to `state/del
 
 ## Anti-patterns
 
-- **Reading 5 files then summarizing inline** — that's `@reader`'s job
-- **Running `npm test` and pasting output** — that's `@executor`'s job
-- **Writing 3 related files in 3 separate edit calls** — batch into one `@writer` call
+- **Reading 5 files then summarizing inline** — batch the reads via a harness subagent to keep main context lean
+- **Running `npm test` and pasting full output** — summarize the output, return the verdict plus failures only
+- **Writing 3 related files in 3 separate edit calls** — batch into one call sequence
 - **Direct memory writes without `@memory-controller`** — bypasses schema validation

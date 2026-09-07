@@ -39,6 +39,7 @@ Before starting, check for a validation brief:
 ## Workflow steps
 
 **Step 0 — Scope Gate (non-skippable):** anchor scope first via `steps/step-00-scope-and-decision-anchoring.md`; `step_tracker.js` exits 1 if Step 1 begins without a locked track.
+Intent triage at gate: Clear (C ≥ 0.85) runs the locked track; Ambiguous (0.50–0.85) halts to a 2–3 Track Fork; Trivial (C < 0.50) executes directly. Gate enforced in all `step_tracking` modes including `off` (DNA 4).
 
 ## Harness-Neutral Delegation (tiered dispatch)
 

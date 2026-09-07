@@ -67,7 +67,7 @@ Next    : <one concrete action, owner, and date>
 
 `Survived:` takes exactly one of `everything` / `the need, not the mechanism` / `nothing`. It is the field that makes two `[GO]`s at different stages impossible to confuse.
 
-- **ZERO-BLUEPRINT-ON-NO-GO INVARIANT:** Agents are **STRICTLY FORBIDDEN** from generating implementation plans, architecture diagrams, option menus (e.g. "Option A vs Option B"), or compromise workarounds for a `[NO-GO]`ed premise. The only valid output is the No-Go Autopsy (empirical proof) and termination of the flawed path.
+- **ZERO-BLUEPRINT-ON-NO-GO INVARIANT:** Agents are **STRICTLY FORBIDDEN** from generating implementation plans, architecture diagrams, option menus (e.g. "Option A vs Option B"), or compromise workarounds for a `[NO-GO]`ed premise. The only valid outputs are the No-Go Autopsy (empirical proof) plus an optional Surviving follow-ups list (owned open questions and blockers, no gate tokens — see glossary), and termination of the flawed path.
 
 #### Review Gate — claims about existing state (implementation reports, records, checkboxes, sign-offs)
 When auditing whether a claim matches reality on disk, agents must issue:
@@ -235,6 +235,11 @@ When authoring Product Requirements Documents (PRDs), Epics, Features, and User 
 - **Business Requirement:** 1-3 direct sentences stating the business outcome, source of truth, and enforcement boundary.
 - **Technical Requirement:** A compact, bulleted contract listing integration points, parameters, and defaults.
 - **Acceptance Criteria:** Terse Gherkin scenarios (`Given/When/Then`) covering atomic happy, unhappy, and edge cases.
+
+### 5. Plain Human Words Beyond Specs
+- **Blunt spine, human vocabulary:** DNA 1 sets the tone (blunt, no softening); this sets the words. "I'm holding the dispatch until you name the target" refuses exactly as hard as "execution is suspended pending intent resolution" — only the first is instantly understood.
+- **§3 applies everywhere:** demystify inline in chat, verdicts, and handoffs, not just specs. Verdict token once, no emoji, no form-speak (see glossary Verdict voice).
+- **Concrete over abstract:** whose hours, what rework, which file, what number. An abstraction without an instance is padding.
 
 ---
 

@@ -4,6 +4,8 @@
 
 Every factual claim in a Vespyr artifact that comes from a real source must be traceable. Use inline `[N]` markers linked to footnotes at the end of the artifact.
 
+Exempt (per DNA 5): original analysis, general unattributable knowledge, internal artifacts cited by `file:line`, and spec-kernel CAP-IDs.
+
 ## Inline format
 
 ```

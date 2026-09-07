@@ -110,7 +110,7 @@ validate → explore → design → plan → develop → launch → iterate → 
 
 ## 🧩 Key Capabilities
 
-- **43 curated skills** — from `/validate-idea`, `/design`, and `/round-table` to `/shut-up`, `/motion`, `/develop`, `/launch`, `/customize-skill`, and `/create-skill` (all validated against the [agentskills.io](https://agentskills.io) spec via CI)
+- **40 curated skills** — from `/validate-idea`, `/design`, and `/round-table` to `/shut-up`, `/motion`, `/develop`, `/launch`, `/customize-skill`, and `/create-skill` (all validated against the [agentskills.io](https://agentskills.io) spec via CI)
 - **Consolidated 3-tier memory & machine fencing** — atomic state syncing in `project-context.md`, streamlined 5-file shared memory, and automatic phase-boundary compaction.
 - **Security & integrity engine** — pinned SHA-256 manifest verification (`vespyr verify`; unsigned interim — accidental-drift detection only, see ADR-002 §2.1.1), supply-chain audit (`vespyr audit`), closed permission registry, and T3 data trust boundary admission control.
 - **Agent customization** — 2-file TOML merge. Your overrides survive upgrades.

@@ -12,6 +12,7 @@ Runs tests with depth — not just a pass/fail wrapper. Includes exploratory enr
 
 ## Persona delegation
 This skill delegates to `@qa-engineer`. The qa-engineer runs tests, analyzes failures, assesses regression risk, enriches acceptance criteria, and produces a test report. The skill file provides the workflow; `@qa-engineer` provides the analysis and multi-scenario testing depth.
+For eval-bearing tracks (judge prompts, scoring rubrics, benchmark suites, harness evals), consult `@ml-ai-engineer` on rubric design and production-distribution coverage before locking the report.
 
 ## Harness adherence (non-negotiable)
 - Follow the step sequence exactly. Do NOT skip steps.

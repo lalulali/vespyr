@@ -13,7 +13,7 @@ step_tracking: off
 # CLI flags (--src, --docs, --ids) override these values.
 graph:
   code:
-    src: src/                      # comma-separated source directories
+    src: bin/,tools/,githooks/     # `src/` absent on disk — scan real code roots until 03h/graph home decided
   doc:
     docs:                          # directories (or single files) scanned for .md
       - artifacts/input/

@@ -110,7 +110,7 @@ function main() {
     }
     console.error('Multiple sessions wrote the same memory file inside the window. Serialize the windows or use a git worktree per session.');
   }
-  process.exit(collisions.length > 0 ? 1 : (strict ? 0 : 0));
+  process.exit(collisions.length > 0 ? (strict ? 2 : 1) : 0);
 }
 
 if (require.main === module) main();

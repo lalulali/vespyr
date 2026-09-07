@@ -38,9 +38,11 @@ function readEvents(days = 7) {
   return events;
 }
 
+const isSynthetic = (ev) => ev && ev.data && (ev.data.synthetic === true || ev.data.agent === 'qa-probe');
+
 function analyzeHotPaths(days = 7) {
   const events = readEvents(days);
-  const agentInvokes = events.filter(e => e.type === 'agent_invoke');
+  const agentInvokes = events.filter(e => e.type === 'agent_invoke' && !isSynthetic(e));
 
   if (agentInvokes.length === 0) {
     console.log('No agent_invoke events found. Run pipeline_simulator.js first.');

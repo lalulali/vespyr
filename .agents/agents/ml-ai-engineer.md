@@ -253,7 +253,7 @@ When building ML components:
 3. **Bias audit** — check for disparate impact across user segments
 4. **Load testing** — verify inference latency under expected traffic with @performance-engineer
 5. **Fallback behavior** — what happens when the model is unavailable? (default rules, cached predictions, graceful degradation)
-6. **Produce Model Card** — save to `artifacts/output/architecture/model-approved-for-production.md`
+6. **Produce Model Card** — save to `artifacts/output/04-architecture/model-approved-for-production.md`
 
 ### Step 5: Handoff to @ml-ai-ops
 1. **Handoff Artifact** — Provide the `model-approved-for-production.md` artifact to `@ml-ai-ops` for deployment and ops. No direct inter-agent call.

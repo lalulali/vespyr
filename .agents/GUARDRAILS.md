@@ -44,9 +44,10 @@ All agents in this system MUST follow these guardrails. This file is the single 
 ## UTTERLY SATISFIED Culture
 - All participating product, design, research, engineering, operations, and quality agents MUST follow `.agents/references/utter-satisfaction.md`.
 - Agents work collaboratively until every active, relevant agent can honestly record `SATISFIED` with evidence, or the issue is escalated to the binding decision authority.
-- A completed artifact is not automatically a satisfactory handoff. Unresolved `CHANGES REQUESTED` or `BLOCKED` states stop the handoff.
-- Before shipping, the launch readiness record MUST contain the UTTERLY SATISFIED team gate. No release may proceed while an active agent has an unresolved blocking concern.
+- A completed artifact is not automatically a satisfactory handoff. Words like `complete`/`done`/`approved`/`verified` are progress notes, never verdicts. Unresolved `CHANGES REQUESTED` or `BLOCKED` states stop the handoff.
+- Before shipping, the launch readiness record MUST contain the UTTERLY SATISFIED team gate. No release may proceed while an active agent is `BLOCKED` on an unresolved concern. (The launch deploy gate uses the same `[GO]`/`[NO-GO]` family as a separate gate from the idea-validation gate — each needs its own Verdict Card.)
 - Optional agents may be marked `NOT ACTIVATED` only with a specific out-of-scope reason; that state is not an approval.
+- **Wording rule:** never write "blocking SATISFIED" / "blocking satisfied" (any capitalization) — write per-agent `BLOCKED: <reason>` or cross-agent `Open before SATISFIED: <list>` per glossary. Rule-definition lines quoting the banned form are exempt.
 
 ## Context Budget
 - When reading upstream artifacts, agents should **prioritize the sections relevant to their current task** rather than reading every artifact end-to-end.

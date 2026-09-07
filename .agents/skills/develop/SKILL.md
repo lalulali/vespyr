@@ -37,7 +37,7 @@ This skill runs in sequential steps. Each step is a self-contained file with its
 - If a step halts (test failure, security finding, 2+ review cycles), stop and escalate to `@tech-lead`. Do NOT proceed past a halt condition.
 
 ## Step sequence
-0. **Scope & Decision Anchoring** (non-skippable gate) → `steps/step-00-scope-and-decision-anchoring.md` — `step_tracker.js` exits 1 if Step 1 begins without a locked track
+0. **Scope & Decision Anchoring** (non-skippable gate) → `steps/step-00-scope-and-decision-anchoring.md` — `step_tracker.js` exits 1 if Step 1 begins without a locked track. Intent triage at gate: Clear (C ≥ 0.85) runs the locked track; Ambiguous (0.50–0.85) halts to a 2–3 Track Fork; Trivial (C < 0.50) executes directly. Gate enforced in all `step_tracking` modes including `off` (DNA 4).
 1. **Spec Alignment & Read Check** → `steps/step-01-spec-alignment.md`
 2. **Architecture** (conditional: if ArchitectPhase: true) → `steps/step-02-architecture.md`
 3a. **Arch Review** → `steps/step-03a-arch-review.md`

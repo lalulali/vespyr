@@ -88,7 +88,7 @@ function validateAgent(filePath) {
   }
 
   const iconMatch = fm.match(/^icon: (.+)$/m);
-  if (iconMatch && iconMatch[1].length > 4) {
+  if (iconMatch && [...new Intl.Segmenter().segment(iconMatch[1])].length > 4) {
     errors.push(`icon "${iconMatch[1]}" doesn't look like a single emoji`);
   }
 
@@ -152,18 +152,19 @@ function validateAgent(filePath) {
   // Socratic stance check: warn only, not a hard fail
   const REASONING_AGENTS = [
     'architect', 'code-reviewer', 'data-analyst', 'developer',
-    'devops-engineer', 'ml-ai-engineer', 'performance-engineer',
+    'devops-engineer', 'founder', 'ml-ai-engineer', 'ml-ai-ops', 'performance-engineer',
     'product-designer', 'product-manager', 'qa-engineer',
     'researcher', 'security-engineer', 'shifu', 'tech-lead',
+    'technical-writer', 'user-researcher', 'ux-researcher',
   ];
   if (REASONING_AGENTS.includes(filename) && !content.includes('## Socratic Stance')) {
     console.warn('WARN: ' + filename + ' — missing Socratic Stance section (recommended, not required)');
   }
 
-  // Citation Protocol check: warn only for all 17 reasoning agents
+  // Citation Protocol check: warn only for all 18 reasoning agents
   const CITATION_AGENTS = [
     'architect', 'code-reviewer', 'data-analyst', 'developer',
-    'devops-engineer', 'founder', 'ml-ai-engineer', 'performance-engineer',
+    'devops-engineer', 'founder', 'ml-ai-engineer', 'ml-ai-ops', 'performance-engineer',
     'product-designer', 'product-manager', 'qa-engineer',
     'researcher', 'security-engineer', 'shifu', 'tech-lead', 'technical-writer',
     'user-researcher', 'ux-researcher',

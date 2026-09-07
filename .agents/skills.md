@@ -1,6 +1,6 @@
 # Workflows & Skills
 
-Vespyr organizes multi-agent execution into **20 specialized personas**, structured **skills** (43 curated workflows located in `.agents/skills/`), and a **shared persistent memory layer** (`artifacts/memory/`).
+Vespyr organizes multi-agent execution into **20 specialized personas**, structured **skills** (40 curated workflows located in `.agents/skills/`), and a **shared persistent memory layer** (`artifacts/memory/`).
 
 The canonical pipeline consists of 11 phases (Phase -1…9, see [phase-table.md](./references/phase-table.md)); the core milestone groupings below provide rapid orientation.
 
@@ -16,13 +16,6 @@ The canonical pipeline consists of 11 phases (Phase -1…9, see [phase-table.md]
 | **Development & Execution** | `@tech-lead`, `@developer`, `@ml-ai-engineer`, `@qa-engineer` | Execution plan, source code, unit/integration tests, QA reports | Granular task breakdown, test-driven implementation, code review, and QA release certification. |
 | **Launch & Operations** | `@devops-engineer`, `@technical-writer`, `@security-engineer` | CI/CD pipelines, documentation, security audit, release sign-off | Production deployment, smoke testing, telemetry verification, and operational runbooks. |
 | **Iteration & Retro** | `@data-analyst`, `@performance-engineer`, `@product-manager` | Telemetry dashboards, performance audit, retrospectives | Post-launch optimization, metric analysis, and memory compaction. |
-
-### Game Development Track
-
-Games follow the same foundational milestones with dedicated game-specific skills:
-- **Validation:** `/validate-game-idea` (core loop, mechanics, player motivations)
-- **Exploration:** `/explore-game-idea` (genre landscape, player personas, competitive analysis)
-- **Design → Execution:** `/design` → `/develop` (converges with standard agile execution)
 
 ---
 
@@ -71,7 +64,7 @@ Every agent persona adheres to the core system principle:
 
 ---
 
-## 4. Curated Skills Catalog (43 Skills)
+## 4. Curated Skills Catalog (40 Skills)
 
 Skills are invoked via `/skill-name` or by referencing `.agents/skills/[name]/SKILL.md`.
 
@@ -81,7 +74,6 @@ Skills are invoked via `/skill-name` or by referencing `.agents/skills/[name]/SK
 
 ### 🔍 Discovery, Ideation & Problem Space
 - **`/validate-idea`**: Socratic concept stress-testing (GO / RESHAPE / NO-GO).
-- **`/validate-game-idea`**: Game concept stress-testing before production.
 - **`/unpack-problem`**: Problem-first exploration before jumping to solution design.
 - **`/root-cause`**: Socratic 5-Whys and Fishbone root-cause analysis.
 - **`/brainstorming`**: 60-method ideation catalog (SCAMPER, Six Thinking Hats, Starbursting, etc.).
@@ -90,7 +82,6 @@ Skills are invoked via `/skill-name` or by referencing `.agents/skills/[name]/SK
 
 ### 👥 User & Market Research
 - **`/explore-idea`**: Comprehensive market, competitor, and customer research.
-- **`/explore-game-idea`**: Genre landscape, market dynamics, and player persona research.
 - **`/research-plan`**: Research goals, hypotheses, and 2-part interview guides (Profile + Behavioral).
 - **`/empathy-map`**: User empathy quadrant canvas (Says / Thinks / Does / Feels).
 - **`/journey-map`**: User touchpoints, emotional state transitions, and friction mapping.

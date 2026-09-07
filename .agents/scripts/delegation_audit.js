@@ -31,8 +31,9 @@ const LOG_CANDIDATES = [
 
 const SESSION_DIR = path.join(ROOT, 'artifacts', 'memory', 'session-summaries');
 
-// Sub-agent handles that count as delegation targets
-const DELEGATION_HANDLES = ['@reader', '@writer', '@executor', '@memory-controller'];
+// Sub-agent handles that count as delegation targets.
+// Trio personas deleted 2026-08-10: counting them rewards violations. Only live target counted.
+const DELEGATION_HANDLES = ['@memory-controller'];
 
 function findLog() {
   return LOG_CANDIDATES.find(p => fs.existsSync(p)) || null;

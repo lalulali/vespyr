@@ -22,6 +22,7 @@ If unclear, ask: "Are you starting a new idea, refining an existing brief, or st
 
 ## Mode routing + steps
 **Step 0 — Scope Gate (non-skippable):** anchor scope first via `steps/step-00-scope-and-decision-anchoring.md`; the selected mode is the locked track. `step_tracker.js` exits 1 if Step 1 begins without a locked track.
+Intent triage at gate: Clear (C ≥ 0.85) runs the locked track; Ambiguous (0.50–0.85) halts to a 2–3 Track Fork; Trivial (C < 0.50) executes directly. Gate enforced in all `step_tracking` modes including `off` (DNA 4).
 
 - **Create** → `steps/step-01a-session-setup.md` → ... → `steps/step-07a-handoff.md` (7 steps: session setup, input analysis, idea framing, stress-test R1, stress-test R2, GO/RESHAPE/NO-GO, handoff)
 - **Edit** → `steps/step-01b-load-existing.md` → ... → `steps/step-05b-finalize.md` (5 steps: load, identify gaps, revise, stress-test, finalize)

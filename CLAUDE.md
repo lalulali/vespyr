@@ -123,7 +123,6 @@ Vespyr organizes complex, multi-agent operations into highly structured **skills
 *   `/teach-me` — Personal learning partner: Quick, Explain, or Deep Dive on any topic
 *   `/craft-lesson` — Create multi-format educational materials (syllabus, handbook, cheatsheet, presentation, class, video script)
 *   `/validate-idea` — Stress-test product concepts before research
-*   `/validate-game-idea` — Stress-test game concepts before production
 *   `/unpack-problem` — Problem-first exploration before solution ideation (guided, automated, or combination)
 *   `/root-cause` — Socratic 5-Whys and Fishbone root cause analysis
 *   `/research-plan` — Research goals, methodology, and 2-part interview guide
@@ -132,7 +131,6 @@ Vespyr organizes complex, multi-agent operations into highly structured **skills
 *   `/jtbd` — Jobs-to-be-Done statements + How Might We opportunity questions
 *   `/discovery-report` — Compile design thinking outputs into unified research/usability report
 *   `/explore-idea` — Market, competitor, and user research
-*   `/explore-game-idea` — Genre market and player research
 *   `/shape-up` — Structure and stress-test semi-cooked ideas into design-ready briefs
 *   `/brainstorming` — Select and apply brainstorming methods from a 60-method catalog
 *   `/validation-patterns` — Apply validation methods (smoke tests, concierge MVPs, etc.)

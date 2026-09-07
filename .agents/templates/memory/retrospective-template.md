@@ -234,7 +234,7 @@ Based on retrospective findings:
 
 - **Continue iterating on this feature?** → Load `product-iteration` skill
 - **New features emerged from findings?** → Load `product-development` skill
-- **Strategic pivot needed?** → Load `product-exploration` skill (or `game-product-exploration` for game projects)
+- **Strategic pivot needed?** → Load `product-exploration` skill
 - **Process changes only?** → Update memory and proceed with next cycle
 
 ---

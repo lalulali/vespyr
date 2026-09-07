@@ -2,7 +2,7 @@
 
 > **Purpose:** Comprehensive visual design, interaction, typography, motion, SVG graphic rendering, and accessibility reference guide for Ivy (`@product-designer`) and the Vespyr multi-agent swarm.
 >
-> **Usage:** Loaded during Phase 3 (Strategy & Design) when selecting visual design directions, typography foundries, component libraries, motion engines, graphic rendering tools, and accessibility standards.
+> **Usage:** Loaded during Phase 2 (Strategy & Design) when selecting visual design directions, typography foundries, component libraries, motion engines, graphic rendering tools, and accessibility standards.
 
 ---
 

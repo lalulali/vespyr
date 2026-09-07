@@ -1,6 +1,6 @@
 ---
 name: retro
-description: Post-cycle review — extract lessons, calibrate estimates, improve processes, compact memory, and update team knowledge
+description: Post-cycle review — extract lessons, calibrate estimates, improve processes, compact memory, and update team knowledge. Consult @ml-ai-engineer where eval harnesses, benchmarks, or biomarker pipelines are under review.
 metadata:
   version: "1.0"
 ---

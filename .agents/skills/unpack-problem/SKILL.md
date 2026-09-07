@@ -41,7 +41,7 @@ Automated/combination modes draft empathy maps, journeys, and JTBD from *simulat
 - Each step file is a contract. Read it fully before executing.
 
 ## Step sequence
-0. **Scope & Decision Anchoring** (non-skippable gate) → `steps/step-00-scope-and-decision-anchoring.md` — `step_tracker.js` exits 1 if Step 1 begins without a locked track
+0. **Scope & Decision Anchoring** (non-skippable gate) → `steps/step-00-scope-and-decision-anchoring.md` — `step_tracker.js` exits 1 if Step 1 begins without a locked track. Intent triage at gate: Clear (C ≥ 0.85) runs the locked track; Ambiguous (0.50–0.85) halts to a 2–3 Track Fork; Trivial (C < 0.50) executes directly. Gate enforced in all `step_tracking` modes including `off` (DNA 4).
 1. **Problem Intake** → `steps/step-01-problem-intake.md` — intake pain points, enforce zero-solution framing
 2. **Analysis Execution** → `steps/step-02-analysis-execution.md` — run or prompt modular sub-skills based on selected mode
 3. **Synthesis & Ideation** → `steps/step-03-synthesis-ideation.md` — map problem findings to candidate solution concepts

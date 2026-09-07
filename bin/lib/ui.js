@@ -46,7 +46,7 @@ function printSummary(targetDir, selections) {
 		``,
 		`  Next steps:`,
 		`    1. Run npx vespyr init (or /help-me) to bootstrap your project context`,
-		`    2. Type @founder, /validate-idea, or /validate-game-idea "your idea" to stress-test a concept`,
+		`    2. Type @founder or /validate-idea "your idea" to stress-test a concept`,
 		`    3. Use @help-me for a tailored navigation report`,
 
 		``,

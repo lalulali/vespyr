@@ -11,9 +11,7 @@ Vespyr organizes complex operations into atomic skills. Each skill is a folder w
 | Command | Phase | Description |
 |---------|-------|-------------|
 | `/validate-idea` | -1 | Stress-test product concepts before research |
-| `/validate-game-idea` | -1 | Stress-test game concepts before production |
 | `/explore-idea` | 0-1 | Market, competitor, and user research |
-| `/explore-game-idea` | 0-1 | Genre market and player research |
 | `/unpack-problem` | 0-1 | Problem-first exploration before solution ideation |
 | `/shape-up` | 1-2 | Bridge semi-cooked ideas into design-ready specs (standalone or lifecycle) |
 | `/design` | 2-3 | PRD and screen specs creation |

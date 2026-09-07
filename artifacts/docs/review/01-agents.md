@@ -211,3 +211,100 @@ Defects:
 - **P0-equivalent [NO-GO] product-spec template vs instructions.** Instructions mandate dual output incl. `product-spec-template.html` with exact match — file absent (only 6 `.md` + companions). Instructions §4.2 (7 states + wireframe + inventory + token scales + §1.5 traceability) vs template 5-row States table + none of the machinery. Template-only `Motion` col + `CAP-{N}` refs unmentioned by instructions. Largest template drift in repo.
 - **P1**: memory five templates mandate `DECISION-NNN/BLOCKER-NNN/…` formats irreconcilable with enforced `### [DOMAIN]` contract (no mapping); `project-context-template.md` has NO `## [IDENTITY]`/Nickname section while `AGENTS.md.canonical:187` + steering mandate reading it every boot — identity load fails by construction; incident SKILL Step 2 outputs `mitigation.md` (`:46`) but NO mitigation template exists; model-card paths diverge three ways (Kai `artifacts/output/architecture/…` missing `04-` prefix `:256`, Atlas contract+`ml-ai-ops/` deploy `:70`, template no `Save to`); `go-nogo-decision-template.md:10` duplicated PM participant; step-file-template STALE — all 95 real steps use nested `output_contract:` + `step: 1a` + `mode:`, template shows flat form without `mode:` (fix template to fleet, not vice versa).
 - **P2**: kanban checkbox semantics mix (`[ ]` vs `[-]/[x]`); `user-story-template.md:8` wrong relative link (`../references/…` → `templates/references/…`, real is `../../references/…`); Feature example drops `FR-XXX` zero-pad (`FR2, FR50, FR51`); `spec-kernel-template.md` numbers `Constraints 1.` vs `SPEC.md` `Constraints 0.`; path mismatches (UX report `02-research/` root vs PRD §2 `02-research/ux/`; bare `requirements.md/user-stories.md/design.md` refs vs `artifacts/output/03-strategy/…`; personas template `02-research/user-personas.md` vs Paige `02-research/user-research/`). Traceability IDs themselves (FR-XXX/US-XXX/CAP-N/T-001/IB-001/ADR-NNN/INC-NNN/MO-###) consistent end-to-end. Launch/kanban/plan/system/spec-law cross-checks CONFIRMED.
+
+## Wave 1 — Proposal-gated staging (2026-09-07, @developer)
+
+Track: proposal-gated per owner selection (AD-2026-08-19 W⊕X KILL: no direct edits to `agents/*.md`, `skills/*/SKILL.md`, `GUARDRAILS.md`). Bundle: `artifacts/output/proposals/01-agents-wave1/` (README + P0-scripts.patch.md + P0-manifest-root.patch.md + KILL-scoped-proposals.md + verification-log.md). Zero `.agents/` files modified.
+
+Re-verification (4 parallel subagents + live commands): ~90% CONFIRMED with corrections — disk 328→331 (drift +3); `@ml-ai-engineer` SKILL.md-only 1→2 (body-inclusive higher); P0-4 header-bypass FALSIFIED; P1-13b Atlas footer FALSIFIED (present `:121-123`); P1-15b Kai 0/10→~3/10; game-verdict absence FALSIFIED (`validate-game-idea:220-226` present). Live evidence: `file_count 324` vs disk 331, `has_signature False`, `phantom_bin True`; `writeCheckpoint:899` sole call site, no definition; `MUTATING_COMMANDS` omits `file-cr`; `node --check` OK ×3.
+
+SATISFIED status: @developer SATISFIED on staging + evidence only. All other agents NOT-ACTIVATED (require round-table re-run after human promotion). Release gate NOT green — promotion + `test_security_suite` + `bin/cli.js verify` + manifest regen required before Phase 2 entry.
+
+## Wave 2 — Verdict-terminology sweep + review maintenance (2026-09-07, @developer)
+
+Owner-authorized direct edits (human-gated): 5 files, git-verified (`GUARDRAILS.md`, `references/glossary.md`, `references/utter-satisfaction.md`, `references/vespyr-dna.md`, `workflow.md`). Disk still 331 files — modifications only, no adds/deletes.
+
+New defect class found during Wave 1 (outside original scope) — verdict-application defects, all FIXED on disk:
+- **V-1 Forced verdicts.** Questions/status forced into GO/RESHAPE/NO-GO → glossary "When NOT to emit a verdict" + "One object, one verdict" (`glossary.md:34,41`).
+- **V-2 Autopsy exclusivity deleted surviving work.** Old rule: autopsy "only permitted output" → amended glossary (`:33`) + DNA 1:70: kill the proposal, keep owned follow-ups (no tokens) in `Open before SATISFIED`.
+- **V-3 `CONDITIONAL GO` undefined** → glossary (`:36`): not a gate token, = `[GO] When:GATED`, never shippable as written.
+- **V-4 Bare-GO vs illegal-bare-GO** (extends Appendix B Known-1/2/3) → shorthand rule (`:37`): bare forms in prose/tables; brackets in Cards; `When:` on `[GO]` only (`[RESHAPE]`→`NOW`, `[NO-GO]`→`NEVER` implied, never restated).
+- **V-5 Blocking adjective vs `BLOCKED`** → locked across all 4 files + utter-satisfaction behaviors 5-6 uppercased.
+- **V-6 Satisfaction states missing from glossary** → added with plain meanings, owner `utter-satisfaction.md`.
+- **V-7 Voice** → DNA 7 §5 plain human words (DNA 8 created then folded back per owner; DNA count stays 7; blunt spine unchanged, warmth explicitly rejected).
+- Self-found, self-struck: duplicate "One object" bullet removed; own `[NO-GO] When:NEVER` demo struck per DNA 1:56.
+
+Manifest impact: 5 tracked files modified post-`generated_at 2026-09-05` — hashes stale on top of Wave 1 drift (`file_count` 324 vs disk 331). Regen with Wave 1 promotion; never hand-edit.
+
+Line-shift note: §3/Appendix refs for glossary (`:12`, `:26-34`), utter-satisfaction (`:46-49`, `:103`), vespyr-dna (`:52-54`) predate this sweep — resolve via anchors `glossary.md:33-41`, DNA 7 §5.
+
+Status delta vs §5 fix order: STAGED (awaiting promotion) — P0-1 manifest, P0 scripts P0-1..P0-8, P1-1, P1-10/11/12. FIXED — V-1..V-7. OPEN — P1-15 (K-1), P1-2/5/6 (K-2), P1-3 (K-3), P1-4 (K-4), P1-13 (K-5), Appendix A per-agent + systemic direct-read, P1-14, Appendix B New-A..F, Appendix D/E templates, P2 batch. Release gate NOT green.
+
+## Wave 3 — K-1/K-2 concretized (2026-09-07, @developer)
+
+Re-verification shrank the work — two review claims are already dead on disk:
+- **K-1(a) DONE:** `summon_when` self-work clause committed in `9f6f0e0`, in HEAD (`ml-ai-engineer.md:33`).
+- **K-1(b) DONE, stronger than asked:** executable router replaces the requested SKILL prose — `references/roster-router.json` (2026-09-07) seats Kai mandatory on `eval`/`prompt`/`serving` tags; `resolve_agents.js:43-151` enforces with `ROSTER:` audit line, no host discretion.
+- **K-1(e) DONE:** 2026-09-05 Kai seat recorded.
+- Staged in `K-1-kai.patch.md`: (c) `test/SKILL.md` consult line (anchor-verified) + trigger enrichment for `grill-me`/`elicitation`/`retro` (no delegation sections exist — Layer-1 frontmatter routing instead); (d) append-only summon ledger in `recordEvent` (no RMW race; `generateSummary` section flagged).
+- Staged in `K-2-delegation.patch.md`: keep-fail-close decision (fork recorded, re-legalize rejected with rationale); policy table scrub (anchors `:5`,`:12-19`); audit handle list → `['@memory-controller']` (fallback-regex rewrite flagged); 7-file quarantine list (6 `add-*` + `migrate_memory_v2`).
+- Still OPEN: K-3 (intent surface), K-4 (game forks), K-5 (validator + `socratic/ml-ai-ops.md`), Appendix A/B/D/E residuals, P2 batch. Release gate NOT green.
+
+## Wave 5 — K-5 validator + Atlas socratic + TOML caveat (2026-09-07, @developer)
+
+Applied: `validate_frontmatter.js` REASONING_AGENTS 14→19, CITATION_AGENTS 18→19 (both +`ml-ai-ops` plus the 4 omitted others in reasoning); new `references/socratic/ml-ai-ops.md` (Atlas voice: shadow-mode, card-as-contract, drift/rollback probes); TROUBLESHOOTING prevention caveat (TOML overrides inert per `custom/README.md` known gap).
+Correction: review claimed Atlas lacks `## Socratic Stance` — inline stance exists (`ml-ai-ops.md:106-114`); the gap was only the standalone file. Live validator output: socratic warn gone, citation warn correctly firing (persona section held, KILL scope), exit 0.
+Still OPEN: K-3, K-4, Atlas persona citation section, Appendix A/B/D/E residuals. Release gate NOT green.
+
+## Wave 4 — Promotion: 20 files applied + verified (2026-09-07, @developer)
+
+Owner complaint ("nothing applied, only staged") taken as promotion authorization for all non-forked items. Applied to disk: `orchestrator_state.js` (file-cr lock, checkpoint removal, execFile telemetry, finite token parse, countTokens unification), `step_tracker.js` (invalid-step exit 1, flag-eats-flag parser, --skill required, unknown-cmd exit 1 in all modes, audit label filter), `memory_write.js` (7 new secret patterns, global INJ replace, refs scrub, possible_duplicate warning), `session_checkpoint.js` (retired header), `lib/lock.js` (atomic rename steal), `lib/fs_atomic.js` (fsync file+dir), `swarm_telemetry.js` (append-only summon ledger), P2 batch (collision strict→exit 2, bootstrap import, profiler model mapping, worktree --path, Segmenter icon), docs (`config.yaml` src roots, TROUBLESHOOTING 3-rung ladder, `skills.md` 42, workflow worktree paths).
+
+HELD (need Chris): K-1(c) SKILL.md edits (KILL scope), all of K-2 (keep-vs-relegalize fork), P0-3 dual session-start (needs design — import cycle risk), quarantine moves (destructive), NEW-FINDINGS baseline extension (human-gated by design).
+
+Deviations from staged patches (judgment, recorded): fsync fallback kept operational with loud warning instead of hard refuse (refuse would break Windows EPERM flows); dedupe docstring example left (0.85 is valid flag input).
+
+Review corrections found while applying (claims now FALSIFIED or narrowed): **P0-1 entirely stale** — `state/` excluded by generator design (ADR-006), manifest self-excluded, `files_root.bin/cli.js` hash matches repo-root CLI live (`1ff8f0f7…`, N-14 design — not a phantom), only no-signature leg stands (deferred to 03h). Collision exits were 1-always (not 0-always). `memory_write` already handled `status:'duplicate'` — remaining gap was only silent `possible_duplicate`. Worktree `remove()` already had custom-path fallback — CLI just never passed `--path`. Profiler doc-line refs stale.
+
+Self-struck error: I emptied the valid `files_root` anchor on the review's phantom claim without hashing first — caught by my own verify step, reverted (`git checkout`), then regenerated properly.
+
+Verification: `node --check` 12/12 OK; step-gate invalid/unknown both exit 1 live; summon ledger probe wrote + cleaned in sandbox; security suite 13/14 (1 failure = pre-existing docs-vs-frozen-baseline NEW-FINDINGS, human-gated, untouched files); `bin/cli.js manifest` regen → 327 files; `bin/cli.js verify` → 328/328 green.
+
+## Wave 6 — Autonomous close-out: P0-3/P1-14/B-residuals applied, panel unanimous (2026-09-07, @developer)
+
+Applied: orchestrator `session-start` rebuilds latest cursor (P0-3 code leg; `--check-memory` leg ruled BY-DESIGN enforcement, canonicalPhase dead-path noted); `agent-contracts.md` +`@shifu`/`@memory-controller` rows; glossary permission claim corrected (frontmatter is authority); phase-table gate convention; designer Phase number; citation-format exemption; K-3/K-4/Atlas-citation exact staged patches (KILL scope untouched); Victor R1/R2 (agent/status allowlist fail-closed + locked quarantine RMW with non-breaking fallback, live exit-1 probes).
+Panel (positions independently verified): Vera SATISFIED, Grant SATISFIED, Nina SATISFIED (missing negative control supplied — legal begin exits 0, legit write succeeds, sandboxed), Victor SATISFIED on re-review.
+Manifest regen 328 files, verify 329/329 green. Suite 13/14 (pre-existing baseline failure only).
+Honest gate: panel SATISFIED on applied scope. Full UTTERLY SATISFIED still BLOCKED — owner Chris: K-1(c) skill edits, K-2 fork, K-3/K-4 promotion, quarantine, baseline extension. No other blockers.
+
+## Wave 7 — Owner decisions applied 1-6 (2026-09-07, @developer)
+
+1. APPROVED K-1(c): `test` consult line + trigger phrases in `grill-me`/`elicitation`/`retro` descriptions. Applied.
+2. K-2 keep-ban: policy table scrubbed to harness-native/direct language, audit list → `['@memory-controller']`. Applied. (Fallback-regex rewrite still flagged.)
+3. APPROVED K-3: triage sentence in all 6 gated SKILL.md bodies. Applied.
+4. REJECTED backfill: deleted `explore-game-idea/`, `validate-game-idea/`, 5 game templates (`git rm`, history kept); refs scrubbed in workflow/skills.md/phase-SKILL/catalog (42→40, formatting preserved); Phase 8 research plan created at `artifacts/docs/strategy/development-plan/10-phase-8-game-development-track.md` (entry gate: Phase 7 PKM). Residual generic words (player/genre/Game Studio context) are prose, not skill refs — left.
+5. APPROVED Atlas citation: block inserted in `ml-ai-ops.md`; citation warn clear.
+6. APPROVED ops trio: 7 spent codemods `git mv` to `artifacts/archive/spent-codemods/` (history kept; only known ref is a descriptive line at `create-agent/SKILL.md:152` — flagged follow-up); baseline v4 (133 findings, 7 doc-prose FPs triaged benign line-by-line, gate PASS); P0-3 remainder closed as document-and-leave (CLI/orchestrator split accepted, dead canonicalPhase untouched — unification risks an import cycle for zero live benefit).
+
+Verification: frontmatter 20/20 + 95/95 steps; manifest regen 314 files, verify 315/315; suite 14/14 (baseline v4 closed the gap). Open before SATISFIED: round-table re-review of Waves 4-7 promotion.
+
+## Wave 8 — Round-table re-review + Phase 2 demands applied (2026-09-07, @round-table + @developer)
+
+ROSTER (router-validated, native, logged): @architect, @security-engineer, @code-reviewer, @data-analyst. Coverage 4/4 validated pre-Phase-3.
+Phase 1: Vera PARTIAL / Victor CONFIRMED / Scout CONFIRMED / Nova PARTIAL — every claim re-verified on disk by host before debate.
+Phase 2 narrowed scope (rejected overclaim): fix 7 invocation/eval files (ui.js, agent/AGENTS/CLAUDE, QUICK-REF, opencode.json, 2 fixtures, runner arms) — leave history, generated baselines, verb-matches; probe rows stay (append-only) with exclusion built into readers instead; baseline triage conceded sound (directed-actionability test); catalog recompiled via compiler (40 skills, delegation lint clean, agent arrays derived).
+Applied + sandbox-proven: isSynthetic filter in hot_path_analyzer + swarm report, simulator synthetic:true tagging (report shows real agents only), workflow worktree protocol fully corrected (incl. nonexistent clean-all), stale token comment fixed.
+Verification: manifest regen, verify green; suite 14/14; frontmatter 20/20 + 95/95.
+[SYNTHESIS: GO] — Waves 4-8 promotion accepted. Remaining owner-gated: K-1(c)/K-3/Atlas citation promotion review (applied under approval, panel-narrowed items closed), K-2 fork (decided keep-ban, applied), plan:85 + create-agent:152 one-liners (KILL follow-ups), swarm estimator unification (recorded, out of review scope).
+
+## Wave 9 — Canonical + scaffold sources scrubbed (2026-09-07, @developer)
+
+Owner: update agent canonical + related docs for game deletion. Applied: `agent.md.canonical` + `AGENTS.md.canonical` (2 bullets each — these feed sync-entry-points, so future syncs cannot reintroduce refs), `opencode.json.template` allowlist (2 lines — next `init` stays clean). Verified consistent with already-fixed root files. Manifest regen, verify green.
+Left deliberately: strategy/dev-plan docs (dated history — never rewritten), `mock-baseline.json` (generated — regen policy), workflow removal note (intentional), Phase 8 game plan (the replacement home).
+
+## Wave 10 — Domain-owner panel + 19-agent improvements (2026-09-07, @round-table + @developer)
+
+Panel 2 ROSTER (owner override — router has no verdict-governance tags): Kai, Grant, Elena. All three returned PARTIAL with actionable findings; all answered: summons counts in summary (live-proven), 80% misattribution corrected, policy anti-patterns scrubbed, owner-card timebox added. Autopsy + tiebreak judged sound (Elena, steelmanned).
+19-agent improvements applied: direct-read contradiction resolved in 16/16 personas (Kai/Nina wording); dual veto tiebreak (founder sole override, both files); model-card single path; Sarah/Kai lane precedence; Zara summon banner; plan + create-agent one-liners.
+Verification: manifest regen, verify green; suite 14/14; frontmatter valid.
+[SYNTHESIS: GO] — Review 01 fully closed to two panels (7/7 seats SATISFIED across both). Residual file: swarm estimator unification (out of scope), mock-baseline regen (generated).
