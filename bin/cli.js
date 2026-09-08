@@ -54,6 +54,8 @@ const installerApi = createInstaller({
 	getExistingUserNickname,
 	updateUserNickname,
 	writeManifest,
+	performGenerateManifest,
+	buildSourceManifest,
 	removeStaleManifestFiles,
 	detectInstalledHarnesses,
 	installGitHook,
@@ -1193,6 +1195,12 @@ function generateManifestData(targetDir) {
 
 function performGenerateManifest(targetDir, flags) {
 	const manifestPath = path.join(targetDir, ".agents", "manifest.json");
+	// Dry-run first: hashing requires a materialized tree, which dry-run
+	// never creates — generating here would throw and break dry-run installs.
+	if (R.dryRun) {
+		logDry(`Would refresh .vespyr-manifest.json and write manifest to ${manifestPath}`);
+		return;
+	}
 	// Lockstep refresh: the legacy path-list manifest must describe the same
 	// universe the hash manifest pins. Refresh it first so
 	// .vespyr-manifest.json's own hash (now covered) is deterministic.
@@ -1202,10 +1210,6 @@ function performGenerateManifest(targetDir, flags) {
 		logWarn(`Could not refresh .vespyr-manifest.json before hashing: ${e.message}`);
 	}
 	const manifestData = generateManifestData(targetDir);
-	if (R.dryRun) {
-		logDry(`Would write manifest to ${manifestPath} (${manifestData.file_count} files)`);
-		return;
-	}
 	fs.writeFileSync(manifestPath, JSON.stringify(manifestData, null, 2) + "\n", "utf8");
 	if (flags.json) {
 		console.log(JSON.stringify({ ok: true, manifest: manifestPath, file_count: manifestData.file_count }));
@@ -1789,10 +1793,12 @@ module.exports = {
 	uninstallHarnesses,
 	performReconfigure,
 	performUpdate,
+	performGlobalInstall,
 	detectInstalledHarnesses,
 	detectMethod,
 	buildSourceManifest,
 	writeManifest,
+	performGenerateManifest,
 	removeStaleManifestFiles,
 	yamlQuote,
 	installGitHook,

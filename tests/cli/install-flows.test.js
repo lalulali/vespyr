@@ -87,6 +87,63 @@ describe('Installer flows: uninstall / reconfigure / repair smoothness', () => {
     assert.ok(fs.existsSync(path.join(tmpDir, 'artifacts')), 'artifacts preserved');
   });
 
+  it('pristine uninstall removes .agents entirely (no shipped residue)', () => {
+    const init = runCli(['init', '--yes'], tmpDir);
+    assert.strictEqual(init.status, 0, init.stderr);
+    assert.ok(fs.existsSync(path.join(tmpDir, '.agents')));
+
+    const r = runCli(['uninstall', '--yes'], tmpDir);
+    assert.strictEqual(r.status, 0, r.stderr + r.stdout);
+    assert.ok(!fs.existsSync(path.join(tmpDir, '.agents')), '.agents must be fully removed');
+
+    const again = runCli(['uninstall', '--yes'], tmpDir);
+    assert.strictEqual(again.status, 0, again.stderr);
+    assert.ok(again.stdout.includes('Nothing to uninstall'));
+  });
+
+  it('verify passes immediately after init (no stale shipped manifest)', () => {
+    const init = runCli(['init', '--yes', '--harness', 'opencode'], tmpDir);
+    assert.strictEqual(init.status, 0, init.stderr);
+
+    const v = runCli(['verify'], tmpDir);
+    assert.strictEqual(v.status, 0, v.stdout + v.stderr);
+    assert.ok(v.stdout.includes('[OK]'));
+  });
+
+  it('verify passes after update (manifest re-pinned, not stale)', () => {
+    const init = runCli(['init', '--yes', '--harness', 'opencode'], tmpDir);
+    assert.strictEqual(init.status, 0, init.stderr);
+
+    const up = runCli(['update', '--yes'], tmpDir);
+    assert.strictEqual(up.status, 0, up.stderr + up.stdout);
+
+    const v = runCli(['verify'], tmpDir);
+    assert.strictEqual(v.status, 0, v.stdout + v.stderr);
+  });
+
+  it('global install generates a verifiable hashed manifest (no global gap)', async () => {
+    const { performGlobalInstall } = require('../../bin/cli.js');
+    const mockHome = fs.mkdtempSync(path.join(os.tmpdir(), 'vespyr-global-'));
+    const origHomedir = os.homedir;
+    os.homedir = () => mockHome;
+    try {
+      await performGlobalInstall(['opencode'], 'symlink', 'Tester', { harnesses: ['opencode'], yes: true });
+      assert.ok(fs.existsSync(path.join(mockHome, '.agents', 'manifest.json')), 'hashed manifest generated');
+      assert.ok(fs.existsSync(path.join(mockHome, '.agents', '.vespyr-manifest.json')), 'legacy manifest generated');
+      assert.ok(fs.existsSync(path.join(mockHome, '.opencode')), 'harness link created');
+      const version = JSON.parse(fs.readFileSync(path.join(mockHome, '.agents', '.vespyr-version'), 'utf8'));
+      assert.strictEqual(version.global, true);
+    } finally {
+      os.homedir = origHomedir;
+    }
+
+    const v = runCli(['verify'], mockHome);
+    assert.strictEqual(v.status, 0, v.stdout + v.stderr);
+    assert.ok(v.stdout.includes('[OK]'));
+
+    fs.rmSync(mockHome, { recursive: true, force: true });
+  });
+
   it('repair state auto-heals on a bare run', () => {
     fs.mkdirSync(path.join(tmpDir, '.agents'));
     fs.writeFileSync(path.join(tmpDir, '.agents', 'GUARDRAILS.md'), 'partial install');

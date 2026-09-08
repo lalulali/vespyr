@@ -105,3 +105,13 @@ Verified: `tests/test_cli.js` 73/73 pass; `tests/cli/cli-init.test.js` + `refact
 - **Gap:** `uninstall`/`reconfigure` existed only in the interactive menu — no non-interactive path; `performUninstall` swept fresh/foreign dirs unguarded; bare `reconfigure --yes` without `--harness` wiped every harness; menu uninstall had no confirm; repair banner copy-pasted in two branches.
 - **Fix:** new `uninstall` / `reconfigure` subcommands (`bin/cli.js:parseFlags` + dispatch + help). `performUninstall` self-guards: fresh → no-op exit 0, foreign/migrate → exit 2, only installed/repair sweep. `reconfigure --yes` without `--harness` keeps the current set (`bin/lib/installer.js`). Confirm prompt on interactive uninstall (menu + subcommand; `--yes`/non-TTY handled). Repair banner extracted to `performRepair`.
 - [Test: tests/cli/install-flows.test.js (6 E2E); full suite 383/383]
+
+### Follow-up (2026-09-08c): stale shipped manifest broke first verify + global-install crash
+- **Bug:** fresh `init` copied the repo's stale `manifest.json` into the target, so the first `verify` always failed (stale hashes; foreign `files_root` scope). Every `update` re-broke `verify` the same way (new bytes, old pins). Separately, global installs crashed with ENOENT: `writeManifest(globalAgentsDir)` nested a second `/.agents` segment.
+- **Fix:** install/update/reconfigure now re-pin via `performGenerateManifest` (passed into the installer; sound against TOFU because these paths just materialized the tree from source). Global writes its legacy manifest at the correct path. `performGenerateManifest` returns before hashing under `--dry-run` (a materialized tree never exists there) — this also fixed a latent `manifest --dry-run` crash and a dry-run-install regression caught by the contract suite.
+- [Test: install-flows verify-after-init + verify-after-update (proven to fail pre-fix, 3 failures on stashed tree); full suite 386/386]
+
+### Follow-up (2026-09-08d): global-scope hashed-manifest gap closed
+- **Gap:** global installs generated only the legacy path-list manifest; `verify` against a global home failed closed (missing baseline), and the legacy write used a doubly-nested `~/.agents/.agents/` path (ENOENT crash).
+- **Fix:** `performGlobalInstall` now pins via `performGenerateManifest(home, flags)` — no new machinery needed, as the manifest/verify walks proved layout-agnostic on home-rooted targets (files_root scope simply absent). `performGlobalInstall` exported for testability; duplicate `buildSourceManifest` export removed.
+- [Test: install-flows global E2E with mocked `os.homedir` (manifests + link + `global:true` + CLI verify clean; fails pre-fix); full suite 387/387]

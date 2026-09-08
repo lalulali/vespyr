@@ -33,6 +33,7 @@ function createInstaller(deps) {
 		getExistingUserNickname,
 		updateUserNickname,
 		writeManifest,
+		performGenerateManifest,
 		removeStaleManifestFiles,
 		detectInstalledHarnesses,
 		installGitHook,
@@ -328,6 +329,7 @@ function surgicallyCleanupAgentsDir(agentsTarget) {
 	// so they are pruned solely when empty.
 	const coreFolders = [
 		"commands",
+		"custom",
 		"references",
 		"scripts",
 		"templates",
@@ -373,6 +375,9 @@ function surgicallyCleanupAgentsDir(agentsTarget) {
 		".vespyr-version",
 		".vespyr-manifest.json",
 		"manifest.json",
+		"config.yaml",
+		"package.json",
+		"package-lock.json",
 		".gitignore",
 		".DS_Store",
 	];
@@ -389,6 +394,26 @@ function surgicallyCleanupAgentsDir(agentsTarget) {
 			fs.unlinkSync(filePath);
 		} catch (e) {}
 	}
+
+	// Vendored runtime deps: installed by wholesale copy (the update path
+	// already overwrites this tree wholesale), so removal is wholesale too.
+	try {
+		const nm = path.join(agentsTarget, "node_modules");
+		try {
+			fs.lstatSync(nm);
+			fs.rmSync(nm, { recursive: true, force: true });
+		} catch {}
+	} catch {}
+
+	// Transient runtime state (locks, session pointer, ledger): safe to drop
+	// on uninstall — durable memory lives in artifacts/, not here.
+	try {
+		const stDir = path.join(agentsTarget, "state");
+		try {
+			fs.lstatSync(stDir);
+			fs.rmSync(stDir, { recursive: true, force: true });
+		} catch {}
+	} catch {}
 
 	// Sweep backup litter (*.bak-*, *.backup.*) so uninstall leaves no
 	// poison for a future verify. User content outside these patterns stays.
@@ -572,7 +597,10 @@ async function performFreshInstall(targetDir, flags) {
 	}
 
 	writeVersionFile(targetDir);
-	writeManifest(targetDir);
+	// Pin the just-materialized tree: shipping the repo manifest would
+	// fail the first verify (stale hashes + foreign files_root scope).
+	// Safe from TOFU: install/update just built this tree from source.
+	performGenerateManifest(targetDir, flags);
 
 	const projectName = flags.projectName || path.basename(targetDir);
 	if (flags.userNickname) {
@@ -675,7 +703,10 @@ async function performUpdate(targetDir, flags) {
 	fs.cpSync(AGENTS_SRC, agentsTarget, { recursive: true, dereference: true });
 
 	writeVersionFile(targetDir);
-	writeManifest(targetDir);
+	// Pin the just-materialized tree: shipping the repo manifest would
+	// fail the first verify (stale hashes + foreign files_root scope).
+	// Safe from TOFU: install/update just built this tree from source.
+	performGenerateManifest(targetDir, flags);
 
 	let installedHarnesses = detectInstalledHarnesses(targetDir, false);
 	let method = detectMethod(targetDir, false);
@@ -691,7 +722,7 @@ async function performUpdate(targetDir, flags) {
 	log(`  artifacts/ preserved.\n`);
 }
 
-async function performGlobalInstall(selections, method, userNickname) {
+async function performGlobalInstall(selections, method, userNickname, flags = {}) {
 	const globalAgentsDir = getGlobalPath("agents");
 	const home = os.homedir();
 
@@ -720,7 +751,12 @@ async function performGlobalInstall(selections, method, userNickname) {
 		global: true,
 	};
 	fs.writeFileSync(versionPath, JSON.stringify(data, null, 2));
-	writeManifest(globalAgentsDir);
+	// Pin the just-materialized tree (hashed + legacy manifests). Targeting
+	// `home` works because the manifest machinery is layout-agnostic: the
+	// agents dir resolves to ~/.agents and the files_root scope is simply
+	// absent there. NOTE: never call writeManifest(globalAgentsDir) here — it
+	// appends "/.agents" itself and used to crash global installs with ENOENT.
+	performGenerateManifest(home, flags);
 
 	if (!selections.includes("opencode")) {
 		const globalCommands = path.join(globalAgentsDir, "commands");
@@ -871,7 +907,10 @@ async function performReconfigure(targetDir, flags) {
 			logWarn(`Core refresh during reconfigure failed: ${e.message}`);
 		}
 		writeVersionFile(targetDir);
-		writeManifest(targetDir);
+		// Pin the just-materialized tree: shipping the repo manifest would
+	// fail the first verify (stale hashes + foreign files_root scope).
+	// Safe from TOFU: install/update just built this tree from source.
+	performGenerateManifest(targetDir, flags);
 	}
 
 	const projectName = path.basename(targetDir);
