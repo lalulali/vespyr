@@ -7,45 +7,45 @@
     {
       "harness_dir": "opencode",
       "config_files": [
-        ".opencode/**",
-        "opencode.json"
+        "**/.opencode/**",
+        "**/opencode.json"
       ],
       "scope": "T0"
     },
     {
       "harness_dir": "claude",
       "config_files": [
-        ".claude/**",
-        "CLAUDE.md"
+        "**/.claude/**",
+        "**/CLAUDE.md"
       ],
       "scope": "T0"
     },
     {
       "harness_dir": "cursor",
       "config_files": [
-        ".cursor/rules/**"
+        "**/.cursor/rules/**"
       ],
       "scope": "T0"
     },
     {
       "harness_dir": "github",
       "config_files": [
-        ".github/agents/**"
+        "**/.github/agents/**"
       ],
       "scope": "T0"
     },
     {
       "harness_dir": "windsurf",
       "config_files": [
-        ".windsurf/**",
-        ".windsurfrules"
+        "**/.windsurf/**",
+        "**/.windsurfrules"
       ],
       "scope": "T0"
     },
     {
       "harness_dir": "kiro",
       "config_files": [
-        ".kiro/**"
+        "**/.kiro/**"
       ],
       "scope": "T0"
     }
@@ -82,32 +82,18 @@
         "lockfile diff accompanying the pin change"
       ]
     },
-    "npm": [
-      {
-        "name": "",
-        "version": "",
-        "integrity": "",
-        "allowlist": true
-      }
-    ],
-    "github_refs": [
-      {
-        "repo": "",
-        "tag": "",
-        "commit_sha": "",
-        "allowlist": true
-      }
-    ]
+    "npm": [],
+    "github_refs": []
   },
   "rules": [
     {
       "id": "GH-1",
       "label": "INJ-HOOK",
-      "path": "**/.git/config,**/gitdir/config,**/.git/hooks/**,**/.husky/**",
+      "path": "**/.git/config,**/gitdir/config,**/.git/hooks/**,**/gitdir/hooks/**,**/.husky/**",
       "pattern": "(core\\.hooksPath|hooksPath)\\s*=|(pre-commit|pre-push|post-checkout|post-merge|prepare-commit-msg)\\s*$",
       "severity": "high",
       "mode": "parse",
-      "note": ""
+      "note": "P0-1 fix: .git/hooks/** + gitdir/hooks/** route to parse (previously walked but never matched). gitdir/ is the git-trackable alias for .git/."
     },
     {
       "id": "INJ-PROMPT",
@@ -164,7 +150,7 @@
       "severity": "medium",
       "mode": "regex",
       "scope": "filename",
-      "note": "applied to filenames + interpolated identifiers only, never full prose (supply-chain-audit-spec.md line 183; QA F-1)"
+      "note": "P1-3 narrowed: filename-scoped ONLY (walk-time rel), never content lines or interpolated identifiers. Prose $/parens are NOT findings."
     },
     {
       "id": "INJ-SECRET",
@@ -175,8 +161,8 @@
       "mode": "regex+entropy",
       "entropy": {
         "min_shannon_per_char": 2.6,
-        "window": "8-char sliding",
-        "note": "threshold 2.6 (max achievable for 8 distinct chars is 3.0; 3.5 was unreachable — rule could never fire). Regex match with entropy < threshold is NOT a finding (negative fixture: AKIA + repeated chars -> ~0.0)."
+        "window": 8,
+        "note": "P2: window is integer 8 (was '8-char sliding' string parsed by accident). threshold 2.6 (max achievable for 8 distinct chars is 3.0; 3.5 was unreachable — rule could never fire). Regex match with entropy < threshold is NOT a finding (negative fixture: AKIA + repeated chars -> ~0.0)."
       }
     },
     {
@@ -198,11 +184,11 @@
     {
       "id": "BEACON-1",
       "label": "S16-BEACON",
-      "path": "**/*.{js,sh,py,mjs,cjs,ps1,cmd,bat}",
+      "path": "**/*.{js,sh,py,mjs,cjs,ps1,cmd,bat},**/.git/hooks/**,**/gitdir/hooks/**,**/.husky/**",
       "pattern": "(curl|wget|Invoke-WebRequest)[^\\n|]*\\| *(?:sudo +)?(sh|bash|powershell|pwsh|iex|cmd)",
       "severity": "medium",
       "mode": "regex",
-      "note": "F-4 (Victor): extended to pwsh/iex/cmd + sudo; iex is canonical PowerShell download-exec"
+      "note": "F-4 (Victor): extended to pwsh/iex/cmd + sudo; iex is canonical PowerShell download-exec. Round-table 2026-09-08: hook paths appended (keywordless curl-pipe hooks exited 0 — extensionless hook filenames never matched the ext glob and vcsMeta skipped content rules; scanner exempts BEACON-1 from the vcsMeta guard)."
     }
   ],
   "fault_contract": {

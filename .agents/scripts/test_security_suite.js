@@ -63,30 +63,51 @@ runTest('Fault-Injection Contract: FAULT-1 Explicit Fault Flag (Exit 2)', () => 
   }
 });
 
-runTest('Fault-Injection Contract: FAULT-2 Explicit Fault Flag (Exit 2)', () => {
+// P1-1 fix: FAULT-2/3/4 must exercise DISTINCT compose failure paths (not a
+// generic stub). Each asserts exit 2 AND its FAULT-N-specific substring
+// (subprocess killed / offline / corrupt manifest). A shared generic message
+// fails these tests (vacuous-pass guard).
+function assertFaultInject(faultId, mustContain) {
   try {
-    execFileSync('node', [path.join(SCRIPTS_DIR, 'security-scan.js'), '--fault-inject', 'FAULT-2'], { cwd: ROOT, encoding: 'utf8', stdio: 'pipe' });
-    throw new Error('Expected exit 2, got 0');
+    execFileSync('node', [path.join(SCRIPTS_DIR, 'security-scan.js'), '--fault-inject', faultId, '--spec', SPEC, '--json'], { cwd: ROOT, encoding: 'utf8', stdio: 'pipe' });
+    throw new Error(`Expected exit 2, got 0 (${faultId})`);
   } catch (e) {
-    if (e.status !== 2) throw new Error(`Expected exit code 2, got ${e.status}`);
+    if (e.status !== 2) throw new Error(`Expected exit code 2, got ${e.status} (${faultId})`);
+    const out = String((e.stdout || '') + (e.stderr || ''));
+    if (!out.includes(mustContain)) {
+      throw new Error(`${faultId} missing distinct path marker "${mustContain}" (vacuous stub?) — got: ${out.slice(0, 200)}`);
+    }
   }
+}
+
+runTest('Fault-Injection Contract: FAULT-2 Explicit Fault Flag (Exit 2)', () => {
+  assertFaultInject('FAULT-2', 'FAULT-2');
 });
 
 runTest('Fault-Injection Contract: FAULT-3 Explicit Fault Flag (Exit 2)', () => {
-  try {
-    execFileSync('node', [path.join(SCRIPTS_DIR, 'security-scan.js'), '--fault-inject', 'FAULT-3'], { cwd: ROOT, encoding: 'utf8', stdio: 'pipe' });
-    throw new Error('Expected exit 2, got 0');
-  } catch (e) {
-    if (e.status !== 2) throw new Error(`Expected exit code 2, got ${e.status}`);
-  }
+  assertFaultInject('FAULT-3', 'FAULT-3');
 });
 
 runTest('Fault-Injection Contract: FAULT-4 Explicit Fault Flag (Exit 2)', () => {
-  try {
-    execFileSync('node', [path.join(SCRIPTS_DIR, 'security-scan.js'), '--fault-inject', 'FAULT-4'], { cwd: ROOT, encoding: 'utf8', stdio: 'pipe' });
-    throw new Error('Expected exit 2, got 0');
-  } catch (e) {
-    if (e.status !== 2) throw new Error(`Expected exit code 2, got ${e.status}`);
+  assertFaultInject('FAULT-4', 'FAULT-4');
+});
+
+runTest('Fault-Injection Distinctness: FAULT-2/3/4 messages differ', () => {
+  const outs = {};
+  for (const fid of ['FAULT-2', 'FAULT-3', 'FAULT-4']) {
+    try {
+      execFileSync('node', [path.join(SCRIPTS_DIR, 'security-scan.js'), '--fault-inject', fid, '--spec', SPEC, '--json'], { cwd: ROOT, encoding: 'utf8', stdio: 'pipe' });
+    } catch (e) {
+      outs[fid] = String(e.stdout || '');
+    }
+  }
+  if (outs['FAULT-2'] === outs['FAULT-3'] || outs['FAULT-2'] === outs['FAULT-4'] || outs['FAULT-3'] === outs['FAULT-4']) {
+    throw new Error('FAULT-2/3/4 messages are not distinct (generic stub — P1-1)');
+  }
+  for (const [fid, needle] of [['FAULT-2', 'subprocess'], ['FAULT-3', 'offline'], ['FAULT-4', 'manifest']]) {
+    if (!outs[fid].toLowerCase().includes(needle)) {
+      throw new Error(`${fid} message missing "${needle}" (real compose path?) — got: ${outs[fid].slice(0, 200)}`);
+    }
   }
 });
 
@@ -267,21 +288,65 @@ runTest('CLI Manifest Verification Contract (fail-closed bootstrap, tamper, extr
   }
 });
 
-// 7. Held-Out Evaluation Dataset
+// 7. Held-Out Evaluation Dataset (P1-6 fix: per-file/per-rule recall —
+// dir-exit-only masked regressed rules; one firing file of six passed).
 runTest('Held-Out Recall Evaluation (evals/security/held_out/)', () => {
   const heldOutPos = path.join(ROOT, 'evals', 'security', 'held_out', 'positive');
   const heldOutNeg = path.join(ROOT, 'evals', 'security', 'held_out', 'negative');
-  
+
   // Positives must exit 1 (findings detected)
+  let posJson = '';
   try {
-    execFileSync('node', [path.join(SCRIPTS_DIR, 'security-scan.js'), '--dir', heldOutPos, '--spec', SPEC], { cwd: ROOT, encoding: 'utf8', stdio: 'pipe' });
+    execFileSync('node', [path.join(SCRIPTS_DIR, 'security-scan.js'), '--dir', heldOutPos, '--spec', SPEC, '--json'], { cwd: ROOT, encoding: 'utf8', stdio: 'pipe' });
     throw new Error('Held-out positive scan expected exit 1, got 0');
   } catch (e) {
     if (e.status !== 1) throw new Error(`Held-out positive expected exit 1, got ${e.status}`);
+    posJson = e.stdout || '';
   }
 
-  // Negatives must exit 0 (clean)
-  execFileSync('node', [path.join(SCRIPTS_DIR, 'security-scan.js'), '--dir', heldOutNeg, '--spec', SPEC], { cwd: ROOT, encoding: 'utf8', stdio: 'pipe' });
+  // P1-6: per-file/per-rule assertions — every expected positive file must
+  // fire its expected rule (a single firing file no longer passes).
+  const expectedPos = [
+    { file: 'adv-prompt-override.md', rule: 'INJ-PROMPT' },
+    { file: 'adv-role-hijack.md', rule: 'INJ-ROLE' },
+    { file: 'adv-tool-smuggling.md', rule: 'INJ-TOOL' },
+    { file: 'adv-secret.md', rule: 'INJ-SECRET' },
+    { file: 'adv-beacon.sh', rule: 'BEACON-1' },
+    { file: 'adv-template.template.md', rule: 'INJ-TEMPLATE' },
+  ];
+  let parsed;
+  try {
+    parsed = JSON.parse(posJson);
+  } catch (err) {
+    throw new Error('Held-out positive scan output unparseable (expected --json findings)');
+  }
+  const findings = parsed.findings || [];
+  for (const exp of expectedPos) {
+    const hit = findings.find((f) => String(f.path || '').endsWith(exp.file) && f.rule === exp.rule);
+    if (!hit) {
+      const got = findings.map((f) => `${f.rule}:${f.path}`).join(', ') || '(none)';
+      throw new Error(`Held-out MISS: ${exp.file} expected ${exp.rule} (got: ${got})`);
+    }
+  }
+  // No unexpected rule collapse: at least 5 distinct rules must fire
+  // (guards against a single over-broad rule masking regressions).
+  const distinctRules = new Set(findings.map((f) => f.rule));
+  if (distinctRules.size < 5) {
+    throw new Error(`Held-out rule diversity collapsed: only ${distinctRules.size} distinct rules (${[...distinctRules].join(',')})`);
+  }
+
+  // Negatives must exit 0 (clean) — per-file: no finding may reference a
+  // negative fixture path.
+  let negJson = '';
+  try {
+    negJson = execFileSync('node', [path.join(SCRIPTS_DIR, 'security-scan.js'), '--dir', heldOutNeg, '--spec', SPEC, '--json'], { cwd: ROOT, encoding: 'utf8', stdio: 'pipe' });
+  } catch (e) {
+    throw new Error(`Held-out negative expected exit 0, got ${e.status}`);
+  }
+  const negParsed = JSON.parse(negJson);
+  if ((negParsed.findings || []).length !== 0) {
+    throw new Error(`Held-out negative expected 0 findings, got ${(negParsed.findings || []).length}`);
+  }
 });
 
 // 8. Adversarial Mutation Evaluation

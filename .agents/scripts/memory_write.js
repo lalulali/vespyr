@@ -43,7 +43,7 @@ const path = require('path');
 const { execFileSync } = require('child_process');
 
 const MEMORY_DIR = path.join(process.cwd(), 'artifacts', 'memory');
-const SCRIPTS_DIR = path.dirname(process.argv[1]);
+const SCRIPTS_DIR = __dirname;
 // 02o.1: all memory-file mutations serialize through one project lock.
 // Scope covers dedupe → append → compaction atomically (TOCTOU closure,
 // gate-review Vera-a). LOCK_TIMEOUT is a loud rejection (exit 1), never a
@@ -79,7 +79,11 @@ const SECRET_PATTERNS = [
   { name: 'AWS Access Key', regex: /\b(AKIA|ABIA|ACCA|ASIA)[0-9A-Z]{16}\b/g },
   { name: 'GitHub Token', regex: /\b(ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9_]{36,255}\b/g },
   { name: 'Anthropic Key', regex: /\bsk-ant-[A-Za-z0-9\-_]{16,}\b/g },
-  { name: 'OpenAI Key', regex: /\bsk-[A-Za-z0-9]{16,}\b/g },
+  // P1 (secret-scrub follow-up): unified with scanner INJ-SECRET sk- class.
+  // Was sk-[A-Za-z0-9]{16,} (no -/_ → missed sk-proj-… which carries hyphens).
+  // Now sk-[A-Za-z0-9_-]{20,} mirrors audit-spec.json (covers sk-proj-…).
+  { name: 'OpenAI Key', regex: /\bsk-[A-Za-z0-9\-_]{20,}\b/g },
+  { name: 'Google AI Key', regex: /\bAIza[0-9A-Za-z\-_]{35}\b/g },
   { name: 'Slack Token', regex: /\bxox[baprs]-[A-Za-z0-9\-_]{8,}\b/g },
   { name: 'Stripe Key', regex: /\b(?:sk|rk|pk)_(?:live|test)_[A-Za-z0-9]{8,}\b/g },
   { name: 'Env Assignment', regex: /^\s*(?:export\s+)?(?:API[_-]?KEY|SECRET|PASSWORD|TOKEN)\s*=\s*[A-Za-z0-9\-_.~+/=]{8,}\s*$/gmi },

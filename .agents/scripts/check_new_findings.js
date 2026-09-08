@@ -44,6 +44,27 @@ function main() {
     return;
   }
   const baseKeys = new Set((baseline.findings || []).map((f) => `${f.rule}|${f.path}|${f.line || 0}`));
+  // Drift gate (§1.1, round-table 2026-09-08): scanner + spec hashes pinned in
+  // the baseline; unreviewed drift is a tool failure (exit 2). Absent fields
+  // in older baselines are skipped; present-but-stale fails closed.
+  {
+    const crypto = require('crypto');
+    const sha16 = (p) => crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex').slice(0, 16);
+    if (baseline.scanner_sha256_prefix && baseline.scanner_sha256_prefix !== sha16(SCAN)) {
+      console.error(
+        `FAIL-CLOSED: scanner drift without human-reviewed re-baseline (live ${sha16(SCAN)} != pinned ${baseline.scanner_sha256_prefix})`
+      );
+      process.exitCode = 2;
+      return;
+    }
+    if (baseline.spec_sha256_prefix && baseline.spec_sha256_prefix !== sha16(SPEC)) {
+      console.error(
+        `FAIL-CLOSED: spec drift without human-reviewed re-baseline (live ${sha16(SPEC)} != pinned ${baseline.spec_sha256_prefix})`
+      );
+      process.exitCode = 2;
+      return;
+    }
+  }
   // O-3 (Victor): line-shift resilience — a finding that moved lines within
   // the same file (rule + identical normalized text) matches its baseline
   // entry via a path+detail key, so doc edits don't churn triage. Genuinely

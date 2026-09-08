@@ -49,12 +49,17 @@ Each row maps a harness adapter to the config files it produces/consumes, derive
 
 | harness_dir | config_files (glob) | T0? | Adapter behavior in `bin/cli.js` |
 |---|---|---|---|
-| opencode | `.opencode/**`, `opencode.json` | T0 | `.opencode` symlink → `.agents`; root `opencode.json` is the live config (present in this repo) |
-| claude | `.claude/**`, `CLAUDE.md` | T0 | `.claude` symlink → `.agents` + root `CLAUDE.md` |
-| cursor | `.cursor/rules/**` | T0 | transpiled `*.mdc` rules; global: `~/Library/Application Support/Cursor/User/globalRules` (darwin) or `~/.config/Cursor/User/globalRules` |
-| github | `.github/agents/**` | T0 | transpiled `*.yml` Copilot agents; global `~/.config/github-copilot` |
-| windsurf | `.windsurf/**`, `.windsurfrules` | T0 | `.windsurf/workflows` symlink + `.windsurfrules` symlink |
-| kiro | `.kiro/**` | T0 | `.kiro/steering/AGENTS.md` + `.kiro/skills` symlink |
+| opencode | `**/.opencode/**`, `**/opencode.json` | T0 | `.opencode` symlink → `.agents`; root `opencode.json` is the live config (present in this repo) |
+| claude | `**/.claude/**`, `**/CLAUDE.md` | T0 | `.claude` symlink → `.agents` + root `CLAUDE.md` |
+| cursor | `**/.cursor/rules/**` | T0 | transpiled `*.mdc` rules; global: `~/Library/Application Support/Cursor/User/globalRules` (darwin) or `~/.config/Cursor/User/globalRules` |
+| github | `**/.github/agents/**` | T0 | transpiled `*.yml` Copilot agents; global `~/.config/github-copilot` |
+| windsurf | `**/.windsurf/**`, `**/.windsurfrules` | T0 | `.windsurf/workflows` symlink + `.windsurfrules` symlink |
+| kiro | `**/.kiro/**` | T0 | `.kiro/steering/AGENTS.md` + `.kiro/skills` symlink |
+
+> `**/` prefix (P0 follow-up): matches both repo-root (`opencode.json`) and
+> nested (`positive/opencode.json`) paths. The pre-fix table (`opencode.json`
+> without prefix) missed nested fixtures — corpus-root scan silently dropped
+> INJ-CONFIG (11 vs 12 findings). `**/X` is a superset (root still matches).
 
 Detection markers (mirrors `detectInstalledHarnesses`): `.opencode` exists · `.claude` exists · `.cursor/rules` dir exists · `.github/agents` dir exists · `.windsurf/workflows` exists · `.kiro/steering` **or** `.kiro/skills` exists. A root `CLAUDE.md` without a `.claude` dir is **not** a detection marker per the registry (documented limitation: it is still scanned when the row matches by file glob).
 
@@ -77,7 +82,7 @@ Row matching is **exact directory-name matching** — no prefix, suffix, or case
 
 ## 3. Pin-Store Policy
 
-`audit-spec.json → pin_store` defines two collections with a machine-checkable `policy` object. Empty mandatory fields make a row **invalid** → scanner errors (exit 2, fail-closed); placeholder rows below are schema documentation, not valid pins.
+`audit-spec.json → pin_store` defines two collections with a machine-checkable `policy` object. Empty arrays = zero pins (current verified state §1.2: zero deps, zero refs). Any present row with empty mandatory fields is **invalid** → scanner errors (exit 2, fail-closed); no placeholder rows exist (P1-4 fix — former empty-string `allowlist:true` placeholders would have failed validation).
 
 ### 3.1 npm pins
 
@@ -140,6 +145,27 @@ The published `vespyr` package **has no install scripts today** (verified §1.2)
 3. Beacon scan: BEACON-1 rule over `bin/`, `.agents/`, and the package `files` list (S16) — phone-home/curl-pipe patterns.
 4. Result artifacts: findings list + updated pin-store rows, fed back through the §3.3 human review.
 
+### 5.3 `node_modules` scan policy (P0-2 fix, binding)
+
+- **Default: skipped but EXPLICIT.** The content scanner skips `node_modules/`
+  trees by default (determinism/perf — vendored trees are large and churn
+  independently of reviewed diffs). The skip is recorded in output
+  (`skipped_node_modules` in `--json`, stderr notice otherwise) — never silent.
+- **Opt-in full scan:** `--include-node-modules` descends into `node_modules/`
+  (symlinked roots route to INJ-SYMLINK). Use for postinstall/beacon triage
+  when vendored content is suspect.
+- **Supply-chain verdict for skipped trees** comes from pin-store (§3) +
+  `--compose` (§6: `npm audit` subprocess + install-script policy), not from
+  content regexes. A skipped tree is "unscanned content, pinned verdict" —
+  not "clean".
+- **CI mandate (`.github/workflows/security.yml`, round-table 2026-09-08):**
+  `--compose` runs on every gated push/PR (exit 2 fails the build); a
+  `node_modules` exec-risk gate scans vendored trees with
+  `--include-node-modules` and fails on any `BEACON-1`/`INJ-SYMLINK` there.
+  `INJ-OBFUSC`/`INJ-SECRET` noise in third-party code (433 + 3 hits measured
+  2026-09-08) is excluded from this gate by rule — full-clean on vendored
+  code is unachievable and would keep CI permanently red.
+
 ---
 
 ## 6. Postinstall / Transitive-Dep Risk Triage Procedure
@@ -158,6 +184,18 @@ Composition of existing tooling (F1.47 spec: "scan.js stays thin — composes ex
 
 **Subprocess failure semantics:** killed `npm audit`/OSV/socket.dev subprocess, corrupt manifest, offline network → **exit 2** (tool failure = fail-closed, never a pass) — fault-injection matrix owned by Nina (02f §9).
 
+**Scanner mechanics (`security-scan.js --compose`, P1-1/P1-2 fix):** default scan
+stays deterministic/offline. `--compose` opts in and (a) re-validates
+pin-store schema (§3), (b) enforces zero-install-scripts policy (§5.1 →
+INJ-CONFIG finding on `package.json`), (c) shells out to `npm audit --json`
+via `child_process` (registry only). Zero-dep/no-lockfile repos skip the
+subprocess (clean). Missing lockfile with deps → FAULT-4 (S15); offline →
+FAULT-3; killed/non-zero/missing binary → FAULT-2. `--fault-inject
+FAULT-2/3/4` exercises these exact paths with distinct messages (tests assert
+substrings, not just exit 2). `--allowlist-file <path>` loads a
+human-reviewed suppression (`{rules:{RULE:[globs]}}` or
+`{excludes:[{rule,path}]}`); unreadable/invalid → exit 2.
+
 ---
 
 ## 7. Rule Catalog (imported verbatim from `audit-spec.json → rules`)
@@ -166,24 +204,24 @@ Every scanner rule maps to a taxonomy label (02f §7); every label has a rule **
 
 | ID | Label | Path | Pattern (abridged) | Severity | Mode |
 |---|---|---|---|---|---|
-| GH-1 | INJ-HOOK | `**/.git/config,**/.husky/**` | `(core\.hooksPath|hooksPath)\s*=\|` hook-name lines (`pre-commit`, `pre-push`, `post-checkout`, `post-merge`, `prepare-commit-msg`) | high | parse |
+| GH-1 | INJ-HOOK | `**/.git/config,**/gitdir/config,**/.git/hooks/**,**/gitdir/hooks/**,**/.husky/**` | `(core\.hooksPath|hooksPath)\s*=\|` hook-name lines (`pre-commit`, `pre-push`, `post-checkout`, `post-merge`, `prepare-commit-msg`) | high | parse |
 | INJ-PROMPT | INJ-PROMPT | `**/*.md` | `ignore (all|any)? (previous\|prior\|earlier) instructions` + disregard/forget variants | high | regex |
 | INJ-TOOL | INJ-TOOL | `**/*.md` | `<(invoke\|use_mcp_tool\|execute_command\|tool_use\|antml:invoke)[^>]*>` (fabricated invocation blocks) | high | regex |
 | INJ-OBFUSC | INJ-OBFUSC | `**` | `[A-Za-z0-9+/]{40,}={0,2}` (base64 blob heuristic) or `(\x[0-9a-fA-F]{2}){16,}` (hex blob) | medium | regex |
 | INJ-ROLE | INJ-ROLE | `**/*.md` | `you are now (the )?(system\|root\|superuser)` / `act as (the )?system` / `new system prompt:` | medium | regex |
 | INJ-TEMPLATE | INJ-TEMPLATE | `**/templates/**,**/*.template.*` | `\{\{\s*[^}]{0,40}\}\}` or `<%[=-]?…%>` (EJS-style) | medium | regex |
-| INJ-PATH | INJ-PATH | `**` | `(\.[/\\])` traversal segments, `^[\\/]{2}` UNC/absolute, `` [`$();|&] `` shell metachar class | medium | regex |
-| INJ-SECRET | INJ-SECRET | `**` | known formats (`AKIA…`, `ghp_…`, `sk-…`, `xox…`, `AIza…`) + `(api_key|secret|token|password)\s*[:=]` with 16+ char value | medium | regex+entropy |
-| INJ-CONFIG | INJ-CONFIG | `{T0}` (pattern-table union) | `mcpServers` / `"command": "…"` spawn keys / `plugins?` entries | high | regex |
+| INJ-PATH | INJ-PATH | `**` | `(\.[/\\])` traversal segments, `^[\\/]{2}` UNC/absolute, `` [`$();|&] `` shell metachar class | medium | regex (filename-scope only) |
+| INJ-SECRET | INJ-SECRET | `**` | known formats (`AKIA…`, `ghp_…`, `sk-…`, `xox…`, `AIza…`) + `(api_key|secret|token|password)\s*[:=]` with 16+ char value | medium | regex+entropy (window integer 8) |
+| INJ-CONFIG | INJ-CONFIG | `{T0}` (pattern-table union, `**/`-prefixed) | `mcpServers` / `"command": "…"` spawn keys / `plugins?` entries | high | regex |
 | INJ-SYMLINK | INJ-SYMLINK | `**` | sentinel `<lstat:target_outside_repo>` — lstat every symlink; target outside repo tree = finding | medium | lstat |
-| BEACON-1 | S16-BEACON | `**/*.{js,sh,py,mjs,cjs}` | `(curl\|wget\|Invoke-WebRequest)[^\n|]*\| *(sh\|bash\|powershell)` (curl-pipe exfil/download patterns) | medium | regex |
+| BEACON-1 | S16-BEACON | `**/*.{js,sh,py,mjs,cjs,ps1,cmd,bat},**/.git/hooks/**,**/gitdir/hooks/**,**/.husky/**` | `(curl\|wget\|Invoke-WebRequest)[^\n|]*\| *(sh\|bash\|powershell\|pwsh\|iex\|cmd)` (+`sudo`) | medium | regex |
 
 **Application context notes (documented here, enforced by scan.js spec F1.47):**
 
-- INJ-PATH regex is applied to **filenames and interpolated identifier values** (task IDs, template arguments), **not** full prose — `$`/parens in natural language are not findings. Traversal (`..\`/`../`, backslash + UNC variants) applies to filenames during the walk; `security-scan.js` owns the walk mechanics.
-- INJ-OBFUSC base64 heuristic is documented-FP-prone on `data:` URIs and long tokens; F1.54's FP budget (≤1% informational) is measured against the frozen corpus, and `data:image/...;base64,` is an explicit known-FP class the corpus records.
+- INJ-PATH regex is applied to **filenames ONLY** (P1-3 narrowed — walk-time `rel`, never content lines; former "filenames + interpolated identifiers" overclaimed what code enforces). `$`/parens in natural language are not findings. Traversal (`..\`/`../`, backslash + UNC variants) applies to filenames during the walk; `security-scan.js` owns the walk mechanics.
+- INJ-OBFUSC base64 heuristic is documented-FP-prone on `data:` URIs and long tokens; F1.54's FP budget (≤1% informational) is measured against the frozen corpus, and `data:image/...;base64,` is an explicit known-FP class the corpus records. Detection normalizes zero-width/comment/homoglyph evasions before matching (P1-5).
 - INJ-ROLE deliberately does **not** match "You are an expert…" — legitimate persona identity lines are T0-canonical content, not findings; only system-role *override* phrasings match.
-- GH-1 additionally requires the executable scan of `.husky/` (files with exec bits) and `.git/config` `core.hooksPath` parse — the pattern above covers the config surface; executable-bit inspection is scanner mechanics.
+- GH-1 routes `.git/config` + `.git/hooks/**` + `.husky/**` (P0-1 fix); `gitdir/` is the git-trackable alias for `.git/` in fixtures. BEACON-1 additionally covers hook paths (round-table 2026-09-08: keywordless curl-pipe hooks exited 0 — GH-1 parse sees keywords only, so hook bodies need the pipe-to-shell rule; `*.sample` templates stay skipped, staged-rename TOCTOU is a recorded residual). Executable-bit inspection is scanner mechanics.
 - The scanner's own `bin/cli.js` and its allowlisted scripts are on the checksum allowlist (F1.47 §9); BEACON-1 exempts nothing else by default — a curl-pipe in any other script is a finding under the "not a distribution channel" policy (02e, §3 S6).
 - Tier-promotion write-time guard (S14) and re-baseline diff review (S12) are **behaviors** of scan.js, not content rules — this spec supplies the content patterns they run against.
 
@@ -203,9 +241,9 @@ Every scanner rule maps to a taxonomy label (02f §7); every label has a rule **
 
 ## 9. Acceptance Criteria (DoD for F1.55)
 
-1. `audit-spec.json` parses via `JSON.parse` and passes the embedded invariant checks (no harness names in rules; empty mandatory pin fields only in placeholder rows).
-2. Pattern table matches `bin/cli.js` registry 1:1 — verified against `HARNESS_OPTIONS`, `detectInstalledHarnesses`, `harnessLinkMap` (6 rows, §2.1).
-3. All 10 taxonomy labels (F1.51) have a rule (INJ-HOOK via GH-1); BEACON-1 covers S16; no label is rule-less and no rule is label-less in the JSON.
+1. `audit-spec.json` parses via `JSON.parse` and passes the embedded invariant checks (no harness names in rules; pin_store empty arrays = zero pins, any present row fully valid).
+2. Pattern table matches `bin/cli.js` registry 1:1 — verified against `HARNESS_OPTIONS`, `detectInstalledHarnesses`, `harnessLinkMap` (6 rows, §2.1; `**/`-prefixed for nested+root matching).
+3. All 11 rules (GH-1 + 10 taxonomy labels incl. BEACON-1/S16) have pos+neg fixtures; no label is rule-less and no rule is label-less in the JSON.
 4. `{T0}` resolution semantics documented; INJ-CONFIG contains zero harness names.
 5. Section 1.2 repo-state findings are current as of 2026-08-08 (zero deps, zero install scripts, no lockfile).
 6. This spec is consumed, not re-derived, by F1.47; pattern drift fails fail-closed.

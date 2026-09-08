@@ -65,6 +65,48 @@ jobs:
       - name: Repo-wide NEW-FINDINGS-ONLY gate (02f DoD #8)
         run: node .agents/scripts/check_new_findings.js
 
+      - name: Composed supply-chain checks (--compose, mandatory)
+        shell: bash
+        run: |
+          set -e
+          SPEC=security/audit-spec.json
+          # --compose runs pin-store validation, the zero-install-scripts
+          # policy, and the npm-audit subprocess. Exit 2 = composed tool
+          # failure (fail-closed); exit 0/1 = checks ran (content findings
+          # are owned by the NEW-FINDINGS-ONLY gate, not this step).
+          set +e
+          node .agents/scripts/security-scan.js --dir . --spec "$SPEC" --compose --json > /dev/null
+          CODE=$?
+          set -e
+          if [ "$CODE" -eq 2 ]; then
+            echo "--compose reported tool failure (exit 2)"; exit 1
+          fi
+          echo "--compose checks ran clean (exit $CODE) ✓"
+
+      - name: node_modules exec-risk gate (BEACON-1 + INJ-SYMLINK only)
+        shell: bash
+        run: |
+          set -e
+          SPEC=security/audit-spec.json
+          # P0-2 mandate: vendored trees must be SCANNED in CI, not skipped.
+          # Gated rules are the exec classes only — INJ-OBFUSC (433 hits) and
+          # INJ-SECRET (3 hits) in third-party code are prose/placeholder
+          # noise (measured 2026-09-08), owned by pin-store + --compose, not
+          # by content regexes. Any beacon or escaped symlink in node_modules
+          # fails the build.
+          node .agents/scripts/security-scan.js --dir . --spec "$SPEC" --json --include-node-modules > /tmp/include-scan.json || true
+          node -e "
+            const fs = require('fs');
+            const d = JSON.parse(fs.readFileSync('/tmp/include-scan.json', 'utf8'));
+            const bad = (d.findings || []).filter((f) => f.path.includes('node_modules') && (f.rule === 'BEACON-1' || f.rule === 'INJ-SYMLINK'));
+            if (bad.length) {
+              console.error('EXEC-RISK findings in node_modules:');
+              for (const f of bad.slice(0, 20)) console.error('  [' + f.severity + '] ' + f.rule + ' ' + f.path + ' — ' + (f.detail || '').slice(0, 100));
+              process.exit(1);
+            }
+            console.log('node_modules exec-risk clean (BEACON-1 + INJ-SYMLINK: 0) ✓');
+          "
+
       - name: R47 drift monitor self-test
         shell: bash
         run: |

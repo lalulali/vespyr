@@ -555,14 +555,17 @@ function searchArchive(query, maxResults = 5) {
   }
 
   scored.sort((a, b) => b.score - a.score);
+  // Secret-scrub follow-up (P1): searchArchive read path had NO scrub call
+  // (filterMemory scrubs previews; archive returned raw summaries). Scrub +
+  // sanitize here before returning to any LLM consumer.
   const results = scored.slice(0, maxResults).map(e => ({
     id: e.id,
-    title: e.title,
+    title: sanitizeContent(scrubSecrets(String(e.title || ''))),
     domain: e.domain,
     date: e.date,
     status: e.status,
     score: e.score,
-    summary: e.summary,
+    summary: sanitizeContent(scrubSecrets(String(e.summary || ''))),
     location: e.location
   }));
 

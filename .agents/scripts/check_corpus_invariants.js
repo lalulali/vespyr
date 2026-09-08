@@ -90,6 +90,29 @@ function main() {
   const run1 = run(['--dir', CORPUS, '--spec', SPEC, '--json']);
   const run2 = run(['--dir', CORPUS, '--spec', SPEC, '--json']);
   if (run1.out !== run2.out) failures.push('corpus-root scan: nondeterministic output across two runs');
+  // (e) drift gate (§1.1, round-table 2026-09-08): scanner + spec hashes are
+  // pinned in the baseline; unreviewed drift fails the gate. Fields absent in
+  // older baselines are skipped (backward compat); present-but-stale fails.
+  {
+    const crypto = require('crypto');
+    const sha16 = (p) => crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex').slice(0, 16);
+    let baselineForDrift = null;
+    if (fs.existsSync(BASELINE)) {
+      try { baselineForDrift = JSON.parse(fs.readFileSync(BASELINE, 'utf8')); } catch (e) { /* handled below */ }
+    }
+    if (baselineForDrift) {
+      if (baselineForDrift.scanner_sha256_prefix && baselineForDrift.scanner_sha256_prefix !== sha16(SCANNER)) {
+        failures.push(
+          `drift without human-reviewed re-baseline: scanner sha ${sha16(SCANNER)} != pinned ${baselineForDrift.scanner_sha256_prefix} (re-pin via reviewed regen)`
+        );
+      }
+      if (baselineForDrift.spec_sha256_prefix && baselineForDrift.spec_sha256_prefix !== sha16(SPEC)) {
+        failures.push(
+          `drift without human-reviewed re-baseline: spec sha ${sha16(SPEC)} != pinned ${baselineForDrift.spec_sha256_prefix} (re-pin via reviewed regen)`
+        );
+      }
+    }
+  }
   if (fs.existsSync(BASELINE)) {
     const baseline = JSON.parse(fs.readFileSync(BASELINE, 'utf8'));
     const cur = JSON.parse(run1.out);
