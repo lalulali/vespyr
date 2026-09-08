@@ -21,7 +21,9 @@ module.exports = {
 	description: "scaffolds .github/copilot-instructions.md & .github/skills/ symlink",
 
 	detectPaths({ targetDir }) {
-		return [`${targetDir}/.github`];
+		// Specific Vespyr emissions only — NOT bare `.github/` (every repo has
+		// one; matching it made detection a false-positive factory).
+		return [`${targetDir}/.github/copilot-instructions.md`, `${targetDir}/.github/skills`];
 	},
 
 	globalPath({ home }) {
@@ -37,7 +39,11 @@ module.exports = {
 		const path = require("path");
 		const { targetDir, agentsTarget, method, handleConflict, createLinkOrCopy, log } = ctx;
 		const githubDir = path.join(targetDir, ".github");
-		fs.mkdirSync(githubDir, { recursive: true });
+		if (ctx.dryRun) {
+			ctx.logDry(`Would create ${path.relative(targetDir, githubDir) || ".github"}/`);
+		} else {
+			fs.mkdirSync(githubDir, { recursive: true });
+		}
 
 		const instructionsPath = path.join(githubDir, "copilot-instructions.md");
 		if (!fs.existsSync(instructionsPath)) {
@@ -118,12 +124,23 @@ module.exports = {
 				fs.rmdirSync(skillsDir);
 			}
 		} catch (e) {}
+		// Only remove the Vespyr-owned stub (install writes it solely when
+		// absent, so a pre-existing user file without the marker is theirs).
 		const copilotInstructions = path.join(githubTargetDir, "copilot-instructions.md");
-		if (fs.existsSync(copilotInstructions)) {
-			try {
+		try {
+			const st = fs.lstatSync(copilotInstructions);
+			if (st.isSymbolicLink()) {
 				fs.unlinkSync(copilotInstructions);
-			} catch (e) {}
-		}
+			} else if (st.isFile()) {
+				let owned = false;
+				try {
+					owned = fs.readFileSync(copilotInstructions, "utf8").includes("Vespyr-managed");
+				} catch {}
+				if (owned) {
+					fs.unlinkSync(copilotInstructions);
+				}
+			}
+		} catch (e) {}
 		removeDirIfEmpty(githubTargetDir);
 	},
 };

@@ -27,7 +27,7 @@ const {
   spliceMachineState
 } = require('../.agents/scripts/session_start.js');
 
-const { migrateMemory } = require('../.agents/scripts/migrate_memory_v2.js');
+const { migrateMemory } = require('../artifacts/archive/spent-codemods/migrate_memory_v2.js');
 
 function makeTempDir() {
   return fs.mkdtempSync(path.join(os.tmpdir(), 'vespyr-mem-test-'));

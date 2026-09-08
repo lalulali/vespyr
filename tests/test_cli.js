@@ -255,6 +255,7 @@ describe('Test 11: handleConflict()', () => {
 
   it('should keep symbolic link if method is symlink and points to .agents', () => {
     const linkPath = path.join(tmpDir, 'test-link');
+    fs.mkdirSync(path.join(tmpDir, '.agents'), { recursive: true });
     fs.symlinkSync('.agents', linkPath, 'dir');
 
     handleConflict(linkPath, 'test-link', tmpDir, 'symlink');
@@ -263,6 +264,18 @@ describe('Test 11: handleConflict()', () => {
     const stat = fs.lstatSync(linkPath);
     assert.ok(stat.isSymbolicLink());
     assert.strictEqual(fs.readlinkSync(linkPath), '.agents');
+  });
+
+  it('should repair a dangling .agents-shaped symlink so reinstall can recreate it', () => {
+    const linkPath = path.join(tmpDir, 'dangling-link');
+    fs.symlinkSync('.agents', linkPath, 'dir');
+    assert.strictEqual(fs.existsSync(linkPath), false, 'precondition: link must be dangling');
+
+    handleConflict(linkPath, 'dangling-link', tmpDir, 'symlink');
+
+    assert.throws(() => {
+      fs.lstatSync(linkPath);
+    }, /ENOENT/);
   });
 
   it('should delete symbolic link if method is symlink but points to wrong target', () => {
@@ -342,9 +355,92 @@ describe('Test 5: detectState()', () => {
     assert.strictEqual(detectState(tmpDir), 'installed');
   });
 
-  it('should detect repair if .agents folder exists but has no .vespyr-version file', () => {
+  it('should detect repair if .agents folder has Vespyr content but no .vespyr-version file', () => {
     fs.mkdirSync(path.join(tmpDir, '.agents'));
+    fs.writeFileSync(path.join(tmpDir, '.agents', 'GUARDRAILS.md'), 'core guardrails');
     assert.strictEqual(detectState(tmpDir), 'repair');
+  });
+});
+
+describe('Test 5b: detectState() foreign .agents vs repair classification', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = makeTempDir();
+  });
+
+  afterEach(() => {
+    cleanTempDir(tmpDir);
+  });
+
+  it('should detect fresh when .agents is empty', () => {
+    fs.mkdirSync(path.join(tmpDir, '.agents'));
+    assert.strictEqual(detectState(tmpDir), 'fresh');
+  });
+
+  it('should detect foreign when .agents holds only third-party content', () => {
+    // The reported scenario: a skill from another tool owns .agents/.
+    // Generic names (agents/, skills/) must NOT count as Vespyr fingerprints.
+    fs.mkdirSync(path.join(tmpDir, '.agents', 'skills', 'my-skill'), { recursive: true });
+    fs.writeFileSync(path.join(tmpDir, '.agents', 'skills', 'my-skill', 'SKILL.md'), 'third-party skill');
+    fs.mkdirSync(path.join(tmpDir, '.agents', 'agents'), { recursive: true });
+    fs.writeFileSync(path.join(tmpDir, '.agents', 'agents', 'custom.md'), 'third-party agent');
+    assert.strictEqual(detectState(tmpDir), 'foreign');
+  });
+
+  it('should still detect repair when Vespyr fingerprints are present', () => {
+    const { isVespyrAgentsDir } = require('../bin/cli.js');
+    const cases = [
+      ['.vespyr-manifest.json', '[]'],
+      ['manifest.json', '{"files":{}}'],
+      ['GUARDRAILS.md', 'guardrails'],
+      ['templates/system/x.md', 'template'],
+      ['scripts/orchestrator_state.js', 'orchestrator'],
+    ];
+    for (const [rel, content] of cases) {
+      const dir = makeTempDir();
+      try {
+        const full = path.join(dir, '.agents', rel);
+        fs.mkdirSync(path.dirname(full), { recursive: true });
+        fs.writeFileSync(full, content);
+        assert.strictEqual(isVespyrAgentsDir(path.join(dir, '.agents')), true, rel);
+        assert.strictEqual(detectState(dir), 'repair', rel);
+      } finally {
+        cleanTempDir(dir);
+      }
+    }
+  });
+
+  it('should back up a foreign .agents/ aside preserving content', () => {
+    const { backupExistingAgentsDir } = require('../bin/cli.js');
+    fs.mkdirSync(path.join(tmpDir, '.agents', 'skills'), { recursive: true });
+    fs.writeFileSync(path.join(tmpDir, '.agents', 'skills', 'keep.md'), 'user content');
+
+    const backupPath = backupExistingAgentsDir(tmpDir);
+
+    assert.strictEqual(fs.existsSync(path.join(tmpDir, '.agents')), false);
+    assert.ok(fs.existsSync(backupPath));
+    assert.strictEqual(fs.readFileSync(path.join(backupPath, 'skills', 'keep.md'), 'utf8'), 'user content');
+  });
+
+  it('should back up foreign .agents and fresh-install on init --yes (reported scenario)', async () => {
+    const { performForeignConflict } = require('../bin/cli.js');
+    fs.mkdirSync(path.join(tmpDir, '.agents', 'skills', 'my-skill'), { recursive: true });
+    fs.writeFileSync(path.join(tmpDir, '.agents', 'skills', 'my-skill', 'SKILL.md'), 'third-party skill');
+
+    await performForeignConflict(tmpDir, { harnesses: [], yes: true });
+
+    const entries = fs.readdirSync(tmpDir);
+    const backup = entries.find((f) => f.startsWith('.agents.backup.'));
+    assert.ok(backup, 'foreign .agents must be backed up aside');
+    assert.strictEqual(
+      fs.readFileSync(path.join(tmpDir, backup, 'skills', 'my-skill', 'SKILL.md'), 'utf8'),
+      'third-party skill',
+    );
+    const version = JSON.parse(fs.readFileSync(path.join(tmpDir, '.agents', '.vespyr-version'), 'utf8'));
+    assert.strictEqual(version.version, VERSION);
+    assert.strictEqual(fs.existsSync(path.join(tmpDir, '.agents', 'skills', 'my-skill')), false);
+    assert.strictEqual(detectState(tmpDir), 'installed');
   });
 });
 
@@ -553,6 +649,8 @@ describe('Test 10: parseFlags()', () => {
       verify: false,
       audit: false,
       manifest: false,
+      uninstall: false,
+      reconfigure: false,
       json: false,
       spec: null,
       command: null,
@@ -597,6 +695,13 @@ describe('Test 10: parseFlags()', () => {
     assert.strictEqual(result.syncDocs, true);
   });
 
+  it('should handle uninstall / reconfigure positionals', () => {
+    assert.strictEqual(parseFlags(['node', 'cli.js', 'uninstall']).command, 'uninstall');
+    assert.strictEqual(parseFlags(['node', 'cli.js', 'uninstall']).uninstall, true);
+    assert.strictEqual(parseFlags(['node', 'cli.js', 'reconfigure']).command, 'reconfigure');
+    assert.strictEqual(parseFlags(['node', 'cli.js', 'reconfigure']).reconfigure, true);
+  });
+
   it('should handle --install-git-hook', () => {
     const result = parseFlags(['node', 'cli.js', '--install-git-hook']);
     assert.strictEqual(result.installGitHook, true);
@@ -611,13 +716,25 @@ describe('Test 10: parseFlags()', () => {
 });
 
 describe('Test 10b: installGitHook()', () => {
-  it('should install post-push hook when .git exists', () => {
+  it('should install pre-push hook when .git exists (git has no post-push)', () => {
     const dir = makeTempDir();
     fs.mkdirSync(path.join(dir, '.git', 'hooks'), { recursive: true });
     const ok = installGitHook(dir);
     assert.strictEqual(ok, true);
-    const hook = fs.readFileSync(path.join(dir, '.git', 'hooks', 'post-push'), 'utf8');
+    const hook = fs.readFileSync(path.join(dir, '.git', 'hooks', 'pre-push'), 'utf8');
     assert.ok(hook.includes('orchestrator_state.js sync-context'));
+    assert.ok(!fs.existsSync(path.join(dir, '.git', 'hooks', 'post-push')), 'legacy post-push must not be created');
+    cleanTempDir(dir);
+  });
+
+  it('should migrate a legacy Vespyr post-push hook to pre-push', () => {
+    const dir = makeTempDir();
+    fs.mkdirSync(path.join(dir, '.git', 'hooks'), { recursive: true });
+    fs.writeFileSync(path.join(dir, '.git', 'hooks', 'post-push'), '#!/bin/sh\n# Vespyr: refresh\nnode .agents/scripts/orchestrator_state.js sync-context >/dev/null 2>&1 || true\n', { mode: 0o755 });
+    const ok = installGitHook(dir);
+    assert.strictEqual(ok, true);
+    assert.ok(!fs.existsSync(path.join(dir, '.git', 'hooks', 'post-push')), 'legacy hook removed');
+    assert.ok(fs.existsSync(path.join(dir, '.git', 'hooks', 'pre-push')));
     cleanTempDir(dir);
   });
 
@@ -625,17 +742,17 @@ describe('Test 10b: installGitHook()', () => {
     const dir = makeTempDir();
     const ok = installGitHook(dir);
     assert.strictEqual(ok, false);
-    assert.ok(!fs.existsSync(path.join(dir, '.git', 'hooks', 'post-push')));
+    assert.ok(!fs.existsSync(path.join(dir, '.git', 'hooks', 'pre-push')));
     cleanTempDir(dir);
   });
 
-  it('should not overwrite an existing non-Vespyr post-push hook', () => {
+  it('should not overwrite an existing non-Vespyr pre-push hook', () => {
     const dir = makeTempDir();
     fs.mkdirSync(path.join(dir, '.git', 'hooks'), { recursive: true });
-    fs.writeFileSync(path.join(dir, '.git', 'hooks', 'post-push'), '#!/bin/sh\necho custom\n', { mode: 0o755 });
+    fs.writeFileSync(path.join(dir, '.git', 'hooks', 'pre-push'), '#!/bin/sh\necho custom\n', { mode: 0o755 });
     const ok = installGitHook(dir);
     assert.strictEqual(ok, false);
-    const hook = fs.readFileSync(path.join(dir, '.git', 'hooks', 'post-push'), 'utf8');
+    const hook = fs.readFileSync(path.join(dir, '.git', 'hooks', 'pre-push'), 'utf8');
     assert.ok(hook.includes('custom'));
     assert.ok(!hook.includes('orchestrator_state.js'));
     cleanTempDir(dir);
@@ -703,6 +820,13 @@ describe('Test 13: surgicallyCleanupAgentsDir()', () => {
     fs.writeFileSync(path.join(targetAgents, 'GUARDRAILS.md'), 'core guardrails');
     fs.writeFileSync(path.join(targetAgents, '.vespyr-version'), 'version info');
 
+    // User-added files inside core folders must survive a surgical sweep
+    fs.mkdirSync(path.join(targetAgents, 'scripts'), { recursive: true });
+    fs.writeFileSync(path.join(targetAgents, 'scripts', 'my-helper.js'), 'user helper');
+    fs.writeFileSync(path.join(targetAgents, 'scripts', 'orchestrator_state.js'), 'core orchestrator');
+    fs.mkdirSync(path.join(targetAgents, 'references'), { recursive: true });
+    fs.writeFileSync(path.join(targetAgents, 'references', 'custom.md'), 'user reference');
+
     // Create custom files/skills
     fs.writeFileSync(path.join(targetAgents, 'agents', 'custom-agent.md'), 'my custom agent');
     fs.mkdirSync(path.join(targetAgents, 'skills', 'my-custom-skill'));
@@ -717,6 +841,11 @@ describe('Test 13: surgicallyCleanupAgentsDir()', () => {
     assert.strictEqual(fs.existsSync(path.join(targetAgents, 'GUARDRAILS.md')), false);
     assert.strictEqual(fs.existsSync(path.join(targetAgents, '.vespyr-version')), false);
     assert.strictEqual(fs.existsSync(path.join(targetAgents, 'commands')), false);
+
+    // Core entries inside core folders are removed, user files survive
+    assert.strictEqual(fs.existsSync(path.join(targetAgents, 'scripts', 'orchestrator_state.js')), false);
+    assert.strictEqual(fs.existsSync(path.join(targetAgents, 'scripts', 'my-helper.js')), true);
+    assert.strictEqual(fs.existsSync(path.join(targetAgents, 'references', 'custom.md')), true);
 
     // Custom files/skills should be preserved
     assert.strictEqual(fs.existsSync(targetAgents), true);
@@ -755,7 +884,7 @@ describe('Test 14: performUninstall() surgical project cleanup', () => {
     fs.mkdirSync(githubAgentsDir, { recursive: true });
     fs.writeFileSync(path.join(githubAgentsDir, 'founder.yml'), 'transpiled founder agent');
     fs.writeFileSync(path.join(githubAgentsDir, 'my-own-agent.yml'), 'user agent');
-    fs.writeFileSync(path.join(tmpDir, '.github', 'copilot-instructions.md'), 'copilot instructions');
+    fs.writeFileSync(path.join(tmpDir, '.github', 'copilot-instructions.md'), '<!-- Vespyr-managed — removed on uninstall. Canonical source: ./AGENTS.md -->\n');
 
     // Setup Windsurf workflows directory (copy method) with core skill and custom skill
     const windsurfWorkflowsDir = path.join(tmpDir, '.windsurf', 'workflows');
@@ -764,7 +893,10 @@ describe('Test 14: performUninstall() surgical project cleanup', () => {
     fs.writeFileSync(path.join(windsurfWorkflowsDir, 'validate-idea', 'SKILL.md'), 'core skill');
     fs.mkdirSync(path.join(windsurfWorkflowsDir, 'my-custom-skill'));
     fs.writeFileSync(path.join(windsurfWorkflowsDir, 'my-custom-skill', 'SKILL.md'), 'user skill');
-    fs.writeFileSync(path.join(tmpDir, '.windsurfrules'), 'windsurf rules');
+    // Vespyr-managed rules carry the marker/.agents path — safe to sweep.
+    fs.writeFileSync(path.join(tmpDir, '.windsurfrules'), '<!-- Vespyr-managed -->\nlink .agents/\n');
+    // User-authored rules without the marker must survive uninstall.
+    fs.writeFileSync(path.join(tmpDir, '.windsurfrules.user'), 'my own rules');
 
     // Run uninstall
     await performUninstall(tmpDir);
@@ -775,6 +907,7 @@ describe('Test 14: performUninstall() surgical project cleanup', () => {
     assert.strictEqual(fs.existsSync(path.join(tmpDir, '.github', 'copilot-instructions.md')), false);
     assert.strictEqual(fs.existsSync(path.join(windsurfWorkflowsDir, 'validate-idea')), false);
     assert.strictEqual(fs.existsSync(path.join(tmpDir, '.windsurfrules')), false);
+    assert.strictEqual(fs.existsSync(path.join(tmpDir, '.windsurfrules.user')), true, 'user-authored rules without marker survive');
 
     // Custom files preserved
     assert.strictEqual(fs.existsSync(path.join(rulesDir, 'my-own-rule.mdc')), true);
@@ -814,6 +947,50 @@ describe('Test 14: performUninstall() surgical project cleanup', () => {
     // Verify global harness got cleaned up surgically
     assert.strictEqual(fs.existsSync(globalOpencode), false);
     assert.strictEqual(fs.existsSync(agentsTarget), false);
+  });
+});
+
+describe('Test 14b: uninstall preserves user-owned files', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = makeTempDir();
+  });
+
+  afterEach(() => {
+    cleanTempDir(tmpDir);
+  });
+
+  it('should preserve user files inside commands/ (no source dir to compare)', async () => {
+    const agentsTarget = path.join(tmpDir, '.agents');
+    fs.mkdirSync(path.join(agentsTarget, 'commands'), { recursive: true });
+    fs.writeFileSync(path.join(agentsTarget, 'commands', 'my-command.md'), 'user command');
+    fs.writeFileSync(path.join(agentsTarget, '.vespyr-version'), JSON.stringify({ version: '1.7.0' }));
+
+    await performUninstall(tmpDir);
+
+    assert.strictEqual(
+      fs.readFileSync(path.join(agentsTarget, 'commands', 'my-command.md'), 'utf8'),
+      'user command',
+    );
+  });
+
+  it('should preserve pre-existing root docs without Vespyr markers', async () => {
+    const agentsTarget = path.join(tmpDir, '.agents');
+    fs.mkdirSync(agentsTarget);
+    fs.writeFileSync(path.join(agentsTarget, '.vespyr-version'), JSON.stringify({ version: '1.7.0' }));
+    fs.writeFileSync(path.join(tmpDir, 'AGENTS.md'), '# My own notes\nNothing to do with any engine.\n');
+    fs.writeFileSync(path.join(tmpDir, 'agent.md'), '# Vespyr quick ref\nSee .agents/ for details.\n');
+
+    await performUninstall(tmpDir);
+
+    assert.strictEqual(
+      fs.readFileSync(path.join(tmpDir, 'AGENTS.md'), 'utf8'),
+      '# My own notes\nNothing to do with any engine.\n',
+    );
+    assert.strictEqual(fs.existsSync(path.join(tmpDir, 'agent.md')), false);
+    const entries = fs.readdirSync(tmpDir);
+    assert.ok(entries.some((f) => f.startsWith('agent.md.uninstall-bak-')), 'managed doc must be backed up');
   });
 });
 
@@ -896,13 +1073,13 @@ describe('Test 16: Reconfiguration harness removal', () => {
     assert.strictEqual(fs.existsSync(claudePath), true);
   });
 
-  it('should remove commands folder from .agents if opencode is not selected', async () => {
+  it('should preserve user commands in .agents when opencode is not selected (surgical sweep)', async () => {
     const agentsTarget = path.join(tmpDir, '.agents');
     fs.mkdirSync(agentsTarget);
     fs.mkdirSync(path.join(agentsTarget, 'agents'));
     fs.mkdirSync(path.join(agentsTarget, 'commands'));
     fs.writeFileSync(path.join(agentsTarget, 'agents', 'founder.md'), 'core agent');
-    fs.writeFileSync(path.join(agentsTarget, 'commands', 'init.md'), 'init command');
+    fs.writeFileSync(path.join(agentsTarget, 'commands', 'my-user-command.md'), 'user command — must survive opencode deselect');
     fs.writeFileSync(path.join(agentsTarget, '.vespyr-version'), JSON.stringify({ version: '1.7.0' }));
 
     // Setup Claude Code (symlink/directory)
@@ -914,8 +1091,9 @@ describe('Test 16: Reconfiguration harness removal', () => {
     const { performReconfigure } = require('../bin/cli.js');
     await performReconfigure(tmpDir, { harnesses: ['claude'], yes: true });
 
-    // commands folder should be removed from .agents
-    assert.strictEqual(fs.existsSync(path.join(agentsTarget, 'commands')), false);
+    // User-authored commands survive; only core-shipped commands are swept.
+    // (No core commands ship in this repo, so the folder stays.)
+    assert.strictEqual(fs.existsSync(path.join(agentsTarget, 'commands', 'my-user-command.md')), true);
   });
 });
 

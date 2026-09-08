@@ -36,7 +36,10 @@ describe('extraction contract fixtures', () => {
 
 	it('uninstall dispatches through the adapter registry (per-shape sweep)', () => {
 		const cli = require('../../bin/cli.js');
-		for (const shape of ['opencode', 'claude', 'kiro', 'github', 'cursor', 'windsurf']) {
+		// Active shapes install then sweep; dormant shapes (cursor/windsurf,
+		// cleanup-only per 02m WS-D) reject --harness at install time, so
+		// their sweep is verified against hand-built legacy dirs.
+		for (const shape of ['opencode', 'claude', 'kiro', 'github']) {
 			const dir = fs.mkdtempSync(path.join(os.tmpdir(), `vespyr-un-${shape}-`));
 			try {
 				execFileSync(process.execPath, [CLI, 'init', '--target', dir, '--harness', shape, '--yes'], { stdio: 'pipe' });
@@ -44,6 +47,32 @@ describe('extraction contract fixtures', () => {
 				const residue = fs.readdirSync(dir).filter((f) =>
 					f.startsWith(`.${shape === 'github' ? 'github' : shape}`));
 				assert.deepStrictEqual(residue, [], `${shape}: artifacts must be swept`);
+			} finally {
+				fs.rmSync(dir, { recursive: true, force: true });
+			}
+		}
+		for (const shape of ['cursor', 'windsurf']) {
+			const dir = fs.mkdtempSync(path.join(os.tmpdir(), `vespyr-un-${shape}-`));
+			try {
+				// Dormant install path must reject (P1-10).
+				let rejected = false;
+				try {
+					execFileSync(process.execPath, [CLI, 'init', '--target', dir, '--harness', shape, '--yes'], { stdio: 'pipe' });
+				} catch (e) {
+					rejected = e.status === 2 && (e.stderr.toString().includes('dormant') || e.stdout.toString().includes('dormant'));
+				}
+				assert.ok(rejected, `${shape}: dormant --harness must exit 2 with dormant notice`);
+				// Legacy sweep still works from hand-built dirs.
+				if (shape === 'cursor') {
+					fs.mkdirSync(path.join(dir, '.cursor', 'rules'), { recursive: true });
+					fs.writeFileSync(path.join(dir, '.cursor', 'rules', 'founder.mdc'), 'legacy');
+				} else {
+					fs.mkdirSync(path.join(dir, '.windsurf', 'workflows'), { recursive: true });
+					fs.writeFileSync(path.join(dir, '.windsurfrules'), '<!-- Vespyr-managed -->\nlegacy\n');
+				}
+				cli.uninstallHarnesses(dir, [shape], false);
+				const residue = fs.readdirSync(dir).filter((f) => f.startsWith(`.${shape}`));
+				assert.deepStrictEqual(residue, [], `${shape}: legacy artifacts must be swept`);
 			} finally {
 				fs.rmSync(dir, { recursive: true, force: true });
 			}
@@ -57,9 +86,9 @@ describe('extraction contract fixtures', () => {
 			try {
 				execFileSync(process.execPath, [CLI, 'init', '--target', target, '--harness', 'nope', '--yes'], { stdio: 'pipe' });
 			} catch (e) {
-				failed = e.status === 1 && e.stderr.toString().includes('Unknown harness: nope');
+				failed = e.status === 2 && e.stderr.toString().includes('Unknown harness: nope');
 			}
-			assert.ok(failed, 'unknown harness must exit 1 with named error');
+			assert.ok(failed, 'unknown harness must exit 2 with named error');
 		} finally {
 			fs.rmSync(target, { recursive: true, force: true });
 		}

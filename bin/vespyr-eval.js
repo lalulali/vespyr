@@ -76,6 +76,13 @@ function parseArgs(args) {
     output: null
   };
 
+  const needValue = (flag, val) => {
+    if (val === undefined || (typeof val === "string" && val.startsWith("-") && !/^\-\d/.test(val))) {
+      console.error(`Missing value for flag: ${flag}`);
+      process.exit(3);
+    }
+    return val;
+  };
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
     if (arg === "run" || arg === "record-baseline" || arg === "diff") {
@@ -84,26 +91,41 @@ function parseArgs(args) {
       printHelp();
       process.exit(0);
     } else if (arg === "--suite" || arg === "-s") {
-      options.suite = args[++i];
+      options.suite = needValue(arg, args[++i]);
     } else if (arg === "--agent" || arg === "-a") {
-      options.agent = args[++i].replace(/^@/, "");
+      const v = needValue(arg, args[++i]);
+      options.agent = String(v).replace(/^@/, "");
     } else if (arg === "--skill" || arg === "-k") {
-      options.skill = args[++i].replace(/^\//, "");
+      const v = needValue(arg, args[++i]);
+      options.skill = String(v).replace(/^\//, "");
     } else if (arg === "--model" || arg === "-m") {
-      options.model = args[++i];
+      options.model = needValue(arg, args[++i]);
     } else if (arg === "--adapter") {
-      options.adapter = args[++i];
+      options.adapter = needValue(arg, args[++i]);
     } else if (arg === "--mock") {
       options.mock = true;
       options.adapter = "mock";
     } else if (arg === "--cli") {
-      options.cli = args[++i];
+      options.cli = needValue(arg, args[++i]);
     } else if (arg === "--temp" || arg === "-t") {
-      options.temp = parseFloat(args[++i]);
+      const raw = needValue(arg, args[++i]);
+      const v = parseFloat(raw);
+      if (!Number.isFinite(v) || v < 0 || v > 2) {
+        console.error(`Invalid value for ${arg}: ${raw} (expected finite float 0..2)`);
+        process.exit(3);
+      }
+      options.temp = v;
     } else if (arg === "--concurrency" || arg === "-c") {
-      options.concurrency = parseInt(args[++i], 10);
+      const raw = needValue(arg, args[++i]);
+      const v = parseInt(raw, 10);
+      if (!Number.isInteger(v) || v < 1 || v > 64) {
+        console.error(`Invalid value for ${arg}: ${raw} (expected integer 1..64)`);
+        process.exit(3);
+      }
+      options.concurrency = v;
     } else if (arg === "--baseline" || arg === "-b") {
-      options.baseline = path.resolve(args[++i]);
+      const v = needValue(arg, args[++i]);
+      options.baseline = path.resolve(v);
     } else if (arg === "--fail-fast") {
       options.failFast = true;
     } else if (arg === "--no-fail-on-regression") {
@@ -113,13 +135,43 @@ function parseArgs(args) {
     } else if (arg === "--tier0") {
       options.tier0Only = true;
     } else if (arg === "--reporter" || arg === "-r") {
-      options.reporter = args[++i];
+      const v = needValue(arg, args[++i]);
+      const allowed = ["console", "json", "ndjson", "markdown"];
+      if (!allowed.includes(v)) {
+        console.error(`Unknown reporter: ${v}. Available: ${allowed.join(", ")}`);
+        process.exit(3);
+      }
+      options.reporter = v;
     } else if (arg === "--output" || arg === "-o") {
-      options.output = path.resolve(args[++i]);
+      const v = needValue(arg, args[++i]);
+      options.output = path.resolve(v);
+    } else {
+      console.error(`Unknown flag: ${arg}`);
+      process.exit(3);
     }
   }
 
   return options;
+}
+
+function renderReport(options, runResults, diffReport) {
+  if (options.reporter === "json") {
+    return renderJsonReport(runResults, diffReport);
+  } else if (options.reporter === "ndjson") {
+    return renderNdjsonReport(runResults);
+  } else if (options.reporter === "markdown") {
+    return renderMarkdownReport(runResults, diffReport);
+  }
+  return renderConsoleReport(runResults, diffReport);
+}
+
+function emitReport(options, reportText) {
+  if (options.output) {
+    fs.writeFileSync(options.output, reportText + "\n");
+    console.log(`Report written to ${options.output}`);
+  } else {
+    console.log(reportText);
+  }
 }
 
 async function main() {
@@ -127,12 +179,24 @@ async function main() {
 
   try {
     if (options.subcommand === "diff") {
+      // Real diff: fresh run with the requested filters vs the pinned
+      // baseline. All flags (--suite/--fail-on-regression/--reporter/
+      // --output) are honored; exit 2 on regression when enabled.
       const baseline = loadBaseline(options.baseline);
       if (!baseline) {
         console.error(`Error: Baseline file not found at ${options.baseline}`);
         process.exit(3);
       }
-      console.log(`Loaded baseline ${options.baseline} (${baseline.summary.total_benchmarks} benchmarks, pass rate: ${(baseline.summary.pass_rate * 100).toFixed(1)}%)`);
+      const runResults = await runEvaluation(options);
+      const diffReport = diffAgainstBaseline(runResults, baseline);
+      const reportText = renderReport(options, runResults, diffReport);
+      emitReport(options, reportText);
+      if (options.failOnRegression && diffReport && diffReport.hasRegression) {
+        process.exit(2);
+      }
+      if (runResults.failed > 0) {
+        process.exit(1);
+      }
       process.exit(0);
     }
 
@@ -156,24 +220,8 @@ async function main() {
       diffReport = diffAgainstBaseline(runResults, baseline);
     }
 
-    // Render report based on chosen reporter
-    let reportText = "";
-    if (options.reporter === "json") {
-      reportText = renderJsonReport(runResults, diffReport);
-    } else if (options.reporter === "ndjson") {
-      reportText = renderNdjsonReport(runResults);
-    } else if (options.reporter === "markdown") {
-      reportText = renderMarkdownReport(runResults, diffReport);
-    } else {
-      reportText = renderConsoleReport(runResults, diffReport);
-    }
-
-    if (options.output) {
-      fs.writeFileSync(options.output, reportText + "\n");
-      console.log(`Report written to ${options.output}`);
-    } else {
-      console.log(reportText);
-    }
+    const reportText = renderReport(options, runResults, diffReport);
+    emitReport(options, reportText);
 
     // Determine exit code
     if (options.subcommand !== "record-baseline" && options.failOnRegression && diffReport && diffReport.hasRegression) {
@@ -191,4 +239,8 @@ async function main() {
   }
 }
 
-main();
+if (require.main === module) {
+  main();
+}
+
+module.exports = { parseArgs };

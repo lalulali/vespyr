@@ -19,7 +19,15 @@
 
 const fs = require('fs');
 const path = require('path');
-const { writeFileSync: atomicWriteFileSync } = require('./lib/fs_atomic.js');
+// NOTE (2026-09-07): spent codemod, archived from .agents/scripts/.
+// The co-located ./lib/fs_atomic.js did not move with it — resolve the live
+// copy so the archived migration stays runnable for legacy checkouts.
+let atomicWriteFileSync;
+try {
+  ({ writeFileSync: atomicWriteFileSync } = require('./lib/fs_atomic.js'));
+} catch {
+  ({ writeFileSync: atomicWriteFileSync } = require(path.join(__dirname, '..', '..', '..', '.agents', 'scripts', 'lib', 'fs_atomic.js')));
+}
 
 function countWords(str) {
   return str.trim().split(/\s+/).filter(Boolean).length;

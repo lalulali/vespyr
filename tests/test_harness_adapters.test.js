@@ -96,7 +96,7 @@ describe('GitHub Copilot GENERATE-TARGET (.github emission)', () => {
     fs.mkdirSync(userSkill, { recursive: true });
     fs.writeFileSync(path.join(userSkill, 'SKILL.md'), 'user skill');
     // Re-link is not needed; uninstall must keep the real dir intact
-    fs.writeFileSync(path.join(tmpDir, '.github', 'copilot-instructions.md'), 'whatever');
+    fs.writeFileSync(path.join(tmpDir, '.github', 'copilot-instructions.md'), '<!-- Vespyr-managed -->\n');
 
     github.uninstall({
       targetDir: tmpDir,
@@ -115,6 +115,27 @@ describe('GitHub Copilot GENERATE-TARGET (.github emission)', () => {
       false,
       'generated stub is removed'
     );
+  });
+
+  it('uninstall preserves a pre-existing copilot-instructions.md without the Vespyr marker', () => {
+    const github = getAdapter('github');
+    github.install(silentCtx(tmpDir));
+
+    const instructionsPath = path.join(tmpDir, '.github', 'copilot-instructions.md');
+    fs.writeFileSync(instructionsPath, 'my own instructions');
+
+    github.uninstall({
+      targetDir: tmpDir,
+      isGlobal: false,
+      agentsSrc: path.join(tmpDir, '.agents'),
+      removeDirIfEmpty: (d) => {
+        try {
+          if (fs.readdirSync(d).length === 0) fs.rmdirSync(d);
+        } catch (e) {}
+      },
+    });
+
+    assert.strictEqual(fs.readFileSync(instructionsPath, 'utf8'), 'my own instructions');
   });
 
   it('uninstall removes a dangling skills link (performUninstall cleans .agents/ first)', () => {

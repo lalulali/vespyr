@@ -13,9 +13,29 @@ const { ADAPTERS: HARNESS_ADAPTERS } = require("./harnesses/index.js");
 function createUi({ VERSION, ASCII_ART, IS_TTY = process.stdout.isTTY, wizardState = {} }) {
 function printSummary(targetDir, selections) {
 	const agentsDir = path.join(targetDir, ".agents", "agents");
-	const count = fs.existsSync(agentsDir)
-		? fs.readdirSync(agentsDir).filter((f) => f.endsWith(".md")).length
-		: 23;
+	let count = 0;
+	try {
+		count = fs.existsSync(agentsDir)
+			? fs.readdirSync(agentsDir).filter((f) => f.endsWith(".md")).length
+			: 0;
+	} catch {
+		count = 0;
+	}
+
+	const createdLines = [];
+	const exists = (rel) => {
+		try {
+			return fs.existsSync(path.join(targetDir, rel));
+		} catch {
+			return false;
+		}
+	};
+	// Only claim what is actually on disk — a skipped scaffold (existing
+	// artifacts/, dry-run, partial install) must not print phantom ✓ lines.
+	if (exists(".agents")) createdLines.push(`    ✓ .agents/                        (core agent engine)`);
+	if (exists("AGENTS.md")) createdLines.push(`    ✓ AGENTS.md                       (harness-agnostic guide)`);
+	if (exists("agent.md")) createdLines.push(`    ✓ agent.md                        (agent quick reference)`);
+	if (exists("artifacts")) createdLines.push(`    ✓ artifacts/                      (memory + output directories)`);
 
 	const lines = [
 		`\n============================================================`,
@@ -27,10 +47,7 @@ function printSummary(targetDir, selections) {
 		`  Harnesses:    ${selections.harnesses.join(", ") || "core only"}`,
 		``,
 		`  Created:`,
-		`    ✓ .agents/                        (core agent engine)`,
-		`    ✓ AGENTS.md                       (harness-agnostic guide)`,
-		`    ✓ agent.md                        (agent quick reference)`,
-		`    ✓ artifacts/                      (memory + output directories)`,
+		...createdLines,
 	];
 
 	for (const adapter of HARNESS_ADAPTERS) {
@@ -45,9 +62,9 @@ function printSummary(targetDir, selections) {
 	lines.push(
 		``,
 		`  Next steps:`,
-		`    1. Run npx vespyr init (or /help-me) to bootstrap your project context`,
+		`    1. Run /help-me to bootstrap your project context`,
 		`    2. Type @founder or /validate-idea "your idea" to stress-test a concept`,
-		`    3. Use @help-me for a tailored navigation report`,
+		`    3. See artifacts/memory/project-context.md for your project state`,
 
 		``,
 		`  Docs: https://github.com/lalulali/vespyr`,
@@ -58,9 +75,26 @@ function printSummary(targetDir, selections) {
 	console.log(lines.join("\n"));
 }
 
-function setupSignalHandler(targetDir) {
-	process.on("SIGINT", () => {
-		if (!R.dryRun && fs.existsSync(path.join(targetDir, ".agents"))) {
+function setupSignalHandler(targetDir, opts = {}) {
+	// Scoped rollback: only a FRESH install in THIS session owns .agents/.
+	// - Update/reconfigure paths reuse a pre-existing .agents/ — deleting it
+	//   on Ctrl-C would destroy user data (P0-5). Guard with R.installed,
+	//   which performFreshInstall sets only after it creates the dir.
+	// - once (not on) + removable: repeated installs in one process (tests)
+	//   must not stack handlers; teardownSignalHandler() removes it.
+	// - lstat (not existsSync): created links may already be dangling
+	//   (.agents/ swept first) — existsSync would miss them.
+	const existedBefore = (() => {
+		try {
+			fs.lstatSync(path.join(targetDir, ".agents"));
+			return true;
+		} catch {
+			return false;
+		}
+	})();
+	const handler = () => {
+		const isFreshSession = !R.dryRun && R.installed && !existedBefore;
+		if (isFreshSession) {
 			try {
 				fs.rmSync(path.join(targetDir, ".agents"), {
 					recursive: true,
@@ -72,14 +106,47 @@ function setupSignalHandler(targetDir) {
 		}
 		for (const link of R.createdLinks) {
 			try {
-				if (fs.existsSync(link)) fs.unlinkSync(link);
+				fs.lstatSync(link);
+				fs.unlinkSync(link);
 			} catch (e) {
-				/* ignore */
+				/* ignore — missing, dir-copy fallback, or already swept */
 			}
 		}
-		console.log("\nInstallation cancelled. No changes were made.");
+		try {
+			for (const link of R.createdLinks) {
+				try {
+					const st = fs.lstatSync(link);
+					if (st.isDirectory() && !st.isSymbolicLink()) {
+						fs.rmSync(link, { recursive: true, force: true });
+					}
+				} catch {
+					/* ignore */
+				}
+			}
+		} catch {
+			/* ignore */
+		}
+		if (isFreshSession) {
+			console.log("\nInstallation cancelled. Partial fresh-install changes were removed.");
+		} else {
+			console.log("\nInstallation cancelled. Existing files preserved; partial new files may remain — re-run to repair.");
+		}
 		process.exit(130);
-	});
+	};
+	process.once("SIGINT", handler);
+	setupSignalHandler._handler = handler;
+	setupSignalHandler._target = targetDir;
+}
+
+function teardownSignalHandler() {
+	if (setupSignalHandler._handler) {
+		try {
+			process.removeListener("SIGINT", setupSignalHandler._handler);
+		} catch {
+			/* ignore */
+		}
+		setupSignalHandler._handler = null;
+	}
 }
 
 function clearScreen() {
@@ -112,7 +179,7 @@ function printWizardSummary() {
 	}
 }
 
-	return { printSummary, setupSignalHandler, clearScreen, printWizardSummary };
+	return { printSummary, setupSignalHandler, teardownSignalHandler, clearScreen, printWizardSummary };
 }
 
 module.exports = { createUi };

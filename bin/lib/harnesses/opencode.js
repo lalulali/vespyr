@@ -46,11 +46,40 @@ module.exports = {
 		if (selections.includes("opencode")) return;
 		const targetCommands = path.join(agentsTarget, "commands");
 		if (!fs.existsSync(targetCommands)) return;
+		// Surgical sweep: remove ONLY core-shipped commands, never
+		// user-authored files. The old code rmSync'd the whole folder,
+		// destroying user commands alongside core ones.
+		let coreCommands = [];
+		try {
+			const srcCommands = path.join(__dirname, "..", "..", "..", ".agents", "commands");
+			if (fs.existsSync(srcCommands)) {
+				coreCommands = fs.readdirSync(srcCommands);
+			}
+		} catch {
+			coreCommands = [];
+		}
+		if (coreCommands.length === 0) return;
 		if (!dryRun) {
-			fs.rmSync(targetCommands, { recursive: true, force: true });
+			for (const entry of coreCommands) {
+				const p = path.join(targetCommands, entry);
+				try {
+					if (fs.existsSync(p) || (() => { try { fs.lstatSync(p); return true; } catch { return false; } })()) {
+						fs.rmSync(p, { recursive: true, force: true });
+					}
+				} catch {
+					/* ignore */
+				}
+			}
+			try {
+				if (fs.existsSync(targetCommands) && fs.readdirSync(targetCommands).length === 0) {
+					fs.rmdirSync(targetCommands);
+				}
+			} catch {
+				/* ignore */
+			}
 		} else {
 			logDry(
-				`Would remove commands folder from ${agentsTarget} because opencode is not selected`,
+				`Would remove core commands from ${agentsTarget} because opencode is not selected (user commands preserved)`,
 			);
 		}
 	},

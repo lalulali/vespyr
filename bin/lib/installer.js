@@ -37,6 +37,7 @@ function createInstaller(deps) {
 		detectInstalledHarnesses,
 		installGitHook,
 		setupSignalHandler,
+		teardownSignalHandler,
 		printSummary,
 		clearScreen,
 		printWizardSummary,
@@ -115,7 +116,7 @@ _(auto-populated on every session by @memory-controller / orchestrator_state.js)
 
 ## Identity
 - **Project Name**: ${projectName}
-- **Repository**: ${detectRepository()}
+- **Repository**: ${detectRepository(targetDir)}
 - **User Nickname**: ${userNickname}
 - **Created**: ${isoDate}
 
@@ -223,15 +224,24 @@ async function installHarnesses(targetDir, selections, method) {
 		logWarn,
 	};
 
+	for (const id of selections) {
+		const adapter = getHarnessAdapter(id);
+		if (adapter && adapter.dormant) {
+			throw new Error(
+				`Harness "${id}" is dormant in this release (cleanup-only, see 03c). Remove it from --harness or use uninstall to sweep a legacy install.`,
+			);
+		}
+	}
+
 	for (const adapter of HARNESS_ADAPTERS) {
 		if (selections.includes(adapter.id)) {
-			adapter.install(ctx);
+			await adapter.install(ctx);
 		}
 	}
 
 	for (const adapter of HARNESS_ADAPTERS) {
 		if (typeof adapter.postInstall === "function") {
-			adapter.postInstall(selections, ctx);
+			await adapter.postInstall(selections, ctx);
 		}
 	}
 }
@@ -273,9 +283,14 @@ function surgicallyCleanupAgentsDir(agentsTarget) {
 			const coreAgents = fs.readdirSync(agentsSrcDir);
 			for (const agent of coreAgents) {
 				const targetAgentPath = path.join(targetAgentsDir, agent);
-				if (fs.existsSync(targetAgentPath)) {
-					fs.rmSync(targetAgentPath, { recursive: true, force: true });
+				try {
+					fs.lstatSync(targetAgentPath);
+				} catch {
+					continue;
 				}
+				try {
+					fs.rmSync(targetAgentPath, { recursive: true, force: true });
+				} catch {}
 			}
 			removeDirIfEmpty(targetAgentsDir);
 		} catch (e) {
@@ -291,9 +306,14 @@ function surgicallyCleanupAgentsDir(agentsTarget) {
 			const coreSkills = fs.readdirSync(skillsSrcDir);
 			for (const skill of coreSkills) {
 				const targetSkillPath = path.join(targetSkillsDir, skill);
-				if (fs.existsSync(targetSkillPath)) {
-					fs.rmSync(targetSkillPath, { recursive: true, force: true });
+				try {
+					fs.lstatSync(targetSkillPath);
+				} catch {
+					continue;
 				}
+				try {
+					fs.rmSync(targetSkillPath, { recursive: true, force: true });
+				} catch {}
 			}
 			removeDirIfEmpty(targetSkillsDir);
 		} catch (e) {
@@ -301,19 +321,47 @@ function surgicallyCleanupAgentsDir(agentsTarget) {
 		}
 	}
 
-	// Delete other core folders
+	// Delete other core folders surgically: only entries shipped in AGENTS_SRC
+	// are removed — user-added files inside these dirs survive. The old code
+	// rmSync'd the whole folder, destroying user scripts/templates. Folders
+	// with no source dir (commands/) hold only user content by definition,
+	// so they are pruned solely when empty.
 	const coreFolders = [
 		"commands",
 		"references",
 		"scripts",
-
 		"templates",
 	];
 	for (const folder of coreFolders) {
 		const folderPath = path.join(agentsTarget, folder);
-		if (fs.existsSync(folderPath)) {
-			fs.rmSync(folderPath, { recursive: true, force: true });
+		try {
+			fs.lstatSync(folderPath);
+		} catch {
+			continue;
 		}
+		let srcEntries = null;
+		try {
+			const srcFolderPath = path.join(AGENTS_SRC, folder);
+			srcEntries = fs.readdirSync(srcFolderPath);
+		} catch {
+			srcEntries = null;
+		}
+		if (srcEntries === null) {
+			removeDirIfEmpty(folderPath);
+			continue;
+		}
+		for (const entry of srcEntries) {
+			const p = path.join(folderPath, entry);
+			try {
+				fs.lstatSync(p);
+			} catch {
+				continue;
+			}
+			try {
+				fs.rmSync(p, { recursive: true, force: true });
+			} catch {}
+		}
+		removeDirIfEmpty(folderPath);
 	}
 
 	// Delete core files
@@ -324,17 +372,40 @@ function surgicallyCleanupAgentsDir(agentsTarget) {
 		"workflow.md",
 		".vespyr-version",
 		".vespyr-manifest.json",
+		"manifest.json",
 		".gitignore",
 		".DS_Store",
 	];
 	for (const file of coreFiles) {
 		const filePath = path.join(agentsTarget, file);
-		if (fs.existsSync(filePath)) {
-			try {
-				fs.unlinkSync(filePath);
-			} catch (e) {}
+		try {
+			fs.lstatSync(filePath);
+		} catch {
+			continue;
 		}
+		try {
+			const st = fs.lstatSync(filePath);
+			if (st.isDirectory() && !st.isSymbolicLink()) continue;
+			fs.unlinkSync(filePath);
+		} catch (e) {}
 	}
+
+	// Sweep backup litter (*.bak-*, *.backup.*) so uninstall leaves no
+	// poison for a future verify. User content outside these patterns stays.
+	try {
+		const sweep = (dir) => {
+			let entries;
+			try { entries = fs.readdirSync(dir, { withFileTypes: true }); } catch { return; }
+			for (const ent of entries) {
+				const full = path.join(dir, ent.name);
+				if (ent.isDirectory() && !ent.isSymbolicLink()) sweep(full);
+				else if (ent.isFile() && (ent.name.includes(".bak-") || ent.name.includes(".backup."))) {
+					try { fs.unlinkSync(full); } catch {}
+				}
+			}
+		};
+		if (fs.existsSync(agentsTarget)) sweep(agentsTarget);
+	} catch {}
 
 	// Delete the directory if it is empty
 	removeDirIfEmpty(agentsTarget);
@@ -422,10 +493,10 @@ async function performFreshInstall(targetDir, flags) {
 				}
 			} else if (step === "method") {
 				const methodChoice = await askSingleChoice(
-					"Select installation method:",
+					"Select harness link method (.agents/ core is always copied):",
 					[
-						"Symlink (Recommended - references the master folder, allowing prompt updates to automatically propagate)",
-						"Copy (Static copy of all agent folders and files)",
+						"Symlink (Recommended - harness links reference .agents/, updates propagate)",
+						"Copy (Static copies of harness files; .agents/ core is still copied)",
 						"← Back",
 					],
 				);
@@ -496,7 +567,7 @@ async function performFreshInstall(targetDir, flags) {
 		if (!fs.existsSync(agentsTarget)) {
 			fs.mkdirSync(agentsTarget, { recursive: true });
 		}
-		fs.cpSync(AGENTS_SRC, agentsTarget, { recursive: true });
+		fs.cpSync(AGENTS_SRC, agentsTarget, { recursive: true, dereference: true });
 		R.installed = true;
 	}
 
@@ -519,12 +590,18 @@ async function performFreshInstall(targetDir, flags) {
 	if (!R.dryRun) {
 		printSummary(targetDir, { harnesses: selections });
 	}
+	try {
+		if (typeof teardownSignalHandler === "function") teardownSignalHandler();
+	} catch {}
 }
 
 /**
  * B1 (02h §10): before an update overwrites .agents/, any existing file whose
  * content differs from the incoming copy is preserved as `<file>.bak-YYYYMMDD`.
- * Unmodified files produce no backup noise.
+ * Unmodified files produce no backup noise. Same-day re-updates append a
+ * counter (`bak-YYYYMMDD-1`, `-2`, …) instead of silently skipping the second
+ * backup — the old existsSync guard overwrote customized content with no
+ * recovery path.
  */
 function backupCustomizedFiles(agentsTarget, sourceDir) {
 	const today = new Date().toISOString().slice(0, 10).replace(/-/g, "");
@@ -543,8 +620,23 @@ function backupCustomizedFiles(agentsTarget, sourceDir) {
 					const incoming = fs.readFileSync(srcPath);
 					const current = fs.readFileSync(dstPath);
 					if (!incoming.equals(current)) {
-						const bakPath = `${dstPath}.bak-${today}`;
-						if (!fs.existsSync(bakPath)) {
+						let bakPath = `${dstPath}.bak-${today}`;
+						let n = 1;
+						while (fs.existsSync(bakPath)) {
+							try {
+								const prev = fs.readFileSync(bakPath);
+								if (prev.equals(current)) break; // identical backup already exists
+							} catch {}
+							bakPath = `${dstPath}.bak-${today}-${n++}`;
+							if (n > 100) break;
+						}
+						let needsWrite = true;
+						try {
+							if (fs.existsSync(bakPath) && fs.readFileSync(bakPath).equals(current)) {
+								needsWrite = false;
+							}
+						} catch {}
+						if (needsWrite) {
 							fs.copyFileSync(dstPath, bakPath);
 							backedUp++;
 						}
@@ -580,7 +672,7 @@ async function performUpdate(targetDir, flags) {
 	}
 
 	removeStaleManifestFiles(targetDir);
-	fs.cpSync(AGENTS_SRC, agentsTarget, { recursive: true });
+	fs.cpSync(AGENTS_SRC, agentsTarget, { recursive: true, dereference: true });
 
 	writeVersionFile(targetDir);
 	writeManifest(targetDir);
@@ -633,90 +725,65 @@ async function performGlobalInstall(selections, method, userNickname) {
 	if (!selections.includes("opencode")) {
 		const globalCommands = path.join(globalAgentsDir, "commands");
 		if (fs.existsSync(globalCommands)) {
-			fs.rmSync(globalCommands, { recursive: true, force: true });
+			try {
+				const srcCommands = path.join(AGENTS_SRC, "commands");
+				const core = fs.existsSync(srcCommands) ? fs.readdirSync(srcCommands) : [];
+				for (const entry of core) {
+					try { fs.rmSync(path.join(globalCommands, entry), { recursive: true, force: true }); } catch {}
+				}
+				if (fs.readdirSync(globalCommands).length === 0) {
+					fs.rmSync(globalCommands, { recursive: true, force: true });
+				}
+			} catch {}
 		}
 	}
 
-	// Create harness links at global paths
-	const harnessLinkMap = {
-		opencode: { type: "dir", source: path.join(globalAgentsDir) },
-		claude: { type: "dir", source: path.join(globalAgentsDir) },
-		cursor: {
-			type: "dir",
-			source: path.join(globalAgentsDir, "agents"),
-			output: "rules",
-		},
-		github: {
-			type: "dir",
-			source: path.join(globalAgentsDir, "agents"),
-			output: "agents",
-		},
-		windsurf: {
-			type: "dir",
-			source: path.join(globalAgentsDir, "skills"),
-			output: "workflows",
-		},
-		kiro: {
-			type: "dir",
-			source: path.join(globalAgentsDir, "skills"),
-			output: "skills",
-		},
+	// Global harness emission delegates to the same adapters as local
+	// installs (single geometry owner). The old harnessLinkMap duplicated
+	// adapter paths here and drifted: cursor/github/windsurf created empty
+	// dirs with no emission, kiro diverged from kiro.js fallback chain.
+	const globalCtx = {
+		targetDir: home,
+		agentsTarget: globalAgentsDir,
+		method,
+		selections,
+		dryRun: R.dryRun,
+		handleConflict,
+		createLinkOrCopy,
+		log,
+		logDry,
+		logWarn,
 	};
-
 	for (const h of selections) {
-		const config = harnessLinkMap[h];
-		if (!config) continue;
-
-		const globalTarget = getGlobalPath(h);
-		if (!globalTarget) continue;
-
-		if (h === "cursor" || h === "github" || h === "windsurf" || h === "kiro") {
-			// These need subdirectory handling
-			const parentDir = path.dirname(globalTarget);
-			if (!fs.existsSync(parentDir))
-				fs.mkdirSync(parentDir, { recursive: true });
-			if (!fs.existsSync(globalTarget))
-				fs.mkdirSync(globalTarget, { recursive: true });
-
-			if (h === "kiro") {
-				const skillsDir = path.join(globalTarget, "skills");
-				handleConflict(skillsDir, `${h} skills`, home, method);
-				if (!fs.existsSync(skillsDir)) {
-					createLinkOrCopy(config.source, skillsDir, "dir", method);
-				}
-				const steeringDir = path.join(globalTarget, "steering");
-				if (!fs.existsSync(steeringDir)) {
-					fs.mkdirSync(steeringDir, { recursive: true });
-				}
-				const steeringAgentsPath = path.join(steeringDir, "vespyr-steering.md");
-				handleConflict(
-					steeringAgentsPath,
-					`${h} steering vespyr-steering.md`,
-					home,
-					method,
-				);
-				if (!fs.existsSync(steeringAgentsPath)) {
-					const canonicalSource = fs.existsSync(
-						path.join(globalAgentsDir, "templates", "system", "vespyr-steering.md.canonical"),
-					)
-						? path.join(globalAgentsDir, "templates", "system", "vespyr-steering.md.canonical")
-						: fs.existsSync(path.join(globalAgentsDir, "templates", "system", "agent.md.canonical"))
-						? path.join(globalAgentsDir, "templates", "system", "agent.md.canonical")
-						: path.join(globalAgentsDir, "AGENTS.md");
-					createLinkOrCopy(
-						canonicalSource,
-						steeringAgentsPath,
-						"file",
-						method,
-					);
-				}
+		const adapter = getHarnessAdapter(h);
+		if (!adapter) continue;
+		if (adapter.dormant) {
+			logWarn(`Skipping dormant harness "${h}" for global install (cleanup-only).`);
+			continue;
+		}
+		if (typeof adapter.install !== "function") continue;
+		if (h === "opencode" || h === "claude") {
+			const globalTarget = getGlobalPath(h);
+			if (!globalTarget) continue;
+			handleConflict(globalTarget, h, home, method);
+			let needsCreate = false;
+			try { fs.lstatSync(globalTarget); } catch { needsCreate = true; }
+			if (needsCreate) {
+				createLinkOrCopy(globalAgentsDir, globalTarget, "dir", method);
 			}
 		} else {
-			// Simple dir symlinks (opencode, claude)
-			handleConflict(globalTarget, h, home, method);
-			if (!fs.existsSync(globalTarget)) {
-				createLinkOrCopy(config.source, globalTarget, "dir", method);
+			try {
+				await adapter.install(globalCtx);
+			} catch (e) {
+				logWarn(`Global harness "${h}" install failed: ${e.message}`);
 			}
+		}
+	}
+	for (const adapter of HARNESS_ADAPTERS) {
+		if (typeof adapter.postInstall === "function") {
+			try {
+				await adapter.postInstall(selections, { ...globalCtx, agentsTarget: globalAgentsDir });
+			} catch {}
 		}
 	}
 
@@ -745,7 +812,9 @@ async function performReconfigure(targetDir, flags) {
 	// Detect previously installed harnesses
 	let prevHarnesses = detectInstalledHarnesses(targetDir, isGlobal);
 
-	let selections = flags.harnesses.length > 0 ? flags.harnesses : [];
+	// --yes without --harness keeps the current set: wiping every harness
+	// integration on a bare `reconfigure --yes` would be a surprise.
+	let selections = flags.harnesses.length > 0 ? flags.harnesses : prevHarnesses;
 	let method = detectMethod(targetDir, isGlobal);
 	let userNickname = getExistingUserNickname(targetDir);
 
@@ -758,10 +827,10 @@ async function performReconfigure(targetDir, flags) {
 		);
 
 		const methodChoice = await askSingleChoice(
-			"Select installation method:",
+			"Select harness link method (.agents/ core is always copied):",
 			[
-				"Symlink (Recommended - references the master folder, allowing prompt updates to automatically propagate)",
-				"Copy (Static copy of all agent folders and files)",
+				"Symlink (Recommended - harness links reference .agents/, updates propagate)",
+				"Copy (Static copies of harness files; .agents/ core is still copied)",
 			],
 		);
 		method = methodChoice === 0 ? "symlink" : "copy";
@@ -788,8 +857,38 @@ async function performReconfigure(targetDir, flags) {
 		uninstallHarnesses(targetDir, removedHarnesses, isGlobal);
 	}
 
+	// Refresh .agents/ core so reconfigure also picks up version bumps.
+	// Previously reconfigure refreshed docs+harnesses only, leaving stale
+	// core files until a separate `update` run.
+	if (!R.dryRun && !isGlobal) {
+		try {
+			backupCustomizedFiles(agentsTarget, AGENTS_SRC);
+		} catch {}
+		removeStaleManifestFiles(targetDir);
+		try {
+			fs.cpSync(AGENTS_SRC, agentsTarget, { recursive: true, dereference: true });
+		} catch (e) {
+			logWarn(`Core refresh during reconfigure failed: ${e.message}`);
+		}
+		writeVersionFile(targetDir);
+		writeManifest(targetDir);
+	}
+
 	const projectName = path.basename(targetDir);
 	bootstrapRootDocs(targetDir, projectName, selections);
+	// Stale CLAUDE.md: claude harness deselected but doc left behind.
+	if (!selections.includes("claude")) {
+		const claudePath = path.join(targetDir, "CLAUDE.md");
+		try {
+			if (fs.existsSync(claudePath)) {
+				const content = fs.readFileSync(claudePath, "utf8");
+				if (content.includes(".claude/") || content.includes(".agents/") || content.includes("Vespyr")) {
+					if (!R.dryRun) fs.unlinkSync(claudePath);
+					else logDry(`Would remove stale CLAUDE.md (claude harness deselected)`);
+				}
+			}
+		} catch {}
+	}
 	performSyncDocs(targetDir);
 
 	await installHarnesses(targetDir, selections, method);

@@ -57,3 +57,51 @@ Date: 2026-09-05 | Scope: `cli.js` (1358) + `vespyr-eval.js` (179) + `lib/` 6 + 
 ## 5. Coverage
 
 `cli.js` + `vespyr-eval.js` end-to-end; all 6 `lib/` + 7 `harnesses/` files read with cross-checks into `installer.js:211-800`. Not executed: install/update/verify live runs; packaging test re-run.
+
+## 6. Resolution (2026-09-07 — all P0/P1 fixed, P2 batch closed)
+
+Verified: `tests/test_cli.js` 73/73 pass; `tests/cli/cli-init.test.js` + `refactor-contracts` 8/8 pass; full `npm test` 348/354 with only the 6 pre-existing fails (packaging, memory-consolidation, plan-reservation — identical on clean tree). Manual E2E: fresh init → manifest → verify clean → `.vespyr-manifest.json` tamper detected → symlink plant detected → pinned-path symlink swap detected without hashing target → `*.bak-*` ignored.
+
+### P0
+- **P0-1 FIXED** — single manifest authority (`bin/cli.js:648-673` `MANIFEST_EXCLUDE_FILES` + `isBackupLitter`, shared by `buildSourceManifest`, `generateManifestData`, reverse-walk). `.vespyr-manifest.json` is now hashed like any other file; `performGenerateManifest` refreshes it first (lockstep); `removeStaleManifestFiles` prefers `manifest.json` keys with legacy fallback.
+- **P0-2 FIXED** — `lstat` + containment guards on both forward walks (`bin/cli.js:1112-1180`): symlinks at pinned paths flagged without reading target; `files_root` same; generation skips symlinks.
+- **P0-3 FIXED** — `vespyr-eval diff` runs a real evaluation vs baseline and honors `--suite/--fail-on-regression/--reporter/--output` with exit-2 gating (`bin/vespyr-eval.js` `renderReport`/`emitReport` + `diff` branch).
+- **P0-4 FIXED** — strict `parseArgs`: unknown flags → exit 3, missing values → exit 3 (no `.replace`/`resolve` crash), `--temp` finite 0..2, `--concurrency` int 1..64.
+- **P0-5 FIXED** — `setupSignalHandler` uses `once`, captures pre-existence, deletes `.agents` only for fresh-install sessions (`R.installed && !existedBefore`), sweeps links via `lstat` (dangling-aware) incl. dir-copy fallbacks, honest receipts; `teardownSignalHandler` removes the handler on success (`bin/lib/ui.js:78-135`).
+
+### P1
+- **P1-1 FIXED** — `main` calls `resetRuntimeState()` at startup (no cross-run leak); frontmatter regex accepts `...` close + BOM; `yamlQuote`/`parseFrontmatter` retained as tested public utils; `snapshotRuntimeState()` added for inspection.
+- **P1-2 FIXED** — single-writer `performSyncDocs` (`bin/cli.js:916`): `execFileSync` (no shell), try/catch, never throws into destructive rollback; template-fallback writer removed.
+- **P1-3 FIXED** — unified exclusions incl. `*.bak-*`/`*.backup.*` everywhere; same-day backup uses counter suffixes (`bin/lib/installer.js` `backupCustomizedFiles`).
+- **P1-4 FIXED** — error rollback stays fresh-only by design (update partials never wiped); SIGINT now matches; link sweep `lstat`-based.
+- **P1-5 FIXED** — `init`/`update` honored: `init` on installed dir = idempotent refresh via update path (T0-INIT-01); `update` on fresh/migrate dirs exits 2; help documents all commands + exit codes.
+- **P1-6 FIXED** — usage errors (missing values, unknown flags, dormant/unknown harness) exit 2; verify tamper exits 1; fail-closed exits 2; `performAudit` sets `exitCode` instead of hard `process.exit`.
+- **P1-7 FIXED** — `--reporter` validated against console/json/ndjson/markdown, exit 3 otherwise.
+- **P1-8 FIXED** — global install delegates to adapters (no `harnessLinkMap`, no empty-dir no-ops); opencode commands prune is surgical; wizard wording states method is harness-only; `detectRepository(targetDir)` uses `cwd`; `cpSync` uses `dereference`.
+- **P1-9 FIXED** — reconfigure refreshes `.agents/` core (backup + stale-sweep + version + manifest), removes stale `CLAUDE.md` when deselected, `await`s adapter installs. Root `AGENTS.md`/`agent.md` stay never-overwrite by design (user-owned after creation; canonical fixes propagate via `.agents/templates` + sync-docs).
+- **P1-10 FIXED** — explicit dormant `--harness` rejected at parse (exit 2) and in `installHarnesses` (throws).
+
+### P2
+- `state.js`: ownership documented, `snapshotRuntimeState()` added, reset-once-at-startup contract.
+- `detector.js`: independent framework labels, `peerDependencies` excluded, corrupt-`package.json` → Unknown (no mislabel), added poetry/setup.py/pnpm-workspace/lockfiles/.NET/PHP/Swift/Dart.
+- `link-utils.js`: dangling `.agents`-link repair, fallback codes extended (`ENOSYS/EROFS/ENOTSUP`), copies tracked in `R.createdLinks` with `dereference`, `ELOOP/EBUSY/ENOENT` still rethrow loudly.
+- `ui.js printSummary`: live counts, only-on-disk ✓ lines, circular `npx vespyr init` next-step removed.
+- `updatePathsInDir`: skips symlinked dirs, rewrites prose outside code fences only.
+- `detectMethod`: single pass, symlink-wins, handles empty probes (cursor probe restored to `.cursor/rules`).
+- Git hook: `hooks/pre-push` (valid; `post-push` never executed) with managed-header guard + legacy migration; `getGlobalPath`/`detectInstalledHarnesses` unified on the registry with `lstat` (dangling-aware).
+- Uninstall: root docs backed up (`*.uninstall-bak-*`) before delete; `*.bak-*`/`*.backup.*` swept inside `.agents/`.
+- Per-harness: opencode sweep is core-only; copilot dry-run pure + specific `detectPaths` (no bare-`.github` false positive); kiro probes `vespyr-steering.md` + uninstall removes only the owned doc; windsurf removes `.windsurfrules` only with Vespyr marker/symlink.
+- Accepted (not bugs): relative `.agents` links (portable across moves), hardcoded repo URLs (match `package.json`), `console-reporter` `bRate` self-reference fixed as drive-by.
+
+[Test: tests/test_cli.js 73/73; tests/cli/cli-init + refactor-contracts 8/8]
+
+### Follow-up (2026-09-08): foreign `.agents/` misclassified as repair
+- **Symptom:** pre-existing non-Vespyr `.agents/` (e.g. another tool's skill) + `vespyr` install → silent repair-merge instead of the fresh-install path.
+- **Root cause:** `detectState` returned `repair` for ANY `.agents/` without `.vespyr-version`.
+- **Fix (`bin/cli.js`):** `detectState` now distinguishes `fresh` (empty dir) / `repair` (Vespyr fingerprints: `.vespyr-manifest.json`, `manifest.json`, `GUARDRAILS.md`, `templates/`, `scripts/orchestrator_state.js` — generic `agents/`/`skills/` names deliberately excluded) / `foreign` (new state). New `performForeignConflict`: `--yes` backs the foreign dir aside (`.agents.backup.<ts>`) then fresh-installs; interactive offers backup+fresh / merge (collisions → `*.bak-*`) / cancel. `update` on foreign exits 2.
+- [Test: tests/test_cli.js Test 5b (5 tests incl. full init---yes E2E); full suite 373/373]
+
+### Follow-up (2026-09-08b): installer flow smoothness (uninstall/reconfigure/repair)
+- **Gap:** `uninstall`/`reconfigure` existed only in the interactive menu — no non-interactive path; `performUninstall` swept fresh/foreign dirs unguarded; bare `reconfigure --yes` without `--harness` wiped every harness; menu uninstall had no confirm; repair banner copy-pasted in two branches.
+- **Fix:** new `uninstall` / `reconfigure` subcommands (`bin/cli.js:parseFlags` + dispatch + help). `performUninstall` self-guards: fresh → no-op exit 0, foreign/migrate → exit 2, only installed/repair sweep. `reconfigure --yes` without `--harness` keeps the current set (`bin/lib/installer.js`). Confirm prompt on interactive uninstall (menu + subcommand; `--yes`/non-TTY handled). Repair banner extracted to `performRepair`.
+- [Test: tests/cli/install-flows.test.js (6 E2E); full suite 383/383]

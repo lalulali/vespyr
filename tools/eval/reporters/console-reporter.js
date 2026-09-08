@@ -65,7 +65,8 @@ function renderConsoleReport(runResults, diffReport = null) {
         const hRate = typeof dimData.hallucination_rate === "number" ? dimData.hallucination_rate : 0.0;
         special = `Hallucination: ${(hRate * 100).toFixed(1)}%`;
       } else if (dimKey === "code_quality") {
-        const bRate = typeof dimData.build_pass_rate === "number" ? `Build Pass: ${(bRate * 100).toFixed(1)}%` : "Build Pass: N/A";
+        const bRateVal = dimData.build_pass_rate;
+        const bRate = typeof bRateVal === "number" ? `Build Pass: ${(bRateVal * 100).toFixed(1)}%` : "Build Pass: N/A";
         special = bRate;
       }
       dimRows.push([

@@ -37,7 +37,7 @@ describe('NPX packaging & manifest verification', () => {
       '.agents/scripts/validate_frontmatter.js',
       '.agents/scripts/memory_write.js',
       '.agents/scripts/dedupe_validator.js',
-      '.agents/scripts/add-identity-block.js',
+      '.agents/scripts/lib/identity.js',
       'evals/roundtable/topics.json',
       // NOTE(de-circularized): evals/baseline.json was removed — it recorded
       // mock fixture-recall as quality evidence. The shipped reference is the

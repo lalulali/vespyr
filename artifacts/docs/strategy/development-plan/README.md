@@ -49,6 +49,7 @@ Every `NN[X]-*.md` file in this directory MUST have a row here; numbers are clai
 | `07-phase-6-loop-engineering.md` | Phase 6 loop engineering | Planned |
 | `08-cross-cutting-utter-satisfaction-dna.md` | Utter-satisfaction DNA | Cross-cutting |
 | `09-phase-7-pkm-knowledge-engine.md` | PKM knowledge engine | Planned (Phase 7) |
+| `10-phase-8-game-development-track.md` | Game development track (v2 rebuild) | Planned (Phase 8, entry gate: Phase 7 PKM complete) |
 
 ---
 

@@ -63,9 +63,22 @@ module.exports.uninstall = function uninstallHarnessShape(ctx) {
 		const windsurfRulesPath = isGlobal
 			? path.join(home, ".windsurfrules")
 			: path.join(targetDir, ".windsurfrules");
-		if (fs.existsSync(windsurfRulesPath)) {
-			try {
+		// Only remove Vespyr-owned rules: a symlink, or a file carrying the
+		// Vespyr marker. A user-authored .windsurfrules without the marker is
+		// left intact — the old code unconditionally unlinked it.
+		try {
+			const st = fs.lstatSync(windsurfRulesPath);
+			if (st.isSymbolicLink()) {
 				fs.unlinkSync(windsurfRulesPath);
-			} catch (e) {}
+			} else if (st.isFile()) {
+				try {
+					const content = fs.readFileSync(windsurfRulesPath, "utf8");
+					if (content.includes("Vespyr-managed") || content.includes(".agents/")) {
+						fs.unlinkSync(windsurfRulesPath);
+					}
+				} catch (e) {}
+			}
+		} catch (e) {
+			/* missing — nothing to do */
 		}
 };

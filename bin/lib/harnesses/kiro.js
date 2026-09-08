@@ -22,7 +22,7 @@ module.exports = {
 	methodProbePaths({ targetDir }) {
 		return [
 			`${targetDir}/.kiro/skills`,
-			`${targetDir}/.kiro/steering/AGENTS.md`,
+			`${targetDir}/.kiro/steering/vespyr-steering.md`,
 		];
 	},
 
@@ -130,25 +130,17 @@ module.exports.uninstall = function uninstallHarnessShape(ctx) {
 					if (stat.isSymbolicLink()) {
 						fs.unlinkSync(steeringDir);
 					} else {
+						// Surgical: remove ONLY the Vespyr-owned steering doc.
+						// The old code additionally deleted any steering/*.md
+						// whose basename collided with a core agent name —
+						// user-authored steering docs with the same filename
+						// were destroyed on uninstall.
 						const vespyrSteering = path.join(steeringDir, "vespyr-steering.md");
-						if (fs.existsSync(vespyrSteering)) {
-							fs.unlinkSync(vespyrSteering);
-						}
-						const agentsSrcDir = path.join(agentsSrc, "agents");
-						if (fs.existsSync(agentsSrcDir)) {
-							const coreAgents = fs
-								.readdirSync(agentsSrcDir)
-								.filter((f) => f.endsWith(".md"));
-							for (const agent of coreAgents) {
-								const targetAgentPath = path.join(steeringDir, agent);
-								if (fs.existsSync(targetAgentPath)) {
-									fs.rmSync(targetAgentPath, {
-										recursive: true,
-										force: true,
-									});
-								}
+						try {
+							if (fs.existsSync(vespyrSteering) || (() => { try { fs.lstatSync(vespyrSteering); return true; } catch { return false; } })()) {
+								fs.unlinkSync(vespyrSteering);
 							}
-						}
+						} catch (e) {}
 						removeDirIfEmpty(steeringDir);
 					}
 				} catch (e) {}

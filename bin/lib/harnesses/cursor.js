@@ -24,8 +24,11 @@ module.exports = {
 			: path.join(home, ".config", "Cursor", "User", "globalRules");
 	},
 
-	methodProbePaths() {
-		return [];
+	methodProbePaths({ targetDir } = {}) {
+		// Dormant shape still reports a probe so detectMethod() can classify
+		// pre-existing installs instead of defaulting blind to "symlink".
+		const base = targetDir || process.cwd();
+		return [`${base}/.cursor/rules`];
 	},
 
 };

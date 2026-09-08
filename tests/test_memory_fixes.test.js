@@ -20,7 +20,7 @@ const path = require('path');
 const { execFileSync } = require('child_process');
 
 const REPO_ROOT = path.resolve(__dirname, '..');
-const MIGRATE = path.join(REPO_ROOT, '.agents', 'scripts', 'migrate_memory_v2.js');
+const MIGRATE = path.join(REPO_ROOT, 'artifacts', 'archive', 'spent-codemods', 'migrate_memory_v2.js');
 const ORCH = path.join(REPO_ROOT, '.agents', 'scripts', 'orchestrator_state.js');
 const SESSION_START = path.join(REPO_ROOT, '.agents', 'scripts', 'session_start.js');
 const MEMORY_FILTER = path.join(REPO_ROOT, '.agents', 'scripts', 'memory_filter.js');
