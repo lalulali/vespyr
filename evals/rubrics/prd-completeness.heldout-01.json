@@ -1,0 +1,47 @@
+{
+  "dimension": "prd_completeness",
+  "name": "PRD & Planning Completeness Rubric — HELD-OUT CANDIDATE 01",
+  "description": "Same criterion intents as prd-completeness.json, re-evidenced through disjoint vocabulary. DRAFT: UNREVIEWED — a blind author (no access to suite fixtures) must review/approve before any score from this file counts as independent evidence.",
+  "passThreshold": 4,
+  "held_out_candidate": true,
+  "review_status": "UNREVIEWED",
+  "decoupled_from": ["AGENT-PM-01"],
+  "criteria": [
+    {
+      "id": "PRD-1",
+      "name": "Structured Problem Statement",
+      "weight": 2,
+      "requiredPatterns": [
+        "problem|context|objective|motivation|goal"
+      ],
+      "note": "Unchanged: no Tier-0 assert in the decoupled benchmark targets this criterion."
+    },
+    {
+      "id": "PRD-2",
+      "name": "Testable Acceptance Criteria",
+      "weight": 2,
+      "requiredPatterns": [
+        "measurable|observable|quantif|threshold|definition of done|done means"
+      ],
+      "note": "Re-evidenced: default pattern names Gherkin ('given|when|then|acceptance criteria'), which the decoupled benchmark asserts verbatim. This variant tests verifiable-outcome language instead. Narrower than the default — blind reviewer to confirm it still measures testability, not just synonym luck."
+    },
+    {
+      "id": "PRD-3",
+      "name": "Explicit Out-of-Scope Boundaries",
+      "weight": 1,
+      "requiredPatterns": [
+        "non-goals|exclusions|not covered|deferr|future work|will not"
+      ],
+      "note": "Re-evidenced: avoids the literal 'out of scope' asserted by the decoupled benchmark. Tests boundary language through exclusion/deferral terms."
+    },
+    {
+      "id": "PRD-4",
+      "name": "Granular Sizing (1-4 Hour Rule)",
+      "weight": 1,
+      "requiredPatterns": [
+        "task|breakdown|estimation|hours|phase|step"
+      ],
+      "note": "Unchanged: no Tier-0 assert in the decoupled benchmark targets this criterion."
+    }
+  ]
+}

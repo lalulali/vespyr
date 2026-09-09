@@ -10,7 +10,7 @@ const fs = require("fs");
 const path = require("path");
 const { countTokens } = require("./lib/tokenizer");
 const { parseMarkdownAST, normalizeVerdict } = require("./lib/ast");
-const { runCommandWithTimeout, splitCommand } = require("./lib/process");
+const { runCommandWithTimeout, splitCommand, validateBenchmarkCommand } = require("./lib/process");
 const { computeRQSDWithDetails } = require("./lib/biomarkers");
 
 /**
@@ -64,9 +64,12 @@ async function evaluateTier0(benchmark, executionResult, sandboxContext) {
       if (rqsRes.rqs_d_score < threshold) {
         failures.push(`RQS-D gate failed: ${rqsRes.rqs_d_score} < ${threshold} (rating ${rqsRes.rating})`);
       }
-      // Hard invariants per 02l Option A §6 INV-TEL-03: SCR=1.0, MSHA=1.0, PD=0.0, PCI=0.0 must pass for success
+      // Hard invariants per 02l Option A §6 INV-TEL-03: SCR=1.0, MSHA=1.0, PD=0.0, PCI=0.0 must pass for success.
+      // N/A biomarkers (SCR with no structured blocks) are SKIPPED, never failed:
+      // with computeSCR returning null instead of a vacuous 1.0, `!== 1.0`
+      // would invert the fix and fail every unstructured output.
       if (benchmark.hardInvariants !== false) {
-        if (rqsRes.biomarkers.scr !== 1.0) failures.push(`Hard invariant SCR=1.0 failed (got ${rqsRes.biomarkers.scr}) [TIER0_SCR]`);
+        if (rqsRes.biomarkers.scr !== null && rqsRes.biomarkers.scr !== 1.0) failures.push(`Hard invariant SCR=1.0 failed (got ${rqsRes.biomarkers.scr}) [TIER0_SCR]`);
         if (rqsRes.biomarkers.msha !== 1.0) failures.push(`Hard invariant MSHA=1.0 failed (got ${rqsRes.biomarkers.msha}) [TIER0_MSHA]`);
         if (rqsRes.biomarkers.placeholder_density !== 0.0) failures.push(`Hard invariant PD=0.0 failed (got ${rqsRes.biomarkers.placeholder_density}) [TIER0_PD]`);
         if (rqsRes.biomarkers.pci !== 0.0) failures.push(`Hard invariant PCI=0.0 failed (got ${rqsRes.biomarkers.pci}) [TIER0_PCI]`);
@@ -112,10 +115,13 @@ async function evaluateTier0(benchmark, executionResult, sandboxContext) {
       }
     }
 
-    // Check required pushback keywords / flaw identifiers
+    // Check required pushback keywords / flaw identifiers (an invalid
+    // pattern is a suite bug, reported as such — not a model failure).
     if (benchmark.expectedFlawKeywords && Array.isArray(benchmark.expectedFlawKeywords)) {
       for (const kw of benchmark.expectedFlawKeywords) {
-        const regex = new RegExp(kw, "i");
+        let regex;
+        try { regex = new RegExp(kw, "i"); }
+        catch (e) { failures.push(`Invalid expectedFlawKeywords pattern: "${kw}" — ${e.message}`); continue; }
         if (!regex.test(outputText)) {
           failures.push(`Missing required pushback flaw identification for: "${kw}"`);
         }
@@ -146,6 +152,27 @@ async function evaluateTier0(benchmark, executionResult, sandboxContext) {
     }
   }
 
+  // 3b. Required plan steps (script fidelity contract): when a benchmark
+  // declares `requiredSteps`, each step (substring/regex, guarded) must be
+  // evidenced in the output. This is the measured input to the
+  // memory_adherence script_fidelity aggregate — null when no benchmark
+  // declares steps, never a pass_rate tautology.
+  if (benchmark.requiredSteps && Array.isArray(benchmark.requiredSteps)) {
+    let matched = 0;
+    const missing = [];
+    for (const step of benchmark.requiredSteps) {
+      let regex;
+      try { regex = new RegExp(step, "i"); }
+      catch (e) { failures.push(`Invalid requiredSteps pattern: "${step}" — ${e.message}`); continue; }
+      if (regex.test(outputText)) matched++;
+      else missing.push(String(step).slice(0, 80));
+    }
+    metrics.script_steps = { matched, total: benchmark.requiredSteps.length };
+    if (missing.length > 0) {
+      failures.push(`Missing required plan steps (${matched}/${benchmark.requiredSteps.length}): ${missing.join("; ")}`);
+    }
+  }
+
   // 4. File Existence & Content Checks in Sandbox
   if (sandboxContext && benchmark.assertFiles && Array.isArray(benchmark.assertFiles)) {
     for (const fileAssert of benchmark.assertFiles) {
@@ -167,17 +194,44 @@ async function evaluateTier0(benchmark, executionResult, sandboxContext) {
     }
   }
 
-  // 5. Unit Test / Command Execution Exit Code Gate (e.g. for Developer Tasks)
+  // 5. Unit Test / Command Execution Exit Code Gate (e.g. for Developer Tasks).
+  // Exit code alone is weak: benchmark.assertTestOutput (optional
+  // substring/regex over stdout+stderr) asserts the command actually
+  // exercised the claim instead of exiting 0 on an empty run.
   if (sandboxContext && benchmark.runTestCommand) {
-    const cmdParts = splitCommand(benchmark.runTestCommand);
-    const bin = cmdParts[0];
-    const args = cmdParts.slice(1);
-    const testResult = await sandboxContext.runCommand(bin, args, {
-      timeoutMs: benchmark.testTimeoutMs || 10000
-    });
+    let cmdParts;
+    try {
+      validateBenchmarkCommand(benchmark.runTestCommand);
+      cmdParts = splitCommand(benchmark.runTestCommand);
+    } catch (e) {
+      failures.push(`Rejected runTestCommand: ${e.message}`);
+      cmdParts = null;
+    }
+    if (cmdParts) {
+      const bin = cmdParts[0];
+      const args = cmdParts.slice(1);
+      const testResult = await sandboxContext.runCommand(bin, args, {
+        timeoutMs: benchmark.testTimeoutMs ?? 10000
+      });
 
-    if (testResult.code !== 0) {
-      failures.push(`Unit test assertion failed with exit code ${testResult.code}: ${testResult.stderr || testResult.stdout}`);
+      if (testResult.code !== 0) {
+        failures.push(`Unit test assertion failed with exit code ${testResult.code}: ${testResult.stderr || testResult.stdout}`);
+      }
+      if (benchmark.assertTestOutput) {
+        const combined = (testResult.stdout || "") + "\n" + (testResult.stderr || "");
+        const patterns = Array.isArray(benchmark.assertTestOutput) ? benchmark.assertTestOutput : [benchmark.assertTestOutput];
+        for (const pattern of patterns) {
+          let regex;
+          try { regex = new RegExp(pattern, "i"); }
+          catch (e) { failures.push(`Invalid assertTestOutput pattern: "${pattern}" — ${e.message}`); continue; }
+          if (!regex.test(combined)) {
+            failures.push(`Test output missing required pattern: "${pattern}"`);
+          }
+        }
+      }
+      if (testResult.truncated) {
+        metrics.testOutputTruncated = true;
+      }
     }
   }
 

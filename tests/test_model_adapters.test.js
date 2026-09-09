@@ -59,7 +59,14 @@ describe("add", () => {
 
     const res = await executeBenchmark(benchmark, { executionAdapter: customAdapter });
     assert.strictEqual(res.passed, true);
-    assert.strictEqual(res.tokens, 42);
+    // Token provenance (review 04 §5): provider usage and the local counter
+    // are incommensurable units — `tokens` is always the local count;
+    // provider figures ride alongside in `providerTokens`.
+    const { countTokens } = require("../tools/eval/lib/tokenizer");
+    assert.strictEqual(res.tokens, countTokens(res.output));
+    assert.strictEqual(res.providerTokens, 42);
+    assert.strictEqual(res.tokenSource, "provider+local");
+    assert.strictEqual(res.mock, false);
     assert.ok(res.tier0Passed);
   });
 });

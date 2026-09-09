@@ -10,21 +10,40 @@ const { spawnSync } = require("child_process");
 
 const ROOT_DIR = path.resolve(__dirname, "..", "..", "..");
 
+/** Max persona characters shipped as a system prompt (full .md files are unbounded). */
+const MAX_SYSTEM_PROMPT_CHARS = 8000;
+
+/** Lines matching these are redacted before a persona ships as a prompt. */
+const SECRET_LINE = /(api[_-]?key|secret|token|password|credential|private[_-]?key)\s*[:=]/i;
+
 /**
  * Loads agent persona instructions if specified on the benchmark.
+ * Traversal-guarded: only bare `[a-z0-9-]` names resolve inside
+ * `.agents/agents/`; anything else (e.g. `../../etc/passwd`) returns null
+ * instead of having its content POSTed to a provider as a system prompt.
  */
 function loadAgentSystemPrompt(agentName) {
   if (!agentName || agentName === "all") return null;
-  const cleanName = agentName.replace(/^@/, "");
+  const cleanName = String(agentName).replace(/^@/, "");
+  if (!/^[a-z0-9-]+$/i.test(cleanName)) return null;
   const agentFile = path.join(ROOT_DIR, ".agents", "agents", cleanName + ".md");
-  if (fs.existsSync(agentFile)) {
-    return fs.readFileSync(agentFile, "utf8");
+  const resolved = path.resolve(agentFile);
+  if (!resolved.startsWith(path.join(ROOT_DIR, ".agents", "agents") + path.sep)) return null;
+  if (fs.existsSync(resolved)) {
+    const raw = fs.readFileSync(resolved, "utf8");
+    const redacted = raw.split("\n").map(line => SECRET_LINE.test(line) ? "[REDACTED]" : line).join("\n");
+    return redacted.length > MAX_SYSTEM_PROMPT_CHARS
+      ? redacted.slice(0, MAX_SYSTEM_PROMPT_CHARS) + "\n…[truncated]"
+      : redacted;
   }
   return null;
 }
 
 /**
- * CLI Adapter: spawns an external process with the benchmark prompt
+ * CLI Adapter: spawns an external process with the benchmark prompt.
+ * Hardened: no shell (the command string is split, never interpreted),
+ * allowlisted env (no full host env, no VESPYR_PROMPT duplication — the
+ * prompt travels on stdin only, never in the process table), bounded output.
  */
 async function cliAdapter(benchmark, { options = {}, sandbox = null }) {
   const cliCommand = options.cli || process.env.VESPYR_EVAL_CLI;
@@ -33,20 +52,34 @@ async function cliAdapter(benchmark, { options = {}, sandbox = null }) {
   }
 
   const cwd = sandbox ? sandbox.dir : process.cwd();
+  const { splitCommand } = require("../lib/process");
+  const parts = splitCommand(String(cliCommand));
+  const file = parts[0];
+  const baseArgs = parts.slice(1);
 
-  const res = spawnSync(cliCommand, {
+  // Explicit env: tooling essentials + provider credentials the child may
+  // need + run metadata. Everything else (notably the full prompt, which
+  // used to ride along as VESPYR_PROMPT) is excluded.
+  const env = {};
+  for (const k of ["PATH", "PATHEXT", "HOME", "USER", "LOGNAME", "SHELL", "TMPDIR", "TEMP", "TMP",
+                   "LANG", "LC_ALL", "LC_CTYPE", "TZ", "SYSTEMROOT", "SYSTEMDRIVE", "COMSPEC",
+                   "NODE_ENV", "CI", "TERM",
+                   "OPENAI_API_KEY", "OPENAI_BASE_URL", "ANTHROPIC_API_KEY",
+                   "GEMINI_API_KEY", "OLLAMA_HOST"]) {
+    if (process.env[k] !== undefined) env[k] = process.env[k];
+  }
+  env.VESPYR_BENCHMARK_ID = benchmark.id;
+  env.VESPYR_BENCHMARK_AGENT = benchmark.agent || "";
+  env.VESPYR_BENCHMARK_SKILL = benchmark.skill || "";
+
+  const res = spawnSync(file, baseArgs, {
     cwd,
     encoding: "utf8",
     timeout: options.timeout || 60000,
-    shell: true,
+    maxBuffer: 1024 * 1024,
+    shell: false,
     input: benchmark.prompt,
-    env: {
-      ...process.env,
-      VESPYR_BENCHMARK_ID: benchmark.id,
-      VESPYR_BENCHMARK_AGENT: benchmark.agent || "",
-      VESPYR_BENCHMARK_SKILL: benchmark.skill || "",
-      VESPYR_PROMPT: benchmark.prompt
-    }
+    env
   });
 
   return {
@@ -236,7 +269,9 @@ async function ollamaAdapter(benchmark, { options = {}, sandbox = null }) {
 }
 
 /**
- * Resolves the appropriate execution adapter based on options and environment
+ * Resolves the appropriate execution adapter based on options and environment.
+ * Fail-closed on unknown names: a typo'd `--adapter gpt5` throws here
+ * instead of resolving null and silently green-lighting a mock run.
  */
 function resolveAdapter(options = {}) {
   const adapterName = (options.adapter || process.env.VESPYR_EVAL_ADAPTER || "").toLowerCase();
@@ -265,10 +300,17 @@ function resolveAdapter(options = {}) {
     if (process.env.ANTHROPIC_API_KEY) return anthropicAdapter;
     if (process.env.OPENAI_API_KEY) return openaiAdapter;
     if (process.env.OLLAMA_HOST) return ollamaAdapter;
-    return null; // fallback to deterministic mock
+    return null; // no credentials: caller fails closed unless --mock is explicit
   }
 
-  return null;
+  if (adapterName === "") {
+    return null; // unspecified: fail closed unless --mock is explicit
+  }
+
+  throw new Error(
+    `Unknown eval adapter "${adapterName}" (expected auto, mock, cli, openai, anthropic, gemini, ollama). ` +
+    `Refusing to fall back to mock — fix the name or pass --mock explicitly.`
+  );
 }
 
 module.exports = {
@@ -277,5 +319,6 @@ module.exports = {
   anthropicAdapter,
   geminiAdapter,
   ollamaAdapter,
-  resolveAdapter
+  resolveAdapter,
+  loadAgentSystemPrompt
 };

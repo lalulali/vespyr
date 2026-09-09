@@ -9,6 +9,14 @@ const path = require("path");
 
 const DEFAULT_BASELINE_PATH = path.join(__dirname, "..", "..", "evals", "baseline.json");
 
+function harnessVersion() {
+  try {
+    const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "..", "package.json"), "utf8"));
+    if (pkg && pkg.version) return String(pkg.version);
+  } catch (e) { /* fall through */ }
+  return "2.0.0";
+}
+
 function loadBaseline(customPath) {
   const filePath = customPath || DEFAULT_BASELINE_PATH;
   if (!fs.existsSync(filePath)) {
@@ -17,7 +25,9 @@ function loadBaseline(customPath) {
   try {
     return JSON.parse(fs.readFileSync(filePath, "utf8"));
   } catch (err) {
-    return null;
+    // A corrupt baseline must FAIL CLOSED: returning null would be read as
+    // "no baseline yet" and silently bless the current run as the reference.
+    throw new Error(`Baseline file corrupt at ${filePath}: ${err.message}. Fix or delete it explicitly; refusing to treat corruption as a fresh baseline.`);
   }
 }
 
@@ -28,19 +38,32 @@ function recordBaseline(runResults, customPath) {
     fs.mkdirSync(dir, { recursive: true });
   }
 
+  // Never silently overwrite: keep a single-level backup of the displaced
+  // baseline so a bad record is recoverable.
+  if (fs.existsSync(filePath)) {
+    try {
+      fs.copyFileSync(filePath, filePath + ".prev.json");
+    } catch (e) { /* backup is best-effort */ }
+  }
+
   const baselineData = {
     version: "2.0.0",
     generated_at: new Date().toISOString(),
-    harness_version: "1.0.0",
+    harness_version: harnessVersion(),
     mock_mode: runResults.mockMode === true,
+    provenance: runResults.provenance || null,
     summary: {
       total_benchmarks: runResults.total || 0,
       passed_benchmarks: runResults.passed || 0,
       failed_benchmarks: runResults.failed || 0,
-      pass_rate: runResults.passRate || 0,
-      tier0_pass_rate: runResults.tier0PassRate || 0,
+      pass_rate: runResults.passRate ?? 0,
+      tier0_pass_rate: runResults.tier0PassRate ?? 0,
       tier1_avg_score: runResults.tier1AvgScore ?? null,
-      total_token_spend: runResults.totalTokens || 0,
+      tier1_independence: runResults.tier1Independence || null,
+      total_token_spend: runResults.totalTokens ?? 0,
+      total_provider_tokens: runResults.totalProviderTokens ?? null,
+      measured_benchmarks: runResults.split ? runResults.split.measured.count : null,
+      mocked_benchmarks: runResults.split ? runResults.split.mocked.count : null,
       latency_p50_ms: runResults.latencyP50 || 0,
       latency_p95_ms: runResults.latencyP95 || 0
     },
@@ -52,10 +75,16 @@ function recordBaseline(runResults, customPath) {
       agent: b.agent,
       skill: b.skill,
       dimension: b.dimension,
+      model_tier: b.modelTier || null,
+      mock: b.mock === true,
+      rubric_source: b.rubricSource || null,
+      tier1_coauthored: b.tier1Coauthored ?? null,
+      token_source: b.tokenSource || "local",
       passed: b.passed,
       tier0_passed: b.tier0Passed,
       tier1_score: b.tier1Score,
       tokens: b.tokens,
+      provider_tokens: b.providerTokens ?? null,
       duration_ms: b.durationMs
     }))
   };
@@ -75,6 +104,7 @@ function diffAgainstBaseline(current, baseline) {
     return {
       hasRegression: false,
       regressions: [],
+      improvements: [],
       deltas: {},
       isNewBaseline: true
     };
@@ -82,20 +112,41 @@ function diffAgainstBaseline(current, baseline) {
 
   const baseSummary = baseline.summary || {};
   const currSummary = current;
+  const currProvenance = current.provenance || {};
+  const baseProvenance = baseline.provenance || {};
+  const thresholds = {
+    pass_rate_drop: currProvenance.thresholds?.pass_rate_drop ?? baseProvenance.thresholds?.pass_rate_drop ?? 0.001,
+    token_inflation_percent: currProvenance.thresholds?.token_inflation_percent ?? baseProvenance.thresholds?.token_inflation_percent ?? 15.0,
+    tier1_erosion: currProvenance.thresholds?.tier1_erosion ?? baseProvenance.thresholds?.tier1_erosion ?? 0.5
+  };
 
-  const passRateDelta = (currSummary.passRate ?? 1.0) - (baseSummary.pass_rate ?? 1.0);
+  // Empty runs measure nothing: default 0 (fail closed), never 1.0.
+  const currPassRate = currSummary.passRate ?? 0;
+  const basePassRate = baseSummary.pass_rate ?? 0;
+  const passRateDelta = currPassRate - basePassRate;
   const tokenSpendDelta = (currSummary.totalTokens ?? 0) - (baseSummary.total_token_spend ?? 0);
   const tokenInflationPercent = baseSummary.total_token_spend > 0
     ? Number(((tokenSpendDelta / baseSummary.total_token_spend) * 100).toFixed(2))
     : 0;
 
   const regressions = [];
+  const improvements = [];
+
+  // 0. Mock-mode mismatch: fixture-recall numbers and model measurements are
+  // incomparable. Comparing them silently launders one as the other.
+  const currMock = currSummary.mockMode ?? currProvenance.mock_mode;
+  if (currMock !== undefined && baseline.mock_mode !== undefined && currMock !== baseline.mock_mode) {
+    regressions.push({
+      type: "MOCK_MODE_MISMATCH",
+      message: `Mock-mode mismatch (baseline mock_mode=${baseline.mock_mode}, current mockMode=${currMock}): fixture-recall and model measurements are incomparable`
+    });
+  }
 
   // 1. Pass Rate Drop (Zero tolerance)
-  if (passRateDelta < -0.001) {
+  if (passRateDelta < -thresholds.pass_rate_drop) {
     regressions.push({
       type: "PASS_RATE_DROP",
-      message: `Pass rate dropped by ${(Math.abs(passRateDelta) * 100).toFixed(1)}% (Baseline: ${(baseSummary.pass_rate * 100).toFixed(1)}%, Current: ${(currSummary.passRate * 100).toFixed(1)}%)`
+      message: `Pass rate dropped by ${(Math.abs(passRateDelta) * 100).toFixed(1)}% (Baseline: ${(basePassRate * 100).toFixed(1)}%, Current: ${(currPassRate * 100).toFixed(1)}%)`
     });
   }
 
@@ -117,10 +168,22 @@ function diffAgainstBaseline(current, baseline) {
   }
 
   // 3. Token Inflation (>15%)
-  if (tokenInflationPercent > 15.0) {
+  if (tokenInflationPercent > thresholds.token_inflation_percent) {
     regressions.push({
       type: "TOKEN_INFLATION",
-      message: `Token spend increased by ${tokenInflationPercent}% (Threshold: +15%)`
+      message: `Token spend increased by ${tokenInflationPercent}% (Threshold: +${thresholds.token_inflation_percent}%)`
+    });
+  }
+
+  // 3b. Tier-1 score erosion: pass-rate parity can hide quality decay.
+  // Previously invisible — only PASS→FAIL flips were gated.
+  const tier1Delta = Number((((currSummary.tier1AvgScore ?? null) !== null ? currSummary.tier1AvgScore : 0) - ((baseSummary.tier1_avg_score ?? null) !== null ? baseSummary.tier1_avg_score : 0)).toFixed(2));
+  if (currSummary.tier1AvgScore !== null && currSummary.tier1AvgScore !== undefined &&
+      baseSummary.tier1_avg_score !== null && baseSummary.tier1_avg_score !== undefined &&
+      tier1Delta < -thresholds.tier1_erosion) {
+    regressions.push({
+      type: "SCORE_EROSION",
+      message: `Tier-1 average eroded by ${Math.abs(tier1Delta).toFixed(2)} (Baseline: ${baseSummary.tier1_avg_score}, Current: ${currSummary.tier1AvgScore}, Threshold: ${thresholds.tier1_erosion})`
     });
   }
 
@@ -144,12 +207,22 @@ function diffAgainstBaseline(current, baseline) {
             message: `Benchmark ${currBm.id} ("${currBm.name}") regressed from PASS to FAIL`
           });
         }
+        // FAIL→PASS flips are NOT regressions, but they are recorded: an
+        // unexpected flip means the baseline is stale (or the gate moved) and
+        // deserves an explicit re-baseline, not silent greening.
+        if (!baseBm.passed && currBm.passed) {
+          improvements.push({
+            type: "BENCHMARK_IMPROVEMENT",
+            id: currBm.id,
+            message: `Benchmark ${currBm.id} ("${currBm.name}") flipped from FAIL to PASS — consider re-baselining`
+          });
+        }
         benchmarkDeltas.push({
           id: currBm.id,
           name: currBm.name,
           basePassed: baseBm.passed,
           currPassed: currBm.passed,
-          scoreDelta: Number(((currBm.tier1Score || 0) - (baseBm.tier1_score || 0)).toFixed(2)),
+          scoreDelta: Number(((currBm.tier1Score ?? 0) - (baseBm.tier1_score ?? 0)).toFixed(2)),
           tokenDelta: (currBm.tokens || 0) - (baseBm.tokens || 0)
         });
       }
@@ -159,11 +232,16 @@ function diffAgainstBaseline(current, baseline) {
   return {
     hasRegression: regressions.length > 0,
     regressions,
+    improvements,
+    thresholds,
     deltas: {
       passRateDelta: Number(passRateDelta.toFixed(4)),
       tokenSpendDelta,
       tokenInflationPercent,
-      tier1AvgScoreDelta: Number(((currSummary.tier1AvgScore || 0) - (baseSummary.tier1_avg_score || 0)).toFixed(2))
+      tier1AvgScoreDelta: (currSummary.tier1AvgScore === null || currSummary.tier1AvgScore === undefined ||
+        baseSummary.tier1_avg_score === null || baseSummary.tier1_avg_score === undefined)
+        ? null
+        : tier1Delta
     },
     benchmarkDeltas
   };

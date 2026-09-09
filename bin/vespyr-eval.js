@@ -2,8 +2,8 @@
 
 /**
  * vespyr-eval — Standalone Multi-Agent Swarm Evaluation CLI Entrypoint (02j)
- * Executes deterministic Tier 0 gates, calibrated Tier 1 rubrics, and SPC metrics
- * across all 20 agent personas and all skill workflows.
+ * Executes deterministic Tier 0 gates, deterministic Tier 1 checklist rubrics,
+ * and SPC metrics across all 20 agent personas and all skill workflows.
  */
 
 const path = require("path");
@@ -39,6 +39,8 @@ Options:
                            benchmarks FAIL CLOSED instead of self-grading.
   --cli <command>            Command string for CLI execution adapter
   --temp, -t <float>         Temperature for evaluation runs (default: 0.0)
+  --min-rqsd <float>          Global RQS-D floor (0..1) for benchmarks with no explicit
+                            RQS-D contract; explicit requireRQSD/minRQSD wins.
   --concurrency, -c <int>    Number of concurrent worker sandboxes (default: 4)
   --baseline, -b <path>      Path to baseline.json (default: evals/baseline.json)
   --fail-fast                Stop immediately on first failure
@@ -67,6 +69,7 @@ function parseArgs(args) {
     cli: null,
     mock: false,
     temp: 0.0,
+    minRQSD: null,
     concurrency: 4,
     baseline: DEFAULT_BASELINE_PATH,
     failFast: false,
@@ -115,6 +118,14 @@ function parseArgs(args) {
         process.exit(3);
       }
       options.temp = v;
+    } else if (arg === "--min-rqsd") {
+      const raw = needValue(arg, args[++i]);
+      const v = parseFloat(raw);
+      if (!Number.isFinite(v) || v < 0 || v > 1) {
+        console.error(`Invalid value for ${arg}: ${raw} (expected finite float 0..1)`);
+        process.exit(3);
+      }
+      options.minRQSD = v;
     } else if (arg === "--concurrency" || arg === "-c") {
       const raw = needValue(arg, args[++i]);
       const v = parseInt(raw, 10);
@@ -188,6 +199,10 @@ async function main() {
         process.exit(3);
       }
       const runResults = await runEvaluation(options);
+      if (runResults.total === 0) {
+        console.error("Harness configuration error: 0 benchmarks matched (check --suite/--agent/--skill filters).");
+        process.exit(3);
+      }
       const diffReport = diffAgainstBaseline(runResults, baseline);
       const reportText = renderReport(options, runResults, diffReport);
       emitReport(options, reportText);
@@ -203,6 +218,16 @@ async function main() {
     const runResults = await runEvaluation(options);
     let baseline = loadBaseline(options.baseline);
     let diffReport = null;
+
+    // Nothing evaluated (e.g. a --suite/--agent filter matched zero
+    // benchmarks) is a configuration error, not a green run.
+    if (runResults.total === 0) {
+      console.error("Harness configuration error: 0 benchmarks matched (check --suite/--agent/--skill filters and suite warnings).");
+      if ((runResults.suiteWarnings || []).length > 0) {
+        for (const w of runResults.suiteWarnings) console.error(`  malformed suite: ${w.file} — ${w.error}`);
+      }
+      process.exit(3);
+    }
 
     if (options.subcommand === "record-baseline") {
       // A mock run must never become the production baseline silently:

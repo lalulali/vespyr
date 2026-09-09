@@ -24,11 +24,14 @@ function computePlaceholderDensity(text) {
 }
 
 function computeSCR(text) {
-  // Deterministic: 1.0 if frontmatter parses (if present) and JSON fences parse; else 0.0
-  // Minimal: if text contains ```json block, try parse; if frontmatter --- block, try parse
+  // Deterministic: 1.0 if frontmatter parses (if present) and JSON fences parse; else 0.0.
+  // No frontmatter AND no JSON fences => N/A (null), NOT 1.0: a vacuous
+  // perfect previously let unstructured prose pass the SCR hard invariant.
   try {
     const fm = text.match(/^---\n([\s\S]*?)\n---/m);
+    let sawStructure = false;
     if (fm) {
+      sawStructure = true;
       const yaml = fm[1];
       if (/^\s*[\w-]+\s*:/m.test(yaml)) {
         // crude yaml sanity: contains key: value
@@ -36,9 +39,10 @@ function computeSCR(text) {
     }
     const jsonFences = [...text.matchAll(/```json\n([\s\S]*?)```/g)];
     for (const m of jsonFences) {
+      sawStructure = true;
       try { JSON.parse(m[1]); } catch(e) { return 0.0; }
     }
-    return 1.0;
+    return sawStructure ? 1.0 : null;
   } catch(e) { return 0.0; }
 }
 
@@ -60,9 +64,11 @@ function computeAcTestability(text) {
   const lines = text.split('\n');
   const acLines = lines.filter(l => /^\s*-\s*(Given|When|Then)\b/i.test(l));
   if (acLines.length === 0) {
-    // no AC section => check if any Gherkin at all; if none, neutral 1.0 (not applicable) else 0
+    // No Gherkin lines at all => N/A (null), not 1.0: a vacuous perfect
+    // previously scored unstructured prose as fully testable. Outputs that
+    // mention Given/When/Then without list form are malformed (0.0).
     const hasAcKeyword = /(Given|When|Then)/i.test(text);
-    return hasAcKeyword ? 0.0 : 1.0;
+    return hasAcKeyword ? 0.0 : null;
   }
   // all acLines already match regex; if we want strict per-commit: ensure they start with "- Given"
   const valid = acLines.filter(l => AC_REGEX.test(l.trim())).length;
@@ -83,7 +89,10 @@ function computeRQSD(text, opts = {}) {
   const msha = computeMSHA(text || '', opts.requiredHeaders);
   const ac_testability = computeAcTestability(text || '');
 
-  // Provisional weights per 02l Option A (sum 1.0, excluding RQS-J)
+  // Provisional weights per 02l Option A (sum 1.0, excluding RQS-J).
+  // N/A components (SCR with no structured blocks, AC with no Gherkin) are
+  // EXCLUDED and remaining weights renormalized — a vacuous 1.0 previously
+  // inflated every unstructured output.
   const w = {
     scr: opts.w_scr != null ? opts.w_scr : 0.25,
     msha: opts.w_msha != null ? opts.w_msha : 0.25,
@@ -91,14 +100,20 @@ function computeRQSD(text, opts = {}) {
     pci: opts.w_pci != null ? opts.w_pci : 0.15,
     ac: opts.w_ac != null ? opts.w_ac : 0.15,
   };
-  // normalize if custom
-  const sum = w.scr + w.msha + w.pd + w.pci + w.ac;
-  const nw = { scr: w.scr/sum, msha: w.msha/sum, pd: w.pd/sum, pci: w.pci/sum, ac: w.ac/sum };
+  const applicable = { scr: scr !== null, msha: true, pd: true, pci: true, ac: ac_testability !== null };
+  const sum = (applicable.scr ? w.scr : 0) + w.msha + w.pd + w.pci + (applicable.ac ? w.ac : 0);
+  const nw = {
+    scr: applicable.scr ? w.scr / sum : 0,
+    msha: w.msha / sum,
+    pd: w.pd / sum,
+    pci: w.pci / sum,
+    ac: applicable.ac ? w.ac / sum : 0,
+  };
 
   const cleanliness = 1 - placeholder_density;
   const antiPci = 1 - pci; // PCI 0.0 best
 
-  const rqs = nw.scr * scr + nw.msha * msha + nw.pd * cleanliness + nw.pci * antiPci + nw.ac * ac_testability;
+  const rqs = (applicable.scr ? nw.scr * scr : 0) + nw.msha * msha + nw.pd * cleanliness + nw.pci * antiPci + (applicable.ac ? nw.ac * ac_testability : 0);
   const rqs_d_score = Math.max(0, Math.min(1, Number(rqs.toFixed(3))));
   let rating = 'REJECTED';
   if (rqs_d_score >= 0.95) rating = 'EXCELLENT';
@@ -119,22 +134,23 @@ function computeRQSD(text, opts = {}) {
     },
     weights: nw,
     tier0: {
-      scr_pass: scr === 1.0,
+      scr_pass: scr === null || scr === 1.0,
       msha_pass: msha === 1.0,
       pd_pass: placeholder_density === 0.0,
       pci_pass: pci === 0.0,
-    }
+    },
+    applicable
   };
 }
 
 function computeRQSDWithDetails(text, opts) {
   const r = computeRQSD(text, opts);
   const checks = [
-    { type: 'json_schema', status: r.biomarkers.scr === 1.0 ? 'PASS' : 'FAIL', details: r.biomarkers.scr === 1.0 ? 'SCR 1.0' : 'SCR failed' },
+    { type: 'json_schema', status: r.biomarkers.scr === null ? 'SKIP' : (r.biomarkers.scr === 1.0 ? 'PASS' : 'FAIL'), details: r.biomarkers.scr === null ? 'SCR N/A (no structured blocks)' : `SCR ${r.biomarkers.scr}` },
     { type: 'markdown_ast', status: r.biomarkers.msha === 1.0 ? 'PASS' : 'FAIL', details: `MSHA ${r.biomarkers.msha}` },
     { type: 'markdown_ast', status: r.biomarkers.placeholder_density === 0.0 ? 'PASS' : 'FAIL', details: `PD ${r.biomarkers.placeholder_density}` },
     { type: 'markdown_ast', status: r.biomarkers.pci === 0.0 ? 'PASS' : 'FAIL', details: `PCI ${r.biomarkers.pci}` },
-    { type: 'markdown_ast', status: r.biomarkers.ac_testability === 1.0 ? 'PASS' : 'FAIL', details: `AC ${r.biomarkers.ac_testability}` },
+    { type: 'markdown_ast', status: r.biomarkers.ac_testability === null ? 'SKIP' : (r.biomarkers.ac_testability === 1.0 ? 'PASS' : 'FAIL'), details: r.biomarkers.ac_testability === null ? 'AC N/A (no Gherkin)' : `AC ${r.biomarkers.ac_testability}` },
   ];
   return { ...r, checks };
 }

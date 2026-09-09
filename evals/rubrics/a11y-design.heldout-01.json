@@ -1,0 +1,38 @@
+{
+  "dimension": "a11y_design",
+  "name": "Design & A11y Adherence Rubric — HELD-OUT CANDIDATE 01",
+  "description": "Same criterion intents as a11y-design.json, re-evidenced through disjoint vocabulary. DRAFT: UNREVIEWED — a blind author (no access to suite fixtures) must review/approve before any score from this file counts as independent evidence.",
+  "passThreshold": 4,
+  "held_out_candidate": true,
+  "review_status": "UNREVIEWED",
+  "decoupled_from": ["AGENT-DESIGNER-01"],
+  "criteria": [
+    {
+      "id": "A11Y-1",
+      "name": "Screen State Completeness",
+      "weight": 2,
+      "requiredPatterns": [
+        "offline|retry|forbidden|unauthorized|not found|zero-results|no results"
+      ],
+      "note": "Re-evidenced: avoids 'empty|loading|error|success|state', asserted verbatim by the decoupled benchmark. Tests edge-state coverage (offline/retry/auth/empty-result) instead of the canonical four-state matrix. Narrower than the default — blind reviewer to confirm."
+    },
+    {
+      "id": "A11Y-2",
+      "name": "WCAG AA Contrast & Semantics",
+      "weight": 2,
+      "requiredPatterns": [
+        "screen reader|alt text|tabindex|landmark|fieldset|lighthouse|axe-core"
+      ],
+      "note": "Re-evidenced: avoids the literal 'wcag' asserted by the decoupled benchmark (deliberately also drops 'contrast|keyboard', which the fixture carries but the asserts do not name — this keeps the variant fully disjoint). Tests semantic-markup evidence instead of contrast/keyboard claims. Narrower — blind reviewer to confirm."
+    },
+    {
+      "id": "A11Y-3",
+      "name": "Consistent Design Token Usage",
+      "weight": 1,
+      "requiredPatterns": [
+        "token|color|spacing|typography|theme"
+      ],
+      "note": "Unchanged: no Tier-0 assert in the decoupled benchmark targets this criterion."
+    }
+  ]
+}

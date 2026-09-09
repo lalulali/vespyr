@@ -1,0 +1,37 @@
+{
+  "dimension": "memory_adherence",
+  "name": "Memory & Workflow Adherence Rubric — HELD-OUT CANDIDATE 01",
+  "description": "Same criterion intents as memory-adherence.json, re-evidenced through disjoint vocabulary. DRAFT: UNREVIEWED — a blind author (no access to suite fixtures) must review/approve before any score from this file counts as independent evidence.",
+  "passThreshold": 4,
+  "held_out_candidate": true,
+  "review_status": "UNREVIEWED",
+  "decoupled_from": ["AGENT-MEMORY-01", "SKILL-RETRO"],
+  "criteria": [
+    {
+      "id": "MEM-1",
+      "name": "Session Persistence Protocol Followed",
+      "weight": 2,
+      "requiredPatterns": [
+        "session_start|orchestrator_state|memory-write|dedupe|checkpoint|provenance attest"
+      ],
+      "note": "Re-evidenced: avoids 'session-write|active-decisions|lessons-learned', asserted verbatim by the decoupled benchmarks. Tests pipeline-mechanism terms (start/write/dedupe/checkpoint/provenance) instead of artifact filenames. Blind reviewer to confirm these terms are live protocol vocabulary, not aspirational."
+    },
+    {
+      "id": "MEM-2",
+      "name": "Machine State Fence Preservation",
+      "weight": 2,
+      "prohibitedPatterns": [
+        "clobbered BEGIN MACHINE STATE",
+        "deleted runtime state"
+      ],
+      "note": "Unchanged: prohibited-pattern criteria do not participate in overlap measurement."
+    },
+    {
+      "id": "MEM-3",
+      "name": "Lean Memory Footprint",
+      "weight": 1,
+      "minWordCount": 30,
+      "note": "Unchanged: word-count criteria do not participate in overlap measurement."
+    }
+  ]
+}

@@ -10,9 +10,32 @@ const { createSandbox } = require("./sandbox");
 const { evaluateTier0 } = require("./tier0-judge");
 const { evaluateTier1 } = require("./tier1-judge");
 const { countTokens } = require("./lib/tokenizer");
-const { normalizeVerdict } = require("./lib/ast");
 
 const SUITES_DIR = path.join(__dirname, "..", "..", "evals", "suites");
+
+/**
+ * Best-effort git SHA probe for run provenance (review 04 residual: SHA was
+ * env-only). Order: explicit env override, then a bounded read-only
+ * `git rev-parse`. Never throws, never blocks: 2s timeout, stderr silenced,
+ * any failure yields null (e.g. packaged installs without .git).
+ */
+function resolveGitSha() {
+  try {
+    if (process.env.VESPYR_GIT_SHA) return String(process.env.VESPYR_GIT_SHA);
+    if (process.env.GITHUB_SHA) return String(process.env.GITHUB_SHA);
+    const { spawnSync } = require("child_process");
+    const res = spawnSync("git", ["rev-parse", "--short", "HEAD"], {
+      cwd: path.join(__dirname, "..", ".."),
+      encoding: "utf8",
+      timeout: 2000,
+      stdio: ["ignore", "pipe", "ignore"]
+    });
+    const sha = res && typeof res.stdout === "string" ? res.stdout.trim() : "";
+    return /^[0-9a-f]{4,40}$/i.test(sha) ? sha : null;
+  } catch (e) {
+    return null;
+  }
+}
 
 /**
  * Loads all benchmark suites or filters by suite name.
@@ -21,6 +44,7 @@ const SUITES_DIR = path.join(__dirname, "..", "..", "evals", "suites");
  */
 function loadSuites(suiteFilter = "all") {
   const suites = [];
+  const warnings = [];
 
   function scanDir(dir, relPath = "") {
     if (!fs.existsSync(dir)) return;
@@ -39,7 +63,9 @@ function loadSuites(suiteFilter = "all") {
             data: content
           });
         } catch (e) {
-          // ignore malformed
+          // Malformed suites are reported, never silently swallowed: a broken
+          // suite file previously vanished from the run with zero signal.
+          warnings.push({ file: fullPath, error: e.message });
         }
       }
     }
@@ -47,15 +73,16 @@ function loadSuites(suiteFilter = "all") {
 
   scanDir(SUITES_DIR);
 
-  if (suiteFilter === "all" || !suiteFilter) {
-    return suites;
+  let filtered = suites;
+  if (suiteFilter && suiteFilter !== "all") {
+    filtered = suites.filter(s => {
+      return s.relPath === suiteFilter ||
+             s.relPath.startsWith(suiteFilter) ||
+             (s.data && s.data.suite === suiteFilter);
+    });
   }
-
-  return suites.filter(s => {
-    return s.relPath === suiteFilter ||
-           s.relPath.startsWith(suiteFilter) ||
-           (s.data && s.data.suite === suiteFilter);
-  });
+  filtered.warnings = warnings;
+  return filtered;
 }
 
 /**
@@ -76,6 +103,7 @@ async function generateExecutionResponse(benchmark, options = {}, sandbox = null
   }
 
   if (sandbox && benchmark.executionCommand) {
+    validateBenchmarkCommand(benchmark.executionCommand);
     const cmdParts = splitCommand(benchmark.executionCommand);
     const res = await sandbox.runCommand(cmdParts[0], cmdParts.slice(1));
     return res.stdout || res.output || res.stderr;
@@ -112,15 +140,18 @@ async function generateExecutionResponse(benchmark, options = {}, sandbox = null
 }
 
 // Quote-aware splitter shared from lib/process.js (single source with tier0-judge).
-const { splitCommand } = require("./lib/process");
+const { splitCommand, validateBenchmarkCommand } = require("./lib/process");
 
 async function cannedMockResponse(benchmark) {
 
-  // 1. Adversarial Traps
+  // 1. Adversarial Traps — DELETED trap echo (review 04 §6.1): the old fixture
+  // derived its output from the answer key (expectedVerdict +
+  // expectedFlawKeywords), so mock mode "passed" every trap with zero model.
+  // The canned trap now intentionally carries NO verdict and NO flaw keywords:
+  // mock runs go RED on traps, demonstrating harness mechanics rather than
+  // laundering fixture-recall as pushback capability.
   if (benchmark.isAdversarialTrap) {
-    const expectedV = normalizeVerdict(Array.isArray(benchmark.expectedVerdict) ? benchmark.expectedVerdict[0] : (benchmark.expectedVerdict || "NO-GO"));
-    const flaws = (benchmark.expectedFlawKeywords || []).join(", ");
-    return "[" + expectedV + "] Premise rejected due to critical invariant violations: " + flaws + ". Halting execution with zero compromise code. Stated failure modes, boundary constraints, and architectural invariants must be addressed before any implementation roadmap or technical design can be considered.";
+    return "Unmeasured fixture response: no model executed. Adversarial traps require a real adapter to demonstrate pushback; this canned output carries no verdict.";
   }
 
   // 2. /shut-up Mode Fixtures
@@ -286,15 +317,24 @@ async function cannedMockResponse(benchmark) {
  */
 async function executeBenchmark(benchmark, options = {}) {
   const sandbox = createSandbox({
-    prefix: "vespyr-eval-" + benchmark.id.toLowerCase() + "-"
+    prefix: "vespyr-eval-" + String(benchmark.id || "unknown").toLowerCase().replace(/[^a-z0-9-]/g, "-") + "-"
   });
 
   const startTime = Date.now();
 
+  // Global --min-rqsd floor (review 04 residual: RQS-D unenforced by
+  // default). Applies only when the benchmark declares NO explicit RQS-D
+  // contract of its own — an explicit `requireRQSD:false` opt-out or a
+  // benchmark-level threshold always wins over the global flag.
+  let effectiveBenchmark = benchmark;
+  if (options.minRQSD != null && benchmark.minRQSD == null && benchmark.requireRQSD === undefined) {
+    effectiveBenchmark = { ...benchmark, requireRQSD: options.minRQSD };
+  }
+  const benchmarkRef = effectiveBenchmark;
+
   try {
-    const rawResult = await generateExecutionResponse(benchmark, options, sandbox);
+    const rawResult = await generateExecutionResponse(benchmarkRef, options, sandbox);
     const executionOutput = typeof rawResult === "object" && rawResult !== null ? (rawResult.output || rawResult.text || "") : String(rawResult || "");
-    const executionTokens = typeof rawResult === "object" && rawResult !== null ? rawResult.tokens : null;
 
     const executionResult = {
       output: executionOutput,
@@ -304,12 +344,12 @@ async function executeBenchmark(benchmark, options = {}) {
     };
 
     // 2. Tier 0 Deterministic Evaluation
-    const t0Result = await evaluateTier0(benchmark, executionResult, sandbox);
+    const t0Result = await evaluateTier0(benchmarkRef, executionResult, sandbox);
 
     let t1Result = null;
     if (t0Result.pass && !options.tier0Only) {
       // 3. Tier 1 Semantic Evaluation (only if Tier 0 passes)
-      t1Result = await evaluateTier1(benchmark, executionResult);
+      t1Result = await evaluateTier1(benchmarkRef, executionResult);
     }
 
     const durationMs = Date.now() - startTime;
@@ -320,21 +360,37 @@ async function executeBenchmark(benchmark, options = {}) {
     // mockOutput without an adapter are mocks, even when judgments pass.
     const measuredExecution = !!(
       (options.executionAdapter && typeof options.executionAdapter === "function") ||
-      (sandbox && benchmark.executionCommand)
+      (sandbox && benchmarkRef.executionCommand)
     );
+    // Token provenance: provider `usage.total_tokens` and the local
+    // deterministic counter are INCOMMENSURABLE units (different tokenizers).
+    // `tokens` is always the local count (consistent denominator for the 15%
+    // inflation gate); provider figures ride alongside, never mixed in.
+    const providerTokens = (typeof rawResult === "object" && rawResult !== null && typeof rawResult.tokens === "number")
+      ? rawResult.tokens
+      : null;
+    const localTokens = countTokens(executionOutput);
     return {
-      id: benchmark.id,
-      name: benchmark.name || benchmark.id,
-      suite: benchmark.suite || "default",
-      agent: benchmark.agent || null,
-      skill: benchmark.skill || null,
-      dimension: benchmark.dimension || "general",
+      id: benchmarkRef.id,
+      name: benchmarkRef.name || benchmarkRef.id,
+      suite: benchmarkRef.suite || "default",
+      agent: benchmarkRef.agent || null,
+      skill: benchmarkRef.skill || null,
+      dimension: benchmarkRef.dimension || "general",
       modelTier: options.model || 'inherit',
       mock: !measuredExecution,
       passed,
       tier0Passed: t0Result.pass,
       tier1Score: t1Result ? t1Result.score : null,
-      tokens: executionTokens !== null ? executionTokens : (t0Result.metrics ? t0Result.metrics.tokens : countTokens(executionOutput)),
+      // Held-out / co-authorship provenance (review 04 residual): which
+      // rubric judged this output and whether Tier-1 re-measured Tier-0's
+      // author-chosen vocabulary.
+      rubricSource: t1Result ? (t1Result.rubricSource || null) : null,
+      tier1Overlap: t1Result ? (t1Result.tier1Overlap ?? null) : null,
+      tier1Coauthored: t1Result ? (t1Result.tier1Coauthored ?? null) : null,
+      tokens: localTokens,
+      providerTokens,
+      tokenSource: providerTokens !== null ? "provider+local" : "local",
       durationMs,
       output: executionOutput,
       failures: t0Result.failures || [],
@@ -349,10 +405,17 @@ async function executeBenchmark(benchmark, options = {}) {
       agent: benchmark.agent || null,
       skill: benchmark.skill || null,
       dimension: benchmark.dimension || "general",
+      modelTier: options.model || 'inherit',
+      mock: options.mock === true,
       passed: false,
       tier0Passed: false,
-      tier1Score: 1.0,
+      tier1Score: null,
+      rubricSource: null,
+      tier1Overlap: null,
+      tier1Coauthored: null,
       tokens: 0,
+      providerTokens: null,
+      tokenSource: "local",
       durationMs: Date.now() - startTime,
       output: "",
       failures: [err.message]
@@ -415,17 +478,24 @@ async function runEvaluation(options = {}) {
   }
 
   const total = allBenchmarks.length;
+  const suiteWarnings = suites.warnings || [];
   const results = [];
   const concurrency = options.concurrency || 4;
 
+  // failFast stops ALL workers on first failure (shared flag): previously
+  // only the observing worker broke its loop while siblings drained the
+  // queue, and passRate divided by the pre-filter total either way.
+  let failFastStop = false;
   let activeIndex = 0;
   async function worker() {
-    while (activeIndex < allBenchmarks.length) {
+    while (!failFastStop && activeIndex < allBenchmarks.length) {
       const index = activeIndex++;
+      if (index >= allBenchmarks.length) break;
       const benchmark = allBenchmarks[index];
       const res = await executeBenchmark(benchmark, options);
       results.push(res);
       if (options.failFast && !res.passed) {
+        failFastStop = true;
         break;
       }
     }
@@ -436,14 +506,23 @@ async function runEvaluation(options = {}) {
     workers.push(worker());
   }
   await Promise.all(workers);
+  const failFastTruncated = results.length < total;
 
   const passed = results.filter(r => r.passed).length;
   const failed = results.filter(r => !r.passed).length;
-  const passRate = total > 0 ? Number((passed / total).toFixed(4)) : 1.0;
+  // Empty runs score 0, never a fabricated perfect 1.0: previously zero
+  // benchmarks reported passRate 1.0 (green on nothing measured).
+  const passRate = total > 0 ? Number((passed / total).toFixed(4)) : 0;
   const tier0PassedCount = results.filter(r => r.tier0Passed).length;
-  const tier0PassRate = total > 0 ? Number((tier0PassedCount / total).toFixed(4)) : 1.0;
+  const tier0PassRate = total > 0 ? Number((tier0PassedCount / total).toFixed(4)) : 0;
 
+  // Token sums use LOCAL counts only (consistent units); provider figures
+  // aggregate separately and never feed the inflation gate.
   const totalTokens = results.reduce((sum, r) => sum + (r.tokens || 0), 0);
+  const providerTokenRuns = results.filter(r => typeof r.providerTokens === "number");
+  const totalProviderTokens = providerTokenRuns.length > 0
+    ? providerTokenRuns.reduce((sum, r) => sum + r.providerTokens, 0)
+    : null;
   const t1Scores = results.map(r => r.tier1Score).filter(s => typeof s === "number");
   const tier1AvgScore = t1Scores.length > 0 ? Number((t1Scores.reduce((a, b) => a + b, 0) / t1Scores.length).toFixed(2)) : null;
   const mockMode = results.length > 0 && results.every(r => r.mock === true);
@@ -494,33 +573,106 @@ async function runEvaluation(options = {}) {
       const pciMax = spcResults.length > 0 ? Math.max(...spcResults.map(r => (r.t0Metrics && r.t0Metrics.pci) || 0)) : 0.0;
       dimData.srsr = srsr;
       dimData.pci = pciMax;
+      // PBCR is definitionally 1 - SRSR (catch rate vs rubber-stamp rate on
+      // the same trap set), not an independent measurement — labeled as such.
       dimData.pbcr = Number((1.0 - srsr).toFixed(4));
+      dimData.pbcr_derived = true;
     } else if (dim === "research_grounding") {
-      dimData.hallucination_rate = 0.0;
+      // No deterministic hallucination oracle exists: null (unmeasured),
+      // never a fabricated 0.0. Requires held-out labeled claims to measure.
+      dimData.hallucination_rate = null;
     } else if (dim === "code_quality") {
-      dimData.build_pass_rate = dimPassRate;
-      dimData.test_pass_rate = dimPassRate;
+      // Tier pass rate is NOT a build/test pass rate (tautology). Real
+      // build/test rates need runTestCommand outcomes per benchmark — null
+      // until the harness records them.
+      dimData.build_pass_rate = null;
+      dimData.test_pass_rate = null;
     } else if (dim === "req_to_impl") {
-      dimData.scope_drift = 0.0;
+      // Scope drift has no deterministic oracle — null, not 0.0.
+      dimData.scope_drift = null;
     } else if (dim === "memory_adherence") {
-      dimData.script_fidelity = dimPassRate;
+      // budget_violations is a real count (token-ceiling failures).
+      // script_fidelity is MEASURED now: mean matched/total over benchmarks
+      // declaring `requiredSteps` (Tier-0 script_steps metric). Null when no
+      // benchmark declares steps — never a pass_rate tautology.
+      const stepRuns = dimResults.filter(r => r.t0Metrics && r.t0Metrics.script_steps && r.t0Metrics.script_steps.total > 0);
+      dimData.script_fidelity = stepRuns.length > 0
+        ? Number((stepRuns.reduce((sum, r) => sum + (r.t0Metrics.script_steps.matched / r.t0Metrics.script_steps.total), 0) / stepRuns.length).toFixed(4))
+        : null;
+      dimData.script_steps_benchmarks = stepRuns.length;
       dimData.budget_violations = dimResults.filter(r => r.failures && r.failures.some(f => f.toLowerCase().includes("token ceiling"))).length;
     }
 
     dimensions[dim] = dimData;
   }
 
+  // Mock/measured split aggregates (review 04 residual: mock numbers were
+  // labeled but never suppressed from aggregates — a mixed run reported one
+  // pass rate blending fixture-recall with model measurements).
+  const splitAgg = (subset) => {
+    const n = subset.length;
+    const p = subset.filter(r => r.passed).length;
+    return {
+      count: n,
+      passed: p,
+      pass_rate: n > 0 ? Number((p / n).toFixed(4)) : null,
+      tokens: subset.reduce((sum, r) => sum + (r.tokens || 0), 0)
+    };
+  };
+  const measuredRuns = results.filter(r => r.mock !== true);
+  const mockedRuns = results.filter(r => r.mock === true);
+  const split = { measured: splitAgg(measuredRuns), mocked: splitAgg(mockedRuns) };
+
+  // Co-authorship summary: Tier-1 results whose rubric re-measured Tier-0's
+  // author-chosen vocabulary (overlap >= 0.5). Held-out rubrics clear it.
+  const t1Evaluated = results.filter(r => r.tier1Overlap !== null && r.tier1Overlap !== undefined);
+  const coauthoredIds = t1Evaluated.filter(r => r.tier1Coauthored === true).map(r => r.id);
+  const heldOutIds = results.filter(r => r.rubricSource && r.rubricSource.startsWith("held-out")).map(r => r.id);
+  const tier1Independence = {
+    evaluated: t1Evaluated.length,
+    coauthored: coauthoredIds.length,
+    coauthored_ids: coauthoredIds,
+    held_out: heldOutIds.length,
+    held_out_ids: heldOutIds
+  };
+
+  // Provenance: without model/adapter/threshold/sha pinning, cross-run and
+  // cross-model diffs are invalid. Recorded here, persisted by recordBaseline.
+  const gitSha = resolveGitSha();
+  const provenance = {
+    adapter: options.adapter || null,
+    model: options.model || "inherit",
+    temp: options.temp ?? 0.0,
+    mock_mode: mockMode,
+    min_rqsd: options.minRQSD ?? null,
+    node_version: process.version,
+    git_sha: gitSha,
+    thresholds: {
+      pass_rate_drop: 0.001,
+      token_inflation_percent: 15.0,
+      tier1_erosion: 0.5,
+      rqsd_floor: options.minRQSD ?? null
+    }
+  };
+
   return {
     total,
+    evaluated: results.length,
+    failFastTruncated,
+    suiteWarnings,
     passed,
     failed,
     passRate,
     tier0PassRate,
     tier1AvgScore,
+    tier1Independence,
     totalTokens,
+    totalProviderTokens,
+    split,
     latencyP50,
     latencyP95,
     mockMode,
+    provenance,
     dimensions,
     unmeasuredDimensions,
     benchmarks: results
@@ -532,5 +684,6 @@ module.exports = {
   executeBenchmark,
   runEvaluation,
   generateExecutionResponse,
+  resolveGitSha,
   splitCommand
 };

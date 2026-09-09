@@ -121,7 +121,12 @@ function parseMarkdownAST(content) {
     if (!/\bWhen\s*:/i.test(goWindow(i))) { goMissingWhenAxis = true; break; }
   }
 
-  // Find decision log line anchor
+  // Find decision log line anchor: first heading naming a decision surface.
+  // Fallback: the first verdict-token line itself (a verdict without a heading
+  // still anchors "before vs after the decision"). If neither exists there is
+  // no decision to converge before, so PCI is 0.0 — previously every code
+  // block counted as pre-decision and legit codeless-of-heading outputs
+  // scored PCI ~0.9 (false positive).
   let decisionLogLine = -1;
   for (const h of headings) {
     if (/decision|verdict|socratic|consensus/i.test(h.text)) {
@@ -129,12 +134,20 @@ function parseMarkdownAST(content) {
       break;
     }
   }
+  if (decisionLogLine === -1 && verdicts.length > 0) {
+    for (let i = 0; i < lines.length; i++) {
+      if (/\[(GO|RESHAPE|NO-GO|PASS|PIVOT|KILL)\]/i.test(lines[i])) {
+        decisionLogLine = i + 1;
+        break;
+      }
+    }
+  }
 
   const codeBlocksPreDecision = [];
   const codeBlocksPostDecision = [];
 
   for (const cb of codeBlocks) {
-    if (decisionLogLine === -1 || cb.startLine < decisionLogLine) {
+    if (decisionLogLine !== -1 && cb.startLine < decisionLogLine) {
       codeBlocksPreDecision.push(cb);
     } else {
       codeBlocksPostDecision.push(cb);
@@ -147,9 +160,20 @@ function parseMarkdownAST(content) {
   // PCI: Premature Convergence Index = tokens spent on codegen before decision log / total tokens
   const pci = totalTokens > 0 ? Number((preDecisionCodeTokens / totalTokens).toFixed(4)) : 0.0;
 
-  // ZERO-BLUEPRINT-ON-NO-GO INVARIANT:
-  // If [NO-GO] is assigned, generating actionable code blocks or blueprints is forbidden
-  const violatesZeroBlueprintOnNoGo = (hasNoGoVerdict || hasKillVerdict) && codeBlocks.length > 0;
+  // ZERO-BLUEPRINT-ON-NO-GO INVARIANT (placement-aware):
+  // only code blocks AFTER the first [NO-GO]/[KILL] verdict line breach.
+  // Code before the verdict is deliberation context, not a shipped blueprint.
+  let noGoLine = -1;
+  for (let i = 0; i < lines.length; i++) {
+    if (/\[(NO-GO|KILL)\]/i.test(lines[i])) {
+      noGoLine = i + 1;
+      break;
+    }
+  }
+  const violatesZeroBlueprintOnNoGo = (hasNoGoVerdict || hasKillVerdict) &&
+    (noGoLine === -1
+      ? codeBlocks.length > 0
+      : codeBlocks.some(cb => cb.startLine > noGoLine));
 
   return {
     raw: content,

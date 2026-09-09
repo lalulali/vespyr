@@ -3,16 +3,53 @@
  * Generates eval-report.md
  */
 
+function esc(v) {
+  return String(v ?? "").replace(/\r?\n/g, " ").replace(/\|/g, "\\|");
+}
+function pct(rate, digits = 1) {
+  return typeof rate === "number" && Number.isFinite(rate) ? (rate * 100).toFixed(digits) + "%" : "N/A";
+}
+function num(v, digits = 2) {
+  return typeof v === "number" && Number.isFinite(v) ? v.toFixed(digits) : "N/A";
+}
+function int(v) {
+  return typeof v === "number" && Number.isFinite(v) ? v.toLocaleString() : "N/A";
+}
+
 function renderMarkdownReport(runResults, diffReport = null) {
   const lines = [];
 
   lines.push("# 🧪 Vespyr Evaluation Harness Report");
   lines.push("");
   lines.push(`**Generated at:** ${new Date().toISOString()}  `);
-  lines.push(`**Overall Pass Rate:** ${(runResults.passRate * 100).toFixed(1)}% (${runResults.passed}/${runResults.total} Passed)  `);
-  lines.push(`**Tier 0 Deterministic Pass Rate:** ${(runResults.tier0PassRate * 100).toFixed(1)}%  `);
-  lines.push(`**Tier 1 Semantic Avg Score:** ${runResults.tier1AvgScore ? runResults.tier1AvgScore.toFixed(2) + " / 5.0" : "N/A"}  `);
-  lines.push(`**Total Token Spend:** ${runResults.totalTokens.toLocaleString()} tokens  `);
+  if (runResults.mockMode) {
+    lines.push(`> **Mock run** — canned fixtures, not a model measurement.  `);
+  }
+  lines.push(`**Overall Pass Rate:** ${pct(runResults.passRate)} (${int(runResults.passed)}/${int(runResults.total)} Passed)  `);
+  lines.push(`**Tier 0 Deterministic Pass Rate:** ${pct(runResults.tier0PassRate)}  `);
+  lines.push(`**Tier 1 Semantic Avg Score:** ${runResults.tier1AvgScore != null ? num(runResults.tier1AvgScore) + " / 5.0" : "N/A"}  `);
+  lines.push(`**Total Token Spend (local):** ${int(runResults.totalTokens)} tokens  `);
+  if (runResults.totalProviderTokens != null) {
+    lines.push(`**Total Token Spend (provider):** ${int(runResults.totalProviderTokens)} tokens  `);
+  }
+  if (runResults.split && runResults.split.measured.count > 0 && runResults.split.mocked.count > 0) {
+    lines.push(`**Measured (real exec):** ${int(runResults.split.measured.passed)}/${int(runResults.split.measured.count)} (${pct(runResults.split.measured.pass_rate)})  `);
+    lines.push(`**Mocked (fixtures):** ${int(runResults.split.mocked.passed)}/${int(runResults.split.mocked.count)} (${pct(runResults.split.mocked.pass_rate)})  `);
+  }
+  if (runResults.tier1Independence && runResults.tier1Independence.evaluated > 0) {
+    const ti = runResults.tier1Independence;
+    lines.push(`**Tier-1 Independence:** ${ti.coauthored}/${ti.evaluated} co-authored, ${ti.held_out} held-out  `);
+  }
+  if (runResults.provenance) {
+    const p = runResults.provenance;
+    lines.push(`**Provenance:** adapter=\`${esc(p.adapter || "?")}\` model=\`${esc(p.model || "?")}\` temp=\`${esc(p.temp ?? "?")}\`  `);
+  }
+  if (runResults.failFastTruncated) {
+    lines.push(`**Truncated:** fail-fast stopped early (${int(runResults.evaluated)}/${int(runResults.total)} evaluated)  `);
+  }
+  if ((runResults.suiteWarnings || []).length > 0) {
+    lines.push(`**Suite Warnings:** ${runResults.suiteWarnings.length} malformed suite file(s) skipped  `);
+  }
   lines.push("");
 
   // Dimensions
@@ -31,21 +68,21 @@ function renderMarkdownReport(runResults, diffReport = null) {
         const pbcr = typeof dimData.pbcr === "number" ? dimData.pbcr : null;
         special = (srsr === null || pci === null || pbcr === null)
           ? "unmeasured"
-          : `**SRSR:** ${(srsr * 100).toFixed(1)}% | **PCI:** ${pci.toFixed(2)} | **PBCR:** ${(pbcr * 100).toFixed(1)}%`;
+          : `**SRSR:** ${pct(srsr)} | **PCI:** ${num(pci)} | **PBCR:** ${pct(pbcr)}`;
       } else if (dimKey === "research_grounding") {
         special = typeof dimData.hallucination_rate === "number"
-          ? `Hallucination Rate: ${(dimData.hallucination_rate * 100).toFixed(1)}%`
-          : "Hallucination Rate: N/A";
+          ? `Hallucination Rate: ${pct(dimData.hallucination_rate)}`
+          : "Hallucination Rate: N/A (unmeasured)";
       } else if (dimKey === "code_quality") {
         special = typeof dimData.build_pass_rate === "number"
-          ? `Build Pass: ${(dimData.build_pass_rate * 100).toFixed(1)}%`
-          : "Build Pass: N/A";
+          ? `Build Pass: ${pct(dimData.build_pass_rate)}`
+          : "Build Pass: N/A (unmeasured)";
       }
       lines.push("| " + [
-        "`" + dimKey + "`",
-        typeof dimData.score === "number" ? dimData.score.toFixed(2) : "N/A",
-        typeof dimData.pass_rate === "number" ? (dimData.pass_rate * 100).toFixed(1) + "%" : "N/A",
-        special
+        "`" + esc(dimKey) + "`",
+        typeof dimData.score === "number" ? num(dimData.score) : "N/A",
+        typeof dimData.pass_rate === "number" ? pct(dimData.pass_rate) : "N/A",
+        esc(special)
       ].join(" | ") + " |");
     }
     lines.push("");
@@ -59,11 +96,14 @@ function renderMarkdownReport(runResults, diffReport = null) {
       lines.push("> [!WARNING]");
       lines.push("> **Regression detected against baseline!**");
       for (const reg of diffReport.regressions) {
-        lines.push(`> - ${reg.message}`);
+        lines.push(`> - ${esc(reg.message)}`);
       }
     } else {
       lines.push("> [!NOTE]");
       lines.push("> **Clean run:** All metrics meet or exceed baseline thresholds.");
+    }
+    for (const imp of diffReport.improvements || []) {
+      lines.push(`> - ✅ ${esc(imp.message)}`);
     }
     lines.push("");
   }
@@ -78,12 +118,12 @@ function renderMarkdownReport(runResults, diffReport = null) {
       const target = b.agent ? `@${b.agent}` : (b.skill ? `/${b.skill}` : b.suite);
       const statusIcon = b.passed ? "✅ PASS" : "❌ FAIL";
       lines.push("| " + [
-        "`" + b.id + "`",
-        target,
-        b.dimension || "general",
+        "`" + esc(b.id) + "`",
+        esc(target),
+        esc(b.dimension || "general"),
         b.tier0Passed ? "✅" : "❌",
-        b.tier1Score ? b.tier1Score.toFixed(2) : "-",
-        b.tokens || 0,
+        b.tier1Score != null ? num(b.tier1Score) : "-",
+        int(b.tokens),
         statusIcon
       ].join(" | ") + " |");
     }

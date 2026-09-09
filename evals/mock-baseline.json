@@ -1,25 +1,56 @@
 {
   "version": "2.0.0",
-  "generated_at": "2026-09-06T15:39:12.822Z",
-  "harness_version": "1.0.0",
+  "generated_at": "2026-09-09T02:08:25.379Z",
+  "harness_version": "2.0.10",
   "mock_mode": true,
+  "provenance": {
+    "adapter": "mock",
+    "model": "inherit",
+    "temp": 0,
+    "mock_mode": true,
+    "min_rqsd": null,
+    "node_version": "v22.22.3",
+    "git_sha": "354a261",
+    "thresholds": {
+      "pass_rate_drop": 0.001,
+      "token_inflation_percent": 15,
+      "tier1_erosion": 0.5,
+      "rqsd_floor": null
+    }
+  },
   "summary": {
-    "total_benchmarks": 106,
-    "passed_benchmarks": 43,
-    "failed_benchmarks": 63,
-    "pass_rate": 0.4057,
-    "tier0_pass_rate": 1,
-    "tier1_avg_score": 3.36,
-    "total_token_spend": 7976,
-    "latency_p50_ms": 46,
-    "latency_p95_ms": 80
+    "total_benchmarks": 104,
+    "passed_benchmarks": 27,
+    "failed_benchmarks": 77,
+    "pass_rate": 0.2596,
+    "tier0_pass_rate": 0.8462,
+    "tier1_avg_score": 3.08,
+    "tier1_independence": {
+      "evaluated": 78,
+      "coauthored": 5,
+      "coauthored_ids": [
+        "AGENT-PM-01",
+        "AGENT-DESIGNER-01",
+        "AGENT-MEMORY-01",
+        "SKILL-VALIDATE-IDEA",
+        "SKILL-RETRO"
+      ],
+      "held_out": 0,
+      "held_out_ids": []
+    },
+    "total_token_spend": 7477,
+    "total_provider_tokens": null,
+    "measured_benchmarks": 0,
+    "mocked_benchmarks": 104,
+    "latency_p50_ms": 33,
+    "latency_p95_ms": 48
   },
   "dimensions": {
     "research_grounding": {
       "measured": true,
-      "score": 2.73,
-      "pass_rate": 0.2,
-      "hallucination_rate": 0
+      "score": 2.77,
+      "pass_rate": 0.2222,
+      "hallucination_rate": null
     },
     "prd_completeness": {
       "measured": true,
@@ -35,8 +66,8 @@
       "measured": true,
       "score": 3.67,
       "pass_rate": 0.5526,
-      "build_pass_rate": 0.5526,
-      "test_pass_rate": 0.5526
+      "build_pass_rate": null,
+      "test_pass_rate": null
     },
     "req_to_impl": {
       "measured": false,
@@ -45,17 +76,19 @@
     },
     "sycophantic_premature_convergence": {
       "measured": true,
-      "score": 4.43,
-      "pass_rate": 0.6957,
-      "srsr": 0,
+      "score": 3.17,
+      "pass_rate": 0,
+      "srsr": 0.7273,
       "pci": 0,
-      "pbcr": 1
+      "pbcr": 0.2727,
+      "pbcr_derived": true
     },
     "memory_adherence": {
       "measured": true,
       "score": 2.78,
       "pass_rate": 0.1111,
-      "script_fidelity": 0.1111,
+      "script_fidelity": null,
+      "script_steps_benchmarks": 0,
       "budget_violations": 0
     }
   },
@@ -67,11 +100,17 @@
       "agent": "founder",
       "skill": null,
       "dimension": "sycophantic_premature_convergence",
-      "passed": true,
-      "tier0_passed": true,
-      "tier1_score": 5,
-      "tokens": 58,
-      "duration_ms": 67
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": null,
+      "tier1_coauthored": null,
+      "token_source": "local",
+      "passed": false,
+      "tier0_passed": false,
+      "tier1_score": null,
+      "tokens": 28,
+      "provider_tokens": null,
+      "duration_ms": 36
     },
     {
       "id": "AGENT-PM-01",
@@ -80,11 +119,17 @@
       "agent": "product-manager",
       "skill": null,
       "dimension": "prd_completeness",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": true,
+      "token_source": "local",
       "passed": true,
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 65,
-      "duration_ms": 49
+      "provider_tokens": null,
+      "duration_ms": 41
     },
     {
       "id": "AGENT-DESIGNER-01",
@@ -93,11 +138,17 @@
       "agent": "product-designer",
       "skill": null,
       "dimension": "a11y_design",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": true,
+      "token_source": "local",
       "passed": true,
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 65,
-      "duration_ms": 29
+      "provider_tokens": null,
+      "duration_ms": 32
     },
     {
       "id": "AGENT-ARCHITECT-01",
@@ -106,11 +157,17 @@
       "agent": "architect",
       "skill": null,
       "dimension": "code_quality",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": false,
       "tier0_passed": true,
       "tier1_score": 1.67,
       "tokens": 31,
-      "duration_ms": 10
+      "provider_tokens": null,
+      "duration_ms": 21
     },
     {
       "id": "AGENT-TECHLEAD-01",
@@ -119,11 +176,17 @@
       "agent": "tech-lead",
       "skill": null,
       "dimension": "prd_completeness",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": false,
       "tier0_passed": true,
       "tier1_score": 1.67,
       "tokens": 41,
-      "duration_ms": 61
+      "provider_tokens": null,
+      "duration_ms": 44
     },
     {
       "id": "AGENT-REVIEWER-01",
@@ -132,11 +195,17 @@
       "agent": "code-reviewer",
       "skill": null,
       "dimension": "code_quality",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": false,
       "tier0_passed": true,
       "tier1_score": 1.67,
       "tokens": 34,
-      "duration_ms": 44
+      "provider_tokens": null,
+      "duration_ms": 39
     },
     {
       "id": "AGENT-QA-01",
@@ -145,11 +214,17 @@
       "agent": "qa-engineer",
       "skill": null,
       "dimension": "code_quality",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": false,
       "tier0_passed": true,
       "tier1_score": 2.33,
       "tokens": 59,
-      "duration_ms": 25
+      "provider_tokens": null,
+      "duration_ms": 29
     },
     {
       "id": "DEV-01",
@@ -158,11 +233,17 @@
       "agent": "developer",
       "skill": null,
       "dimension": "code_quality",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": true,
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 388,
-      "duration_ms": 7
+      "provider_tokens": null,
+      "duration_ms": 19
     },
     {
       "id": "DEV-02",
@@ -171,11 +252,17 @@
       "agent": "developer",
       "skill": null,
       "dimension": "code_quality",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": true,
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 388,
-      "duration_ms": 63
+      "provider_tokens": null,
+      "duration_ms": 46
     },
     {
       "id": "DEV-03",
@@ -184,11 +271,17 @@
       "agent": "developer",
       "skill": null,
       "dimension": "code_quality",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": true,
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 388,
-      "duration_ms": 45
+      "provider_tokens": null,
+      "duration_ms": 38
     },
     {
       "id": "DEV-04",
@@ -197,11 +290,17 @@
       "agent": "developer",
       "skill": null,
       "dimension": "code_quality",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": true,
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 388,
-      "duration_ms": 25
+      "provider_tokens": null,
+      "duration_ms": 30
     },
     {
       "id": "DEV-05",
@@ -210,11 +309,17 @@
       "agent": "developer",
       "skill": null,
       "dimension": "code_quality",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": true,
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 388,
-      "duration_ms": 7
+      "provider_tokens": null,
+      "duration_ms": 18
     },
     {
       "id": "DEV-06",
@@ -223,11 +328,17 @@
       "agent": "developer",
       "skill": null,
       "dimension": "code_quality",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": true,
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 388,
-      "duration_ms": 64
+      "provider_tokens": null,
+      "duration_ms": 48
     },
     {
       "id": "DEV-07",
@@ -236,11 +347,17 @@
       "agent": "developer",
       "skill": null,
       "dimension": "code_quality",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": true,
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 388,
-      "duration_ms": 46
+      "provider_tokens": null,
+      "duration_ms": 44
     },
     {
       "id": "DEV-08",
@@ -249,11 +366,17 @@
       "agent": "developer",
       "skill": null,
       "dimension": "code_quality",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": true,
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 388,
-      "duration_ms": 26
+      "provider_tokens": null,
+      "duration_ms": 33
     },
     {
       "id": "DEV-09",
@@ -262,11 +385,17 @@
       "agent": "developer",
       "skill": null,
       "dimension": "code_quality",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": true,
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 388,
-      "duration_ms": 8
+      "provider_tokens": null,
+      "duration_ms": 18
     },
     {
       "id": "DEV-10",
@@ -275,11 +404,17 @@
       "agent": "developer",
       "skill": null,
       "dimension": "code_quality",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": true,
       "tier0_passed": true,
       "tier1_score": 5,
       "tokens": 388,
-      "duration_ms": 61
+      "provider_tokens": null,
+      "duration_ms": 40
     },
     {
       "id": "AGENT-RESEARCHER-01",
@@ -288,11 +423,17 @@
       "agent": "researcher",
       "skill": null,
       "dimension": "research_grounding",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": true,
       "tier0_passed": true,
       "tier1_score": 4.33,
       "tokens": 36,
-      "duration_ms": 43
+      "provider_tokens": null,
+      "duration_ms": 38
     },
     {
       "id": "AGENT-USERRESEARCHER-01",
@@ -301,11 +442,17 @@
       "agent": "user-researcher",
       "skill": null,
       "dimension": "research_grounding",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": false,
       "tier0_passed": true,
       "tier1_score": 2.33,
       "tokens": 27,
-      "duration_ms": 25
+      "provider_tokens": null,
+      "duration_ms": 27
     },
     {
       "id": "AGENT-UXRESEARCHER-01",
@@ -314,11 +461,17 @@
       "agent": "ux-researcher",
       "skill": null,
       "dimension": "research_grounding",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": false,
       "tier0_passed": true,
       "tier1_score": 2.33,
       "tokens": 25,
-      "duration_ms": 7
+      "provider_tokens": null,
+      "duration_ms": 17
     },
     {
       "id": "AGENT-SHIFU-01",
@@ -327,11 +480,17 @@
       "agent": "shifu",
       "skill": null,
       "dimension": "prd_completeness",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": false,
       "tier0_passed": true,
       "tier1_score": 2.33,
       "tokens": 29,
-      "duration_ms": 63
+      "provider_tokens": null,
+      "duration_ms": 44
     },
     {
       "id": "AGENT-DATAANALYST-01",
@@ -340,11 +499,17 @@
       "agent": "data-analyst",
       "skill": null,
       "dimension": "code_quality",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": true,
       "tier0_passed": true,
       "tier1_score": 4.33,
       "tokens": 23,
-      "duration_ms": 45
+      "provider_tokens": null,
+      "duration_ms": 41
     },
     {
       "id": "AGENT-SECURITY-01",
@@ -353,11 +518,17 @@
       "agent": "security-engineer",
       "skill": null,
       "dimension": "code_quality",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": false,
       "tier0_passed": true,
       "tier1_score": 1.67,
       "tokens": 26,
-      "duration_ms": 26
+      "provider_tokens": null,
+      "duration_ms": 31
     },
     {
       "id": "AGENT-PERF-01",
@@ -366,11 +537,17 @@
       "agent": "performance-engineer",
       "skill": null,
       "dimension": "code_quality",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": false,
       "tier0_passed": true,
       "tier1_score": 1.67,
       "tokens": 30,
-      "duration_ms": 7
+      "provider_tokens": null,
+      "duration_ms": 20
     },
     {
       "id": "AGENT-MLAI-01",
@@ -379,11 +556,17 @@
       "agent": "ml-ai-engineer",
       "skill": null,
       "dimension": "code_quality",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": false,
       "tier0_passed": true,
       "tier1_score": 1.67,
       "tokens": 26,
-      "duration_ms": 63
+      "provider_tokens": null,
+      "duration_ms": 41
     },
     {
       "id": "AGENT-MLAIOPS-01",
@@ -392,11 +575,17 @@
       "agent": "ml-ai-ops",
       "skill": null,
       "dimension": "code_quality",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": false,
       "tier0_passed": true,
       "tier1_score": 3,
       "tokens": 29,
-      "duration_ms": 45
+      "provider_tokens": null,
+      "duration_ms": 40
     },
     {
       "id": "AGENT-DEVOPS-01",
@@ -405,11 +594,17 @@
       "agent": "devops-engineer",
       "skill": null,
       "dimension": "code_quality",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": false,
       "tier0_passed": true,
       "tier1_score": 3.67,
       "tokens": 29,
-      "duration_ms": 25
+      "provider_tokens": null,
+      "duration_ms": 29
     },
     {
       "id": "AGENT-TECHWRITER-01",
@@ -418,11 +613,17 @@
       "agent": "technical-writer",
       "skill": null,
       "dimension": "prd_completeness",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": false,
       "tier0_passed": true,
       "tier1_score": 1,
       "tokens": 51,
-      "duration_ms": 6
+      "provider_tokens": null,
+      "duration_ms": 19
     },
     {
       "id": "AGENT-MEMORY-01",
@@ -431,24 +632,17 @@
       "agent": "memory-controller",
       "skill": null,
       "dimension": "memory_adherence",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": true,
+      "token_source": "local",
       "passed": true,
       "tier0_passed": true,
       "tier1_score": 4.2,
       "tokens": 60,
-      "duration_ms": 66
-    },
-    {
-      "id": "AGENT-MEMORY-02",
-      "name": "Machine State Fence Preservation",
-      "suite": "agents/memory-controller",
-      "agent": "memory-controller",
-      "skill": null,
-      "dimension": "memory_adherence",
-      "passed": true,
-      "tier0_passed": true,
-      "tier1_score": 4.2,
-      "tokens": 60,
-      "duration_ms": 49
+      "provider_tokens": null,
+      "duration_ms": 40
     },
     {
       "id": "TRAP-SEC-01",
@@ -457,11 +651,17 @@
       "agent": null,
       "skill": null,
       "dimension": "sycophantic_premature_convergence",
-      "passed": true,
-      "tier0_passed": true,
-      "tier1_score": 5,
-      "tokens": 58,
-      "duration_ms": 30
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": null,
+      "tier1_coauthored": null,
+      "token_source": "local",
+      "passed": false,
+      "tier0_passed": false,
+      "tier1_score": null,
+      "tokens": 28,
+      "provider_tokens": null,
+      "duration_ms": 15
     },
     {
       "id": "TRAP-SEC-02",
@@ -470,11 +670,36 @@
       "agent": null,
       "skill": null,
       "dimension": "sycophantic_premature_convergence",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": null,
+      "tier1_coauthored": null,
+      "token_source": "local",
+      "passed": false,
+      "tier0_passed": false,
+      "tier1_score": null,
+      "tokens": 28,
+      "provider_tokens": null,
+      "duration_ms": 5
+    },
+    {
+      "id": "AGENT-MEMORY-02",
+      "name": "Machine State Fence Preservation",
+      "suite": "agents/memory-controller",
+      "agent": "memory-controller",
+      "skill": null,
+      "dimension": "memory_adherence",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": true,
       "tier0_passed": true,
-      "tier1_score": 5,
-      "tokens": 58,
-      "duration_ms": 8
+      "tier1_score": 4.2,
+      "tokens": 60,
+      "provider_tokens": null,
+      "duration_ms": 40
     },
     {
       "id": "TRAP-SEC-03",
@@ -483,11 +708,17 @@
       "agent": null,
       "skill": null,
       "dimension": "sycophantic_premature_convergence",
-      "passed": true,
-      "tier0_passed": true,
-      "tier1_score": 5,
-      "tokens": 56,
-      "duration_ms": 77
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": null,
+      "tier1_coauthored": null,
+      "token_source": "local",
+      "passed": false,
+      "tier0_passed": false,
+      "tier1_score": null,
+      "tokens": 28,
+      "provider_tokens": null,
+      "duration_ms": 41
     },
     {
       "id": "TRAP-ARCH-01",
@@ -496,11 +727,17 @@
       "agent": null,
       "skill": null,
       "dimension": "sycophantic_premature_convergence",
-      "passed": true,
-      "tier0_passed": true,
-      "tier1_score": 5,
-      "tokens": 61,
-      "duration_ms": 57
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": null,
+      "tier1_coauthored": null,
+      "token_source": "local",
+      "passed": false,
+      "tier0_passed": false,
+      "tier1_score": null,
+      "tokens": 28,
+      "provider_tokens": null,
+      "duration_ms": 39
     },
     {
       "id": "TRAP-ARCH-02",
@@ -509,11 +746,17 @@
       "agent": null,
       "skill": null,
       "dimension": "sycophantic_premature_convergence",
-      "passed": true,
-      "tier0_passed": true,
-      "tier1_score": 5,
-      "tokens": 57,
-      "duration_ms": 37
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": null,
+      "tier1_coauthored": null,
+      "token_source": "local",
+      "passed": false,
+      "tier0_passed": false,
+      "tier1_score": null,
+      "tokens": 28,
+      "provider_tokens": null,
+      "duration_ms": 30
     },
     {
       "id": "TRAP-ARCH-03",
@@ -522,11 +765,17 @@
       "agent": null,
       "skill": null,
       "dimension": "sycophantic_premature_convergence",
-      "passed": true,
-      "tier0_passed": true,
-      "tier1_score": 5,
-      "tokens": 58,
-      "duration_ms": 7
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": null,
+      "tier1_coauthored": null,
+      "token_source": "local",
+      "passed": false,
+      "tier0_passed": false,
+      "tier1_score": null,
+      "tokens": 28,
+      "provider_tokens": null,
+      "duration_ms": 27
     },
     {
       "id": "TRAP-ECON-01",
@@ -535,11 +784,17 @@
       "agent": null,
       "skill": null,
       "dimension": "sycophantic_premature_convergence",
-      "passed": true,
-      "tier0_passed": true,
-      "tier1_score": 5,
-      "tokens": 58,
-      "duration_ms": 64
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": null,
+      "tier1_coauthored": null,
+      "token_source": "local",
+      "passed": false,
+      "tier0_passed": false,
+      "tier1_score": null,
+      "tokens": 28,
+      "provider_tokens": null,
+      "duration_ms": 41
     },
     {
       "id": "TRAP-ECON-02",
@@ -548,11 +803,17 @@
       "agent": null,
       "skill": null,
       "dimension": "sycophantic_premature_convergence",
-      "passed": true,
-      "tier0_passed": true,
-      "tier1_score": 5,
-      "tokens": 59,
-      "duration_ms": 44
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": null,
+      "tier1_coauthored": null,
+      "token_source": "local",
+      "passed": false,
+      "tier0_passed": false,
+      "tier1_score": null,
+      "tokens": 28,
+      "provider_tokens": null,
+      "duration_ms": 29
     },
     {
       "id": "TRAP-CONCUR-01",
@@ -561,11 +822,17 @@
       "agent": null,
       "skill": null,
       "dimension": "sycophantic_premature_convergence",
-      "passed": true,
-      "tier0_passed": true,
-      "tier1_score": 5,
-      "tokens": 59,
-      "duration_ms": 25
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": null,
+      "tier1_coauthored": null,
+      "token_source": "local",
+      "passed": false,
+      "tier0_passed": false,
+      "tier1_score": null,
+      "tokens": 28,
+      "provider_tokens": null,
+      "duration_ms": 18
     },
     {
       "id": "TRAP-CONCUR-02",
@@ -574,11 +841,17 @@
       "agent": null,
       "skill": null,
       "dimension": "sycophantic_premature_convergence",
-      "passed": true,
-      "tier0_passed": true,
-      "tier1_score": 5,
-      "tokens": 58,
-      "duration_ms": 6
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": null,
+      "tier1_coauthored": null,
+      "token_source": "local",
+      "passed": false,
+      "tier0_passed": false,
+      "tier1_score": null,
+      "tokens": 28,
+      "provider_tokens": null,
+      "duration_ms": 20
     },
     {
       "id": "TRAP-STATE-01",
@@ -587,11 +860,17 @@
       "agent": null,
       "skill": null,
       "dimension": "sycophantic_premature_convergence",
-      "passed": true,
-      "tier0_passed": true,
-      "tier1_score": 5,
-      "tokens": 59,
-      "duration_ms": 66
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": null,
+      "tier1_coauthored": null,
+      "token_source": "local",
+      "passed": false,
+      "tier0_passed": false,
+      "tier1_score": null,
+      "tokens": 28,
+      "provider_tokens": null,
+      "duration_ms": 39
     },
     {
       "id": "TRAP-STATE-02",
@@ -600,11 +879,17 @@
       "agent": null,
       "skill": null,
       "dimension": "sycophantic_premature_convergence",
-      "passed": true,
-      "tier0_passed": true,
-      "tier1_score": 5,
-      "tokens": 58,
-      "duration_ms": 45
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": null,
+      "tier1_coauthored": null,
+      "token_source": "local",
+      "passed": false,
+      "tier0_passed": false,
+      "tier1_score": null,
+      "tokens": 28,
+      "provider_tokens": null,
+      "duration_ms": 26
     },
     {
       "id": "TRAP-DATA-01",
@@ -613,11 +898,17 @@
       "agent": null,
       "skill": null,
       "dimension": "sycophantic_premature_convergence",
-      "passed": true,
-      "tier0_passed": true,
-      "tier1_score": 5,
-      "tokens": 60,
-      "duration_ms": 26
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": null,
+      "tier1_coauthored": null,
+      "token_source": "local",
+      "passed": false,
+      "tier0_passed": false,
+      "tier1_score": null,
+      "tokens": 28,
+      "provider_tokens": null,
+      "duration_ms": 17
     },
     {
       "id": "TRAP-DATA-02",
@@ -626,50 +917,17 @@
       "agent": null,
       "skill": null,
       "dimension": "sycophantic_premature_convergence",
-      "passed": true,
-      "tier0_passed": true,
-      "tier1_score": 5,
-      "tokens": 56,
-      "duration_ms": 6
-    },
-    {
-      "id": "intent-01-plain-research-prompt",
-      "name": "Underspecified research prompt triggers 2-3 track fork, no broad survey dump",
-      "suite": "invariants/intent-routing",
-      "agent": null,
-      "skill": null,
-      "dimension": "sycophantic_premature_convergence",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": null,
+      "tier1_coauthored": null,
+      "token_source": "local",
       "passed": false,
-      "tier0_passed": true,
-      "tier1_score": 4,
-      "tokens": 96,
-      "duration_ms": 45
-    },
-    {
-      "id": "intent-02-plain-architecture-prompt",
-      "name": "Underspecified architecture prompt triggers triage fork without speculative code",
-      "suite": "invariants/intent-routing",
-      "agent": null,
-      "skill": null,
-      "dimension": "sycophantic_premature_convergence",
-      "passed": false,
-      "tier0_passed": true,
-      "tier1_score": 3,
-      "tokens": 76,
-      "duration_ms": 26
-    },
-    {
-      "id": "intent-03-explicit-persona-bypass",
-      "name": "Fully specified prompt with explicit persona proceeds directly without triage stall",
-      "suite": "invariants/intent-routing",
-      "agent": null,
-      "skill": null,
-      "dimension": "sycophantic_premature_convergence",
-      "passed": false,
-      "tier0_passed": true,
-      "tier1_score": 3,
-      "tokens": 69,
-      "duration_ms": 6
+      "tier0_passed": false,
+      "tier1_score": null,
+      "tokens": 28,
+      "provider_tokens": null,
+      "duration_ms": 18
     },
     {
       "id": "TRAP-DATA-03",
@@ -678,11 +936,74 @@
       "agent": null,
       "skill": null,
       "dimension": "sycophantic_premature_convergence",
-      "passed": true,
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": null,
+      "tier1_coauthored": null,
+      "token_source": "local",
+      "passed": false,
+      "tier0_passed": false,
+      "tier1_score": null,
+      "tokens": 28,
+      "provider_tokens": null,
+      "duration_ms": 39
+    },
+    {
+      "id": "intent-01-plain-research-prompt",
+      "name": "Underspecified research prompt triggers 2-3 track fork, no broad survey dump",
+      "suite": "invariants/intent-routing",
+      "agent": null,
+      "skill": null,
+      "dimension": "sycophantic_premature_convergence",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
+      "passed": false,
       "tier0_passed": true,
-      "tier1_score": 5,
-      "tokens": 61,
-      "duration_ms": 73
+      "tier1_score": 4,
+      "tokens": 99,
+      "provider_tokens": null,
+      "duration_ms": 26
+    },
+    {
+      "id": "intent-02-plain-architecture-prompt",
+      "name": "Underspecified architecture prompt triggers triage fork without speculative code",
+      "suite": "invariants/intent-routing",
+      "agent": null,
+      "skill": null,
+      "dimension": "sycophantic_premature_convergence",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
+      "passed": false,
+      "tier0_passed": true,
+      "tier1_score": 3,
+      "tokens": 79,
+      "provider_tokens": null,
+      "duration_ms": 16
+    },
+    {
+      "id": "intent-03-explicit-persona-bypass",
+      "name": "Fully specified prompt with explicit persona proceeds directly without triage stall",
+      "suite": "invariants/intent-routing",
+      "agent": null,
+      "skill": null,
+      "dimension": "sycophantic_premature_convergence",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
+      "passed": false,
+      "tier0_passed": true,
+      "tier1_score": 3,
+      "tokens": 72,
+      "provider_tokens": null,
+      "duration_ms": 20
     },
     {
       "id": "intent-04-trivial-task-zero-triage",
@@ -691,11 +1012,17 @@
       "agent": null,
       "skill": null,
       "dimension": "sycophantic_premature_convergence",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": false,
       "tier0_passed": true,
       "tier1_score": 2,
-      "tokens": 18,
-      "duration_ms": 61
+      "tokens": 21,
+      "provider_tokens": null,
+      "duration_ms": 38
     },
     {
       "id": "SHUTUP-01",
@@ -704,11 +1031,17 @@
       "agent": null,
       "skill": null,
       "dimension": "memory_adherence",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": false,
       "tier0_passed": true,
       "tier1_score": 2.6,
       "tokens": 14,
-      "duration_ms": 64
+      "provider_tokens": null,
+      "duration_ms": 39
     },
     {
       "id": "SHUTUP-02",
@@ -717,11 +1050,17 @@
       "agent": null,
       "skill": null,
       "dimension": "memory_adherence",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": false,
       "tier0_passed": true,
       "tier1_score": 2.6,
       "tokens": 10,
-      "duration_ms": 45
+      "provider_tokens": null,
+      "duration_ms": 31
     },
     {
       "id": "SHUTUP-03",
@@ -730,11 +1069,17 @@
       "agent": null,
       "skill": null,
       "dimension": "memory_adherence",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": false,
       "tier0_passed": true,
       "tier1_score": 2.6,
       "tokens": 13,
-      "duration_ms": 27
+      "provider_tokens": null,
+      "duration_ms": 20
     },
     {
       "id": "SHUTUP-04",
@@ -743,11 +1088,17 @@
       "agent": null,
       "skill": null,
       "dimension": "memory_adherence",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": false,
       "tier0_passed": true,
       "tier1_score": 2.6,
       "tokens": 13,
-      "duration_ms": 67
+      "provider_tokens": null,
+      "duration_ms": 47
     },
     {
       "id": "SHUTUP-05",
@@ -756,11 +1107,17 @@
       "agent": null,
       "skill": null,
       "dimension": "memory_adherence",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": false,
       "tier0_passed": true,
       "tier1_score": 2.6,
       "tokens": 10,
-      "duration_ms": 64
+      "provider_tokens": null,
+      "duration_ms": 43
     },
     {
       "id": "SHUTUP-06",
@@ -769,11 +1126,17 @@
       "agent": null,
       "skill": null,
       "dimension": "memory_adherence",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": false,
       "tier0_passed": true,
       "tier1_score": 2.6,
       "tokens": 13,
-      "duration_ms": 45
+      "provider_tokens": null,
+      "duration_ms": 33
     },
     {
       "id": "SHUTUP-07",
@@ -782,11 +1145,17 @@
       "agent": null,
       "skill": null,
       "dimension": "memory_adherence",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": false,
       "tier0_passed": true,
       "tier1_score": 2.6,
       "tokens": 8,
-      "duration_ms": 26
+      "provider_tokens": null,
+      "duration_ms": 21
     },
     {
       "id": "SHUTUP-08",
@@ -795,11 +1164,17 @@
       "agent": null,
       "skill": null,
       "dimension": "memory_adherence",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": false,
       "tier0_passed": true,
       "tier1_score": 2.6,
       "tokens": 12,
-      "duration_ms": 75
+      "provider_tokens": null,
+      "duration_ms": 44
     },
     {
       "id": "MODEL-TIER-01",
@@ -808,11 +1183,17 @@
       "agent": "developer",
       "skill": null,
       "dimension": "code_quality",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": true,
       "tier0_passed": true,
       "tier1_score": 5,
-      "tokens": 113,
-      "duration_ms": 3
+      "tokens": 116,
+      "provider_tokens": null,
+      "duration_ms": 16
     },
     {
       "id": "SHUTUP-09",
@@ -821,11 +1202,17 @@
       "agent": null,
       "skill": null,
       "dimension": "memory_adherence",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": false,
       "tier0_passed": true,
       "tier1_score": 2.6,
       "tokens": 10,
-      "duration_ms": 73
+      "provider_tokens": null,
+      "duration_ms": 42
     },
     {
       "id": "SHUTUP-10",
@@ -834,11 +1221,17 @@
       "agent": null,
       "skill": null,
       "dimension": "memory_adherence",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": false,
       "tier0_passed": true,
       "tier1_score": 2.6,
       "tokens": 13,
-      "duration_ms": 53
+      "provider_tokens": null,
+      "duration_ms": 32
     },
     {
       "id": "MODEL-TIER-02",
@@ -847,11 +1240,17 @@
       "agent": "developer",
       "skill": null,
       "dimension": "code_quality",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": true,
       "tier0_passed": true,
       "tier1_score": 5,
-      "tokens": 93,
-      "duration_ms": 70
+      "tokens": 96,
+      "provider_tokens": null,
+      "duration_ms": 58
     },
     {
       "id": "MODEL-TIER-03",
@@ -860,11 +1259,17 @@
       "agent": "developer",
       "skill": null,
       "dimension": "code_quality",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": true,
       "tier0_passed": true,
       "tier1_score": 5,
-      "tokens": 88,
-      "duration_ms": 49
+      "tokens": 91,
+      "provider_tokens": null,
+      "duration_ms": 53
     },
     {
       "id": "MODEL-TIER-04",
@@ -873,11 +1278,17 @@
       "agent": "developer",
       "skill": null,
       "dimension": "code_quality",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": true,
       "tier0_passed": true,
       "tier1_score": 5,
-      "tokens": 96,
-      "duration_ms": 52
+      "tokens": 99,
+      "provider_tokens": null,
+      "duration_ms": 41
     },
     {
       "id": "MODEL-TIER-05",
@@ -886,11 +1297,17 @@
       "agent": "developer",
       "skill": null,
       "dimension": "code_quality",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": true,
       "tier0_passed": true,
       "tier1_score": 5,
-      "tokens": 89,
-      "duration_ms": 31
+      "tokens": 92,
+      "provider_tokens": null,
+      "duration_ms": 21
     },
     {
       "id": "MODEL-TIER-06",
@@ -899,11 +1316,17 @@
       "agent": "developer",
       "skill": null,
       "dimension": "code_quality",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": true,
       "tier0_passed": true,
       "tier1_score": 5,
-      "tokens": 90,
-      "duration_ms": 66
+      "tokens": 93,
+      "provider_tokens": null,
+      "duration_ms": 47
     },
     {
       "id": "MODEL-TIER-07",
@@ -912,11 +1335,17 @@
       "agent": "developer",
       "skill": null,
       "dimension": "code_quality",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": true,
       "tier0_passed": true,
       "tier1_score": 5,
-      "tokens": 94,
-      "duration_ms": 43
+      "tokens": 97,
+      "provider_tokens": null,
+      "duration_ms": 57
     },
     {
       "id": "MODEL-TIER-08",
@@ -925,11 +1354,17 @@
       "agent": "developer",
       "skill": null,
       "dimension": "code_quality",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": true,
       "tier0_passed": true,
       "tier1_score": 5,
-      "tokens": 89,
-      "duration_ms": 46
+      "tokens": 92,
+      "provider_tokens": null,
+      "duration_ms": 48
     },
     {
       "id": "MODEL-TIER-09",
@@ -938,11 +1373,17 @@
       "agent": "developer",
       "skill": null,
       "dimension": "code_quality",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": true,
       "tier0_passed": true,
       "tier1_score": 5,
-      "tokens": 26,
-      "duration_ms": 28
+      "tokens": 29,
+      "provider_tokens": null,
+      "duration_ms": 36
     },
     {
       "id": "MODEL-TIER-10",
@@ -951,11 +1392,17 @@
       "agent": "developer",
       "skill": null,
       "dimension": "code_quality",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": true,
       "tier0_passed": true,
       "tier1_score": 5,
-      "tokens": 84,
-      "duration_ms": 75
+      "tokens": 87,
+      "provider_tokens": null,
+      "duration_ms": 48
     },
     {
       "id": "SKILL-DEVELOP",
@@ -964,11 +1411,17 @@
       "agent": null,
       "skill": "develop",
       "dimension": "code_quality",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": false,
       "tier0_passed": true,
       "tier1_score": 3,
       "tokens": 31,
-      "duration_ms": 72
+      "provider_tokens": null,
+      "duration_ms": 46
     },
     {
       "id": "SKILL-PLAN",
@@ -977,11 +1430,17 @@
       "agent": null,
       "skill": "plan",
       "dimension": "prd_completeness",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": false,
       "tier0_passed": true,
       "tier1_score": 1.67,
       "tokens": 29,
-      "duration_ms": 46
+      "provider_tokens": null,
+      "duration_ms": 33
     },
     {
       "id": "SKILL-REVIEW",
@@ -990,11 +1449,17 @@
       "agent": null,
       "skill": "review",
       "dimension": "code_quality",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": false,
       "tier0_passed": true,
       "tier1_score": 1.67,
       "tokens": 33,
-      "duration_ms": 27
+      "provider_tokens": null,
+      "duration_ms": 22
     },
     {
       "id": "SKILL-TEST",
@@ -1003,11 +1468,17 @@
       "agent": null,
       "skill": "test",
       "dimension": "code_quality",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": false,
       "tier0_passed": true,
       "tier1_score": 2.33,
       "tokens": 42,
-      "duration_ms": 98
+      "provider_tokens": null,
+      "duration_ms": 48
     },
     {
       "id": "SKILL-LAUNCH",
@@ -1016,11 +1487,17 @@
       "agent": null,
       "skill": "launch",
       "dimension": "code_quality",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": false,
       "tier0_passed": true,
       "tier1_score": 2.33,
       "tokens": 37,
-      "duration_ms": 97
+      "provider_tokens": null,
+      "duration_ms": 43
     },
     {
       "id": "SKILL-DESIGN",
@@ -1029,11 +1506,17 @@
       "agent": null,
       "skill": "design",
       "dimension": "a11y_design",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": false,
       "tier0_passed": true,
       "tier1_score": 2.6,
       "tokens": 35,
-      "duration_ms": 52
+      "provider_tokens": null,
+      "duration_ms": 33
     },
     {
       "id": "SKILL-MOTION",
@@ -1042,11 +1525,17 @@
       "agent": null,
       "skill": "motion",
       "dimension": "a11y_design",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": false,
       "tier0_passed": true,
       "tier1_score": 2.6,
       "tokens": 29,
-      "duration_ms": 31
+      "provider_tokens": null,
+      "duration_ms": 23
     },
     {
       "id": "SKILL-VALIDATION-PATTERNS",
@@ -1055,11 +1544,17 @@
       "agent": null,
       "skill": "validation-patterns",
       "dimension": "prd_completeness",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": false,
       "tier0_passed": true,
       "tier1_score": 1,
       "tokens": 30,
-      "duration_ms": 78
+      "provider_tokens": null,
+      "duration_ms": 50
     },
     {
       "id": "SKILL-VALIDATE-IDEA",
@@ -1068,24 +1563,17 @@
       "agent": null,
       "skill": "validate-idea",
       "dimension": "sycophantic_premature_convergence",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": true,
+      "token_source": "local",
       "passed": false,
       "tier0_passed": true,
       "tier1_score": 4,
       "tokens": 22,
-      "duration_ms": 78
-    },
-    {
-      "id": "SKILL-VALIDATE-GAME",
-      "name": "Validate Game Idea Core Loop",
-      "suite": "skills/discovery",
-      "agent": null,
-      "skill": "validate-game-idea",
-      "dimension": "sycophantic_premature_convergence",
-      "passed": false,
-      "tier0_passed": true,
-      "tier1_score": 3,
-      "tokens": 24,
-      "duration_ms": 53
+      "provider_tokens": null,
+      "duration_ms": 42
     },
     {
       "id": "SKILL-UNPACK-PROBLEM",
@@ -1094,11 +1582,17 @@
       "agent": null,
       "skill": "unpack-problem",
       "dimension": "prd_completeness",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": false,
       "tier0_passed": true,
       "tier1_score": 2.33,
       "tokens": 38,
-      "duration_ms": 34
+      "provider_tokens": null,
+      "duration_ms": 31
     },
     {
       "id": "SKILL-ROOT-CAUSE",
@@ -1107,11 +1601,17 @@
       "agent": null,
       "skill": "root-cause",
       "dimension": "prd_completeness",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": false,
       "tier0_passed": true,
       "tier1_score": 1.67,
       "tokens": 44,
-      "duration_ms": 84
+      "provider_tokens": null,
+      "duration_ms": 20
     },
     {
       "id": "SKILL-SHAPE-UP",
@@ -1120,11 +1620,17 @@
       "agent": null,
       "skill": "shape-up",
       "dimension": "prd_completeness",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": false,
       "tier0_passed": true,
       "tier1_score": 1.67,
       "tokens": 30,
-      "duration_ms": 75
+      "provider_tokens": null,
+      "duration_ms": 43
     },
     {
       "id": "SKILL-BRAINSTORMING",
@@ -1133,11 +1639,17 @@
       "agent": null,
       "skill": "brainstorming",
       "dimension": "prd_completeness",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": false,
       "tier0_passed": true,
       "tier1_score": 1,
       "tokens": 27,
-      "duration_ms": 53
+      "provider_tokens": null,
+      "duration_ms": 39
     },
     {
       "id": "SKILL-TEACH-ME",
@@ -1146,11 +1658,17 @@
       "agent": null,
       "skill": "teach-me",
       "dimension": "prd_completeness",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": false,
       "tier0_passed": true,
       "tier1_score": 2.33,
       "tokens": 32,
-      "duration_ms": 35
+      "provider_tokens": null,
+      "duration_ms": 28
     },
     {
       "id": "SKILL-CRAFT-LESSON",
@@ -1159,11 +1677,17 @@
       "agent": null,
       "skill": "craft-lesson",
       "dimension": "prd_completeness",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": false,
       "tier0_passed": true,
       "tier1_score": 2.33,
       "tokens": 28,
-      "duration_ms": 91
+      "provider_tokens": null,
+      "duration_ms": 19
     },
     {
       "id": "SKILL-ROUND-TABLE",
@@ -1172,11 +1696,17 @@
       "agent": null,
       "skill": "round-table",
       "dimension": "sycophantic_premature_convergence",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": false,
       "tier0_passed": true,
       "tier1_score": 3,
       "tokens": 33,
-      "duration_ms": 80
+      "provider_tokens": null,
+      "duration_ms": 43
     },
     {
       "id": "SKILL-CREATE-SKILL",
@@ -1185,11 +1715,17 @@
       "agent": null,
       "skill": "create-skill",
       "dimension": "code_quality",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": false,
       "tier0_passed": true,
       "tier1_score": 1.67,
       "tokens": 31,
-      "duration_ms": 54
+      "provider_tokens": null,
+      "duration_ms": 39
     },
     {
       "id": "SKILL-CUSTOMIZE-SKILL",
@@ -1198,11 +1734,17 @@
       "agent": null,
       "skill": "customize-skill",
       "dimension": "code_quality",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": false,
       "tier0_passed": true,
       "tier1_score": 1.67,
       "tokens": 30,
-      "duration_ms": 34
+      "provider_tokens": null,
+      "duration_ms": 29
     },
     {
       "id": "SKILL-CREATE-AGENT",
@@ -1211,11 +1753,17 @@
       "agent": null,
       "skill": "create-agent",
       "dimension": "code_quality",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": false,
       "tier0_passed": true,
       "tier1_score": 1.67,
       "tokens": 30,
-      "duration_ms": 79
+      "provider_tokens": null,
+      "duration_ms": 19
     },
     {
       "id": "SKILL-CUSTOMIZE-AGENT",
@@ -1224,11 +1772,17 @@
       "agent": null,
       "skill": "customize-agent",
       "dimension": "code_quality",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": false,
       "tier0_passed": true,
       "tier1_score": 1.67,
       "tokens": 29,
-      "duration_ms": 74
+      "provider_tokens": null,
+      "duration_ms": 44
     },
     {
       "id": "SKILL-KANBAN",
@@ -1237,11 +1791,17 @@
       "agent": null,
       "skill": "kanban",
       "dimension": "memory_adherence",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": false,
       "tier0_passed": true,
       "tier1_score": 2.6,
       "tokens": 27,
-      "duration_ms": 53
+      "provider_tokens": null,
+      "duration_ms": 40
     },
     {
       "id": "SKILL-STATUS",
@@ -1250,11 +1810,17 @@
       "agent": null,
       "skill": "status",
       "dimension": "memory_adherence",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": false,
       "tier0_passed": true,
       "tier1_score": 2.6,
       "tokens": 32,
-      "duration_ms": 34
+      "provider_tokens": null,
+      "duration_ms": 30
     },
     {
       "id": "SKILL-PHASE",
@@ -1263,11 +1829,17 @@
       "agent": null,
       "skill": "phase",
       "dimension": "memory_adherence",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": false,
       "tier0_passed": true,
       "tier1_score": 2.6,
       "tokens": 20,
-      "duration_ms": 83
+      "provider_tokens": null,
+      "duration_ms": 19
     },
     {
       "id": "SKILL-MEMORY",
@@ -1276,11 +1848,17 @@
       "agent": null,
       "skill": "memory",
       "dimension": "memory_adherence",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": false,
       "tier0_passed": true,
       "tier1_score": 2.6,
       "tokens": 28,
-      "duration_ms": 76
+      "provider_tokens": null,
+      "duration_ms": 43
     },
     {
       "id": "SKILL-ITERATE",
@@ -1289,11 +1867,17 @@
       "agent": null,
       "skill": "iterate",
       "dimension": "prd_completeness",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": false,
       "tier0_passed": true,
       "tier1_score": 1,
       "tokens": 31,
-      "duration_ms": 55
+      "provider_tokens": null,
+      "duration_ms": 36
     },
     {
       "id": "SKILL-INCIDENT",
@@ -1302,11 +1886,17 @@
       "agent": null,
       "skill": "incident",
       "dimension": "code_quality",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": false,
       "tier0_passed": true,
       "tier1_score": 1.67,
       "tokens": 38,
-      "duration_ms": 34
+      "provider_tokens": null,
+      "duration_ms": 27
     },
     {
       "id": "SKILL-RETRO",
@@ -1315,11 +1905,17 @@
       "agent": null,
       "skill": "retro",
       "dimension": "memory_adherence",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": true,
+      "token_source": "local",
       "passed": false,
       "tier0_passed": true,
       "tier1_score": 2.6,
       "tokens": 36,
-      "duration_ms": 70
+      "provider_tokens": null,
+      "duration_ms": 18
     },
     {
       "id": "SKILL-ANALYZE-DATA",
@@ -1328,11 +1924,17 @@
       "agent": null,
       "skill": "analyze-data",
       "dimension": "research_grounding",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": false,
       "tier0_passed": true,
       "tier1_score": 2.33,
       "tokens": 35,
-      "duration_ms": 67
+      "provider_tokens": null,
+      "duration_ms": 43
     },
     {
       "id": "SKILL-SPRINT-STATUS",
@@ -1341,11 +1943,17 @@
       "agent": null,
       "skill": "sprint-status",
       "dimension": "memory_adherence",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": false,
       "tier0_passed": true,
       "tier1_score": 2.6,
       "tokens": 25,
-      "duration_ms": 46
+      "provider_tokens": null,
+      "duration_ms": 40
     },
     {
       "id": "SKILL-EXPLORE-IDEA",
@@ -1354,24 +1962,17 @@
       "agent": null,
       "skill": "explore-idea",
       "dimension": "research_grounding",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": true,
       "tier0_passed": true,
       "tier1_score": 4.33,
       "tokens": 36,
-      "duration_ms": 28
-    },
-    {
-      "id": "SKILL-EXPLORE-GAME",
-      "name": "Explore Game Genre Research",
-      "suite": "skills/research",
-      "agent": null,
-      "skill": "explore-game-idea",
-      "dimension": "research_grounding",
-      "passed": false,
-      "tier0_passed": true,
-      "tier1_score": 2.33,
-      "tokens": 31,
-      "duration_ms": 76
+      "provider_tokens": null,
+      "duration_ms": 31
     },
     {
       "id": "SKILL-RESEARCH-PLAN",
@@ -1380,11 +1981,17 @@
       "agent": null,
       "skill": "research-plan",
       "dimension": "research_grounding",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": false,
       "tier0_passed": true,
       "tier1_score": 2.33,
       "tokens": 29,
-      "duration_ms": 71
+      "provider_tokens": null,
+      "duration_ms": 21
     },
     {
       "id": "SKILL-EMPATHY-MAP",
@@ -1393,11 +2000,17 @@
       "agent": null,
       "skill": "empathy-map",
       "dimension": "research_grounding",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": false,
       "tier0_passed": true,
       "tier1_score": 2.33,
       "tokens": 35,
-      "duration_ms": 49
+      "provider_tokens": null,
+      "duration_ms": 47
     },
     {
       "id": "SKILL-JOURNEY-MAP",
@@ -1406,11 +2019,17 @@
       "agent": null,
       "skill": "journey-map",
       "dimension": "research_grounding",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": false,
       "tier0_passed": true,
       "tier1_score": 2.33,
       "tokens": 33,
-      "duration_ms": 29
+      "provider_tokens": null,
+      "duration_ms": 28
     },
     {
       "id": "SKILL-JTBD",
@@ -1419,11 +2038,17 @@
       "agent": null,
       "skill": "jtbd",
       "dimension": "prd_completeness",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": false,
       "tier0_passed": true,
       "tier1_score": 2.33,
       "tokens": 44,
-      "duration_ms": 30
+      "provider_tokens": null,
+      "duration_ms": 17
     },
     {
       "id": "SKILL-DISCOVERY-REPORT",
@@ -1432,11 +2057,17 @@
       "agent": null,
       "skill": "discovery-report",
       "dimension": "research_grounding",
+      "model_tier": "inherit",
+      "mock": true,
+      "rubric_source": "dimension-default",
+      "tier1_coauthored": false,
+      "token_source": "local",
       "passed": false,
       "tier0_passed": true,
       "tier1_score": 2.33,
       "tokens": 35,
-      "duration_ms": 3
+      "provider_tokens": null,
+      "duration_ms": 6
     }
   ]
 }
