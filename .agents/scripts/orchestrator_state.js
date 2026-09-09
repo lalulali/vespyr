@@ -40,6 +40,13 @@ const TELEMETRY_DIR = path.join(process.cwd(), 'artifacts', 'telemetry');
 const PROJECT_ROOT = process.cwd();
 
 function countTokens(text) {
+  // INV-TEL-04: single canonical estimator (tools/eval/lib/tokenizer).
+  // Local words/0.75 math survives only as unreachable-environment fallback.
+  try {
+    const { countTokens: canonical } = require('../../tools/eval/lib/tokenizer');
+    if (typeof canonical === 'function') return canonical(text);
+  } catch (e) {}
+  if (!text || typeof text !== 'string') return 0;
   const words = text.trim().split(/\s+/).filter(Boolean).length;
   return Math.round(words / 0.75);
 }
@@ -369,7 +376,7 @@ function printNextDashboard(state, action) {
   console.log('');
 }
 
-// Best-effort token estimate from file size: ~0.75 words per token on average.
+// Best-effort token estimate from file content via canonical countTokens().
 // Used only when the caller does not supply --tokens.
 // Single canonical estimator. recordSpanForAgent and estimateTokensFromFile
 // must both call countTokens() — no len/4, no floor-8.
@@ -377,8 +384,7 @@ function estimateTokensFromFile(absPath) {
   try {
     if (!fs.existsSync(absPath)) return 0;
     const content = fs.readFileSync(absPath, 'utf8');
-    const words = content.split(/\s+/).filter(Boolean).length;
-    return Math.max(1, Math.round(words / 0.75));
+    return Math.max(1, countTokens(content));
   } catch (e) {
     return 0;
   }
@@ -452,7 +458,10 @@ function recordSpanForAgent(agent, phase, tokens, durationMs, artifact) {
       tier0_evaluation: { executed: tier0Checks.length>0, passed: rqsD>=0.85, checks: tier0Checks },
       error: null
     };
-    // Tier B guard (INV-TEL-05) — audit warning but do not block span emission
+    // Tier B guard (INV-TEL-05) — audit tag, not a span block: demotions are
+    // recorded as span.error TIER_DEMOTION and `swarm_telemetry.js verify`
+    // fails closed on them (tier_pass:false → exit 2). Standalone guard
+    // exit 2 alone never blocked releases; wire CI to the verify gate.
     try {
       const { checkTier } = require('../../tools/telemetry/modelTierGuards');
       const chk = checkTier(agent, process.env.VESPYR_MODEL_ID || span.model.model_id);

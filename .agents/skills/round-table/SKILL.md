@@ -109,6 +109,16 @@ The closed, versioned tag table lives in `.agents/references/roster-router.json`
 
 Roundtable discussions enforce true perspective collision where agents are mandated to defend their positions under pushback or justify concessions with technical proof.
 
+### Dispatch Ledger (attribution — every subagent call leaves a row)
+
+Token spend on the subagent path is harness-side invisible; attribution is not. The host (writer) records one row per dispatch at completion via `.agents/scripts/dispatch_ledger.js` — never batched from memory at close:
+
+```bash
+node .agents/scripts/dispatch_ledger.js record --writer "@round-table" --agent "@<persona>" --task "<what they were asked>" --outcome <success|error|timeout|rejected_by_gate|cancelled> [--attempt N] [--parent-trace <id>] [--context-bytes N]
+```
+
+Rules: one row per dispatch (retries counted via `--attempt`, never re-rowed); outcome from the closed enum only; token/cost columns do not exist here (rows carry `tokens_unknown:true, cost_unknown:true` by design — spend aggregation over the ledger is refused). When a later agent consumes an artifact, link it: `dispatch_ledger.js consume --dispatch <id> --consumer <label>`. At close, `dispatch_ledger.js verify` must pass (empty window fails); `summary` reports the orphan-artifact rate ("did it matter").
+
 ### Phase 1: Position Stating (Scatter & Verdict Gate)
 - **Unconditioned parallel subagent dispatch** (no anchor bias, unconditioned priors).
 - **Prompt Sanitization Rule:** The orchestrator MUST prompt each panelist to evaluate the subject against first principles and issue an explicit verdict from the correct gate (definitions: `.agents/references/vespyr-dna.md`):

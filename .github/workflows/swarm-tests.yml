@@ -72,8 +72,18 @@ jobs:
           node .agents/scripts/swarm_telemetry.js baseline
           node .agents/scripts/swarm_telemetry.js summary --days 7
 
+      - name: Verify span hybrid mechanics, hermetic (INV-TEL-01 unit level)
+        # Mechanics live here (tmp-isolated fixtures, red controls included).
+        # The signal gate below runs UNSEEDED on the real window and is allowed
+        # to red honestly on empty — no seed loop (workspace seeding made the
+        # gate grade its own fixtures; round-table turn 8).
+        run: node --test tests/test_span_hybrid.test.js
+
       - name: Verify span hybrid (INV-TEL-01 ≥80% exact, no zero-token)
         run: node .agents/scripts/swarm_telemetry.js verify --days 7
+
+      - name: Verify model tier guards (INV-TEL-05 anchored matching)
+        run: node --test tests/test_model_tier_guards.test.js
 
       - name: Verify single-owner span schema import (INV single-owner)
         run: node --test tests/test_schema_single_owner.test.js

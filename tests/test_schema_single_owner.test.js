@@ -65,4 +65,76 @@ describe('canonical span schema single-owner (02l → 04/04a import)', () => {
     const v = swarm.validateSpan(good);
     assert.equal(v.valid, true);
   });
+
+  it('validateSpan rejects spans missing canonical required keys (P0-2)', () => {
+    const swarm = require(path.join(__dirname, '..', '.agents', 'scripts', 'swarm_telemetry.js'));
+    const base = {
+      trace_id: '11111111-1111-4111-8111-111111111111',
+      span_id: '22222222-2222-4222-8222-222222222222',
+      parent_span_id: null,
+      timestamp: new Date().toISOString(),
+      session_id: 'test',
+      workflow: 'delivery/develop',
+      agent_persona: 'developer',
+      model: { provider: 'anthropic', model_id: 'claude-3-5-sonnet', temperature: 0 },
+      usage: { prompt_tokens: 10, completion_tokens: 10, total_tokens: 20, cost_usd: null, estimated: false },
+      duration_ms: 10,
+      quality_scorecard: { rqs_d_score: 0.9, rqs_j_score: null, rating: 'PASS', biomarkers: { scr: 1, msha: 1, placeholder_density: 0, pci: 0, ac_testability: 1, srsr: null, scope_drift: null } },
+      tier0_evaluation: { executed: true, passed: true, checks: [] },
+      error: null
+    };
+    for (const drop of ['tier0_evaluation', 'error', 'quality_scorecard', 'usage', 'model']) {
+      const s = { ...base };
+      delete s[drop];
+      const v = swarm.validateSpan(s);
+      assert.equal(v.valid, false, `${drop} absence must fail validation`);
+    }
+    // missing model.temperature
+    const noTemp = { ...base, model: { provider: 'anthropic', model_id: 'x' } };
+    assert.equal(swarm.validateSpan(noTemp).valid, false, 'model.temperature absence must fail');
+    // missing usage.cost_usd key (nullable value is fine, absent key is not)
+    const noCost = { ...base, usage: { prompt_tokens: 1, completion_tokens: 1, total_tokens: 2, estimated: false } };
+    assert.equal(swarm.validateSpan(noCost).valid, false, 'usage.cost_usd absence must fail');
+    // missing biomarker key
+    const noBio = { ...base, quality_scorecard: { rqs_d_score: 0.9, rqs_j_score: null, rating: 'PASS', biomarkers: { scr: 1, msha: 1, placeholder_density: 0, pci: 0, ac_testability: 1, srsr: null } } };
+    assert.equal(swarm.validateSpan(noBio).valid, false, 'biomarkers.scope_drift absence must fail');
+    // bad rating enum
+    const badRating = { ...base, quality_scorecard: { ...base.quality_scorecard, rating: 'MAYBE' } };
+    assert.equal(swarm.validateSpan(badRating).valid, false, 'rating enum violation must fail');
+  });
+
+  it('validateSpan required list tracks the canonical schema file (P0-1 drift tripwire)', () => {
+    const swarm = require(path.join(__dirname, '..', '.agents', 'scripts', 'swarm_telemetry.js'));
+    const schema = swarm.loadCanonicalSchema();
+    assert.ok(schema && Array.isArray(schema.required), 'canonical schema must load');
+    // every canonical top-level required key must be enforced: drop each one
+    const base = {
+      trace_id: 't', span_id: 's', parent_span_id: null, timestamp: new Date().toISOString(),
+      session_id: 't', workflow: 'w', agent_persona: 'a',
+      model: { provider: 'p', model_id: 'm', temperature: 0 },
+      usage: { prompt_tokens: 1, completion_tokens: 1, total_tokens: 2, cost_usd: null, estimated: false },
+      duration_ms: 1,
+      quality_scorecard: { rqs_d_score: 0.9, rqs_j_score: null, rating: 'PASS', biomarkers: { scr: 1, msha: 1, placeholder_density: 0, pci: 0, ac_testability: 1, srsr: null, scope_drift: null } },
+      tier0_evaluation: { executed: true, passed: true, checks: [] },
+      error: null
+    };
+    for (const k of schema.required) {
+      const s = { ...base };
+      delete s[k];
+      assert.equal(swarm.validateSpan(s).valid, false, `schema-required key ${k} must be enforced`);
+    }
+  });
+
+  it('validator enum mirrors track the canonical schema (drift tripwire extension)', () => {
+    const swarm = require(path.join(__dirname, '..', '.agents', 'scripts', 'swarm_telemetry.js'));
+    const schema = swarm.loadCanonicalSchema();
+    const q = schema.properties.quality_scorecard.properties;
+    const t = schema.properties.tier0_evaluation.properties;
+    assert.deepEqual([...swarm.RATING_ENUM].sort(), [...q.rating.enum].sort(), 'RATING_ENUM must mirror schema rating enum');
+    const checkItem = t.checks.items.properties;
+    assert.deepEqual([...swarm.TIER0_CHECK_TYPES].sort(), [...checkItem.type.enum].sort(), 'TIER0_CHECK_TYPES must mirror schema');
+    assert.deepEqual([...swarm.TIER0_CHECK_STATUS].sort(), [...checkItem.status.enum].sort(), 'TIER0_CHECK_STATUS must mirror schema');
+    const schemaBioKeys = schema.properties.quality_scorecard.properties.biomarkers.required;
+    assert.deepEqual([...swarm.BIOMARKER_KEYS].sort(), [...schemaBioKeys].sort(), 'BIOMARKER_KEYS must mirror schema biomarkers required');
+  });
 });

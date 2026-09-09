@@ -57,6 +57,13 @@ function generateId() {
 
 function estimateTokensFallback(text) {
   if (!text || typeof text !== 'string') return 0;
+  // INV-TEL-04: single canonical estimator — tools/eval/lib/tokenizer countTokens.
+  // No len/4 duplicates; len/4 survives only as last-resort fallback if the
+  // canonical module is unreachable (must stay unreachable in practice).
+  try {
+    const { countTokens } = require('../../tools/eval/lib/tokenizer');
+    if (typeof countTokens === 'function') return countTokens(text);
+  } catch (e) {}
   return Math.ceil(text.length / 4);
 }
 
@@ -69,22 +76,100 @@ function loadCanonicalSchema() {
   return null;
 }
 
+const RATING_ENUM = ['EXCELLENT', 'PASS', 'NEEDS_REPAIR', 'REJECTED'];
+const TIER0_CHECK_TYPES = ['markdown_ast', 'json_schema', 'eslint', 'unit_tests', 'token_ceiling'];
+const TIER0_CHECK_STATUS = ['PASS', 'FAIL'];
+const BIOMARKER_KEYS = ['scr', 'msha', 'placeholder_density', 'pci', 'ac_testability', 'srsr', 'scope_drift'];
+const NULLABLE_BIOMARKERS = new Set(['srsr', 'scope_drift']);
+
+function isInt(n) { return typeof n === 'number' && Number.isInteger(n); }
+
+// Validates against the canonical schema (tools/telemetry/schema.json, single
+// owner). Required-field lists are driven from the loaded schema so drift
+// between this validator and the canonical file surfaces as failures instead
+// of silent overlap. Structural type/range/enum checks mirror the schema.
 function validateSpan(span) {
   const errors = [];
-  if (!span.trace_id) errors.push('trace_id required');
-  if (!span.span_id) errors.push('span_id required');
+  if (!span || typeof span !== 'object') return { valid: false, errors: ['span must be an object'] };
+  const schema = loadCanonicalSchema();
+  const topRequired = (schema && Array.isArray(schema.required) && schema.required.length)
+    ? schema.required
+    : ['trace_id', 'span_id', 'parent_span_id', 'timestamp', 'session_id', 'workflow', 'agent_persona', 'model', 'usage', 'duration_ms', 'quality_scorecard', 'tier0_evaluation', 'error'];
+  for (const k of topRequired) {
+    if (span[k] === undefined) errors.push(`${k} required (canonical schema)`);
+  }
+  if (typeof span.trace_id !== 'string' || !span.trace_id) errors.push('trace_id must be a non-empty string');
+  if (typeof span.span_id !== 'string' || !span.span_id) errors.push('span_id must be a non-empty string');
   if (span.parent_span_id !== null && span.parent_span_id !== undefined && typeof span.parent_span_id !== 'string') errors.push('parent_span_id must be string or null');
-  if (!span.timestamp) errors.push('timestamp required');
-  if (!span.session_id) errors.push('session_id required');
-  if (!span.workflow) errors.push('workflow required');
-  if (!span.agent_persona) errors.push('agent_persona required');
-  if (!span.model || !span.model.provider || !span.model.model_id) errors.push('model.provider/model_id required');
-  if (!span.usage || typeof span.usage.total_tokens !== 'number') errors.push('usage.total_tokens required');
-  if (typeof span.usage.estimated !== 'boolean') errors.push('usage.estimated must be boolean');
+  if (typeof span.timestamp !== 'string' || Number.isNaN(Date.parse(span.timestamp))) errors.push('timestamp must be a date-time string');
+  if (typeof span.session_id !== 'string' || !span.session_id) errors.push('session_id required');
+  if (typeof span.workflow !== 'string' || !span.workflow) errors.push('workflow required');
+  if (typeof span.agent_persona !== 'string' || !span.agent_persona) errors.push('agent_persona required');
+  // model (schema requires provider/model_id/temperature)
+  const mReq = (schema && schema.properties && schema.properties.model && schema.properties.model.required) || ['provider', 'model_id', 'temperature'];
+  if (!span.model || typeof span.model !== 'object') errors.push('model required');
+  else {
+    for (const k of mReq) { if (span.model[k] === undefined) errors.push(`model.${k} required (canonical schema)`); }
+    if (typeof span.model.provider !== 'string' || !span.model.provider) errors.push('model.provider required');
+    if (typeof span.model.model_id !== 'string' || !span.model.model_id) errors.push('model.model_id required');
+    if (typeof span.model.temperature !== 'number') errors.push('model.temperature must be a number');
+  }
+  // usage (schema requires prompt/completion/total/cost_usd/estimated)
+  const uReq = (schema && schema.properties && schema.properties.usage && schema.properties.usage.required) || ['prompt_tokens', 'completion_tokens', 'total_tokens', 'cost_usd', 'estimated'];
+  if (!span.usage || typeof span.usage !== 'object') errors.push('usage required');
+  else {
+    for (const k of uReq) { if (span.usage[k] === undefined) errors.push(`usage.${k} required (canonical schema)`); }
+    for (const k of ['prompt_tokens', 'completion_tokens', 'total_tokens']) {
+      if (span.usage[k] !== undefined && (!isInt(span.usage[k]) || span.usage[k] < 0)) errors.push(`usage.${k} must be an integer >=0`);
+    }
+    if (span.usage.cost_usd !== undefined && span.usage.cost_usd !== null && typeof span.usage.cost_usd !== 'number') errors.push('usage.cost_usd must be number or null');
+    if (span.usage.estimated !== undefined && typeof span.usage.estimated !== 'boolean') errors.push('usage.estimated must be boolean');
+  }
   if (typeof span.duration_ms !== 'number' || span.duration_ms < 0) errors.push('duration_ms must be >=0');
-  if (!span.quality_scorecard || typeof span.quality_scorecard.rqs_d_score !== 'number') errors.push('quality_scorecard.rqs_d_score required');
+  // quality_scorecard
+  const qReq = (schema && schema.properties && schema.properties.quality_scorecard && schema.properties.quality_scorecard.required) || ['rqs_d_score', 'rqs_j_score', 'rating', 'biomarkers'];
+  if (!span.quality_scorecard || typeof span.quality_scorecard !== 'object') errors.push('quality_scorecard required');
+  else {
+    const q = span.quality_scorecard;
+    for (const k of qReq) { if (q[k] === undefined) errors.push(`quality_scorecard.${k} required (canonical schema)`); }
+    if (q.rqs_d_score !== undefined && (typeof q.rqs_d_score !== 'number' || q.rqs_d_score < 0 || q.rqs_d_score > 1)) errors.push('quality_scorecard.rqs_d_score must be 0..1');
+    if (q.rqs_j_score !== undefined && q.rqs_j_score !== null && (typeof q.rqs_j_score !== 'number' || q.rqs_j_score < 0 || q.rqs_j_score > 1)) errors.push('quality_scorecard.rqs_j_score must be 0..1 or null');
+    if (q.rating !== undefined && !RATING_ENUM.includes(q.rating)) errors.push(`quality_scorecard.rating must be one of ${RATING_ENUM.join('|')}`);
+    if (q.biomarkers === undefined) errors.push('quality_scorecard.biomarkers required (canonical schema)');
+    else if (!q.biomarkers || typeof q.biomarkers !== 'object') errors.push('quality_scorecard.biomarkers must be an object');
+    else {
+      for (const k of BIOMARKER_KEYS) {
+        const v = q.biomarkers[k];
+        if (v === undefined) { errors.push(`quality_scorecard.biomarkers.${k} required (canonical schema)`); continue; }
+        if (v === null) {
+          if (!NULLABLE_BIOMARKERS.has(k)) errors.push(`quality_scorecard.biomarkers.${k} must be 0..1 (not nullable)`);
+          continue;
+        }
+        if (typeof v !== 'number' || v < 0 || v > 1) errors.push(`quality_scorecard.biomarkers.${k} must be 0..1`);
+      }
+    }
+  }
+  // tier0_evaluation (schema requires executed/passed/checks)
+  if (!span.tier0_evaluation || typeof span.tier0_evaluation !== 'object') errors.push('tier0_evaluation required (canonical schema)');
+  else {
+    const t = span.tier0_evaluation;
+    if (t.executed === undefined) errors.push('tier0_evaluation.executed required (canonical schema)');
+    else if (typeof t.executed !== 'boolean') errors.push('tier0_evaluation.executed must be boolean');
+    if (t.passed === undefined) errors.push('tier0_evaluation.passed required (canonical schema)');
+    else if (typeof t.passed !== 'boolean') errors.push('tier0_evaluation.passed must be boolean');
+    if (t.checks === undefined) errors.push('tier0_evaluation.checks required (canonical schema)');
+    else if (!Array.isArray(t.checks)) errors.push('tier0_evaluation.checks must be an array');
+    else t.checks.forEach((c, i) => {
+      if (!c || typeof c !== 'object') { errors.push(`tier0_evaluation.checks[${i}] must be an object`); return; }
+      if (!TIER0_CHECK_TYPES.includes(c.type)) errors.push(`tier0_evaluation.checks[${i}].type must be one of ${TIER0_CHECK_TYPES.join('|')}`);
+      if (!TIER0_CHECK_STATUS.includes(c.status)) errors.push(`tier0_evaluation.checks[${i}].status must be PASS|FAIL`);
+    });
+  }
+  // error key must be present (nullable by schema); absent key is drift, not null
+  if (!('error' in span)) errors.push('error key required (canonical schema, null when no error)');
+  else if (span.error !== null && (typeof span.error !== 'object' || typeof span.error.code !== 'string')) errors.push('error must be null or {code,message}');
   if (errors.length) return { valid: false, errors };
-  return { valid: true };
+  return { valid: true, errors: [] };
 }
 
 /**
@@ -125,7 +210,19 @@ function recordEvent(type, data) {
 function recordSpan(span) {
   ensureDir();
   const now = new Date().toISOString().split('T')[0];
-  const s = { ...span };
+  const input = span && typeof span === 'object' ? span : {};
+  const s = { ...input };
+  // P0-3: track caller omissions BEFORE defaulting. IDs/timestamps are
+  // legitimately generated; workflow/agent/model/usage/scorecard/tier0 are
+  // caller-owned — synthesizing them masks invalid input, so synthesized
+  // spans are recorded (never throw) but marked SPAN_VALIDATION, ok:false.
+  const synthesized = [];
+  if (input.workflow === undefined) synthesized.push('workflow');
+  if (input.agent_persona === undefined) synthesized.push('agent_persona');
+  if (input.model === undefined) synthesized.push('model');
+  if (input.usage === undefined) synthesized.push('usage');
+  if (input.quality_scorecard === undefined) synthesized.push('quality_scorecard');
+  if (input.tier0_evaluation === undefined) synthesized.push('tier0_evaluation');
   // Auto-populate defaults
   if (!s.trace_id) s.trace_id = generateId();
   if (!s.span_id) s.span_id = generateId();
@@ -145,7 +242,14 @@ function recordSpan(span) {
   if (s.error === undefined) s.error = null;
 
   const v = validateSpan(s);
-  // Even if invalid, we still write with error marker to surface fault — never throw
+  if (!Array.isArray(v.errors)) v.errors = [];
+  if (synthesized.length) {
+    v.valid = false;
+    v.errors.push(`synthesized defaults for: ${synthesized.join(', ')} — caller must supply these fields`);
+  }
+  // Even if invalid, we still write with error marker to surface fault — never throw.
+  // Invalid spans persist for forensics but verifySpans() fails the gate when any exist,
+  // so they can never silently count toward a passing summary.
   if (!v.valid) {
     s.error = { code: 'SPAN_VALIDATION', message: v.errors.join('; ') };
   }
@@ -165,7 +269,10 @@ function captureUsage(opts) {
   const hasNative = typeof usage.prompt_tokens === 'number' && typeof usage.completion_tokens === 'number';
   const prompt = hasNative ? usage.prompt_tokens : 0;
   const completion = hasNative ? usage.completion_tokens : 0;
-  const total = hasNative ? (usage.total_tokens != null ? usage.total_tokens : prompt + completion) : (usage.total_tokens != null ? usage.total_tokens : estimateTokensFallback(opts.rawText||''));
+  // Non-native path must never emit a valid zero-token span (zero signal):
+  // floor estimated fallback at 1 so missing-provenance rows count against
+  // exact coverage instead of passing as empty exact rows.
+  const total = hasNative ? (usage.total_tokens != null ? usage.total_tokens : prompt + completion) : (usage.total_tokens != null ? usage.total_tokens : Math.max(1, estimateTokensFallback(opts.rawText||'')));
   const estimated = !hasNative;
   return recordSpan({
     trace_id: opts.trace_id,
@@ -236,20 +343,28 @@ function readSpans(days = 7) {
 function verifySpans(days = 7) {
   const spans = readSpans(days);
   const total = spans.length;
-  if (total === 0) return { total: 0, exact: 0, estimated: 0, exact_coverage: null, zero_token: 0, valid: 0, invalid: 0, hybrid_pass: true, reason: 'no spans yet — skip gate (empty window passes)' };
-  let exact = 0, estimated = 0, zero = 0, valid = 0, invalid = 0;
+  // P0-3: an empty window is zero signal and must FAIL, never pass CI.
+  if (total === 0) return { total: 0, exact: 0, estimated: 0, exact_coverage: null, zero_token: 0, valid: 0, invalid: 0, tier_demotions: 0, hybrid_pass: false, tier_pass: true, reason: 'no spans in window — gate FAILS (empty window is zero signal)' };
+  let exact = 0, estimated = 0, zero = 0, valid = 0, invalid = 0, demotions = 0;
   for (const s of spans) {
     if (s.usage && s.usage.estimated === false) exact++;
     else estimated++;
     if (!s.usage || s.usage.total_tokens === 0) zero++;
+    if (s.error && s.error.code === 'TIER_DEMOTION') demotions++;
     const v = validateSpan(s);
-    if (v.valid) valid++; else invalid++;
+    // Spans persisted with SPAN_VALIDATION markers are forensic rows, not
+    // valid signal — count them invalid even if the stored shape validates.
+    if (v.valid && !(s.error && s.error.code === 'SPAN_VALIDATION')) valid++; else invalid++;
   }
   const exact_coverage = total ? exact / total : null;
-  const hybrid_pass = total > 0 && exact_coverage != null && exact_coverage >= 0.8 && zero < total; // zero < total ensures not all zero, but allow zero check separate
-  // strict hybrid: >=80% exact and no >20% estimated, plus not all zero
-  const hybridStrict = exact_coverage >= 0.8 && zero !== total;
-  return { total, exact, estimated, exact_coverage: exact_coverage != null ? Number(exact_coverage.toFixed(3)) : null, zero_token: zero, valid, invalid, hybrid_pass: hybridStrict, reason: hybridStrict ? 'pass' : (exact_coverage < 0.8 ? 'INSUFFICIENT_EXACT_COVERAGE (<80% exact)' : 'zero-token window') };
+  // Single hybrid computation (INV-TEL-01): >=80% exact, not all zero-token,
+  // and zero invalid rows. Invalid rows fail the gate even at 100% exact.
+  const hybridStrict = exact_coverage >= 0.8 && zero !== total && invalid === 0;
+  const tier_pass = demotions === 0;
+  const reason = hybridStrict
+    ? (tier_pass ? 'pass' : 'TIER_DEMOTION present (INV-TEL-05 audit fail)')
+    : (invalid > 0 ? `SPAN_VALIDATION rows present (${invalid} invalid)` : (exact_coverage < 0.8 ? 'INSUFFICIENT_EXACT_COVERAGE (<80% exact)' : 'zero-token window'));
+  return { total, exact, estimated, exact_coverage: exact_coverage != null ? Number(exact_coverage.toFixed(3)) : null, zero_token: zero, valid, invalid, tier_demotions: demotions, hybrid_pass: hybridStrict, tier_pass, reason };
 }
 
 /**
@@ -260,6 +375,11 @@ function generateSummary(days = 7) {
   const spans = readSpans(days);
   const stats = {
     total_events: events.length,
+    synthetic_events: 0,
+    // LOCKED DEFINITION (round-table turn 8): by_type shares divide by
+    // prod_events (non-synthetic rows) — never by total_events, which
+    // includes synthetic rows and would deflate every share.
+    prod_events: 0,
     total_spans: spans.length,
     by_type: {},
     memory_load_avg_tokens: 0,
@@ -291,12 +411,18 @@ function generateSummary(days = 7) {
   } catch {}
 
   for (const ev of events) {
+    // P1-4: simulator/synthetic rows carry provenance (synthetic:true) and
+    // are excluded from production aggregates — counted separately instead.
+    if (isSynthetic(ev)) { stats.synthetic_events++; continue; }
+    stats.prod_events++;
     stats.by_type[ev.type] = (stats.by_type[ev.type] || 0) + 1;
 
     if (ev.type === 'memory_load') {
       stats.memory_load_count++;
-      if (ev.data.tokens) {
+      if (typeof ev.data.tokens === 'number') {
         stats.memory_load_avg_tokens += ev.data.tokens;
+      } else {
+        stats.memory_load_missing_tokens = (stats.memory_load_missing_tokens || 0) + 1;
       }
     }
 
@@ -327,7 +453,9 @@ function generateSummary(days = 7) {
   }
 
   if (stats.memory_load_count > 0) {
-    stats.memory_load_avg_tokens = Math.round(stats.memory_load_avg_tokens / stats.memory_load_count);
+    const missing = stats.memory_load_missing_tokens || 0;
+    const withTokens = stats.memory_load_count - missing;
+    stats.memory_load_avg_tokens = withTokens > 0 ? Math.round(stats.memory_load_avg_tokens / withTokens) : null;
   }
 
   if (stats.dedupe_total > 0) {
@@ -366,13 +494,15 @@ function generateReport(days = 30) {
       const phase = ev.data.phase;
       const agent = ev.data.agent;
       if (!phases[phase]) phases[phase] = {};
-      if (!phases[phase][agent]) phases[phase][agent] = { count: 0, total_tokens: 0, min_tokens: Infinity, max_tokens: 0, durations: [] };
+      if (!phases[phase][agent]) phases[phase][agent] = { count: 0, total_tokens: 0, zero_token_rows: 0, min_tokens: Infinity, max_tokens: 0, durations: [] };
 
       phases[phase][agent].count++;
-      if (ev.data.tokens) {
+      if (typeof ev.data.tokens === 'number' && ev.data.tokens > 0) {
         phases[phase][agent].total_tokens += ev.data.tokens;
         phases[phase][agent].min_tokens = Math.min(phases[phase][agent].min_tokens, ev.data.tokens);
         phases[phase][agent].max_tokens = Math.max(phases[phase][agent].max_tokens, ev.data.tokens);
+      } else {
+        phases[phase][agent].zero_token_rows++;
       }
       if (ev.data.duration_ms) {
         phases[phase][agent].durations.push(ev.data.duration_ms);
@@ -380,14 +510,18 @@ function generateReport(days = 30) {
     }
   }
 
-  // Compute averages and clean up
+  // Compute averages and clean up. avg_tokens divides by token-bearing rows
+  // only; zero-token/legacy rows are counted honestly via tokens_missing
+  // instead of silently deflating the mean while reporting null totals.
   const report = {};
   for (const [phase, agents] of Object.entries(phases)) {
     report[phase] = {};
     for (const [agent, stats] of Object.entries(agents)) {
+      const withTokens = stats.count - stats.zero_token_rows;
       report[phase][agent] = {
         invocations: stats.count,
-        avg_tokens: stats.total_tokens > 0 ? Math.round(stats.total_tokens / stats.count) : null,
+        tokens_missing: stats.zero_token_rows,
+        avg_tokens: stats.total_tokens > 0 && withTokens > 0 ? Math.round(stats.total_tokens / withTokens) : null,
         total_tokens: stats.total_tokens > 0 ? stats.total_tokens : null,
         min_tokens: stats.min_tokens === Infinity ? null : stats.min_tokens,
         max_tokens: stats.max_tokens === 0 ? null : stats.max_tokens,
@@ -514,22 +648,31 @@ function main() {
 
   const cmd = args[0];
 
+  // Valued-flag parser: consumes the next token only when it exists and is not
+  // another flag. Fixes the old i+=2 stride, which desynced on missing values
+  // and mangled values like `--total 0` adjacent to flags.
+  function takeVal(i) {
+    const v = args[i + 1];
+    if (v === undefined || (typeof v === 'string' && v.startsWith('--'))) return { ok: false, next: i + 1 };
+    return { ok: true, val: v, next: i + 2 };
+  }
+
   if (cmd === 'record') {
     let type = null;
     let data = {};
     let agent = null;
     let phase = null;
-    for (let i = 1; i < args.length; i += 2) {
-      if (args[i] === '--type') type = args[i + 1];
+    for (let i = 1; i < args.length;) {
+      if (args[i] === '--type') { const t = takeVal(i); if (!t.ok) { console.error('Missing value for --type'); process.exit(1); } type = t.val; i = t.next; continue; }
       if (args[i] === '--data') {
-        try {
-          data = JSON.parse(args[i + 1]);
-        } catch (e) {
-          data = { raw: args[i + 1] };
-        }
+        const t = takeVal(i); if (!t.ok) { console.error('Missing value for --data'); process.exit(1); }
+        try { data = JSON.parse(t.val); } catch (e) { data = { raw: t.val }; }
+        i = t.next; continue;
       }
-      if (args[i] === '--agent') agent = args[i + 1];
-      if (args[i] === '--phase') phase = args[i + 1];
+      if (args[i] === '--agent') { const t = takeVal(i); if (!t.ok) { console.error('Missing value for --agent'); process.exit(1); } agent = t.val; i = t.next; continue; }
+      if (args[i] === '--phase') { const t = takeVal(i); if (!t.ok) { console.error('Missing value for --phase'); process.exit(1); } phase = t.val; i = t.next; continue; }
+      console.error(`Unknown flag: ${args[i]}`);
+      process.exit(1);
     }
     if (!type) {
       console.error('Missing --type');
@@ -543,45 +686,76 @@ function main() {
 
   if (cmd === 'record-span') {
     let data = null;
+    let dataGiven = false;
     const opts = {};
-    for (let i = 1; i < args.length; i += 2) {
+    const numVal = (name, raw) => {
+      const n = name === '--rqs' ? parseFloat(raw) : parseInt(raw, 10);
+      if (!Number.isFinite(n)) { console.error(`Invalid numeric value for ${name}: ${raw}`); process.exit(1); }
+      return n;
+    };
+    for (let i = 1; i < args.length;) {
+      const flagParsers = {
+        '--trace': v => { opts.trace_id = v; },
+        '--span': v => { opts.span_id = v; },
+        '--parent': v => { opts.parent_span_id = v; },
+        '--agent': v => { opts.agent_persona = v; },
+        '--workflow': v => { opts.workflow = v; },
+        '--model': v => { opts.model_id = v; },
+        '--provider': v => { opts.provider = v; },
+        '--prompt': v => { opts.prompt_tokens = numVal('--prompt', v); },
+        '--completion': v => { opts.completion_tokens = numVal('--completion', v); },
+        '--total': v => { opts.total_tokens = numVal('--total', v); },
+        '--duration': v => { opts.duration_ms = numVal('--duration', v); },
+        '--rqs': v => { opts.rqs_d_score = numVal('--rqs', v); },
+      };
       if (args[i] === '--data') {
-        try { data = JSON.parse(args[i+1]); } catch(e) { console.error('Invalid --data JSON'); process.exit(1); }
+        const t = takeVal(i); if (!t.ok) { console.error('Missing value for --data'); process.exit(1); }
+        try { data = JSON.parse(t.val); dataGiven = true; } catch(e) { console.error('Invalid --data JSON'); process.exit(1); }
+        i = t.next; continue;
       }
-      if (args[i] === '--trace') opts.trace_id = args[i+1];
-      if (args[i] === '--span') opts.span_id = args[i+1];
-      if (args[i] === '--parent') opts.parent_span_id = args[i+1];
-      if (args[i] === '--agent') opts.agent_persona = args[i+1];
-      if (args[i] === '--workflow') opts.workflow = args[i+1];
-      if (args[i] === '--model') opts.model_id = args[i+1];
-      if (args[i] === '--provider') opts.provider = args[i+1];
-      if (args[i] === '--prompt') opts.prompt_tokens = parseInt(args[i+1],10);
-      if (args[i] === '--completion') opts.completion_tokens = parseInt(args[i+1],10);
-      if (args[i] === '--total') opts.total_tokens = parseInt(args[i+1],10);
-      if (args[i] === '--duration') opts.duration_ms = parseInt(args[i+1],10);
-      if (args[i] === '--rqs') opts.rqs_d_score = parseFloat(args[i+1]);
+      if (flagParsers[args[i]]) {
+        const t = takeVal(i); if (!t.ok) { console.error(`Missing value for ${args[i]}`); process.exit(1); }
+        flagParsers[args[i]](t.val);
+        i = t.next; continue;
+      }
+      console.error(`Unknown flag: ${args[i]}`);
+      process.exit(1);
     }
-    if (data) {
+    if (dataGiven) {
       const r = recordSpan(data);
       console.log(JSON.stringify({ ok: r.ok, validation: r.validation }, null, 2));
       process.exit(r.ok ? 0 : 2);
     } else {
-      // build minimal span from flags
+      // Build span from flags. Missing valued flags are OMITTED (not
+      // 'unknown'-filled) so recordSpan's synthesized-default detection marks
+      // incomplete CLI spans SPAN_VALIDATION instead of masking them.
+      const flagUsage = {};
+      if (opts.prompt_tokens != null) flagUsage.prompt_tokens = opts.prompt_tokens;
+      if (opts.completion_tokens != null) flagUsage.completion_tokens = opts.completion_tokens;
+      if (opts.total_tokens != null) {
+        flagUsage.total_tokens = opts.total_tokens;
+      } else if (opts.prompt_tokens != null || opts.completion_tokens != null) {
+        flagUsage.total_tokens = (opts.prompt_tokens || 0) + (opts.completion_tokens || 0);
+      } else {
+        flagUsage.total_tokens = 0;
+      }
+      flagUsage.cost_usd = null;
+      flagUsage.estimated = !(opts.prompt_tokens != null && opts.completion_tokens != null);
       const span = {
         trace_id: opts.trace_id || generateId(),
         span_id: opts.span_id || generateId(),
         parent_span_id: opts.parent_span_id || null,
         timestamp: new Date().toISOString(),
         session_id: process.env.VESPYR_SESSION_ID || 'local',
-        workflow: opts.workflow || 'unknown',
-        agent_persona: opts.agent_persona || 'unknown',
-        model: { provider: opts.provider || 'unknown', model_id: opts.model_id || 'unknown', temperature: 0 },
-        usage: { prompt_tokens: opts.prompt_tokens||0, completion_tokens: opts.completion_tokens||0, total_tokens: (opts.total_tokens!=null?opts.total_tokens:(opts.prompt_tokens||0)+(opts.completion_tokens||0)), cost_usd: null, estimated: !(opts.prompt_tokens!=null && opts.completion_tokens!=null) },
-        duration_ms: opts.duration_ms||0,
+        duration_ms: opts.duration_ms != null ? opts.duration_ms : 0,
         quality_scorecard: { rqs_d_score: opts.rqs_d_score!=null?opts.rqs_d_score:0, rqs_j_score: null, rating: (opts.rqs_d_score>=0.95?'EXCELLENT':opts.rqs_d_score>=0.85?'PASS':opts.rqs_d_score>=0.7?'NEEDS_REPAIR':'REJECTED'), biomarkers: { scr: 1, msha: 1, placeholder_density: 0, pci: 0, ac_testability: 1, srsr: null, scope_drift: null } },
         tier0_evaluation: { executed: true, passed: (opts.rqs_d_score||0)>=0.85, checks: [] },
         error: null
       };
+      if (opts.workflow != null) span.workflow = opts.workflow;
+      if (opts.agent_persona != null) span.agent_persona = opts.agent_persona;
+      if (opts.model_id != null || opts.provider != null) span.model = { provider: opts.provider || 'unknown', model_id: opts.model_id || 'unknown', temperature: 0 };
+      if (opts.prompt_tokens != null || opts.completion_tokens != null || opts.total_tokens != null) span.usage = flagUsage;
       const r = recordSpan(span);
       console.log(JSON.stringify({ ok: r.ok, span: r.span.span_id, validation: r.validation }, null, 2));
       process.exit(r.ok ? 0 : 2);
@@ -613,7 +787,8 @@ function main() {
     }
     const v = verifySpans(days);
     console.log(JSON.stringify(v, null, 2));
-    process.exit(v.hybrid_pass ? 0 : 2);
+    // Fail closed on both gates: hybrid exactness AND tier-demotion audit.
+    process.exit(v.hybrid_pass && v.tier_pass !== false ? 0 : 2);
   }
 
   if (cmd === 'baseline') {
@@ -633,4 +808,4 @@ function main() {
 
 if (require.main === module) main();
 
-module.exports = { recordEvent, recordSpan, captureUsage, readEvents, readSpans, verifySpans, generateSummary, generateReport, estimateTokensFallback, generateId, validateSpan, loadCanonicalSchema };
+module.exports = { recordEvent, recordSpan, captureUsage, readEvents, readSpans, verifySpans, generateSummary, generateReport, estimateTokensFallback, generateId, validateSpan, loadCanonicalSchema, RATING_ENUM, TIER0_CHECK_TYPES, TIER0_CHECK_STATUS, BIOMARKER_KEYS, NULLABLE_BIOMARKERS };

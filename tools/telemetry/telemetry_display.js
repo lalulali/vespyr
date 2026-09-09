@@ -2,7 +2,8 @@
 /**
  * Telemetry Display — Thin RQS-D Scorecard Renderer (02l Option A, WS-2.4)
  * Phase-1 thin slice: exact/estimated flag + RQS-D + deterministic biomarkers only.
- * Macro digests (7-day, hot-paths, heatmaps) deferred to 04a telemetry_surface.js
+ * Token estimates use the canonical tokenizer (tools/eval/lib/tokenizer
+ * countTokens) via estimateTokensFallback — no local len/4 estimator.
  */
 
 const fs = require('fs');
@@ -52,7 +53,7 @@ function scoreText(text, opts = {}) {
     workflow: opts.workflow || 'unknown',
     model: opts.model || { model_id: 'unknown' },
     duration_ms: opts.duration_ms || 0,
-    usage: { total_tokens: text ? Math.ceil(text.length/4) : 0, cost_usd: null, estimated: true },
+    usage: { total_tokens: text ? estimateTokensFallback(text) : 0, cost_usd: null, estimated: true },
     biomarkers: res.biomarkers,
     artifact: opts.artifact,
     estimated: true,
@@ -66,7 +67,7 @@ function main() {
     console.log(`Usage:
   node tools/telemetry/telemetry_display.js --text "<markdown>"
   node tools/telemetry/telemetry_display.js --file <path> [--agent <a>] [--workflow <w>]
-  Outputs RQS-D scorecard (Phase-1 thin). Macro digests deferred to 04a telemetry_surface.js`);
+  Outputs RQS-D scorecard (Phase-1 thin).`);
     process.exit(0);
   }
   let text = '';

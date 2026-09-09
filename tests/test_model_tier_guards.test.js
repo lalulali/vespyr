@@ -50,4 +50,41 @@ describe('model tier guards — INV-TEL-05 (02l Option A)', () => {
     // unknown tier should not trigger warning (conservative)
     assert.equal(r.warning, false);
   });
+
+  it('P1-1: substring lookalikes must NOT promote to Tier B', () => {
+    for (const m of ['neo1-board', 'photo1-model', 'o12', 'micro-o3x', 'o11', 'pro1gevity']) {
+      assert.equal(tierOf(m), 'unknown', `${m} must not classify as Tier B`);
+      assert.equal(checkTier('architect', m).warning, false, `${m} must not warn`);
+    }
+  });
+
+  it('P1-1: genuine o-series and family models classify correctly', () => {
+    assert.equal(tierOf('o1'), 'B');
+    assert.equal(tierOf('o1-mini'), 'B');
+    assert.equal(tierOf('o3'), 'B');
+    assert.equal(tierOf('o3-mini'), 'B');
+    assert.equal(tierOf('claude-3-opus'), 'B');
+    assert.equal(tierOf('mistral-pro'), 'B');
+    assert.equal(tierOf('qwen2-8b'), 'A');
+    assert.equal(checkTier('architect', 'claude-3-opus').warning, false);
+    assert.equal(checkTier('architect', 'qwen2-8b').warning, true);
+  });
+
+  it('VESPYR_TIER_STRICT=1 warns on unclassified models for Tier-B agents', () => {
+    const prev = process.env.VESPYR_TIER_STRICT;
+    try {
+      delete process.env.VESPYR_TIER_STRICT;
+      assert.equal(checkTier('architect', 'unknown-model-xyz').warning, false);
+      process.env.VESPYR_TIER_STRICT = '1';
+      const r = checkTier('architect', 'unknown-model-xyz');
+      assert.equal(r.warning, true);
+      assert.equal(r.code, 'TIER_DEMOTION');
+      // strict mode does not affect classified models or non-Tier-B agents
+      assert.equal(checkTier('architect', 'claude-3-5-sonnet').warning, false);
+      assert.equal(checkTier('developer', 'unknown-model-xyz').warning, false);
+    } finally {
+      if (prev === undefined) delete process.env.VESPYR_TIER_STRICT;
+      else process.env.VESPYR_TIER_STRICT = prev;
+    }
+  });
 });

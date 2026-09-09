@@ -131,4 +131,29 @@ describe('span hybrid — exact/estimated/retry + 80% guard (02l Option A)', () 
     });
     assert.equal(r.ok, true);
   });
+
+  it('P0-3: empty window FAILS the gate (zero signal never passes)', () => {
+    const v = swarm.verifySpans(1);
+    assert.equal(v.total, 0);
+    assert.equal(v.hybrid_pass, false);
+    assert.match(v.reason, /zero signal/);
+  });
+
+  it('P0-3: recordSpan with caller omissions is invalid, not silently defaulted', () => {
+    const r = swarm.recordSpan({ session_id: 'test' });
+    assert.equal(r.ok, false);
+    assert.match(r.validation.errors.join('; '), /synthesized defaults/);
+    assert.equal(r.span.error.code, 'SPAN_VALIDATION');
+    // invalid rows fail the gate even though they persist for forensics
+    const v = swarm.verifySpans(1);
+    assert.equal(v.invalid, 1);
+    assert.equal(v.hybrid_pass, false);
+  });
+
+  it('P1-3: estimateTokensFallback uses the canonical tokenizer, not len/4', () => {
+    const { countTokens } = require('../tools/eval/lib/tokenizer');
+    const text = 'hello world, this is a test.';
+    assert.equal(swarm.estimateTokensFallback(text), countTokens(text));
+    assert.notEqual(swarm.estimateTokensFallback(text), Math.ceil(text.length / 4));
+  });
 });

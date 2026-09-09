@@ -29,8 +29,14 @@ function countWords(content) {
   return content.split(/\s+/).filter(w => w.length > 0).length;
 }
 
-function estimateTokens(words) {
-  // Rough estimate: 1 token ≈ 0.75 words for English text
+function estimateTokens(content) {
+  // Single canonical estimator (tools/eval/lib/tokenizer countTokens).
+  // words/0.75 math survives only as unreachable-environment fallback.
+  try {
+    const { countTokens } = require('../../tools/eval/lib/tokenizer');
+    if (typeof countTokens === 'function') return countTokens(content);
+  } catch (e) {}
+  const words = countWords(content);
   return Math.round(words / 0.75);
 }
 
@@ -40,7 +46,7 @@ function checkFile(filePath, thresholds) {
   }
   const content = fs.readFileSync(filePath, 'utf8');
   const words = countWords(content);
-  const tokens = estimateTokens(words);
+  const tokens = estimateTokens(content);
   const wordThreshold = thresholds.words;
   const tokenThreshold = thresholds.tokens;
 

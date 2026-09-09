@@ -435,8 +435,16 @@ function filterMemory(agent, task, maxResults) {
 
   // §11.1 Context Budget Ceiling: total injected memory context is capped
   // under 1,000 tokens ("Lost in the Middle" / context-dilution defense).
+  // Single canonical estimator (tools/eval/lib/tokenizer countTokens).
   const INJECTED_BUDGET_TOKENS = 1000;
-  const estTokens = (text) => Math.round(text.trim().split(/\s+/).filter(Boolean).length / 0.75);
+  let canonicalCount = null;
+  try {
+    const { countTokens } = require('../../tools/eval/lib/tokenizer');
+    if (typeof countTokens === 'function') canonicalCount = countTokens;
+  } catch (e) {}
+  const estTokens = (text) => canonicalCount
+    ? canonicalCount(text)
+    : Math.round(text.trim().split(/\s+/).filter(Boolean).length / 0.75);
 
   const results = [];
   let injectedTokens = 0;
