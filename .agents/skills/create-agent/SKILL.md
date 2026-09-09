@@ -141,15 +141,15 @@ Keep it minimal and role-specific. Do not copy blocks the agent doesn't need. Re
 
 ### Step 4: Enrich with Standard Blocks
 
-Run the standard enrichment scripts to inject canonical sections. They take no arguments, process all agents in `.agents/agents/`, and are idempotent (they only add missing sections). Spent codemods live in `artifacts/archive/spent-codemods/` — never re-run them against the live tree (re-running re-poisons the catalog):
+Run the standard enrichment scripts to inject canonical sections. They take no arguments, process all agents in `.agents/agents/`, and are idempotent (they only add missing sections):
 
 ```bash
-node artifacts/archive/spent-codemods/add-identity-block.js
-node artifacts/archive/spent-codemods/add-citation-protocol.js
-node artifacts/archive/spent-codemods/add-pipeline-bookkeeping.js
+node .agents/scripts/add-identity-block.js
+node .agents/scripts/add-citation-protocol.js
+node .agents/scripts/add-pipeline-bookkeeping.js
 ```
 
-Role-scoped scripts (`add-socratic-stance.js`, `add-delegation-contract.js`) only apply to agents with a defined stance or contract entry and will skip a new custom agent — write the `## Socratic Stance` section manually if the role is reasoning-based.
+Role-scoped script (`add-socratic-stance.js`) only applies to agents with a defined stance entry and will skip a new custom agent — write the `## Socratic Stance` section manually if the role is reasoning-based. (`add-delegation-contract.js` deleted 2026-09-09: it injected the banned trio mapping. Write capability-based delegation manually.)
 
 ### Step 5: Write the Per-Agent Socratic Reference
 

@@ -308,3 +308,12 @@ Panel 2 ROSTER (owner override — router has no verdict-governance tags): Kai, 
 19-agent improvements applied: direct-read contradiction resolved in 16/16 personas (Kai/Nina wording); dual veto tiebreak (founder sole override, both files); model-card single path; Sarah/Kai lane precedence; Zara summon banner; plan + create-agent one-liners.
 Verification: manifest regen, verify green; suite 14/14; frontmatter valid.
 [SYNTHESIS: GO] — Review 01 fully closed to two panels (7/7 seats SATISFIED across both). Residual file: swarm estimator unification (out of scope), mock-baseline regen (generated).
+
+## Wave 11 — Quarantine reversed: guards instead of archive (2026-09-07, @developer)
+
+Owner catch: `artifacts/` ships outside npx, so the archive broke create-agent's live dependency on 5 codemods (verified references, not assumed). All 7 moved back via `git mv` (history intact either way); archive dir removed.
+Hazard now neutralized in place: `add-delegation-contract.js` + `migrate_memory_v2.js` refuse with exit 2 and reason (live-proven, zero agent files touched). create-agent doc restored + refusal noted. Lesson: quarantine location must respect the distribution boundary — npx payload vs repo-only.
+
+## Wave 12 — Harmful codemods deleted, verdicts recorded (2026-09-09, @developer)
+
+Owner decisions: `add-delegation-contract.js` deleted (banned-mapping source, only referrer was a doc line — updated); `migrate_memory_v2.js` deleted (zero callers, legacy dirs gone, lossy + ungated purge). Both recoverable via git history. Remaining 5 injectors verified harmless (read-only missing-section writes, skip-if-present, no deletes): identity, citation, pipeline, socratic (create-agent live deps), step-tracker-calls (unreferenced, inert). create-agent doc now names only live scripts.
