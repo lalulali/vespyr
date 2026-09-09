@@ -11,6 +11,11 @@
         "Verdict",
         "Assumptions",
         "Risk"
+      ],
+      "prompt": "Run /validate-idea on on-demand dog-laundry: Socratic verdict gate with assumptions matrix and risk register.",
+      "assertNotContains": [
+        "I cannot",
+        "As an AI"
       ]
     },
     {
@@ -22,6 +27,11 @@
         "Problem Definition",
         "User Impact",
         "Root Cause"
+      ],
+      "prompt": "Run /unpack-problem on checkout drop-off: problem definition, user impact, and root cause without premature solutions.",
+      "assertNotContains": [
+        "I cannot",
+        "As an AI"
       ]
     },
     {
@@ -33,6 +43,11 @@
         "5 Whys",
         "Root Cause",
         "Action Item"
+      ],
+      "prompt": "Run /root-cause on the auth outage: 5-Whys, fishbone categories, pinpointed root cause, and preventive action.",
+      "assertNotContains": [
+        "I cannot",
+        "As an AI"
       ]
     },
     {
@@ -44,6 +59,11 @@
         "Appetite",
         "Boundaries",
         "Rabbit Holes"
+      ],
+      "prompt": "Run /shape-up for the CSV importer: appetite, fixed boundaries, and fenced rabbit holes.",
+      "assertNotContains": [
+        "I cannot",
+        "As an AI"
       ]
     },
     {
@@ -55,6 +75,11 @@
         "SCAMPER",
         "Ideas",
         "Prioritization"
+      ],
+      "prompt": "Run /brainstorming with SCAMPER on onboarding: 10 structured ideas with effort-vs-impact prioritization.",
+      "assertNotContains": [
+        "I cannot",
+        "As an AI"
       ]
     }
   ]

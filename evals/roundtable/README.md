@@ -40,7 +40,7 @@ node .agents/scripts/roundtable_eval.js log --mode <native|solo|refused> --topic
 
 | Metric | Definition | Healthy signal |
 |---|---|---|
-| Coverage compliance | share of transcripts whose `roundtable-coverage` block parses with zero unchallenged panelists | 1.0 — this one is a hard gate, not a trend |
+| Coverage compliance | share of NATIVE transcripts whose `roundtable-coverage` block parses with zero unchallenged panelists | 1.0 — this one is a hard gate, not a trend. Solo runs are excluded (firewalled dispatch cannot produce cross-challenges by construction); refused runs are log-only |
 | Round-1 disagreement | per transcript: `1 − (modal verdict share)` over Decision-Gate verdicts | > 0 on sound premises; zero is an SPC advisory |
 | SPC flag | round-1 unanimity (disagreement = 0) | advisory only — **unanimous `[NO-GO]` on flawed-premise topics is correct behavior**, not sycophancy; read jointly with premise table |
 | Verdict stability | across ≥3 native runs of one topic: share of runs matching the modal `[SYNTHESIS]` | establish baseline first; no gate until then |

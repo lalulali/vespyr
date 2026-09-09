@@ -11,6 +11,11 @@
         "Screen States",
         "Interactions",
         "Components"
+      ],
+      "prompt": "Run /design from the email-verification PRD: screen states, interactions, and design-system components.",
+      "assertNotContains": [
+        "I cannot",
+        "As an AI"
       ]
     },
     {
@@ -22,6 +27,11 @@
         "Duration",
         "Easing",
         "Trigger"
+      ],
+      "prompt": "Run /motion for the checkout button: duration, easing curve, and hover/active triggers with implementation handoff.",
+      "assertNotContains": [
+        "I cannot",
+        "As an AI"
       ]
     },
     {
@@ -33,6 +43,11 @@
         "Pattern",
         "Hypothesis",
         "Success Metric"
+      ],
+      "prompt": "Run /validation-patterns to select a validation method for willingness-to-pay with hypothesis and success metric.",
+      "assertNotContains": [
+        "I cannot",
+        "As an AI"
       ]
     }
   ]

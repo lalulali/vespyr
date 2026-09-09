@@ -22,7 +22,7 @@
  *   - filename <topic>_<mode>_<run>.md with mode in {native, solo}
  *
  * Exit codes (coverage): 0 = all panelists challenged, 1 = coverage gap, 2 = missing/malformed block
- * Exit codes (score): 0 = gate pass, 1 = gate failed (coverage compliance < 1.0 or flawed-premise hint contradicted), 2 = usage/input error
+ * Exit codes (score): 0 = gate pass, 1 = gate failed (coverage compliance < 1.0 over non-solo runs, or flawed-premise hint contradicted), 2 = usage/input error
  * Exit codes (log/session): 0 = ok, 2 = usage/input error
  */
 
@@ -442,11 +442,21 @@ function cmdScore(flags) {
   // ADR escalations never count as contradictions — penalizing escalation
   // would discourage it.
   const gateFailures = [];
-  const scoredRows = rows.filter((r) => !r.refused);
+  // Solo runs are context-firewalled sequential dispatches: no cross-challenges
+  // can occur by construction, so a coverage block in a solo transcript is
+  // uncheckable either way (present = unverifiable, absent = expected). Solo
+  // is therefore EXCLUDED from challenge-compliance — same as refused runs —
+  // and tracked instead via solo disclosure + solo-vs-native divergence.
+  const soloExcluded = rows.filter((r) => !r.refused && r.mode === "solo").map((r) => r.file);
+  const scoredRows = rows.filter((r) => !r.refused && r.mode !== "solo");
+  // No gateable rows (solo-only or refused-only dir): compliance is UNKNOWN
+  // (null), never a vacuous 1.0 — same fail-closed convention as unmeasured
+  // eval dimensions. The gate passes vacuously; the report must not claim a
+  // measured 1.0.
   const compliance = scoredRows.length
     ? Number((scoredRows.filter((r) => r.coverageCompliant).length / scoredRows.length).toFixed(2))
-    : 1.0;
-  if (compliance < 1.0) {
+    : null;
+  if (compliance !== null && compliance < 1.0) {
     gateFailures.push(`coverage compliance ${compliance} < 1.0`);
   }
   for (const p of premiseRows || []) {
@@ -498,6 +508,7 @@ function cmdScore(flags) {
   const report = {
     transcripts: rows.length,
     refusedRuns: rows.filter((r) => r.refused).map((r) => r.file),
+    soloExcludedFromCompliance: soloExcluded,
     coverageComplianceRate: compliance,
     gate: { pass: gateFailures.length === 0, failures: gateFailures },
     spcFlags: rows.filter((r) => r.spcFlag).map((r) => `${r.file}${flawedIds.has(r.topic) ? ' (flawed premise — unanimity expected)' : ''}`),
@@ -533,7 +544,7 @@ function cmdScore(flags) {
     process.exit(report.gate.pass ? 0 : 1);
     return;
   }
-  console.log(`transcripts: ${report.transcripts}  coverage compliance: ${report.coverageComplianceRate}  mean round-1 disagreement: ${report.meanRound1Disagreement}`);
+  console.log(`transcripts: ${report.transcripts}  coverage compliance: ${report.coverageComplianceRate === null ? "n/a (no native runs)" : report.coverageComplianceRate}  mean round-1 disagreement: ${report.meanRound1Disagreement}`);
   console.log(`solo-vs-native divergence: ${report.soloVsNativeDivergence}`);
   console.log(`concessions: ${report.totalConcessions} total; ${report.zeroConcessionCompliant.length} coverage-compliant transcript(s) with zero concessions`);
   if (report.soloDisclosureFailures.length) {
@@ -552,6 +563,9 @@ function cmdScore(flags) {
   }
   if (report.refusedRuns.length) {
     console.log(`refused runs (log-only, excluded from compliance): ${report.refusedRuns.join(', ')}`);
+  }
+  if (report.soloExcludedFromCompliance.length) {
+    console.log(`solo runs (firewalled, excluded from challenge-compliance): ${report.soloExcludedFromCompliance.join(', ')}`);
   }
   if (report.logReconciliation) {
     const { loggedNeverSpoke, spokeNeverLogged } = report.logReconciliation;

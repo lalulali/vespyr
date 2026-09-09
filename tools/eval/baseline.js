@@ -17,6 +17,33 @@ function harnessVersion() {
   return "2.0.0";
 }
 
+/**
+ * Content hash of the benchmark dataset (all suite JSON files under
+ * evals/suites). Without a dataset hash, cross-run diffs are invalid:
+ * a silently edited suite would read as a model regression/improvement.
+ * Best-effort, never throws: null when suites are unreadable.
+ */
+function computeDatasetHash() {
+  try {
+    const crypto = require("crypto");
+    const suitesDir = path.join(__dirname, "..", "..", "evals", "suites");
+    const files = [];
+    const walk = (dir) => {
+      for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+        const p = path.join(dir, e.name);
+        if (e.isDirectory()) walk(p);
+        else if (e.isFile() && e.name.endsWith(".json")) files.push(p);
+      }
+    };
+    if (!fs.existsSync(suitesDir)) return null;
+    walk(suitesDir);
+    files.sort();
+    const h = crypto.createHash("sha256");
+    for (const f of files) h.update(fs.readFileSync(f));
+    return "sha256:" + h.digest("hex").slice(0, 16);
+  } catch (e) { return null; }
+}
+
 function loadBaseline(customPath) {
   const filePath = customPath || DEFAULT_BASELINE_PATH;
   if (!fs.existsSync(filePath)) {
@@ -51,7 +78,12 @@ function recordBaseline(runResults, customPath) {
     generated_at: new Date().toISOString(),
     harness_version: harnessVersion(),
     mock_mode: runResults.mockMode === true,
-    provenance: runResults.provenance || null,
+    provenance: {
+      ...(runResults.provenance || null),
+      dataset_hash: (runResults.provenance && runResults.provenance.dataset_hash) || computeDatasetHash(),
+      seed: (runResults.provenance && runResults.provenance.seed !== undefined) ? runResults.provenance.seed : (runResults.seed ?? null),
+      judge: "tier0-regex+tier1-checklist/1.0"
+    },
     summary: {
       total_benchmarks: runResults.total || 0,
       passed_benchmarks: runResults.passed || 0,
@@ -85,7 +117,12 @@ function recordBaseline(runResults, customPath) {
       tier1_score: b.tier1Score,
       tokens: b.tokens,
       provider_tokens: b.providerTokens ?? null,
-      duration_ms: b.durationMs
+      duration_ms: b.durationMs,
+      failures: b.failures || [],
+      output_excerpt: typeof b.output === "string" ? b.output.slice(0, 2000) : "",
+      t1_criteria: b.t1Results && Array.isArray(b.t1Results.criteriaResults)
+        ? b.t1Results.criteriaResults.map(c => ({ id: c.id || c.name, passed: !!c.passed }))
+        : []
     }))
   };
 

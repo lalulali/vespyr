@@ -39,6 +39,8 @@ Options:
                            benchmarks FAIL CLOSED instead of self-grading.
   --cli <command>            Command string for CLI execution adapter
   --temp, -t <float>         Temperature for evaluation runs (default: 0.0)
+  --seed <int>               Run seed for model sampling (default: unset).
+                           Recorded in provenance for rerunnable configs.
   --min-rqsd <float>          Global RQS-D floor (0..1) for benchmarks with no explicit
                             RQS-D contract; explicit requireRQSD/minRQSD wins.
   --concurrency, -c <int>    Number of concurrent worker sandboxes (default: 4)
@@ -69,6 +71,7 @@ function parseArgs(args) {
     cli: null,
     mock: false,
     temp: 0.0,
+    seed: null,
     minRQSD: null,
     concurrency: 4,
     baseline: DEFAULT_BASELINE_PATH,
@@ -126,6 +129,14 @@ function parseArgs(args) {
         process.exit(3);
       }
       options.minRQSD = v;
+    } else if (arg === "--seed") {
+      const raw = needValue(arg, args[++i]);
+      const v = parseInt(raw, 10);
+      if (!Number.isInteger(v) || v < 0) {
+        console.error(`Invalid value for ${arg}: ${raw} (expected non-negative integer)`);
+        process.exit(3);
+      }
+      options.seed = v;
     } else if (arg === "--concurrency" || arg === "-c") {
       const raw = needValue(arg, args[++i]);
       const v = parseInt(raw, 10);

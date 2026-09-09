@@ -11,6 +11,11 @@
         "Market Analysis",
         "Competitors",
         "Findings"
+      ],
+      "prompt": "Run /explore-idea on usage-based pricing: market analysis, competitor landscape, and differentiators with citations.",
+      "assertNotContains": [
+        "I cannot",
+        "As an AI"
       ]
     },
     {
@@ -22,6 +27,11 @@
         "Goals",
         "Profile Questions",
         "Behavioral Questions"
+      ],
+      "prompt": "Run /research-plan for checkout friction: study goals, profile questions, and behavioral observations.",
+      "assertNotContains": [
+        "I cannot",
+        "As an AI"
       ]
     },
     {
@@ -34,6 +44,11 @@
         "Thinks",
         "Does",
         "Feels"
+      ],
+      "prompt": "Run /empathy-map from 5 checkout interviews: says, thinks, does, and feels quadrants.",
+      "assertNotContains": [
+        "I cannot",
+        "As an AI"
       ]
     },
     {
@@ -45,6 +60,11 @@
         "Touchpoints",
         "Emotional State",
         "Friction"
+      ],
+      "prompt": "Run /journey-map for first-run onboarding: touchpoints, emotional curve, and friction bottlenecks.",
+      "assertNotContains": [
+        "I cannot",
+        "As an AI"
       ]
     },
     {
@@ -56,6 +76,11 @@
         "Job Statement",
         "Outcome",
         "How Might We"
+      ],
+      "prompt": "Run /jtbd for the export feature: job statement, measurable outcome, and How-Might-We vectors.",
+      "assertNotContains": [
+        "I cannot",
+        "As an AI"
       ]
     },
     {
@@ -67,6 +92,11 @@
         "Executive Summary",
         "Usability Score",
         "Next Steps"
+      ],
+      "prompt": "Run /discovery-report to synthesize interviews into executive summary, usability score, and design backlog.",
+      "assertNotContains": [
+        "I cannot",
+        "As an AI"
       ]
     }
   ]

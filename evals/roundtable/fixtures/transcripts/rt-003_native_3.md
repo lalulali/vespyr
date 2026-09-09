@@ -9,7 +9,7 @@ Latency ceiling undefined: summarization must beat manual reading time or the fe
 [VERDICT: RESHAPE]
 
 ### @security-engineer (Victor)
-Standing by the KILL unless the DPA is signed first; prompt-injection surface (meeting content is untrusted input) needs the T2/T3 data rule.
+Standing by NO-GO unless the DPA is signed first; prompt-injection surface (meeting content is untrusted input) needs the T2/T3 data rule.
 [VERDICT: NO-GO]
 
 ```roundtable-coverage

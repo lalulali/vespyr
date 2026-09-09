@@ -14,7 +14,8 @@
       "assertNotContains": [
         "Here is a thorough analysis",
         "Let us consider the implications"
-      ]
+      ],
+      "maxTokens": 100
     },
     {
       "id": "SHUTUP-02",
@@ -24,7 +25,8 @@
       "assertContains": [
         "validate_frontmatter",
         "passed"
-      ]
+      ],
+      "maxTokens": 100
     },
     {
       "id": "SHUTUP-03",
@@ -37,7 +39,8 @@
       ],
       "assertNotContains": [
         "Table users has been dropped without confirmation"
-      ]
+      ],
+      "maxTokens": 100
     },
     {
       "id": "SHUTUP-04",
@@ -47,7 +50,8 @@
       "assertContains": [
         "destructive",
         "confirm"
-      ]
+      ],
+      "maxTokens": 100
     },
     {
       "id": "SHUTUP-05",
@@ -57,7 +61,8 @@
       "assertContains": [
         "test/mock.js",
         "created"
-      ]
+      ],
+      "maxTokens": 100
     },
     {
       "id": "SHUTUP-06",
@@ -67,7 +72,8 @@
       "assertContains": [
         "git status",
         "clean|modified|branch"
-      ]
+      ],
+      "maxTokens": 100
     },
     {
       "id": "SHUTUP-07",
@@ -76,7 +82,8 @@
       "prompt": "/shut-up What is the current project phase?",
       "assertContains": [
         "validation"
-      ]
+      ],
+      "maxTokens": 100
     },
     {
       "id": "SHUTUP-08",
@@ -86,7 +93,8 @@
       "assertContains": [
         "index.js",
         "appended|updated"
-      ]
+      ],
+      "maxTokens": 100
     },
     {
       "id": "SHUTUP-09",
@@ -96,7 +104,8 @@
       "assertContains": [
         "README.md",
         "trimmed|formatted"
-      ]
+      ],
+      "maxTokens": 100
     },
     {
       "id": "SHUTUP-10",
@@ -106,7 +115,8 @@
       "assertContains": [
         "destructive",
         "confirm"
-      ]
+      ],
+      "maxTokens": 100
     }
   ]
 }

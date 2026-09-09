@@ -11,6 +11,11 @@
         "Telemetry Analysis",
         "Hypothesis",
         "Change Scope"
+      ],
+      "prompt": "Run /iterate on onboarding telemetry: funnel analysis, hypothesis, and targeted change scope.",
+      "assertNotContains": [
+        "I cannot",
+        "As an AI"
       ]
     },
     {
@@ -22,6 +27,11 @@
         "Severity",
         "Mitigation",
         "Post-Mortem"
+      ],
+      "prompt": "Run /incident for the P1 auth outage: severity, mitigation rollback, and post-mortem gap.",
+      "assertNotContains": [
+        "I cannot",
+        "As an AI"
       ]
     },
     {
@@ -33,6 +43,11 @@
         "Lessons Learned",
         "Compaction",
         "Action Items"
+      ],
+      "prompt": "Run /retro for sprint 1: lessons learned, memory compaction, and workflow action items.",
+      "assertNotContains": [
+        "I cannot",
+        "As an AI"
       ]
     },
     {
@@ -44,6 +59,11 @@
         "Dataset",
         "Distribution",
         "Insights"
+      ],
+      "prompt": "Run /analyze-data on 10k checkout telemetry events: dataset shape, distribution, and conversion bottleneck insights.",
+      "assertNotContains": [
+        "I cannot",
+        "As an AI"
       ]
     },
     {
@@ -55,6 +75,11 @@
         "Sprint",
         "Phase",
         "Status"
+      ],
+      "prompt": "Run /sprint-status for sprint 1: sprint id, active phase, and delivery status.",
+      "assertNotContains": [
+        "I cannot",
+        "As an AI"
       ]
     }
   ]

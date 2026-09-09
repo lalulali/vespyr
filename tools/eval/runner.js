@@ -142,6 +142,18 @@ async function generateExecutionResponse(benchmark, options = {}, sandbox = null
 // Quote-aware splitter shared from lib/process.js (single source with tier0-judge).
 const { splitCommand, validateBenchmarkCommand } = require("./lib/process");
 
+/**
+ * Extracts fenced code blocks from model output for materialization.
+ * Returns [{ lang, code }] in document order; callers select by index.
+ */
+function extractCodeFences(text) {
+  const fences = [];
+  const re = /```(\w*)[ \t]*\n([\s\S]*?)```/g;
+  let m;
+  while ((m = re.exec(String(text || ""))) !== null) fences.push({ lang: m[1] || "", code: m[2] });
+  return fences;
+}
+
 async function cannedMockResponse(benchmark) {
 
   // 1. Adversarial Traps — DELETED trap echo (review 04 §6.1): the old fixture
@@ -316,8 +328,21 @@ async function cannedMockResponse(benchmark) {
  * Executes a single benchmark test case inside an ephemeral sandbox.
  */
 async function executeBenchmark(benchmark, options = {}) {
+  const path = require("path");
+  let fixtureAbs = null;
+  if (benchmark.fixturePath && typeof benchmark.fixturePath === "string") {
+    const cand = path.isAbsolute(benchmark.fixturePath)
+      ? benchmark.fixturePath
+      : path.join(__dirname, "..", "..", benchmark.fixturePath);
+    const repoRoot = path.resolve(path.join(__dirname, "..", ".."));
+    if (path.resolve(cand).startsWith(repoRoot + path.sep) || path.resolve(cand) === repoRoot) {
+      const fs = require("fs");
+      if (fs.existsSync(cand)) fixtureAbs = cand;
+    }
+  }
   const sandbox = createSandbox({
-    prefix: "vespyr-eval-" + String(benchmark.id || "unknown").toLowerCase().replace(/[^a-z0-9-]/g, "-") + "-"
+    prefix: "vespyr-eval-" + String(benchmark.id || "unknown").toLowerCase().replace(/[^a-z0-9-]/g, "-") + "-",
+    ...(fixtureAbs ? { fixturePath: fixtureAbs } : {})
   });
 
   const startTime = Date.now();
@@ -336,11 +361,37 @@ async function executeBenchmark(benchmark, options = {}) {
     const rawResult = await generateExecutionResponse(benchmarkRef, options, sandbox);
     const executionOutput = typeof rawResult === "object" && rawResult !== null ? (rawResult.output || rawResult.text || "") : String(rawResult || "");
 
+    // Model-output materialization (review 06 P1-3 follow-on): when a
+    // benchmark declares `materialize: { file, fenceIndex }`, the model's
+    // fenced code block is written into the sandbox OVER the fixture copy
+    // BEFORE Tier-0 runs. runTestCommand then exercises MODEL output, not
+    // the pristine checked-in fixture — a gate that greens a buggy echo is
+    // vacuous, and this is what closes it. No fence found (or an unsafe
+    // target path) => materialized=false => Tier-0 fails closed.
+    let materialized = null;
+    if (benchmarkRef.materialize && typeof benchmarkRef.materialize.file === "string") {
+      materialized = false;
+      const target = benchmarkRef.materialize.file;
+      const safeTarget = !path.isAbsolute(target) && !target.includes("\\") && !target.split("/").includes("..") && target.length > 0 && target.length <= 256;
+      if (safeTarget) {
+        const fences = extractCodeFences(executionOutput);
+        const fence = fences[benchmarkRef.materialize.fenceIndex ?? 0];
+        if (fence) {
+          try {
+            const fs = require("fs");
+            fs.writeFileSync(path.join(sandbox.dir, target), fence.code);
+            materialized = true;
+          } catch (e) { materialized = false; }
+        }
+      }
+    }
+
     const executionResult = {
       output: executionOutput,
       stdout: executionOutput,
       stderr: (typeof rawResult === "object" && rawResult !== null && rawResult.stderr) || "",
-      exitCode: (typeof rawResult === "object" && rawResult !== null && rawResult.exitCode !== undefined) ? rawResult.exitCode : 0
+      exitCode: (typeof rawResult === "object" && rawResult !== null && rawResult.exitCode !== undefined) ? rawResult.exitCode : 0,
+      materialized
     };
 
     // 2. Tier 0 Deterministic Evaluation
@@ -643,6 +694,7 @@ async function runEvaluation(options = {}) {
     adapter: options.adapter || null,
     model: options.model || "inherit",
     temp: options.temp ?? 0.0,
+    seed: options.seed ?? null,
     mock_mode: mockMode,
     min_rqsd: options.minRQSD ?? null,
     node_version: process.version,
@@ -685,5 +737,6 @@ module.exports = {
   runEvaluation,
   generateExecutionResponse,
   resolveGitSha,
+  extractCodeFences,
   splitCommand
 };

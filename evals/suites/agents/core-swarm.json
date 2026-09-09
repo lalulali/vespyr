@@ -122,6 +122,12 @@
       "name": "Rate Limiter Token-Bucket Race Condition Fix",
       "dimension": "code_quality",
       "prompt": "Fix off-by-one race condition in async token-bucket rate limiter.",
+      "fixturePath": "evals/fixtures/dev-tasks",
+      "materialize": { "file": "rate-limiter.js", "fenceIndex": 0 },
+      "runTestCommand": "node rate-limiter.test.js",
+      "assertTestOutput": [
+        "rate-limiter tests passed"
+      ],
       "assertContains": [
         "rateLimiter",
         "tokens",
@@ -138,9 +144,9 @@
       "prompt": "Implement idempotent REST checkout endpoint with schema validation.",
       "assertContains": [
         "idempotencyKey",
-        "status",
-        "200",
-        "409"
+        "status\\s*=\\s*200|status:\\s*200",
+        "conflictStatus|409",
+        "idempotency"
       ],
       "minTokens": 40
     },
@@ -196,7 +202,7 @@
         "stream",
         "chunk",
         "parse",
-        "error"
+        "error\\s*=|malformed.*recover|recovery"
       ],
       "minTokens": 40
     },
@@ -249,10 +255,11 @@
       "dimension": "code_quality",
       "prompt": "Refactor monolithic controller into discrete services maintaining all unit tests.",
       "assertContains": [
-        "service",
-        "controller",
-        "refactor",
-        "tests"
+        "service\\s*=|Service",
+        "controller\\s*=|Controller",
+        "refactor\\(\\)|Refactor",
+        "unit tests passing",
+        "module\\.exports"
       ],
       "minTokens": 40
     }

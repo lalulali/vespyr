@@ -41,7 +41,17 @@ async function evaluateTier0(benchmark, executionResult, sandboxContext) {
     }
   }
 
-  // 1b. RQS-D Deterministic Biomarkers (02l Option A Thin Slice) — SCR/MSHA/PD/PCI/AC <25ms, 0 tokens
+  // 1b. Materialization contract (review 06 P1-3 follow-on): a benchmark
+  // declaring `materialize.file` requires the model output to have been
+  // written into the sandbox before tests run. Unmaterialized means the
+  // runTestCommand outcome below would measure the pristine fixture, not
+  // the model — fail closed instead of recording a vacuous pass.
+  if (benchmark.materialize && typeof benchmark.materialize.file === "string") {
+    if (executionResult.materialized !== true) {
+      failures.push(`Materialization failed: no usable code fence for "${benchmark.materialize.file}" — refusing to test the pristine fixture as model output`);
+    }
+  }
+  // 1c. RQS-D Deterministic Biomarkers (02l Option A Thin Slice) — SCR/MSHA/PD/PCI/AC <25ms, 0 tokens
   // Computed for all benchmarks where benchmark.requireRQSD is set, or where requiredHeaders provided.
   // Default gate: RQS-D >= 0.85 if benchmark.enforceRQSD or benchmark.requiredHeaders present.
   let rqsD = null;

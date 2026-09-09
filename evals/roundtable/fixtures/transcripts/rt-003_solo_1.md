@@ -16,13 +16,7 @@ Baseline-first, eval-gated.
 Redaction required, DPA sequencing.
 [VERDICT: RESHAPE]
 
-```roundtable-coverage
-panel: @product-manager, @ml-ai-engineer, @security-engineer
-challenges:
-- @ml-ai-engineer -> @product-manager: retention claim unevidenced
-- @product-manager -> @security-engineer: DPA sequencing is a policy call, not an engineering blocker
-- @security-engineer -> @ml-ai-engineer: baseline doubles demo time
-```
+<!-- No coverage block in solo mode: context-firewalled sequential dispatch produces no cross-challenges by construction (scorer excludes solo from challenge-compliance; see README). -->
 
 Host synthesis: conditional proceed.
 [SYNTHESIS: RESHAPE]

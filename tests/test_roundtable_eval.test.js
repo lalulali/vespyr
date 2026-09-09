@@ -749,6 +749,9 @@ test("Regression: evals/roundtable fixtures score cleanly (canonical post-P1-14)
   // NOTE(RT-P1-14): canonical vocab sweep done — 5 files, all compliant,
   // gate passes. The legacy PASS-vocab file lives in fixtures/legacy/ and
   // is pinned by the normalization test below, not by this gate.
+  // NOTE(review-06 follow-on): solo runs are excluded from
+  // challenge-compliance (firewalled dispatch); rt-003_solo_1.md carries no
+  // coverage block by construction and gates via disclosure + divergence.
   assert.strictEqual(res.status, 0, `stdout: ${res.stdout}\nstderr: ${res.stderr}`);
   const report = JSON.parse(res.stdout);
   assert.strictEqual(report.gate.pass, true, "canonical fixtures must pass the gate");
@@ -956,4 +959,37 @@ test("RT-P2-6: transcripts without ROSTER lines skip observer check", () => {
   const res = runCli("score", "--dir", dir, "--json");
   const report = JSON.parse(res.stdout);
   assert.deepStrictEqual(report.observerSilentFlags, []);
+});
+
+test("Review06-followup: solo excluded from challenge-compliance, native still gates", () => {
+  const dir = tmpDir();
+  // Native with a real coverage gap must still fail the gate.
+  fs.writeFileSync(
+    path.join(dir, "t_native_1.md"),
+    transcript({
+      block: ["```roundtable-coverage", "panel: @a,@b", "challenges:", "- @a -> @a:", "```"].join("\n"),
+    })
+  );
+  // Solo without any coverage block must not rescue or worsen the gate math:
+  // it is excluded, disclosed, and still divergence-tracked.
+  fs.writeFileSync(
+    path.join(dir, "t_solo_1.md"),
+    `[MODE: solo — isolated calls, 2 seats]\n` + transcript({ block: "<!-- no coverage in solo mode -->" })
+  );
+  const res = runCli("score", "--dir", dir, "--json");
+  assert.strictEqual(res.status, 1, "native coverage gap must still fail the gate");
+  const report = JSON.parse(res.stdout);
+  assert.deepStrictEqual(report.soloExcludedFromCompliance, ["t_solo_1.md"]);
+  assert.deepStrictEqual(report.soloDisclosureFailures, []);
+
+  // Solo-only dir: nothing to gate on compliance, gate passes on that axis.
+  const dir2 = tmpDir();
+  fs.writeFileSync(
+    path.join(dir2, "t_solo_1.md"),
+    `[MODE: solo — isolated calls, 2 seats]\n` + transcript({ block: "<!-- no coverage in solo mode -->" })
+  );
+  const res2 = runCli("score", "--dir", dir2, "--json");
+  const report2 = JSON.parse(res2.stdout);
+  assert.strictEqual(report2.coverageComplianceRate, null, "solo-only dir is unmeasured, never a vacuous 1.0");
+  assert.deepStrictEqual(report2.soloExcludedFromCompliance, ["t_solo_1.md"]);
 });

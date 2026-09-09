@@ -6,10 +6,11 @@
   "criteria": [
     {
       "id": "RG-1",
-      "name": "Explicit Citations Present",
+      "name": "Explicit Citations With URLs",
       "weight": 2,
       "requiredPatterns": [
-        "\\[\\d+\\]|\\[source:|\\[ref:"
+        "\\[\\d+\\]",
+        "https?://"
       ]
     },
     {

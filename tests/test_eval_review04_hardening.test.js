@@ -235,7 +235,10 @@ test("Review04 - recordBaseline pins provenance + version and keeps a backup", (
       file
     );
     assert.strictEqual(first.harness_version, pkg.version, "harness version tracks package.json");
-    assert.deepStrictEqual(first.provenance, { adapter: "mock" });
+    assert.strictEqual(first.provenance.adapter, "mock", "caller provenance preserved");
+    assert.ok(first.provenance.dataset_hash, "dataset hash pinned for cross-run validity");
+    assert.ok(first.provenance.judge, "judge identity pinned");
+    assert.ok("seed" in first.provenance, "seed pinned (null when unset)");
     recordBaseline(
       { total: 1, passed: 0, failed: 1, passRate: 0, tier0PassRate: 0, tier1AvgScore: 2.0, totalTokens: 12, benchmarks: [] },
       file

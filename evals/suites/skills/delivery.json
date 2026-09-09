@@ -12,6 +12,11 @@
         "Implementation",
         "Verification",
         "Session Complete"
+      ],
+      "prompt": "Run /develop to implement the email-verification endpoint: spec review, execution plan, implementation with tests, review, and session completion.",
+      "assertNotContains": [
+        "I cannot",
+        "As an AI"
       ]
     },
     {
@@ -23,6 +28,11 @@
         "Tasks",
         "Dependencies",
         "Estimates"
+      ],
+      "prompt": "Run /plan to produce a standalone execution plan for OAuth2 Google Sign-in with 1-4 hour tasks, dependencies, and estimates.",
+      "assertNotContains": [
+        "I cannot",
+        "As an AI"
       ]
     },
     {
@@ -34,6 +44,11 @@
         "Audit",
         "Findings",
         "Recommendations"
+      ],
+      "prompt": "Run /review on PR #42 touching session-cookie flags: read-only audit with findings and merge recommendation.",
+      "assertNotContains": [
+        "I cannot",
+        "As an AI"
       ]
     },
     {
@@ -45,6 +60,11 @@
         "Test Execution",
         "Pass/Fail",
         "Coverage"
+      ],
+      "prompt": "Run /test for the checkout retry loop: execute unit and integration tests and report pass/fail with line coverage.",
+      "assertNotContains": [
+        "I cannot",
+        "As an AI"
       ]
     },
     {
@@ -56,6 +76,11 @@
         "Readiness Gate",
         "Smoke Tests",
         "Rollback Plan"
+      ],
+      "prompt": "Run /launch for the v2.0 release: readiness gate, post-deploy smoke tests, and rollback plan.",
+      "assertNotContains": [
+        "I cannot",
+        "As an AI"
       ]
     }
   ]

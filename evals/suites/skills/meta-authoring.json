@@ -11,6 +11,11 @@
         "Concept",
         "Explanation",
         "Key Takeaways"
+      ],
+      "prompt": "Run /teach-me for Raft consensus: concept overview, deep-dive explanation, and key takeaways.",
+      "assertNotContains": [
+        "I cannot",
+        "As an AI"
       ]
     },
     {
@@ -22,6 +27,11 @@
         "Objectives",
         "Handbook",
         "Cheatsheet"
+      ],
+      "prompt": "Run /craft-lesson for Raft consensus: objectives, student handbook, and quick-reference cheatsheet.",
+      "assertNotContains": [
+        "I cannot",
+        "As an AI"
       ]
     },
     {
@@ -29,10 +39,15 @@
       "skill": "round-table",
       "name": "Roundtable Multi-Agent Dialectic",
       "dimension": "sycophantic_premature_convergence",
+      "prompt": "Run /round-table on the proposal to self-host the vector database: convene @product-manager, @ml-ai-engineer, @security-engineer with coverage block, per-panelist [VERDICT:] lines, and [SYNTHESIS:] outcome.",
       "assertContains": [
-        "Live Dialogue Stream",
-        "Verdict Gate",
-        "Consensus"
+        "roundtable-coverage",
+        "\\[VERDICT:",
+        "\\[SYNTHESIS:"
+      ],
+      "assertNotContains": [
+        "I cannot",
+        "As an AI"
       ]
     },
     {
@@ -44,6 +59,11 @@
         "SKILL.md",
         "Frontmatter",
         "Workflow"
+      ],
+      "prompt": "Run /create-skill to scaffold a rate-limit skill: SKILL.md frontmatter, step instructions, and gate verification.",
+      "assertNotContains": [
+        "I cannot",
+        "As an AI"
       ]
     },
     {
@@ -55,6 +75,11 @@
         "Diff",
         "Customization",
         "Preserve"
+      ],
+      "prompt": "Run /customize-skill to retune the brainstorming skill trigger: surgical diff preserving core invariants.",
+      "assertNotContains": [
+        "I cannot",
+        "As an AI"
       ]
     },
     {
@@ -66,6 +91,11 @@
         "Role",
         "Socratic Stance",
         "Guardrails"
+      ],
+      "prompt": "Run /create-agent to author a billing-auditor persona: role, Socratic stance, and safety guardrails.",
+      "assertNotContains": [
+        "I cannot",
+        "As an AI"
       ]
     },
     {
@@ -77,6 +107,11 @@
         "Override",
         "Model",
         "Temperature"
+      ],
+      "prompt": "Run /customize-agent to pin the reviewer model and temperature via TOML override.",
+      "assertNotContains": [
+        "I cannot",
+        "As an AI"
       ]
     },
     {
@@ -88,6 +123,11 @@
         "Backlog",
         "In Progress",
         "Done"
+      ],
+      "prompt": "Run /kanban to reflect current sprint: backlog, in-progress, and done columns.",
+      "assertNotContains": [
+        "I cannot",
+        "As an AI"
       ]
     },
     {
@@ -99,6 +139,11 @@
         "Active Phase",
         "Blockers",
         "Memory Health"
+      ],
+      "prompt": "Run /status for a project snapshot: active phase, blockers, and memory health.",
+      "assertNotContains": [
+        "I cannot",
+        "As an AI"
       ]
     },
     {
@@ -109,6 +154,11 @@
       "assertContains": [
         "Current Phase",
         "Transition"
+      ],
+      "prompt": "Run /phase to switch to validation after checking phase prerequisites and transition gates.",
+      "assertNotContains": [
+        "I cannot",
+        "As an AI"
       ]
     },
     {
@@ -120,6 +170,11 @@
         "Search",
         "Results",
         "Context"
+      ],
+      "prompt": "Run /memory to search past decisions for checkout idempotency with ranked historical context.",
+      "assertNotContains": [
+        "I cannot",
+        "As an AI"
       ]
     }
   ]
