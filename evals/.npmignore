@@ -1,3 +1,4 @@
 security/
 roundtable/fixtures/
 roundtable/README.md
+*.prev.json

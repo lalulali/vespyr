@@ -1,11 +1,11 @@
 {
   "version": "2.0.10",
-  "generated_at": "2026-09-09T14:08:15.142Z",
+  "generated_at": "2026-09-10T10:16:15.458Z",
   "file_count": 321,
   "files": {
     ".gitignore": "02be8395c2a0b6cdfcf971daa5689776e2d98cc43603b22a45d8c2bd78c13772",
-    ".vespyr-manifest.json": "0c680c8b9177c35207bff3d3b06aa250f32e9a573aefee6fde51e5e9a0213716",
-    "GUARDRAILS.md": "89a13ba3c8a47dbc7ee526ae72afa685fdf43c840f514d3d85b89c4c92a0adf3",
+    ".vespyr-manifest.json": "f11b343c2d08672f5988ed9285b48b95604afe50480312ffd313477389207ace",
+    "GUARDRAILS.md": "0e374601252d673944f48b5861a954d6ed1c2f1a4af6ba3bc2e5e0e887076fea",
     "TROUBLESHOOTING.md": "2e7d34c4b328ee9de532025cf42e3a1f30e51fb6f13f9633208345222abd5159",
     "agents/architect.md": "91368d0348baa4449af609a2bdf70342ec8e950059de58b49d3ce0d57a959ef0",
     "agents/code-reviewer.md": "85ddd459c426a7b64ad503121a0fec9c6ed71e7fc28214a3946e872a7cc62709",
@@ -95,7 +95,7 @@
     "scripts/lib/fs_atomic.js": "3aaebba182093f6221d7f50380b15a1f7fc88ef83d6afeaadedb1fd85ea616fa",
     "scripts/lib/identity.js": "5654838bfa82dece075aaa6761d9b5a13b16db4bf814cf85c17a01f548572425",
     "scripts/lib/lock.js": "48155e5604d84a81d3ce7f99239fed632110c85ac814e588660440a6d7df0493",
-    "scripts/lib/session.js": "867a295d274ade3664d0887480981e1f08a51fd31951291097fc4adf50906d92",
+    "scripts/lib/session.js": "0b3a7f80a7445391410351510ed99c7ff78f0db494960f147ba97fdf37ef88cb",
     "scripts/lib/workspace.js": "7072cf2054f82ee8b6970424bc4b91e97162d3d1d28f9e7044a89b2cefd2565d",
     "scripts/match_methods.js": "cd3c8b10e6b76fd8e97415b756346b3c03ac5ad2908db59f7654572ef9621e46",
     "scripts/memory_filter.js": "e02963d31356179a64089850f036da1d99056d7bf76f6e80cef6ecd26f8f67f0",
@@ -111,16 +111,16 @@
     "scripts/session_checkpoint.js": "93e433c952c6c2cb5fa908b2624c4f9e97914fa52bc7b831222c101e9ec428be",
     "scripts/session_start.js": "4ef3b1af3119e830b5568840ebbfe3f2a474dc1ba56a18cf0128ec4db77d2096",
     "scripts/spec_check.js": "564653ee43133e7b07188ce1b97a24f5a21712437fa30317487b15aea6f01f49",
-    "scripts/step_tracker.js": "fcf5a21b0937ecbf327bda5874ef975178ba781abed8f5f0ace665a138482efe",
+    "scripts/step_tracker.js": "18ff8d8f3ad4cc1a35f858af5d2fc58233bee6c63dbf487eebf6a084d5289ca0",
     "scripts/swarm_telemetry.js": "fcbf490898bcc30a187fdf8c5a58a88eda8cb65640e3cce90254fdf0ccff775c",
     "scripts/sync-entry-points.js": "5e65ff9860e380e9b73a814c48b2cce3f8208950a0eafb4979f396b39808a74a",
     "scripts/test_security_mutation.js": "45eb4b37303515a06a1b201c0903a9b0936cf035d71de08f23386b1cf31107b9",
     "scripts/test_security_suite.js": "c740e8c8ee6c0fd79a5ac7f794717788cd7cd51c405e0610905921a5391dc0d0",
     "scripts/token_profiler.js": "04d9b4cf6470f31de414cb935b7760bb3fa526cb225656ab832861584674faad",
-    "scripts/validate_frontmatter.js": "f3128be27b35a2842429b23e200fcc948d6ef507a80b650c1cd5a1003f7e3404",
+    "scripts/validate_frontmatter.js": "44d8b75d6039c60769399f9d7f0304c61c388c0f3afd6743db5bcfd3d6745bff",
     "scripts/validate_matrix.js": "cf20565df8b268ba1ba4b0a34fa6726dd4ed6f2b5ce415a2b5ad124121afb392",
     "scripts/witness.js": "c39f0610112b3724f9e28ae241ea601f89a6a24dcde2a515bca4253b2ae350ff",
-    "scripts/worktree.js": "33bd07a35ab47ca7955c7fd812c23c92d9bc3f3e0fbaf5746728c59e901474d2",
+    "scripts/worktree.js": "9b0ddc11939ce73dd81ec5c004f1ac383457cd3361dfad0bdecb6ef359adafb1",
     "skills/analyze-data/SKILL.md": "6d4cd5800c223cd95f13e561395fa9d45c2bade0eaf2635aee6135a5770550c4",
     "skills/brainstorming/SKILL.md": "bf314729421e3fee09ca186283ade6721e4f33913f643bf8033e14782db12dd7",
     "skills/brainstorming/methods.csv": "39d0179f31bd35714c1bf5b65dea0a74b2d145dadc5d28f2c40004550916d9f9",
@@ -323,9 +323,9 @@
     "templates/system/agent.md.canonical": "fe7db40f945e67489df6fafca28e2758618f4d86dfea0980295e881b5de59467",
     "templates/system/opencode.json.template": "3b105b46ec629faee00208f8f055d4f734130230ed66f72cf53a56b163ffbbc3",
     "templates/system/vespyr-steering.md.canonical": "6cb253bcdaaa3b7577c0a9638c4589556fd41026b8cad1a653d236f6f1174e81",
-    "workflow.md": "54f1978e2b6c803d48f69ec07a894c34779bc710027b95cbc1cd2ccd997de48f"
+    "workflow.md": "e61a733911a95ed053ed8149d0ef407d400ed9606dd95f4703364a199a630b5f"
   },
   "files_root": {
-    "bin/cli.js": "d17028e08ccab8d0bca537d0f981cec89f8d9cfa260a959dd8ceb44b79c8606a"
+    "bin/cli.js": "092df4a88950389ef77af646a6de00b418b7d7ac9c082f85bee37cff7dcce5fc"
   }
 }

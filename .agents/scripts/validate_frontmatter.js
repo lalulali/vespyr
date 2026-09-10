@@ -38,6 +38,11 @@ function validateAgent(filePath) {
 
   const errors = [];
 
+  const DEPRECATED_AGENTS = ['executor', 'reader', 'writer', 'ml-engineer'];
+  if (DEPRECATED_AGENTS.includes(filename)) {
+    errors.push(`deprecated legacy agent removed in Vespyr v2.0 (delete this file or migrate)`);
+  }
+
   for (const field of REQUIRED_FIELDS) {
     if (!fm.includes(`${field}:`)) {
       errors.push(`missing ${field}`);
@@ -149,27 +154,16 @@ function validateAgent(filePath) {
     errors.push(`missing Response format section in body`);
   }
 
-  // Socratic stance check: warn only, not a hard fail
-  const REASONING_AGENTS = [
-    'architect', 'code-reviewer', 'data-analyst', 'developer',
-    'devops-engineer', 'founder', 'ml-ai-engineer', 'ml-ai-ops', 'performance-engineer',
-    'product-designer', 'product-manager', 'qa-engineer',
-    'researcher', 'security-engineer', 'shifu', 'tech-lead',
-    'technical-writer', 'user-researcher', 'ux-researcher',
-  ];
-  if (REASONING_AGENTS.includes(filename) && !content.includes('## Socratic Stance')) {
+  // Socratic stance & Citation Protocol check: dynamic reasoning agent check (warn only, not a hard fail)
+  const isReasoning = filename !== 'memory-controller' &&
+    !fm.includes('reasoning_participant: false') &&
+    !(fm.match(/^origin:\s*(.+)$/m) && fm.match(/^origin:\s*(.+)$/m)[1].trim() === 'custom');
+
+  if (isReasoning && !content.includes('## Socratic Stance')) {
     console.warn('WARN: ' + filename + ' — missing Socratic Stance section (recommended, not required)');
   }
 
-  // Citation Protocol check: warn only for all 18 reasoning agents
-  const CITATION_AGENTS = [
-    'architect', 'code-reviewer', 'data-analyst', 'developer',
-    'devops-engineer', 'founder', 'ml-ai-engineer', 'ml-ai-ops', 'performance-engineer',
-    'product-designer', 'product-manager', 'qa-engineer',
-    'researcher', 'security-engineer', 'shifu', 'tech-lead', 'technical-writer',
-    'user-researcher', 'ux-researcher',
-  ];
-  if (CITATION_AGENTS.includes(filename) && !content.includes('## Citation Protocol')) {
+  if (isReasoning && !content.includes('## Citation Protocol')) {
     console.warn('WARN: ' + filename + ' — missing Citation Protocol section (recommended, not required)');
   }
 

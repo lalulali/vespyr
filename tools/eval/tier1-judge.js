@@ -1,6 +1,6 @@
 /**
  * Tier 1: Deterministic Rubric Evaluation Judge (WS-1 Task 1.5)
- * Evaluates agent outputs against 7 foundational dimensions using discrete,
+ * Evaluates agent outputs against 8 foundational dimensions using discrete,
  * multi-criteria binary checklist rubrics (1/0) aggregated deterministically (INV-JUDGE-2).
  * NOTE: regex/substring heuristics only — no LLM call, no calibration. The
  * "calibrated semantic" label was removed as an overclaim.

@@ -82,6 +82,24 @@
         "I cannot",
         "As an AI"
       ]
+    },
+    {
+      "id": "SKILL-DEVELOP-TRACE",
+      "skill": "develop",
+      "name": "Requirements-to-Implementation Traceability",
+      "dimension": "req_to_impl",
+      "assertContains": [
+        "US-114",
+        "acceptance criteria",
+        "implemented"
+      ],
+      "prompt": "Run /develop for the email-verification story US-114: implement the token endpoint per SPEC.md acceptance criteria with zero scope creep.",
+      "assertNotContains": [
+        "I cannot",
+        "As an AI",
+        "also added an unrequested feature"
+      ],
+      "mockOutput": "## Step 1: Spec Review\nReviewed SPEC.md for story US-114: acceptance criteria AC-1 token generation, AC-2 expiry, AC-3 rate limit.\n\n## Step 2: Implementation\nImplemented the token endpoint matching each acceptance criterion: token generated, expiry set, rate limit applied. No requirements were added beyond the story.\n\n## Step 3: Verification\nAll acceptance criteria verified against the implementation with tests.\n\n## Step 4: Review\nSession complete."
     }
   ]
 }

@@ -4,10 +4,11 @@
  *
  * Tests:
  * 1. Machine Fence Synchronization & Atomic Writes
- * 2. Idempotent Migration Engine & Ghost Folder Purge
- * 3. Phase-Boundary Compaction & Active Decisions Sharding
- * 4. Scaffolding Invariants & Zero Ghost Directory Creation
- * 5. Witness & Memory Filter Invariants
+ * 2. Phase-Boundary Compaction & Active Decisions Sharding
+ * 3. Memory Security Governance & Pre-Write Sanitization
+ * 4. 3-Signal Semantic Deduplication Validation
+ * 5. Passive Context Encapsulation & Admission Control
+ * (Legacy migration-engine tests removed with migrate_memory_v2.js — deleted by owner decision 2026-09-09, Review 01 Wave 12.)
  */
 
 const { describe, it, beforeEach, afterEach } = require('node:test');
@@ -26,8 +27,6 @@ const {
   generateMachineStateBlock,
   spliceMachineState
 } = require('../.agents/scripts/session_start.js');
-
-const { migrateMemory } = require('../artifacts/archive/spent-codemods/migrate_memory_v2.js');
 
 function makeTempDir() {
   return fs.mkdtempSync(path.join(os.tmpdir(), 'vespyr-mem-test-'));
@@ -101,73 +100,7 @@ describe('Epic 02i: Memory Consolidation & Lifecycle Architecture', () => {
     });
   });
 
-  describe('Suite 2: Migration Engine & Ghost Folder Purge', () => {
-    let tmpDir;
-    let oldCwd;
-
-    beforeEach(() => {
-      tmpDir = makeTempDir();
-      oldCwd = process.cwd();
-      process.chdir(tmpDir);
-
-      // Create test directory layout
-      const memoryDir = path.join(tmpDir, 'artifacts', 'memory');
-      const agentNotesDir = path.join(memoryDir, 'agent-notes');
-      const pendingDir = path.join(memoryDir, 'pending-questions');
-      const checkpointDir = path.join(memoryDir, 'session-checkpoints');
-      const templateDir = path.join(tmpDir, '.agents', 'templates', 'memory');
-      fs.mkdirSync(agentNotesDir, { recursive: true });
-      fs.mkdirSync(pendingDir, { recursive: true });
-      fs.mkdirSync(checkpointDir, { recursive: true });
-      fs.mkdirSync(templateDir, { recursive: true });
-
-      // Write mock files
-      fs.writeFileSync(path.join(agentNotesDir, 'developer-notes.md'), `# Developer Notes\n\n### [CODE] Test Note 1 [date: 2026-08-18] [agent: @developer]\nContent 1\n**Status:** active\n`);
-      fs.writeFileSync(path.join(agentNotesDir, 'qa-notes.md'), `# QA Notes\n\n### [TEST] Test Note 2 [date: 2026-08-18] [agent: @qa-engineer]\nContent 2\n**Status:** active\n`);
-      fs.writeFileSync(path.join(templateDir, 'agent-notes-template.md'), '# Template');
-      fs.writeFileSync(path.join(memoryDir, 'patterns-and-conventions.md'), '# Patterns and Conventions\n\n');
-    });
-
-    afterEach(() => {
-      process.chdir(oldCwd);
-      cleanTempDir(tmpDir);
-    });
-
-    it('should migrate agent-notes into patterns-and-conventions and purge ghost directories', () => {
-      const result = migrateMemory();
-      // Union semantics (A1 fix): file-title headers (#) migrate alongside
-      // ### sections — 4 sections total across the two source files.
-      assert.strictEqual(result.migrated_entries, 4);
-      assert.strictEqual(result.loss_check, 'pass');
-      assert.ok(result.purged_directories.includes('agent-notes'));
-      assert.ok(result.purged_directories.includes('pending-questions'));
-      assert.ok(result.purged_directories.includes('session-checkpoints'));
-
-      const memoryDir = path.join(tmpDir, 'artifacts', 'memory');
-      assert.ok(!fs.existsSync(path.join(memoryDir, 'agent-notes')));
-      assert.ok(!fs.existsSync(path.join(memoryDir, 'pending-questions')));
-      assert.ok(!fs.existsSync(path.join(memoryDir, 'session-checkpoints')));
-
-      const patterns = fs.readFileSync(path.join(memoryDir, 'patterns-and-conventions.md'), 'utf8');
-      assert.ok(patterns.includes('# Developer Notes'), 'file-title header must survive (A1)');
-      assert.ok(patterns.includes('# QA Notes'), 'file-title header must survive (A1)');
-      assert.ok(patterns.includes('Test Note 1'));
-      assert.ok(patterns.includes('Test Note 2'));
-    });
-
-    it('should be completely idempotent when executed multiple times', () => {
-      const firstRun = migrateMemory();
-      assert.strictEqual(firstRun.migrated_entries, 4);
-      assert.strictEqual(firstRun.loss_check, 'pass');
-
-      const secondRun = migrateMemory();
-      assert.strictEqual(secondRun.migrated_entries, 0);
-      assert.strictEqual(secondRun.loss_check, 'pass (nothing to migrate)');
-      assert.strictEqual(secondRun.purged_directories.length, 0);
-    });
-  });
-
-  describe('Suite 3: Phase Compaction & Live Cursor Invariants', () => {
+  describe('Suite 2: Phase Compaction & Live Cursor Invariants', () => {
     let tmpDir;
     let oldCwd;
 
@@ -224,7 +157,7 @@ describe('Epic 02i: Memory Consolidation & Lifecycle Architecture', () => {
     });
   });
 
-  describe('Suite 4: Memory Security Governance & Pre-Write Sanitization', () => {
+  describe('Suite 3: Memory Security Governance & Pre-Write Sanitization', () => {
     const { scrubSecrets, sanitizeContent, buildEntry } = require('../.agents/scripts/memory_write.js');
 
     it('should scrub credentials, tokens, and private keys from memory text', () => {
@@ -275,7 +208,7 @@ describe('Epic 02i: Memory Consolidation & Lifecycle Architecture', () => {
     });
   });
 
-  describe('Suite 5: 3-Signal Semantic Deduplication Validator Ensemble', () => {
+  describe('Suite 4: 3-Signal Semantic Deduplication Validator Ensemble', () => {
     const { computeSimilarity, dedupeCheck } = require('../.agents/scripts/dedupe_validator.js');
     let tmpDir;
 
@@ -311,7 +244,7 @@ describe('Epic 02i: Memory Consolidation & Lifecycle Architecture', () => {
     });
   });
 
-  describe('Suite 6: Passive Context Encapsulation & Admission Control', () => {
+  describe('Suite 5: Passive Context Encapsulation & Admission Control', () => {
     const { formatT3Block, checkAdmissionControl, searchArchive } = require('../.agents/scripts/memory_filter.js');
     let tmpDir;
     let oldCwd;

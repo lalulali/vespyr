@@ -405,6 +405,13 @@ if (!['begin', 'complete', 'scope-lock', 'status', 'audit'].includes(command)) {
   process.exit(1);
 }
 if (mode === 'off' && ['begin', 'complete'].includes(command)) {
+  // R01-D1: even in off mode (the shipped default), a skill-less begin or
+  // complete must not silently pass — it is the cross-skill misattribution
+  // audit hole (P0-6). Enforce --skill before the no-breadcrumb return.
+  if (!args.skill) {
+    console.error(`step_tracker: --skill is required for ${command} (prevents cross-skill misattribution).`);
+    process.exit(1);
+  }
   return; // gate already enforced; no breadcrumb write in off mode
 }
 

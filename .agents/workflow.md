@@ -195,7 +195,7 @@ node .agents/scripts/worktree.js create task-2
 node .agents/scripts/worktree.js list
 ```
 
-**Worktree location:** sibling `<repo>-wt-<name>/` via `node .agents/scripts/worktree.js create <name>` with shared-memory symlinks (see `worktree.js:101-115`).
+**Worktree location:** sibling `<repo>-wt-<name>/` via `node .agents/scripts/worktree.js create <name>` with shared-memory symlinks (see `worktree.js` `linkShared` wiring; `clean` removes idle `auto-*` worktrees).
 **Branch naming:** `wt/<name>`. There is no `.agents/worktrees/` tree and no `loop-state.json` on disk — do not follow the old paths.
 
 ### Task assignment
@@ -249,7 +249,7 @@ git merge wt/task-3 --no-ff -m "feat: notification system"
 # 3. Run full test suite after all merges
 npm test  # or equivalent
 
-# 4. Clean up worktrees (one remove per worktree — no clean-all subcommand exists)
+# 4. Clean up worktrees (one remove per worktree; 'worktree.js clean' bulk-removes idle auto-* worktrees)
 node .agents/scripts/worktree.js remove task-1
 node .agents/scripts/worktree.js remove task-2
 node .agents/scripts/worktree.js remove task-3

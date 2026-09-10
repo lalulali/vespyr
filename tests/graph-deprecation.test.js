@@ -33,6 +33,19 @@ const forbiddenPatterns = [
   '/doc-graph'
 ];
 
+// The one legitimate reference is the removal machinery: the
+// DEPRECATED_CORE_FILES block in bin/cli.js. Verify it actually names the
+// deprecated graph paths this test guards (so the carve-out cannot mask a
+// live feature), then strip that declarative block before scanning — every
+// other reference in the file remains subject to the scan.
+const cliSource = fs.readFileSync(path.join(process.cwd(), 'bin', 'cli.js'), 'utf8');
+const depBlockMatch = cliSource.match(/const DEPRECATED_CORE_FILES\s*=\s*\[[\s\S]*?\];/);
+assert.ok(depBlockMatch, 'bin/cli.js must declare DEPRECATED_CORE_FILES');
+for (const token of ['scripts/doc_graph.js', 'scripts/query_graph.js', 'scripts/shallow_graph.js', 'scripts/incremental_graph.js', 'scripts/ensure_graph.js', 'skills/code-graph', 'skills/doc-graph']) {
+  assert.ok(depBlockMatch[0].includes(token), `DEPRECATED_CORE_FILES must name ${token}`);
+}
+const depBlockPattern = /const DEPRECATED_CORE_FILES\s*=\s*\[[\s\S]*?\];/g;
+
 const ignoredFiles = [
   '02h-phase-1-graph-shutup-and-cli.md',
   'active-decisions.md',
@@ -64,7 +77,8 @@ function scanDirectory(dir) {
       // Case-insensitive ignore matching: the allowlist must not silently miss
       // real files due to filename casing (CHANGELOG.md vs changelog.md).
       if (ignoredFiles.some(ign => full.toLowerCase().includes(ign.toLowerCase()))) continue;
-      const content = fs.readFileSync(full, 'utf8');
+      const raw = fs.readFileSync(full, 'utf8');
+      const content = raw.replace(depBlockPattern, '');
       for (const pattern of forbiddenPatterns) {
         if (content.includes(pattern)) {
           violations.push({ file: path.relative(process.cwd(), full), pattern });

@@ -591,7 +591,8 @@ async function runEvaluation(options = {}) {
     "code_quality",
     "req_to_impl",
     "sycophantic_premature_convergence",
-    "memory_adherence"
+    "memory_adherence",
+    "brevity"
   ];
 
   const dimensions = {};

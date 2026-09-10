@@ -7,9 +7,9 @@
 4. **Persona Socratic Stance Upgrades & Skill Step 0 Gating:** Update all 20 agent personas with explicit rejection of underspecified briefs, and mandate a non-skippable `step-00-scope-and-decision-anchoring.md` across core skills (`/explore-idea`, `/unpack-problem`, `/plan`, `/develop`, `/design`, `/validate-idea`), enforced deterministically by `step_tracker.js` (exit code 1 if bypassed).
 5. **`vespyr-eval` Benchmark Integration:** Add automated regression benchmarks in `evals/suites/invariants/intent-routing.json` (including false-positive decoy traps for trivial tasks) to deterministically verify that un-persona'd domain prompts trigger the triage gate while trivial single-action tasks pass unimpeded.
 
-**Position:** Phase 1 (vespyr 2.0.0) sub-plan — authored as `02k` (12th); **re-homed to `02m` (13th) on 2026-08-28** when a concurrent session inserted `02k-phase-1-round-table-skill.md` and shifted the series. Current neighbors: after `02l-phase-1-observability-biomarkers-and-small-model-harness.md`, before `02n-phase-1-record-integrity-recovery.md` (formerly numbered `02m`). Task IDs below retain their historical `02k.N` labels.
+**Position:** Phase 1 (vespyr 2.0.0) sub-plan — authored as `02k` (12th); **re-homed to `02m` (13th) on 2026-08-28** when a concurrent session inserted `02k-phase-1-round-table-skill.md` and shifted the series. Current neighbors: after `02l-phase-1-observability-biomarkers-and-small-model-harness.md`; on-disk successors before `02p` are `02n-phase-1-reverse-prd-design-fork.md` (inserted 2026-09-09) and `02o-phase-1-prd-prototype-fidelity.md` (inserted 2026-09-10); `02p-phase-1-record-integrity-recovery.md` is the former `02m` (record integrity), renumbered again 2026-09-10. Task IDs below retain their historical `02k.N` labels.
 
-**Gate Reviews:** Round table 2026-08-19 (@founder, @architect, @tech-lead, @researcher, @product-manager, @qa-engineer, @ml-ai-engineer), unanimous alignment recorded in `artifacts/memory/active-decisions.md`.
+**Gate Reviews:** Round table 2026-08-19 (@founder, @architect, @tech-lead, @researcher, @product-manager, @qa-engineer, @ml-ai-engineer), unanimous alignment recorded in `artifacts/memory/active-decisions.md`. **Later review passes:** 2026-08-28 record-correction round table (token-budget + eval-gating + gate-reachability corrections); 2026-09-01 token-budget withdrawal (5/5 SATISFIED); **2026-09-10 final review** (5 seats + 2 challengers — corrections folded into §7.1).
 
 ---
 
@@ -128,10 +128,12 @@ Update `.agents/GUARDRAILS.md` (add named section `Anti-Premature Execution, Sco
 
 | Harness Environment | Intent Detection Mechanism | Dispatch Action |
 | :--- | :--- | :--- |
-| **Google Antigravity** | Root system prompt (`AGENTS.md` + rules) triggers DNA 4 on un-persona'd domain prompts. | Halts text generation; presents 2–3 Track Fork; upon user selection, calls `invoke_subagent` or activates skill via skill tool. |
-| **Claude Code** | System prompt & `CLAUDE.md` rules intercept plain prompts. | Halts; presents 2–3 Track Fork; spawns subagent (`Agent tool`) or prompts `/skill-name`. |
-| **Cursor / Windsurf / Kiro** | System rules & `.cursorrules` intercept plain prompts. | Halts; outputs 2–3 Track Fork and provides clickable `@.agents/agents/<name>.md` and `/skill-name` shortcuts. |
-| **OpenCode / Headless CLI** | `bin/cli.js` & orchestrator state detect missing persona argument. | CLI prompts user for domain track and automatically attaches the corresponding persona file. |
+| **Google Antigravity** | Root system prompt (`AGENTS.md` + rules) triggers DNA 4 on un-persona'd domain prompts. | `[SPEC — prompt-text only]` Halts text generation; presents 2–3 Track Fork; upon user selection, calls `invoke_subagent` or activates skill via skill tool. |
+| **Claude Code** | System prompt & `CLAUDE.md` rules intercept plain prompts. | `[SPEC — prompt-text only]` Halts; presents 2–3 Track Fork; spawns subagent (`Agent tool`) or prompts `/skill-name`. |
+| **Cursor / Windsurf / Kiro** | System rules & `.cursorrules` intercept plain prompts. | `[SPEC — NOT IMPLEMENTED]` No `.cursorrules`/`.cursor/`/`.kiro/`/`.windsurf/` on disk; row describes target state. |
+| **OpenCode / Headless CLI** | `bin/cli.js` & orchestrator state detect missing persona argument. | `[SPEC — NOT IMPLEMENTED]` `rg -ni "persona\|track" bin/cli.js` → 0 matches; no detection exists. Target: CLI prompts for domain track and attaches the persona file. |
+
+**Correction — 2026-09-10 (final review):** All Layer-3 dispatch rows describe **target behavior, not verified implementation**. Delivery on disk is the root directive text only (`AGENTS.md` + `CLAUDE.md` DNA 4, `GUARDRAILS.md` section); no harness dispatch test exists. Falsifiers: `rg -ni "persona|track" bin/cli.js .agents/scripts/orchestrator_state.js` → 0 matches; `ls .cursorrules .cursor .kiro .windsurf` → all absent. Inline `[SPEC …]` labels are derived from this block, never hand-edited.
 
 ---
 
@@ -153,6 +155,8 @@ Update the `## Socratic Stance` section of each persona to explicitly reject unc
 | **`@performance-engineer` (Felix)** | *"I reject unquantified performance complaints. If p95 latency baselines, throughput targets, and hardware profiles are missing, I require baseline telemetry before profiling."* |
 | **`@ml-ai-engineer` (Kai)** | *"I reject vague AI/LLM feature requests. If evaluation datasets, prompt benchmarks, latency ceilings, and fallback strategies are missing, I halt before writing RAG or inference pipelines."* |
 | **`@devops-engineer` (Axel)** | *"I reject un-budgeted infrastructure requests. If cloud environment constraints, CI/CD runners, and rollback invariants are missing, I require environment parameters before scaffolding IaC."* |
+
+**Correction — 2026-09-10 (final review):** the original execution hardened 12 reasoning personas (listed above); disk now carries the invariant in **20/20 agent files** — the remaining 8 landed later (`cdcdba6`, 2026-09-07). Falsifier: `rg -l "On underspecified briefs" .agents/agents/ | wc -l` → 20.
 
 ---
 
@@ -177,7 +181,7 @@ All major multi-step skills must include a standardized, non-skippable **`step-0
 
 ## 4. `vespyr-eval` Benchmark Integration
 
-Add a dedicated evaluation suite to `vespyr-eval` (`evals/suites/invariants/intent-routing.json`) with robust regex pattern matching, negative boundary decoy traps, and calibrated 1-shot G-Eval anchors:
+Add a dedicated evaluation suite to `vespyr-eval` (`evals/suites/invariants/intent-routing.json`): Tier-0 structural regexes with negative-boundary decoy fixtures. Original spec — ~~robust regex pattern matching, negative boundary decoy traps, and calibrated 1-shot G-Eval anchors~~ — **[FALSIFIED 2026-08-28: no Tier-1 anchors shipped; suite is fixture-tier]**. Listed-phrase regexes are demonstrably bypassable: a generic horizontal survey carrying a `Track A` header and an `@researcher` name-drop passes Tier-0. Behavioral gating deferred (FC-2).
 
 ### 4.1 Benchmark Test Matrix (`evals/suites/invariants/intent-routing.json` — sketch; shipped suite uses 02j schema `assertContains`/`assertNotContains`, no token ceiling)
 
@@ -272,6 +276,8 @@ Add a dedicated evaluation suite to `vespyr-eval` (`evals/suites/invariants/inte
 
 ## 5. Granular Task Breakdown & Execution Matrix
 
+> **Note (2026-09-10):** §5 preserves the plan-time breakdown. Execution state, evidence stamps, and corrections live in §7 / §7.1.
+
 ### Phase 1: Core System Directives & DNA Updates
 - [ ] **Task 02k.1 — Vespyr Core DNA 4 Codification**
   - **Files:** `.agents/references/vespyr-dna.md`, `AGENTS.md`
@@ -320,16 +326,18 @@ Add a dedicated evaluation suite to `vespyr-eval` (`evals/suites/invariants/inte
 
 1. **DNA 4 Active:** `vespyr-dna.md` and `AGENTS.md` contain `DNA 4: Intent & Scope Triage Gate` (concise card, no token budget).
 2. **Guardrail Active:** `.agents/GUARDRAILS.md` named section `Anti-Premature Execution, Scope Clarification & Ban on Broad Fallbacks` exists and mandates the 2–3 Track Fork (plan label "§22" descriptive).
-3. **12+ Personas Hardened:** All reasoning personas explicitly declare their Socratic pushback against underspecified briefs.
-4. **Step 0 Enforced Deterministically:** `/explore-idea`, `/unpack-problem`, `/develop`, `/design`, `/validate-idea`, and `/plan` enforce `step-00-scope-and-decision-anchoring` with `step_tracker.js` exit code 1 validation.
-5. **Evals Verified:** `evals/suites/invariants/intent-routing.json` exists and executes with 0 failures across positive triage, single-track adoption, explicit bypass, and trivial decoy tests (fixture-tier, structural regex only).
-6. **Memory Persisted:** Decision logged in `active-decisions.md`, session summary updated in `session-summaries/latest.md`, and `project-context.md` reflects Epic 02k.
+3. **All 20 Personas Hardened (20/20 disk):** every agent file carries the Socratic pushback against underspecified briefs — 12 at original execution, completed 2026-09-07 (`cdcdba6`). **Derived**, never hand-edited: `rg -l "On underspecified briefs" .agents/agents/ | wc -l` → 20.
+4. **Step 0 Enforced Deterministically:** `/explore-idea`, `/unpack-problem`, `/develop`, `/design`, `/validate-idea`, and `/plan` enforce `step-00-scope-and-decision-anchoring` with `step_tracker.js` exit code 1 validation. Probe-verified 2026-09-10 after stale-lock purge (develop: exit 1 no-lock → exit 0 after `scope-lock`). **Open limit (FC-3):** locks are not session/track-scoped — any past lock unlocks the skill indefinitely; hardening unowned.
+5. **Evals (split — one blended checkbox forbidden):**
+   - **[VERIFIED — structural, fixture-tier]** `evals/suites/invariants/intent-routing.json` exists, 02j schema valid. Documented invocation `node bin/vespyr-eval.js run --suite invariants/intent-routing --mock` → Tier-0 4/4 PASS, overall 0/4 (Tier-1 dimension-default SPC rubric 2.0–4.0 vs threshold 4.5), exit 1; without `--mock` the runner fails closed (4/4 FAIL, exit 1, "Refusing to self-grade"). Structural gates only.
+   - **[UNVERIFIED — behavioral, open]** real harness execution, Tier-1 green, no-`--mock` exit 0. Owner: @ml-ai-engineer via FC-1/FC-2 routing. Trigger: execution adapter lands, ratified at the 02l gate review. Probe: `node bin/vespyr-eval.js run --suite invariants/intent-routing` exits 0 without `--mock`.
+6. **Memory Persisted:** Decision logged in `active-decisions.md`, session summary updated in `session-summaries/latest.md`, and `project-context.md` reflects the epic. Final review 2026-09-10 corrected the stale `02k-…` filename pointers via the sanctioned memory path (§7.1 D4).
 
 ---
 
 ## 7. Master Execution Checklist & TODOs
 
-> **Execution status: IMPLEMENTED — EVIDENCE-STAMPED 2026-08-28 — PENDING 02n RECONCILIATION (record-integrity recovery, formerly numbered 02m; closure stamping prohibited per its ruling).** All 6 tasks executed single-writer in one session. Evidence commands recorded per box. Two plan-vs-implementation deviations, resolved toward the epic decision: (1) `/plan` was omitted from Task 02k.4's file list but named in the epic decision's core-skills set — step-00 shipped for all 6 skills; (2) Task 02k.6's sketch used `tier0_gates`/`required_regex` keys — the shipped 02j suite schema (`assertContains`/`assertNotContains`; `maxTokens` deprecated 2026-09-01 per owner — no token ceiling asserted) governs, and the suite lives at `evals/suites/invariants/intent-routing.json` per 02j's suite layout.
+> **Execution status: BUILD WORK PERFORMED — EVIDENCE RECORDED 2026-08-28 — PROVISIONAL ONLY; NO CLOSURE CLAIMED (02p:112). Reconciliation pends `02p-phase-1-record-integrity-recovery.md`.** All 6 tasks executed single-writer in one session; committed as `45e34a6` (suite + record corrections), token-claim scrub in `35cbe4c`/`3b91342`, series renumber in `ee22666`. Final review 2026-09-10 (5 seats + 2 challengers) recorded falsified/partial stamps in §7.1. Two plan-vs-implementation deviations, resolved toward the epic decision: (1) `/plan` was omitted from Task 02k.4's file list but named in the epic decision's core-skills set — step-00 shipped for all 6 skills; (2) Task 02k.6's sketch used `tier0_gates`/`required_regex` keys — the shipped 02j suite schema (`assertContains`/`assertNotContains`; the former token-ceiling keys were removed 2026-09-01 per owner — exact identifiers in `35cbe4c`, suite follow-up `3b91342`; no token ceiling asserted) governs, and the suite lives at `evals/suites/invariants/intent-routing.json` per 02j's suite layout.
 
 ### Phase 1: Core System Directives & DNA 4
 - [x] **Task 02k.1:** Codify `DNA 4: Intent & Scope Triage Gate` (tri-route $C \ge 0.85$ vs $0.50 \le C < 0.85$ vs $C < 0.50$) in `.agents/references/vespyr-dna.md` and `AGENTS.md`. **[EXECUTED 2026-08-28]** Evidence: `rg -c "DNA 4: Intent & Scope Triage Gate" AGENTS.md CLAUDE.md .agents/references/vespyr-dna.md` → 1 each, identical block; trivial-tier (C < 0.50) included to match eval decoy intent-04.
@@ -337,17 +345,65 @@ Add a dedicated evaluation suite to `vespyr-eval` (`evals/suites/invariants/inte
 - [x] **Task 02k.2:** Expand §22 in `.agents/GUARDRAILS.md` to ban broad horizontal survey fallbacks and mandate the 2–3 Track Fork UX protocol. **[EXECUTED 2026-08-28]** Evidence: `rg -n "Ban on Broad Fallbacks" .agents/GUARDRAILS.md` → section present with all 4 mandates (no §22 numbering exists in GUARDRAILS.md — added as named section; plan's "§22" label does not map to the file's structure).
 
 ### Phase 2: Agent Persona Socratic Hardening
-- [x] **Task 02k.3:** Update 12+ reasoning personas (`@researcher`, `@user-researcher`, `@ux-researcher`, `@architect`, `@tech-lead`, `@developer`, `@product-manager`, `@product-designer`, `@security-engineer`, `@performance-engineer`, `@ml-ai-engineer`, `@devops-engineer`) with explicit Socratic rejection of underspecified briefs. **[EXECUTED 2026-08-28]** Evidence: `rg -l "On underspecified briefs" .agents/agents/ | wc -l` → 12; `node .agents/scripts/validate_frontmatter.js` → 20/20 agents pass, no regressions.
+- [x] **Task 02k.3:** Update 12+ reasoning personas (`@researcher`, `@user-researcher`, `@ux-researcher`, `@architect`, `@tech-lead`, `@developer`, `@product-manager`, `@product-designer`, `@security-engineer`, `@performance-engineer`, `@ml-ai-engineer`, `@devops-engineer`) with explicit Socratic rejection of underspecified briefs. **[EXECUTED 2026-08-28]** Evidence: ~~`rg -l "On underspecified briefs" .agents/agents/ | wc -l` → 12~~ **[FALSIFIED 2026-09-10 → §7.1 D1.1]** (12 was true at execution; disk now → 20, completed `cdcdba6` 2026-09-07); `node .agents/scripts/validate_frontmatter.js` → 20/20 agents pass, no regressions.
 
 ### Phase 3: Skill Step 0 Gating & Deterministic Script Verification
 - [x] **Task 02k.4a:** Author `step-00-scope-and-decision-anchoring.md` across core skills (`/explore-idea`, `/unpack-problem`, `/develop`, `/design`, `/validate-idea`). **[EXECUTED 2026-08-28 — 6 skills incl. `/plan` per decision statement]** Evidence: `ls .agents/skills/{develop,plan,design,validate-idea,explore-idea,unpack-problem}/steps/step-00-scope-and-decision-anchoring.md` → 6 files; all 6 SKILL.md bootloaders reference the Step 0 gate; `validate_frontmatter.js` → 95/95 step files pass.
-- [x] **Task 02k.4b:** Update `.agents/scripts/step_tracker.js` to assert `scope_locked: true` before advancing past Step 0 (exit code 1 if bypassed). **[EXECUTED 2026-08-28]** Evidence: bypass probe `node .agents/scripts/step_tracker.js begin --skill develop --step 1` (no lock) → exit 1 with `[ERROR] Step 0 Scope Gate bypassed...` **in `off` mode** (gate is config-independent); `scope-lock --skill develop --track "test-track"` → exit 0, audit entry recorded; repeat `begin` → exit 0; non-gated skill (`shape-up`) → silent exit 0, contract unchanged; test residue removed. Suite: `tests/run-all.js` → 168/168.
+- [~] **Task 02k.4b:** Update `.agents/scripts/step_tracker.js` to assert `scope_locked: true` before advancing past Step 0 (exit code 1 if bypassed). **[EXECUTED 2026-08-28; [~] = partial — residue gap closed 2026-09-10]** Evidence: bypass probe `node .agents/scripts/step_tracker.js begin --skill develop --step 1` (no lock) → exit 1 with `[ERROR] Step 0 Scope Gate bypassed...` **in `off` mode** (gate is config-independent); `scope-lock --skill develop --track "test-track"` → exit 0, audit entry recorded; repeat `begin` → exit 0; non-gated skill (`shape-up`) → silent exit 0, contract unchanged; ~~test residue removed~~ **[PARTIAL 2026-08-28 → §7.1 D2]**. Suite: `tests/run-all.js` → 168/168.
   **[RECORD CORRECTION → REMEDIATED 2026-08-28, review roundtable]:** gate reachability was **[PARTIAL]** — `begin --step 1` callers existed only in develop/design/validate-idea; explore-idea & unpack-problem were tracker-optional (GUARDRAILS:131) and plan had no step-1 file, leaving 3/6 gates inert. Same-day remediation: GUARDRAILS:131 carve-out fixed, tracker begin/complete added to explore-idea/unpack-problem step-01 and plan SKILL.md Step 1; off-mode contract docs corrected in 3 sites (step_tracker.js header, GUARDRAILS.md, config.yaml). Counter-evidence the gate works in real use: a concurrent `/plan` session scope-locked track `surgical-skill-edit` at 02:26Z (`step-audit.json` entry 2) before Step 1.
+  **[FINAL REVIEW 2026-09-10]:** (a) the "test residue removed" sub-claim was **[FALSIFIED]** — a stale `qa-probe-track` lock (2026-08-28T02:13:10Z, QA-seat probe) left `develop` unlocked (`begin --skill develop --step 1` → exit 0); purged 2026-09-10 with acceptance probes (develop exit 1 no-lock → `scope-lock` exit 0 → begin exit 0 → probe lock purged → exit 1; design exit 1; shape-up exit 0). (b) the off-mode doc correction was **[PARTIAL]**: `GUARDRAILS.md:143` still claimed "0 output, 0 files written"; corrected 2026-09-10 and the four tracker bullets moved back under `## Step Tracking`. (c) evergreen-lock limit (any past lock unlocks a skill indefinitely) recorded as **FC-3**, unowned.
 
 ### Phase 4: Multi-Harness Sync & Documentation
 - [x] **Task 02k.5:** Update `CLAUDE.md`, `.cursorrules`, `README.md`, `README_CN.md`, `artifacts/memory/project-context.md`, and `artifacts/memory/active-decisions.md`. **[EXECUTED 2026-08-28 with 2 named deviations]** Evidence: CLAUDE.md carries the identical DNA 4 block (`rg -c` → 1); README.md:21 + README_CN.md carry the DNA 4 feature note (placed outside the Why-Vespyr table — AGENTS.md locks the identity claim at two differentiators; a third table row would contradict it); `.cursorrules` does not exist on disk — "if present" branch N/A; memory files updated via the sanctioned pipeline only (`memory_write.js` [DECISION] entry 2026-08-28; session-write via `orchestrator_state.js`), not direct edits.
 
 ### Phase 5: Automated Evals & Decoy Trap Benchmarking
-- [x] **Task 02k.6:** Author `evals/suites/intent-routing.json` in `vespyr-eval` asserting Tier 0 regex patterns and Tier 1 G-Eval calibration anchors across positive triage, single-track direct adoption, explicit bypass, and trivial decoy tasks. **[EXECUTED 2026-08-28]** Evidence: `node bin/vespyr-eval.js run --suite invariants/intent-routing` → 4/4 PASS (intent-01 96 tok; intent-02 76 tok; intent-03 bypass; intent-04 trivial decoy 18 tok, zero triage markers), no baseline regressions, exit 0. Schema note: authored in the shipped 02j suite schema, not this plan's §4.1 pre-implementation sketch.
-  **[RECORD CORRECTION 2026-08-28, review roundtable; AMENDED 2026-09-01 per owner]:** eval-gating claim **[FALSIFIED]** — the suite validates its own `mockOutput` fixtures (runner.js:63-65 returns them verbatim; tier0 regexes assert the same text); passes 4/4 in a tree with NO AGENTS.md (@qa-engineer counterfactual); no Tier-1 anchors exist; baseline diff vacuous (0 intent-* entries). Dispositions: suite repurposed as **fixture-tier** (not cut); behavioral gating → harness prompt-execution adapter (post-02n backlog); falsifiability restructure (runner prompt-keyed branches, delete mockOutput, fix intent-03 answer-key leak) → 02l per @tech-lead ruling. **Token-ceiling gates (maxTokens / max_output_tokens) removed 2026-09-01 per owner — no quantitative token budget is asserted; suite now gates on structural regex only.**
+- [~] **Task 02k.6:** Author `evals/suites/invariants/intent-routing.json` in `vespyr-eval` asserting Tier 0 regex patterns ~~and Tier 1 G-Eval calibration anchors~~ **[FALSIFIED 2026-08-28 — no Tier-1 anchors shipped]** across positive triage, single-track direct adoption, explicit bypass, and trivial decoy tasks. **[EXECUTED 2026-08-28; [~] = partial — evidence stamp superseded 2026-09-10]** Evidence: ~~`node bin/vespyr-eval.js run --suite invariants/intent-routing` → 4/4 PASS (intent-01 96 tok; intent-02 76 tok; intent-03 bypass; intent-04 trivial decoy 18 tok, zero triage markers), no baseline regressions, exit 0~~ **[FALSIFIED 2026-08-28 → §7.1 D1.3]**. Current runner (probe 2026-09-10): no-`--mock` → 4/4 FAIL, exit 1 ("Refusing to self-grade"); `--mock` → Tier-0 4/4 PASS, overall 0/4 (Tier-1 dimension-default SPC rubric 4.00/3.00/3.00/2.00 vs threshold 4.5), tokens 99/79/72/21, exit 1. Fixture-tier structural only. Schema note: authored in the shipped 02j suite schema, not this plan's §4.1 pre-implementation sketch.
+  **[RECORD CORRECTION 2026-08-28, review roundtable; AMENDED 2026-09-01 per owner]:** eval-gating claim **[FALSIFIED]** — the suite validates its own `mockOutput` fixtures (runner.js:63-65 returns them verbatim; tier0 regexes assert the same text); passes 4/4 in a tree with NO AGENTS.md (@qa-engineer counterfactual); no Tier-1 anchors exist; baseline diff vacuous (0 intent-* entries). Dispositions: suite repurposed as **fixture-tier** (not cut); behavioral gating → harness prompt-execution adapter (post-02n backlog); falsifiability restructure (runner prompt-keyed branches, delete mockOutput, fix intent-03 answer-key leak) → 02l per @tech-lead ruling. **Token-ceiling gates removed 2026-09-01 per owner — the exact suite-schema key identifiers are preserved in git history (`35cbe4c` carries the deletions; `3b91342` is the suite-touching follow-up); no quantitative token budget is asserted; suite now gates on structural regex only.**
+  **[FINAL REVIEW 2026-09-10]:** current runner is fail-closed at `tools/eval/runner.js:112-127` (mockOutput returns only under explicit `--mock`, watermarked `[MOCK]`; else throws — the cited `:63-65` is stale suite-loading code). The intent-03 answer-key leak is still live (assertContains strings match its own `mockOutput`). Routes were **phantom on disk** — 02l carries no restructure item and no backlog artifact named the adapter — replaced by the forward-condition table **FC-1/FC-2** in §7.1. The recorded dispositions above remain true only as intent, not as landed work.
+
+---
+
+### §7.1 Final-review corrections (2026-09-10)
+
+**Panel:** @tech-lead (Grant), @product-manager (Sarah), @ml-ai-engineer (Kai), @code-reviewer (Scout), @founder (Elena) — 5 context-firewalled seats; challengers @qa-engineer (Nina), @architect (Vera). Pre-fold verdicts: 4× [PARTIAL], 1× [FALSIFIED]; every challenged position defended or conceded; the fold below is binding. Cross-record items are filed to `02p`'s single reconciliation pass (02p:112) instead of being edited here.
+
+#### D1 — Falsified evidence stamps (struck inline above)
+
+| # | Task | Recorded stamp (quoted forensically — struck inline above) | Correction (2026-09-10) |
+|---|---|---|---|
+| D1.1 | 02k.3 | `→ 12` personas | **[FALSIFIED]** disk → 20 (`cdcdba6`, 2026-09-07) |
+| D1.2 | 02k.4b | "test residue removed" | **[PARTIAL]** stale `qa-probe-track` lock left `develop` unlocked; purged 2026-09-10 (D2) |
+| D1.3 | 02k.6 | "4/4 PASS …, exit 0" | **[FALSIFIED]** no-`--mock` → 4/4 FAIL exit 1; `--mock` → T0 4/4 PASS, overall 0/4, exit 1 |
+| D1.4 | §4 intro | "calibrated 1-shot G-Eval anchors" | **[FALSIFIED]** no Tier-1 anchors shipped |
+
+Falsifiers: D1.1 `rg -l "On underspecified briefs" .agents/agents/ | wc -l` → 20. D1.2 `node .agents/scripts/step_tracker.js begin --skill develop --step 1` → exit 0 pre-purge / exit 1 post-purge. D1.3 `node bin/vespyr-eval.js run --suite invariants/intent-routing` → exit 1; with `--mock` → exit 1 (Tier-1 dimension-default SPC rubric 4.00/3.00/3.00/2.00 vs threshold 4.5; tokens 99/79/72/21). D1.4 `rg -c tier1_rubrics evals/suites/invariants/intent-routing.json` → 0.
+
+#### D2 — Stale-lock purge + acceptance probes (2026-09-10)
+
+- Purged `develop`/`qa-probe-track` from `artifacts/output/step-audit.json` (runtime, gitignored; backup taken). Remaining legitimate locks: `plan`/`surgical-skill-edit`, `validate-idea`/`create`.
+- Probes: develop exit 1 (no lock) → `scope-lock` exit 0 → begin exit 0 → probe lock purged → exit 1; design exit 1; shape-up (non-gated) exit 0.
+- **FC-3 open limit:** locks are not session/track-scoped — any historical lock unlocks the skill indefinitely.
+
+#### D3 — Cross-record defects (filed to 02p; not edited here)
+
+| # | Defect | Falsifier | Filed to |
+|---|---|---|---|
+| D3.1 | `02j:630` TL-HO-06 claims `handoff-continuity.json` + `zero-mention-routing.json` executed in 02m — neither exists | `ls evals/suites/skills/handoff-continuity.json evals/suites/invariants/zero-mention-routing.json` → both absent | 02p §1.1 R1.6 ("02j×1") |
+| D3.2 | `02p` title/self-references still "(02m)" — collides with this epic's number | `sed -n '1p' 02p-phase-1-record-integrity-recovery.md` | 02p single pass |
+| D3.3 | dev-plan `README.md:120` "(02k)" / "`02a`–`02k` sub-plans"; `:3` sequencing inconsistent; `:31` registry row lacks reconciliation-pending | `sed -n '3p;31p;120p' development-plan/README.md` | 02p single pass |
+| D3.4 | `02o` cites an "02l forward-note" no 02l task carries | `rg -n "fixture-tier\|prompt-execution" 02l-*.md` → no hits | 02p single pass (with FC-1) |
+
+#### FC — Forward conditions (unowned until a gate review ratifies an owner)
+
+| # | Item | Owner | Routing | Acceptance probe |
+|---|---|---|---|---|
+| FC-1 | Falsifiability restructure: prompt-keyed runner branches, delete `mockOutput`, fix intent-03 answer-key leak | unowned | 02l gate review ratifies owner, else back to 02j | no-`--mock` run exits 1 on fixture-only suites; AGENTS.md-less counterfactual tree cannot pass intent-01/02; `rg mockOutput evals/suites/invariants/intent-routing.json` → 0 |
+| FC-2 | Behavioral gating adapter (real harness execution, measured split) | unowned | 02p converts to backlog | `node bin/vespyr-eval.js run --suite invariants/intent-routing` exits 0 without `--mock`; run appears in `split.measured` |
+| FC-3 | Scope-lock session/track binding (kill evergreen bypass) | unowned | candidate 02q (parallel-session) or 02p defect pass | stale lock from a prior session no longer unlocks `begin --step 1` |
+
+#### D4 — Memory corrections (2026-09-10)
+
+`active-decisions.md` correction entry appended via the sanctioned `memory_write.js` pipeline (append-only; session `w-4a812faa25db`) — it supersedes the dangling `02k-…` reference at `:42` and records the withdrawn `<100-token` clause / TL-HO-06 falsifier. `project-context.md` living bullets re-pointed in place (`02k-…` → `02m-…`; "Next deliverable" refreshed; `02a–02q` header) — `memory_write.js` has no update primitive for existing entries and explicitly directs existing content to manual update; no secrets/injection markers were present. Also logged: `memory_write.js` silently ignores unknown flags (no `--dry-run`) → `lessons-learned.md`.
+
+*Final-review synthesis: no [NO-GO]. The shipped core (DNA 4 in three root files, GUARDRAILS section, six step-00 gates, `scope-lock` gate) is [CONFIRMED] on disk; the eval layer is fixture-tier with its behavioral half explicitly unverified; every red is dated, cited, and owned above. Fold verified 2026-09-10 by the five original seats (transcript: `artifacts/evals/roundtable/transcripts/final-review-02m-intent-routing_native_1.md`); post-verification polish removed the withdrawn token-key literals from this document — exact identifiers retained in git history (`35cbe4c` carries the deletions; `3b91342` suite follow-up).*
 

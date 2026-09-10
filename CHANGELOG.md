@@ -6,6 +6,16 @@ All notable changes to the Vespyr project will be documented in this file.
 
 ## [Unreleased]
 
+---
+
+## [2.0.10] - 2026-09-10
+
+### Harness, worktree & installer fixes (2026-09-10)
+- **Worktree (02q) defects fixed:** transactional `create()` — placeholder-only `.agents/state` in a fresh checkout now links instead of erroring, and a wiring failure rolls back the checkout + branch (no half-created worktrees, ever); busy-tree auto-offer requires ≥2 distinct foreign session ids (per-invocation `w-` ids had self-triggered the detector); new `worktree clean` removes idle `wt/auto-*` worktrees and skips dirty ones.
+- **Session cursor fixed (02i-adjacent):** `parseLastHistoryEntry` no longer truncates `latest.md` — `Decisions` / `Next step` / `Blockers` re-derive from append-only `history.md` as designed.
+- **Installer / update hygiene:** customized-file backups now live under `.agents/.bak/<relative path>/` (no scattered `*.bak-*` litter; `.bak` excluded from manifests and swept on uninstall); deprecated core files (removed I/O sub-agents, graph skills/scripts, squads) are pruned on fresh-install / update / `--sync-docs`, with backups preserved.
+- **Tests:** graph-deprecation scan strips the declarative removal block and asserts it names every deprecated graph path (carve-out cannot mask a live feature); +8 regression tests (worktree shared-state, `latest.md` parser); full suite 464/464.
+
 ### Review-01 close-out (Waves 1–9, `artifacts/docs/review/01-agents.md`)
 - **Game track deleted (owner verdict: too shallow):** removed `explore-game-idea/`, `validate-game-idea/`, 5 game templates; refs scrubbed from workflow, skills registry (42→40), catalog (recompiled, lint clean), eval fixtures/runner, CLI help, guides (en/cn), canonical templates, and scaffold allowlists. Replacement planned in `artifacts/docs/strategy/development-plan/10-phase-8-game-development-track.md` (Phase 8, post-PKM entry gate).
 - **Kai starvation closed:** `summon_when` self-work clause, executable `roster-router.json` (Kai mandatory on eval/prompt/serving tags), skill-body consult lines, append-only summon ledger in telemetry.
@@ -21,10 +31,6 @@ All notable changes to the Vespyr project will be documented in this file.
 - **Brainstorming seam:** Step 4b threshold routing (roundtable on ≥2 tensions, grill-me on single bets, NO-GO archives) with override logging; roundtable brainstorm-artifact intake (validate-then-adopt); matcher IDF + floor + synonyms + golden set; SPC/skip markers with closed taxonomies; specialist co-dispatch; shared `degraded-mode-tiers.md` + `step-0-sharpening.md` contracts (also adopted by elicitation); elicitation marker parity.
 - **Eval-harness de-circularization (`tools/eval/`):** fail-closed mock gate (`--mock`/`--adapter mock` explicit or refuse-to-self-grade); `[MOCK]` watermarks + `mockMode` flags + console banner; Tier-1 de-aliased from Tier-0 (missing rubric fails closed); Tier-0 `requireRQSD:false` opt-out + trap `maxPci` default; unmeasured dimensions nulled + flagged; quote-aware command splitter shared via `lib/process.js`; `record-baseline` refuses mock runs at the default path; fabricated `evals/baseline.json` replaced by mock-labeled `evals/mock-baseline.json` (43/106 @ 3.36); packaging contract updated.
 - **Verification:** full suite green (365 tests); baseline waves scored with gate passing except retained negative controls, by design.
-
----
-
-## [2.0.10] - 2026-09-05
 
 ### Design System Overhaul (consultant, taste & agency craft)
 - **Designer-as-consultant flow:** `design.md` (v1→v3) opens with taste extraction — 3-question interview, 2–3 proposed directions — plus anti-references and a no-tokens-before-taste gate. Wired into `@product-designer`'s Socratic stance and underspecified-briefs rule.

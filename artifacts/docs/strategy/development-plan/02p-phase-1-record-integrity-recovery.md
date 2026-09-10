@@ -2,7 +2,7 @@
 
 **Decision:** Vespyr adopts a mechanical-evidence standard for every dev-plan checkbox: a box may be checked only when a reproducible command (grep/ls/git show/test run) proves its claim on disk at check time. This plan reconciles the ~54 falsely-stamped boxes found in the 2026-08-23 audit, rebuilds the two 02g tooling items that were never built, aligns the harness matrix to the owner's five-shape scope under the architect's emitter/symlink classification, and bootstraps the missing sign-off machinery. Single-author serial execution is a **binding constraint**, not a recommendation — the root cause of this recovery was concurrent sessions clobbering shared state.
 
-**Position:** Phase 1 (vespyr 2.0.0) sub-plan — authored as `02m` (13th); re-homed to `02n` on 2026-08-28; **re-homed to `02o` on 2026-09-09** when the owner-urgent reverse-PRD design fork was inserted as `02n`. Current neighbors: after `02n-phase-1-reverse-prd-design-fork.md`, before `02p-phase-1-parallel-session-safety.md` (formerly numbered `02o`). Task IDs below retain their historical `R*` numbering. It repairs the record layer beneath the entire `02*` series; it does not reopen feature work closed legitimately. **Sequencing (ruled 2026-08-23, owner-requested hybrid):** a ~3.5h prelude (R0.1–R0.2) runs first; then 02h→02i→02j→02k→02l proceed to completion under evidence-stamping rules with closure stamping PROHIBITED; full 02m reconciliation executes last, after hijkl facts settle.
+**Position:** Phase 1 (vespyr 2.0.0) sub-plan — authored as `02m` (13th); re-homed to `02n` on 2026-08-28; **re-homed to `02o` on 2026-09-09** when the owner-urgent reverse-PRD design fork was inserted as `02n`; **re-homed to `02p` on 2026-09-10** when the owner-requested traditional-direction parity plan was inserted as `02o`. Current neighbors: after `02o-phase-1-prd-prototype-fidelity.md`, before `02q-phase-1-parallel-session-safety.md` (formerly numbered `02o`, then `02p`). Task IDs below retain their historical `R*` numbering. It repairs the record layer beneath the entire `02*` series; it does not reopen feature work closed legitimately. **Sequencing (ruled 2026-08-23, owner-requested hybrid):** a ~3.5h prelude (R0.1–R0.2) runs first; then 02h→02i→02j→02k→02l proceed to completion under evidence-stamping rules with closure stamping PROHIBITED; full 02m reconciliation executes last, after hijkl facts settle.
 
 **Gate reviews:** Roundtable 2026-08-23 (@architect, @tech-lead, @developer) — full forensics on disk: 02g KILL adjudicated over three rounds (git archaeology: `dcf028e` honest PARTIALLY EXECUTED state reverted to EXECUTED inside mislabeled typo-fix commit `43f8fa1`; H-CONC concurrency hypothesis owner-corroborated); mechanical checkbox sweep of 02-phase-1-skills (126 boxes), 06, 08 completed. Verdict and dispositions recorded in `artifacts/memory/active-decisions.md` (2026-08-23 entries).
 
@@ -25,7 +25,7 @@
 
 **Mandate (from Chris):** Mechanical re-verification of every dev-plan checkbox after proven systemic record corruption; recovery, not blame. Concurrent 02f+02g sessions over one working tree produced clobbered records; the sweep confirmed ~54 false boxes across 8 documents and a repo-wide governance hole (`utter-satisfaction.md` holds **zero** per-epic sign-off records).
 
-Update version to: 2.0.10
+bump version
 
 ### 1.1 In scope
 

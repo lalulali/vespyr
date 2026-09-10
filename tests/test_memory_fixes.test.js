@@ -3,13 +3,11 @@
  * (Epic 02i reopened tasks 3.4-A1/A2, 11.4, R-5 tail, DoD #1).
  *
  * Each test maps 1:1 to a defect demonstrated live on 2026-08-25:
- *   F1  migration silently dropped ## and pre-header content (A1)
- *   F2  purge executed even when capture was partial (A1 gate)
- *   F3  divergent duplicate headers lost bodies (A1 union semantics)
  *   F4  parallel complete calls lost artifacts last-writer-wins (A2)
  *   F5  advance succeeded over the <400-token budget gate (R-5)
  *   F6  session-start clobbered human lines outside the fence (DoD #1)
  *   F7  injected context lacked the spec'd HISTORICAL_MEMORY_DATA boundary (11.4)
+ * (F1-F3 tested the legacy migrate_memory_v2.js codemod — removed with the codemod, owner decision 2026-09-09.)
  */
 
 const { describe, it, beforeEach, afterEach } = require('node:test');
@@ -20,7 +18,6 @@ const path = require('path');
 const { execFileSync } = require('child_process');
 
 const REPO_ROOT = path.resolve(__dirname, '..');
-const MIGRATE = path.join(REPO_ROOT, 'artifacts', 'archive', 'spent-codemods', 'migrate_memory_v2.js');
 const ORCH = path.join(REPO_ROOT, '.agents', 'scripts', 'orchestrator_state.js');
 const SESSION_START = path.join(REPO_ROOT, '.agents', 'scripts', 'session_start.js');
 const MEMORY_FILTER = path.join(REPO_ROOT, '.agents', 'scripts', 'memory_filter.js');
@@ -42,91 +39,6 @@ describe('Suite: Memory Fix Loop Regressions (2026-08-25)', () => {
 		process.chdir(oldCwd);
 		fs.rmSync(tmpDir, { recursive: true, force: true });
 	});
-
-	it('F1: migration preserves preamble, ## sections, and ### sections (zero loss)', () => {
-		const notes = path.join(tmpDir, 'artifacts', 'memory', 'agent-notes');
-		fs.mkdirSync(notes, { recursive: true });
-		fs.writeFileSync(
-			path.join(notes, 'developer-notes.md'),
-			[
-				'# Developer Notes',
-				'CRITICAL-PREHEADER-CONTENT must survive migration',
-				'## SubSection',
-				'sub content line',
-				'### Existing Header',
-				'body line'
-			].join('\n')
-		);
-
-		const { migrateMemory } = require(MIGRATE);
-		const result = migrateMemory({ targetDir: tmpDir });
-
-		assert.strictEqual(result.loss_check, 'pass');
-		const out = fs.readFileSync(
-			path.join(tmpDir, 'artifacts', 'memory', 'patterns-and-conventions.md'),
-			'utf8'
-		);
-		for (const mustExist of [
-			'# Developer Notes',
-			'CRITICAL-PREHEADER-CONTENT must survive migration',
-			'## SubSection',
-			'sub content line',
-			'body line'
-		]) {
-			assert.ok(out.includes(mustExist), `lost content: ${mustExist}`);
-		}
-	});
-
-	it('F2: zero-loss gate aborts and refuses to purge when output would lose lines', () => {
-		const memDir = path.join(tmpDir, 'artifacts', 'memory');
-		const notes = path.join(memDir, 'agent-notes');
-		fs.mkdirSync(notes, { recursive: true });
-		fs.writeFileSync(path.join(notes, 'qa-notes.md'), '# QA Notes\nunique-line-alpha\n');
-
-		const { migrateMemory } = require(MIGRATE);
-		migrateMemory({ targetDir: tmpDir }); // first pass migrates everything
-
-		// Simulate a hostile regression: re-seed a file whose content the
-		// renderer cannot represent (binary-ish line), gate must abort.
-		fs.mkdirSync(notes, { recursive: true });
-		const poison = '\u0000-null-byte-line\n';
-		fs.writeFileSync(path.join(notes, 'poison-notes.md'), poison);
-
-		let failed = false;
-		try {
-			migrateMemory({ targetDir: tmpDir });
-		} catch (err) {
-			failed = err.message.startsWith('ZERO_LOSS_GATE');
-		}
-		assert.ok(failed, 'expected ZERO_LOSS_GATE abort');
-		assert.ok(fs.existsSync(notes), 'sources must NOT be purged when the gate fails');
-	});
-
-	it('F3: divergent duplicate headers preserve both bodies as variants', () => {
-		const memDir = path.join(tmpDir, 'artifacts', 'memory');
-		const notes = path.join(memDir, 'agent-notes');
-		fs.mkdirSync(notes, { recursive: true });
-		fs.writeFileSync(
-			path.join(notes, 'architect-notes.md'),
-			'### Deployment\nDeploy via Vercel.\n'
-		);
-		fs.writeFileSync(
-			path.join(notes, 'devops-notes.md'),
-			'### Deployment\nDeploy via Fly.io.\n'
-		);
-
-		const { migrateMemory } = require(migratePath());
-		migrateMemory({ targetDir: tmpDir });
-
-		const out = fs.readFileSync(path.join(memDir, 'patterns-and-conventions.md'), 'utf8');
-		assert.ok(out.includes('Deploy via Vercel.'), 'first body must survive');
-		assert.ok(/Deployment \(variant \d+ from devops-notes\)/.test(out), 'divergent body must migrate as variant');
-		assert.ok(out.includes('Deploy via Fly.io.'), 'variant body must survive');
-	});
-
-	function migratePath() {
-		return MIGRATE;
-	}
 
 	it('F4: eight SIMULTANEOUS complete spawns record all eight artifacts (lock works)', () => {
 		const { spawn } = require('child_process');

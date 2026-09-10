@@ -27,11 +27,14 @@ describe('update-mode customized-file backups (.bak-YYYYMMDD)', () => {
 		execFileSync(process.execPath, [CLI, 'update', '--target', target, '--yes'], { stdio: 'pipe' });
 
 		const today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-		const bakPath = `${skillPath}.bak-${today}`;
+		const bakPath = path.join(target, '.agents', '.bak', 'skills', 'shut-up', `SKILL.md.bak-${today}`);
 
-		assert.ok(fs.existsSync(bakPath), 'customized file must be backed up with .bak-YYYYMMDD suffix');
+		assert.ok(fs.existsSync(bakPath), 'customized file must be backed up with .bak-YYYYMMDD suffix in .agents/.bak');
 		assert.strictEqual(fs.readFileSync(bakPath, 'utf8'), customContent, 'backup must preserve the customization verbatim');
 		assert.ok(fs.existsSync(skillPath), 'customized file must still be replaced by the shipped version');
+
+		const scattered = fs.readdirSync(path.dirname(skillPath)).filter((f) => f.includes('.bak'));
+		assert.deepStrictEqual(scattered, [], 'no backup litter scattered in original folder');
 
 		const residue = fs.existsSync(untouchedPath)
 			? fs.readdirSync(path.dirname(untouchedPath)).filter((f) => f.startsWith('GUARDRAILS.md.bak'))

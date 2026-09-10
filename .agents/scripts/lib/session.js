@@ -67,7 +67,11 @@ function ensureSessionCurrent(agent) {
 function parseLastHistoryEntry(historyText) {
   if (!historyText) return null;
   const blocks = [];
-  const re = /^## \[([0-9-]+ [0-9:]+)\] Agent: @([^\n]+)\n([\s\S]*?)(?=\n## \[|\n*$)/gm;
+  // Body ends at the next entry header or the true end of string. Do NOT use
+  // `\n*$` here: under the `m` flag `$` matches before ANY newline, which
+  // truncated the body to its first line and emptied latest.md fields
+  // (harness-defects-2026-09-10.md D2).
+  const re = /^## \[([0-9-]+ [0-9:]+)\] Agent: @([^\n]+)\n([\s\S]*?)(?=\n## \[[0-9-]+ [0-9:]+\] Agent: @|(?![\s\S]))/gm;
   let m;
   while ((m = re.exec(historyText)) !== null) {
     blocks.push({ date: m[1], agent: m[2].trim(), body: m[3] });

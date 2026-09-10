@@ -293,6 +293,21 @@ function surgicallyCleanupAgentsDir(agentsTarget) {
 					fs.rmSync(targetAgentPath, { recursive: true, force: true });
 				} catch {}
 			}
+			// Also clean up any retired core agents (origin: core) so stale agents don't block folder cleanup
+			try {
+				const remaining = fs.readdirSync(targetAgentsDir);
+				for (const file of remaining) {
+					if (!file.endsWith(".md")) continue;
+					const filePath = path.join(targetAgentsDir, file);
+					try {
+						const content = fs.readFileSync(filePath, "utf8");
+						const match = content.match(/^(?:\uFEFF)?---\r?\n([\s\S]*?)\r?\n(?:---|\.\.\.)/);
+						if (match && match[1].includes("origin: core")) {
+							fs.rmSync(filePath, { recursive: true, force: true });
+						}
+					} catch {}
+				}
+			} catch {}
 			removeDirIfEmpty(targetAgentsDir);
 		} catch (e) {
 			// ignore
@@ -415,7 +430,7 @@ function surgicallyCleanupAgentsDir(agentsTarget) {
 		} catch {}
 	} catch {}
 
-	// Sweep backup litter (*.bak-*, *.backup.*) so uninstall leaves no
+	// Sweep backup litter (*.bak-*, *.backup.*, .bak) so uninstall leaves no
 	// poison for a future verify. User content outside these patterns stays.
 	try {
 		const sweep = (dir) => {
@@ -423,8 +438,11 @@ function surgicallyCleanupAgentsDir(agentsTarget) {
 			try { entries = fs.readdirSync(dir, { withFileTypes: true }); } catch { return; }
 			for (const ent of entries) {
 				const full = path.join(dir, ent.name);
-				if (ent.isDirectory() && !ent.isSymbolicLink()) sweep(full);
-				else if (ent.isFile() && (ent.name.includes(".bak-") || ent.name.includes(".backup."))) {
+				if (ent.name === ".bak" && ent.isDirectory()) {
+					try { fs.rmSync(full, { recursive: true, force: true }); } catch {}
+				} else if (ent.isDirectory() && !ent.isSymbolicLink()) {
+					sweep(full);
+				} else if (ent.isFile() && (ent.name.includes(".bak-") || ent.name.includes(".backup."))) {
 					try { fs.unlinkSync(full); } catch {}
 				}
 			}
@@ -591,6 +609,8 @@ async function performFreshInstall(targetDir, flags) {
 	} else {
 		if (!fs.existsSync(agentsTarget)) {
 			fs.mkdirSync(agentsTarget, { recursive: true });
+		} else {
+			removeStaleManifestFiles(targetDir);
 		}
 		fs.cpSync(AGENTS_SRC, agentsTarget, { recursive: true, dereference: true });
 		R.installed = true;
@@ -633,6 +653,7 @@ async function performFreshInstall(targetDir, flags) {
  */
 function backupCustomizedFiles(agentsTarget, sourceDir) {
 	const today = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+	const bakDir = path.join(agentsTarget, ".bak");
 	let backedUp = 0;
 	const walk = (srcDir, relDir) => {
 		const entries = fs.readdirSync(srcDir, { withFileTypes: true });
@@ -648,14 +669,16 @@ function backupCustomizedFiles(agentsTarget, sourceDir) {
 					const incoming = fs.readFileSync(srcPath);
 					const current = fs.readFileSync(dstPath);
 					if (!incoming.equals(current)) {
-						let bakPath = `${dstPath}.bak-${today}`;
+						const bakDstDir = path.join(bakDir, relDir);
+						fs.mkdirSync(bakDstDir, { recursive: true });
+						let bakPath = path.join(bakDstDir, `${entry.name}.bak-${today}`);
 						let n = 1;
 						while (fs.existsSync(bakPath)) {
 							try {
 								const prev = fs.readFileSync(bakPath);
 								if (prev.equals(current)) break; // identical backup already exists
 							} catch {}
-							bakPath = `${dstPath}.bak-${today}-${n++}`;
+							bakPath = path.join(bakDstDir, `${entry.name}.bak-${today}-${n++}`);
 							if (n > 100) break;
 						}
 						let needsWrite = true;
@@ -696,7 +719,7 @@ async function performUpdate(targetDir, flags) {
 
 	const customized = backupCustomizedFiles(agentsTarget, AGENTS_SRC);
 	if (customized > 0) {
-		log(`  Preserved ${customized} customized file(s) as *.bak-${new Date().toISOString().slice(0, 10).replace(/-/g, "")}`);
+		log(`  Preserved ${customized} customized file(s) in .agents/.bak/`);
 	}
 
 	removeStaleManifestFiles(targetDir);

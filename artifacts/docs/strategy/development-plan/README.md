@@ -1,6 +1,6 @@
 # Vespyr Development Plan
 
-> **Status:** v2.0 — Phase 1 in progress. Executed: 02a–02j (02i re-certified 2026-08-26). 02k (round-table skill) WIP. 02o (parallel-session safety) executing 2026-08-28. Pending: 02l, then 02n record-integrity reconciliation (closure stamps deferred). **Resequenced 2026-08-28:** 02o before 02l (owner ruling); series renumbered same day — intent-routing 02k→02m, record-integrity 02m→02n, round-table skill inserted as 02k.
+> **Status:** v2.0 — Phase 1 in progress. Executed: 02a–02j (02i re-certified 2026-08-26). 02k (round-table skill) WIP. 02q (parallel-session safety, formerly 02o, then 02p) executing 2026-08-28. Pending: 02l, then 02n reverse-PRD design fork (urgent, owner; roundtable 2026-09-10 → RESHAPE + A1–A12 folded, execution held), then 02o traditional-direction parity (after 02n — sequencing owner-confirmed 2026-09-10: 02n → 02o → 02p → 02q; roundtable 2026-09-10 → RESHAPE + B1–B20 folded; execution held pending parallel investigation), then 02p record-integrity reconciliation (closure stamps deferred). **Resequenced 2026-08-28:** 02o before 02l (owner ruling); series renumbered same day — intent-routing 02k→02m, record-integrity 02m→02n, round-table skill inserted as 02k. **Resequenced 2026-09-09 (owner, urgent):** reverse-PRD design fork inserted as `02n`; record-integrity 02n→02o; parallel-session 02o→02p (task IDs retain historical `02o.N` labels). **Resequenced 2026-09-10 (owner):** traditional-direction parity plan inserted as `02o` (mirror direction promoted out of 02n.7); record-integrity 02o→02p; parallel-session 02p→02q.
 > **Maintainer:** Chris (solo, AI-assisted)
 > **Created:** 2026-07-02 — consolidates and corrects the original strategy folder (7,330 lines → this folder)
 
@@ -16,21 +16,23 @@ Every `NN[X]-*.md` file in this directory MUST have a row here; numbers are clai
 | `01a-phase-0-framework-analysis.md` | Framework analysis | Shipped |
 | `01b-phase-0-risk-register.md` | Risk register | Live |
 | `02-phase-1-skills.md` | Phase 1 skills (parent) | In progress |
-| `02a-phase-1-step-tracker.md` | Step tracker | Audit pending (02n) |
-| `02b-phase-1-agent-memory-fix.md` | Agent memory fix | Audit pending (02n) |
-| `02c-phase-1-teaching-partner.md` | Teaching partner | Audit pending (02n) |
+| `02a-phase-1-step-tracker.md` | Step tracker | Audit pending (02p) |
+| `02b-phase-1-agent-memory-fix.md` | Agent memory fix | Audit pending (02p) |
+| `02c-phase-1-teaching-partner.md` | Teaching partner | Audit pending (02p) |
 | `02d-phase-1-ai-ready-team.md` | AI-ready team | Executed (verified 2026-08-08) |
 | `02e-phase-1-agentskills-standardization.md` | Skills standardization | Executed |
 | `02f-phase-1-security-and-integrity-architecture.md` | Security & integrity | Executed |
-| `02g-phase-1-harness-honesty.md` | Harness honesty | Executed (record corrected forward; 02n owns §7.3) |
+| `02g-phase-1-harness-honesty.md` | Harness honesty | Executed (record corrected forward; 02p owns §7.3) |
 | `02h-phase-1-graph-shutup-and-cli.md` | Graph/shut-up/CLI | Executed 2026-08-25 |
 | `02i-phase-1-memory-consolidation.md` | Memory consolidation | Executed + re-certified 2026-08-26 |
 | `02j-phase-1-evals-and-agnostic-harness.md` | Evals & harness | Executed (fixture-tier caveat, 02m record) |
 | `02k-phase-1-round-table-skill.md` | Round-table skill | WIP (concurrent session) |
 | `02l-phase-1-observability-biomarkers-and-small-model-harness.md` | Observability & biomarkers | Not started (after 02o, owner ruling) |
 | `02m-phase-1-intent-routing-and-anti-premature-execution.md` | Intent routing | Implemented + evidence-stamped (was 02k; re-homed) |
-| `02n-phase-1-record-integrity-recovery.md` | Record integrity recovery | Pending (last; formerly 02m) |
-| `02o-phase-1-parallel-session-safety.md` | Parallel session safety | Executed 2026-08-28 (incl. 02o.7–9 worktree automation) |
+| `02n-phase-1-reverse-prd-design-fork.md` | Reverse-PRD design fork (prototype-first) | Authored 2026-09-09 (urgent, owner; roundtable 2026-09-10 → RESHAPE, A1–A12 binding and folded; mirror moved to 02o; A10 ruled + A12 GO'd 2026-09-10 — item-count checkpoints; A12 clause corrected; execution held pending parallel investigation) |
+| `02o-phase-1-prd-prototype-fidelity.md` | Traditional-direction parity (PRD→prototype fidelity) | Authored 2026-09-10 (owner, urgent); roundtable 2026-09-10 → RESHAPE + B1–B20 folded; sequencing owner-confirmed 02n → 02o → 02p → 02q; execution held pending parallel investigation |
+| `02p-phase-1-record-integrity-recovery.md` | Record integrity recovery | Pending (last; formerly 02m, then 02n, then 02o) |
+| `02q-phase-1-parallel-session-safety.md` | Parallel session safety | Executed 2026-08-28 (incl. 02o.7–9 worktree automation; renumbered 02o→02p 2026-09-09, 02p→02q 2026-09-10) |
 | `03-phase-2-enablement.md` | Phase 2 enablement | Planned (v2.1) |
 | `03a-phase-2-external-skills-research-and-ingestion.md` | External skills research & ingestion | Planned |
 | `03b-phase-2-mcp-integration-plan.md` | MCP integration | Planned |

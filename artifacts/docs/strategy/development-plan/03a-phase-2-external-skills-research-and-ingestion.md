@@ -263,5 +263,8 @@ npx vespyr skill update
 
 ## 9. Additional notes from Chris
 
-I saw this skills and it looks really promising: https://github.com/996pm/interaction-prd
+- I saw this skills and it looks really promising: https://github.com/996pm/interaction-prd
 It would be a great adition for Sarah. But all documents are in Chinese
+- we have a lot of token reduction skills like what I want to implement in 03f-token-effective-mode. but, my latest approach would like to incorporate those skills in vespyr instead of building it myself. what we need to do
+  - plan how the installer works
+  - plan how agents and skills can use the skills natively

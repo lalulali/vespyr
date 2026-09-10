@@ -1,0 +1,142 @@
+# Prototype-First Design Fork — Reverse-PRD Workflow, Grounded Synthesis & Parity Gates (02n)
+
+bump version
+
+**Decision:** Vespyr adds a **reverse mode** to `/design`: prototype-first, PRD-later. The PRD is never one-shot "generated from" the prototype — it is **synthesized through the same interactive loop the traditional flow uses**, from an **Evidence Ledger** where every behavioral statement traces to a prototype anchor, and both artifacts are held to a bidirectional **Parity Gate** with a hash-witnessed **Sync Contract**. The mirror defect (PRD-first, prototype/implementation lags) is covered by the same machinery inverted: a **Spec Coverage Contract** at the develop/QA boundary. Standing rule: **whichever artifact comes second must be earned through the same loop as the first — never derived in one pass.**
+
+**Problem (owner, 2026-09-09) — the Asymmetry Law:** in any spec↔prototype chain, the artifact authored first (human-iterated) is rich; the artifact produced second is detail-poor, too high-level, sometimes hallucinated. Observed in BOTH directions:
+
+| Direction | First artifact (strong) | Second artifact (weak) | Owner-observed defects |
+|---|---|---|---|
+| Traditional (PRD → prototype) | PRD | prototype / implementation | small details missing; implementation can't keep up with PRD quality |
+| Reverse (prototype → PRD) | prototype | PRD | (1) details missing vs PRD-first output (2) prototype evolves, PRD never updated (drift) (3) too high-level, hallucinated, unusable |
+
+**Root cause — 3 mechanisms → 3 countermeasures (this plan):**
+
+| # | Mechanism | Countermeasure |
+|---|---|---|
+| M1 | First artifact earned its detail through many human iterations; the second is produced in ONE pass — detail loss is structural, not a prompt problem | **Looped derivation:** reverse mode re-runs create-mode steps (personas → stories → screen states → tokens) with the prototype inventory as fixed input |
+| M2 | Ungrounded generation smooths gaps ("high-level mush") and invents plausible specifics (hallucination) | **Grounded synthesis — DNA 5 applied to specs:** every behavioral statement carries an evidence anchor (`path#id`); unprovable → `[OPEN]`, never invented |
+| M3 | Nothing measures whether the derived artifact preserved the source's detail; nothing forces re-derivation when the source changes | **Parity Gate + Sync Contract:** mechanical orphan/ghost/detail-class counts + prototype↔spec hash witness enforced at the Step-0 scope gate |
+
+**Position:** Phase 1 (vespyr 2.0.0) sub-plan — 14th in the `02*` series. **Inserted 2026-09-09 at owner request (urgent); series renumbered same day** — record-integrity `02n→02o`, parallel-session `02o→02p` (task IDs retain historical `02o.N` labels). **Revision 2026-09-10 (owner):** the mirror direction (former 02n.7) was promoted into its own epic `02o-phase-1-prd-prototype-fidelity.md`; series renumbered again — record-integrity `02o→02p`, parallel-session `02p→02q`. **Sequencing: owner-confirmed 2026-09-10 — `02n → 02o → 02p → 02q`**: this plan executes next; `02o` executes after this plan (precondition: 02n's ledger grammar + witness pattern land). Theme mapping: T2 (new step files), T3 (parity artifact + witness), T8 (handoff gate).
+
+**Gate reviews:** roundtable 2026-09-10 complete — **[SYNTHESIS: RESHAPE]** with a binding 12-amendment package (A1–A12, recorded in `active-decisions.md`; transcript `artifacts/evals/roundtable/transcripts/gate-review-02n-reverse-prd_native_1.md`). D1/D2 resolved in-panel (A1 routing precedence; A2 code-level witness executor). A9 (mirror-direction sweep) binds `02o` — see `02o-phase-1-prd-prototype-fidelity.md` (A9 as amended by its B8/B12). **A1–A12 folded 2026-09-10** (owner permission; development held): A10 applied as owner re-based (item-count checkpoint after item 5 of 9; hours sizing-only); A12 GO'd 2026-09-10 with corrected consequence clause (target feature TBD; hand-run not yet run).
+
+---
+
+## 1. Scope
+
+### 1.1 In scope
+
+| Item | Detail |
+|---|---|
+| Reverse mode in `/design` | 5 new step files (`steps/step-0Xd-*`), router mode detection, Step-0 staleness hook |
+| Evidence Ledger | Structured section in `requirements.md` (+ template): statement → evidence anchor (`path#id` — frozen grammar, A11) → evidence type (prototype / user / owner) → status |
+| Prototype inventory | `prototype-inventory.md`: screens, flows, behaviors, states extracted with `path#id` anchors — tool-agnostic (HTML mock, code, Figma export, AI-generated prototype) |
+| Parity Gate | `parity-report.md`: ghost statements, orphan behaviors, grounding rate, detail-class coverage (10 classes), `[OPEN]` list |
+| Mechanical checker | `.agents/scripts/spec_parity.js` + `tests/test_spec_parity.js` (08-23 rule: script + named test — no mockOutput tautology, 02m lesson) |
+| Sync Contract | Prototype + spec hash witness in `parity-report.md` frontmatter; **non-file prototypes (Figma URL, live code): witness = source pointer + access timestamp + snapshot hash of `prototype-inventory.md` — honestly labeled weaker than file-hash (A3)**; stale witness blocks all `/design` modes at Step-0 until step-05d re-syncs |
+| Mirror direction | ~~Spec Coverage Contract at develop/qa gates~~ MOVED to `02o-phase-1-prd-prototype-fidelity.md` (owner ruling 2026-09-10) — orphan-AC sweep, fidelity review, RTI-4 |
+| Evals + rubrics | Reverse-mode benchmarks in `evals/suites/skills/design.json`; PRD-5/PRD-6 criteria in `evals/rubrics/prd-completeness.json` |
+| Personas | `@product-manager` + `@product-designer` workflow sections + socratic files (reverse stance: challenge smoothing, challenge invention) |
+| Docs | AGENTS.md `/design` line, `skills-catalog.json`, `quick-reference.md`, guide design section, dev-plan registry stamp, readme/readme_cn, changelog, `.agents/skills.md`, `.agents/workflow.md` (A11) |
+
+### 1.2 Out of scope (named, with rationale)
+
+| Item | Rationale |
+|---|---|
+| New persona or standalone skill folder | Mode reuses `/design` chain, memory wiring, artifacts (Simplicity First) |
+| Figma/screenshot auto-ingestion, vision pipelines | Inventory is a human+agent walk-through of the prototype; no binary parsing, tool-agnostic |
+| `/develop` restructure | Now owned by `02o` (fidelity-review step + sweep at existing gates, no workflow rewrite); this plan keeps hands off `/develop` |
+| Token budgets, LLM-judge automation in CI | 02m ruling stands: structural gates only; G-Eval scored runs stay in the vespyr-eval behavioral tier |
+| Retroactive PRD backfill for shipped features | The machinery applies to new design cycles; backfill is a separate owner decision |
+
+---
+
+## 2. First Principles
+
+1. **The second artifact must be earned through the same loop as the first.** One-shot derivation is the defect; a synthesis prompt is not a workflow.
+2. **No evidence, no requirement (DNA 5 applied to specs).** A PRD statement without a resolvable anchor is `[OPEN]`, not invented; anchors use the frozen `path#id` grammar (A11). Hallucination is banned mechanically, not rhetorically.
+3. **Parity is counted, not felt.** Orphan/ghost/detail-class numbers are script-computed and test-backed; "as good as traditional" is a measured claim or it is not made. The parity-delta threshold is set only by first-run calibration with a mandatory blocking owner disposition in `parity-report.md` — no invented prior (A8).
+4. **Sync is loud.** Staleness blocks at Step-0 like every other Vespyr gate; silent drift is the exact defect class 02o/02m exist to prevent.
+5. **The law is bidirectional — one machinery, two epics.** PRD-first gaps and prototype-first gaps are the same lossy-derivation defect; `02n` ships the reverse machinery, `02o` reuses it (ledger grammar, witness pattern, honest tiering) for the traditional direction — no duplicated ceremony.
+
+---
+
+## 3. Reverse-Mode Workflow (d-series steps)
+
+| Step | File | Contract |
+|---|---|---|
+| R1 | `steps/step-01d-ingest-prototype.md` | Inventory the prototype → `prototype-inventory.md`: screens, flows, behaviors, states, interactions — each row anchored `path#id`. Extraction only; no interpretation, no spec language yet |
+| R2 | `steps/step-02d-evidence-ledger.md` | Build the Evidence Ledger in `requirements.md`: behavior → anchor (`path#id`, frozen — A11) → type → status. Gaps become `[OPEN]` questions put to the owner — never filled by inference |
+| R3 | `steps/step-03d-prd-synthesis.md` | Re-run create-mode steps 02a→05a (personas, stories, screen states, tokens) with the ledger as fixed input; every authored artifact row-anchored to the ledger |
+| R4 | `steps/step-04d-parity-gate.md` | Run `spec_parity.js`; complete the 10-class detail checklist; produce `parity-report.md`. Gate: ghosts = 0, orphans = 0-or-deferred (deferred rows carry owner + date). **Owner samples 3 of N ledger statements at R4; each anchor verified to support its claim; disposition recorded in `parity-report.md` (+0.5h, A7)** |
+| R5 | `steps/step-05d-sync-contract.md` | Re-runnable sync: prototype delta → inventory delta → ledger delta → spec delta → witness refresh → parity re-run |
+
+**Mode routing (SKILL.md — reverse checked FIRST, A1):** inventory present ∧ no `requirements.md` → **reverse**; neither artifact → **create**; both present → **edit**, but only after Step-0 recomputes the prototype hash against the witness; mismatch → route to step-05d before anything else.
+
+---
+
+## 4. Quality Measurement — the "as good as traditional" bar
+
+| Metric | Definition | Gate |
+|---|---|---|
+| Ghost statements | ledger statements whose evidence anchor does not resolve on disk | **0 (hard)** |
+| Orphan behaviors | inventory behaviors with no ledger/spec statement | **0**, or deferral row with owner + date |
+| Grounding rate | behavioral statements with resolvable evidence ÷ total behavioral statements | **100%** (remainder must be `[OPEN]`) |
+| Detail-class coverage | 10 classes covered-with-evidence or N/A-with-reason | **10/10** |
+| Parity delta vs traditional | same feature through both modes: AC count + detail-class counts diffed | **first-run calibration; mechanical thresholds stand as-is; owner disposition mandatory and blocking in parity-report.md (A8)** — judged tier, honestly labeled, not structural |
+
+**Detail classes (the "small details" guard):** screen states (empty/loading/error) · edge cases & validation · data fields & types · permissions & auth · navigation & flows · copy & tone · telemetry · performance notes · accessibility · platform constraints.
+
+**Honest tiering (02m lesson):** ghost/orphan/witness checks are **structural** (script, deterministic, test-backed). Grounding *semantics* — whether an anchor actually says what the statement claims — is **judged tier** (G-Eval + owner parity review at R4). The plan does not claim the structural tier catches semantic hallucination.
+
+---
+
+## 5. Build Items (21h serial stated / 24.5–26.5h honest — sizing only; control = checkpoint when 5 of 9 countable items verify complete; single-writer; commit-per-item)
+
+| ID | Task | Est | Status | Verify |
+|---|---|---|---|---|
+| 02n.F | Fixture-prototype build (A5 — prerequisite: lands BEFORE 02n.2): prototype seeded rich in behaviors across the 10 detail classes | 2h | pending | fixture prototype exists; seeded behaviors enumerated |
+| 02n.1 | `SKILL.md` reverse routing (reverse-first precedence, A1) + Step-0 staleness hook; `spec_parity.js` `witness check` subcommand called from step-00; code-level hash-compare stub + `tests/test_step0_staleness.js` (A2) | 3h | pending | probe: mutate prototype file → Step-0 blocks all modes; staleness test exits 1 on mutated prototype |
+| 02n.2 | `step-01d` + `prototype-inventory.md` template | 2h | pending | fixture prototype → inventory lists every seeded behavior with anchors |
+| 02n.3 | `step-02d` + Evidence Ledger section in requirements template | 2h | pending | ledger rows resolve to anchors; `[OPEN]` fencing demonstrated |
+| 02n.4 | `step-03d` (loop a-steps) + `step-04d` parity gate (+ A7 DoD text: owner samples 3 of N at R4) | 2.5h | pending | dry-run on fixture: PRD synthesized, parity-report produced; sampling disposition recorded |
+| 02n.5 | `spec_parity.js` + `tests/test_spec_parity.js` | 2.5h | pending | green on fixture; red on 3 seeded violations (ghost / orphan / stale witness) |
+| 02n.6 | `step-05d` sync contract + witness refresh (Sync Contract v2 — A3: non-file witness = pointer + access timestamp + inventory snapshot hash, honestly weaker) | 1.5h | pending | probe: prototype edit → Step-0 stale → sync → witness updated → gate opens |
+| 02n.7 | ~~Mirror: Spec Coverage Contract~~ MOVED to `02o` (owner ruling 2026-09-10) — A9 as amended by 02o's B8/B12; tracked in 02o DoD | — | moved | — |
+| 02n.8 | Evals + rubrics (PRD-5/6, reverse benchmarks in `design.json` — fixture-tier, 02l forward-note, A6) + personas + socratic files + catalog/quick-reference/AGENTS.md docs + readme/readme_cn, changelog, `.agents/skills.md`, `.agents/workflow.md` (A11) | 3.5h | pending | reverse benchmarks in design.json labeled fixture-tier; catalog parity green; full suite green |
+| 02n.9 | `step_tracker.js` artifact-presence/hash extension (owner @developer); step-00 owner @product-designer (A4) | 2h | pending | tracker distinguishes edit-after-recompute from edit-without-hash; stale pair routes per precedence |
+
+**Total: 21h stated** (15h post-move + A2 net +0.5h + A4 2h + A5 2h + A7 0.5h + A11 docs bump +1h). **Honest range 24.5–26.5h** — carries the pre-fold 3.5–5.5h single-writer cushion; sizing only, never the control (owner A10 re-base).
+
+**Control mechanics (owner A10 re-base, 2026-09-10):** the control is a **checkpoint when 5 of the 9 countable items are verified complete** (counted from commits/registry rows via the Status column; countable = 02n.F, 02n.1–02n.6, 02n.8, 02n.9 — struck 02n.7 excluded; A12 is owner-executed, zero-build, not counted). Under dependency order the 5th close is expected at 02n.4 (fixture → 01d → ledger → loop → parity-gate); the count governs, not the prediction. Single writer halts and records a replan decision (continue/descope/defer) in the registry row with date + SHA. **Scope-drift halt:** any new task, verify-criterion redesign, or deliverable growth → halt and owner rules; the §5 baseline is captured at execution start. Regression gate per item: `tests/run-all.js` green. No hour-based owner gate.
+
+**A12 optional pre-build validation (GO'd by owner 2026-09-10; target feature TBD):** founder's pre-registered hand-run — R1→R3 on one in-scope feature, AC→evidence map with file:line refs, ≤2h, zero build. Corrected consequence clause (B20): trip (≥1 orphan) strengthens M1 at anecdote tier; clean run falsifies the re-sequencing advice (02n-first stands); no >2h arm (hours not a control unit).
+
+---
+
+## 6. Definition of Done
+
+1. [ ] `/design` routes prototype-first correctly (reverse-first precedence, A1); Step-0 calls `spec_parity.js` `witness check`; hash-compare stub + `test_step0_staleness.js` exits 1 on mutated prototype (A2).
+2. [ ] Zero ghost statements; orphans 0-or-deferred on the 02n.F fixture feature (script-verified, 02n.5).
+3. [ ] `parity-report.md` carries the 5 metrics + hash witness; `spec_parity.js` + named test live; bypass probe (delete script or stub it) fails loudly, not silently. **Owner samples 3 of N ledger statements at R4 with recorded disposition (A7); parity-delta threshold set by first-run calibration with blocking owner disposition — no invented prior (A8).**
+4. [ ] Reverse-mode PRD on the fixture feature covers all 10 detail classes (PRD-5/PRD-6 structural patterns present).
+5. [ ] ~~Spec Coverage Contract live at develop/qa gates~~ MOVED to `02o` (owner ruling 2026-09-10) — tracked in 02o DoD.
+6. [ ] Full suite green (179 current + new tests), catalog parity green, docs updated (incl. readme/readme_cn, changelog, `.agents/skills.md`, `.agents/workflow.md` — A11), eval additions labeled fixture-tier with 02l forward-note (A6), registry row stamped with execution evidence.
+
+---
+
+## 7. Risk Register
+
+| # | Risk | L | I | Mitigation |
+|---|---|---|---|---|
+| R-PR1 | Ledger ceremony kills prototype-first speed (why people go prototype-first) | Med | High | One-line rows; script does the counting; N/A-with-reason allowed; 5 steps, no sub-ceremony |
+| R-PR2 | Structural gates catch broken anchors, not semantic hallucination | Med | Med | Honest tiering (§4); judged tier + owner review at R4 **(A7 owner sampling of 3 of N ledger statements)**; never claim more than the gate proves |
+| R-PR3 | Prototype sources too varied to inventory reliably | Low | Med | Inventory = human+agent walk-through normalized to behaviors; tool-agnostic by construction |
+| R-PR4 | Sync gate annoys solo iteration mid-shaping | Med | Low | step-05d re-run is fast (delta → delta → refresh); gate is loud by design — same trade every other Vespyr gate makes |
+
+---
+
+*Author: @product-manager (Sarah) at Chris's request, 2026-09-09. Gate review COMPLETE 2026-09-10 (native roundtable, RESHAPE → **A1–A12 folded**; transcript: `artifacts/evals/roundtable/transcripts/gate-review-02n-reverse-prd_native_1.md`). A10 applied as owner re-based (item-count checkpoint after item 5 of 9; hours sizing-only). A12 GO'd 2026-09-10 (corrected consequence clause; target feature TBD; hand-run not yet run). Sequencing owner-confirmed: `02n → 02o → 02p → 02q`. Execution HELD pending a parallel investigation (owner).*

@@ -184,7 +184,7 @@ To ensure seamless collaboration across different agent steps and avoid context 
 
 Before responding to the user for the first time in any session, **always read `artifacts/memory/project-context.md`** and extract the `User Nickname` field from the `## [IDENTITY]` section. Address the user by their preferred name throughout the conversation. If the file or field is missing, default to `"User"`.
 
-### 🚦 Session Bootstrap (mandatory first action, 02o)
+### 🚦 Session Bootstrap (mandatory first action, 02q)
 
 The **first action of every session** is:
 

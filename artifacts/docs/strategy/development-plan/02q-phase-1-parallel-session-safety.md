@@ -2,7 +2,7 @@
 
 **Decision:** Make concurrent agent sessions safe by default. Today, two sessions writing one working tree can silently destroy each other's records — this happened live on 2026-08-28 (a second window overwrote `session-summaries/latest.md` mid-review and renumbered the 02-series while another epic was executing) and caused the 2026-08-14 02f/02g record corruption. This epic makes every shared-state write **serialized (lock-protected), attributed (session-stamped), and recoverable (append-only + derived views)**, and codifies the parallel-work protocol so parallel workers multiply throughput instead of destroying memory.
 
-**Position:** Phase 1 (vespyr 2.0.0) sub-plan — authored as `02o` (15th); **re-homed to `02p` (16th) on 2026-09-09** when the owner-urgent reverse-PRD design fork was inserted as `02n` and record-integrity shifted `02n→02o`. Task IDs retain their historical `02o.N` labels. **Sequencing recommendation: execute BEFORE `02l`.** Rationale: every remaining epic (02l included) writes shared state; this epic is 8h and removes the hazard class for all of them. No dependency on 02l.
+**Position:** Phase 1 (vespyr 2.0.0) sub-plan — authored as `02o` (15th); **re-homed to `02p` (16th) on 2026-09-09** when the owner-urgent reverse-PRD design fork was inserted as `02n` and record-integrity shifted `02n→02o`; **re-homed to `02q` (17th) on 2026-09-10** when the owner-requested traditional-direction parity plan was inserted as `02o` and record-integrity shifted `02o→02p`. Task IDs retain their historical `02o.N` labels. **Sequencing recommendation: execute BEFORE `02l`.** Rationale: every remaining epic (02l included) writes shared state; this epic is 8h and removes the hazard class for all of them. No dependency on 02l.
 
 **Relationship to 02l (observability):** complementary layers. 02o is the **lock** (prevents damage); 02l is the **camera** (records what happened). 02o ships independently on the 02i lock primitive; after 02l lands, its spans (`session_id`, `trace_id`, parent/child propagation) upgrade 02o's collision detection from timestamp-heuristic to trace-verified. Integration point recorded in 02o.4; not a build dependency. This plan also implements the "single-owner rule for shared schemas/scripts" recommended by the 2026-08-23 review of 02l.
 
@@ -34,7 +34,7 @@
 |---|---|
 | Real-time multi-writer merge logic (CRDT/operational transforms) | Over-engineering; file-based engine needs serialization + attribution, not merging |
 | 02l span pipeline | Owned by 02l; 02o only defines the hook point |
-| History rewriting for past collisions | Correct-forward discipline (record-integrity — `02o` after the 2026-09-09 renumber — owns reconciliation) |
+| History rewriting for past collisions | Correct-forward discipline (record-integrity — `02p` after the 2026-09-10 renumber — owns reconciliation) |
 | Cross-machine distributed locking | Single-repo scope; hostname-scoped session_id is sufficient provenance |
 
 ---
@@ -98,6 +98,18 @@
 | R56 | Concurrent sessions corrupt shared state (occurred 2026-08-14, 2026-08-28) | High (until 02o) | High | This epic is the primary mitigation |
 | R58 | Lock contention deadlock on stale holders | Low | Med | 02i lock already has grace-period stale takeover + PID-liveness eviction; add probe |
 | R59 | Derived `latest.md` breaks consumers expecting hand-written format | Med | Low | Keep output format identical; consumers read, never write |
+
+---
+
+## 7. Post-Execution Hardening (2026-09-10 — D1 defect fix)
+
+Defect + evidence: `artifacts/docs/defects/harness-defects-2026-09-10.md` (D1; fixed same day in `.agents/scripts/worktree.js`):
+
+- **Rule choice (auto-offer firing):** `detectBusyTree` now requires **≥2 distinct foreign session ids** within the window before firing — harnesses that spawn a fresh shell per tool call mint a new `w-<ppid-hash>` id per write, so single-write self-triggers were observed. Residual: multi-write self-churn can still fire, and now yields a valid shared worktree (creation is transactional), never residue.
+- **Placeholder tolerance:** `linkShared` replaces placeholder-only dirs (tracked `.npmignore`/`.gitkeep` in a fresh checkout) and still refuses real content.
+- **Transactional create:** a wiring failure rolls back checkout + branch — no half-created worktrees.
+- **`worktree clean`:** implemented for the package script `worktree:clean`; removes idle `wt/auto-*` worktrees, skips dirty ones.
+- Tests: `tests/test_worktree_shared_state.test.js` (5) + updated `tests/test_worktree.test.js` 02o.8 fixture; full suite **464/464** (the transient `graph-deprecation` failure from the concurrent `bin/cli.js` workstream resolved the same day — see `harness-defects-2026-09-10.md` release note).
 
 ---
 

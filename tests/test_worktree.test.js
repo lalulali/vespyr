@@ -86,12 +86,20 @@ test('02o.7: worktree create — branch, shared state, shared memory', () => {
 test('02o.8: busy tree → auto-offer creates exactly one auto worktree', () => {
   const repo = makeGitRepo();
   try {
-    // Foreign window wrote memory 1 minute ago
+    // Foreign window wrote memory 1 minute ago — two distinct ids, because the
+    // 2026-09-10 hardening fires only on >= 2 distinct foreign sessions
+    // (per-invocation `w-` ids made single self-writes look foreign; see
+    // harness-defects-2026-09-10.md D1).
     const ledger = path.join(repo, '.agents', 'state', 'memory-write-ledger.jsonl');
-    fs.writeFileSync(ledger, JSON.stringify({
-      ts: new Date(Date.now() - 60 * 1000).toISOString(),
-      session_id: 'w-ffffffffffff', file: 'active-decisions.md', title: 'foreign'
-    }) + '\n');
+    fs.writeFileSync(ledger,
+      JSON.stringify({
+        ts: new Date(Date.now() - 60 * 1000).toISOString(),
+        session_id: 'w-ffffffffffff', file: 'active-decisions.md', title: 'foreign'
+      }) + '\n' +
+      JSON.stringify({
+        ts: new Date(Date.now() - 30 * 1000).toISOString(),
+        session_id: 'w-eeeeeeeeeeee', file: 'active-decisions.md', title: 'foreign-2'
+      }) + '\n');
 
     let out = '';
     try {

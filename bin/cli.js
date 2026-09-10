@@ -732,11 +732,43 @@ const MANIFEST_EXCLUDE_FILES = new Set([
 	".DS_Store",
 	"manifest.json",
 ]);
-const MANIFEST_EXCLUDE_DIRS = new Set(["node_modules", ".git"]);
+const MANIFEST_EXCLUDE_DIRS = new Set(["node_modules", ".git", ".bak"]);
 function isBackupLitter(name) {
-	return name.includes(".bak-") || name.includes(".backup.");
+	return name.includes(".bak-") || name.includes(".backup.") || name === ".bak";
 }
 const MANIFEST_EXCLUDE = MANIFEST_EXCLUDE_FILES;
+
+const DEPRECATED_CORE_FILES = [
+	// Removed I/O sub-agents (replaced by direct tool/harness execution in v2.0)
+	"agents/executor.md",
+	"agents/reader.md",
+	"agents/writer.md",
+	// Replaced by ml-ai-engineer.md and ml-ai-ops.md
+	"agents/ml-engineer.md",
+	// Deprecated / removed skills
+	"skills/code-graph",
+	"skills/doc-graph",
+	"skills/explore-game-idea",
+	"skills/validate-game-idea",
+	"skills/delegate",
+	"skills/squad",
+	// Deprecated / removed squads directory
+	"squads",
+	// Deprecated graph scripts and legacy scripts
+	"scripts/doc_graph.js",
+	"scripts/ensure_graph.js",
+	"scripts/incremental_graph.js",
+	"scripts/query_graph.js",
+	"scripts/shallow_graph.js",
+	"scripts/fix-squads.js",
+	"scripts/squads.js",
+	// Deprecated references
+	"references/socratic-universal.md",
+	"references/socratic/ml-engineer.md",
+	"references/socratic/executor.md",
+	"references/socratic/reader.md",
+	"references/socratic/writer.md",
+];
 
 function buildSourceManifest(srcDir) {
 	const manifest = [];
@@ -776,8 +808,139 @@ function writeManifest(targetDir) {
 	);
 }
 
+function migrateLegacyBackupFiles(agentsTarget) {
+	if (!fs.existsSync(agentsTarget)) return;
+	const bakDir = path.join(agentsTarget, ".bak");
+
+	function sweepDir(dir, relDir) {
+		let entries;
+		try { entries = fs.readdirSync(dir, { withFileTypes: true }); } catch { return; }
+		for (const ent of entries) {
+			if (ent.name === ".bak") continue;
+			const fullPath = path.join(dir, ent.name);
+			const currentRelDir = relDir ? path.join(relDir, ent.name) : ent.name;
+			if (ent.isDirectory() && !ent.isSymbolicLink()) {
+				sweepDir(fullPath, currentRelDir);
+			} else if (ent.isFile() && (ent.name.includes(".bak-") || ent.name.includes(".backup."))) {
+				try {
+					const dstDir = path.join(bakDir, relDir);
+					fs.mkdirSync(dstDir, { recursive: true });
+					const dstFile = path.join(dstDir, ent.name);
+					fs.renameSync(fullPath, dstFile);
+				} catch {}
+			}
+		}
+	}
+	sweepDir(agentsTarget, "");
+}
+
+function backupAndRemoveFile(target, agentsTarget, bakDir) {
+	const rel = path.relative(agentsTarget, target);
+	const today = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+	const relDir = path.dirname(rel);
+	const bakDstDir = path.join(bakDir, relDir);
+	fs.mkdirSync(bakDstDir, { recursive: true });
+	const baseName = path.basename(rel);
+	let bakPath = path.join(bakDstDir, `${baseName}.bak-${today}`);
+	let n = 1;
+	while (fs.existsSync(bakPath)) {
+		bakPath = path.join(bakDstDir, `${baseName}.bak-${today}-${n++}`);
+		if (n > 100) break;
+	}
+	try {
+		fs.copyFileSync(target, bakPath);
+	} catch {}
+	fs.rmSync(target, { recursive: true, force: true });
+}
+
+function cleanupDeprecatedCoreFiles(targetDir) {
+	const agentsTarget = path.join(targetDir, ".agents");
+	if (!fs.existsSync(agentsTarget)) return;
+	const bakDir = path.join(agentsTarget, ".bak");
+
+	// Consolidate any scattered legacy backup files into .agents/.bak/
+	migrateLegacyBackupFiles(agentsTarget);
+
+	for (const rel of DEPRECATED_CORE_FILES) {
+		const target = path.resolve(agentsTarget, rel);
+		if (!target.startsWith(agentsTarget + path.sep)) continue;
+		let st;
+		try {
+			st = fs.lstatSync(target);
+		} catch {
+			continue;
+		}
+
+		try {
+			if (st.isFile()) {
+				backupAndRemoveFile(target, agentsTarget, bakDir);
+			} else {
+				fs.rmSync(target, { recursive: true, force: true });
+			}
+		} catch (e) {
+			// ignore
+		}
+	}
+
+	// Dynamic core agent cleanup:
+	// Automatically discovers retired or renamed core agents without relying on static lists.
+	// If an agent file in targetDir/.agents/agents/*.md is NOT present in AGENTS_SRC/agents/*.md:
+	// - If it declares `origin: custom` (or module:*), it is a user custom agent -> preserve it.
+	// - If it declares `origin: core`, it was a core agent that has been renamed or removed in the newer release -> back up & remove it!
+	const targetAgentsDir = path.join(agentsTarget, "agents");
+	const agentsSrcDir = path.join(AGENTS_SRC, "agents");
+	if (fs.existsSync(targetAgentsDir) && fs.existsSync(agentsSrcDir)) {
+		let currentCoreAgents;
+		try {
+			currentCoreAgents = new Set(
+				fs.readdirSync(agentsSrcDir).filter((f) => f.endsWith(".md"))
+			);
+		} catch {
+			currentCoreAgents = new Set();
+		}
+
+		let targetEntries;
+		try {
+			targetEntries = fs.readdirSync(targetAgentsDir, { withFileTypes: true });
+		} catch {
+			targetEntries = [];
+		}
+
+		for (const ent of targetEntries) {
+			if (!ent.isFile() && !ent.isSymbolicLink()) continue;
+			if (!ent.name.endsWith(".md")) continue;
+			if (currentCoreAgents.has(ent.name)) continue;
+
+			const agentFile = path.join(targetAgentsDir, ent.name);
+			try {
+				const content = fs.readFileSync(agentFile, "utf8");
+				const parsed = parseFrontmatter(content);
+				const origin = parsed.data && parsed.data.origin ? String(parsed.data.origin).trim() : null;
+
+				// User-authored custom agent or module -> preserve
+				if (origin === "custom" || (origin && origin.startsWith("module:"))) {
+					continue;
+				}
+
+				// If it explicitly declares origin: core, it is a retired/renamed core agent
+				if (origin === "core") {
+					backupAndRemoveFile(agentFile, agentsTarget, bakDir);
+				}
+			} catch (e) {
+				// ignore read error
+			}
+		}
+	}
+}
+
 function removeStaleManifestFiles(targetDir) {
 	const agentsTarget = path.join(targetDir, ".agents");
+	if (!fs.existsSync(agentsTarget)) return;
+	const bakDir = path.join(agentsTarget, ".bak");
+
+	// Always clean up known deprecated core files
+	cleanupDeprecatedCoreFiles(targetDir);
+
 	// Single authority: prefer the hashed manifest.json file list; fall back
 	// to the legacy path-list .vespyr-manifest.json for pre-unification
 	// installs. Both describe the same file universe post-fix.
@@ -793,14 +956,15 @@ function removeStaleManifestFiles(targetDir) {
 	} catch {}
 	if (!prevList) {
 		const manifestPath = path.join(agentsTarget, ".vespyr-manifest.json");
-		if (!fs.existsSync(manifestPath)) return;
-		try {
-			prevList = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
-		} catch (e) {
-			return;
+		if (fs.existsSync(manifestPath)) {
+			try {
+				const parsed = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+				if (Array.isArray(parsed)) prevList = parsed;
+			} catch (e) {}
 		}
-		if (!Array.isArray(prevList)) return;
 	}
+
+	if (!Array.isArray(prevList)) return;
 
 	const next = buildSourceManifest(AGENTS_SRC);
 	const nextSet = new Set(next);
@@ -814,13 +978,19 @@ function removeStaleManifestFiles(targetDir) {
 		const target = path.resolve(agentsTarget, rel);
 		if (!target.startsWith(agentsTarget + path.sep)) continue;
 		// lstat guard: never follow a symlink out of bounds during cleanup.
+		let st;
 		try {
-			fs.lstatSync(target);
+			st = fs.lstatSync(target);
 		} catch {
 			continue;
 		}
+
 		try {
-			fs.rmSync(target, { recursive: true, force: true });
+			if (st.isFile()) {
+				backupAndRemoveFile(target, agentsTarget, bakDir);
+			} else {
+				fs.rmSync(target, { recursive: true, force: true });
+			}
 		} catch (e) {
 			// ignore
 		}
@@ -1097,6 +1267,10 @@ function performSyncDocs(targetDir) {
 	}
 
 	try {
+		cleanupDeprecatedCoreFiles(targetDir);
+	} catch (e) {}
+
+	try {
 		const validateScript = path.join(
 			targetDir,
 			".agents",
@@ -1111,7 +1285,7 @@ function performSyncDocs(targetDir) {
 			});
 		}
 	} catch (e) {
-		logWarn(`Frontmatter validation failed (non-fatal): ${e.message}`);
+		logWarn(`Frontmatter validation reported issues (non-fatal): ${e.message}`);
 		return false;
 	}
 	return true;
@@ -1800,6 +1974,8 @@ module.exports = {
 	writeManifest,
 	performGenerateManifest,
 	removeStaleManifestFiles,
+	cleanupDeprecatedCoreFiles,
+	DEPRECATED_CORE_FILES,
 	yamlQuote,
 	installGitHook,
 	ASCII_ART,

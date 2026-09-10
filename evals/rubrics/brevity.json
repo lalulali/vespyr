@@ -1,0 +1,39 @@
+{
+  "dimension": "brevity",
+  "name": "Brevity & Terse Execution Rubric",
+  "description": "Evaluates terse, filler-free execution output: direct completion statements with no preamble, analysis fluff, or flourish.",
+  "passThreshold": 4,
+  "criteria": [
+    {
+      "id": "BRV-1",
+      "name": "No Preamble or Analysis Filler",
+      "weight": 2,
+      "prohibitedPatterns": [
+        "Here is a thorough analysis",
+        "Let us consider",
+        "Let me explain",
+        "I'll walk you through",
+        "comprehensive overview",
+        "As an AI"
+      ]
+    },
+    {
+      "id": "BRV-2",
+      "name": "Direct Action Completion Token",
+      "weight": 2,
+      "requiredPatterns": [
+        "updated|created|passed|confirm|clean|phase|appended|trimmed|completed|done|deleted|ok"
+      ]
+    },
+    {
+      "id": "BRV-3",
+      "name": "No Flourish Adverbs",
+      "weight": 1,
+      "prohibitedPatterns": [
+        "Furthermore",
+        "Moreover",
+        "Additionally"
+      ]
+    }
+  ]
+}

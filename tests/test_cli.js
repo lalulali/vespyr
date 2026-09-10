@@ -25,6 +25,9 @@ const {
   performReconfigure,
   performUpdate,
   installGitHook,
+  removeStaleManifestFiles,
+  cleanupDeprecatedCoreFiles,
+  DEPRECATED_CORE_FILES,
   ASCII_ART,
   VERSION,
 } = require('../bin/cli.js');
@@ -1140,10 +1143,10 @@ describe('Test 17: End-to-End Installation, Update, Reconfiguration, and Uninsta
     const newVersion = JSON.parse(fs.readFileSync(path.join(agentsTarget, '.vespyr-version'), 'utf8'));
     assert.strictEqual(newVersion.version, VERSION);
 
-    // Verify B1: customized file preserved as .bak-YYYYMMDD with verbatim content
+    // Verify B1: customized file preserved as .bak-YYYYMMDD with verbatim content in .agents/.bak/
     const today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-    const bakFile = `${customizedFile}.bak-${today}`;
-    assert.strictEqual(fs.existsSync(bakFile), true, 'customized file must be backed up as .bak-YYYYMMDD');
+    const bakFile = path.join(agentsTarget, '.bak', `GUARDRAILS.md.bak-${today}`);
+    assert.strictEqual(fs.existsSync(bakFile), true, 'customized file must be backed up in .agents/.bak');
     assert.strictEqual(fs.readFileSync(bakFile, 'utf8'), 'user-customized guardrails content');
 
     // 3. Run performReconfigure to select opencode and claude
@@ -1322,5 +1325,155 @@ describe('Test 19: Root Docs Regeneration on Update', () => {
     assert.strictEqual(fs.existsSync(path.join(tmpDir, 'CLAUDE.md')), true);
   });
 });
+
+describe('Test 20: Deprecated Core Files Cleanup on Update & Manifest Sync', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = makeTempDir();
+  });
+
+  afterEach(() => {
+    cleanTempDir(tmpDir);
+  });
+
+  it('should include executor, reader, writer, and ml-engineer in DEPRECATED_CORE_FILES', () => {
+    assert.ok(DEPRECATED_CORE_FILES.includes('agents/executor.md'));
+    assert.ok(DEPRECATED_CORE_FILES.includes('agents/reader.md'));
+    assert.ok(DEPRECATED_CORE_FILES.includes('agents/writer.md'));
+    assert.ok(DEPRECATED_CORE_FILES.includes('agents/ml-engineer.md'));
+  });
+
+  it('should prune deprecated core agents and create backups even without a manifest', () => {
+    const agentsTarget = path.join(tmpDir, '.agents');
+    const agentsDir = path.join(agentsTarget, 'agents');
+    fs.mkdirSync(agentsDir, { recursive: true });
+
+    // Seed deprecated files
+    fs.writeFileSync(path.join(agentsDir, 'executor.md'), '# Old Executor');
+    fs.writeFileSync(path.join(agentsDir, 'writer.md'), '# Old Writer');
+
+    // Run removeStaleManifestFiles without any manifest.json
+    removeStaleManifestFiles(tmpDir);
+
+    // Deprecated files should be removed
+    assert.strictEqual(fs.existsSync(path.join(agentsDir, 'executor.md')), false);
+    assert.strictEqual(fs.existsSync(path.join(agentsDir, 'writer.md')), false);
+
+    // Backups should have been created in .bak/agents/
+    const bakAgentsDir = path.join(agentsTarget, '.bak', 'agents');
+    assert.ok(fs.existsSync(bakAgentsDir), '.bak/agents directory should exist');
+    const files = fs.readdirSync(bakAgentsDir);
+    assert.ok(files.some(f => f.startsWith('executor.md.bak-')));
+    assert.ok(files.some(f => f.startsWith('writer.md.bak-')));
+  });
+
+  it('should clean up deprecated agents during performUpdate so frontmatter validation passes', async () => {
+    const agentsTarget = path.join(tmpDir, '.agents');
+    fs.mkdirSync(path.join(agentsTarget, 'agents'), { recursive: true });
+    fs.writeFileSync(path.join(agentsTarget, '.vespyr-version'), JSON.stringify({ version: '1.6.0' }));
+
+    // Put a deprecated agent file in target
+    fs.writeFileSync(path.join(agentsTarget, 'agents', 'executor.md'), '# Broken legacy executor');
+    fs.writeFileSync(path.join(agentsTarget, 'agents', 'reader.md'), '# Broken legacy reader');
+
+    await performUpdate(tmpDir, { yes: true });
+
+    // Stale agents must be removed
+    assert.strictEqual(fs.existsSync(path.join(agentsTarget, 'agents', 'executor.md')), false);
+    assert.strictEqual(fs.existsSync(path.join(agentsTarget, 'agents', 'reader.md')), false);
+
+    // Active agents must exist
+    assert.strictEqual(fs.existsSync(path.join(agentsTarget, 'agents', 'developer.md')), true);
+  });
+});
+
+describe('Test 21: Forward-compatible Dynamic Agent Lifecycle & Cleanup', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = makeTempDir();
+  });
+
+  afterEach(() => {
+    cleanTempDir(tmpDir);
+  });
+
+  it('dynamically backs up and prunes retired core agents without requiring hardcoded lists', () => {
+    const agentsTarget = path.join(tmpDir, '.agents');
+    const agentsDir = path.join(agentsTarget, 'agents');
+    fs.mkdirSync(agentsDir, { recursive: true });
+
+    // Simulate an agent that was shipped as core in a previous version, but is NOT in current AGENTS_SRC/agents
+    // and is NOT in DEPRECATED_CORE_FILES (e.g. hypothetical retired agent 'hypothetical-old-core.md')
+    const oldCoreContent = '---\nname: hypothetical-old-core\norigin: core\nversion: "1.0"\n---\n# Old Core\n';
+    fs.writeFileSync(path.join(agentsDir, 'hypothetical-old-core.md'), oldCoreContent);
+
+    // Also place a user custom agent (origin: custom)
+    const customContent = '---\nname: my-special-agent\norigin: custom\nversion: "1.0"\n---\n# Special Agent\n';
+    fs.writeFileSync(path.join(agentsDir, 'my-special-agent.md'), customContent);
+
+    // Also place a plain user notes file (no frontmatter / no origin: core)
+    fs.writeFileSync(path.join(agentsDir, 'notes.md'), '# Just some user notes\n');
+
+    // Run cleanup
+    cleanupDeprecatedCoreFiles(tmpDir);
+
+    // Retired core agent must be removed from agents/
+    assert.strictEqual(fs.existsSync(path.join(agentsDir, 'hypothetical-old-core.md')), false);
+
+    // Retired core agent must be backed up in .bak/agents/
+    const bakAgentsDir = path.join(agentsTarget, '.bak', 'agents');
+    assert.ok(fs.existsSync(bakAgentsDir));
+    const bakFiles = fs.readdirSync(bakAgentsDir);
+    assert.ok(bakFiles.some(f => f.startsWith('hypothetical-old-core.md.bak-')));
+
+    // User custom agent and plain user files MUST be preserved
+    assert.strictEqual(fs.existsSync(path.join(agentsDir, 'my-special-agent.md')), true);
+    assert.strictEqual(fs.readFileSync(path.join(agentsDir, 'my-special-agent.md'), 'utf8'), customContent);
+    assert.strictEqual(fs.existsSync(path.join(agentsDir, 'notes.md')), true);
+  });
+
+  it('update workflow dynamically handles future renamed or removed core agents', async () => {
+    const agentsTarget = path.join(tmpDir, '.agents');
+    const agentsDir = path.join(agentsTarget, 'agents');
+    fs.mkdirSync(agentsDir, { recursive: true });
+    fs.writeFileSync(path.join(agentsTarget, '.vespyr-version'), JSON.stringify({ version: '2.0.0' }));
+
+    // Retired core agent not in AGENTS_SRC
+    fs.writeFileSync(path.join(agentsDir, 'future-retired-agent.md'), '---\nname: future-retired-agent\norigin: core\n---\n# Retired\n');
+    // User custom agent
+    fs.writeFileSync(path.join(agentsDir, 'custom-helper.md'), '---\nname: custom-helper\norigin: custom\n---\n# Helper\n');
+
+    await performUpdate(tmpDir, { yes: true });
+
+    // Retired agent was pruned
+    assert.strictEqual(fs.existsSync(path.join(agentsDir, 'future-retired-agent.md')), false);
+    // User custom agent preserved
+    assert.strictEqual(fs.existsSync(path.join(agentsDir, 'custom-helper.md')), true);
+    // Shipped core agents installed
+    assert.strictEqual(fs.existsSync(path.join(agentsDir, 'developer.md')), true);
+  });
+
+  it('surgically cleans up retired core agents on uninstall without leaving empty-blocking residue', () => {
+    const agentsTarget = path.join(tmpDir, '.agents');
+    const agentsDir = path.join(agentsTarget, 'agents');
+    fs.mkdirSync(agentsDir, { recursive: true });
+
+    // Add current core agent, retired core agent, and custom agent
+    fs.writeFileSync(path.join(agentsDir, 'developer.md'), '---\nname: developer\norigin: core\n---\n# Developer\n');
+    fs.writeFileSync(path.join(agentsDir, 'old-retired.md'), '---\nname: old-retired\norigin: core\n---\n# Old Retired\n');
+    fs.writeFileSync(path.join(agentsDir, 'my-custom.md'), '---\nname: my-custom\norigin: custom\n---\n# Custom\n');
+
+    surgicallyCleanupAgentsDir(agentsTarget);
+
+    // Current and retired core agents deleted
+    assert.strictEqual(fs.existsSync(path.join(agentsDir, 'developer.md')), false);
+    assert.strictEqual(fs.existsSync(path.join(agentsDir, 'old-retired.md')), false);
+    // Custom agent preserved
+    assert.strictEqual(fs.existsSync(path.join(agentsDir, 'my-custom.md')), true);
+  });
+});
+
 
 
