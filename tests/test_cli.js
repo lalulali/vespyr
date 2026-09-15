@@ -12,6 +12,7 @@ const {
   transpileCopilotYAML,
   transpileCursorMDC,
   scaffoldArtifacts,
+  backupExistingArtifactsDir,
   bootstrapRootDocs,
   writeVersionFile,
   getInstalledVersion,
@@ -445,6 +446,132 @@ describe('Test 5b: detectState() foreign .agents vs repair classification', () =
     assert.strictEqual(fs.existsSync(path.join(tmpDir, '.agents', 'skills', 'my-skill')), false);
     assert.strictEqual(detectState(tmpDir), 'installed');
   });
+
+  it('should present Merge as 1st option when foreign .agents has skills', async () => {
+    const { performForeignConflict } = require('../bin/cli.js');
+    fs.mkdirSync(path.join(tmpDir, '.agents', 'skills', 'custom-skill'), { recursive: true });
+    fs.writeFileSync(path.join(tmpDir, '.agents', 'skills', 'custom-skill', 'SKILL.md'), 'custom');
+
+    let askedQuestion = null;
+    let presentedChoices = null;
+    const mockPrompt = async (question, choices) => {
+      askedQuestion = question;
+      presentedChoices = choices;
+      return 2; // Cancel
+    };
+
+    // Prevent process.exit from terminating the test runner
+    const origExit = process.exit;
+    let exitCode = null;
+    process.exit = (code) => { exitCode = code; throw new Error('EXIT_CALLED'); };
+
+    try {
+      await performForeignConflict(tmpDir, {}, mockPrompt);
+    } catch (e) {
+      if (e.message !== 'EXIT_CALLED') throw e;
+    } finally {
+      process.exit = origExit;
+    }
+
+    assert.ok(presentedChoices);
+    assert.ok(presentedChoices[0].startsWith('Merge'));
+    assert.ok(presentedChoices[1].startsWith('Fresh install'));
+    assert.strictEqual(exitCode, 0);
+  });
+
+  it('should present Fresh install as 1st option when foreign .agents has no skills', async () => {
+    const { performForeignConflict } = require('../bin/cli.js');
+    fs.mkdirSync(path.join(tmpDir, '.agents', 'other'), { recursive: true });
+    fs.writeFileSync(path.join(tmpDir, '.agents', 'other', 'file.txt'), 'other');
+
+    let presentedChoices = null;
+    const mockPrompt = async (question, choices) => {
+      presentedChoices = choices;
+      return 2; // Cancel
+    };
+
+    const origExit = process.exit;
+    let exitCode = null;
+    process.exit = (code) => { exitCode = code; throw new Error('EXIT_CALLED'); };
+
+    try {
+      await performForeignConflict(tmpDir, {}, mockPrompt);
+    } catch (e) {
+      if (e.message !== 'EXIT_CALLED') throw e;
+    } finally {
+      process.exit = origExit;
+    }
+
+    assert.ok(presentedChoices);
+    assert.ok(presentedChoices[0].startsWith('Fresh install'));
+    assert.ok(presentedChoices[1].startsWith('Merge'));
+    assert.strictEqual(exitCode, 0);
+  });
+
+  it('should initialize artifacts when choosing Merge and artifacts does not exist', async () => {
+    const { performForeignConflict } = require('../bin/cli.js');
+    fs.mkdirSync(path.join(tmpDir, '.agents', 'skills', 'my-skill'), { recursive: true });
+    fs.writeFileSync(path.join(tmpDir, '.agents', 'skills', 'my-skill', 'SKILL.md'), 'custom skill');
+
+    const mockPrompt = async (question, choices) => {
+      // Choose Merge (index 0 when skills present)
+      return 0;
+    };
+
+    await performForeignConflict(tmpDir, { harnesses: [] }, mockPrompt);
+
+    // .agents/ merged
+    assert.ok(fs.existsSync(path.join(tmpDir, '.agents', 'skills', 'my-skill', 'SKILL.md')));
+    assert.ok(fs.existsSync(path.join(tmpDir, '.agents', '.vespyr-version')));
+
+    // artifacts initialized
+    assert.ok(fs.existsSync(path.join(tmpDir, 'artifacts', 'output')));
+    assert.ok(fs.existsSync(path.join(tmpDir, 'artifacts', 'memory', 'project-context.md')));
+  });
+
+  it('should prompt for artifacts resolution when choosing Merge and artifacts already exists', async () => {
+    const { performForeignConflict } = require('../bin/cli.js');
+    fs.mkdirSync(path.join(tmpDir, '.agents', 'skills', 'my-skill'), { recursive: true });
+    fs.writeFileSync(path.join(tmpDir, '.agents', 'skills', 'my-skill', 'SKILL.md'), 'custom skill');
+
+    // Pre-existing artifacts with custom file and old context
+    fs.mkdirSync(path.join(tmpDir, 'artifacts', 'memory'), { recursive: true });
+    fs.writeFileSync(path.join(tmpDir, 'artifacts', 'memory', 'project-context.md'), '# Old Context');
+    fs.writeFileSync(path.join(tmpDir, 'artifacts', 'my-file.txt'), 'keep me');
+
+    let askedPrompts = [];
+    const mockPrompt = async (question, choices) => {
+      askedPrompts.push({ question, choices });
+      if (question.includes('Existing artifacts/')) {
+        // Choose Merge (index 1 in [Replace, Merge, Fresh install])
+        const mergeIdx = choices.findIndex((c) => c.startsWith('Merge'));
+        return mergeIdx;
+      }
+      // First prompt: choose Merge
+      return 0;
+    };
+
+    await performForeignConflict(tmpDir, { harnesses: [] }, mockPrompt);
+
+    assert.strictEqual(askedPrompts.length, 2);
+    assert.ok(askedPrompts[1].question.includes('Existing artifacts/'));
+    assert.ok(askedPrompts[1].choices.some((c) => c.startsWith('Replace')));
+    assert.ok(askedPrompts[1].choices.some((c) => c.startsWith('Merge')));
+    assert.ok(askedPrompts[1].choices.some((c) => c.startsWith('Fresh install')));
+
+    // Existing context preserved under merge
+    assert.strictEqual(
+      fs.readFileSync(path.join(tmpDir, 'artifacts', 'memory', 'project-context.md'), 'utf8'),
+      '# Old Context',
+    );
+    assert.strictEqual(
+      fs.readFileSync(path.join(tmpDir, 'artifacts', 'my-file.txt'), 'utf8'),
+      'keep me',
+    );
+    // Missing dirs and files populated
+    assert.ok(fs.existsSync(path.join(tmpDir, 'artifacts', 'output')));
+    assert.ok(fs.existsSync(path.join(tmpDir, 'artifacts', 'memory', 'active-decisions.md')));
+  });
 });
 
 describe('Test 6: getInstalledVersion() / writeVersionFile()', () => {
@@ -551,6 +678,92 @@ describe('Test 7: scaffoldArtifacts()', () => {
     assert.ok(ctx.includes('<!-- BEGIN MACHINE STATE -->'));
     assert.ok(ctx.includes('<!-- END MACHINE STATE -->'));
     assert.ok(ctx.includes(`Engine Version: ${require("../package.json").version}`));
+  });
+
+  it('should back up existing artifacts directory using backupExistingArtifactsDir', () => {
+    fs.mkdirSync(path.join(tmpDir, 'artifacts', 'output'), { recursive: true });
+    fs.writeFileSync(path.join(tmpDir, 'artifacts', 'output', 'report.md'), 'analysis');
+
+    const backupPath = backupExistingArtifactsDir(tmpDir);
+
+    assert.strictEqual(fs.existsSync(path.join(tmpDir, 'artifacts')), false);
+    assert.ok(fs.existsSync(backupPath));
+    assert.strictEqual(
+      fs.readFileSync(path.join(backupPath, 'output', 'report.md'), 'utf8'),
+      'analysis',
+    );
+  });
+
+  it('should merge missing directories and templates without overwriting existing files', () => {
+    fs.mkdirSync(path.join(tmpDir, 'artifacts', 'memory'), { recursive: true });
+    fs.writeFileSync(
+      path.join(tmpDir, 'artifacts', 'memory', 'project-context.md'),
+      '# Custom Project Context',
+    );
+    fs.writeFileSync(path.join(tmpDir, 'artifacts', 'custom.txt'), 'custom content');
+
+    scaffoldArtifacts(tmpDir, 'test-project', 'User', null, 'merge');
+
+    // Existing files preserved
+    assert.strictEqual(
+      fs.readFileSync(path.join(tmpDir, 'artifacts', 'memory', 'project-context.md'), 'utf8'),
+      '# Custom Project Context',
+    );
+    assert.strictEqual(
+      fs.readFileSync(path.join(tmpDir, 'artifacts', 'custom.txt'), 'utf8'),
+      'custom content',
+    );
+
+    // Missing directories and files created
+    assert.ok(fs.existsSync(path.join(tmpDir, 'artifacts', 'output')));
+    assert.ok(fs.existsSync(path.join(tmpDir, 'artifacts', 'directions')));
+    assert.ok(fs.existsSync(path.join(tmpDir, 'artifacts', 'memory', 'active-decisions.md')));
+    assert.ok(fs.existsSync(path.join(tmpDir, 'artifacts', 'memory', 'lessons-learned.md')));
+  });
+
+  it('should replace template files with fresh copies while keeping other user files in replace mode', () => {
+    fs.mkdirSync(path.join(tmpDir, 'artifacts', 'memory'), { recursive: true });
+    fs.writeFileSync(
+      path.join(tmpDir, 'artifacts', 'memory', 'project-context.md'),
+      '# Stale Context',
+    );
+    fs.writeFileSync(path.join(tmpDir, 'artifacts', 'custom.txt'), 'custom content');
+
+    scaffoldArtifacts(tmpDir, 'fresh-project', 'User', null, 'replace');
+
+    // Template file replaced with fresh copy
+    const ctx = fs.readFileSync(path.join(tmpDir, 'artifacts', 'memory', 'project-context.md'), 'utf8');
+    assert.ok(ctx.includes('Project: fresh-project'));
+    assert.ok(!ctx.includes('# Stale Context'));
+
+    // Non-template user files kept
+    assert.strictEqual(
+      fs.readFileSync(path.join(tmpDir, 'artifacts', 'custom.txt'), 'utf8'),
+      'custom content',
+    );
+  });
+
+  it('should back up existing artifacts and create fresh tree in fresh-install mode', () => {
+    fs.mkdirSync(path.join(tmpDir, 'artifacts', 'memory'), { recursive: true });
+    fs.writeFileSync(
+      path.join(tmpDir, 'artifacts', 'memory', 'project-context.md'),
+      '# Old Artifacts',
+    );
+
+    scaffoldArtifacts(tmpDir, 'new-project', 'User', null, 'fresh-install');
+
+    // Fresh install in place
+    const ctx = fs.readFileSync(path.join(tmpDir, 'artifacts', 'memory', 'project-context.md'), 'utf8');
+    assert.ok(ctx.includes('Project: new-project'));
+
+    // Old artifacts backed up
+    const entries = fs.readdirSync(tmpDir);
+    const backupDir = entries.find((e) => e.startsWith('artifacts.backup.'));
+    assert.ok(backupDir, 'artifacts.backup directory must exist');
+    assert.strictEqual(
+      fs.readFileSync(path.join(tmpDir, backupDir, 'memory', 'project-context.md'), 'utf8'),
+      '# Old Artifacts',
+    );
   });
 });
 

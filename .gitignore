@@ -21,9 +21,10 @@ artifacts/evals/roundtable/telemetry/
 *.log
 
 # IDE
-.obsidian/
-.vscode/
-.idea/
+.obsidian/*
+.vscode/*
+.idea/*
+.commmandcode/*
 *.swp
 *.swo
 *~

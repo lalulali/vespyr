@@ -5,6 +5,18 @@ const assert = require('node:assert/strict');
 const fs = require('fs');
 const path = require('path');
 
+// 08-isolation: 04/04a/04b are owner-only dev-plan docs, untracked after the
+// private-workspace split. On a fresh clone / CI checkout the single-owner
+// contract is not machine-checkable here — skip loudly instead of failing
+// red; coverage moves to the private repo's own CI (08 plan, Phase 0.2).
+const DEV_PLAN_DIR = path.join(__dirname, '..', 'artifacts', 'docs', 'strategy', 'development-plan');
+
+function skipIfPrivateWorkspaceAbsent(ctx) {
+  if (fs.existsSync(DEV_PLAN_DIR)) return false;
+  ctx.skip('private workspace absent (post-purge clone) — verified in private-repo CI');
+  return true;
+}
+
 describe('canonical span schema single-owner (02l → 04/04a import)', () => {
   it('tools/telemetry/schema.json exists and is valid JSON schema', () => {
     const p = path.join(__dirname, '..', 'tools', 'telemetry', 'schema.json');
@@ -17,7 +29,8 @@ describe('canonical span schema single-owner (02l → 04/04a import)', () => {
     assert.ok(j.properties.quality_scorecard.properties.rqs_j_score.type.includes('null'));
   });
 
-  it('04-phase-3-observability.md does not redefine VespyrTelemetrySpan — imports canonical', () => {
+  it('04-phase-3-observability.md does not redefine VespyrTelemetrySpan — imports canonical', (ctx) => {
+    if (skipIfPrivateWorkspaceAbsent(ctx)) return;
     const p = path.join(__dirname, '..', 'artifacts', 'docs', 'strategy', 'development-plan', '04-phase-3-observability.md');
     const t = fs.readFileSync(p, 'utf8');
     // Should contain canonical import line
@@ -28,7 +41,8 @@ describe('canonical span schema single-owner (02l → 04/04a import)', () => {
     assert.equal(interfaceCount, 0, '04 must not redefine interface — import only');
   });
 
-  it('04a-phase-3-observability-engine.md imports canonical, not redefines', () => {
+  it('04a-phase-3-observability-engine.md imports canonical, not redefines', (ctx) => {
+    if (skipIfPrivateWorkspaceAbsent(ctx)) return;
     const p = path.join(__dirname, '..', 'artifacts', 'docs', 'strategy', 'development-plan', '04a-phase-3-observability-engine.md');
     const t = fs.readFileSync(p, 'utf8');
     assert.match(t, /tools\/telemetry\/schema\.json/);
@@ -38,7 +52,8 @@ describe('canonical span schema single-owner (02l → 04/04a import)', () => {
     assert.equal(interfaceCount, 0, '04a must not contain full interface definition');
   });
 
-  it('04b imports canonical (dashboard) and splits RQS-D/J', () => {
+  it('04b imports canonical (dashboard) and splits RQS-D/J', (ctx) => {
+    if (skipIfPrivateWorkspaceAbsent(ctx)) return;
     const p = path.join(__dirname, '..', 'artifacts', 'docs', 'strategy', 'development-plan', '04b-phase-3-observability-ui-miniapp.md');
     const t = fs.readFileSync(p, 'utf8');
     assert.match(t, /tools\/telemetry\/schema\.json/);

@@ -49,15 +49,40 @@ function createInstaller(deps) {
 	} = deps;
 	const { handleConflict, createLinkOrCopy } = linkUtils;
 
-function scaffoldArtifacts(targetDir, projectName, userNickname = "User", stack = null) {
+function backupExistingArtifactsDir(targetDir) {
+	const artifactsPath = path.join(targetDir, "artifacts");
+	const backupPath = path.join(targetDir, `artifacts.backup.${Date.now()}`);
+	if (R.dryRun) {
+		logDry(`Would back up existing artifacts/ to ${path.basename(backupPath)}`);
+		return backupPath;
+	}
+	fs.renameSync(artifactsPath, backupPath);
+	return backupPath;
+}
+
+function scaffoldArtifacts(targetDir, projectName, userNickname = "User", stack = null, mode = "fresh") {
 	const artifactsDir = path.join(targetDir, "artifacts");
-	if (fs.existsSync(artifactsDir)) {
+
+	if (mode === "fresh" && fs.existsSync(artifactsDir)) {
 		log("  Existing artifacts/ found, skipping.");
 		return;
 	}
 
+	if (mode === "fresh-install" && fs.existsSync(artifactsDir)) {
+		const backupPath = backupExistingArtifactsDir(targetDir);
+		if (!R.dryRun) {
+			log(`  Backed up existing artifacts/ to ${path.basename(backupPath)}`);
+		}
+	}
+
 	if (R.dryRun) {
-		logDry(`Would create artifacts/ directory tree in ${targetDir}`);
+		if (mode === "replace") {
+			logDry(`Would replace artifacts/ templates with fresh copies in ${targetDir}`);
+		} else if (mode === "merge") {
+			logDry(`Would merge missing artifacts/ directories and templates in ${targetDir}`);
+		} else {
+			logDry(`Would create artifacts/ directory tree in ${targetDir}`);
+		}
 		return;
 	}
 
@@ -88,9 +113,8 @@ function scaffoldArtifacts(targetDir, projectName, userNickname = "User", stack 
 	const memoryPath = path.join(artifactsDir, "memory");
 	const isoDate = new Date().toISOString().split("T")[0];
 
-	fs.writeFileSync(
-		path.join(memoryPath, "project-context.md"),
-		`# Project Context
+	const templateFiles = {
+		"project-context.md": `# Project Context
 
 ## [CORE]
 Project: ${projectName} (startup)
@@ -133,24 +157,27 @@ _(auto-populated on every session by @memory-controller / orchestrator_state.js)
 - **Lessons Learned**: None yet
 - **Active Decisions**: None yet
 `,
-	);
+		"active-decisions.md": "# Active Decisions\n\nNo decisions recorded yet.\n",
+		"patterns-and-conventions.md": "# Patterns & Conventions\n\nNo patterns recorded yet.\n",
+		"lessons-learned.md": "# Lessons Learned\n\nNo lessons recorded yet.\n",
+		"blockers-and-risks.md": "# Blockers & Risks\n\nNo blockers or risks recorded yet.\n",
+	};
 
-	fs.writeFileSync(
-		path.join(memoryPath, "active-decisions.md"),
-		"# Active Decisions\n\nNo decisions recorded yet.\n",
-	);
-	fs.writeFileSync(
-		path.join(memoryPath, "patterns-and-conventions.md"),
-		"# Patterns & Conventions\n\nNo patterns recorded yet.\n",
-	);
-	fs.writeFileSync(
-		path.join(memoryPath, "lessons-learned.md"),
-		"# Lessons Learned\n\nNo lessons recorded yet.\n",
-	);
-	fs.writeFileSync(
-		path.join(memoryPath, "blockers-and-risks.md"),
-		"# Blockers & Risks\n\nNo blockers or risks recorded yet.\n",
-	);
+	for (const [filename, content] of Object.entries(templateFiles)) {
+		const filePath = path.join(memoryPath, filename);
+		if (mode === "merge" && fs.existsSync(filePath)) {
+			continue;
+		}
+		fs.writeFileSync(filePath, content);
+	}
+
+	if (mode === "merge") {
+		log("  Merged artifacts/ directory tree (existing files preserved).");
+	} else if (mode === "replace") {
+		log("  Replaced artifacts/ templates with fresh copies.");
+	} else if (mode === "fresh-install") {
+		log("  Scaffolded fresh artifacts/ directory tree.");
+	}
 }
 
 function bootstrapRootDocs(targetDir, projectName, selectedHarnesses) {
@@ -962,6 +989,7 @@ async function performReconfigure(targetDir, flags) {
 
 	return {
 		scaffoldArtifacts,
+		backupExistingArtifactsDir,
 		bootstrapRootDocs,
 		writeVersionFile,
 		getInstalledVersion,

@@ -71,6 +71,7 @@ const installerApi = createInstaller({
 });
 const {
 	scaffoldArtifacts,
+	backupExistingArtifactsDir,
 	bootstrapRootDocs,
 	writeVersionFile,
 	getInstalledVersion,
@@ -1105,7 +1106,7 @@ async function performUninstall(targetDir) {
  * --yes (or init --yes) backs the foreign dir aside and fresh-installs;
  * interactive asks: backup+fresh (default), merge, or cancel.
  */
-async function performForeignConflict(targetDir, flags) {
+async function performForeignConflict(targetDir, flags, promptFn = askSingleChoice) {
 	log(`\n============================================================`);
 	log(`   VESPYR v${VERSION} — Existing .agents/ Detected`);
 	log(`============================================================`);
@@ -1122,21 +1123,65 @@ async function performForeignConflict(targetDir, flags) {
 		return;
 	}
 
-	const choice = await askSingleChoice("Select an action:", [
-		"Fresh install (Back up existing .agents/ and start fresh)",
-		"Merge (Keep existing files, add Vespyr files alongside)",
-		"Cancel (Keep everything as-is)",
-	]);
+	const hasSkills = fs.existsSync(path.join(targetDir, ".agents", "skills"));
 
-	if (choice === 0) {
+	const choices = hasSkills
+		? [
+				"Merge (Keep existing files, add Vespyr files alongside)",
+				"Fresh install (Back up existing .agents/ and start fresh)",
+				"Cancel (Keep everything as-is)",
+		  ]
+		: [
+				"Fresh install (Back up existing .agents/ and start fresh)",
+				"Merge (Keep existing files, add Vespyr files alongside)",
+				"Cancel (Keep everything as-is)",
+		  ];
+
+	const choice = await promptFn("Select an action:", choices);
+	const selected = choices[choice];
+
+	if (selected && selected.startsWith("Fresh install")) {
 		const backupPath = backupExistingAgentsDir(targetDir);
 		if (!R.dryRun) {
 			log(`  Backed up existing .agents/ to ${path.basename(backupPath)}`);
 		}
 		await performFreshInstall(targetDir, flags);
-	} else if (choice === 1) {
+	} else if (selected && selected.startsWith("Merge")) {
 		log(`  Merging Vespyr files alongside existing content (collisions backed up as *.bak-*).\n`);
 		await performUpdate(targetDir, flags);
+
+		const artifactsDir = path.join(targetDir, "artifacts");
+		const projectName = flags.projectName || path.basename(targetDir);
+		let userNickname = flags.userNickname;
+		if (userNickname) {
+			userNickname = userNickname.replace(/[^a-zA-Z0-9\s\-_.]/g, "") || "User";
+		} else {
+			userNickname = getExistingUserNickname(targetDir) || "User";
+		}
+		const resolvedStack = flags.stack || detectStack(targetDir);
+
+		if (!fs.existsSync(artifactsDir)) {
+			log(`  Initializing artifacts/ directory tree...`);
+			scaffoldArtifacts(targetDir, projectName, userNickname, resolvedStack, "fresh");
+		} else {
+			const artifactChoices = [
+				"Replace (Overwrite existing files with fresh templates)",
+				"Merge (Keep existing files, add missing directories and templates)",
+				"Fresh install (Back up existing artifacts/ and start fresh)",
+			];
+			const artChoice = await promptFn(
+				"Existing artifacts/ folder detected. Select an action:",
+				artifactChoices,
+			);
+			const artSelected = artifactChoices[artChoice];
+			if (artSelected && artSelected.startsWith("Replace")) {
+				scaffoldArtifacts(targetDir, projectName, userNickname, resolvedStack, "replace");
+			} else if (artSelected && artSelected.startsWith("Merge")) {
+				scaffoldArtifacts(targetDir, projectName, userNickname, resolvedStack, "merge");
+			} else if (artSelected && artSelected.startsWith("Fresh install")) {
+				scaffoldArtifacts(targetDir, projectName, userNickname, resolvedStack, "fresh-install");
+			}
+		}
 	} else {
 		log(`  Installation cancelled.\n`);
 		process.exit(0);
@@ -1950,6 +1995,7 @@ module.exports = {
 	detectState,
 	isVespyrAgentsDir,
 	backupExistingAgentsDir,
+	backupExistingArtifactsDir,
 	performForeignConflict,
 	createLinkOrCopy,
 	scaffoldArtifacts,
