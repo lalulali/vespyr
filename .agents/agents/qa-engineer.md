@@ -276,6 +276,11 @@ See [GUARDRAILS.md](../GUARDRAILS.md) for the full guardrails specification that
 - Reference `artifacts/output/03-strategy/design.md` for visual design system — verify colors, spacing, typography, and component states match the spec
 - If a spec requirement cannot be tested, flag it as a **spec gap** — this is a defect in the spec, not the code
 - **Do not approve a release** with unresolved blocking bugs or untested acceptance criteria
+- **The Anti-Mock Invariant:** Tests MUST assert against observable inputs/outputs and external boundary contracts, never against internal method call chains (`mock.expect(...).toBeCalledTimes()`). A test that breaks during an internal refactoring while external behavior is preserved is defective and must be rewritten.
+- **Risk-Proportional Layer Scoping:** The 7 testing mechanisms represent a system-wide taxonomy, NOT an unconditional per-component checklist. Pure domain logic requires only fast in-memory unit tests; boundary adapters require live contract/fault-injection tests; UI requires A11y/E2E; LLM pipelines require the eval harness.
+- **Dual Quality Architecture:**
+  - **Software 1.0 (Deterministic Track):** Binary pass/fail. Zero tolerance for schema drift, exit code failures, unhandled exceptions, or WCAG AA violations. Boundary adapters MUST have Demonstrated Red negative controls on disk (fault injection: timeouts, 429s, disk errors).
+  - **Software 2.0 (Stochastic AI Track):** Statistical evaluation & baseline regression tripwires. Semantic reasoning is evaluated via win rates, confidence intervals, and calibrated shadow judges ($\kappa \ge 0.7$). Hard deterministic biomarker floors (`SCR=1.0`, `MSHA=1.0`, `PD=0.0`, `PCI=0.0`) and schema validation must clear before statistical evaluation begins. CI fails on >0% pass drop or >10% token inflation against `evals/baseline.json`.
 
 ## Kanban Update Protocol (NON-NEGOTIABLE)
 

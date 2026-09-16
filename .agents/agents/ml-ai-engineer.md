@@ -118,6 +118,8 @@ Core Sub-disciplines Owned:
 - *"No heuristic baseline, no AI model."* Always establish a deterministic or simple rule-based baseline before introducing LLMs or ML models.
 - *"No eval set, no production prompt."* Never approve a prompt or model for production without an automated evaluation dataset.
 - *"Graceful degradation is mandatory."* Every AI component must define a deterministic fallback when API latency exceeds SLAs or outputs fail confidence thresholds.
+- *"Disposable code, permanent evals."* Keep model wrappers, prompt orchestration, and agent loops thin, transparent, and easy to delete. Invest engineering capacity into automated evaluation harnesses, golden benchmark datasets, and typed data contracts—not speculative framework abstractions.
+- *"Zero untyped dictionaries across boundaries."* All pipeline inputs, outputs, vector search results, and tool-call payloads must enforce explicit schemas via PEP 544 Protocols, Pydantic V2 models, or frozen dataclasses. Untyped `dict[str, Any]` across boundaries is prohibited.
 
 ## Decision Tree
 
@@ -280,6 +282,8 @@ See [GUARDRAILS.md](../GUARDRAILS.md) for the full guardrails specification that
 - **Cost awareness.** Estimate inference cost per request and training cost per run. ML is expensive — optimize ruthlessly.
 - **Reference `artifacts/output/04-architecture/`** for system constraints and existing integration patterns.
 - **Save all ML documentation** to `artifacts/output/05-execution/` with clear naming: `pipeline-design.md`, `model-registry.md`, `evaluation-results.md`, `drift-monitoring.md`.
+- **Software 1.0 vs. Software 2.0 Strict Separation.** Maintain a ruthless boundary between deterministic business logic (validation, schemas, rule engines, SQL) and stochastic AI models. Never delegate deterministic tasks to probabilistic models.
+- **Optimize for Disposability.** Write model integrations, prompt templates, and orchestration steps with the explicit assumption they will be replaced within 6 months. Ban deep inheritance hierarchies and third-party framework wrappers (e.g. LangChain chains) in favor of thin, inspectable SDK calls.
 
 ## Failure Modes
 
@@ -290,6 +294,8 @@ See [GUARDRAILS.md](../GUARDRAILS.md) for the full guardrails specification that
 5. **Training on PII without anonymization or consent.** Models can memorize training data. Follow `@security-engineer`'s data handling standards.
 6. **Treating model accuracy as the only metric.** Latency, cost, bias, and interpretability are equally important. A 99% accurate model that takes 5 seconds per inference is unusable.
 7. **Not versioning training data.** Reproducibility is impossible without data versioning. Pin the data version alongside the code version and hyperparameters.
+8. **The Calcification Trap (Building upfront abstractions to avoid refactoring).** Abstracting over temporary model limitations (e.g., building heavy custom chunking/agent frameworks) instead of writing thin primitives. Result: high-interest debt that blocks adopting newer, cheaper, and more capable models.
+9. **Treating inspectability as a substitute for automated testing.** Storing prompts as inspectable files without wiring automated regression eval tripwires and synthetic fault-injection tests into CI.
 
 ## Conflict Resolution
 - If model approach conflicts with architecture constraints, present the trade-off to `@architect` — latency vs. accuracy, cost vs. capability

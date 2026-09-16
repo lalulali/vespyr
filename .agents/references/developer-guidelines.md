@@ -42,10 +42,12 @@ You MUST load, read, and fully digest the **Product Spec** (`artifacts/output/03
 ### Step 2: Study Existing Patterns
 Read existing source files in the same component area. Learn and match all naming conventions, folder structures, imports, and styling patterns exactly.
 
-### Step 3: Implement the Logic
+### Step 3: Implement the Logic (Evolutionary Design over BDUF)
 Write modular, clean, and highly robust code adhering to:
-*   Clear, self-documenting naming.
-*   Single Responsibility Principle (SRP) for functions and components.
+*   **Kent Beck's 4 Rules of Simple Design:** (1) Passes tests, (2) Reveals intention, (3) Eliminates duplication, (4) Fewest elements.
+*   **YAGNI over BDUF:** Never build speculative frameworks, generic abstractions, or plumbing layers upfront. Build the simplest design that satisfies current acceptance criteria.
+*   **Ports & Adapters (Hexagonal Boundaries):** Isolate pure domain business logic from databases, external APIs, IPC, and UI. Keep external frameworks at the boundary adapters.
+*   Clear, self-documenting naming and Single Responsibility Principle (SRP).
 *   Relevant Architectural Decision Records (ADRs). Reference the specific ADR numbers in code comments if they inform important design decisions.
 
 ### Step 4: Implement Acceptance Criteria Categories
@@ -57,15 +59,21 @@ You must write code satisfying all three mandatory criteria categories:
 ### Step 5: Logging and Observability
 Instrument your code with structured logging using appropriate levels (`info`, `warn`, `error`). Always pass correlation/request IDs across asynchronous boundaries to preserve execution traceability.
 
-### Step 6: Test-Driven Development (TDD)
-Write unit and integration tests alongside your code, not after. Every acceptance criterion defined in the user story must have an equivalent test case. Write tests yourself.
+### Step 6: Test-Driven Development (TDD) & Refactoring
+Follow the strict **Red-Green-Refactor** cycle alongside your code:
+*   **Red:** Write a failing test proving the missing capability or defect.
+*   **Green:** Write minimal code to pass the test.
+*   **Refactor:** Continuously clean structure, eliminate duplication, and improve readability while keeping tests green.
+*   **The Anti-Mock Invariant:** Tests MUST assert against observable inputs/outputs and external boundary contracts, never against internal method call chains (`mock.expect(...).toBeCalledTimes()`). Tests that break during internal refactoring while external behavior is preserved are defective.
+*   **Wire-Level vs. Internal Mocking Boundary:** Wire-level I/O simulation (e.g. MSW, local Node `http.createServer`, testcontainers) is legitimate and expected when testing boundary adapters against external systems. The Anti-Mock ban applies strictly to mocking *internal domain class methods*.
+*   **Demonstrated Red on Disk:** Boundary adapters (DBs, network APIs, IPC) MUST have contract tests with negative fault injection (timeouts, 429s, disk errors) proving the failure handlers trip.
 
 ### Step 7: Minimal, Non-Obvious Comments
 Do NOT add comments for obvious code. Let clean structure and descriptive variables speak for themselves. Add comments only to explain "why" a non-obvious workaround, algorithm, or mathematical scale is used.
 
 ### Step 8: Verify via Static Analysis
 Verify your implementation's static correctness by running linting and type-checking directly:
-*   *Example:* `npm run lint && npm run typecheck`
+*   *Example:* `npm run lint && npm run typecheck` (or syntax validation `node --check` when standalone).
 
 ### Step 9: Re-verify
 Verify that no regression has been introduced in other files.
@@ -77,8 +85,10 @@ Verify that no regression has been introduced in other files.
 Before declaring a task complete and handing it over to downstream agents, verify that all of the following requirements are met:
 
 *   [ ] **Acceptance Criteria:** Every happy path, unhappy path, and edge case is fully implemented.
-*   [ ] **Test Coverage:** All unit and integration tests pass successfully (`npm test`).
-*   [ ] **Linting & Code Style:** Linter checks pass cleanly with zero errors (`npm run lint`).
+*   [ ] **Test Coverage & Anti-Mock:** All tests assert observable behavior with zero mocks on domain logic; pre-existing and new test suites pass (`npm test`).
+*   [ ] **Demonstrated Red:** Boundary adapters include automated negative fault-injection tests proving error handlers trip under simulated network/system faults.
+*   [ ] **Continuous Refactoring Completed:** Red-Green-Refactor executed; code is simplified with zero speculative abstraction layers.
+*   [ ] **Linting & Code Style:** Linter and syntax checks pass cleanly with zero errors (`npm run lint`).
 *   [ ] **Type Safety:** Compilation and type-checks pass completely (`npm run typecheck`).
 *   [ ] **Regression Safeguard:** The full pre-existing test suite passes with no regressions.
 *   [ ] **ADR Compliance:** Code complies with all active architectural designs (ADRs).
@@ -88,6 +98,12 @@ Before declaring a task complete and handing it over to downstream agents, verif
 
 ## 4. Coding Standards
 
+*   **Evolutionary Design & YAGNI (The 2-Callsite Invariant):** Speculative abstractions are forbidden. Any internal interface, generic helper class, or multi-tenant wrapper must have at least two active, concrete production call sites in the PR to justify its existence.
+    *   *No Test-as-Callsite Gaming:* Unit test invocations do **NOT** count toward the two required call sites.
+    *   *Boundary Ports Exemption:* Outbound boundary ports (Ports & Adapters / Hexagonal Architecture) isolating pure business logic from external I/O (e.g. database repositories, third-party API clients) are justified by architectural boundary decoupling, not internal call site counts.
+*   **Software 1.0 vs. Software 2.0 Boundary Standard:**
+    *   *Software 1.0 (Deterministic Core):* Pure domain business logic, validated schemas, deterministic state transitions. Tested with zero-mock in-memory tests.
+    *   *Software 2.0 (Stochastic AI/ML):* Prompts, agent loops, and model wrappers are disposable primitives (<24h replacement velocity). Typed schemas (PEP 544 / Pydantic) required at boundaries—no untyped dictionaries.
 *   **Explicit over Implicit:** Write clear, descriptive code. Avoid clever tricks or implicit language syntax that reduces readability.
 *   **Total Error Handling:** Never swallow exceptions or hide failures. Catch errors, log them with appropriate severity, and return clean user feedback or recovery alternatives.
 *   **Traceability:** Always reference the Kanban backlog (`kanban.md`) and architectural patterns (`04-architecture/`) in your task reasoning.

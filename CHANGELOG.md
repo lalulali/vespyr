@@ -6,6 +6,20 @@ All notable changes to the Vespyr project will be documented in this file.
 
 ## [Unreleased]
 
+### Evolutionary Design & Dual Quality Architecture Hardening (2026-09-16)
+- **Multi-Agent Socratic Alignment (Review 10):** Following a dialectic `/round-table` review with project owner Chris, realigned the 8 core engineering and product personas on Evolutionary Design over Big Design Up Front (BDUF), continuous refactoring as routine hygiene in the Definition of Done (Red-Green-Refactor), and Dual Quality Architecture separating deterministic Software 1.0 from stochastic Software 2.0.
+- **8 Swarm Personas Hardened:**
+  - **`@developer` (Rex):** Codified Kent Beck's 4 Rules of Simple Design, YAGNI over BDUF, Refactoring Safety Contract (no unverified refactoring), Ports & Adapters boundary isolation, and Demonstrated Red fault injection on boundary adapters.
+  - **`@ml-ai-engineer` (Kai):** Codified "disposable code, permanent evals" (<24h replacement velocity), PEP 544 / Pydantic V2 boundary schemas (prohibiting untyped `dict[str, Any]`), and guards against the Calcification Trap.
+  - **`@qa-engineer` (Nina):** Codified the Anti-Mock Invariant (assert against observable behavior/contracts, never internal method call chains), Risk-Proportional Layer Scoping, and Dual Quality Architecture (deterministic zero-drift vs. statistical evals with biomarker tripwires).
+  - **`@architect` (Vera):** Codified Evolutionary Architecture, banned speculative BDUF framework scaffolding in ADRs, and mandated Replacement Velocity and Cost of Disposability evaluation for AI/ML components.
+  - **`@tech-lead` (Grant):** Enforced thin vertical slices over horizontal framework tickets, embedded continuous refactoring into task estimates and DoD, and established the AI Task Sequencing Invariant (Eval Dataset & Heuristic Baseline before prompt implementation).
+  - **`@product-manager` (Sarah):** Mandated explicit Unhappy Paths (`AC-U*`) and Edge Cases (`AC-E*`) in all stories, quantitative AI budgets (`AC-ML*` for hallucination rate, p95 latency, token cost), and formal ingestion of QA-enriched acceptance criteria.
+  - **`@code-reviewer` (Scout):** Added blocking review gates: Anti-Mock Invariant blocker, Demonstrated Red on disk blocker, YAGNI 2-callsite rule blocker, and "No Eval Benchmark, No Merge" for prompt/model changes.
+  - **`@ml-ai-ops` (Atlas):** Added blocking CI/CD Golden Dataset eval gate, continuous semantic drift telemetry (embedding cosine distance, cache hit rates, token cost), and shadow routing verification.
+- **Master Developer Guidelines Aligned:** Updated `.agents/references/developer-guidelines.md` with Kent Beck's 4 Rules, Ports & Adapters, the Anti-Mock Invariant, Demonstrated Red, and continuous refactoring in the Definition of Done.
+- **Documentation:** Authored comprehensive review and development plan in `artifacts/docs/review/10-evolutionary-design-and-dual-quality-plan.md`.
+
 ---
 
 ## [2.0.10] - 2026-09-10

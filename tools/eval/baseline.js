@@ -45,9 +45,14 @@ function computeDatasetHash() {
 }
 
 function loadBaseline(customPath) {
-  const filePath = customPath || DEFAULT_BASELINE_PATH;
+  let filePath = customPath || DEFAULT_BASELINE_PATH;
   if (!fs.existsSync(filePath)) {
-    return null;
+    const fallbackPath = path.join(__dirname, "..", "..", "evals", "mock-baseline.json");
+    if (!customPath && fs.existsSync(fallbackPath)) {
+      filePath = fallbackPath;
+    } else {
+      return null;
+    }
   }
   try {
     return JSON.parse(fs.readFileSync(filePath, "utf8"));

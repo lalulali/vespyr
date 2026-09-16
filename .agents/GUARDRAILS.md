@@ -173,3 +173,14 @@ When an agent discovers an issue with an upstream artifact (spec gap, implementa
   - **Technical Requirement:** A compact, bulleted contract detailing integration points, parameters, and default fallbacks.
   - **Acceptance Criteria:** Terse, unambiguous Gherkin scenarios (`Given/When/Then`) covering atomic happy, unhappy, and edge cases.
 
+## Core Engineering Invariants (Evolutionary Design & Dual Quality)
+
+- **Evolutionary Design & YAGNI (The 2-Callsite Invariant):** Speculative abstractions, generic factory layers, and multi-tenant wrappers are prohibited. Any internal interface or abstraction must have at least two distinct concrete production call sites in the PR (unit test invocations do NOT count as a call site). Outbound boundary ports isolating domain logic from external I/O (Ports & Adapters) are justified by architectural boundary decoupling.
+- **The Anti-Mock Invariant:** Tests MUST assert against observable inputs/outputs, state transitions, and external contract boundaries. Mocking internal domain class method calls (`mock.expect(...).toBeCalledTimes()`) is defective and forbidden. Real wire-level simulation (MSW, local test HTTP servers) is expected at external boundary adapters.
+- **Demonstrated Red on Disk:** Every boundary adapter (DB connector, external API client, IPC) MUST include automated negative fault-injection tests (timeouts, 429 rate limits, 500 errors) proving that failure handling trips cleanly.
+- **Continuous Refactoring in DoD:** Routine refactoring is mandatory engineering hygiene (Red-Green-Refactor) embedded in every ticket's Definition of Done—never deferred to isolated cleanup tickets. Refactoring unverified code lacking automated regression coverage is prohibited.
+- **Software 2.0 Evaluation & Schema Invariant:**
+  - Prohibit untyped dictionaries (`dict[str, Any]`) across boundaries; enforce typed schemas (PEP 544 Protocols / Pydantic V2).
+  - Prompts and model wrappers are disposable primitives (<24h replacement velocity); permanent assets are Golden Evaluation Datasets and automated eval runners.
+  - "No Eval Benchmark, No Merge": PRs modifying prompts, model parameters, or retrieval logic MUST include an attached Golden Dataset benchmark run proving accuracy, latency, and $\le 10\%$ token inflation against baseline.
+

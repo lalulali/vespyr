@@ -123,7 +123,8 @@ async function openaiAdapter(benchmark, { options = {}, sandbox = null }) {
   const response = await fetch(baseUrl.replace(/\/+$/, "") + "/chat/completions", {
     method: "POST",
     headers,
-    body: JSON.stringify(body)
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(options.timeout || 30000)
   });
 
   if (!response.ok) {
@@ -168,7 +169,8 @@ async function anthropicAdapter(benchmark, { options = {}, sandbox = null }) {
       "x-api-key": apiKey,
       "anthropic-version": "2023-06-01"
     },
-    body: JSON.stringify(body)
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(options.timeout || 30000)
   });
 
   if (!response.ok) {
@@ -216,7 +218,8 @@ async function geminiAdapter(benchmark, { options = {}, sandbox = null }) {
   const response = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body)
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(options.timeout || 30000)
   });
 
   if (!response.ok) {
@@ -253,7 +256,8 @@ async function ollamaAdapter(benchmark, { options = {}, sandbox = null }) {
   const response = await fetch(host.replace(/\/+$/, "") + "/api/generate", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body)
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(options.timeout || 30000)
   });
 
   if (!response.ok) {

@@ -69,4 +69,117 @@ describe("add", () => {
     assert.strictEqual(res.mock, false);
     assert.ok(res.tier0Passed);
   });
+
+  describe("Boundary Adapter Fault Injection & Negative Controls (Demonstrated Red)", () => {
+    const http = require("node:http");
+
+    it("openaiAdapter cleanly rejects on HTTP 429 Rate Limit", async () => {
+      const server = http.createServer((req, res) => {
+        res.writeHead(429, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: { message: "Rate limit reached" } }));
+      });
+
+      await new Promise((resolve) => server.listen(0, resolve));
+      const port = server.address().port;
+      const baseUrl = `http://127.0.0.1:${port}`;
+
+      try {
+        const benchmark = { id: "TEST-429", prompt: "Hello" };
+        const options = { baseUrl, apiKey: "test-key" };
+        await assert.rejects(
+          async () => {
+            await openaiAdapter(benchmark, { options });
+          },
+          (err) => {
+            assert.ok(err.message.includes("OpenAI API request failed (429)"));
+            assert.ok(err.message.includes("Rate limit reached"));
+            return true;
+          }
+        );
+      } finally {
+        await new Promise((resolve) => server.close(resolve));
+      }
+    });
+
+    it("openaiAdapter cleanly rejects on HTTP 500 Server Error", async () => {
+      const server = http.createServer((req, res) => {
+        res.writeHead(500, { "Content-Type": "text/plain" });
+        res.end("Internal Server Error");
+      });
+
+      await new Promise((resolve) => server.listen(0, resolve));
+      const port = server.address().port;
+      const baseUrl = `http://127.0.0.1:${port}`;
+
+      try {
+        const benchmark = { id: "TEST-500", prompt: "Hello" };
+        const options = { baseUrl, apiKey: "test-key" };
+        await assert.rejects(
+          async () => {
+            await openaiAdapter(benchmark, { options });
+          },
+          (err) => {
+            assert.ok(err.message.includes("OpenAI API request failed (500)"));
+            assert.ok(err.message.includes("Internal Server Error"));
+            return true;
+          }
+        );
+      } finally {
+        await new Promise((resolve) => server.close(resolve));
+      }
+    });
+
+    it("openaiAdapter cleanly aborts on timeout when server hangs", async () => {
+      const server = http.createServer((req, res) => {
+        // Intentionally hang: never respond
+      });
+
+      await new Promise((resolve) => server.listen(0, resolve));
+      const port = server.address().port;
+      const baseUrl = `http://127.0.0.1:${port}`;
+
+      try {
+        const benchmark = { id: "TEST-TIMEOUT", prompt: "Hello" };
+        const options = { baseUrl, apiKey: "test-key", timeout: 50 };
+        await assert.rejects(
+          async () => {
+            await openaiAdapter(benchmark, { options });
+          },
+          (err) => {
+            assert.ok(err.name === "TimeoutError" || err.name === "AbortError" || err.message.includes("aborted"));
+            return true;
+          }
+        );
+      } finally {
+        await new Promise((resolve) => server.close(resolve));
+      }
+    });
+
+    it("ollamaAdapter cleanly rejects on HTTP 503 Service Unavailable", async () => {
+      const server = http.createServer((req, res) => {
+        res.writeHead(503, { "Content-Type": "text/plain" });
+        res.end("Service Unavailable");
+      });
+
+      await new Promise((resolve) => server.listen(0, resolve));
+      const port = server.address().port;
+      const baseUrl = `http://127.0.0.1:${port}`;
+
+      try {
+        const benchmark = { id: "TEST-OLLAMA-503", prompt: "Hello" };
+        const options = { baseUrl };
+        await assert.rejects(
+          async () => {
+            await ollamaAdapter(benchmark, { options });
+          },
+          (err) => {
+            assert.ok(err.message.includes("Ollama API request failed (503)"));
+            return true;
+          }
+        );
+      } finally {
+        await new Promise((resolve) => server.close(resolve));
+      }
+    });
+  });
 });

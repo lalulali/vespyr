@@ -127,4 +127,4 @@
 
 ---
 
-*Author: @product-manager (Sarah) at Chris's request, 2026-09-10, promoting the traditional-direction mirror out of 02n.7 with the roundtable's binding rulings carried over. Gate review COMPLETE 2026-09-10 (native roundtable, RESHAPE → **B1–B20 folded**; transcript: `artifacts/evals/roundtable/transcripts/gate-review-02o-prd-prototype-fidelity_native_1.md`). A12 GO'd and sequencing confirmed 2026-09-10; execution HELD pending a parallel investigation (owner).*
+*Author: @product-manager (Sarah) at Chris's request, 2026-09-10, promoting the traditional-direction mirror out of 02n.7 with the roundtable's binding rulings carried over. Gate review COMPLETE 2026-09-10 (native roundtable, RESHAPE → **B1–B20 folded**; transcript: `artifacts/evals/roundtable/transcripts/gate-review-02o-prd-prototype-fidelity_native_1.md`). A12 GO'd and sequencing confirmed 2026-09-10; parallel investigation RESOLVED & RATIFIED 2026-09-16 via Review 11 (`artifacts/docs/review/11-design-phase-spec-prototype-fidelity-and-lifecycle-plan.md`); execution UNBLOCKED (executes after 02n per sequencing).*
