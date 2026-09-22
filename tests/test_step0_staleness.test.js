@@ -104,3 +104,25 @@ test('step0 staleness: step-00 and SKILL.md keep the hook + reverse-first routin
   assert.match(skill, /step-05d-sync-contract\.md/);
   assert.match(skill, /step0_staleness\.js/);
 });
+
+test('step0 staleness: rollback re-witness cycle reopens the gate (02n.6 probe)', () => {
+  const root = tmpTree();
+  assert.equal(stamp(root).status, 0);
+  fs.appendFileSync(path.join(root, REL.prototype), '\n<!-- prototype v2 after falsified model -->\n');
+  const blocked = runHook(root);
+  assert.equal(blocked.status, 1, 'post-freeze edit must block at Step 0');
+  assert.equal(stamp(root).status, 0, 'rollback path re-witnesses the new prototype');
+  const open = runHook(root);
+  assert.equal(open.status, 0, open.stderr);
+  assert.match(open.stdout, /fresh/);
+});
+
+test('step0 staleness: step-05d is the Spike Rollback protocol, not a steady-state sync loop', () => {
+  const step5 = fs.readFileSync(path.join(ROOT, '.agents', 'skills', 'design', 'steps', 'step-05d-sync-contract.md'), 'utf8');
+  assert.match(step5, /Spike Rollback Protocol/);
+  assert.match(step5, /Re-witness/);
+  assert.match(step5, /\[DELTA-NN\]/);
+  assert.doesNotMatch(step5, /Re-runnable sync/);
+  const skill = fs.readFileSync(path.join(ROOT, '.agents', 'skills', 'design', 'SKILL.md'), 'utf8');
+  assert.match(skill, /invoked only on QA falsification/);
+});

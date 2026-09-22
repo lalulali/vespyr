@@ -61,7 +61,7 @@ If unclear, ask: "Are you designing from scratch, refining existing specs, revie
 2. Evidence Ledger → `steps/step-02d-evidence-ledger.md`
 3. PRD Synthesis (looped create steps 02a→05a, ledger as fixed input) → `steps/step-03d-prd-synthesis.md`
 4. Parity Gate → `steps/step-04d-parity-gate.md`
-5. Sync Contract / Spike Rollback → `steps/step-05d-sync-contract.md`
+5. Spike Rollback (Sync Contract v2 — invoked only on QA falsification) → `steps/step-05d-sync-contract.md`
 
 ## Edit mode step sequence
 1. Load Existing → `steps/step-01b-load-existing.md`
