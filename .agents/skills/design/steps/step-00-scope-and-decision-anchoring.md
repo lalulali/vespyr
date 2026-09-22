@@ -15,16 +15,30 @@ Confirm the user prompt states all three:
 - **Boundary constraints** — platform invariants, design-system constraints, breakpoints in/out of scope
 - **Target decision** — the decision this design work informs
 
-## 2. Decision Fork
-- **Unambiguous (C ≥ 0.85):** proceed to mode routing (create / edit / validate).
+## 2. Staleness Hook (all modes — 02n.1)
+Before mode routing, run the deterministic witness check:
+
+```bash
+node .agents/scripts/step0_staleness.js --report artifacts/output/03-strategy/parity-report.md
+```
+
+- **exit 0** → proceed (`witness: fresh` or `absent` — reverse mode unused).
+- **exit 1** (`[BLOCK] ...`) → **HALT**. A stale or expected-but-missing prototype witness blocks every mode. Restore the frozen prototype, or run the step-05d Spike Rollback to re-extract and re-witness, before any step executes.
+- **script missing / unexpected failure** → **HALT loudly**. Never proceed silently — a bypassed staleness gate is a correctness failure (DoD 3).
+
+Reverse mode additionally requires the **SPEC.md Spec Kernel anchor** (`artifacts/output/03-strategy/SPEC.md`); missing kernel → halt (Review 10 §4).
+
+## 3. Decision Fork
+- **Unambiguous (C ≥ 0.85):** proceed to mode routing (reverse / create / edit / validate) — reverse checked FIRST (A1).
 - **Ambiguous / multi-track (0.50 ≤ C < 0.85):** HALT. Emit the 2–3 Track Fork card — e.g., full create flow vs edit of existing spec vs heuristic-validate only. Each track names its recommended `@agent` + `/skill` handles. Wait for selection. Zero artifact scaffolding to `artifacts/output/` before selection (GUARDRAILS: Anti-Premature Execution).
 - **Trivial single-action (C < 0.50):** execute directly — do not run this skill at all.
+- **Reverse-first precedence (A1):** when artifact signals collide (prototype source or `prototype-inventory.md` present ∧ no `requirements.md`), reverse wins — route to `steps/step-01d-ingest-prototype.md`, never create.
 
-## 3. Satisfaction Checkpoint
+## 4. Satisfaction Checkpoint
 After track selection, lock the scope (the selected mode is the track) before advancing:
 
 ```bash
-node .agents/scripts/step_tracker.js scope-lock --skill design --track "<create|edit|validate>"
+node .agents/scripts/step_tracker.js scope-lock --skill design --track "<create|edit|validate|reverse>"
 node .agents/scripts/step_tracker.js begin --skill design --step 0
 ```
 
