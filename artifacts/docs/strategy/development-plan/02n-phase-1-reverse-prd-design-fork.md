@@ -79,6 +79,12 @@ bump version
 
 **Mode routing (SKILL.md — reverse checked FIRST, A1):** reverse mode requires the SPEC.md Spec Kernel anchor (Review 10 §4); inventory present ∧ no `requirements.md` → **reverse**; neither artifact → **create**; both present → **edit**, but only after Step-0 recomputes the prototype hash against the witness; mismatch → block, then either restore the frozen prototype or run step-05d Spike Rollback before anything else.
 
+**Anchor grammar `path#id` (frozen — A11; binding on 02n.2, 02n.3, 02n.5, and 02o's evidence refs):**
+- **Syntax:** exactly one `#`; split at the first `#`. `path` = repo-relative POSIX path (`/` separators, no leading `./`, chars `[A-Za-z0-9._/-]`); `id` = anchor token `^[A-Za-z][A-Za-z0-9._:-]*$`.
+- **Resolution (structural):** (1) `path` resolves to an existing file from the repo root; (2) `id` is present in that file — for `.html`/`.htm`/`.svg` as an `id="<id>"` / `id='<id>'` attribute; for all other files as a word-boundary occurrence of the id.
+- **Rows:** one primary anchor per row; `[OPEN]` and `[DEFERRED TO SPEC]` are statuses, never anchors. Non-file prototypes (Figma URL, live code) anchor to `prototype-inventory.md#<row-id>`; their witness is Sync Contract v2 (A3) — honestly weaker than a file hash.
+- **Honest tiering:** resolution is structural (script, test-backed); whether the anchor actually supports the statement is judged tier — owner sampling at R4 (A7) — never claimed as structural.
+
 ---
 
 ## 4. Quality Measurement — the "as good as traditional" bar
@@ -101,7 +107,7 @@ bump version
 
 | ID | Task | Est | Status | Verify |
 |---|---|---|---|---|
-| 02n.F | Fixture-prototype build (A5 — prerequisite: lands BEFORE 02n.2): prototype seeded rich in behaviors across the 10 detail classes | 2h | pending | fixture prototype exists; seeded behaviors enumerated |
+| 02n.F | Fixture-prototype build (A5 — prerequisite: lands BEFORE 02n.2): prototype seeded rich in behaviors across the 10 detail classes | 2h | done (2026-09-22) | fixture prototype exists; seeded behaviors enumerated (49 anchors / 10 classes; `tests/test_reverse_prd_fixture.test.js` green) |
 | 02n.1 | `SKILL.md` reverse routing (reverse-first precedence, A1) + Step-0 staleness hook + **SPEC.md kernel anchor requirement (Review 10 §4)**; `spec_parity.js` `witness check` subcommand called from step-00; code-level hash-compare stub + `tests/test_step0_staleness.js` (A2) | 3h | pending | probe: mutate prototype file → Step-0 blocks all modes; reverse mode refuses without SPEC.md kernel; staleness test exits 1 on mutated prototype |
 | 02n.2 | `step-01d` + `prototype-inventory.md` template (+ **4-criteria completeness / State-Switcher reject gate**, Review 10 §4) | 2h | pending | fixture prototype → inventory lists every seeded behavior with anchors; incomplete prototype rejected before inventorying |
 | 02n.3 | `step-02d` + Evidence Ledger section in requirements template (+ **`[DEFERRED TO SPEC]` fidelity partition**, Review 10 §4) | 2h | pending | ledger rows resolve to anchors; `[OPEN]` fencing and `[DEFERRED TO SPEC]` partition demonstrated |

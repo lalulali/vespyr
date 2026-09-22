@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Orbit — Workspace Members (prototype fixture)</title>
+<style>
+  :root {
+    --color-bg: #f7f7f5;
+    --color-surface: #ffffff;
+    --color-fg: #1c1c1e;
+    --color-muted: #6b6b70;
+    --color-border: #e2e2df;
+    --color-accent: #2f5eff;
+    --color-danger: #c0392b;
+    --color-danger-contrast: #ffffff;
+    --color-skeleton: #ececea;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-6: 24px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --font-sans: -apple-system, "Segoe UI", Roboto, sans-serif;
+    --shadow-modal: 0 12px 32px rgb(0 0 0 / 18%);
+  }
+  body { margin: 0; font-family: var(--font-sans); color: var(--color-fg); background: var(--color-bg); }
+  header { padding: var(--space-6); background: var(--color-surface); border-bottom: 1px solid var(--color-border); }
+  nav[aria-label="Settings sections"] a { margin-right: var(--space-4); color: var(--color-muted); text-decoration: none; }
+  nav[aria-label="Settings sections"] a[aria-current="page"] { color: var(--color-accent); font-weight: 600; }
+  main { max-width: 880px; margin: 0 auto; padding: var(--space-6); }
+  #state-switcher { display: flex; gap: var(--space-2); margin: var(--space-4) 0; }
+  #state-switcher button { padding: var(--space-2) var(--space-3); border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface); cursor: pointer; }
+  #state-switcher button:hover { border-color: var(--color-accent); }
+  #state-switcher button:active { transform: translateY(1px); }
+  #state-switcher button:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+  #toolbar { display: flex; gap: var(--space-3); align-items: center; margin-bottom: var(--space-4); }
+  #toolbar input { flex: 1; padding: var(--space-2) var(--space-3); border: 1px solid var(--color-border); border-radius: var(--radius-md); }
+  #toolbar input:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 1px; }
+  button.primary { background: var(--color-accent); color: #fff; border: 0; border-radius: var(--radius-md); padding: var(--space-2) var(--space-4); cursor: pointer; }
+  button.destructive { background: var(--color-danger); color: var(--color-danger-contrast); border: 0; border-radius: var(--radius-md); padding: var(--space-2) var(--space-4); cursor: pointer; }
+  table { width: 100%; border-collapse: collapse; background: var(--color-surface); border-radius: var(--radius-lg); overflow: hidden; }
+  th, td { text-align: left; padding: var(--space-3); border-bottom: 1px solid var(--color-border); }
+  .skeleton { height: 16px; border-radius: var(--radius-md); background: var(--color-skeleton); animation: pulse 1.2s infinite; }
+  .truncate { max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  dialog { border: 0; border-radius: var(--radius-lg); box-shadow: var(--shadow-modal); padding: var(--space-6); width: min(480px, 92vw); }
+  dialog::backdrop { background: rgb(0 0 0 / 40%); }
+  .error { color: var(--color-danger); font-size: 14px; margin-top: var(--space-2); }
+  .banner { border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: var(--space-3); margin-bottom: var(--space-4); background: var(--color-surface); }
+  [hidden] { display: none !important; }
+  @keyframes pulse { 50% { opacity: 0.5; } }
+
+  /* platform-responsive: desktop dialog >= 768px; mobile bottom-sheet < 768px */
+  @media (max-width: 767px) {
+    dialog { position: fixed; inset: auto 0 0 0; width: 100%; border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
+    dialog { padding-bottom: calc(var(--space-6) + env(safe-area-inset-bottom)); } /* platform-safe-area */
+    table { display: block; overflow-x: auto; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Settings</h1>
+  <!-- nav-settings-tabs: Settings tabs General / Members / Billing / Integrations; Members active -->
+  <nav id="nav-settings-tabs" aria-label="Settings sections">
+    <a href="#general">General</a>
+    <a href="#members" aria-current="page">Members</a>
+    <a href="#billing">Billing</a>
+    <a href="#integrations">Integrations</a>
+  </nav>
+</header>
+
+<main>
+  <!-- state-switcher: prototype-only control toggling Day 0 (empty) / Day 30 (populated) / Error -->
+  <div id="state-switcher" role="group" aria-label="Prototype state switcher">
+    <button type="button" data-state="empty">Day 0 — Empty</button>
+    <button type="button" data-state="populated">Day 30 — Populated</button>
+    <button type="button" data-state="loading">Loading</button>
+    <button type="button" data-state="error">Error</button>
+  </div>
+
+  <!-- perm-member-readonly: role member sees view-only banner and no invite control -->
+  <section id="perm-member-readonly" class="banner" hidden>
+    You have view-only access to members. Ask an admin to make changes.
+  </section>
+  <!-- perm-sso-scim-note: SSO/SCIM-managed workspace disables manual invites -->
+  <section id="perm-sso-scim-note" class="banner" hidden>
+    This workspace is managed by SSO/SCIM. Manual invites are disabled — members sync from your identity provider.
+  </section>
+  <!-- copy-suspended-banner: suspended member context banner with reason -->
+  <section id="copy-suspended-banner" class="banner" hidden>
+    This member is suspended. They cannot sign in until reactivated. Reason: billing hold.
+  </section>
+
+  <div id="toolbar">
+    <!-- nav-search-filter: search members by name or email; empty-search results state -->
+    <label for="member-search" class="truncate">Search members</label>
+    <input id="member-search" type="search" placeholder="Search by name or email">
+    <!-- copy-invite-cta: primary action label -->
+    <button type="button" class="primary" id="copy-invite-cta">Invite teammate</button>
+  </div>
+
+  <!-- state-loading: skeleton rows while members load -->
+  <section id="state-loading" aria-busy="true" hidden>
+    <div class="skeleton" style="width: 60%"></div>
+    <div class="skeleton" style="width: 80%; margin-top: var(--space-2)"></div>
+    <div class="skeleton" style="width: 70%; margin-top: var(--space-2)"></div>
+  </section>
+
+  <!-- state-error: load failure panel; copy-error-load + Retry -->
+  <section id="state-error" hidden>
+    <p id="copy-error-load">We couldn't load your team.</p>
+    <button type="button" id="retry-load">Retry</button>
+  </section>
+
+  <!-- state-empty: Day 0 empty state -->
+  <section id="state-empty" hidden>
+    <h2 id="copy-empty-title">No teammates yet</h2>
+    <p>Invite your first teammate to start collaborating.</p>
+    <button type="button" class="primary">Invite teammate</button>
+  </section>
+
+  <!-- state-populated: Day 30 table with 24 members and pagination -->
+  <section id="state-populated" hidden>
+    <table>
+      <thead>
+        <tr><th>Member</th><th>Role</th><th>Status</th><th>Last active</th><th aria-label="Actions"></th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="truncate" title="Alejandra María de la Cruz-Fernández (alejandra.cruz-fernandez@verylongcompanydomain.example)">Alejandra María de la Cruz-Fernández</td>
+          <td>Owner</td><td>Active</td><td>2m ago</td>
+          <td><button type="button" aria-label="Remove Alejandra María de la Cruz-Fernández">Remove</button></td>
+        </tr>
+        <tr id="edge-long-names">
+          <td class="truncate" title="Maximilian Wolfeschlegelsteinhausenbergerdorff (maximilian.wolfeschlegelsteinhausenbergerdorff@subdomain.example.com)">Maximilian Wolfeschlegelsteinhausenbergerdorff</td>
+          <td>Admin</td><td>Active</td><td>Yesterday</td>
+          <td><button type="button" aria-label="Remove Maximilian Wolfeschlegelsteinhausenbergerdorff">Remove</button></td>
+        </tr>
+        <tr id="edge-unicode-names">
+          <td>Amélie 陳大文</td><td>Member</td><td>Active</td><td>3d ago</td>
+          <td><button type="button" aria-label="Remove Amélie 陳大文">Remove</button></td>
+        </tr>
+        <!-- edge-invite-expiry: pending invite expires after 7 days and flips to Expired with Resend -->
+        <tr id="edge-invite-expiry">
+          <td>jane@acme.com</td>
+          <td>
+            <!-- nav-role-change: inline role dropdown with save/cancel; optimistic update with rollback -->
+            <select id="nav-role-change" aria-label="Role for jane@acme.com">
+              <option>Member</option><option>Admin</option>
+            </select>
+          </td>
+          <td>Invited — expires in 7 days</td><td>Never</td>
+          <td><button type="button">Revoke</button></td>
+        </tr>
+        <tr>
+          <td>dmitri@acme.com</td><td>Member</td><td>Expired</td><td>Never</td>
+          <td><button type="button">Resend</button></td>
+        </tr>
+      </tbody>
+    </table>
+    <!-- nav-pagination: 25 rows per page; prev/next + page count -->
+    <nav id="nav-pagination" aria-label="Members pagination">
+      <button type="button" disabled>Previous</button>
+      <span>Page 1 of 1</span>
+      <button type="button" disabled>Next</button>
+    </nav>
+  </section>
+</main>
+
+<!-- nav-invite-modal: email + role + message; Esc/Cancel closes; dirty close asks confirm -->
+<dialog id="nav-invite-modal" aria-modal="true" aria-labelledby="invite-modal-title">
+  <h2 id="invite-modal-title">Invite teammate</h2>
+  <label for="invite-email">Email</label>
+  <input id="invite-email" type="email" placeholder="name@company.com">
+  <!-- validation-email-format: inline invalid-format error -->
+  <p id="validation-email-format" class="error" hidden>Enter a valid email address.</p>
+  <!-- validation-duplicate-email: duplicate invite error -->
+  <p id="validation-duplicate-email" class="error" hidden>jane@acme.com has already been invited.</p>
+  <!-- validation-max-members: Free plan cap 25/25; invite disabled with upgrade hint -->
+  <p id="validation-max-members" class="error" hidden>Free plan limit reached (25/25). Upgrade to invite more people.</p>
+  <!-- validation-self-invite: self-invite blocked -->
+  <p id="validation-self-invite" class="error" hidden>You're already a member of this workspace.</p>
+  <label for="invite-role">Role</label>
+  <select id="invite-role"><option>Member</option><option>Admin</option></select>
+  <label for="invite-message">Message (optional)</label>
+  <textarea id="invite-message" rows="3" placeholder="Add a note to the invitation email"></textarea>
+  <footer style="display:flex; gap: var(--space-2); justify-content: flex-end; margin-top: var(--space-4);">
+    <button type="button" id="invite-cancel">Cancel</button>
+    <button type="button" class="primary" id="invite-send">Send invite</button>
+  </footer>
+</dialog>
+
+<!-- nav-remove-confirm: destructive confirmation dialog -->
+<dialog id="nav-remove-confirm" aria-modal="true" aria-labelledby="remove-confirm-title">
+  <h2 id="remove-confirm-title">Remove member</h2>
+  <p id="copy-confirm-remove">Remove Jane? They'll lose access immediately.</p>
+  <footer style="display:flex; gap: var(--space-2); justify-content: flex-end;">
+    <button type="button">Cancel</button>
+    <button type="button" class="destructive">Remove</button>
+  </footer>
+</dialog>
+
+<!-- copy-toast-success + a11y-live-region: polite announcement of invite outcome -->
+<div id="copy-toast-success" hidden>Invite sent to jane@acme.com</div>
+<div id="a11y-live-region" role="status" aria-live="polite" hidden></div>
+
+<!-- ================= prototype annotations (non-UI classes, machine-readable) ================= -->
+<!-- data-member-schema -->
+<script type="application/json" id="data-member-schema">
+{"entity":"member","fields":[
+  {"name":"id","type":"string (uuid)"},
+  {"name":"name","type":"string"},
+  {"name":"email","type":"string (lowercased, unique per workspace)"},
+  {"name":"role","type":"enum(owner|admin|member)"},
+  {"name":"status","type":"enum(active|invited|suspended|expired)"},
+  {"name":"joinedAt","type":"ISO-8601 UTC date-time"},
+  {"name":"lastActive","type":"ISO-8601 UTC date-time | null (renders 'Never')"}
+]}
+</script>
+<!-- data-invite-schema -->
+<script type="application/json" id="data-invite-schema">
+{"entity":"invite","fields":[
+  {"name":"id","type":"string (uuid)"},
+  {"name":"email","type":"string (lowercased)"},
+  {"name":"role","type":"enum(owner|admin|member)"},
+  {"name":"invitedBy","type":"member.id"},
+  {"name":"expiresAt","type":"ISO-8601 UTC date-time (+7 days from send)"},
+  {"name":"status","type":"enum(pending|accepted|revoked|expired)"}
+]}
+</script>
+<!-- data-role-enum -->
+<script type="application/json" id="data-role-enum">{"enum":"owner|admin|member","owner":"single per workspace","display":"Title Case"}</script>
+<!-- data-status-enum -->
+<script type="application/json" id="data-status-enum">{"enum":"active|invited|suspended|expired","display":{"invited":"Invited — expires in 7 days","expired":"Expired"}}</script>
+<!-- data-dates -->
+<script type="application/json" id="data-dates">{"storage":"ISO-8601 UTC","display":"relative for < 7 days, absolute date beyond","null":"lastActive null renders 'Never'"}</script>
+
+<!-- perm-owner-actions -->
+<script type="application/json" id="perm-owner-actions">{"role":"owner","allowed":["invite","revoke_invite","change_role","remove_member","transfer_ownership"]}</script>
+<!-- perm-admin-restricted -->
+<script type="application/json" id="perm-admin-restricted">{"role":"admin","allowed":["invite","revoke_invite"],"denied":["change_admin_role","remove_admin","remove_owner","transfer_ownership"],"ui":"role dropdown and remove action disabled for admins/owner rows"}</script>
+<!-- perm-session-expired -->
+<script type="application/json" id="perm-session-expired">{"event":"session expired","behavior":"redirect to /signin?next=/settings/members","pending_action":"preserve invite draft in sessionStorage"}</script>
+
+<!-- telemetry-events -->
+<script type="application/json" id="telemetry-events">{"events":["members_viewed","invite_sent","invite_revoked","invite_resent","role_changed","member_removed","search_performed"]}</script>
+<!-- telemetry-props -->
+<script type="application/json" id="telemetry-props">{"common":{"workspace_id":"string","actor_role":"enum","member_count":"number","source_surface":"settings_members"}}</script>
+<!-- telemetry-pii-rule -->
+<script type="application/json" id="telemetry-pii-rule">{"rule":"emails are SHA-256 hashed before export; names and message bodies never leave the app"}</script>
+
+<!-- perf-list-virtualization -->
+<script type="application/json" id="perf-list-virtualization">{"rule":"virtualize the table beyond 100 members","budget":"<= 50 rendered rows in DOM at any time"}</script>
+<!-- perf-search-debounce -->
+<script type="application/json" id="perf-search-debounce">{"rule":"debounce search input 300ms; cancel in-flight request on new keystroke"}</script>
+<!-- perf-optimistic-updates -->
+<script type="application/json" id="perf-optimistic-updates">{"rule":"role change and remove apply optimistically; rollback + error toast on API failure"}</script>
+
+<!-- a11y-focus-trap -->
+<script type="application/json" id="a11y-focus-trap">{"rule":"modal traps Tab/Shift+Tab; Esc closes; focus returns to the trigger element"}</script>
+<!-- a11y-keyboard -->
+<script type="application/json" id="a11y-keyboard">{"rule":"full keyboard path: Enter submits invite, arrow keys navigate the role menu, Esc closes dialogs"}</script>
+<!-- a11y-contrast -->
+<script type="application/json" id="a11y-contrast">{"rule":"destructive red >= 4.5:1 on white; focus ring visible on light and dark surfaces"}</script>
+<!-- a11y-labels -->
+<script type="application/json" id="a11y-labels">{"rule":"icon-only buttons carry aria-label including the member name"}</script>
+
+<!-- platform-responsive -->
+<script type="application/json" id="platform-responsive">{"rule":"desktop dialog >= 768px; mobile bottom-sheet < 768px"}</script>
+<!-- platform-safe-area -->
+<script type="application/json" id="platform-safe-area">{"rule":"bottom-sheet padding respects env(safe-area-inset-bottom)"}</script>
+<!-- platform-browsers -->
+<script type="application/json" id="platform-browsers">{"supported":"evergreen Chrome, Safari, Firefox, Edge","unsupported":["IE11"]}</script>
+<!-- platform-offline -->
+<script type="application/json" id="platform-offline">{"rule":"offline banner shown; mutation actions disabled and queued copy explains why"}</script>
+
+<script>
+  // Prototype-only behavior: state switcher + modal wiring + debounce demo.
+  const panels = ['empty', 'loading', 'error', 'populated'];
+  function show(state) {
+    for (const p of panels) document.getElementById('state-' + p).hidden = p !== state;
+  }
+  document.getElementById('state-switcher').addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-state]');
+    if (btn) show(btn.dataset.state);
+  });
+  document.getElementById('copy-invite-cta').addEventListener('click', () => {
+    document.getElementById('nav-invite-modal').showModal();
+  });
+  document.getElementById('invite-cancel').addEventListener('click', () => {
+    document.getElementById('nav-invite-modal').close();
+  });
+  document.getElementById('member-search').addEventListener('input', debounce(() => {
+    // search_performed telemetry fires here; results update with an empty-search state
+  }, 300));
+  function debounce(fn, ms) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; }
+  show('empty');
+</script>
+</body>
+</html>
