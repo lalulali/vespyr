@@ -5,9 +5,10 @@
 > **Save to:** `artifacts/output/03-strategy/requirements.md`
 > **Paired with:** `SPEC.md` (`.agents/templates/product/SPEC.md`) for distilled agent contract, `user-story-template.md` (`.agents/templates/product/user-story-template.md`) for sprint stories
 
-**Version:** 4
-**Last changed:** 2026-09-04
+**Version:** 5
+**Last changed:** 2026-09-22
 **Change log:**
+- v5: Added Evidence Ledger §14 (reverse mode — `path#id` anchors, `[OPEN]` fencing, `[DEFERRED TO SPEC]` fidelity partition)
 - v4: Added Research Foundation §2; renumbered all subsequent sections; standardized 03-strategy output paths and DNA 7 concise specifications
 - v3: Added Hypothesis of Solution §3; renumbered subsequent sections
 - v2: Added ML/AI §11.1, Assumptions to Validate §9.3
@@ -303,10 +304,30 @@ Reference assumptions from the idea brief that must hold true:
 - Target WCAG compliance level
 - Assistive technology support requirements
 
+## 14. Evidence Ledger (reverse mode only)
+
+<!--
+Reverse mode (/design reverse): populate BEFORE synthesis. Every behavioral statement
+carries a `path#id` anchor (frozen A11 grammar: repo-relative path + one `#` + anchor token).
+No anchor, no fact — a statement without resolvable evidence is `[OPEN]`, never invented.
+`[DEFERRED TO SPEC]` marks infrastructure/telemetry/DB bounds that no prototype can prove
+(Fidelity Partition, Review 10 §4). This section is parsed by `.agents/scripts/spec_parity.js`.
+-->
+
+| ID | Statement | Anchor (`path#id`) | Type | Status |
+|---|---|---|---|---|
+| L-01 | {behavioral statement} | `{path}#{anchor}` | prototype | confirmed |
+| L-02 | {statement with no prototype evidence yet} | — | owner | `[OPEN]` |
+| L-03 | {infrastructure/telemetry bound} | `{path}#{anchor}` | prototype | `[DEFERRED TO SPEC]` |
+
+- **Type:** `prototype` (anchored to a prototype artifact or `prototype-inventory.md#INV-NN`) · `user` (anchored to a research artifact) · `owner` (anchored to a decision record).
+- **Status:** `confirmed` · `[OPEN]` (question put to the owner — never filled by inference) · `[DEFERRED TO SPEC]` (fidelity partition).
+- **Open questions** raised by `[OPEN]` rows are mirrored to §12; they do not block synthesis, but they must be listed in `parity-report.md`.
+
 ---
 
 **Document info:**
-- Version: 4.0
+- Version: 5.0
 - Author: @product-manager
 - Date: ...
 - Next review: ...
