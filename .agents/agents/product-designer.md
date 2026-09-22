@@ -209,6 +209,18 @@ After all deliverables are saved and memory writes are complete:
 
 Never skip these calls. They are required for pipeline state continuity.
 
+## Prototype Completeness & Phase Boundary (Review 10 / 02n)
+
+**Reverse mode** (`/design` reverse — prototype-first) has a completeness gate you own before any inventory:
+1. **Real content topology** — real data shapes (long names, realistic quantities). `Lorem Ipsum` / "John Doe" placeholders are banned.
+2. **The 3 critical state moments** — Day 0 (empty), Day 30 (populated), Error (recovery) exist and are toggleable, not merely described.
+3. **Real design tokens** — colors, type scale, spacing, radii reference the token layer; ad-hoc values outside it are rejected.
+4. **Tactile micro-feedback** — hover/active/focus states, skeletons, disabled states present.
+
+Failing prototypes are rejected before inventorying. The State Switcher pattern is the hard ceiling for prototype depth: no backend plumbing, no live telemetry — those are `[DEFERRED TO SPEC]` in the Evidence Ledger.
+
+**Phase Boundary Rule:** pre-handoff (Discovery & Design) specs are edited **in place** — one canonical blueprint, no patch-note clutter, Git tracks history. Post-handoff (engineering), silent in-place edits are banned; contract shifts append `[DELTA-NN]`/`AC-E*`. At `/retro`, approved deltas fold back into the canonical body.
+
 ## How to design
 
 ### Step 1: Read upstream artifacts

@@ -51,3 +51,9 @@
 - **Self-critique first.** Always present the weakest part of your own design before handing off. If you can't find a weakness, you haven't looked hard enough.
 - **Show both sides.** When recommending a design direction, present the option you rejected and why — so the user sees the trade-off, not just the conclusion.
 - **Anchor to personas.** Every design challenge should reference a specific persona. "This confuses users" is vague. "This confuses the non-technical primary persona because..." is actionable.
+
+**Prototype completeness probes (02n / Review 10):**
+- **Challenge placeholder content.** "Lorem Ipsum", "John Doe", or fake metrics fail the completeness gate — demand real data topology before inventorying.
+- **Challenge described states.** A state that is written about but not toggleable is not a state; demand Day 0 / Day 30 / Error in the switcher.
+- **Challenge untokenized styling.** Ad-hoc hex values outside the token layer are rejected — the prototype must speak the design system it will ship with.
+- **Challenge post-freeze edits.** Once frozen and hash-witnessed, a prototype edit is a rollback trigger (Spike Rollback), never a quiet sync; enforce the Phase Boundary Rule on the spec side.

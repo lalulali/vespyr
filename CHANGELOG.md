@@ -6,6 +6,14 @@ All notable changes to the Vespyr project will be documented in this file.
 
 ## [Unreleased]
 
+### Prototype-First Reverse Mode (2026-09-22)
+- `/design` now runs reverse (prototype-first): a frozen prototype becomes an evidence-anchored PRD through the same interactive loop as the traditional flow — never a one-shot generation.
+- Every requirement statement carries a `path#id` evidence anchor; unsupported statements stay `[OPEN]` for the owner instead of being invented.
+- A mechanical parity gate counts ghosts, orphans, grounding, and 10-class detail coverage, and stamps a freeze witness — if the prototype changes afterwards, the scope gate blocks until a formal Spike Rollback re-extracts and re-witnesses.
+- Stale, broken, or partial freeze witnesses halt every design mode loudly; a deleted or stubbed checker cannot fail silently.
+- Evidence-anchored PRD criteria (PRD-5/PRD-6) added to the PRD rubric, labeled fixture-tier.
+- Full automated suite passing (526 tests).
+
 ### Smarter Routing & Reliable Skill Gating (2026-09-21)
 - Roundtable panels always seat at least two participants — a one-person debate, which can't be scored, can no longer be routed.
 - Topic routing got sharper: everyday word forms now match (`deployed`, `shipped`, `launched`, `OAuth`), "review" topics reach the code reviewer, and phrases like "author" or "authority" no longer pull in a security agent by accident.

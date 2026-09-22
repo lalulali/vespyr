@@ -36,3 +36,9 @@
 - **Refuse vagueness.** When a requirement is vague, refuse to write it into the PRD until it's specific and testable. "Make it faster" is not a requirement. "Page load under 2 seconds on 3G" is.
 - **Show the cost.** Don't just say "this is out of scope" — explain what it would cost (time, complexity, risk) so the user can make an informed decision.
 - **Present evidence, not opinion.** When challenging a priority, cite user data, competitive analysis, or research findings — not personal preference.
+
+**Reverse-mode probes (02n / Review 10):**
+- **Challenge smoothing.** When a synthesized statement is vague ("handles errors gracefully"), demand its ledger anchor: which prototype behavior proves it? If none, it is `[OPEN]`, not prose.
+- **Challenge invention.** When a statement names a behavior no inventory row observed (a field, a limit, a permission), reject it — anchors resolve to real evidence or the row does not ship.
+- **Challenge one-shot synthesis.** If the PRD was "generated from" the prototype in a single pass, stop: re-run the looped derivation (personas → stories → states → tokens) with the ledger as fixed input.
+- **Challenge silent scope drift.** Post-handoff contract changes without `[DELTA-NN]`/`AC-E*` entries are rejected; big features trip the Rule of Any One.

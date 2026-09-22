@@ -98,11 +98,13 @@ test("Tier 1 Judge - evaluates discrete binary checklist rubrics", async () => {
   const rubric = loadRubric("prd-completeness");
   assert.ok(rubric !== null, "PRD completeness rubric must exist");
   const benchmark = { id: "TEST-PRD", dimension: "prd_completeness" };
-  const completePRD = { output: "## Problem Statement\nObjective.\n\n## Acceptance Criteria\nGiven When Then\n\n## Out of Scope\nNon-goals.\n\n## Tasks\nTask 1 breakdown." };
+  // PRD-5/PRD-6 (02n.8) are reverse-mode criteria: a complete sample carries an
+  // evidence anchor and the 10-class coverage vocabulary.
+  const completePRD = { output: "## Problem Statement\nObjective.\n\n## Acceptance Criteria\nGiven When Then\n\n## Out of Scope\nNon-goals.\n\n## Tasks\nTask 1 breakdown.\n\nEvidence Ledger row `evals/fixtures/prototypes/reverse-prd/workspace-members.html#state-empty`.\n\nScreen states, Edge cases, Data fields, Permissions, Navigation, Copy, Telemetry, Performance, Accessibility, Platform." };
   const result = await evaluateTier1(benchmark, completePRD);
   assert.strictEqual(result.pass, true);
   assert.ok(result.score >= 4.0);
-  assert.strictEqual(result.criteriaResults.length, 4);
+  assert.strictEqual(result.criteriaResults.length, 6);
 });
 
 test("Baseline Manager - detects regressions, pass rate drops, and token inflation", () => {

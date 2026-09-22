@@ -49,6 +49,46 @@
         "I cannot",
         "As an AI"
       ]
+    },
+    {
+      "id": "SKILL-DESIGN-REVERSE",
+      "skill": "design",
+      "name": "Reverse Mode — Prototype-First Routing & Evidence Ledger",
+      "dimension": "prd_completeness",
+      "tier": "fixture-tier",
+      "forwardNote": "Fixture-tier: upgrades to behavioral gating when the prompt-execution adapter lands (02l).",
+      "assertContains": [
+        "Evidence Ledger",
+        "path#id",
+        "[OPEN]"
+      ],
+      "prompt": "Run /design reverse for the workspace-members prototype: inventory, Evidence Ledger, and PRD synthesis.",
+      "assertNotContains": [
+        "I cannot",
+        "As an AI",
+        "generated from the prototype in one pass"
+      ],
+      "mockOutput": "## Reverse mode — prototype-first (reverse checked FIRST, A1)\nPrototype: evals/fixtures/prototypes/reverse-prd/workspace-members.html\nSPEC kernel required: artifacts/output/03-strategy/SPEC.md\n\n### Goal & problem\nGoal: kill the Asymmetry Law — the second artifact is earned through the same loop as the first, never derived in one pass. Problem: one-shot derivation loses detail and hallucinates.\n\n### Evidence Ledger (requirements.md §14)\n| ID | Statement | Anchor (`path#id`) | Type | Status |\n| L-01 | Day 0 empty state shows \"No teammates yet\" + invite CTA | `evals/fixtures/prototypes/reverse-prd/workspace-members.html#state-empty` | prototype | confirmed |\n| L-02 | Bulk member import in/out of scope | — | owner | `[OPEN]` |\n| L-03 | Invite persistence contract | `evals/fixtures/prototypes/reverse-prd/workspace-members.html#data-invite-schema` | prototype | `[DEFERRED TO SPEC]` |\n\n### Out of scope\nBulk import until the owner answers L-02; no silent inference.\n\n### Acceptance criteria\n- [ ] Ghosts = 0 (every confirmed anchor resolves)\n- [ ] Orphans 0-or-deferred (owner + date rows)\nVerification step: run `spec_parity.js check` at Step 4.\n\n### 10-class coverage\nScreen states · Edge cases & validation · Data fields & types · Permissions & auth · Navigation & flows · Copy & tone · Telemetry · Performance notes · Accessibility · Platform constraints"
+    },
+    {
+      "id": "SKILL-DESIGN-PARITY",
+      "skill": "design",
+      "name": "Parity Gate — Stale Witness Blocks & Spike Rollback",
+      "dimension": "prd_completeness",
+      "tier": "fixture-tier",
+      "forwardNote": "Fixture-tier: upgrades to behavioral gating when the prompt-execution adapter lands (02l).",
+      "assertContains": [
+        "[BLOCK]",
+        "Spike Rollback",
+        "spec_parity.js"
+      ],
+      "prompt": "The prototype changed after the freeze. Run /design and report the Step-0 result.",
+      "assertNotContains": [
+        "I cannot",
+        "As an AI",
+        "proceeding anyway"
+      ],
+      "mockOutput": "## Step 0 — Staleness hook: [BLOCK]\nWitness stale: the prototype hash differs from the frozen witness. HALT — every mode is blocked until this clears.\nFix: run the step-05d Spike Rollback (halt engineering → Prototype v2 in isolation → re-extract → re-witness) or restore the frozen prototype.\n\n## Goal & problem\nGoal: parity is counted, not felt — ghosts 0, orphans 0-or-deferred, grounding 100%, classes 10/10. Problem: silent drift and one-shot re-derivation.\n\n### Evidence Ledger\nRows L-04..L-49 stay anchored (`path#id`); no silent rewrites.\n\n### Out of scope\nProceeding on a stale witness; checklist-tier green.\n\n### Acceptance criteria\n- [ ] `spec_parity.js check` exits 0\n- [ ] witness stamp refreshed after re-extraction\nVerification step: Step-0 recompute, then the parity gate.\n\n### 10-class coverage\nScreen states · Edge cases & validation · Data fields & types · Permissions & auth · Navigation & flows · Copy & tone · Telemetry · Performance notes · Accessibility · Platform constraints"
     }
   ]
 }

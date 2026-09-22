@@ -89,7 +89,7 @@ Skills are invoked via `/skill-name` or by referencing `.agents/skills/[name]/SK
 - **`/discovery-report`**: Unified design thinking and usability scoring compilation.
 
 ### 🎨 Product Design & Motion
-- **`/design`**: Product requirements scoping (PRD) and detailed developer-ready screen specs.
+- **`/design`**: Product requirements scoping (PRD) and detailed developer-ready screen specs. Reverse mode turns a prototype into an evidence-anchored PRD (prototype-first).
 - **`/motion`**: Motion design research, animation specifications, and development handoff.
 
 ### 💻 Engineering, Quality & Architecture

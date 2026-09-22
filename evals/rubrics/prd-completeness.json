@@ -35,6 +35,27 @@
       "requiredPatterns": [
         "task|breakdown|estimation|hours|phase|step"
       ]
+    },
+    {
+      "id": "PRD-5",
+      "name": "Evidence-Anchored Statements (reverse mode)",
+      "weight": 1,
+      "tier": "fixture-tier",
+      "forwardNote": "Fixture-tier: upgrades to behavioral gating when the prompt-execution adapter lands (02l).",
+      "requiredPatterns": [
+        "[A-Za-z0-9._/-]+#[A-Za-z][A-Za-z0-9._:-]*",
+        "Evidence Ledger|\\[OPEN\\]|\\[DEFERRED TO SPEC\\]"
+      ]
+    },
+    {
+      "id": "PRD-6",
+      "name": "10-Class Detail Coverage",
+      "weight": 1,
+      "tier": "fixture-tier",
+      "forwardNote": "Fixture-tier: upgrades to behavioral gating when the prompt-execution adapter lands (02l).",
+      "requiredPatterns": [
+        "Screen states|Edge cases|Data fields|Permissions|Navigation|Copy|Telemetry|Performance|Accessibility|Platform"
+      ]
     }
   ]
 }

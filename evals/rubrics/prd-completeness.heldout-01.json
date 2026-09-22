@@ -42,6 +42,25 @@
         "task|breakdown|estimation|hours|phase|step"
       ],
       "note": "Unchanged: no Tier-0 assert in the decoupled benchmark targets this criterion."
+    },
+    {
+      "id": "PRD-5",
+      "name": "Evidence-Anchored Statements (reverse mode)",
+      "weight": 1,
+      "requiredPatterns": [
+        "\\btraceab\\w*|\\bwitness(ed|es)?\\b|\\bprovenance\\b",
+        "\\bunresolved\\b|\\bprovisional\\b|\\btbd\\b"
+      ],
+      "note": "Re-evidenced: the default names the literal path#id anchor + Evidence Ledger markers; this variant tests traceability/witness vocabulary instead."
+    },
+    {
+      "id": "PRD-6",
+      "name": "10-Class Detail Coverage",
+      "weight": 1,
+      "requiredPatterns": [
+        "empty state|loading state|error state|permission|role|navigation|microcopy|instrumentation|latency|contrast|breakpoint"
+      ],
+      "note": "Re-evidenced: the default uses the canonical class names; this variant tests the same coverage intent through disjoint surface vocabulary."
     }
   ]
 }

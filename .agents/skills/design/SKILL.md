@@ -1,8 +1,8 @@
 ---
 name: design
-description: Defines product requirements from validated ideas, then produces detailed developer-ready specs. Supports create/edit/validate modes.
+description: Defines product requirements from validated ideas, then produces detailed developer-ready specs. Supports reverse (prototype-first), create, edit, and validate modes.
 metadata:
-  version: "1.0"
+  version: "1.1"
 ---
 
 # Design

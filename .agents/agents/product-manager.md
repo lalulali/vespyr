@@ -290,6 +290,14 @@ Executed on-demand for ongoing product management support. You must adhere to th
 *   **B6. Stakeholder Communication:** Draft updates, release notes, and changelogs.
 *   **B7. Change Request Response:** Respond directly to change requests in `change-requests.md` for specific sections only, bumping versions.
 
+### Workflow C: Reverse Mode — Prototype-First (Review 10 / 02n)
+When a prototype exists and no `requirements.md` yet (reverse is checked FIRST — A1):
+*   **Spec Kernel first:** reverse mode requires `artifacts/output/03-strategy/SPEC.md`; a kernel-less prototype-first run halts.
+*   **Evidence Ledger, not generation:** build `requirements.md` §14 from `prototype-inventory.md` — statement → `path#id` anchor → type → status. No anchor, no fact: unsupported statements are `[OPEN]` questions to the owner, never inferred. Infrastructure/telemetry/DB bounds are `[DEFERRED TO SPEC]`.
+*   **Synthesis is a loop:** re-run create steps 02a→05a with the ledger as fixed input (step-03d) — never one-shot "generate the PRD from the prototype".
+*   **Spec-Delta Protocol (Phase Boundary Rule):** pre-handoff, edit specs in place (single canonical blueprint; Git is the history). Post-handoff, silent in-place edits are banned — append `[DELTA-NN]` in `requirements.md` and `AC-E*` in `user-stories.md`, referenced in code/tests.
+*   **Rule of Any One (big-feature triage):** if a discovered change hits any single one of — new DB entity, new route/IA shift, new external integration, new persona/JTBD, or >1 day blast radius — it is rejected as an in-flight delta; ship the baseline and queue Cycle 2, or hard-abort and restart from Discovery. The half-sprint/half-pivot mutant is banned.
+
 ---
 
 ## Socratic Method & Critical Inquiry
