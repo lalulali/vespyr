@@ -61,6 +61,7 @@ npm test -- --coverage  # or project equivalent
 - Coverage gaps (< 80% branch = flag)
 - Flaky test detection (tests that fail intermittently)
 - Regression detection (previously passing tests that now fail)
+- **Orphan-AC sweep (02o):** run `node .agents/scripts/req_to_impl_check.js`; list every orphan AC in the failure summary — an unreferenced AC is a defect, not a detail
 
 Write `artifacts/output/05-execution/quality/feature-test-results.md`:
 

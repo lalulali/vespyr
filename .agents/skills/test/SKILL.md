@@ -19,6 +19,7 @@ For eval-bearing tracks (judge prompts, scoring rubrics, benchmark suites, harne
 - Step 01 (exploratory enrichment) is a hard gate — run it before any test execution.
 - Steps 02a and 02b are parallelizable but both must complete before step 03.
 - Each step file is a contract. Read it fully before executing.
+- **Coverage sweep (02o):** every failure summary (feature and full-cycle) runs `node .agents/scripts/req_to_impl_check.js` and lists orphan ACs. An unreferenced AC is a defect, not a detail — cite the sweep in the test report and qa-signoff (honestly labeled prose; the phase-advance refusal mechanism is a separately filed defect).
 
 ## When to use
 - "Run the tests"

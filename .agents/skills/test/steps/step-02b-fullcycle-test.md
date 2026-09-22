@@ -51,6 +51,7 @@ npm run test:e2e  # or project equivalent
 - Pass/fail counts by journey
 - Flaky E2E detection (E2E is the flakiest track — must be tracked explicitly)
 - Regression detection (previously passing journeys that now fail)
+- **Orphan-AC sweep (02o):** run `node .agents/scripts/req_to_impl_check.js`; list every orphan AC in the failure summary — an unreferenced AC is a defect, not a detail
 
 Write `artifacts/output/05-execution/quality/fullcycle-test-results.md`:
 
