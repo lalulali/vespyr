@@ -45,6 +45,7 @@ This skill runs in sequential steps. Each step is a self-contained file with its
 4. **Kanban Activation** → `steps/step-04-kanban-activation.md`
 5. **Spike** (optional) → `steps/step-05-spike.md`
 6. **Dev Loop** (worktrees from step 3b, multi-developer OR single) → `steps/step-06-dev-loop.md`
+6a. **Fidelity Review** (coverage contract + 10-class audit before QA — 02o) → `steps/step-06a-fidelity-review.md`
 7. **Quality Gates** (QA hard gate → security conditional → performance conditional) → `steps/step-07-quality-gates.md`
 8. **PM Verification** → `steps/step-08-pm-verification.md`
 9. **Documentation** → `steps/step-09-documentation.md`

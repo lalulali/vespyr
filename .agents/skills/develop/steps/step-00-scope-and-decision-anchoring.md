@@ -15,6 +15,16 @@ Confirm the user prompt states all three:
 - **Boundary constraints** — what is explicitly in and out of scope
 - **Target decision** — the decision this build informs
 
+## 1b. Coverage Freshness (02o P3)
+If a coverage report exists (`artifacts/output/05-execution/quality/coverage-report.md`), check it against the newest code change before proceeding:
+
+```bash
+node .agents/scripts/req_to_impl_check.js --freshness
+```
+
+- **exit 0** → proceed (fresh, or no report yet).
+- **exit 1** (`STALE`) → re-run the orphan-AC sweep and refresh the coverage report before any Step 1 work; a stale report is a loud failure, never a silent pass.
+
 ## 2. Decision Fork
 - **Unambiguous (C ≥ 0.85):** proceed to Step 1.
 - **Ambiguous / multi-track (0.50 ≤ C < 0.85):** HALT. Emit the 2–3 Track Fork card — e.g., MVP slice vs full epic vs spike-first. Each track names its recommended `@agent` + `/skill` handles. Wait for selection. Zero artifact scaffolding to `artifacts/output/` before selection (GUARDRAILS: Anti-Premature Execution).

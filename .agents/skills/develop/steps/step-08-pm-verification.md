@@ -20,6 +20,7 @@ Confirm the feature meets all acceptance criteria, edge cases, and error states 
 - Review against original acceptance criteria in user stories
 - Check edge cases and error states match the spec
 - Verify all capabilities (CAP-N) from the spec-kernel are satisfied
+- Confirm the coverage contract (`artifacts/output/05-execution/quality/coverage-report.md`) reflects the accepted scope: orphan ACs 0-or-deferred, `--fidelity` 10/10; cite the sweep's output (honestly labeled prose — no enforcement stub claimed)
 
 ## Loop limit
 Max 2 rejection cycles:

@@ -244,12 +244,42 @@ function cmdFidelity(root, reportPath, json) {
   process.exit(out.pass ? 0 : 1);
 }
 
+function cmdFreshness(args) {
+  const root = path.resolve(args.root || process.cwd());
+  const reportPath = path.resolve(root, args.report || DEFAULTS.report);
+  const targets = String(args.targets || DEFAULTS.targets).split(',').map((s) => s.trim()).filter(Boolean);
+  const result = { gate: 'freshness', report: path.relative(root, reportPath), fresh: true, reason: null, newest: null };
+  if (!fs.existsSync(reportPath)) {
+    result.reason = 'no coverage report — nothing to check';
+  } else {
+    const files = collectFiles(root, targets, [reportPath]);
+    const reportMtime = fs.statSync(reportPath).mtimeMs;
+    let newest = { file: null, mtime: 0 };
+    for (const f of files) {
+      const m = fs.statSync(f).mtimeMs;
+      if (m > newest.mtime) newest = { file: path.relative(root, f), mtime: m };
+    }
+    result.newest = newest.file;
+    if (newest.mtime > reportMtime) {
+      result.fresh = false;
+      result.reason = `coverage report is older than ${newest.file} — re-run the sweep before proceeding`;
+    } else {
+      result.reason = `report newer than the newest target file (${newest.file || 'none'})`;
+    }
+  }
+  if (args.json) console.log(JSON.stringify(result, null, 2));
+  else if (result.fresh) console.log(`req_to_impl_check --freshness: FRESH — ${result.reason}`);
+  else console.error(`req_to_impl_check --freshness: STALE — ${result.reason}`);
+  process.exit(result.fresh ? 0 : 1);
+}
+
 function cmdSweep(args) {
   const root = path.resolve(args.root || process.cwd());
   const storiesPath = path.resolve(root, args.stories || DEFAULTS.stories);
   const reportPath = path.resolve(root, args.report || DEFAULTS.report);
   const targets = String(args.targets || DEFAULTS.targets).split(',').map((s) => s.trim()).filter(Boolean);
 
+  if (args.freshness) return cmdFreshness(args);
   if (args.fidelity) return cmdFidelity(root, reportPath, Boolean(args.json));
 
   if (!fs.existsSync(storiesPath)) {

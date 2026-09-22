@@ -111,6 +111,33 @@ test('req_to_impl: an AC cross-ref is a row key, not implementation evidence', (
   assert.deepEqual(JSON.parse(res.stdout).unresolvedOrphans, ['AC-E2']);
 });
 
+test('req_to_impl --freshness: fresh report passes; a newer code change makes it stale (02o P3)', () => {
+  const root = tmpTree();
+  const report = path.join(root, REL.report);
+  const target = path.join(root, REL.targets, 'rate-limiter.js');
+  const base = Date.now() / 1000;
+  fs.utimesSync(report, base + 60, base + 60);
+  fs.utimesSync(target, base, base);
+  const fresh = run(root, ['--freshness', '--report', REL.report, '--targets', REL.targets, '--json']);
+  assert.equal(fresh.status, 0, fresh.stderr);
+  assert.equal(JSON.parse(fresh.stdout).fresh, true);
+
+  fs.utimesSync(target, base + 120, base + 120);
+  const stale = run(root, ['--freshness', '--report', REL.report, '--targets', REL.targets, '--json']);
+  assert.equal(stale.status, 1);
+  const out = JSON.parse(stale.stdout);
+  assert.equal(out.fresh, false);
+  assert.match(out.reason, /older than/);
+});
+
+test('req_to_impl --freshness: no report means nothing to check (green)', () => {
+  const root = tmpTree();
+  fs.rmSync(path.join(root, REL.report));
+  const res = run(root, ['--freshness', '--report', REL.report, '--targets', REL.targets, '--json']);
+  assert.equal(res.status, 0, res.stderr);
+  assert.match(JSON.parse(res.stdout).reason, /no coverage report/);
+});
+
 test('req_to_impl --fidelity: green on the fixture, red on a missing class', () => {
   const green = run(ROOT, ['--fidelity', '--report', REL.report, '--json']);
   assert.equal(green.status, 0, green.stderr + green.stdout);
