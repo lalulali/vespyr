@@ -49,6 +49,8 @@
   .banner { border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: var(--space-3); margin-bottom: var(--space-4); background: var(--color-surface); }
   [hidden] { display: none !important; }
   h2 { margin-top: var(--space-6); }
+  details.annotation-group { margin-top: var(--space-6); }
+  details.annotation-group > summary { font-weight: 700; cursor: pointer; }
   details.annotation { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: var(--space-2) var(--space-3); margin: var(--space-2) 0; }
   details.annotation summary { cursor: pointer; font-weight: 600; }
   details.annotation pre { white-space: pre-wrap; margin: var(--space-2) 0 0; font-size: 13px; }
@@ -210,7 +212,8 @@
 <div id="copy-toast-success" hidden>Invite sent to jane@acme.com</div>
 <div id="a11y-live-region" role="status" aria-live="polite" hidden></div>
 
-<h2 id="prototype-annotations">Prototype annotations</h2>
+<details class="annotation-group" id="prototype-annotations">
+<summary>Prototype annotations (22) — collapsed by default; deep-links auto-open the one you asked for</summary>
 <!-- data-member-schema -->
 <details class="annotation">
 <summary>Annotation: data-member-schema</summary>
@@ -345,6 +348,7 @@
 <summary>Annotation: platform-offline</summary>
 <pre id="platform-offline">{"rule":"offline banner shown; mutation actions disabled and queued copy explains why"}</pre>
 </details>
+</details>
 
 <script>
   // Prototype-only behavior: state switcher + modal wiring + debounce demo.
@@ -368,18 +372,22 @@
   function debounce(fn, ms) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; }
 
   // A7 deep-link reveal: file.html#anchor lands on the element the statement claims.
+  let revealed = [];
   function revealForAnchor() {
+    for (const n of revealed) n.hidden = true;  // reset: each anchor shows only its own state
+    revealed = [];
     const id = decodeURIComponent(location.hash.slice(1));
     if (!id) return;
     const el = document.getElementById(id);
     if (!el) return;
     const dlg = el.closest('dialog');
+    for (const d of document.querySelectorAll('dialog[open]')) { if (d !== dlg) d.close(); }
     if (dlg && !dlg.open) dlg.showModal();
     const section = el.closest('section[id^="state-"]');
     if (section) show(section.id.replace('state-', ''));
     let node = el.parentElement;
     while (node) { if (node.tagName === 'DETAILS') node.open = true; node = node.parentElement; }
-    el.hidden = false;
+    if (el.hidden) { el.hidden = false; revealed.push(el); }
     el.scrollIntoView({ block: 'center' });
   }
   window.addEventListener('hashchange', revealForAnchor);

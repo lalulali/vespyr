@@ -6,8 +6,8 @@ prototype_type: file
 inventory: evals/fixtures/prototypes/reverse-prd/dry-run/prototype-inventory.md
 requirements: evals/fixtures/prototypes/reverse-prd/dry-run/requirements.md
 dry_run: 02n.4/02n.5 fixture — witness stamped by spec_parity.js at freeze
-frozen: 2026-09-22T18:30:00.000Z
-prototype_sha256: d41a2ef60fb21830d50f7e2e5dcddecf8741dbbbdbde5e5f6596f1714ed78557
+frozen: 2026-09-22T19:00:00.000Z
+prototype_sha256: 73787b0111086a682f0d83ce4ee656f8fb4e6689a1bcfeffa514357f2e6a7c20
 ---
 # Parity Report — Workspace Member Management (Orbit)
 
@@ -64,7 +64,17 @@ Owner samples 3 of N ledger statements at R4; each anchor verified to support it
 
 **Remediation — 2026-09-22 (fixture defects found by round 1):** deep-link reveal added (`file.html#anchor` now opens the dialog, switches state, unhides the target, and opens its annotation); every "Invite teammate" CTA wired (the empty-state button was dead); all 22 annotation blocks converted to openable `<details>`; witness re-stamped.
 
-**Round 2:** same three rows pending owner re-check. **The parity gate stays open until they verify.**
+**Round 2 — 2026-09-22 (same three rows): 2 SUPPORTED, 1 not yet.**
+
+| Ledger row | Disposition round 2 |
+|---|---|
+| L-08 `#validation-max-members` | **supported** — owner: "is correct" (2026-09-22) |
+| L-35 `#telemetry-events` | **supported** — owner: "open correctly" (2026-09-22); owner finding: annotation clutter on the members page → fixed (all 22 blocks wrapped in one collapsed group) |
+| L-24 `#nav-invite-modal` | **not yet** — owner observed both anchors landing in the same dialog with L-08's error state carrying over, so the two rows looked identical. Cause: reveal state leaked across navigations → fixed (each navigation resets the previous unhide; dialogs close when you leave them). Round 3: open `#nav-invite-modal` fresh → expect a clean invite modal (email/role/message, no leftover error). |
+
+**Round 3:** L-24 only. **The parity gate closes when L-24 verifies.**
+
+Witness re-stamped after each remediation (prototype changed → old hash correctly went stale every time).
 
 ## Parity delta vs traditional (A8)
 
