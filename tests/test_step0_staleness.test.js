@@ -68,12 +68,21 @@ test('step0 staleness: mutated prototype blocks (exit 1, [BLOCK]) — all modes 
   assert.match(res.stderr, /Spike Rollback/);
 });
 
-test('step0 staleness: expected-but-missing witness blocks', () => {
+test('step0 staleness: report without a witness field blocks (partial freeze)', () => {
   const root = tmpTree();
-  fs.rmSync(path.join(root, REL.report));
-  const res = runHook(root, ['--inventory', REL.inventory]);
+  const reportPath = path.join(root, REL.report);
+  fs.writeFileSync(reportPath, fs.readFileSync(reportPath, 'utf8').replace(/^prototype_sha256:.*\n/m, ''));
+  const res = runHook(root);
   assert.equal(res.status, 1);
   assert.match(res.stderr, /\[BLOCK\]/);
+});
+
+test('step0 staleness: report absent means never frozen — proceed', () => {
+  const root = tmpTree();
+  fs.rmSync(path.join(root, REL.report));
+  const res = runHook(root);
+  assert.equal(res.status, 0, res.stderr);
+  assert.match(res.stdout, /absent/);
 });
 
 test('step0 staleness: unavailable checker halts loudly (bypass probe)', () => {

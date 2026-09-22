@@ -11,6 +11,7 @@
  *   node step_tracker.js begin --skill shape-up --step 2 [--agent founder]
  *   node step_tracker.js complete --step 2 [--skill shape-up]
  *   node step_tracker.js scope-lock --skill develop --track "<track-name>" [--agent NAME]
+ *   node step_tracker.js route --skill design [--json]     (design artifact + witness evidence)
  *   node step_tracker.js status [--skill shape-up]
  *   node step_tracker.js audit --skill shape-up
  *   node step_tracker.js audit --all
@@ -22,6 +23,8 @@
  */
 
 const fs = require('fs');
+const crypto = require('crypto');
+const { spawnSync } = require('child_process');
 const { writeFileSync: atomicWriteFileSync } = require('./lib/fs_atomic.js');
 const { withLock } = require('./lib/lock.js');
 const { resolveSessionId, windowSessionId, ensureSessionCurrent } = require('./lib/session.js');
@@ -253,6 +256,85 @@ function ensureSessionAnchor() {
   } catch {}
 }
 
+// ---------------------------------------------------------------------------
+// Design routing evidence (02n.9) — artifact presence + witness state.
+// The 4-way routing decision becomes auditable: a lock taken with a stale
+// witness is distinguishable from one taken after a recompute.
+// ---------------------------------------------------------------------------
+const DESIGN_ARTIFACTS = [
+  'artifacts/output/03-strategy/prototype-inventory.md',
+  'artifacts/output/03-strategy/requirements.md',
+  'artifacts/output/03-strategy/product-spec.md',
+  'artifacts/output/03-strategy/parity-report.md',
+  'artifacts/output/03-strategy/SPEC.md',
+];
+
+function sha256File(file) {
+  return crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
+}
+
+function designArtifactEvidence() {
+  const out = {};
+  for (const rel of DESIGN_ARTIFACTS) {
+    const p = path.join(PROJECT_ROOT, rel);
+    out[rel] = fs.existsSync(p) ? { present: true, sha256: sha256File(p) } : { present: false, sha256: null };
+  }
+  return out;
+}
+
+function witnessEvidence() {
+  const script = [
+    path.join(PROJECT_ROOT, '.agents', 'scripts', 'spec_parity.js'),
+    path.join(__dirname, 'spec_parity.js'),
+  ].find((p) => fs.existsSync(p));
+  if (!script) return { state: 'unknown', reason: 'spec_parity.js missing' };
+  const res = spawnSync(process.execPath, [script, 'witness', 'check', '--json'], {
+    cwd: PROJECT_ROOT,
+    encoding: 'utf8',
+  });
+  try {
+    const j = JSON.parse(res.stdout);
+    return { state: j.witness, ok: j.ok, reason: j.reason || null };
+  } catch {
+    return { state: 'unknown', reason: 'witness check output unparsable' };
+  }
+}
+
+function computeDesignRoute(evidence) {
+  const inv = evidence.artifacts['artifacts/output/03-strategy/prototype-inventory.md'].present;
+  const req = evidence.artifacts['artifacts/output/03-strategy/requirements.md'].present;
+  const spec = evidence.artifacts['artifacts/output/03-strategy/product-spec.md'].present;
+  const w = evidence.witness.state;
+  if (inv && !req) {
+    return { route: 'reverse', reason: 'inventory present and no requirements.md (A1 reverse-first)' };
+  }
+  if (req || spec) {
+    if (w === 'stale' || w === 'missing' || w === 'broken') {
+      return { route: 'rollback', blocked: true, reason: `frozen prototype witness is ${w} — Step-0 blocks; run step-05d Spike Rollback before edit` };
+    }
+    return { route: 'edit', reason: `artifacts present; witness ${w}` };
+  }
+  return { route: 'create', reason: 'no requirements.md or product-spec.md present' };
+}
+
+function cmdRoute(args) {
+  const evidence = { artifacts: designArtifactEvidence(), witness: witnessEvidence() };
+  const decision = computeDesignRoute(evidence);
+  const out = {
+    skill: 'design',
+    route: decision.route,
+    blocked: Boolean(decision.blocked),
+    reason: decision.reason,
+    witness_state: evidence.witness.state,
+    artifacts: Object.fromEntries(
+      Object.entries(evidence.artifacts).filter(([, v]) => v.present).map(([k, v]) => [k, v.sha256])
+    ),
+    ts: new Date().toISOString(),
+  };
+  if (args.json) console.log(JSON.stringify(out, null, 2));
+  else console.log(`route: ${out.route}${out.blocked ? ' (blocked)' : ''} — ${out.reason}`);
+}
+
 function cmdScopeLock(args, mode) {
   const { skill, track, agent = 'unknown' } = args;
   if (!skill || !track) {
@@ -261,14 +343,28 @@ function cmdScopeLock(args, mode) {
   }
   ensureSessionAnchor();
   const session_id = resolveSessionId();
-  appendAudit({
+  const entry = {
     type: 'scope_lock',
     skill,
     track,
     session_id,
     agent,
     ts: new Date().toISOString()
-  });
+  };
+  if (String(skill).startsWith('design')) {
+    try {
+      const artifacts = designArtifactEvidence();
+      const witness = witnessEvidence();
+      entry.artifacts = Object.fromEntries(
+        Object.entries(artifacts).filter(([, v]) => v.present).map(([k, v]) => [k, v.sha256])
+      );
+      entry.witness_state = witness.state;
+      entry.route = computeDesignRoute({ artifacts, witness }).route;
+    } catch {
+      // Evidence is advisory — locking must never fail on it.
+    }
+  }
+  appendAudit(entry);
   if (mode === 'verbose') console.log(`🔒 Scope locked: ${skill} — track "${track}" (session: ${session_id})`);
 }
 
@@ -457,7 +553,7 @@ const mode = config.step_tracking || 'off';
 // No command → show usage regardless of mode (human error, not an agent call)
 if (!command) {
   console.error('step_tracker: no command given. Use begin, complete, scope-lock, status, or audit.');
-  console.error('Usage: node step_tracker.js <begin|complete|scope-lock|status|audit> [--skill NAME] [--step N] [--track NAME] [--agent NAME]');
+  console.error('Usage: node step_tracker.js <begin|complete|scope-lock|route|status|audit> [--skill NAME] [--step N] [--track NAME] [--agent NAME]');
   process.exit(1);
 }
 
@@ -470,8 +566,8 @@ if (command === 'begin' && args.skill && args.step) {
 // In off mode, audit/status/scope-lock run; begin/complete still enforce the
 // Step-0 gate (checked above) but skip breadcrumb writes. Unknown commands
 // always exit 1 regardless of mode.
-if (!['begin', 'complete', 'scope-lock', 'status', 'audit'].includes(command)) {
-  console.error(`step_tracker: unknown command "${command}". Use begin, complete, scope-lock, status, or audit.`);
+if (!['begin', 'complete', 'scope-lock', 'route', 'status', 'audit'].includes(command)) {
+  console.error(`step_tracker: unknown command "${command}". Use begin, complete, scope-lock, route, status, or audit.`);
   process.exit(1);
 }
 if (mode === 'off' && ['begin', 'complete'].includes(command)) {
@@ -489,9 +585,10 @@ switch (command) {
   case 'begin':      cmdBegin(args, mode); break;
   case 'complete':   cmdComplete(args, mode); break;
   case 'scope-lock': cmdScopeLock(args, mode); break;
+  case 'route':      cmdRoute(args); break;
   case 'status':     cmdStatus(args); break;
   case 'audit':      cmdAudit(args); break;
   default:
-    console.error(`step_tracker: unknown command "${command}". Use begin, complete, status, or audit.`);
+    console.error(`step_tracker: unknown command "${command}". Use begin, complete, scope-lock, route, status, or audit.`);
     process.exit(1);
 }

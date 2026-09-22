@@ -3,8 +3,8 @@
  * step0_staleness.js — Step-0 staleness gate for /design (02n.1).
  *
  * Wraps `spec_parity.js witness check` into the deterministic Step-0 hook:
- *   exit 0  → proceed  (witness fresh, or no witness at all — reverse mode unused)
- *   exit 1  → BLOCK    (stale / expected-but-missing / broken witness)
+ *   exit 0  → proceed  (witness fresh, or absent — nothing frozen yet)
+ *   exit 1  → BLOCK    (stale / witness field missing on a frozen report / broken)
  *
  * Fail-loud contract (DoD 3): if this script or spec_parity.js cannot run,
  * the Step-0 prompt must HALT — a bypass is a correctness failure, not a skip.

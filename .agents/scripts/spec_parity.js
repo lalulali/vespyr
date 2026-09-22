@@ -405,16 +405,13 @@ function cmdWitnessStamp(args) {
 function cmdWitnessCheck(args) {
   const root = path.resolve(args.root || process.cwd());
   const reportPath = path.resolve(root, args.report || DEFAULTS.report);
-  const inventoryDefault = path.resolve(root, args.inventory || DEFAULTS.inventory);
 
   const result = { report: path.relative(root, reportPath), witness: 'absent', ok: true, reason: null };
 
   if (!fs.existsSync(reportPath)) {
-    if (fs.existsSync(inventoryDefault)) {
-      result.ok = false;
-      result.witness = 'missing';
-      result.reason = 'prototype inventory exists (reverse mode in use) but parity-report.md is missing — witness expected';
-    }
+    // No report = never frozen: nothing can be stale. A deleted report after a
+    // freeze is visible in the scope-lock audit evidence (step_tracker route).
+    result.witness = 'absent';
   } else {
     const { data } = parseFrontmatter(fs.readFileSync(reportPath, 'utf8'));
     const prototype = data.prototype;

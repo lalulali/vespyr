@@ -105,15 +105,17 @@ test('spec_parity: stale prototype witness blocks after the freeze', () => {
   assert.notEqual(out.expected, out.actual);
 });
 
-test('spec_parity: witness expected-but-missing is red; absent witness with no reverse artifacts is green', () => {
+test('spec_parity: witness field missing on a frozen report is red; absent report is green (never frozen)', () => {
   const root = tmpTree();
-  fs.rmSync(path.join(root, REL.report));
-  const missing = run(['witness', 'check', '--root', root, '--inventory', REL.inventory, '--json']);
+  const reportPath = path.join(root, REL.report);
+  fs.writeFileSync(reportPath, fs.readFileSync(reportPath, 'utf8').replace(/^prototype_sha256:.*\n/m, ''));
+  const missing = run(['witness', 'check', '--root', root, '--report', REL.report, '--json']);
   assert.equal(missing.status, 1);
   assert.equal(JSON.parse(missing.stdout).witness, 'missing');
 
-  const empty = fs.mkdtempSync(path.join(os.tmpdir(), 'spec-parity-empty-'));
-  const absent = run(['witness', 'check', '--root', empty, '--json']);
+  const root2 = tmpTree();
+  fs.rmSync(path.join(root2, REL.report));
+  const absent = run(['witness', 'check', '--root', root2, '--report', REL.report, '--json']);
   assert.equal(absent.status, 0);
   assert.equal(JSON.parse(absent.stdout).witness, 'absent');
 });
