@@ -12,6 +12,7 @@ All notable changes to the Vespyr project will be documented in this file.
 - A mechanical parity gate counts ghosts, orphans, grounding, and 10-class detail coverage, and stamps a freeze witness — if the prototype changes afterwards, the scope gate blocks until a formal Spike Rollback re-extracts and re-witnesses.
 - Stale, broken, or partial freeze witnesses halt every design mode loudly; a deleted or stubbed checker cannot fail silently.
 - Evidence-anchored PRD criteria (PRD-5/PRD-6) added to the PRD rubric, labeled fixture-tier.
+- Governance: the Freeze Boundary and Rule of Any One are now swarm-wide guardrails; contract shifts without `[DELTA-NN]`/`AC-E*` entries and untokenized UI values are rejected in review; the 2-Tier Iteration Filter lives in the developer guidelines.
 - Full automated suite passing (526 tests).
 
 ### Smarter Routing & Reliable Skill Gating (2026-09-21)

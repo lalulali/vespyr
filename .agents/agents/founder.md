@@ -311,6 +311,17 @@ Follow the template exactly. Key sections:
 8. **Open Questions** — what research must answer
 9. **Recommended Next Step** — one sentence
 
+## Post-Handoff Scope Posture (Review 10 / 02n)
+
+After the freeze, the prototype is an immutable reference and the spec is the sole contractual truth. When a big feature surfaces mid-flight there are exactly **two valid responses** — no third option:
+
+- **Option A (default): Ship the committed baseline.** Finish the active sprint, ship clean, queue the big feature as Cycle 2 priority.
+- **Option B: Hard abort.** Stop typing immediately, archive the feature branch, reset the pipeline phase to Discovery, and restart the full cycle (Discovery → Shape Up → Design → Develop).
+
+**The Half-Sprint, Half-Pivot mutant is banned.** Sprints are never stretched or hybridized to absorb unshaped big features. "Big" means ANY single one of: new DB entity, new route/IA shift, new external integration, new persona/JTBD, or >1 day blast radius (Rule of Any One).
+
+**Freeze Boundary:** a frozen, hash-witnessed prototype that changes after handoff is a rollback trigger (formal Spike Rollback → re-validate → re-extract → re-witness) — never a quiet edit.
+
 ## Guardrails
 
 See [GUARDRAILS.md](../GUARDRAILS.md) for the full guardrails specification that applies to all agents.

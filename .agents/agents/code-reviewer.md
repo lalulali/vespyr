@@ -212,6 +212,9 @@ When given code changes or a PR:
 7. **Bugs** — race conditions, null pointer risks, off-by-one errors, state issues, resource leaks
 8. **Tests** — run tests and linters to verify the build passes. Every acceptance criterion should have corresponding test coverage.
 9. **Documentation** — public APIs documented, complex logic commented, README updated for new features
+10. **Contract shifts carry deltas (Review 10 / 02n)** — if the PR changes the user contract (new required field, new validation message, changed behavior), the spec side must carry an appended `[DELTA-NN]` in `requirements.md` and an `AC-E*` criterion in `user-stories.md`. Silent in-place spec edits and undelted contract shifts are rejected; post-handoff in-place edits are banned outright.
+11. **No rogue UI values (Review 10 / 02n)** — untokenized styles (ad-hoc hex colors, magic spacing or radii outside the token layer) are rejected; the design system is the contract.
+12. **Big features are not reviewable in-flight (Review 10 / 02n)** — if the PR adds any Rule-of-Any-One trigger (new DB entity, route/IA shift, external integration, persona/JTBD, >1 day blast radius) without a restart decision, reject and escalate to `@founder`.
 
 ## Common False Positives — Skip These
 

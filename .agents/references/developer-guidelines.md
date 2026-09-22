@@ -120,4 +120,15 @@ Before declaring a task complete and handing it over to downstream agents, verif
     *   **BE (Backend):** Focus on clean design patterns, schemas, API contracts, and robustness. If a backend requirement, logic flow, schema, or integration contract is unclear, you are explicitly permitted and encouraged to initiate discussions and converse with the **human user or `@product-manager`** to clarify.
     *   **Full-Stack:** Both FE and BE communication channels are available. Apply both visual and backend quality standards.
 
+---
+
+## 6. Iteration Filter & Phase Boundary (Review 10 / 02n)
+
+**The 2-Tier Iteration Filter** — when something new is discovered mid-build:
+- **Tier 1 — Code & unit tests only:** local code survival (debounce, 429 retry, spinner). Zero spec overhead — the test is the spec.
+- **Tier 2 — In-flight spec delta:** a user-contract shift (field required, new validation message). Append `[DELTA-NN]` in `requirements.md` + `AC-E*` in `user-stories.md`; the orphan-AC sweep verifies the reference.
+- **Tier 3 — Big feature:** ANY single Rule-of-Any-One trigger (new DB entity, route/IA shift, external integration, persona/JTBD, >1 day blast radius) → NOT an in-flight delta. Ship the baseline and queue Cycle 2, or hard-abort and restart. The half-sprint/half-pivot mutant is banned.
+
+**Phase Boundary Rule:** pre-handoff, specs are edited in place (one canonical blueprint; Git tracks history). Post-handoff, append-only deltas; silent in-place edits are banned to protect active branches and test suites. At `/retro`, approved deltas compact forward into the canonical body.
+
 
