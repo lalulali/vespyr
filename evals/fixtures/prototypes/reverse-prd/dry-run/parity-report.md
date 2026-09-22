@@ -6,8 +6,8 @@ prototype_type: file
 inventory: evals/fixtures/prototypes/reverse-prd/dry-run/prototype-inventory.md
 requirements: evals/fixtures/prototypes/reverse-prd/dry-run/requirements.md
 dry_run: 02n.4/02n.5 fixture — witness stamped by spec_parity.js at freeze
-frozen: 2026-09-22T00:00:00.000Z
-prototype_sha256: 6c41d0489279fd10689bdad8eb1311dad73cf87106209ec190622e0aa03732bb
+frozen: 2026-09-22T18:30:00.000Z
+prototype_sha256: d41a2ef60fb21830d50f7e2e5dcddecf8741dbbbdbde5e5f6596f1714ed78557
 ---
 # Parity Report — Workspace Member Management (Orbit)
 
@@ -52,13 +52,19 @@ Reverse-mode dry-run (02n). Structural tier: ghosts / orphans / grounding / 10-c
 
 ## Owner sampling (A7)
 
-Owner samples 3 of N ledger statements at R4; each anchor verified to support its claim. Proposed sample (owner disposes):
+Owner samples 3 of N ledger statements at R4; each anchor verified to support its claim.
+
+**Round 1 — 2026-09-22: 3 of 51 sampled, ALL REJECTED (owner).**
 
 | Ledger row | Anchor | Does the anchor support the statement? | Disposition |
 |---|---|---|---|
-| L-08 | `workspace-members.html#validation-max-members` | {owner check} | pending owner |
-| L-24 | `workspace-members.html#nav-invite-modal` | {owner check} | pending owner |
-| L-35 | `workspace-members.html#telemetry-events` | {owner check} | pending owner |
+| L-08 | `workspace-members.html#validation-max-members` | No — element sits behind the invite modal; opening the anchor showed nothing ("cannot open the page") | rejected 2026-09-22 (owner) |
+| L-24 | `workspace-members.html#nav-invite-modal` | No — only the members page opens; the modal did not open from the anchor or the visible CTA | rejected 2026-09-22 (owner) |
+| L-35 | `workspace-members.html#telemetry-events` | No — annotation block invisible in the rendered page | rejected 2026-09-22 (owner) |
+
+**Remediation — 2026-09-22 (fixture defects found by round 1):** deep-link reveal added (`file.html#anchor` now opens the dialog, switches state, unhides the target, and opens its annotation); every "Invite teammate" CTA wired (the empty-state button was dead); all 22 annotation blocks converted to openable `<details>`; witness re-stamped.
+
+**Round 2:** same three rows pending owner re-check. **The parity gate stays open until they verify.**
 
 ## Parity delta vs traditional (A8)
 

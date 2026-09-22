@@ -48,6 +48,10 @@
   .error { color: var(--color-danger); font-size: 14px; margin-top: var(--space-2); }
   .banner { border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: var(--space-3); margin-bottom: var(--space-4); background: var(--color-surface); }
   [hidden] { display: none !important; }
+  h2 { margin-top: var(--space-6); }
+  details.annotation { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: var(--space-2) var(--space-3); margin: var(--space-2) 0; }
+  details.annotation summary { cursor: pointer; font-weight: 600; }
+  details.annotation pre { white-space: pre-wrap; margin: var(--space-2) 0 0; font-size: 13px; }
   @keyframes pulse { 50% { opacity: 0.5; } }
 
   /* platform-responsive: desktop dialog >= 768px; mobile bottom-sheet < 768px */
@@ -98,7 +102,7 @@
     <label for="member-search" class="truncate">Search members</label>
     <input id="member-search" type="search" placeholder="Search by name or email">
     <!-- copy-invite-cta: primary action label -->
-    <button type="button" class="primary" id="copy-invite-cta">Invite teammate</button>
+    <button type="button" class="primary js-open-invite" id="copy-invite-cta">Invite teammate</button>
   </div>
 
   <!-- state-loading: skeleton rows while members load -->
@@ -118,7 +122,7 @@
   <section id="state-empty" hidden>
     <h2 id="copy-empty-title">No teammates yet</h2>
     <p>Invite your first teammate to start collaborating.</p>
-    <button type="button" class="primary">Invite teammate</button>
+    <button type="button" class="primary js-open-invite">Invite teammate</button>
   </section>
 
   <!-- state-populated: Day 30 table with 24 members and pagination -->
@@ -206,9 +210,11 @@
 <div id="copy-toast-success" hidden>Invite sent to jane@acme.com</div>
 <div id="a11y-live-region" role="status" aria-live="polite" hidden></div>
 
-<!-- ================= prototype annotations (non-UI classes, machine-readable) ================= -->
+<h2 id="prototype-annotations">Prototype annotations</h2>
 <!-- data-member-schema -->
-<script type="application/json" id="data-member-schema">
+<details class="annotation">
+<summary>Annotation: data-member-schema</summary>
+<pre id="data-member-schema">
 {"entity":"member","fields":[
   {"name":"id","type":"string (uuid)"},
   {"name":"name","type":"string"},
@@ -218,9 +224,12 @@
   {"name":"joinedAt","type":"ISO-8601 UTC date-time"},
   {"name":"lastActive","type":"ISO-8601 UTC date-time | null (renders 'Never')"}
 ]}
-</script>
+</pre>
+</details>
 <!-- data-invite-schema -->
-<script type="application/json" id="data-invite-schema">
+<details class="annotation">
+<summary>Annotation: data-invite-schema</summary>
+<pre id="data-invite-schema">
 {"entity":"invite","fields":[
   {"name":"id","type":"string (uuid)"},
   {"name":"email","type":"string (lowercased)"},
@@ -229,52 +238,113 @@
   {"name":"expiresAt","type":"ISO-8601 UTC date-time (+7 days from send)"},
   {"name":"status","type":"enum(pending|accepted|revoked|expired)"}
 ]}
-</script>
+</pre>
+</details>
 <!-- data-role-enum -->
-<script type="application/json" id="data-role-enum">{"enum":"owner|admin|member","owner":"single per workspace","display":"Title Case"}</script>
+<details class="annotation">
+<summary>Annotation: data-role-enum</summary>
+<pre id="data-role-enum">{"enum":"owner|admin|member","owner":"single per workspace","display":"Title Case"}</pre>
+</details>
 <!-- data-status-enum -->
-<script type="application/json" id="data-status-enum">{"enum":"active|invited|suspended|expired","display":{"invited":"Invited — expires in 7 days","expired":"Expired"}}</script>
+<details class="annotation">
+<summary>Annotation: data-status-enum</summary>
+<pre id="data-status-enum">{"enum":"active|invited|suspended|expired","display":{"invited":"Invited — expires in 7 days","expired":"Expired"}}</pre>
+</details>
 <!-- data-dates -->
-<script type="application/json" id="data-dates">{"storage":"ISO-8601 UTC","display":"relative for < 7 days, absolute date beyond","null":"lastActive null renders 'Never'"}</script>
+<details class="annotation">
+<summary>Annotation: data-dates</summary>
+<pre id="data-dates">{"storage":"ISO-8601 UTC","display":"relative for < 7 days, absolute date beyond","null":"lastActive null renders 'Never'"}</pre>
+</details>
 
 <!-- perm-owner-actions -->
-<script type="application/json" id="perm-owner-actions">{"role":"owner","allowed":["invite","revoke_invite","change_role","remove_member","transfer_ownership"]}</script>
+<details class="annotation">
+<summary>Annotation: perm-owner-actions</summary>
+<pre id="perm-owner-actions">{"role":"owner","allowed":["invite","revoke_invite","change_role","remove_member","transfer_ownership"]}</pre>
+</details>
 <!-- perm-admin-restricted -->
-<script type="application/json" id="perm-admin-restricted">{"role":"admin","allowed":["invite","revoke_invite"],"denied":["change_admin_role","remove_admin","remove_owner","transfer_ownership"],"ui":"role dropdown and remove action disabled for admins/owner rows"}</script>
+<details class="annotation">
+<summary>Annotation: perm-admin-restricted</summary>
+<pre id="perm-admin-restricted">{"role":"admin","allowed":["invite","revoke_invite"],"denied":["change_admin_role","remove_admin","remove_owner","transfer_ownership"],"ui":"role dropdown and remove action disabled for admins/owner rows"}</pre>
+</details>
 <!-- perm-session-expired -->
-<script type="application/json" id="perm-session-expired">{"event":"session expired","behavior":"redirect to /signin?next=/settings/members","pending_action":"preserve invite draft in sessionStorage"}</script>
+<details class="annotation">
+<summary>Annotation: perm-session-expired</summary>
+<pre id="perm-session-expired">{"event":"session expired","behavior":"redirect to /signin?next=/settings/members","pending_action":"preserve invite draft in sessionStorage"}</pre>
+</details>
 
 <!-- telemetry-events -->
-<script type="application/json" id="telemetry-events">{"events":["members_viewed","invite_sent","invite_revoked","invite_resent","role_changed","member_removed","search_performed"]}</script>
+<details class="annotation">
+<summary>Annotation: telemetry-events</summary>
+<pre id="telemetry-events">{"events":["members_viewed","invite_sent","invite_revoked","invite_resent","role_changed","member_removed","search_performed"]}</pre>
+</details>
 <!-- telemetry-props -->
-<script type="application/json" id="telemetry-props">{"common":{"workspace_id":"string","actor_role":"enum","member_count":"number","source_surface":"settings_members"}}</script>
+<details class="annotation">
+<summary>Annotation: telemetry-props</summary>
+<pre id="telemetry-props">{"common":{"workspace_id":"string","actor_role":"enum","member_count":"number","source_surface":"settings_members"}}</pre>
+</details>
 <!-- telemetry-pii-rule -->
-<script type="application/json" id="telemetry-pii-rule">{"rule":"emails are SHA-256 hashed before export; names and message bodies never leave the app"}</script>
+<details class="annotation">
+<summary>Annotation: telemetry-pii-rule</summary>
+<pre id="telemetry-pii-rule">{"rule":"emails are SHA-256 hashed before export; names and message bodies never leave the app"}</pre>
+</details>
 
 <!-- perf-list-virtualization -->
-<script type="application/json" id="perf-list-virtualization">{"rule":"virtualize the table beyond 100 members","budget":"<= 50 rendered rows in DOM at any time"}</script>
+<details class="annotation">
+<summary>Annotation: perf-list-virtualization</summary>
+<pre id="perf-list-virtualization">{"rule":"virtualize the table beyond 100 members","budget":"<= 50 rendered rows in DOM at any time"}</pre>
+</details>
 <!-- perf-search-debounce -->
-<script type="application/json" id="perf-search-debounce">{"rule":"debounce search input 300ms; cancel in-flight request on new keystroke"}</script>
+<details class="annotation">
+<summary>Annotation: perf-search-debounce</summary>
+<pre id="perf-search-debounce">{"rule":"debounce search input 300ms; cancel in-flight request on new keystroke"}</pre>
+</details>
 <!-- perf-optimistic-updates -->
-<script type="application/json" id="perf-optimistic-updates">{"rule":"role change and remove apply optimistically; rollback + error toast on API failure"}</script>
+<details class="annotation">
+<summary>Annotation: perf-optimistic-updates</summary>
+<pre id="perf-optimistic-updates">{"rule":"role change and remove apply optimistically; rollback + error toast on API failure"}</pre>
+</details>
 
 <!-- a11y-focus-trap -->
-<script type="application/json" id="a11y-focus-trap">{"rule":"modal traps Tab/Shift+Tab; Esc closes; focus returns to the trigger element"}</script>
+<details class="annotation">
+<summary>Annotation: a11y-focus-trap</summary>
+<pre id="a11y-focus-trap">{"rule":"modal traps Tab/Shift+Tab; Esc closes; focus returns to the trigger element"}</pre>
+</details>
 <!-- a11y-keyboard -->
-<script type="application/json" id="a11y-keyboard">{"rule":"full keyboard path: Enter submits invite, arrow keys navigate the role menu, Esc closes dialogs"}</script>
+<details class="annotation">
+<summary>Annotation: a11y-keyboard</summary>
+<pre id="a11y-keyboard">{"rule":"full keyboard path: Enter submits invite, arrow keys navigate the role menu, Esc closes dialogs"}</pre>
+</details>
 <!-- a11y-contrast -->
-<script type="application/json" id="a11y-contrast">{"rule":"destructive red >= 4.5:1 on white; focus ring visible on light and dark surfaces"}</script>
+<details class="annotation">
+<summary>Annotation: a11y-contrast</summary>
+<pre id="a11y-contrast">{"rule":"destructive red >= 4.5:1 on white; focus ring visible on light and dark surfaces"}</pre>
+</details>
 <!-- a11y-labels -->
-<script type="application/json" id="a11y-labels">{"rule":"icon-only buttons carry aria-label including the member name"}</script>
+<details class="annotation">
+<summary>Annotation: a11y-labels</summary>
+<pre id="a11y-labels">{"rule":"icon-only buttons carry aria-label including the member name"}</pre>
+</details>
 
 <!-- platform-responsive -->
-<script type="application/json" id="platform-responsive">{"rule":"desktop dialog >= 768px; mobile bottom-sheet < 768px"}</script>
+<details class="annotation">
+<summary>Annotation: platform-responsive</summary>
+<pre id="platform-responsive">{"rule":"desktop dialog >= 768px; mobile bottom-sheet < 768px"}</pre>
+</details>
 <!-- platform-safe-area -->
-<script type="application/json" id="platform-safe-area">{"rule":"bottom-sheet padding respects env(safe-area-inset-bottom)"}</script>
+<details class="annotation">
+<summary>Annotation: platform-safe-area</summary>
+<pre id="platform-safe-area">{"rule":"bottom-sheet padding respects env(safe-area-inset-bottom)"}</pre>
+</details>
 <!-- platform-browsers -->
-<script type="application/json" id="platform-browsers">{"supported":"evergreen Chrome, Safari, Firefox, Edge","unsupported":["IE11"]}</script>
+<details class="annotation">
+<summary>Annotation: platform-browsers</summary>
+<pre id="platform-browsers">{"supported":"evergreen Chrome, Safari, Firefox, Edge","unsupported":["IE11"]}</pre>
+</details>
 <!-- platform-offline -->
-<script type="application/json" id="platform-offline">{"rule":"offline banner shown; mutation actions disabled and queued copy explains why"}</script>
+<details class="annotation">
+<summary>Annotation: platform-offline</summary>
+<pre id="platform-offline">{"rule":"offline banner shown; mutation actions disabled and queued copy explains why"}</pre>
+</details>
 
 <script>
   // Prototype-only behavior: state switcher + modal wiring + debounce demo.
@@ -286,9 +356,9 @@
     const btn = e.target.closest('button[data-state]');
     if (btn) show(btn.dataset.state);
   });
-  document.getElementById('copy-invite-cta').addEventListener('click', () => {
+  document.querySelectorAll('.js-open-invite').forEach((b) => b.addEventListener('click', () => {
     document.getElementById('nav-invite-modal').showModal();
-  });
+  }));
   document.getElementById('invite-cancel').addEventListener('click', () => {
     document.getElementById('nav-invite-modal').close();
   });
@@ -296,7 +366,25 @@
     // search_performed telemetry fires here; results update with an empty-search state
   }, 300));
   function debounce(fn, ms) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; }
+
+  // A7 deep-link reveal: file.html#anchor lands on the element the statement claims.
+  function revealForAnchor() {
+    const id = decodeURIComponent(location.hash.slice(1));
+    if (!id) return;
+    const el = document.getElementById(id);
+    if (!el) return;
+    const dlg = el.closest('dialog');
+    if (dlg && !dlg.open) dlg.showModal();
+    const section = el.closest('section[id^="state-"]');
+    if (section) show(section.id.replace('state-', ''));
+    let node = el.parentElement;
+    while (node) { if (node.tagName === 'DETAILS') node.open = true; node = node.parentElement; }
+    el.hidden = false;
+    el.scrollIntoView({ block: 'center' });
+  }
+  window.addEventListener('hashchange', revealForAnchor);
   show('empty');
+  revealForAnchor();
 </script>
 </body>
 </html>
