@@ -4,12 +4,97 @@ mode: reverse
 generated: "2026-09-22"
 source_kernel: evals/fixtures/prototypes/reverse-prd/SPEC.md
 source_inventory: evals/fixtures/prototypes/reverse-prd/dry-run/prototype-inventory.md
-synthesis: pending (step-3d)
+synthesis: step-3d complete (2026-09-22) — 9 stories / 27 ACs in user-stories.md
 ---
 
 # Requirements — Workspace Member Management (Orbit)
 
 > Reverse-mode dry-run artifact (02n.3 / 02n.4). Sections 1–13 are synthesized at step-3d; the Evidence Ledger below is the fixed input. Every statement traces to a prototype anchor (frozen A11 grammar) — no anchor, no fact.
+
+## 1. Executive Summary
+
+Workspace admins at small companies currently change membership through support — slow and unauditable. Orbit adds self-serve member management: browse members, invite teammates, and manage roles under explicit permission rules. Success: 75% of new workspaces invite within 48 hours and invite-related support tickets drop below 2/week.
+
+## 2. Research Foundation
+
+Prototype-first cycle (reverse mode): the evidence source is the frozen prototype + Evidence Ledger (§14), not upstream research artifacts. Market/competitive research is N/A for this cycle — rationale: the interaction contract was proven by the prototype walk-through and no market claims are made here.
+
+## 3. Problem Statement
+
+Admins cannot self-serve membership changes; every change becomes a support ticket — slow onboarding, no audit trail, access drift when people leave. Cost: ~15 minutes per change, weekly during hiring, plus trust cost when the wrong people keep access.
+
+## 4. Hypothesis of Solution
+
+We believe self-serve member management will reduce invite-related support tickets below 2/week and get 75% of new workspaces to invite within 48 hours, as evidenced by `invite_sent` telemetry and ticket volume within 8 weeks.
+
+## 5. Goals & Success Metrics
+
+- **Primary:** 75% of new workspaces invite ≥1 teammate within 48h (`invite_sent` ÷ workspace creations).
+- **Guardrail:** invite error rate < 2% (validation failures excluded); zero PII in telemetry (L-37).
+- **Secondary:** search used in >40% of sessions with >10 members.
+
+## 6. Target Audience
+
+- **P1 Maya — owner/admin, 12-person startup on Free, near the 25-member cap.** Goals: add teammates fast, control access. Pains: support round-trips, lost invites, no visibility into pending state.
+- **P2 Dev — workspace member (read-only).** Needs visibility into who is in the workspace; makes no changes.
+- **Out of target:** SSO/SCIM enterprise admins (manual invites disabled, L-22); workspaces above the Free cap (upgrade path is out of scope).
+
+## 7. Feature Overview
+
+Capabilities: (1) browse members and pending invites; (2) invite teammates with a role; (3) manage roles and removal under the permission matrix.
+
+| Requirement ID | Category | Description | Priority |
+|---|---|---|---|
+| FR-001 | Members list | Show members + invites with role/status/last active; states empty/loading/error/populated (L-01..L-05, L-13, L-15, L-16) | Must-have |
+| FR-002 | Search & pagination | Search by name/email (300ms debounce, request cancel); 25 rows/page (L-28, L-38, L-39, L-26) | Must-have |
+| FR-003 | Invite | Email + role + message; inline validation (format, duplicate, self, cap); success toast (L-06..L-09, L-24, L-30, L-32) | Must-have |
+| FR-004 | Invite lifecycle | 7-day expiry; Expired status + Resend; revoke (L-10, L-14, L-17) | Should-have |
+| FR-005 | Role management | Inline role change, optimistic with rollback (L-27, L-40) | Must-have |
+| FR-006 | Removal | Destructive confirmation; suspended banner (L-25, L-33, L-34) | Should-have |
+| FR-007 | Permission matrix | Owner/admin/member allowed+denied per L-18..L-22 | Must-have |
+| FR-008 | Telemetry | Events + props per L-35, L-36; emails hashed (L-37) | Must-have |
+
+## 8. Non-Functional Requirements
+
+| Requirement ID | Category | Description | Priority |
+|---|---|---|---|
+| NFR-001 | Accessibility | WCAG 2.1 AA: focus trap, keyboard path, aria-live, contrast (L-41..L-45) | Must-have |
+| NFR-002 | Performance | Debounce + cancel; virtualize >100 members (≤50 DOM rows) (L-38, L-39) | Should-have |
+| NFR-003 | Platform | Evergreen browsers; mobile bottom-sheet + safe-area; offline disables mutations (L-46..L-49) | Must-have |
+| NFR-004 | Security & privacy | Emails hashed before export; session expiry redirect preserves draft (L-21, L-37) | Must-have |
+
+## 9. Timeline & Phases
+
+- **MVP:** FR-001, FR-002, FR-003, FR-005, FR-007, NFR-001.
+- **V1.1:** FR-004, FR-006, NFR-002, NFR-003, NFR-004.
+- No dates in this fixture cycle.
+
+## 10. Out of Scope
+
+1. Authentication, SSO, and SCIM implementation (kernel non-goal).
+2. Billing/upgrade checkout — only the cap hint ships.
+3. Audit log export (kernel non-goal).
+4. Bulk member import — `[OPEN]` L-51, owner confirmation pending.
+
+## 11. Dependencies & Risks
+
+Dependencies: email delivery service (invite send); identity provider for SSO/SCIM-managed workspaces. Risks: Free-cap friction at 25/25 (mitigate: upgrade hint, L-08); invite deliverability (mitigate: resend + visible status, L-10).
+
+## 12. Open Questions & Decisions
+
+| Question | Owner | Deadline | Status |
+|---|---|---|---|
+| L-51: is bulk member import in or out of scope? | owner | before `/plan` handoff | Open |
+| A7: sampling disposition (3 of 51 ledger statements) | owner | at R4 gate | Open |
+| A8: parity-delta disposition | owner | at R4 gate | Open |
+
+## 13. Optional Components
+
+### 13.1 ML/AI Requirements
+None.
+
+### 13.2 Accessibility Requirements
+WCAG 2.1 AA per NFR-001 (L-41..L-45).
 
 ## 14. Evidence Ledger (reverse mode only)
 

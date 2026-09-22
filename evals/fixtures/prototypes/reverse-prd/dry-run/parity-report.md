@@ -6,8 +6,9 @@ prototype_type: file
 inventory: evals/fixtures/prototypes/reverse-prd/dry-run/prototype-inventory.md
 requirements: evals/fixtures/prototypes/reverse-prd/dry-run/requirements.md
 dry_run: 02n.4/02n.5 fixture — witness stamped by spec_parity.js at freeze
+frozen: 2026-09-22T00:00:00.000Z
+prototype_sha256: 6c41d0489279fd10689bdad8eb1311dad73cf87106209ec190622e0aa03732bb
 ---
-
 # Parity Report — Workspace Member Management (Orbit)
 
 Reverse-mode dry-run (02n). Structural tier: ghosts / orphans / grounding / 10-class coverage / witness — script-computed, test-backed. Judged tier: anchor semantics (owner sampling, A7) and parity delta vs traditional (A8) — honestly labeled, never claimed structural.
@@ -21,6 +22,8 @@ Reverse-mode dry-run (02n). Structural tier: ghosts / orphans / grounding / 10-c
 | Grounding rate | 100% of non-`[OPEN]` | 100% | PASS |
 | Detail-class coverage | 10/10 | 10/10 | PASS |
 | Witness | frozen (stamped) | blocks stale at Step-0 | PASS |
+
+**Synthesis scope (step-3d dry-run):** requirements §1–13 + `user-stories.md` (9 stories / 27 ACs, every AC row-anchored). `product-spec.md` and `design.md` follow the same looped procedure and are not materialized in this fixture.
 
 ## Detail-class coverage
 
@@ -63,5 +66,5 @@ First-run calibration: no prior threshold exists and none is invented. Mechanica
 
 | Dimension | Reverse-mode dry-run | Traditional-mode baseline | Delta |
 |---|---|---|---|
-| AC count | {step-3d synthesis} | {not built for this fixture} | {first-run} |
-| Detail-class counts | 10/10 | {n/a} | {first-run} |
+| AC count | 27 (US-01..US-09 × AC-H/U/E) | not built for this fixture | first-run calibration — owner disposition pending (A8) |
+| Detail-class counts | 10/10 | not built for this fixture | first-run calibration — owner disposition pending (A8) |
