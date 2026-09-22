@@ -4,7 +4,7 @@
 
 **一个平台无关、基于文件的多智能体引擎。** 将 20 个专业 AI 角色直接安装到你的仓库中。它们规划、设计、构建、审查、测试和交付——拥有跨会话持久化的结构化记忆，以及两大其他框架无法同时具备的架构护城河。
 
-[![Vespyr Version](https://img.shields.io/badge/version-2.0.10-blue)](https://github.com/lalulali/vespyr)
+[![Vespyr Version](https://img.shields.io/badge/version-2.0.11-blue)](https://github.com/lalulali/vespyr)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 📖 **[完整文档 →](Guide/cn/index.md)**
@@ -54,6 +54,8 @@ npx vespyr --yes --target /path/to/my-project --harness opencode,claude
 ```
 
 涵盖从 `/validate-idea`、`/design`、`/round-table` 到 `/shut-up`、`/motion`、`/develop`、`/launch`、`/customize-skill` 和 `/create-skill` 等 43 个端到端工作流（全部通过 CI 校验符合 [agentskills.io](https://agentskills.io) 智能体技能规范）。
+- **原型优先逆向模式** — `/design` 将冻结的原型转化为有证据锚定的 PRD：每条陈述都可追溯到 `path#id` 锚点，哈希见证在范围门处拦截过期规格。
+- **实现覆盖契约** — `/develop` 在 QA 前扫描每条验收标准的实现证据：孤儿 AC 会使构建失败，10 个细节类别要么被审计实现，要么显式延期。
 
 > **初次使用 Vespyr？** 跟随[快速上手指南](Guide/cn/getting-started.md)逐步学习。
 

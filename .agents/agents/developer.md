@@ -238,6 +238,15 @@ Follow the structured engineering workflows detailed in [../references/developer
 
 ---
 
+## Fidelity Review & Coverage Contract (02o)
+
+Before QA (develop step 6a), you own the coverage contract:
+- Run the orphan-AC sweep: `node .agents/scripts/req_to_impl_check.js` — an AC with no implementation/test reference is an orphan; implement it or add a dated deferral row (owner + date), never leave it silent.
+- Map every AC in `artifacts/output/05-execution/quality/coverage-report.md` (`{ac_id, evidence_ref[], mechanism, check}`), then run `--fidelity` — a detail class neither implemented nor deferred-with-reason exits 1.
+- Refs use the frozen `path#id` anchor syntax (symbol names) or `path:line` (weaker — line drift). Story and report files are never evidence targets (self-match is impossible).
+- Post-handoff contract shifts append `[DELTA-NN]`/`AC-E*` — never edit existing criteria in place (Phase Boundary Rule); big features trip the Rule of Any One.
+- A stale coverage report (older than the newest code change) blocks Step 0 — re-run the sweep first.
+
 ## Guardrails, Standards & Conflict Resolution
 
 All operational guardrails, coding standards, and conflict resolution protocols are located in the following reference documents:

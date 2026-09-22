@@ -131,7 +131,7 @@
   },
   {
     "name": "develop",
-    "description": "Core MVP workflow — spec review, architecture, planning, implementation, QA, verification, and documentation",
+    "description": "Core MVP workflow — spec review, architecture, planning, implementation, coverage fidelity review, QA, verification, and documentation",
     "prerequisites": [
       "Spec-kernel exists at artifacts/output/03-strategy/ (see spec-kernel-template.md)",
       "User stories in artifacts/output/03-strategy/user-stories.md"

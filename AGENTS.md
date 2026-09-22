@@ -136,7 +136,7 @@ Vespyr organizes complex, multi-agent operations into highly structured **skills
 *   `/validation-patterns` — Apply validation methods (smoke tests, concierge MVPs, etc.)
 *   `/design` — PRD and screen specs creation (reverse/prototype-first, create, edit, validate)
 *   `/motion` — Motion research, motion spec, and implementation handoff
-*   `/develop` — MVP development cycle
+*   `/develop` — MVP development cycle (includes the fidelity review + orphan-AC sweep before QA)
 *   `/launch` — Release readiness and deployment
 *   `/iterate` — Post-launch behavior improvements
 *   `/incident` — Production incident response
@@ -150,7 +150,7 @@ Vespyr organizes complex, multi-agent operations into highly structured **skills
 *   `/phase` — Show/switch phases
 *   `/plan` — Standalone execution planning
 *   `/review` — Standalone code review
-*   `/test` — Run tests, summarize failures
+*   `/test` — Run tests, summarize failures (failure summary lists orphan ACs)
 *   `/kanban` — Display and update Kanban board
 *   `/analyze-data` — General data analysis companion — EDA, dataset provision, visualization mapping, insight extraction, and PM metric co-piloting
 *   `/create-skill` — Create new skills, modify and improve existing skills, and design lightweight skill evals

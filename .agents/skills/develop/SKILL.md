@@ -1,8 +1,8 @@
 ---
 name: develop
-description: Core MVP workflow — spec review, architecture, planning, implementation, QA, verification, and documentation
+description: Core MVP workflow — spec review, architecture, planning, implementation, coverage fidelity review, QA, verification, and documentation
 metadata:
-  version: "1.0"
+  version: "1.1"
 ---
 
 # Develop — Multi-Step Workflow

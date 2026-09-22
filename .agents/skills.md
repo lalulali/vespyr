@@ -94,10 +94,10 @@ Skills are invoked via `/skill-name` or by referencing `.agents/skills/[name]/SK
 
 ### 💻 Engineering, Quality & Architecture
 - **`/shut-up`**: One-shot silent execution mode — executes tasks directly with zero unsolicited critique, no conversational filler, and ultra-minimal output.
-- **`/develop`**: Core MVP engineering lifecycle (spec review, architecture, coding, review, QA).
+- **`/develop`**: Core MVP engineering lifecycle (spec review, architecture, coding, coverage fidelity review, QA).
 - **`/plan`**: Standalone granular execution planning outside the develop loop.
 - **`/review`**: Standalone read-only code review and security audit.
-- **`/test`**: Test execution, failure analysis, acceptance criteria enrichment, and QA reporting.
+- **`/test`**: Test execution, failure analysis (orphan-AC sweep cited), acceptance criteria enrichment, and QA reporting.
 - **`/analyze-data`**: Exploratory data analysis, visualization mapping, and metric co-piloting.
 
 ### 🚀 Release, Ops & Maintenance

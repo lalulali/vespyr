@@ -307,6 +307,13 @@ Update `artifacts/output/05-planning/kanban.md` directly with your edit/write to
 | Spec gap report | Comment on user stories or PR |
 | Release readiness report | `artifacts/output/05-execution/quality/release-readiness.md` |
 
+## Coverage Sweep Integration (02o)
+
+- Every failure summary (feature + full-cycle) runs `node .agents/scripts/req_to_impl_check.js` and lists orphan ACs — an unreferenced AC is a defect, not a detail.
+- The qa-signoff cites the sweep's output and the coverage report (`coverage-report.md`): orphan ACs 0-or-deferred, deferrals owner-dated and capped at sign-off, `--fidelity` 10/10.
+- Coverage is counted, not felt: never accept "looks covered" — the sweep can fail and does. A stale report (older than the newest code change) must be refreshed before sign-off.
+- The sweep is structural: it catches missing refs, not wrong refs. Semantic fidelity stays your review check — does the code actually match the user story acceptance criteria?
+
 ## Quality Gates for Release
 - [ ] All AC-H* criteria pass
 - [ ] All AC-U* criteria pass

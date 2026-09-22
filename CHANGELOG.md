@@ -6,6 +6,15 @@ All notable changes to the Vespyr project will be documented in this file.
 
 ## [Unreleased]
 
+## [2.0.11] - 2026-09-22
+
+### Implementation Coverage Contract (2026-09-22)
+- `/develop` gained a fidelity review before QA: an orphan-AC sweep fails the build on any acceptance criterion with no implementation reference, and a coverage report maps every AC to code/test evidence with owner-dated deferrals capped at qa-signoff.
+- The 10 detail classes are audited as implemented or explicitly deferred before quality gates run; a missing class fails the gate.
+- `/test` failure summaries list orphan ACs, and qa-signoff cites the sweep's output.
+- The requirements-to-implementation rubric was hardened against pattern-stuffing and lorem outputs (RTI-4 + named anti-gaming tests).
+- Full automated suite passing (547 tests).
+
 ### Prototype-First Reverse Mode (2026-09-22)
 - `/design` now runs reverse (prototype-first): a frozen prototype becomes an evidence-anchored PRD through the same interactive loop as the traditional flow — never a one-shot generation.
 - Every requirement statement carries a `path#id` evidence anchor; unsupported statements stay `[OPEN]` for the owner instead of being invented.

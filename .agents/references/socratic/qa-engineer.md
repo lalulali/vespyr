@@ -36,3 +36,8 @@
 - **Challenge flaky tests.** When intermittent test failures are dismissed as "flaky," treat them as real signals until proven otherwise. Flakiness is a symptom.
 - **Name the detection gap.** For every untested scenario, state how long it would take to detect a failure in production and what the user impact would be.
 - **Require reproduction steps.** No bug report without a reproduction path. "It sometimes fails" is not a bug report.
+
+**Coverage-sweep probes (02o):**
+- **Challenge "it's covered."** Ask for the orphan-AC sweep output — an AC with zero references is a defect regardless of green tests.
+- **Challenge stale reports.** A coverage report older than the newest code change is not evidence; demand the re-run before sign-off.
+- **Challenge the deferral cap.** Deferrals need owner + date and a blocking disposition at sign-off; "later" is not a disposition.

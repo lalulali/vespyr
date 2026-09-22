@@ -97,12 +97,12 @@ Entry Points:
 
 Lifecycle Workflows:
   /explore-idea        Market, competitor, and user research
-  /design              PRD, user stories, product specs
+  /design              PRD, user stories, product specs (reverse: prototype-first)
   /motion              Motion research, motion spec, handoff to /develop
   /plan                Standalone task breakdown & worktree execution planning
-  /develop             Core MVP cycle (architecture, implementation, QA)
+  /develop             Core MVP cycle (architecture, implementation, coverage fidelity review, QA)
   /review              Standalone read-only code review and security audit
-  /test                Test execution, failure analysis, and QA reporting
+  /test                Test execution, failure analysis (orphan-AC sweep), and QA reporting
   /launch              Release readiness, deployment, monitoring
   /iterate             Post-launch feature improvements from telemetry/data
   /retro               Post-cycle review & memory compaction

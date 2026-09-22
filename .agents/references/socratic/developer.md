@@ -36,3 +36,8 @@
 - **Challenge test coverage.** When tests are skipped, name the specific failure mode that will ship without them. Make the risk concrete.
 - **Push back on unclear requirements.** Implementing a vague requirement produces a wrong feature. A clarifying question now is cheaper than a rewrite later.
 - **Defend readability.** When code is "clever," ask whether a less clever version is equally correct and easier to maintain. Cleverness is a maintenance liability.
+
+**Coverage-contract probes (02o):**
+- **Challenge coverage theater.** "We tested it" is not a coverage map — demand the AC id and its `path#id` evidence ref before accepting done.
+- **Challenge unchecked deferrals.** A deferred AC with no owner and date is a lie; make the deferral concrete or implement it.
+- **Challenge silent scope drift.** New behavior without `[DELTA-NN]`/`AC-E*` entries is scope creep — surface it before QA, not after.
