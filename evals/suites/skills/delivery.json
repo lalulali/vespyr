@@ -88,6 +88,8 @@
       "skill": "develop",
       "name": "Requirements-to-Implementation Traceability",
       "dimension": "req_to_impl",
+      "tier": "fixture-tier",
+      "forwardNote": "Fixture-tier: upgrades to behavioral gating when the prompt-execution adapter lands (02l). Relabel attribution: 02o.5 (B15; out-of-scope 02n-window touch routed to 02p).",
       "assertContains": [
         "US-114",
         "acceptance criteria",
@@ -99,7 +101,27 @@
         "As an AI",
         "also added an unrequested feature"
       ],
-      "mockOutput": "## Step 1: Spec Review\nReviewed SPEC.md for story US-114: acceptance criteria AC-1 token generation, AC-2 expiry, AC-3 rate limit.\n\n## Step 2: Implementation\nImplemented the token endpoint matching each acceptance criterion: token generated, expiry set, rate limit applied. No requirements were added beyond the story.\n\n## Step 3: Verification\nAll acceptance criteria verified against the implementation with tests.\n\n## Step 4: Review\nSession complete."
+      "mockOutput": "## Step 1: Spec Review\nReviewed SPEC.md for story US-114: acceptance criteria AC-1 token generation, AC-2 expiry, AC-3 rate limit.\n\n## Step 2: Implementation\nImplemented the token endpoint matching each acceptance criterion: token generated, expiry set, rate limit applied. No requirements were added beyond the story.\n\n## Step 3: Verification\nAll acceptance criteria verified against the implementation with tests. Coverage map: AC-1 `src/token.js#generateToken` (test `tests/token.test.js#generateToken`), AC-2 `src/token.js#expiry` (test `tests/token.test.js#expiry`), AC-3 `src/token.js#rateLimit` (test `tests/token.test.js#rateLimit`). 10-class audit: Screen states, Edge cases, Data fields, Permissions, Navigation, Copy, Telemetry, Performance, Accessibility, Platform recorded in the coverage report.\n\n## Step 4: Review\nSession complete."
+    },
+    {
+      "id": "SKILL-DEVELOP-COVERAGE",
+      "skill": "develop",
+      "name": "Fidelity Review — Coverage Contract & 10-Class Audit",
+      "dimension": "req_to_impl",
+      "tier": "fixture-tier",
+      "forwardNote": "Fixture-tier: upgrades to behavioral gating when the prompt-execution adapter lands (02l).",
+      "assertContains": [
+        "coverage report",
+        "AC-H1",
+        "orphan"
+      ],
+      "prompt": "Run /develop step 6a for US-114: sweep orphan ACs and complete the coverage contract before QA.",
+      "assertNotContains": [
+        "I cannot",
+        "As an AI",
+        "unrequested feature"
+      ],
+      "mockOutput": "## Step 6a: Fidelity Review\nOrphan-AC sweep: `node .agents/scripts/req_to_impl_check.js` — zero orphan ACs for US-114; every acceptance criterion maps to implementation evidence per the spec.\n\nCoverage report (`artifacts/output/05-execution/quality/coverage-report.md`):\n| AC id | Evidence refs | Mechanism | Check | Status |\n| AC-H1 | `evals/fixtures/dev-tasks/spec-coverage/rate-limiter.js#allowRequest`, `evals/fixtures/dev-tasks/spec-coverage/rate-limiter.test.js#allowRequest` | unit assertions cover capacity honored | `node rate-limiter.test.js` | covered |\n| AC-U1 | `evals/fixtures/dev-tasks/spec-coverage/rate-limiter.js#TokenBucketRateLimiter` | reject-on-empty asserted | `node rate-limiter.test.js` | covered |\n| AC-E1 | `evals/fixtures/dev-tasks/spec-coverage/rate-limiter.js#refillRate` | deterministic refill asserted | `node rate-limiter.test.js` | covered |\n\n10-class fidelity: Screen states, Edge cases, Data fields, Permissions, Navigation, Copy, Telemetry, Performance, Accessibility, Platform — implemented or deferred with reason; `--fidelity` exits 0. Zero orphan behavior remains."
     }
   ]
 }

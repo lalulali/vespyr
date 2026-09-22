@@ -1,7 +1,7 @@
 {
   "dimension": "req_to_impl",
   "name": "Requirements-to-Implementation Accuracy Rubric",
-  "description": "Evaluates trace fidelity from requirements to code with zero scope creep.",
+  "description": "Evaluates trace fidelity from requirements to code: story/AC traceability, zero scope creep, verification evidence linkage, and the AC coverage map.",
   "passThreshold": 4,
   "criteria": [
     {
@@ -9,7 +9,9 @@
       "name": "Full User Story AC Traceability",
       "weight": 2,
       "requiredPatterns": [
-        "spec|requirement|story|implement|criteria"
+        "US-\\d+",
+        "AC-[A-Z]*\\d+",
+        "acceptance criteria|per the spec|per the story|requirements"
       ]
     },
     {
@@ -18,14 +20,30 @@
       "weight": 2,
       "prohibitedPatterns": [
         "also added an unrequested feature",
-        "speculative framework rewrite"
+        "speculative framework rewrite",
+        "unrequested feature",
+        "beyond the scope of the story",
+        "outside the acceptance criteria"
       ]
     },
     {
       "id": "RTI-3",
-      "name": "Clean Diff Footprint",
+      "name": "Verification Evidence Linkage",
       "weight": 1,
-      "minWordCount": 40
+      "requiredPatterns": [
+        "AC-[A-Z]*\\d+[\\s\\S]{0,400}(test|verif|cover|assert|check)|(test|verif|cover|assert|check)[\\s\\S]{0,400}AC-[A-Z]*\\d+"
+      ]
+    },
+    {
+      "id": "RTI-4",
+      "name": "AC Coverage Map With Evidence Refs",
+      "weight": 2,
+      "tier": "fixture-tier",
+      "forwardNote": "Fixture-tier: upgrades to behavioral gating when the prompt-execution adapter lands (02l).",
+      "requiredPatterns": [
+        "AC-[A-Z]*\\d+[^\\n]*`?[A-Za-z0-9._/-]+#[A-Za-z][A-Za-z0-9._:-]*",
+        "10-class|Screen states|Edge cases|Accessibility"
+      ]
     }
   ]
 }
