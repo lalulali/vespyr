@@ -23,7 +23,7 @@
 |---|---|
 | Lock coverage | Verify + wire `.agents/scripts/lib/lock.js` (02i primitive) around ALL shared-state writers: `memory_write.js`, `orchestrator_state.js session-write`, `memory_filter.js` sync paths, `step-audit.json` appends |
 | `latest.md` redesign | Replace last-writer-wins hand-written `latest.md` with a **generated view** derived from append-only `history.md` (regenerated at session start); direct writes deprecated |
-| Session provenance | Every memory entry + session row stamped with `session_id` (host+pid+boot-time hash) |
+| Session provenance | Every memory entry + session row stamped with `session_id` (host+pid+boot-time hash). **[CORRECTED 2026-09-21 — review 12/roundtable]:** shipped as `w-<sha1(hostname:ppid)[0:12]>` per the executed DoD at `:85`, ratified by `02k:231`; the boot-time component was never shipped. No behavioral impact on attribution; the scope-lock same-window branch is unbounded by design (window = session identity, 02o). |
 | Collision detection | `drift_monitor.js` flags interleaved writers (two session_ids on one shared file inside a window); emits telemetry event (02l hook point) |
 | Plan-file reservation | Dev-plan numbers claimed by committing a stub first; `development-plan/README.md` index is the allocation record |
 | Protocol | GUARDRAILS section: one epic per window; `git worktree` per session for true parallelism; commit-per-build-item |
@@ -82,7 +82,7 @@
 
 1. [x] **Zero-loss parallel writes:** 8 concurrent writers in sandbox → 8/8 entries, exact-once, header intact, ledger complete (`tests/test_parallel_memory.test.js` DoD#1 case; probe run evidence in session log).
 2. [x] **No last-writer-wins state:** exactly ONE `latest.md` write site remains under `.agents/scripts/**` — the sanctioned derived regeneration (`lib/session.js:117`); orchestrator direct overwrite removed; `memory_filter.js` regenerates-on-read when missing (grep evidence 2026-08-28).
-3. [x] **Full attribution:** every memory entry carries `**Session:**` (8/8 in probe); history rows carry `- Session:`; ledger rows carry `session_id` (window hash `w-<sha1(hostname:ppid)[0:12]>` or `VESPYR_SESSION_ID`).
+3. [x] **Full attribution:** every memory entry carries `**Session:**` (8/8 in probe); history rows carry `- Session:`; ledger rows carry `session_id` (window hash `w-<sha1(hostname:ppid)[0:12]>` or `VESPYR_SESSION_ID`). **[ANNOTATED 2026-09-21 — review 12/roundtable:** this executed DoD is the authority for the shipped hash; the "boot-time" phrasing at `:26` is superseded.]
 4. [x] **Collision is loud:** forced two-window ledger probe → exit 1 naming both sessions; real-tree run clean (exit 0); telemetry event hook emits `memory_collision` to `artifacts/telemetry/events-*.ndjson` (02l span integration point).
 5. [x] **Falsifiable verification:** planted-bypass probe (stub pass-through lock + widened rename window — structural, not timing-dependent) reproduces lost-entry/torn-structure corruption; suite fails if the lock is not load-bearing. Deliberate deviation from the plan's `parallel-safety.json` sketch: a mockOutput eval JSON would repeat the 02m tautology — the named node test IS the deterministic verification (08-23 rule: script + named test).
 6. [x] **Protocol codified:** GUARDRAILS "Parallel Session Protocol" section live; Plan Registry in development-plan/README.md = allocation record (36/36 registered, `check_plan_reservation.js` + named test).

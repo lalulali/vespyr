@@ -28,6 +28,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { loadRouter } = require('./resolve_agents');
 
 const PROJECT_ROOT = process.cwd();
 const RESULTS_DIR = path.join(PROJECT_ROOT, 'artifacts', 'evals', 'roundtable');
@@ -76,7 +77,7 @@ function readCoverageBlock(text) {
   return fence ? fence[1] : null;
 }
 
-function parseCoverage(text) {
+function parseCoverage(text, options = {}) {
   const warnings = [];
   const block = readCoverageBlock(text);
   if (!block) return { error: 'no ```roundtable-coverage block found', warnings };
@@ -86,7 +87,8 @@ function parseCoverage(text) {
     return { error: `duplicate 'panel:' line (${panelLines.length} found) — multi-turn transcripts must carry exactly one panel`, warnings };
   }
   const panel = panelLines[0].replace(/^\s*panel:\s*/, '').split(',').map((s) => s.trim()).filter(Boolean);
-  if (panel.length < 2) return { error: 'panel needs at least 2 panelists', warnings };
+  const minSeats = options.minSeats !== undefined ? options.minSeats : 2;
+  if (panel.length < minSeats) return { error: `panel needs at least ${minSeats} panelists`, warnings };
   if (panel.some((p) => !p.startsWith('@'))) return { error: `malformed panel entry in: ${panelLines[0]}`, warnings };
   const challenges = [];
   const re = /^\s*[-*]\s*(@[\w.-]+)\s*(->|→)\s*(@[\w.-]+)(\s*:)?/gm;
@@ -120,7 +122,16 @@ function cmdCoverage(flags) {
   } else {
     text = fs.readFileSync(0, 'utf8');
   }
-  const result = parseCoverage(text);
+  let minSeats = 2;
+  try {
+    const router = loadRouter();
+    if (router.rules && Number.isInteger(router.rules.default_seats)) {
+      minSeats = router.rules.default_seats;
+    }
+  } catch (err) {
+    console.warn(`[roundtable-eval] warn: could not load router rules (${err.message}); falling back to default seats (2)`);
+  }
+  const result = parseCoverage(text, { minSeats });
   if (result.error) {
     console.error(`[roundtable-eval] FAIL: ${result.error}`);
     process.exit(2);
@@ -295,12 +306,21 @@ function cmdScore(flags) {
     console.error(`[roundtable-eval] --dir is not a directory: ${flags.dir}`);
     process.exit(2);
   }
+  let defaultSeats = 2;
+  try {
+    const router = loadRouter();
+    if (router && router.rules && typeof router.rules.default_seats === 'number') {
+      defaultSeats = router.rules.default_seats;
+    }
+  } catch (err) {
+    console.warn(`[roundtable-eval] warn: could not load router rules (${err.message}); falling back to default seats (2)`);
+  }
   const entries = loadTranscripts(flags.dir).map((e) => {
     if (e.refused) return { ...e, verdicts: null, concessions: [], rounds: [], redTeam: null, rosterSeats: null, soloDisclosure: null, coverage: { skipped: 'refused-log-only' }, compliant: null };
     if (e.nameError) return { ...e, topic: null, mode: null, run: null, verdicts: null, concessions: [], rounds: [], soloDisclosure: null, coverage: { error: e.nameError, warnings: [] }, compliant: false };
     const text = fs.readFileSync(path.join(flags.dir, e.file), 'utf8');
     const verdicts = extractVerdicts(text);
-    const cov = parseCoverage(text);
+    const cov = parseCoverage(text, { minSeats: defaultSeats });
     const compliant = !cov.error && !cov.malformed && Array.isArray(cov.uncovered) && cov.uncovered.length === 0;
     const coverageDetail = cov.error
       ? cov.error
@@ -720,37 +740,65 @@ function cmdOverrides(flags) {
     console.error(`[roundtable-eval] --dir is not a directory: ${flags.dir}`);
     process.exit(2);
   }
-  const patterns = {
+  let maxOverrideRate = 0.20;
+  let minSessions = 10;
+  try {
+    const router = loadRouter();
+    const sla = router && router.rules && router.rules.revisit_sla;
+    if (sla) {
+      if (typeof sla.max_override_rate === 'number' && sla.max_override_rate > 0 && sla.max_override_rate <= 0.50) {
+        maxOverrideRate = sla.max_override_rate;
+      }
+      if (typeof sla.min_sessions === 'number' && sla.min_sessions >= 5) {
+        minSessions = sla.min_sessions;
+      }
+    }
+  } catch (err) {
+    console.warn(`[roundtable-eval] warn: could not load router policy (${err.message}); falling back to default revisit SLA`);
+  }
+
+  const overridePatterns = {
     routing_override: /\[ROUTING-OVERRIDE:/g,
     router_deviation: /\[ROUTER-DEVIATION:/g,
     spc_skipped: /\[SPC:\s*skipped\b/g,
     codispatch_absent: /\[CO-DISPATCH-ABSENT:/g,
     elicitation_skipped: /\[ELICITATION-SKIPPED:/g,
   };
+  const telemetryPatterns = {
+    router_autoseat: /\[ROUTER-AUTOSEAT:/g,
+  };
   const files = collectMarkdown(flags.dir);
   const hits = [];
+  let autoseatHits = 0;
   for (const file of files) {
     const text = fs.readFileSync(file, 'utf8');
-    const found = Object.entries(patterns)
+    const found = Object.entries(overridePatterns)
       .filter(([, re]) => { re.lastIndex = 0; return re.test(text); })
       .map(([name]) => name);
     if (found.length) hits.push({ file: path.relative(flags.dir, file), markers: found });
+
+    const autoseatMatches = text.match(telemetryPatterns.router_autoseat);
+    if (autoseatMatches) autoseatHits += autoseatMatches.length;
   }
   const rate = files.length ? hits.length / files.length : 0;
-  const revisit = files.length >= 10 && rate > 0.2;
+  const revisit = files.length >= minSessions && rate > maxOverrideRate;
   const report = {
     sessions_scanned: files.length,
     sessions_with_overrides: hits.length,
     override_rate: Number(rate.toFixed(2)),
-    revisit_threshold: 0.2,
-    revisit_min_sessions: 10,
+    revisit_threshold: maxOverrideRate,
+    revisit_min_sessions: minSessions,
     revisit: revisit,
+    autoseat_markers_detected: autoseatHits,
     hits,
   };
   if (flags.json) {
     console.log(JSON.stringify(report, null, 2));
   } else {
     console.log(`override audit: ${hits.length}/${files.length} sessions carry override/skip markers (rate ${report.override_rate})`);
+    if (autoseatHits > 0) {
+      console.log(`telemetry: ${autoseatHits} router autoseat marker(s) detected`);
+    }
     for (const h of hits) console.log(`  - ${h.file}: ${h.markers.join(', ')}`);
     console.log(revisit ? 'REVISIT TRIGGERED: override rate above threshold — recalibrate or kill the default' : 'revisit: not triggered');
   }

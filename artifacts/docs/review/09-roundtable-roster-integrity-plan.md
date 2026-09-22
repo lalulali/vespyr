@@ -1,7 +1,7 @@
 # Review 09 — Roundtable Roster Integrity Plan
 
-**Date:** 2026-09-11  
-**Status:** PROPOSED r2 (reshaped — r1 blockers fixed; no code changed by this document)  
+**Date:** 2026-09-11 (r3 ratified 2026-09-16; implementation record + Review-12 corrections 2026-09-21; CR fixes 2026-09-22)  
+**Status:** IMPLEMENTED r3 — **review-validated 4/4 SATISFIED `[CONFIRMED]` 2026-09-22** (r2 text below retained as plan-of-record; r3 = 4/4 round-table GO 2026-09-16 with 6 binding amendments; evidence in §7; final transcript `artifacts/evals/roundtable/transcripts/review-implementation-12_native_1.md`)  
 **Target:** `lalulali/vespyr` v2.0.10  
 **Scope:** `.agents/references/roster-router.json`, `.agents/scripts/resolve_agents.js`, `.agents/scripts/roundtable_eval.js` (contract only), `.agents/skills/round-table/SKILL.md`, `tests/test_router.test.js`, `evals/roundtable/topics.json`, `evals/roundtable/tag-probes.json` (new)
 
@@ -116,7 +116,7 @@ flowchart LR
 
 Rules:
 - **One floor.** `rules.default_seats` (2) is read by `matchTopicToTags`, `validateRoster` **and** `roundtable_eval.js`'s panel-size check. No consumer hardcodes it.
-- **Tagged topics:** if the mandatory union has fewer than `default_seats`, seat 2 is filled deterministically from the highest-scoring matched tag's `consulted` list (first entry not already seated). **Seat 2's contract is positional** — "highest-ranked consulted seat" — not a `non-builder` predicate, because no such predicate exists in agent frontmatter (D5). `rules.reserved_seat_2` is rewritten to say exactly that; the words "non-builder observer" are deleted rather than left as unenforceable prose.
+- **Tagged topics:** if the mandatory union has fewer than `default_seats`, seat 2 is filled deterministically from the highest-scoring matched tag's `consulted` list (first entry not already seated). **Seat 2's contract is positional** — "highest-ranked consulted seat" — not a `non-builder` predicate, because no such predicate exists in agent frontmatter (D5). `rules.reserved_seat_2` is rewritten to say exactly that; the words "non-builder observer" are deleted rather than left as unenforceable prose. **[SHIPPED AS `policy.reserved_seat_2` — 2026-09-21, recorded in §7.2; the enforced `rules` namespace holds only keys code reads.]**
 - **Untagged topics (0 tags matched):** fall back to `rules.untagged_fallback`, **read from the JSON** (`["tech-lead", "architect"]`). The list is added to the table, not written as a literal in the script — hardcoding it in `resolve_agents.js` would re-create the exact defect class this plan exists to delete (a constant shadowing the adjacent prose rule).
 - **Keyword matching:** keywords of length ≤ 6 match as **whole words** (`\bkw\b`); longer compound keywords keep plain substring matching. Measured, not assumed — a word-*start* boundary (`\bkw`) does **not** fix D4: `\bauth` still matches "author" and "authority". Whole-word matching does, at the cost of inflections (`auth` stops matching "authentication"), so surface forms are listed explicitly: `authentication`, `authorization`, `authz`, `secrets`, `purges`, `purging`. The boundary rule and the surface-form list are one change.
 - **Auto-seat logging & telemetry:** reported in matcher JSON as `autoSeated: [{ tag, agent }]` and emitted in transcripts as `[ROUTER-AUTOSEAT: <tag> → @<agent>]`. Normal deterministic router behavior, **distinct from user overrides or host deviations**, tracked as an informational biomarker and excluded from the revisit rate.
@@ -131,7 +131,7 @@ Rules:
 ### Phase 1 — Enforce the floor, from one source
 1. `.agents/references/roster-router.json`:
    - Add `rules.untagged_fallback: ["tech-lead", "architect"]`.
-   - Rewrite `rules.reserved_seat_2` to the **positional** contract (tagged: highest-ranked consulted seat; untagged: owner + strongest dissenter). Delete "non-builder observer" (D5).
+   - Rewrite `rules.reserved_seat_2` to the **positional** contract (tagged: highest-ranked consulted seat; untagged: owner + strongest dissenter). Delete "non-builder observer" (D5). **[SHIPPED AS `policy.reserved_seat_2` — see §7.2.]**
 2. `resolve_agents.js` `matchTopicToTags`:
    - Read `rules.default_seats` (default 2) — no literal.
    - If tags matched and mandatory union < `default_seats`: auto-seat the first agent from the top-ranked matched tag's `consulted` list not already mandatory. Populate `autoSeated: [{ tag, agent }]`; include in `rosterLine`.
@@ -222,24 +222,26 @@ node tests/run-all.js
 
 ## 5. Verification & Acceptance Checklist
 
-- [ ] All 15 tags emit `rosterLine` with ≥2 seats, driven by `evals/roundtable/tag-probes.json` (15/15 OK).
-- [ ] Untagged topics emit the `rules.untagged_fallback` pair read from the JSON (≥2 seats); the pair appears nowhere as a literal in `resolve_agents.js`.
-- [ ] `resolve_agents.js roster check --seats "@developer"` exits 2 with the floor message across all topics.
-- [ ] `roundtable_eval.js`'s panel-size check reads `rules.default_seats` — the literal `2` at `:89` is gone, and the scorer reads `roster-router.json` at least once.
-- [ ] No literal seat-floor `2` remains in either script (grep assertion).
-- [ ] The D2 topic string seats `@security-engineer`.
-- [ ] `"investigate memory leak in Node.js event loop"` routes to `performance` (not empty, not `security`) and does NOT seat `@security-engineer`.
-- [ ] `"security audit of a memory leak in the cache"` does NOT match the `security` tag — the probe that actually exercises `security.excludes`.
-- [ ] `"author a new agent persona"` and `"authority model for tool permissions"` do NOT seat `@security-engineer`, and `"authentication flow review"` still DOES (D4, both directions).
-- [ ] `"purge the cache after deploy"` does NOT match the `security` tag (accepted-false-positive exclusion).
-- [ ] `reserved_seat_2` prose contains no undefined predicate ("non-builder") and matches the implemented positional rule (D5).
-- [ ] `[ROUTER-AUTOSEAT: …]` appears when the observer is auto-seated and is excluded from the revisit rate.
-- [ ] `hard_cap_native` / `hard_cap_solo` removed; every remaining `rules.*` key has a non-test reader (guard test passes).
-- [ ] `revisit_threshold` is either read as a number from the table or deleted with the hardcoded `0.2`/`10` acknowledged — no prose-as-config.
-- [ ] Each of the 13 `evals/roundtable/topics.json` topics routes to ≥2 seats (a *routing* check; `roundtable_eval.js score` takes a transcript directory, not the topic corpus).
-- [ ] `tests/test_router.test.js` asserts behavior, not constants; no new assertion duplicates `:193`/`:199`.
-- [ ] `node tests/run-all.js` green.
-- [ ] SKILL.md prose matches implemented behavior.
+> **Implementation status (verified 2026-09-21, @code-reviewer, Review 12):** every item below verified on disk; one partial annotated. Evidence and deviations in §7.
+
+- [x] All 15 tags emit `rosterLine` with ≥2 seats, driven by `evals/roundtable/tag-probes.json` (15/15 OK).
+- [x] Untagged topics emit the `rules.untagged_fallback` pair read from the JSON (≥2 seats); the pair appears nowhere as a literal in `resolve_agents.js` (`rulesOf()` hard-fails on a malformed table — Review-12 R09-D1 fix).
+- [x] `resolve_agents.js roster check --seats "@developer"` exits 2 with the floor message across all topics.
+- [x] `roundtable_eval.js`'s panel-size check reads `rules.default_seats` — the literal `2` at `:89` is gone, and the scorer reads `roster-router.json` at least once.
+- [~] No literal seat-floor `2` remains in either script (grep assertion). `resolve_agents.js` has none (hard fail); `roundtable_eval.js` retains the plan-sanctioned fallback-to-2-with-warning (§Phase 1.4) plus `parseCoverage`'s default parameter.
+- [x] The D2 topic string seats `@security-engineer`.
+- [x] `"investigate memory leak in Node.js event loop"` routes to `performance` (not empty, not `security`) and does NOT seat `@security-engineer`.
+- [x] `"security audit of a memory leak in the cache"` does NOT match the `security` tag — the probe that actually exercises `security.excludes`.
+- [x] `"author a new agent persona"` and `"authority model for tool permissions"` do NOT seat `@security-engineer`, and `"authentication flow review"` still DOES (D4, both directions).
+- [x] `"purge the cache after deploy"` does NOT match the `security` tag (accepted-false-positive exclusion).
+- [x] `reserved_seat_2` prose contains no undefined predicate ("non-builder") and matches the implemented positional rule (D5).
+- [x] `[ROUTER-AUTOSEAT: …]` appears when the observer is auto-seated and is excluded from the revisit rate.
+- [x] `hard_cap_native` / `hard_cap_solo` removed; every remaining `rules.*` key has a non-test reader (guard test passes with an explicit reader map).
+- [x] `revisit_threshold` is read as numbers from the table — resolved as `rules.revisit_sla`, consumed by `roundtable_eval.js` (Review-12 R09-D5 correction: moved out of `policy` into the enforced namespace; no prose-as-config).
+- [x] Each of the 13 `evals/roundtable/topics.json` topics routes to ≥2 seats.
+- [x] `tests/test_router.test.js` asserts behavior, not constants; no new assertion duplicates `:193`/`:199`.
+- [x] `node tests/run-all.js` green (501/501 after roundtable RESHAPE corrections; 496/496 after Review-12 fixes; 494/494 at review start).
+- [x] SKILL.md prose matches implemented behavior.
 
 ---
 
@@ -251,3 +253,46 @@ node tests/run-all.js
 - **Residual — the shared contract is a loader, not a module.** Phase 1.4 has the scorer read `roster-router.json`; it does not refactor the two scripts onto a shared library. A future third consumer can still diverge. Full extraction is out of scope until a third consumer exists.
 - **Residual — the probe map is a maintenance surface.** `tag-probes.json` must be updated when a tag's keywords change, or the guard silently stops covering that tag. Mitigation: the guard asserts the probe map's key set equals the router's tag set, so a *new* tag fails loudly; a renamed keyword inside an existing tag will not.
 - **Residual:** substring matching still misroutes topics that use none of the table's vocabulary; the untagged fallback prevents runtime crash or single-seat emission, but human topic sharpening remains required for domain-specialized panels.
+
+---
+
+## 7. Implementation Record & Review-12 Corrections (2026-09-21)
+
+### 7.1 Delivery
+
+| Artifact | State on disk |
+| :--- | :--- |
+| `.agents/references/roster-router.json` v1.1.0 | `rules`/`policy` namespace split; `untagged_fallback`; `revisit_sla` in `rules`; security/performance/architecture/planning/tooling/launch/data/serving/docs keyword expansion; `security.excludes`; `hard_cap_native`/`hard_cap_solo` deleted |
+| `.agents/scripts/resolve_agents.js` | whole-word matching for tokens ≤6 chars; auto-seat cascade (`autoSeated`); untagged fallback; floor in `validateRoster`; `rulesOf()` hard-fails on a malformed table |
+| `.agents/scripts/roundtable_eval.js` | panel floor read from `rules.default_seats` (warn-fallback sanctioned by Phase 1.4); `rules.revisit_sla` read as numbers; `router_autoseat` partitioned from override patterns |
+| `.agents/skills/round-table/SKILL.md` | `[ROUTER-AUTOSEAT: …]` contract; untagged fallback; positional seat-2 dialectic mandate |
+| `evals/roundtable/tag-probes.json` | 15-tag probe map — single source (duplicate `tests/fixtures/` copy deleted in Review 12) |
+| `tests/test_router.test.js` | behavioral probes, boundary/memory probes, QA-ENRICH-1..5, explicit reader map, probe-map ↔ tag-set equality guard |
+
+**r3 provenance:** ratified 2026-09-16 by round table 4/4 GO across 6 binding amendments (`artifacts/memory/session-summaries/history.md:1938-1940`); implemented same day (`history.md:1945-1946`); QA GO with 33/33 feature + 5/5 journey tests (`artifacts/output/05-execution/quality/test-report.md`). The r3 amendments were never written back into this document — §5/§7 are the forward correction (Review 12 A5).
+
+### 7.2 Review-12 corrections applied
+
+| # | Correction | Evidence |
+| :--- | :--- | :--- |
+| R09-D1 | Literal fallbacks removed; `rulesOf()` throws on a missing `rules.*` key instead of shadowing the table | `resolve_agents.js` (no `\|\| 2`, no inline `['tech-lead','architect']`) |
+| R09-D2 | Duplicate probe artifact deleted; tests read `evals/roundtable/tag-probes.json` | `tests/fixtures/` removed; `test_router.test.js` reads the evals path |
+| R09-D3 | Constant echo replaced by a floor-invariant assertion | `test_router.test.js` RT-P1-1 |
+| R09-D4 | Structural guard now uses the plan's explicit reader map as the only escape hatch | `test_router.test.js` "declared non-test reader" |
+| R09-D5 | `revisit_sla` moved from `policy` into `rules` — enforced namespace holds every key code reads | `roster-router.json`; `roundtable_eval.js` reads `rules.revisit_sla` |
+| R09-D6 | `roundtable_eval.js` SLA clamps (`max_override_rate ≤ 0.50`, `min_sessions ≥ 5`) retained as defensive validation — accepted, no behavioral deviation | `roundtable_eval.js` |
+| — | Probe-map ↔ tag-set equality guard added (closes the §6 residual mitigation as specified) | `test_router.test.js` RT-P1-1 |
+| RT-01 | Inflection surface forms completed for the whole-word rule (`launches/launched/deploys/deployed/ships/shipped`, `oauth/oauth2`) + inflected-phrase regression corpus | `roster-router.json`; `test_router.test.js` "inflected surface forms" |
+| RT-02 | `review` added to the `review` tag keywords — evidence: the 2026-09-21 roundtable topic "review the implementation" missed every tag and hit the untagged fallback | `roster-router.json`; live probe now seats `@code-reviewer,@qa-engineer` |
+| RT-03 | `rulesOf()` upgraded from presence-only to type/range validation (`default_seats` integer ≥2, `hard_cap` positive integer, `default_seats ≤ hard_cap`, `untagged_fallback` non-empty string array) + throw tests | `resolve_agents.js`; `test_router.test.js` "rulesOf rejects malformed router tables" |
+| RT-04 | `reserved_seat_2` namespace relocation (`rules` → `policy`) recorded; stale plan references annotated at §3 and Phase 1.1 | this section; `roster-router.json` |
+| RT-05 | `validateRoster` docblock corrected to match the implemented positions-3+ allowlist (the claim never covered seats 1–2) | `resolve_agents.js` docblock |
+| RT-06 | Untagged allowlist test made discriminating (seat 3 outside `untagged_fallback` → exit 2 via allowlist, not missing-mandatory) | `test_router.test.js` RT-P3-1 |
+
+### 7.3 Residuals
+
+- `roundtable_eval.js` keeps the Phase 1.4 warn-fallback to `2` when the router cannot be resolved — the only remaining seat-floor literal, by plan design.
+- A renamed keyword inside an existing tag remains uncovered until the probe topic is updated (§6 residual stands; the equality guard catches added/removed **tags**, not reworded keywords). The inflected-phrase corpus (RT-01) now covers the whole-word inflections class; other vocabularies still rely on the probe map.
+- Router recall: keywords remain vocabulary-bound — the 2026-09-21 roundtable supplied one live miss ("review the implementation" → untagged) now fixed by RT-02; new domains still require a table edit, per §6.
+- QA-report claims corrected by dated annotation in `artifacts/output/05-execution/quality/test-report.md` (the `§7` backport claim and the inverted `"memory leak" removed from excludes` claim).
+- `reserved_seat_2` (policy) has no behavioral test linking the prose to the implemented positional seating; traceability is via §7.2 RT-04 and the QA-ENRICH-2 auto-seat test. **Owner: @tech-lead** (table/mechanics owner per SKILL.md router rule 7; added to Review 12's residual list — roundtable R2, 2026-09-22).

@@ -39,10 +39,6 @@ function windowSessionId() {
 function resolveSessionId() {
   if (process.env.VESPYR_SESSION_ID) return process.env.VESPYR_SESSION_ID;
   try { return windowSessionId(); } catch { /* fall through */ }
-  try {
-    const j = JSON.parse(fs.readFileSync(SESSION_CURRENT, 'utf8'));
-    if (j && j.session_id) return j.session_id;
-  } catch { /* fall through */ }
   return 'unattributed';
 }
 
@@ -122,4 +118,4 @@ function regenerateLatest() {
   return true;
 }
 
-module.exports = { resolveSessionId, ensureSessionCurrent, regenerateLatest, latestFromHistory, parseLastHistoryEntry };
+module.exports = { resolveSessionId, windowSessionId, ensureSessionCurrent, regenerateLatest, latestFromHistory, parseLastHistoryEntry };

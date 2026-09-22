@@ -22,7 +22,7 @@
     "eval:invariants": "node bin/vespyr-eval.js run --suite invariants/grill-me-spcp --mock",
     "eval:baseline": "node bin/vespyr-eval.js record-baseline --mock --baseline evals/mock-baseline.json",
     "sync-docs": "node bin/cli.js --sync-docs",
-    "lint": "node --check bin/cli.js bin/vespyr-eval.js tools/eval/runner.js",
+    "lint": "node --check bin/cli.js && node --check bin/vespyr-eval.js && node --check tools/eval/runner.js",
     "typecheck": "node --check bin/cli.js",
     "validate:frontmatter": "node .agents/scripts/validate_frontmatter.js",
     "worktree:create": "node .agents/scripts/worktree.js create",

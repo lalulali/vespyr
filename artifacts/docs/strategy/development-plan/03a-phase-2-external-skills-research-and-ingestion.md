@@ -268,3 +268,5 @@ It would be a great adition for Sarah. But all documents are in Chinese
 - we have a lot of token reduction skills like what I want to implement in 03f-token-effective-mode. but, my latest approach would like to incorporate those skills in vespyr instead of building it myself. what we need to do
   - plan how the installer works
   - plan how agents and skills can use the skills natively
+  - update the plan, remove obsolete plan
+- ruflo hive mind: https://github.com/ruvnet/ruflo/blob/main/.agents/skills/hive-mind/SKILL.md (can be used to generate ppt too)

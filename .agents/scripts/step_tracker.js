@@ -24,6 +24,7 @@
 const fs = require('fs');
 const { writeFileSync: atomicWriteFileSync } = require('./lib/fs_atomic.js');
 const { withLock } = require('./lib/lock.js');
+const { resolveSessionId, windowSessionId, ensureSessionCurrent } = require('./lib/session.js');
 const path = require('path');
 
 const PROJECT_ROOT = process.cwd();
@@ -159,6 +160,59 @@ function requiresScopeLock(skill) {
   });
 }
 
+function getActiveSessionContext() {
+  const envSession = process.env.VESPYR_SESSION_ID;
+  let currentWindow = null;
+  try { currentWindow = windowSessionId(); } catch {}
+
+  let sessionCurrent = null;
+  try {
+    const sessionFile = path.join(PROJECT_ROOT, '.agents', 'state', 'session-current.json');
+    if (fs.existsSync(sessionFile)) {
+      sessionCurrent = JSON.parse(fs.readFileSync(sessionFile, 'utf8'));
+    }
+  } catch {}
+
+  return { envSession, currentWindow, sessionCurrent };
+}
+
+function isLockActive(lock, skill, ctx) {
+  if (!lock || lock.type !== 'scope_lock' || lock.skill !== skill) return false;
+
+  const { envSession, currentWindow, sessionCurrent } = ctx || getActiveSessionContext();
+  const lockSession = lock.session_id ? String(lock.session_id) : null;
+  const lockTime = lock.ts ? new Date(lock.ts).getTime() : 0;
+  const FIFTEEN_MINUTES = 15 * 60 * 1000;
+  const isRecent = lockTime > 0 && (Date.now() - lockTime) < FIFTEEN_MINUTES;
+  const sessionStart = sessionCurrent && sessionCurrent.started ? new Date(sessionCurrent.started).getTime() : 0;
+  const afterSessionStart = sessionStart > 0 && lockTime >= (sessionStart - 5000);
+  // Window-bound ids are the only ones allowed to ride the recency fallback.
+  const windowBound = !lockSession || lockSession === 'unattributed' || lockSession.startsWith('w-');
+
+  // 1. Explicit Session ID match (CI or orchestrated runs)
+  if (envSession) {
+    return lockSession === envSession;
+  }
+
+  // 2. Window Hash match — the window IS the session identity for interactive
+  // runs (02o), so a same-window lock stays valid for the window's lifetime,
+  // bounded by process-tree identity rather than a TTL.
+  if (lockSession && currentWindow && lockSession === currentWindow) {
+    return true;
+  }
+
+  // 3. Any-window recency fallback (forked-ppid harnesses, ≤15 min). Window-bound
+  // locks from an unrelated window can satisfy the gate within the TTL; this is
+  // an accepted residual, not a subshell-specific guarantee (roundtable
+  // 2026-09-21). Session-UUID-shaped locks are never honored — no producer
+  // exists for them, so they stay fail-closed.
+  if (windowBound && afterSessionStart && isRecent) {
+    return true;
+  }
+
+  return false;
+}
+
 function enforceScopeGate(skill, step, mode) {
   const raw = String(step ?? '');
   if (!skill || !/^\d+[a-z]?$/i.test(raw)) {
@@ -167,8 +221,9 @@ function enforceScopeGate(skill, step, mode) {
   }
   const num = parseInt(raw, 10);
   if (!(num >= 1) || !requiresScopeLock(skill)) return;
-  const locks = readAudit().filter(e => e.type === 'scope_lock');
-  if (locks.some(e => e.skill === skill)) return;
+  const ctx = getActiveSessionContext();
+  const locks = readAudit().filter(e => isLockActive(e, skill, ctx));
+  if (locks.length > 0) return;
   // Mode-variant chains (e.g. validate-idea-create) may satisfy the gate via a
   // base-skill lock ONLY when the locked track names this mode — 02k-era binding.
   const hyphen = skill.lastIndexOf('-');
@@ -176,20 +231,26 @@ function enforceScopeGate(skill, step, mode) {
     const base = skill.slice(0, hyphen);
     const suffix = skill.slice(hyphen + 1).toLowerCase();
     if (skillStepsDir(base)) {
-      const mismatch = locks.find(e => e.skill === base);
-      if (mismatch && String(mismatch.track).toLowerCase() === suffix) return;
-      if (mismatch) {
-        console.error(`[ERROR] Scope gate: base lock for '${base}' has track "${mismatch.track}", not mode '${suffix}' — ${skill} is not unlocked.`);
+      const baseLocks = readAudit().filter(e => isLockActive(e, base, ctx));
+      const mismatch = baseLocks.find(e => String(e.track).toLowerCase() === suffix);
+      if (mismatch) return;
+      if (baseLocks.length > 0) {
+        console.error(`[ERROR] Scope gate: base lock for '${base}' has track "${baseLocks[0].track}", not mode '${suffix}' — ${skill} is not unlocked.`);
         console.error(`Fix: node .agents/scripts/step_tracker.js scope-lock --skill ${base} --track "${suffix}"`);
         process.exit(1);
       }
     }
   }
-  if (!locks.some(e => e.skill === skill)) {
-    console.error('[ERROR] Step 0 Scope Gate bypassed. Scope must be locked before Step 1 execution.');
-    console.error(`Fix: node .agents/scripts/step_tracker.js scope-lock --skill ${skill} --track "<track-name>"`);
-    process.exit(1);
-  }
+  console.error('[ERROR] Step 0 Scope Gate bypassed. Scope must be locked before Step 1 execution.');
+  console.error(`Fix: node .agents/scripts/step_tracker.js scope-lock --skill ${skill} --track "<track-name>"`);
+  process.exit(1);
+}
+
+function ensureSessionAnchor() {
+  try {
+    const sessionFile = path.join(PROJECT_ROOT, '.agents', 'state', 'session-current.json');
+    if (!fs.existsSync(sessionFile)) ensureSessionCurrent();
+  } catch {}
 }
 
 function cmdScopeLock(args, mode) {
@@ -198,8 +259,17 @@ function cmdScopeLock(args, mode) {
     console.error('step_tracker: --skill and --track are required for scope-lock');
     process.exit(1);
   }
-  appendAudit({ type: 'scope_lock', skill, track, agent, ts: new Date().toISOString() });
-  if (mode === 'verbose') console.log(`🔒 Scope locked: ${skill} — track "${track}"`);
+  ensureSessionAnchor();
+  const session_id = resolveSessionId();
+  appendAudit({
+    type: 'scope_lock',
+    skill,
+    track,
+    session_id,
+    agent,
+    ts: new Date().toISOString()
+  });
+  if (mode === 'verbose') console.log(`🔒 Scope locked: ${skill} — track "${track}" (session: ${session_id})`);
 }
 
 // ---------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-# Review 11 — Design Phase Architecture: Spec & Prototype Lifecycle, Phase Boundary Rule, and Big Feature Restarts
+# Review 10 — Design Phase Architecture: Spec & Prototype Lifecycle, Phase Boundary Rule, and Big Feature Restarts
 
 **Date:** 2026-09-16  
 **Status:** RATIFIED & PLANNED  
@@ -203,8 +203,8 @@ This ratified architecture unblocks the execution hold on both **02n** and **02o
 
 - [ ] Socratic round-table review completed; consensus ratified with project owner Chris.
 - [ ] Active decision stamped in `artifacts/memory/active-decisions.md` via `memory_write.js`.
-- [ ] Review 11 plan published to `artifacts/docs/review/11-design-phase-spec-prototype-fidelity-and-lifecycle-plan.md`.
-- [ ] Sub-plans `02n` and `02o` updated to reference Review 11 and released from execution hold.
+- [ ] Review 10 plan published to `artifacts/docs/review/10-design-phase-spec-prototype-fidelity-and-lifecycle-plan.md`.
+- [ ] Sub-plans `02n` and `02o` updated to reference Review 10 and released from execution hold.
 - [ ] `spec_parity.js` and `req_to_impl_check.js` implemented with automated test suites passing on negative and positive controls.
 - [ ] Reverse-mode step files (`step-01d` through `step-05d`) live in `.agents/skills/design/steps/`.
 - [ ] Fidelity review step (`step-06a`) live in `.agents/skills/develop/steps/`.

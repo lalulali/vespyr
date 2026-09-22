@@ -46,13 +46,45 @@ function loadRouter(routerPath) {
   return JSON.parse(fs.readFileSync(routerPath || ROUTER_PATH, 'utf8'));
 }
 
+function escapeRegex(s) {
+  return String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+// Enforced router namespace (review 12 R09-D1): every value the code consumes
+// is read from rules.* and nowhere else. A malformed table fails loudly at the
+// call site rather than silently shadowing the table with a literal.
+function rulesOf(router) {
+  const rules = (router && router.rules) || {};
+  for (const key of ['default_seats', 'hard_cap', 'untagged_fallback']) {
+    if (rules[key] === undefined) {
+      throw new Error(`roster-router.json is missing rules.${key} — refusing to fall back to a literal`);
+    }
+  }
+  if (!Number.isInteger(rules.default_seats) || rules.default_seats < 2) {
+    throw new Error('roster-router.json rules.default_seats must be an integer >= 2');
+  }
+  if (!Number.isInteger(rules.hard_cap) || rules.hard_cap < 1) {
+    throw new Error('roster-router.json rules.hard_cap must be a positive integer');
+  }
+  if (rules.default_seats > rules.hard_cap) {
+    throw new Error('roster-router.json rules.default_seats must be <= rules.hard_cap');
+  }
+  if (!Array.isArray(rules.untagged_fallback) || rules.untagged_fallback.length === 0
+      || rules.untagged_fallback.some((s) => typeof s !== 'string' || !s.trim())) {
+    throw new Error('roster-router.json rules.untagged_fallback must be a non-empty array of agent names');
+  }
+  return rules;
+}
+
 // Content router: match a free-text topic against router tag keywords and
 // return matched tags plus unioned mandatory/consulted seats. This is what
 // makes auto-seating executable instead of host improvisation (RT-P1-1).
-// Scoring is intentionally simple (substring hits on multi-word compounds);
-// ties keep table order. Overflow beyond the seat cap is a hard error, never
-// a silent drop: the caller must narrow the topic or split the panel
-// (ties → founder per §6 rule 1). Returns { tags, mandatory, consulted,
+// Scoring matches whole words for single tokens <= 6 chars, exact substrings
+// for multi-word phrases, and substrings for longer tokens.
+// If mandatory union < default_seats (default 2), auto-seating cascades from
+// matched tags' consulted lists to untagged_fallback.
+// Untagged topics assign rules.untagged_fallback as mandatory.
+// Returns { tags, mandatory, consulted, autoSeated, untaggedFallback,
 // overflow, cap, rosterLine }.
 function matchTopicToTags(topic, router, mode) {
   const text = String(topic || '').toLowerCase();
@@ -66,7 +98,18 @@ function matchTopicToTags(topic, router, mode) {
     if (excluded) continue;
     let score = 0;
     for (const kw of def.keywords || []) {
-      if (kw && text.includes(String(kw).toLowerCase())) score += 1;
+      if (!kw) continue;
+      const lkw = String(kw).toLowerCase();
+      let hit = false;
+      if (lkw.includes(' ') || lkw.includes('/')) {
+        hit = text.includes(lkw);
+      } else if (lkw.length <= 6) {
+        const re = new RegExp('\\b' + escapeRegex(lkw) + '\\b');
+        hit = re.test(text);
+      } else {
+        hit = text.includes(lkw);
+      }
+      if (hit) score += 1;
     }
     if (score > 0) tags.push({ tag, score });
   }
@@ -81,15 +124,54 @@ function matchTopicToTags(topic, router, mode) {
       if (!consulted.includes(seat) && !mandatory.includes(seat)) consulted.push(seat);
     }
   }
-  // Native and solo share one hard cap (owner decision 2026-09-06), read from
-  // the router table — never hardcoded here (drift guard).
-  const cap = (router.rules && router.rules.hard_cap) || 5;
+
+  const rules = rulesOf(router);
+  const defaultSeats = rules.default_seats;
+  const cap = rules.hard_cap;
+  const untaggedFallbackList = rules.untagged_fallback;
+
+  let untaggedFallback = false;
+  let seats = [];
+  const autoSeated = [];
+
+  if (tags.length === 0) {
+    untaggedFallback = true;
+    mandatory.push(...untaggedFallbackList);
+    seats = mandatory.slice(0, cap);
+  } else {
+    seats = mandatory.slice(0, cap);
+    if (seats.length < defaultSeats) {
+      // 1. Try consulted from matched tags in rank order
+      for (const { tag } of tags) {
+        for (const candidate of (router.tags[tag] && router.tags[tag].consulted) || []) {
+          if (!seats.includes(candidate)) {
+            seats.push(candidate);
+            autoSeated.push({ tag, agent: candidate });
+            if (seats.length >= defaultSeats) break;
+          }
+        }
+        if (seats.length >= defaultSeats) break;
+      }
+      // 2. If consulted is exhausted, fallback to untagged_fallback
+      if (seats.length < defaultSeats) {
+        for (const candidate of untaggedFallbackList) {
+          if (!seats.includes(candidate)) {
+            seats.push(candidate);
+            autoSeated.push({ tag: 'fallback', agent: candidate });
+            if (seats.length >= defaultSeats) break;
+          }
+        }
+      }
+    }
+  }
+
   const overflow = mandatory.length > cap ? mandatory.slice(cap) : [];
-  const seats = mandatory.slice(0, cap);
   return {
     tags,
     mandatory,
     consulted,
+    autoSeated,
+    untaggedFallback,
     overflow,
     cap,
     rosterLine: `ROSTER: ${seats.map((s) => '@' + s).join(',')}`,
@@ -136,20 +218,30 @@ function buildRoster(agentsDir) {
 }
 
 // ROSTER validator (RT-P2-6): checks a proposed seat list against the router
-// for a topic. Rules: within cap; every mandatory seat of matched tags is
-// present (no substitution); every seat beyond the first 2 names a matched
-// tag (mandatory or consulted). User-named overrides bypass validation only
-// with an explicit [ROUTER-DEVIATION]/[ROUTING-OVERRIDE] marker — the
-// validator itself never waives. Returns { pass, failures[], tags,
-// rosterLine }.
+// for a topic. Rules: within cap; at least default_seats (default 2); every
+// mandatory seat of matched tags is present (no substitution); seats from
+// position 3 onward must belong to allowed (mandatory or consulted; for
+// untagged, untagged_fallback) — positions 1-2 are unchecked by design
+// (09-roundtable-roster-integrity-plan.md §3).
+// User-named overrides bypass validation only with an explicit
+// [ROUTER-DEVIATION]/[ROUTING-OVERRIDE] marker — the validator itself never waives.
+// Returns { pass, failures[], tags, rosterLine }.
 function validateRoster(topic, seats, router, mode) {
   const match = matchTopicToTags(topic, router, mode);
   const norm = (seats || []).map((s) => String(s).trim().replace(/^@/, '')).filter(Boolean);
   const failures = [];
-  // Single shared cap, read from the router table like the matcher above.
-  const cap = (router.rules && router.rules.hard_cap) || 5;
-  if (norm.length === 0) failures.push('roster is empty — seat at least the tag-mandatory agents');
-  if (norm.length > cap) failures.push(`roster of ${norm.length} exceeds cap ${cap}`);
+  const rules = rulesOf(router);
+  const defaultSeats = rules.default_seats;
+  const cap = rules.hard_cap;
+
+  if (norm.length === 0) {
+    failures.push('roster is empty — seat at least the tag-mandatory agents');
+  } else if (norm.length < defaultSeats) {
+    failures.push(`roster below default_seats (${defaultSeats}) — seat at least ${defaultSeats} agents`);
+  }
+  if (norm.length > cap) {
+    failures.push(`roster of ${norm.length} exceeds cap ${cap}`);
+  }
   for (const m of match.mandatory) {
     if (!norm.includes(m)) failures.push(`missing mandatory seat @${m}`);
   }

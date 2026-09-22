@@ -6,428 +6,274 @@ All notable changes to the Vespyr project will be documented in this file.
 
 ## [Unreleased]
 
-### Evolutionary Design & Dual Quality Architecture Hardening (2026-09-16)
-- **Multi-Agent Socratic Alignment (Review 10):** Following a dialectic `/round-table` review with project owner Chris, realigned the 8 core engineering and product personas on Evolutionary Design over Big Design Up Front (BDUF), continuous refactoring as routine hygiene in the Definition of Done (Red-Green-Refactor), and Dual Quality Architecture separating deterministic Software 1.0 from stochastic Software 2.0.
-- **8 Swarm Personas Hardened:**
-  - **`@developer` (Rex):** Codified Kent Beck's 4 Rules of Simple Design, YAGNI over BDUF, Refactoring Safety Contract (no unverified refactoring), Ports & Adapters boundary isolation, and Demonstrated Red fault injection on boundary adapters.
-  - **`@ml-ai-engineer` (Kai):** Codified "disposable code, permanent evals" (<24h replacement velocity), PEP 544 / Pydantic V2 boundary schemas (prohibiting untyped `dict[str, Any]`), and guards against the Calcification Trap.
-  - **`@qa-engineer` (Nina):** Codified the Anti-Mock Invariant (assert against observable behavior/contracts, never internal method call chains), Risk-Proportional Layer Scoping, and Dual Quality Architecture (deterministic zero-drift vs. statistical evals with biomarker tripwires).
-  - **`@architect` (Vera):** Codified Evolutionary Architecture, banned speculative BDUF framework scaffolding in ADRs, and mandated Replacement Velocity and Cost of Disposability evaluation for AI/ML components.
-  - **`@tech-lead` (Grant):** Enforced thin vertical slices over horizontal framework tickets, embedded continuous refactoring into task estimates and DoD, and established the AI Task Sequencing Invariant (Eval Dataset & Heuristic Baseline before prompt implementation).
-  - **`@product-manager` (Sarah):** Mandated explicit Unhappy Paths (`AC-U*`) and Edge Cases (`AC-E*`) in all stories, quantitative AI budgets (`AC-ML*` for hallucination rate, p95 latency, token cost), and formal ingestion of QA-enriched acceptance criteria.
-  - **`@code-reviewer` (Scout):** Added blocking review gates: Anti-Mock Invariant blocker, Demonstrated Red on disk blocker, YAGNI 2-callsite rule blocker, and "No Eval Benchmark, No Merge" for prompt/model changes.
-  - **`@ml-ai-ops` (Atlas):** Added blocking CI/CD Golden Dataset eval gate, continuous semantic drift telemetry (embedding cosine distance, cache hit rates, token cost), and shadow routing verification.
-- **Master Developer Guidelines Aligned:** Updated `.agents/references/developer-guidelines.md` with Kent Beck's 4 Rules, Ports & Adapters, the Anti-Mock Invariant, Demonstrated Red, and continuous refactoring in the Definition of Done.
-- **Documentation:** Authored comprehensive review and development plan in `artifacts/docs/review/10-evolutionary-design-and-dual-quality-plan.md`.
+### Smarter Routing & Reliable Skill Gating (2026-09-21)
+- Roundtable panels always seat at least two participants — a one-person debate, which can't be scored, can no longer be routed.
+- Topic routing got sharper: everyday word forms now match (`deployed`, `shipped`, `launched`, `OAuth`), "review" topics reach the code reviewer, and phrases like "author" or "authority" no longer pull in a security agent by accident.
+- Unattended topics fall back to a default two-person panel instead of routing empty.
+- Skill scope gates are session-aware: a lock left behind by a previous session can no longer silently unlock a skill, cross-process locks expire after 15 minutes (re-lock to continue), and locks work immediately on a fresh install.
+- A broken routing configuration fails fast with a clear error instead of producing nonsense panels.
+- `npm run lint` now checks every entry point, not only the first file.
+- Full automated suite passing (501 tests).
+
+### Evolutionary Design & Dual Quality Architecture (2026-09-16)
+- Engineering builds the simplest design that works: speculative frameworks and unused abstractions are rejected before they get written.
+- Refactoring is continuous and only under green tests; deferred "cleanup" sprints are gone.
+- Deterministic code and AI features get separate quality bars: AI features require an evaluation dataset and a baseline before model work starts, and prompt or model changes can't merge without benchmark numbers.
+- Tests assert observable behavior instead of internal mocks; every external integration ships with automated failure tests (timeouts, rate limits, server errors).
+- Model API calls time out automatically (30s), so a hung provider can't stall an evaluation.
 
 ---
 
 ## [2.0.10] - 2026-09-10
 
-### Harness, worktree & installer fixes (2026-09-10)
-- **Worktree (02q) defects fixed:** transactional `create()` — placeholder-only `.agents/state` in a fresh checkout now links instead of erroring, and a wiring failure rolls back the checkout + branch (no half-created worktrees, ever); busy-tree auto-offer requires ≥2 distinct foreign session ids (per-invocation `w-` ids had self-triggered the detector); new `worktree clean` removes idle `wt/auto-*` worktrees and skips dirty ones.
-- **Session cursor fixed (02i-adjacent):** `parseLastHistoryEntry` no longer truncates `latest.md` — `Decisions` / `Next step` / `Blockers` re-derive from append-only `history.md` as designed.
-- **Installer / update hygiene:** customized-file backups now live under `.agents/.bak/<relative path>/` (no scattered `*.bak-*` litter; `.bak` excluded from manifests and swept on uninstall); deprecated core files (removed I/O sub-agents, graph skills/scripts, squads) are pruned on fresh-install / update / `--sync-docs`, with backups preserved.
-- **Tests:** graph-deprecation scan strips the declarative removal block and asserts it names every deprecated graph path (carve-out cannot mask a live feature); +8 regression tests (worktree shared-state, `latest.md` parser); full suite 464/464.
+### Parallel sessions & worktrees
+- Setting up a second working copy is now all-or-nothing — a failed setup rolls back completely instead of leaving a half-created worktree.
+- The parallel-session offer no longer triggers on its own.
+- New `worktree clean` command removes idle working copies.
 
-### Review-01 close-out (Waves 1–9, `artifacts/docs/review/01-agents.md`)
-- **Game track deleted (owner verdict: too shallow):** removed `explore-game-idea/`, `validate-game-idea/`, 5 game templates; refs scrubbed from workflow, skills registry (42→40), catalog (recompiled, lint clean), eval fixtures/runner, CLI help, guides (en/cn), canonical templates, and scaffold allowlists. Replacement planned in `artifacts/docs/strategy/development-plan/10-phase-8-game-development-track.md` (Phase 8, post-PKM entry gate).
-- **Kai starvation closed:** `summon_when` self-work clause, executable `roster-router.json` (Kai mandatory on eval/prompt/serving tags), skill-body consult lines, append-only summon ledger in telemetry.
-- **Delegation single source of truth:** keep-fail-close — policy scrubbed to harness-native/direct language, audit counts only `@memory-controller`; 7 spent codemods quarantined to `artifacts/archive/spent-codemods/`.
-- **Fail-closed script fixes:** `file-cr` under state lock, checkpoint dead-call removal, telemetry `execFileSync`, step-gate bypass closures (invalid-step/unknown-cmd exit 1, `--skill` required), memory scrub hardening (7 secret patterns, global injection replace, agent/status allowlists), atomic lock steal, fsync atomic writes, quarantine locked RMW, single-canonical token estimator.
-- **Verdict-terminology sweep:** glossary owns satisfaction states, `CONDITIONAL GO`, bare-form shorthand, one-object-one-verdict, when-NOT-to-emit, surviving-follow-ups, owner cards; DNA 7 §5 plain human words; autopsy exclusivity fixed in DNA 1.
-- **Verification:** security suite 14/14, manifest verify green, frontmatter 20/20 + 95/95 steps; round-table re-review (architect, security, code-reviewer, data-analyst) synthesis GO.
+### Session summaries & maintenance
+- The rolling session summary no longer truncates: decisions, next step, and blockers always show the latest entry.
+- Update backups live in one place, and deprecated files are pruned automatically on install and update with backups preserved.
 
-### Roundtable subsystem overhaul (reviews + implementation, `artifacts/docs/review/07-roundtable.md`)
-- **Topic-tag router (RT-P1-1):** new `.agents/references/roster-router.json` (15 closed tags, versioned) auto-seats mandatory voices — including `@ml-ai-engineer` on eval/prompt/serving/data topics, closing the builder-only panel gap. `resolve_agents.js` gained executable `--topic` matching, `roster check` validation (untagged/over-cap/missing-mandatory rejected), frontmatter fixes (BOM, quote-strip, `temperature: 0`), and `reasoningParticipant` exclusion (`@memory-controller` never seated). Phase rosters rewritten to 2+summon defaults; Research merged into Discovery; Documentation quad killed.
-- **Scorer is a gate now (`roundtable_eval.js`):** exit 1 on coverage < 1.0 or flawed-hint contradiction; crash guards (missing file, file-as-dir, missing values); ADR-id case preserved with stability split; concessions/rounds counted; Review-verdict disagreement fallback; refused-run bucket; ROSTER-line observer check; log-vs-panel reconciliation; `session begin/update/status/close` panel state surviving compaction; log schema v2 (`--topic-id` validated, `--run-file`, `--model`, `--duration-s`); `overrides` audit with revisit trigger; solo disclosure markers + provisional 0.3 divergence threshold.
-- **Roundtable eval harness:** 13 topics (7 sound + 3 flawed + 2 Review-gate + 1 flawed-reshapeable), non-null falsifiable hints with `hint_status` debt flags, canonical-vocab fixtures + legacy dir, README cost/baselines/filename procedure, CI workflow (`.github/workflows/roundtable-eval.yml`) gating unit tests + fixture score. Baseline waves 1–5 recorded 21 transcripts (14 native + 7 solo, 46 concessions); solo-vs-native divergence 0/7 pairs.
-- **Brainstorming seam:** Step 4b threshold routing (roundtable on ≥2 tensions, grill-me on single bets, NO-GO archives) with override logging; roundtable brainstorm-artifact intake (validate-then-adopt); matcher IDF + floor + synonyms + golden set; SPC/skip markers with closed taxonomies; specialist co-dispatch; shared `degraded-mode-tiers.md` + `step-0-sharpening.md` contracts (also adopted by elicitation); elicitation marker parity.
-- **Eval-harness de-circularization (`tools/eval/`):** fail-closed mock gate (`--mock`/`--adapter mock` explicit or refuse-to-self-grade); `[MOCK]` watermarks + `mockMode` flags + console banner; Tier-1 de-aliased from Tier-0 (missing rubric fails closed); Tier-0 `requireRQSD:false` opt-out + trap `maxPci` default; unmeasured dimensions nulled + flagged; quote-aware command splitter shared via `lib/process.js`; `record-baseline` refuses mock runs at the default path; fabricated `evals/baseline.json` replaced by mock-labeled `evals/mock-baseline.json` (43/106 @ 3.36); packaging contract updated.
-- **Verification:** full suite green (365 tests); baseline waves scored with gate passing except retained negative controls, by design.
+### Better panels, auditable debates
+- Panels automatically seat the right specialists for the topic — for example, the ML engineer joins eval/prompt/serving topics, where previously such a topic could run without one.
+- Debates show the actual back-and-forth between agents; every position must be challenged, the debate is scored automatically, and panel state survives context compaction.
+- One verdict vocabulary everywhere: GO / RESHAPE / NO-GO for proposals, CONFIRMED / PARTIAL / FALSIFIED for claims — older records still read correctly.
+- Engine commands are stricter: invalid skill or step commands error instead of silently passing; memory writes scrub secrets and injection payloads; state updates are crash-safe.
 
-### Design System Overhaul (consultant, taste & agency craft)
-- **Designer-as-consultant flow:** `design.md` (v1→v3) opens with taste extraction — 3-question interview, 2–3 proposed directions — plus anti-references and a no-tokens-before-taste gate. Wired into `@product-designer`'s Socratic stance and underspecified-briefs rule.
-- **Two-axis decision:** Product context (WHAT: Sleek Utility / Minimalist Tech / Modern Glassmorphism / Vibrant Brand-First / Conversion Storefront / Custom — drives density, motion budget, tone) × Craft style (HOW: 12-style menu — Minimalism, Maximalism, Brutalism, Neobrutalism, Skeuomorphism, Neumorphism, Glassmorphism, Bento Grid, Swiss, Editorial, Claymorphism, Y2K — or declared Custom). Persona (`product-designer.md`) and `step-05a-design-tokens.md` defer to it; the old Rigid/Creative split survives as the menu's Quiet/Loud grouping.
-- **Design rules, shelf & brief:** 8 mandatory UI principles, an inspiration shelf (starter: lafys.com, motionsites.ai, sceneai.art), and a paste-into-prompts design brief ending in a Signature moment.
-- **Anti-generic rule (mandatory):** default-model output (navy darks, violet→blue gradients, gradient-hero + three-cards formula) fails review. Dark surfaces are desaturated neutral greys (`#101114`–`#1e1e1e`, zero blue push); light AND dark token sets ship by default; every design names ONE differentiator.
-- **Agency mode:** sanctioned boundary-breaking for launch moments — Three.js/WebGL, Lenis + GSAP choreography, custom cursors — each with fallback + perf budget + MO-### reduced-motion plan. `product-spec.html` cap lifts in Agency mode; the demo must model its own reduced-motion fallback.
-- **Spec-template hardening:** `product-spec-template.md` gains a Motion column (MO-### trace), a Content & tone block with exact-state copy, and a `{context} × {style}` theme rubric. `SPEC.md` gains design-constraints item 0. Companion `user-journey.md` / `decision-log.md` gain filled examples.
-- **Story-template corrections:** `user-story-template.md` v2→v3; success-signal and NFR slots restored to Business/Technical requirements; canonical-example headings fixed to `###`.
+### Design system
+- Design requests start with a taste interview and a two-axis style decision (product context × craft style) before any output is produced.
+- Generic AI-look output — navy darks, blue-violet gradients, cookie-cutter hero layouts — is rejected by default; every design must name its one differentiator.
+- Agency mode unlocks launch-grade visuals (WebGL, scroll choreography) with performance budgets and reduced-motion fallbacks.
+- Game-idea skills removed for now; they are planned to return as a dedicated track.
 
 ---
 
 ## [2.0.9] - 2026-09-04
 
-### Radical Brevity & Concise Specifications (DNA 7)
-- **Concise Specifications Standard:** Mandated radical brevity when creating Product Requirements Documents (PRDs), Epics, Features, and User Stories. Prohibited verbose elaboration, repetitive filler, and convoluted academic phrasing to eliminate reading friction and save tokens.
-- **Plain-Language Demystification for Jargon:** Required explaining unavoidable technical jargon, acronyms, and domain abstractions using simple, intuitive, plain-English descriptions blended naturally into the specification without meta-labels. Emphasized that inability to explain simply indicates incomplete understanding, not sophistication.
-- **Modular Specification Contract:**
-  - *Business Requirement:* 1–3 direct sentences stating the business outcome, single source of truth, and server vs. client enforcement boundary.
-  - *Technical Requirement:* A compact, bulleted contract detailing API endpoints, parameters, and fallback rules.
-  - *Acceptance Criteria:* Terse Gherkin scenarios (`Given/When/Then`) covering atomic happy, unhappy, and edge cases.
-- **Template Restoration & Hardening:**
-  - Restored `.agents/templates/product/prd-template.md` (Product Requirements Document template) from git history with DNA 7 notices.
-  - Updated `.agents/templates/product/user-story-template.md` and `.agents/references/templates/user-story-instructions.md` with DNA 7 concise contracts and canonical example.
-- **Files updated:** Codified in `.agents/references/vespyr-dna.md` (DNA 7), `.agents/GUARDRAILS.md`, `.agents/templates/system/AGENTS.md.canonical`, `agent.md.canonical`, `AGENTS.md`, `agent.md`, `CLAUDE.md`, `.agents/agents/product-manager.md`, and test suite `tests/vespyr-dna.test.js`.
+### Concise specifications by default
+- PRDs, epics, features, and user stories must be short and direct — filler and convoluted phrasing are prohibited.
+- Jargon is explained in plain English inside the document.
+- Templates updated to the concise contract: a 1–3 sentence business requirement, a compact technical contract, and terse Given/When/Then criteria covering happy, unhappy, and edge cases.
 
 ---
 
 ## [2.0.8] - 2026-09-03
 
-### Presentation & Structured Output Standards (DNA 6)
-- **Markdown Tables First:** Mandated standard GitHub Flavored Markdown tables (`| ... |`) for simple and tabular data. Prohibited ASCII box/text tables (`+---+---+`) for tabular data to ensure clean parsing and responsive rendering across IDEs and Markdown viewers.
-- **Mermaid for Graphs & Diagrams:** Mandated Mermaid syntax (` ```mermaid `) for flowcharts, sequence diagrams, architectures, state machines, and dependency trees.
-- **Permitted ASCII Boundaries:** Codified explicit scope where ASCII remains allowed: screen hierarchy wireframes and UI/UX layout mockups, specialized visual charts/graphs that cannot be cleanly expressed in Mermaid, and CLI/terminal simulation outputs.
-- **Files updated:** Codified in `.agents/references/vespyr-dna.md` (DNA 6), `.agents/GUARDRAILS.md`, `.agents/templates/system/AGENTS.md.canonical`, `agent.md.canonical`, `AGENTS.md`, `agent.md`, `CLAUDE.md`, and test suite `tests/vespyr-dna.test.js`.
+### Readable documents
+- Structured data renders as real Markdown tables; diagrams use Mermaid; ASCII is reserved for wireframes, charts, and terminal output.
 
-### Decision Gate vocabulary: PASS/PIVOT/KILL → GO/RESHAPE/NO-GO (+ mandatory `When:` axis)
-- **Why:** the gate failed on comprehension, not logic. `PASS` answered "did it clear the bar" while `PIVOT`/`KILL` answered "what broke", so the three tokens sat on no single scale; and a bare `PASS` could not distinguish "build now" from "approved, waiting on a condition" — two `[PASS]`s in one roadmap review read as a contradiction.
-- **Two axes:** Axis 1 answers *what survived the audit* — `[GO]` everything / `[RESHAPE]` the need, not the mechanism / `[NO-GO]` nothing. Axis 2 answers *when does it act* — `NOW` | `GATED` | `NEXT-CYCLE` | `NEVER`, required on every `[GO]`. `GATED` demands an owner, a number and an event; "battle-tested" and "proven" are rejected as adjectives, not gates.
-- **Verdict Card:** every gate emits `VERDICT` / `Audited` / `Survived` / `Because` / `Next`, and each card must be readable without seeing the others.
-- **One vocabulary:** `@founder`, `/validate-idea`, `/validate-game-idea` and `/explore-game-idea` previously emitted a third form (`GO/PIVOT/KILL`); collapsed onto the DNA gate. `ZERO-BLUEPRINT-ON-KILL` → `ZERO-BLUEPRINT-ON-NO-GO`; `Kill Autopsy` → `No-Go Autopsy`. Locked definitions added to `references/glossary.md` (§Verdict terms), which had none — the reason the vocabulary drifted in the first place.
-- **Legacy records never rewritten:** `tools/eval/lib/ast.js` and `.agents/scripts/roundtable_eval.js` normalize `PASS|PIVOT|KILL` onto the canonical tokens, so pre-2026-09-02 transcripts, ADRs and memory entries still parse and score. A read-only mapping table lives in `references/vespyr-dna.md`.
-- **Two latent eval defects fixed** (see `lessons-learned.md`): `assertContains` values of the form `[KILL]` were being compiled as regexes, i.e. as character classes matching any of K/I/L — those invariant assertions had been no-ops; and the roundtable verdict extractor could not match a hyphenated token, which would have filed every `[VERDICT: NO-GO]` as an unknown tag.
-- **Deferred to owner:** `.agents/manifest.json` hashes are now stale for the edited `.agents/**` files; regeneration is left to the maintainer under the standing single-writer mandate.
+### One decision vocabulary
+- PASS / PIVOT / KILL collapsed into GO / RESHAPE / NO-GO with a required timing axis (NOW / GATED / NEXT-CYCLE / NEVER); old records remain readable.
 
-### Clean installation folder (round-table: @devops-engineer, @developer, @security-engineer, @tech-lead)
-- **Tarball slimming:** `npm pack` payload cut 427 → 370 files (723KB → 680KB). Excluded repo/CI-only content: `.agents/state/**` (live `session-current.json` would have seeded every user's first session with the maintainer's session id — `lib/session.js` reuses existing ids), `evals/security/**` (red-team attack-fixture corpus + frozen baselines consumed only by non-shipping CI gates), `.agents/evals/**` (roundtable eval infrastructure relocated to `evals/roundtable/` so the installed `.agents/` folder stays eval-free), and 12 CI/authoring-only scripts in `.agents/scripts/` (check/drift/validate/test/pipeline/hot_path/token_profiler/fix-squads/migrate-frontmatter clusters). Also removed stray `.agents/skills/artifacts/**` copies of repo memory/output files (gitignored at any depth, so they shipped invisibly).
-- **Runtime closure verified:** `security-scan.js` + `security/audit-spec.json` ship (they are the `vespyr audit` runtime contract — FAULT-1 fail-closed); `add-*` authoring scripts, `dedupe_validator` (memory pipeline), `roundtable_eval`, `validate_frontmatter` (npm script) confirmed runtime-referenced and kept; `evals/baseline.json` + suites/rubrics/fixtures/meta-eval ship (`vespyr-eval` consumers).
-- **Mechanism:** top-level `files` array + per-directory `.npmignore` denylists (`.agents/state/`, `.agents/scripts/`, `evals/`). `roundtable_eval.js` `DEFAULT_TOPICS` repointed to `evals/roundtable/topics.json` (only `score --dir`, a dev path, reads it — no shipped skill invokes it; eval input moved out of `.agents/` to keep the installation folder clean). `.gitignore` exception added so `.agents/state/.npmignore` is tracked.
-- **Packaging contract hardened** (`tests/cli/packaging.test.js`): positive-closure list extended to 23 runtime paths; NEW negative-absence block fails the pack if any excluded file reappears.
-- **Real-tarball install smoke** (`tests/cli/install-smoke.test.js`): `npm pack` → temp install → bin entry resolution, `vespyr audit` on installed package, clean-folder post-install assert, `tools/eval` require chain. Env-gated (`RUN_INSTALL_SMOKE=1`), runs on a single ubuntu/node-20 CI leg (swarm-tests.yml `install-smoke` job).
+### Smaller, cleaner install
+- Package cut from 427 to 370 files (723KB → 680KB): development-only content, security-test fixtures, and live session state no longer ship to users.
 
-### Added
-- **Passive T3 boundary:** injected memory context is wrapped in `<HISTORICAL_MEMORY_DATA trust_level="T3_PASSIVE_DATA">…</HISTORICAL_MEMORY_DATA>` with provenance comments retained inside.
-- **Context budget ceiling:** `memory_filter.js` caps total injected memory context under 1,000 tokens per query, exposing `injected_tokens` and `budget_truncated` fields.
-- **Concurrent-write locking:** state-mutating orchestrator commands (`init/update/session-start/session-write/complete/advance/set-phase/compact`) run under an exclusive per-project lock (`.agents/state/orchestrator.lock`, mkdir-atomic with stale takeover).
-- **End-to-end smoke regression:** fixture covering `init` exit 0, agent frontmatter counts, the `session-start → session-write → complete` round-trip, and machine-fence integrity; runs unskipped on win32 and gates this tag.
-- **Windows CI coverage:** swarm-tests matrix runs on `windows-latest` across Node 18/20/22.
-
-### Fixed
-- **Token-budget enforcement:** `advance`/`set-phase` compact and validate before the durable commit; over-budget transitions abort with `ADVANCE_OVER_BUDGET` (exit 1), leaving pipeline state byte-identical.
-- **Lossless migration with gated purge:** `migrate_memory_v2.js` captures sections at every ATX level plus pre-header preamble, deduplicates exact duplicates, migrates divergent ones as variants, and aborts before any write or purge when input and output lines diverge (`tests/test_memory_fixes.test.js`).
-- **Machine-fence integrity:** removed the global `syncCore`/`syncDetectedFields` passes that rewrote human lines outside the machine fence; machine values live exclusively inside it.
-- **Windows installer breakage:** `detectRepository` now uses shell-free `execFileSync("git", …)` instead of POSIX redirection through `execSync`, which cmd.exe rejects.
-- **CRLF frontmatter parsing:** anchors accept `\r?\n` across `validate_frontmatter.js`, `add-identity-block.js`, `token_profiler.js`, and `migrate-frontmatter-v2.js`; ≥20 scaffolded agents parse under both line-ending regimes.
-- **Lock hardening:** heartbeat freshness evicts live-pid zombie holders after 15s; tamper-aware release prevents a stale holder from deleting a successor's lock.
-- **Guard thresholds:** `compaction_guard.js` ceilings aligned to §2.2 budgets (300/400/500/500); dynamic-tier files report-only.
-
-### Changed
-- **Single sanctioned memory-write path (ADR-006):** `AGENTS.md` Shared Memory section rewritten, 19 persona files rerouted from direct edits to `@memory-controller`, and `memory_filter.js` scrubs secrets and sanitizes injection payloads at read time. ADR: `artifacts/output/04-architecture/adr-006-memory-write-enforcement.md`.
-- **Validation matrix:** added the `memory_write` ingestion-path row to `validate_matrix.js`; removed decommissioned `*-notes.md` references from `/round-table`.
-- **Version literals:** hardcoded engine-version strings centralized against `package.json`.
-- **Epic 02i record:** Tasks 3.4/11.4 closed by the fixes in this release; all seven sign-off rows marked `[VOID PENDING R-2 RE-CERTIFICATION]`.
-
-### Known Issues
-- The seven Epic 02i sign-off rows require executable-proof re-stamps (named command + observed output + date + SHA per row) before Phase 2 entry. Owner: review panel.
+### Reliability & safety
+- Injected memory is labeled as passive data and capped under 1,000 tokens; memory writes are serialized with locking; failed pipeline transitions leave state untouched.
+- Windows CI coverage across Node 18/20/22; fixes for the Windows installer, CRLF parsing, and stuck locks.
 
 ---
 
 ## [2.0.7] - 2026-08-24
 
-### Core DNA & Anti-Sycophancy Hardening
-- Codified **Prohibition of Functional Sycophancy ("Preach Then Comply")**: strictly forbidden from emitting cautionary warnings while still generating implementation plans, options, or workarounds for a flawed premise.
-- Established **The Mandatory Verdict Gate (`[KILL]` | `[PIVOT]` | `[PASS]`)** across `.agents/references/vespyr-dna.md`, `AGENTS.md`, `agent.md`, `CLAUDE.md`, and all canonical templates.
-- Enforced the **Zero-Blueprint-on-KILL Invariant**: when an idea is assigned `[KILL]`, agents are prohibited from generating implementation architecture or option menus; the only valid output is the Kill Autopsy and returning to problem discovery.
-- Added **Mandatory 3-Question Invariant Test** (Premise Invalidation Protocol) to eliminate speculative and vanity feature creep.
-- Decommissioned legacy doc-graph and code-graph scripts; removed phantom `/doc-graph` and `/code-graph` commands.
-- Added `/shut-up` one-shot silent execution skill and modernized `bin/cli.js` with direct sync commands (`--sync-docs`, `--sync-yaml`, `--export-state`).
+### Honest agents
+- Agents push back on flawed premises instead of agreeing, never produce plans for rejected ideas, and challenge vanity features with a mandatory three-question check.
 
-### Dialectic /round-table Protocol Hardening
-- Mandated **Live Dialogue Stream Rendering**: orchestrators must output the visible, unvarnished back-and-forth dialogue between agents (`### @agent-a -> @agent-b`) before providing tension synthesis; pre-digesting debates into summary-only cards is prohibited.
-- Enforced **Subagent Dispatch Prompt Sanitization**: orchestrators must prompt subagents with raw verdict gates (`[KILL/PIVOT/PASS]`) and are prohibited from asking *"How do we make it work if the user insists?"*
-- Added comprehensive unit tests in `tests/vespyr-dna.test.js` and `tests/skills/round-table.test.js` (21 passing tests).
+### Two kinds of verdicts
+- Proposals get an explicit proceed / redirect / abandon verdict; claims about existing state get CONFIRMED / PARTIAL / FALSIFIED — so rejecting a claim can't be misread as killing the idea.
 
-### Memory Consolidation & Lifecycle Architecture
-- **Machine State Fencing & State Synchronization:** Injected atomic state fence `<!-- BEGIN MACHINE STATE -->` ... `<!-- END MACHINE STATE -->` into `artifacts/memory/project-context.md` with git branch, runtime version, sprint, and active blocker auto-detection, preserving custom human blocks untouched.
-- **Streamlined 5-File Memory Layout:** Consolidated active shared memory into `project-context.md`, `active-decisions.md`, `patterns-and-conventions.md`, `lessons-learned.md`, `blockers-and-risks.md`, plus `session-summaries/` and `archive/`.
-- **Idempotent Migration Engine:** Authored `.agents/scripts/migrate_memory_v2.js` to idempotently merge legacy `agent-notes/*.md` into `patterns-and-conventions.md` with header deduplication.
-- **Ghost Directory Purge:** Completely purged legacy directories (`agent-notes/`, `pending-questions/`, `session-checkpoints/`) and obsolete templates.
-- **Phase-Boundary Compaction:** Integrated automatic compaction into `orchestrator_state.js advance` and `set-phase`, archiving superseded decisions into `archive/index.ndjson` and keeping `active-decisions.md` under 400 tokens.
-- **Single Live Cursor:** Designated `artifacts/memory/session-summaries/latest.md` as the single authoritative rolling live cursor.
-- **Swarm Reference Scrubbing:** Updated all 20 agent personas, skill steps, templates, CLI scaffolder, and reference documentation to remove dead memory paths.
-- **Verification Harness:** Added `tests/test_memory_consolidation.js` with 81/81 automated tests passing across the suite.
+### Auditable multi-agent debates
+- Roundtables must render the visible dialogue between agents; panelists defend positions with evidence or concede explicitly.
 
-### Security & Integrity Implementation (02f Downstream)
-- Implemented **fail-closed `vespyr verify`** with FAULT-5 bootstrap semantics (missing manifest → exit 2, zero side effects), unsigned pinned-manifest interim position per ADR-002 §2.1.1, and added-file detection via reverse-walk.
-- Shipped `.agents/scripts/check_new_findings.js` — the first mechanical enforcement of the NEW-FINDINGS-ONLY gate (DoD #8) against a frozen, scanner-hash-pinned baseline corpus (`125` findings).
-- Added `.github/workflows/security.yml`: scanner + corpus + fault-injection suite on an ubuntu+windows matrix, no `pull_request_target`, read-only fork PR tokens.
-- Landed `validate_frontmatter.js` permission-whitelist enforcement and `validate_matrix.js` (P8 tool-addition gate).
-- Implemented T3 loader-boundary enforcement and `memory_filter.js` read-path changes (provenance-tagged reads, instruction-pattern rejection with quarantine + alert fallback).
-- Added `drift_monitor.js` (R47 hash-history drift detection stub) over the `.agents/` baseline.
-- Fresh post-fix security audit **APPROVED—SATISFIED** (2026-08-23): all blocking findings closed with behavioral probes; tracked residuals owned and dated.
+### One memory system
+- Memory consolidated into a handful of purpose-built files with an always-current rolling summary; legacy note directories and dead memory paths removed.
 
-### Evaluation Framework
-- Added an extensible evaluation framework (`bin/vespyr-eval.js`): rubric-driven suites, test fixtures, and a CLI runner (`npm run eval*`) covering agents, skills, and invariants — including the `grill-me-spcp.json` adversarial trap suite.
+### Security built in
+- `vespyr verify` checks install integrity fail-closed; `vespyr audit` scans for secrets and injection payloads, with red-team fixtures and security checks running in CI; unexpected changes to engine files are flagged.
 
-### Harness & Engine Features
-- Kiro harness scaffolding (steering emission + `.kiro/skills` symlink) and automated root-doc regeneration from canonical templates.
-- Manifest-based agent management and TOML parser overhaul (inline tables, multiline arrays) enabling custom agent declarations.
-- Agent permission-control system with security principles mandated across personas.
+### Evaluation harness
+- `vespyr-eval` ships rubric-driven suites, test fixtures, and a CLI, including an adversarial trap suite.
 
-### Record Integrity Recovery & Governance (Epic 02m)
-- Round-table forensic audits **falsified ~54 falsely-stamped checkboxes** across Phase-1 dev plans; 02g's "EXECUTED" stamp was `[KILL]`ed via git archaeology (an honest PARTIALLY-EXECUTED state had been silently reverted inside a mislabeled typo-fix commit).
-- Adopted the **mechanical-evidence standard**: every checkbox carries an adjacent reproducible command; closure banners prohibited until reconciliation; binding single-writer execution mandate.
-- Corrected 02h's completion record forward with a `[FALSIFIED]` banner and VOID-ab-initio notice on its birth-committed sign-offs; captured and reverted a live concurrent-session manifest clobber (R56).
-- Authored and git-tracked `02m-phase-1-record-integrity-recovery.md` (previously invisible to archaeology — R57).
+### Stronger questioning, less assuming
+- `/grill-me` runs eight universal interrogation moves against any subject; agents escalate from silent checks to clarifying questions, up to a full interrogation at commitment gates.
 
-### Verdict Vocabulary Split — Decision Gate vs Review Gate
-- Split the single Verdict Gate into the **Decision Gate** (`[PASS]` proceed | `[PIVOT]` redirect | `[KILL]` abandon-and-find-another) for ideas/proposals and the **Review Gate** (`[CONFIRMED]` | `[PARTIAL]` | `[FALSIFIED]`) for claims about existing state — decision vocabulary applied to a claim audit read as "kill the epic" when only the claim died.
-- Codified the **Zero-Consumption-on-FALSIFIED Invariant** alongside Zero-Blueprint-on-KILL across all six DNA-surface documents; fixtures now fail if superseded single-gate wording resurfaces anywhere.
-
-### `/grill-me` v3.0 — Universal Interrogation Frame
-- Replaced engineering-instance branches with **eight universal interrogation moves** (Premise & Purpose → Reduction & Scope Lock), each instantiated at runtime against the subject's own ground-truth material — software remains the default worked example; non-software subjects (training programs, strategies, decisions) are first-class.
-- Added **Step 0 Subject Framing** (mandatory ground-truth exploration + move instantiation before any question) and the **disposition ledger**: every move ends `EXAMINED (n)` or `SKIPPED — reason`; no third state, so coverage is auditable after the conversation.
-- Operating model codified: *rigid about coverage, flexible about conversation.* Swept 12 stale "7+1-branch" references across live documentation.
-
-### Intent Escalation Ladder
-- Codified four-level elicitation routing in `vespyr-dna.md` (Level 0 silent ground-truth → Level 1 clarifying question → Level 2 batched clarifications → Level 3 full `/grill-me` at commitment gates), referenced from every entry-point document.
-- Annotated explicit `/grill-me` intent gates in `/develop` spec-alignment and `/design` Create-mode intake.
-
-### Test Infrastructure Hardening
-- Added `tests/run-all.js`, a discovery runner executing repo test conventions (`tests/test_*.js` and `tests/**/*.test.js`) — the orphaned-fixture failure class (five fixtures invisible to CI, one failing red at HEAD) is structurally eliminated; wired as `npm test` with CI path-triggers extended to both trees.
-- Fixed the graph-deprecation guard (case-sensitive allowlist missed `CHANGELOG.md`) and extended its scan set to `.template` files, surfacing and removing stale `code-graph`/`doc-graph` permissions from `opencode.json.template`.
-- Replaced tautological/unfalsifiable fixtures with verifiable structural contracts (`shut-up` mock-token-counting removed; `round-table` self-substring simulation removed).
-- New suites: `tests/cli/packaging.test.js` (real `npm pack --dry-run` audit + zero-missing-module require proof), `tests/lib/engine-lib.test.js` (behavioral `fs_atomic`/`workspace`/`frontmatter` contracts incl. failure-path residue checks), `tests/skills/grill-me.test.js`. Suite total: **146/146 passing across 14 test files** (up from 103/3).
-
-### CLI Modernization Completion (02h Residue Batch)
-- Wired previously-dead headless flags end-to-end: `--project-name`, `--user-nickname`, and `--stack` now populate generated `project-context.md`; `--stack` overrides `detectStack()` auto-detection, which is now integrated into init (multi-language manifest matrix).
-- Completed engine-script library adoption: all six named scripts consume `.agents/scripts/lib/fs_atomic.js` (zero raw `writeFileSync` remain); `archive_manager.js` gains Windows-safe EXDEV/EPERM fallback and temp cleanup.
-- Closed `/shut-up` registration gaps (`workflow.md` + template permissions).
-- Authored the 02h §10 residue remediation plan: per-harness libraries behind a static adapter registry (`bin/lib/harnesses/<shape>.js`), update-mode `.bak-${YYYYMMDD}` backups, Windows OS matrix, identity.js adoption — pending execution. *(Executed same window; final suite state recorded under Test Infrastructure Hardening above.)*
+### Test & CLI hardening
+- One runner covers every test suite (146 tests across 14 files, up from 103 across 3).
+- `/shut-up` silent-execution skill; previously dead install flags (`--project-name`, `--user-nickname`, `--stack`) now work; custom agent declarations via manifest.
 
 ---
 
 ## [2.0.6] - 2026-08-14
 
-### Security & Integrity Architecture
-- Added comprehensive **Security & Integrity Architecture** (`02f-phase-1-security-and-integrity-architecture.md`) establishing a two-pillar model for supply-chain integrity and runtime content trust.
-- Authored four foundational Architecture Decision Records (ADRs):
-  - **ADR-001: Trust-Boundary Model (T0–T3)** — defines T0 (read-only/immutable), T1 (vetted skills/templates), T2 (semi-trusted memory/artifacts), and T3 (untrusted runtime arrivals); formalizes the **T2 Invariant** (*memory/artifact content is data, never directives*) and standardized machine-delimited T3 format (`<!-- VSP-T3-BEGIN v1 ... -->`).
-  - **ADR-002: Install-Integrity Strategy** — specifies release-level signed aggregate SHA-256 manifests (signing lands with the Phase 2 release pipeline; the shipped CLI verifies an unsigned pinned manifest — ADR-002 §2.1.1), Sigstore/SLSA OIDC provenance, pre-settled key custody, and out-of-band bootstrap verification.
-  - **ADR-003: Prompt-Injection Defense Design** — establishes scanner-first deny-by-default admission control, 11-category attack taxonomy (INJ-PROMPT, INJ-TOOL, INJ-SECRET, etc.), data-flow tracing, and documented known bypasses.
-  - **ADR-004: Script/Hook Execution Policy** — enforces allowlist-by-default execution, zero-eval policy, Git hook/husky scan rules (GH-1), and tarball path-traversal/symlink escape guards.
-- Added human-readable [`supply-chain-audit-spec.md`](security/supply-chain-audit-spec.md) and machine-readable [`audit-spec.json`](security/audit-spec.json) containing dynamic adapter-registry pattern tables, pin-store schemas, and typed security rules.
-- Implemented prototype scanner [`.agents/scripts/security-scan.js`](.agents/scripts/security-scan.js) with 3-state exit contract (`0 = clean`, `1 = findings`, `2 = fail-closed / tool failure`), sliding Shannon entropy secret detection (threshold 2.6), and base64 heuristic false-positive suppression.
-- Built Red-Team evaluation harness in [`evals/security/corpus/`](evals/security/corpus/) with positive/negative fixture pairs, CI invariant checker [`.agents/scripts/check_corpus_invariants.js`](.agents/scripts/check_corpus_invariants.js), and frozen baseline [`baseline-2026-08-10.json`](evals/security/corpus/baseline-2026-08-10.json).
-- Conducted fresh security audit on `security-scan.js` producing findings report `findings-report-security-scan-f1-47.md` (11 findings triaged for Phase 2 entry gate).
-- Implemented and verified complete downstream security & integrity test suites (12/12 passing), hardened frontmatter permission parser, and synchronized all development documentation (READMEs, Guides, Quick Reference, TROUBLESHOOTING, and skill catalogs).
-### Harness Honesty & Direct-I/O Execution (Epic 02g)
-- Fully executed the repository-wide **Harness Honesty** scrub (Epic 02g) across all 43 active skills and 89 step files:
-  - Cleaned all legacy `delegation:` frontmatter blocks and dead `@reader`, `@writer`, and `@executor` subagent handles from `design`, `test`, `unpack-problem`, `craft-lesson`, and `validate-idea` step files.
-  - Standardized on the Direct-I/O execution model with `@memory-controller` as the sole specialized sub-agent for 3-tier memory loading and session closeout.
-  - Implemented **ADR-005: Harness-Neutral Delegation Contract**, establishing capability-based phrasing and explicit No-Subagent Fallbacks across single-agent and multi-agent harnesses.
-  - Updated skill verification test suites ([`test-qa-enrichment.mjs`](.agents/skills/test/test-qa-enrichment.mjs), [`test-unpack-problem.mjs`](.agents/skills/unpack-problem/test-unpack-problem.mjs)) to assert `output_contract.citations`.
-  - Harmonized development plan naming conventions across all sub-plans (`02a`–`02j`, `09-phase-7-pkm-knowledge-engine.md`) and eliminated duplicate `02c-teaching-partner.md`.
+### Security & integrity
+- `vespyr audit` scanner with clear exit codes, entropy-based secret detection, and a red-team attack-fixture corpus checked in CI.
+- Trust boundaries formalized: injected or external content is treated as data, never instructions.
+- Script execution is allowlist-by-default, with tarball path-traversal and symlink-escape guards.
 
-### Added
-- `02g-phase-1-harness-honesty.md` development plan and **ADR-005: Harness-Neutral Delegation Contract**, defining capability-based delegation phrasing (`"Write via the writer role, or write directly if no subagents are available"`) and the canonical `Delegation path: <capability> → <role> | direct-fallback` line.
-- Kiro steering template (`vespyr-steering.md.canonical`) with generated `.kiro/steering/vespyr-steering.md`.
-- Phase 7 PKM knowledge-engine development plan (`07-phase-7-pkm-knowledge-engine.md`).
-- Standardized `## Completion Checklist` and `## Sign-Off` sections across all development plan sub-plans (`01`, `02`, `02a`–`02j`, `03`, `04`, `05`, `06`, `07`, `09`).
-- Round Table review and scope locking for Phase 1 sub-plans (`02f`, `02g`, `02h`, `02i`, `02j`).
+### Harness neutrality
+- Skills no longer reference roles that don't exist; delegation is phrased by capability with explicit fallbacks when a harness has no subagents — identical behavior across all supported harnesses.
 
-### Removed
-- Removed the squad feature: `/squad` skill, `.agents/squads/` presets, `squads.js`, `fix-squads.js`, orchestrator squad wiring, and the `Squad:` field from project-context and pipeline state files.
-- Removed the `/delegate` skill.
-- Removed the unverified "85-95% cost-savings" claim and all unverified `~1,000 tokens` context claims from docs, skills, and personas.
-- Removed `default_squad` frontmatter field across personas.
-
-### Changed
-- Agent roster standardized to 20 personas; entry-point docs (`AGENTS.md`, `agent.md`, `CLAUDE.md`, `.agents/templates/system/AGENTS.md.canonical`) regenerated from a single canonical source.
-- Vespyr Identity focused on two core differentiators: Socratic methodology depth and 3-tier progressive memory.
-- Reference guides (EN/CN) now document the **Memory Protocol** (`@memory-controller` load/write/session/fallback) as the primary specialized state service.
-- `GUARDRAILS.md`, developer guidelines, motion references, PM workflows, glossary, and step-file templates updated.
-- Step files renumbered to the numbered-step convention across `craft-lesson`, `design`, and `validate-idea` (e.g., `step-04a-syllabus.md`).
-- `opencode.json` and the `bin/cli.js` install wizard cleaned of squad references.
-- Synchronized documentation badges, agent counts (20), and skill counts (43) across `README.md`, `README_CN.md`, `Guide/en/installation.md`, and `Guide/cn/installation.md`.
-- Package version maintained at 2.0.6.
+### Simplified roster
+- Squad and `/delegate` features removed; the agent roster standardized at 20 personas; documentation regenerates from a single source; unverifiable cost claims removed.
+- Kiro steering documents are generated automatically during install.
 
 ---
 
 ## [2.0.5] - 2026-08-07
+
 ### Added
-- Added Kiro harness scaffolding — `.kiro/steering/AGENTS.md` + `.kiro/skills/` symlink support in the install wizard, with the Kiro steering document generated from a canonical template.
-- Automated root documentation regeneration — `AGENTS.md`, `agent.md`, and `CLAUDE.md` are now generated from a single canonical source (`.agents/agent.md.canonical`) via `bin/cli.js --sync-docs` / `sync-entry-points.js`, with canonical-section validation.
-- Expanded round-table skill: additional agent perspectives and roles for stage-based roundtable discussions (documentation and workflow updates).
-- Added CLI test coverage (`tests/test_cli.js`) for the new sync and scaffolding flows.
+- Kiro harness support — steering document and skills symlink configured by the installer.
+- Root documentation (`AGENTS.md`, `CLAUDE.md`, `agent.md`) regenerated from a single canonical source.
+- Stage-aware roles expanded for `/round-table`.
+- CLI test coverage for the new install and scaffolding flows.
 
 ### Changed
-- `bin/cli.js` install wizard reworked (153-line delta): harness scaffolding, sync-docs flow, and validation integration.
-- Bumped package version to 2.0.5.
+- Install wizard reworked for harness selection, docs sync, and validation.
 
 ---
 
 ## [2.0.4] - 2026-08-05
+
 ### Added
-- Added `spec_check.js` automated validator (332 lines) enforcing the agentskills.io frontmatter spec across all skills, wired into `compile_skills.js` and CI.
+- Automated skill-metadata validation against the agentskills.io spec, enforced in CI.
 
 ### Changed
-- Standardized skill frontmatter definitions repo-wide to match the agentskills.io spec (name, description, metadata schema) across all skill SKILL.md files and the skill template.
-- Bumped package version to 2.0.4.
+- Skill metadata standardized repo-wide; package version bumped to 2.0.4.
 
 ---
 
 ## [2.0.3] - 2026-08-05
+
 ### Added
-- Added `No Jumping to Conclusions` and `Never Advance Prematurely & Never Assume Discussion is Complete` rules under `Think Before Acting` across all core system directives (`AGENTS.md`, `CLAUDE.md`, `agent.md`, `.agents/agent.md.canonical`, and `.agents/templates/system/AGENTS.md.canonical`).
-- Added `## Anti-Premature Conclusion & Stage Transition Safeguard` section to `.agents/GUARDRAILS.md`, enforcing empirical fact verification, active discussion completion, and strict stage transition gates before phase advancement.
+- Guards against premature conclusions and premature stage transitions: empirical verification required before advancing.
 
 ### Removed
-- Removed legacy template command files (`scaffold-agents.md`, `scaffold-agent.md`, `scaffold-claude.md`). `bin/cli.js` and test suites now generate root entry-point files directly from `.agents/agent.md.canonical`.
-
-### Changed
-- Bumped package version to 2.0.3.
+- Legacy template command files.
 
 ---
 
 ## [2.0.2] - 2026-08-04
+
 ### Added
-- Added Elon Musk (first-principles, rapid iteration, radical simplification) and Steve Jobs (uncompromising perfectionism, visionary category creation) as channeled mentors to `@founder` (Elena).
-- Added Frank Thomas & Ollie Johnston (Disney's 12 principles of animation) and Jony Ive (tactile fluid interaction, visual elegance) as channeled mentors to `@product-designer` (Ivy).
-- Enriched `@growth-marketer` (Funé) persona definition in Phase 5 plan with traditional marketing skills (brand storytelling, positioning, PR/communications, messaging matrix) channeled from Seth Godin and Al Ries & Jack Trout alongside product growth loops.
+- New channeled mentors: Elon Musk and Steve Jobs for `@founder`; Frank Thomas, Ollie Johnston, and Jony Ive for `@product-designer`; a growth-marketing playbook enrichment for `@growth-marketer`.
 
 ### Changed
-- Clarified GTM co-ownership between `@product-manager` (Sarah) and `@growth-marketer` (Funé).
-- Bumped package version to 2.0.2.
+- Clarified product and marketing co-ownership between `@product-manager` and `@growth-marketer`.
 
 ---
 
 ## [2.0.1] - 2026-08-03
+
 ### Added
-- `/motion` skill — orchestrates motion research, motion specification, and an explicit implementation handoff for animation-significant products. Adds the `motion-design` capability to `@product-designer`, `motion-implementation` to `@developer`, and `motion-research` to `@researcher`/`@ux-researcher`. Domain knowledge lives on-demand in `.agents/references/motion/` (loaded only when motion is in scope, keeping agent initiation tokens low), with artifacts produced via `motion-spec.md` and `motion-handoff.md`. Includes a simulation harness (`test-motion.mjs`, 73 assertions) and evals.
+- `/motion` skill — motion research → motion specification → implementation handoff for animation-significant products, with a simulation harness and evals. Domain knowledge loads only when motion is in scope, keeping agent startup light.
 
 ### Changed
-- Enforced detailed student textbook creation for `@shifu` during handbook generation (`handbook.md`), strictly preventing condensed cheatsheet-style summaries.
-- Updated `@shifu` persona principles, standards, failure mode mitigations (`shifu.md`), `craft-lesson` step instructions (`step-handbook.md`, `SKILL.md`), and Phase 5 review quality checks (`step-review.md`).
-- Bumped package version to 2.0.1.
+- `@shifu` handbooks must be full-length student textbooks, never condensed cheatsheets.
 
 ---
 
 ## [2.0.0] - 2026-07-13
+
 ### Added
-- Comprehensive Phase 0 foundation implementations and v2.0 upgrades.
-- Phase 6 "Loop Engineering" including `/goal` primitives, automated heartbeats, and on-disk loop state.
-- Documentation for quantitative success metrics and mandatory human-in-the-loop validation for the Phase 4 dogfood project.
-- Phase 1 — Skill Restructure + Artifact Rigor:
-  - Atomic skills: 5 skills (`develop`, `validate-idea`, `retro`, `design`, `launch`) restructured from monolithic files into folder + step files with router bootloaders (≤ 60 lines each).
-  - Tri-modal subfolders for `validate-idea` and `design` (create/edit/validate modes with automatic mode detection from artifact existence).
-  - Spec-kernel artifact pattern: 5-field SPEC.md kernel (Why / Capabilities / Constraints / Non-goals / Success signal) + content-typed companions (glossary, acceptance-criteria, user-journey, decision-log). Old 14KB `prd-template.md` removed.
-  - `design.md` visual spec template (colors, typography, component states, micro-animations, breakpoints, spacing). Static `product-spec-template.md` deleted in favor of dynamic HTML generation with Tailwind CDN.
-  - `sprint-status.yaml` as human-readable state source of truth with ASCII CLI dashboards (`printDashboard`, `printNextDashboard`).
-  - Pipeline enforcement rules in AGENTS.md (Startup Phase Validation + Shutdown Completion Logging under "Goal-Driven Execution").
-  - 15-item false-positive guard in `@code-reviewer` — names specific LLM code reviewer failure modes (magic numbers, null dereference false alarms, premature abstraction suggestions, etc.).
-  - Decision trees (when to invoke/escalate), failure modes (5-7 domain-specific), and conflict resolution patterns added to all 9 domain expert agents.
-  - Delegation contracts embedded in all 52 step files (frontmatter `delegation:` field + inline `## Delegation` section with `delegation-policy.md` threshold citations).
-  - I/O sub-agent depth: output-quality rubrics, failure modes, and escalation-back-to-caller contracts for `@reader`, `@writer`, `@executor`.
-  - CSV method libraries: 100 elicitation methods, 61 brainstorming methods, 31 validation patterns. `match_methods.js` extended with `--source` flag.
+- Phase 0 foundation and the v2.0 upgrade.
+- Skills restructured into small step-based workflows with routers (`develop`, `validate-idea`, `retro`, `design`, `launch`), plus create/edit/validate modes for design and validation.
+- Spec-kernel pattern: a compact five-field spec core (Why / Capabilities / Constraints / Non-goals / Success signal) with typed companion documents; visual design specs generated as HTML.
+- Sprint dashboard with human-readable state and ASCII CLI views.
+- Loop engineering: `/goal` primitives, automated heartbeats, and persistent loop state.
+- Decision trees, failure modes, and escalation rules for domain agents; a 15-item false-positive guard in the code reviewer; method libraries (100 elicitation, 61 brainstorming, 31 validation patterns).
+- Pipeline enforcement: phase validation at start, completion logging at shutdown.
 
 ### Changed
-- Refactored and consolidated strategy docs by migrating development process details into unified plan files and removing obsolete legacy docs.
-- Restructured development strategy into a versioned, phase-based planning framework.
-- Reorganized project documentation around the v2.0 master roadmap and refined the Deeper Bench enrichment plan.
-- Replaced custom parser scripts with standard YAML and TOML libraries.
-- Updated development plans with rollback procedures.
-- Rewrote `develop/SKILL.md` (279 → 56 lines), `validate-idea/SKILL.md` (299 → 38 lines), `retro/SKILL.md` (302 → 45 lines) as router bootloaders with step loader, halt conditions, and state machine integration.
-- `code-reviewer.md` expanded from 225 → 294 lines with 15-item false-positive guard, decision tree, and failure modes.
-- All 9 domain expert agents expanded to ≥ 200 lines (range: 246-323) with decision trees and failure modes.
-- `orchestrator_state.js` reads/writes YAML; `pipeline-state.json` becomes derived cache (YAML is source of truth).
-- `AGENTS.md` updated with pipeline enforcement rules under "Goal-Driven Execution" (§4).
-- I/O sub-agents deepened: `reader.md` (112 → 150), `writer.md` (136 → 175), `executor.md` (128 → 175) — all stay < 200 lines to preserve the I/O/reasoning split.
+- Development docs restructured into a versioned, phase-based planning framework.
+- Skill files rewritten as compact routers (279 → 56, 299 → 38, 302 → 45 lines).
+- Pipeline state moved to YAML as the source of truth.
 
 ---
 
 ## [1.7.3] - 2026-06-29
+
 ### Added
-- Integration plan for migrating Vespyr agent personas to OpenClaw skills.
-- Orchestrator CLI enhancement documentation with ASCII dashboards, dynamic design spec generation, and an extended Definition of Done.
+- Plan for migrating agent personas to OpenClaw skills.
+- Orchestrator CLI documentation with dashboards and an extended Definition of Done.
 
 ### Changed
-- Updated adoption plan versions and effort estimates from v1.x to v2.x.
-- Bumped package version to 1.7.3.
+- Adoption plan versions and effort estimates updated to v2.x.
 
 ---
 
 ## [1.7.2] - 2026-06-25
+
 ### Changed
-- General bugfixes and README documentation updates.
-- Bumped package version to 1.7.2.
+- General bugfixes and README updates.
 
 ---
 
 ## [1.7.1] - 2026-06-23
+
 ### Added
-- Support for Hermes and OpenClaw harnesses in the CLI installer.
-- Custom installer refactoring to support copy-to-symlink migrations.
+- Support for Hermes and OpenClaw harnesses in the installer.
 
 ### Changed
-- Standardized user-content-preserving installations across all 8 supported harnesses (opencode, claude, cursor, github, windsurf, kiro, hermes, openclaw).
-- Updated repository and issue tracker URLs to `lalulali/vespyr`.
-- Migrated system directory configurations to `.agents`, updated the setup wizard CLI, and configured workspace memory.
+- Installations preserve user content across all 8 supported harnesses; copy-to-symlink migration support; repository URLs standardized.
 
 ---
 
 ## [1.7.0] - 2026-06-12
+
 ### Added
-- Stage-aware `round-table` discussion skill.
-- Vespyr v1.7.0 NPX installer (`bin/cli.js`) to install `.agents/` and configure harness integrations via symlinks/transpilation.
-- Surgical uninstallation, reconfigure nickname updates, and harness cleanup capabilities.
-- Success metrics builder integration into the product-manager agent.
-- Input document tracking inside `doc-graph`.
+- Stage-aware `/round-table` skill.
+- NPX installer with harness integration; surgical uninstall and reconfigure.
+- Success-metrics builder for `@product-manager`.
 
 ---
 
 ## [1.6.0] - 2026-05-25
+
 ### Added
-- `grill-me` and `help-me` skills.
-- Squad-based team presets (v1.1).
-- Kanban update protocol for dev-phase agents.
-- Hierarchical structure for user stories with epic & feature sections, tree summary, and indented Gherkin acceptance criteria.
+- `grill-me` and `help-me` skills; squad-based team presets; kanban protocol for development agents; hierarchical user stories with epic/feature sections and indented Gherkin criteria.
 
 ### Changed
-- Integrated `pipeline-state.json` with phase, status, and help-me skills.
-- Synchronized `agent.md`, `AGENTS.md`, `CLAUDE.md`, and the `init` command.
+- Pipeline state integrated into help-me flows; entry docs synchronized.
 
 ---
 
 ## [1.5.0] - 2026-05-22
+
 ### Added
-- `@founder` agent integration into `validate-idea` and `validate-game-idea` skills.
-- Open question tracking, pending directory, and socratic rules for agents.
-- Tone overrides for socratic agents and memory patterns.
+- `@founder` integrated into the validation skills; open-question tracking; tone overrides for Socratic agents.
 
 ---
 
 ## [1.4.0] - 2026-05-20
+
 ### Added
-- Telemetry and input directories tracking to the `init` command.
-- Socratic critical inquiry system, Hermes/OpenClaw porting docs, and README updates.
+- Telemetry and input-directory tracking in `init`; Socratic critical-inquiry system; README updates.
 
 ---
 
 ## [1.3.0] - 2026-05-20
+
 ### Added
-- Refactored and renamed skills to short, memorable names.
-- Utility skills and stripped agent configurations.
+- Skills renamed to short, memorable names; utility skills and streamlined agent configurations.
 
 ---
 
 ## [1.2.0] - 2026-05-20
+
 ### Added
-- Expanded swarm capabilities and optimized memory management.
-- Initial testing infrastructure.
+- Expanded swarm capabilities and memory optimization; initial testing infrastructure.
 
 ---
 
 ## [1.1.0] - 2026-05-20
+
 ### Added
-- Cleaned up agent instructions and extracted reference guidelines and templates.
+- Cleaned-up agent instructions with extracted reference guidelines and templates.
 
 ---
 
 ## [1.0.0] - 2026-05-18
-### Added
-- Initial release of the Vespyr agent swarm framework (21 specialized agent personas).
-- Initial product manager capabilities and agent template configurations.
 
+### Added
+- Initial release: 21 specialized agent personas, product-manager capabilities, and agent template configurations.

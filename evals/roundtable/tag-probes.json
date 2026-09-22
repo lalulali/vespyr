@@ -1,0 +1,17 @@
+{
+  "eval": "review scoring rubrics and benchmark metrics for agent eval harness",
+  "prompt": "prompt engineering and context window optimization for RAG retrieval",
+  "security": "security audit of credential leak and auth token exposure",
+  "performance": "investigate latency bottleneck and memory leak profiling in production",
+  "architecture": "review storage system design and database migration ADRs",
+  "planning": "manage dependencies and sprint task breakdown estimation",
+  "product-scope": "resolve roadmap priority dispute and PRD user stories",
+  "tooling": "CLI installer packaging and monorepo refactor",
+  "launch": "automate daily deployments and shipping release rollback",
+  "data": "conversion funnels and user cohorts retention telemetry dashboard",
+  "serving": "vector database drift monitor and model promotion rollback policy",
+  "discovery": "user research interviews and persona journey mapping discovery",
+  "design": "design system wireframe usability and screen states motion spec",
+  "review": "pull request quality gate and pattern audit code review",
+  "docs": "write API reference manuals and user guide lessons handbook"
+}

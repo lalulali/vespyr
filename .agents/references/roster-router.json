@@ -1,16 +1,23 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "owner": "@tech-lead",
   "tiebreak": "@founder",
   "source_of_truth": "artifacts/docs/review/07-roundtable.md sections 6, 8, 9",
   "rules": {
     "default_seats": 2,
     "hard_cap": 5,
-    "hard_cap_native": 5,
-    "hard_cap_solo": 5,
-    "reserved_seat_2": "On tagged topics, seat 2 is a reserved non-builder observer (speaks on tag match + drift signal). Untagged topics seat owner + strongest dissenter.",
+    "untagged_fallback": [
+      "tech-lead",
+      "architect"
+    ],
+    "revisit_sla": {
+      "max_override_rate": 0.20,
+      "min_sessions": 10
+    }
+  },
+  "policy": {
+    "reserved_seat_2": "On tagged topics, seat 2 is the highest-ranked consulted agent (positional contract) acting as an active dialectic counterweight. Untagged topics seat owner + strongest dissenter.",
     "override": "User override '<agent> instead/add' is honored and logged as [ROUTING-OVERRIDE: default -> chosen — reason]. Host-initiated deviation requires [ROUTER-DEVIATION: rule -> action — evidence].",
-    "revisit_threshold": "Deviation/override rate above ~20% over a rolling 10 sessions triggers a router review.",
     "sunset": "Router defaults expire 30 days / 20 roundtables after adoption on process metrics (override rate, p50 routing time, dispute count). Veto triggers are permanent safety invariants.",
     "measurement": "Owner @tech-lead counts [ROUTING-OVERRIDE]/[ROUTER-DEVIATION] markers across the last 10 roundtable transcripts and reports override rate, median rounds-to-synthesis, and dispute count in session-write. No new tooling — grep over transcripts.",
     "precedence": "On any conflict between this file and SKILL.md prose, this file wins. SKILL.md phase rosters are cost-mode defaults; tag matches override them."
@@ -30,6 +37,7 @@
         "benchmark",
         "baseline",
         "rubric",
+        "rubrics",
         "metric claim",
         "accuracy claim",
         "hallucination rate",
@@ -76,17 +84,46 @@
         "architect",
         "developer"
       ],
+      "excludes": [
+        "memory leak",
+        "resource leak",
+        "purge the cache",
+        "cache purge"
+      ],
       "keywords": [
         "secret",
+        "secrets",
         "PII",
         "threat model",
         "vulnerability",
         "auth",
+        "authentication",
+        "authorization",
+        "authz",
         "injection",
         "compliance",
         "security audit",
         "incident",
-        "breach"
+        "breach",
+        "secret leak",
+        "credential leak",
+        "data leak",
+        "token leak",
+        "artifact leak",
+        "oauth",
+        "oauth2",
+        "history rewrite",
+        "filter-repo",
+        "redaction",
+        "secret scan",
+        "private repo",
+        "exposure",
+        "purge",
+        "purges",
+        "purging",
+        "git purge",
+        "history purge",
+        "repo purge"
       ]
     },
     "performance": {
@@ -107,7 +144,12 @@
         "caching",
         "load test",
         "throughput",
-        "token cost"
+        "token cost",
+        "memory leak",
+        "heap",
+        "heaps",
+        "gc pause",
+        "allocation"
       ]
     },
     "architecture": {
@@ -120,11 +162,16 @@
       ],
       "keywords": [
         "ADR",
+        "ADRs",
         "topology",
         "API contract",
         "tech debt",
         "system design",
-        "data model"
+        "data model",
+        "database",
+        "migration",
+        "schema",
+        "storage"
       ]
     },
     "planning": {
@@ -139,6 +186,7 @@
         "execution plan",
         "estimation",
         "sprint",
+        "sprints",
         "task breakdown",
         "dependencies",
         "coordination"
@@ -177,7 +225,9 @@
         "packaging",
         "refactor",
         "symlink",
-        "harness adapter"
+        "harness adapter",
+        "monorepo",
+        "repository"
       ]
     },
     "launch": {
@@ -193,9 +243,20 @@
       ],
       "keywords": [
         "launch",
+        "launching",
+        "launches",
+        "launched",
         "release",
         "deploy",
+        "deployment",
+        "deployments",
+        "deploying",
+        "deploys",
+        "deployed",
         "ship",
+        "shipping",
+        "ships",
+        "shipped",
         "rollback",
         "smoke test",
         "go-live",
@@ -216,10 +277,12 @@
       "keywords": [
         "telemetry",
         "funnel",
+        "funnels",
         "dashboard",
         "experiment",
         "A/B",
         "cohort",
+        "cohorts",
         "retention",
         "instrumentation"
       ]
@@ -236,6 +299,7 @@
       "keywords": [
         "serving",
         "vector index",
+        "vector database",
         "drift monitor",
         "rollback policy",
         "model promotion",
@@ -294,7 +358,8 @@
         "code review",
         "quality gate",
         "pattern audit",
-        "pull request"
+        "pull request",
+        "review"
       ]
     },
     "docs": {
@@ -307,9 +372,11 @@
       ],
       "keywords": [
         "manual",
+        "manuals",
         "API reference",
         "user guide",
         "lesson",
+        "lessons",
         "curriculum",
         "release notes",
         "handbook"

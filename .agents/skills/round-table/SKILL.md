@@ -67,10 +67,10 @@ The closed, versioned tag table lives in `.agents/references/roster-router.json`
    ```
    Record the validated `ROSTER:` line at the top of the transcript for auditability (future observer-voice checks join on it). List seats in seating order: the 2 core seats first, summoned specialists after — positions beyond 2 are audited as challengers.
 2. Auto-seat every `mandatory` agent of matching tags — no substitution, no host discretion.
-3. On tagged topics, seat 2 is a reserved non-builder observer (speaks on tag match + drift signal). Untagged topics seat owner + strongest dissenter.
-4. `consulted` agents join Phase 2 as challengers or are cited — never silent full seats by default.
+3. On tagged topics, seat 2 is the highest-ranked consulted agent (`policy.reserved_seat_2`), acting as an active dialectic counterweight. If mandatory seats are fewer than `rules.default_seats` (2), auto-seat fills from consulted with telemetry marker `[ROUTER-AUTOSEAT: <tag> → @<agent>]`. Untagged topics fall back to `rules.untagged_fallback` (`@tech-lead`, `@architect`).
+4. `consulted` agents beyond the floor join Phase 2 as challengers or are cited — never silent full seats by default. Auto-seated Seat 2 is an **active dialectic participant** across Round 1 and Round 2 with an explicit mandate to evaluate boundaries and cross-examine assumptions.
 5. Emit a machine-checkable roster line before dispatch: `ROSTER: @a,@b[+@c: tag-name]` — every seat beyond 2 must name a router-table tag. Free-text tensions are rejected.
-6. User override (`<agent> instead/add`) is honored and logged as `[ROUTING-OVERRIDE: default → chosen — reason]`. Host-initiated deviation requires `[ROUTER-DEVIATION: rule → action — evidence]` and counts toward the >20%/10-session revisit threshold.
+6. User override (`<agent> instead/add`) is honored and logged as `[ROUTING-OVERRIDE: default → chosen — reason]`. Host-initiated deviation requires `[ROUTER-DEVIATION: rule → action — evidence]` and counts toward the revisit SLA (`max_override_rate: 0.20`, `min_sessions: 10`).
 7. Owner of this table: `@tech-lead` (mechanics). `@founder` settles ALL roster disputes; ties auto-resolve to the more-reversible roster with logged dissent.
 
 ### Recommended Rosters by Phase (2+summon defaults)
@@ -121,6 +121,7 @@ Rules: one row per dispatch (retries counted via `--attempt`, never re-rowed); o
 
 ### Phase 1: Position Stating (Scatter & Verdict Gate)
 - **Unconditioned parallel subagent dispatch** (no anchor bias, unconditioned priors).
+- **Active Dialectic Mandate for Seat 2:** Seat 2 (auto-seated consulted counterweight or counterpart) is an **active dialectic participant** from Round 1 onward, with an explicit mandate to evaluate boundaries and cross-examine assumptions rather than acting as a passive observer.
 - **Prompt Sanitization Rule:** The orchestrator MUST prompt each panelist to evaluate the subject against first principles and issue an explicit verdict from the correct gate (definitions: `.agents/references/vespyr-dna.md`):
   - **Decision Gate — proposals, ideas, designs under stress-test:** `[GO]` / `[RESHAPE]` / `[NO-GO]`.
   - **Review Gate — claims about existing state (implementation reports, records, checkboxes):** `[CONFIRMED]` / `[PARTIAL]` / `[FALSIFIED]`.
