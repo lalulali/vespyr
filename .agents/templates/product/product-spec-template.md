@@ -108,3 +108,14 @@ graph TD
 | ADRs | `artifacts/output/04-architecture/` |
 | Visual design system | `design.md` |
 | Execution plan | `artifacts/output/05-planning/execution-plan.md` |
+
+## Acceptance-Criteria ID Convention & Coverage Grammar (02o)
+
+Acceptance criteria use stable, sweepable ids — never free-form text:
+
+- `AC-H*` happy path · `AC-U*` unhappy/error path · `AC-E*` edge case · `AC-AI-*` AI/ML criteria (accuracy thresholds, fallback, rubric expectations).
+- Ids are unique per story set; matching is anchored — `AC-1` never satisfies `AC-10`, and `AC-E-012` never satisfies `AC-E-012-1`.
+- **Phase Boundary Rule (post-handoff):** contract shifts append new criteria as `AC-E*` (plus a `[DELTA-NN]` entry in `requirements.md`) — in-place edits to existing criteria are banned during engineering.
+- Every AC id needs ≥1 resolvable implementation reference (code or test) or a dated deferral row — the orphan-AC sweep (`.agents/scripts/req_to_impl_check.js`) exits 1 on the first orphan, and qa-signoff cites the sweep's output.
+
+**Coverage report grammar:** `.agents/skills/develop/templates/coverage-report.md` — rows `{ac_id, evidence_ref[], mechanism, check}`; refs use the frozen `path#id` anchor syntax (id = code/test symbol) or `path:line` (weaker — line drift).
