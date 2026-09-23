@@ -72,7 +72,7 @@ Owner samples 3 of N ledger statements at R4; each anchor verified to support it
 | L-35 `#telemetry-events` | **supported** — owner: "open correctly" (2026-09-22); owner finding: annotation clutter on the members page → fixed (all 22 blocks wrapped in one collapsed group) |
 | L-24 `#nav-invite-modal` | **not yet** — owner observed both anchors landing in the same dialog with L-08's error state carrying over, so the two rows looked identical. Cause: reveal state leaked across navigations → fixed (each navigation resets the previous unhide; dialogs close when you leave them). Round 3: open `#nav-invite-modal` fresh → expect a clean invite modal (email/role/message, no leftover error). |
 
-**Round 3:** L-24 only. **The parity gate closes when L-24 verifies.**
+**Round 3 — 2026-09-23: L-24 SUPPORTED (owner: "all good now"). A7 CLOSED — 3/3 sampled rows verified.**
 
 Witness re-stamped after each remediation (prototype changed → old hash correctly went stale every time).
 
