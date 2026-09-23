@@ -25,6 +25,8 @@ bump version
 
 **Review 10 fold (C-package — owner-authorized 2026-09-22, pre-baseline amendment):** `artifacts/docs/review/10-design-phase-spec-prototype-fidelity-and-lifecycle-plan.md` (RATIFIED 2026-09-16) §4 step-contract alignments folded: step-00 requires the **SPEC.md Spec Kernel anchor** for reverse mode; step-01d gates on the **4 cognitive-completeness criteria + State Switcher** (prototypes failing are rejected before inventorying); step-02d marks plumbing/telemetry rows **`[DEFERRED TO SPEC]`**; step-04d stamps the **freeze boundary** (SHA-256 witness); **step-05d is repurposed from the re-runnable sync loop to the formal Spike Rollback Protocol** (invoked only when QA falsifies the interaction model). Review 10 §5 Sprint 3 governance added as **02n.10**; PM/PD Review 10 invariants ride in 02n.8. Amended baseline: **10 countable items, checkpoint at 5/10**; commit-per-item authorized (local, no push). Engine version bump at ship (`bump version` note, line 3).
 
+**Deviation record (2026-09-23, roundtable class B — owner ruling requested):** commit `15279c1` changed the witness rule in code so an ABSENT parity-report = never-frozen = proceed (only stale/missing-field/broken block); the plan text above still describes blocking on an expected-but-missing witness. Correct-forward options: amend the plan text with this dated ruling, or revert the code to blocking — until one lands, do not cite Step-0 as enforcing expected-missing.
+
 ---
 
 ## 1. Scope
@@ -125,6 +127,8 @@ bump version
 **Control mechanics (owner A10 re-base, 2026-09-10; amended 2026-09-22 with the C-package):** the control is a **checkpoint when 5 of the 10 countable items are verified complete** (counted from commits/registry rows via the Status column; countable = 02n.F, 02n.1–02n.6, 02n.8, 02n.9, 02n.10 — struck 02n.7 excluded; A12 is owner-executed, zero-build, not counted). Under dependency order the 5th close is expected around the fixture → 01d → ledger → checker → staleness-hook path; the count governs, not the prediction. Single writer halts and records a replan decision (continue/descope/defer) in the registry row with date + SHA. **Scope-drift halt:** any new task, verify-criterion redesign, or deliverable growth → halt and owner rules; the §5 baseline is captured at execution start. Regression gate per item: `tests/run-all.js` green. No hour-based owner gate.
 
 **A12 optional pre-build validation (GO'd by owner 2026-09-10; target feature TBD):** founder's pre-registered hand-run — R1→R3 on one in-scope feature, AC→evidence map with file:line refs, ≤2h, zero build. Corrected consequence clause (B20): trip (≥1 orphan) strengthens M1 at anecdote tier; clean run falsifies the re-sequencing advice (02n-first stands); no >2h arm (hours not a control unit).
+
+**Weight rationale (recorded 2026-09-23 after roundtable — previously silent, commit `857cc72`):** PRD-5/6 were created at `weight: 1` (mirroring PRD-3/4) so additive reverse-mode criteria could not flip any previously-passing benchmark — at `weight: 2`, AGENT-PM-01 scores 6/10 = 3.40 and fails. @tech-lead classed the unruled change as scope-drift (class B); the executor contests it as pre-authorized additive criteria (02n.8 row). **Owner ruling requested** — either ratify the weights with this rationale or re-weight and re-baseline.
 
 ---
 
