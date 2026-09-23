@@ -143,6 +143,7 @@ Rules: one row per dispatch (retries counted via `--attempt`, never re-rowed); o
 
 ### Phase 4: Synthesis Gate & Irreconcilable Trade-Off Escalation
 - No false consensus: if trade-offs are mutually exclusive, log them as an explicit ADR decision record in `artifacts/memory/active-decisions.md` rather than synthesizing a muddy compromise.
+- **Owner brief first (DNA 8):** before any marker, write the owner-readable result — one plain sentence of what the panel found; each finding as what's-wrong → why-it-matters → consequence; every open decision as a linked brief (question, context, file link, options with consequences, one recommendation). Machine markers come after the brief, never instead of it.
 - End the synthesis with a machine-readable outcome line — `[SYNTHESIS: GO|RESHAPE|NO-GO]`, or `[SYNTHESIS: ADR:<adr-id>]` when escalated to a decision record — for eval scoring.
 
 ### Invariant Anti-Sycophancy & Orchestration Rules

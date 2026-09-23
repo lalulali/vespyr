@@ -51,7 +51,21 @@ describe('Vespyr Core DNA & Anti-Sycophancy Invariants', () => {
     assert.ok(content.includes('Modular & Token-Efficient Structure'), 'Must mandate modular structure');
   });
 
+  it('vespyr-dna.md defines DNA 8 Owner-Readable Results', () => {
+    const content = fs.readFileSync(dnaPath, 'utf8');
+    assert.ok(content.includes('DNA 8: Owner-Readable Results'), 'Must define DNA 8');
+    assert.ok(content.includes('One plain sentence first'), 'Must mandate the plain-lead sentence');
+    assert.ok(content.includes('Decisions are briefs, never pointers'), 'Must mandate decision briefs');
+    assert.ok(content.includes('Machine markers get a human translation'), 'Must mandate human translation of markers');
+    assert.ok(content.includes('Comprehension test before sending'), 'Must mandate the repo-closed comprehension test');
+  });
+
   filesToCheck.forEach(({ name, path: filePath }) => {
+    it(`${name} contains the DNA 8 owner-readable results contract`, () => {
+      const content = fs.readFileSync(filePath, 'utf8');
+      assert.ok(content.includes('Owner-Readable Results'), `${name} must carry the DNA 8 contract`);
+    });
+
     it(`${name} contains Core DNA anti-sycophancy, two-gate verdict rules (no stale single-gate wording)`, () => {
       assert.ok(fs.existsSync(filePath), `${name} must exist`);
       const content = fs.readFileSync(filePath, 'utf8');

@@ -243,4 +243,19 @@ When authoring Product Requirements Documents (PRDs), Epics, Features, and User 
 
 ---
 
-*(Additional core DNA principles can be appended here as the engine evolves — next is DNA 8).*
+*(Additional core DNA principles can be appended here as the engine evolves — next is DNA 9).*
+
+## DNA 8: Owner-Readable Results (Plain-Language Output Contract)
+
+Every result an owner consumes — roundtable synthesis, review verdict, gate report, execution summary, decision ask — is governed here. DNA 7 demystifies *words*; DNA 8 governs *structure*: an output can use only plain words and still be unreadable if it dumps audit data instead of telling the story. The plain-language method is applied implicitly and never labeled (DNA 7 §3).
+
+### Rules — unconditional for owner-facing results
+1. **One plain sentence first.** Open with what happened in everyday English. No verdict tokens, claim IDs, class letters, amendment codes, commit hashes, or file paths in that first sentence. "Four reviewers checked the work; the work is solid, but three paperwork errors and two bugs need your decisions" passes. "C1 CONFIRMED, C2 PARTIAL, class-B pending" fails.
+2. **Findings as consequences.** Each finding = what is wrong → why it matters → what happens if we ignore it. Two to three lines. IDs, SHAs, and `file:line` may follow as evidence — never as the explanation itself.
+3. **Decisions are briefs, never pointers.** Every owner decision carries: (a) the question in one line, (b) two context bullets, (c) a link to the exact file and section, (d) each option with its consequence, (e) one recommendation. "N decisions on your desk" without briefs is a defect, not a summary.
+4. **Machine markers get a human translation.** Gate lines (`[VERDICT: ...]`, `[SYNTHESIS: ...]`, class letters, amendment codes) exist for scorers and records; immediately after each block of them, one plain sentence says the same thing for a human.
+5. **Link, don't cite.** Owner-facing paths are links into the file (plus the section name); bulky evidence lives behind one link (transcript, report, diff) — not pasted into the reply.
+6. **Comprehension test before sending.** Read the draft with the repository closed. If a decision, finding, or outcome needs a file open to decode it, it is not done — rewrite. Brevity that encodes ideas as IDs is jargon wearing a short coat.
+
+### Why DNA, not guideline
+A result the owner cannot act on stalls the pipeline just as hard as a broken gate. Every roundtable and eval in this engine is optimized for machine-parseable verdicts; without this DNA the human layer silently rots while the scorer stays green.
