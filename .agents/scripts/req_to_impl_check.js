@@ -27,6 +27,9 @@
 
 const fs = require('fs');
 const path = require('path');
+// B1 (frozen 2026-09-23): ONE grammar implementation shared with the spec
+// parity checker — anchor refs are never re-parsed here.
+const { resolveAnchor } = require('./spec_parity.js');
 
 const DEFAULTS = {
   stories: 'artifacts/output/03-strategy/user-stories.md',
@@ -185,22 +188,18 @@ function resolveRef(root, ref) {
   if (isAcId(ref)) return { ok: true, kind: 'ac-cross-ref' };
   const hashIdx = ref.indexOf('#');
   if (hashIdx > 0) {
-    const rel = ref.slice(0, hashIdx);
-    const id = ref.slice(hashIdx + 1);
-    const file = path.resolve(root, rel);
-    if (!fs.existsSync(file)) return { ok: false, kind: 'anchor', reason: `file not found: ${rel}` };
-    const content = fs.readFileSync(file, 'utf8');
-    const re = /\.(html?|svg)$/i.test(file)
-      ? new RegExp(`id=["']${escapeRe(id)}["']`)
-      : new RegExp(`(^|[^A-Za-z0-9_-])${escapeRe(id)}([^A-Za-z0-9_-]|$)`);
-    return re.test(content)
-      ? { ok: true, kind: 'anchor' }
-      : { ok: false, kind: 'anchor', reason: `symbol "${id}" not found in ${rel}` };
+    // Frozen A11 grammar (D1 fixed 2026-09-23): delegate to the single
+    // implementation — rejects absolute paths, `..` escapes, empty ids.
+    const res = resolveAnchor(root, ref);
+    return res.ok ? { ok: true, kind: 'anchor' } : { ok: false, kind: 'anchor', reason: res.reason };
   }
   const lineIdx = ref.lastIndexOf(':');
   if (lineIdx > 0 && /^\d+$/.test(ref.slice(lineIdx + 1))) {
     const rel = ref.slice(0, lineIdx);
     const line = parseInt(ref.slice(lineIdx + 1), 10);
+    if (path.isAbsolute(rel) || rel.split('/').includes('..')) {
+      return { ok: false, kind: 'line', reason: `ref path must be repo-relative: ${rel}` };
+    }
     const file = path.resolve(root, rel);
     if (!fs.existsSync(file)) return { ok: false, kind: 'line', reason: `file not found: ${rel}` };
     const lines = fs.readFileSync(file, 'utf8').split(/\r?\n/);
@@ -209,6 +208,11 @@ function resolveRef(root, ref) {
       : { ok: false, kind: 'line', reason: `${rel}:${line} beyond EOF (${lines.length} lines)` };
   }
   return { ok: false, kind: 'unknown', reason: `unrecognized ref "${ref}"` };
+}
+
+function extractRefs(text) {
+  const found = [...String(text).matchAll(/(?:[A-Za-z0-9._/-]+#[A-Za-z][A-Za-z0-9._:-]*|[A-Za-z0-9._/-]+:\d+)/g)].map((m) => m[0]);
+  return [...new Set(found)];
 }
 
 // ---------------------------------------------------------------------------
@@ -222,24 +226,37 @@ function cmdFidelity(root, reportPath, json) {
   const rows = parseClassRows(fs.readFileSync(reportPath, 'utf8'));
   const problems = [];
   const byCls = new Map(rows.map((r) => [r.cls, r]));
+  let implemented = 0;
+  let deferred = 0;
+  let refsResolved = 0;
   for (const cls of CLASSES) {
     const row = byCls.get(cls);
     if (!row) { problems.push(`${cls}: missing from the fidelity table`); continue; }
     if (/^deferr/i.test(row.status)) {
       const reason = row.status.replace(/^deferred?\s*[:\-—]?\s*/i, '').trim();
       if (!reason && !row.evidence) problems.push(`${cls}: deferred without a reason`);
+      else deferred++;
     } else if (/^implemented/i.test(row.status)) {
-      if (!row.evidence) problems.push(`${cls}: implemented without evidence`);
+      if (!row.evidence) { problems.push(`${cls}: implemented without evidence`); continue; }
+      // D2 fixed 2026-09-23: evidence refs are RESOLVED, not counted as non-empty strings.
+      const refs = extractRefs(row.evidence);
+      if (refs.length === 0) problems.push(`${cls}: implemented without a resolvable evidence ref`);
+      for (const r of refs) {
+        const res = resolveRef(root, r);
+        if (!res.ok) problems.push(`${cls}: evidence ref ${r} does not resolve (${res.reason})`);
+        else refsResolved++;
+      }
+      implemented++;
     } else {
       problems.push(`${cls}: status must be "implemented" or "deferred: reason" (got "${row.status}")`);
     }
   }
-  const out = { gate: 'fidelity', classes: rows.length, problems, pass: problems.length === 0 };
+  const out = { gate: 'fidelity', classes: rows.length, implemented, deferred, refsResolved, problems, pass: problems.length === 0 };
   if (json) console.log(JSON.stringify(out, null, 2));
   else {
-    console.log(`req_to_impl_check --fidelity: ${rows.length}/10 classes recorded`);
+    console.log(`req_to_impl_check --fidelity: ${rows.length}/10 classes recorded (${implemented} implemented with ${refsResolved} resolvable ref(s), ${deferred} deferred with reasons)`);
     for (const p of problems) console.error(`  ✗ ${p}`);
-    if (out.pass) console.log('fidelity: PASS — every class implemented with evidence or deferred with reason');
+    if (out.pass) console.log('fidelity: PASS — implemented classes carry resolvable evidence refs; deferred rows carry reasons');
   }
   process.exit(out.pass ? 0 : 1);
 }
@@ -349,4 +366,4 @@ function main() {
 
 if (require.main === module) main();
 
-module.exports = { extractAcs, isAcId, parseCoverageRows, parseClassRows, resolveRef, hasAnchoredRef, collectFiles };
+module.exports = { extractAcs, isAcId, parseCoverageRows, parseClassRows, resolveRef, extractRefs, hasAnchoredRef, collectFiles };

@@ -21,12 +21,12 @@ Coverage contract fixture for the orphan-AC sweep (02o.2) and the fidelity revie
 | Detail class | Status | Evidence / reason |
 |---|---|---|
 | Screen states (empty/loading/error) | deferred: no UI surface in this fixture scope | rate-limiter is a headless utility |
-| Edge cases & validation | implemented | AC-U1 reject-on-empty assertion |
-| Data fields & types | implemented | `capacity` / `refillRate` / `tokens` fields in `rate-limiter.js` |
+| Edge cases & validation | implemented | AC-U1 reject-on-empty assertion — `evals/fixtures/dev-tasks/spec-coverage/rate-limiter.js#allowRequest` |
+| Data fields & types | implemented | `capacity` / `refillRate` / `tokens` fields — `evals/fixtures/dev-tasks/spec-coverage/rate-limiter.js#capacity` |
 | Permissions & auth | deferred: no auth surface in this fixture scope | endpoint auth lives outside the utility |
 | Navigation & flows | deferred: no navigation surface in this fixture scope | headless utility |
 | Copy & tone | deferred: no user-facing copy in this fixture scope | headless utility |
 | Telemetry | deferred: metrics land with the service layer (owner: @developer, 2026-09-22) | not implemented in the utility |
-| Performance notes | implemented | O(1) token-bucket checks |
+| Performance notes | implemented | O(1) token-bucket checks — `evals/fixtures/dev-tasks/spec-coverage/rate-limiter.js#allowRequest` |
 | Accessibility | deferred: no UI surface in this fixture scope | headless utility |
 | Platform constraints | deferred: runtime-agnostic utility (owner: @developer, 2026-09-22) | no platform branches |

@@ -8,6 +8,11 @@ All notable changes to the Vespyr project will be documented in this file.
 
 ## [2.0.11] - 2026-09-22
 
+### Rulings + gate boundary fixes (2026-09-23)
+- Owner rulings executed: the "missing parity report = proceed" witness rule is ratified (report-deletion-after-freeze guard filed as open defect D3); the reverse-mode PRD scoring weights are ratified at their current values with the rationale on record, and re-checking them against real data is now a required step of the pending A8 comparison.
+- Plain-language scope extended to every document the engine writes, in any language the owner chooses (DNA 7).
+- Coverage-gate boundaries hardened after the roundtable probes: evidence references now share one grammar implementation with the parity checker (outside paths, parent-directory escapes, and empty identifiers all rejected), and the fidelity check resolves every evidence reference — dead paths and reference-less "implemented" rows now fail the gate.
+
 ### Owner-readable results (DNA 8, 2026-09-23)
 - Roundtable verdicts, review summaries, and decision asks must now open with one plain sentence, state findings as consequences, and present decisions as linked briefs with options and a recommendation — machine gate markers always get a human translation, links replace bare citations, and anything that needs the repo open to decode gets rewritten.
 

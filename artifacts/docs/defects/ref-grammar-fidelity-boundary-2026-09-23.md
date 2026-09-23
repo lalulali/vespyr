@@ -30,4 +30,12 @@ Found during the native roundtable implementation review of 02n/02o (`artifacts/
 
 ---
 
-**Status:** OPEN — owner @developer. Fix changes gate behavior → requires owner GO (flagged for the next session alongside A8/A12). Cross-references: 02o plan §1.1 (B1), §4; transcript `review-implementation-02n-02o_native_1.md`.
+**Statuses (2026-09-23):** **D1 FIXED** — `resolveRef` now delegates to `spec_parity.resolveAnchor` (one grammar implementation for B1: absolute paths, `..`, empty ids all rejected); named test `tests/test_req_to_impl_ref_grammar.test.js` written, green. **D2 FIXED** — `--fidelity` now resolves every evidence reference and requires implemented classes to carry ≥1 resolvable ref; PASS output made structural-true; named test `tests/test_req_to_impl_fidelity_refs.test.js` written, green. Both fixes GO'd in-session by the owner ("fix now", 2026-09-23).
+
+## D3 — report-deletion-after-freeze guard (owner ruled 2026-09-23, option a)
+
+Ruling: the witness rule stands as code — absent report = never-frozen = proceed (mid-flow sessions must not deadlock). Residual hole: after a freeze, `rm parity-report.md` reopens the gate silently (probe: `[OK] witness: absent`, exit 0). Detection seam already exists: 02n.9's scope-lock records artifact hashes — a guard comparing "parity-report.md present at lock time" vs "absent now" blocks without re-creating the mid-flow deadlock.
+
+**Status: OPEN** — owner @developer (small; not bundled with A8 unless the owner says so).
+
+**Cross-references:** 02o plan §1.1 (B1), §4; transcript `review-implementation-02n-02o_native_1.md`.
