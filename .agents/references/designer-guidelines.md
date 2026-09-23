@@ -38,6 +38,8 @@ Motion is not decoration — it is spatial affordance, kinetic feedback, and pro
 | **Radix UI** | [radix-ui.com](https://www.radix-ui.com/) | Unstyled, accessible UI primitives for React. Handles focus management, ARIA attributes, keyboard navigation, and portal rendering. |
 | **Lucide Icons** | [lucide.dev](https://lucide.dev/) | Clean, consistent, highly customizable open-source icon set for modern web applications. |
 
+> **Stack guideline gate (`@shadcn/lint`):** when the shadcn/Tailwind stack is chosen — or detected by `.agents/scripts/shadcn_gate.js` when the user has no recorded preference — design-system compliance is machine-checked: set up `@shadcn/lint` per [SETUP.md](https://github.com/shadcn-ui/lint/blob/main/SETUP.md) and keep `npm run lint` at zero `shadcn/*` violations before any design gate (`no-restyle`, `no-raw-colors`, `no-arbitrary-values`, `no-inline-styles`, `no-unknown-classes`, `require-static-classes`). The shadcn MCP server (registry browse/search/install) is offered once via the UI stack gate — opt-in only.
+
 ---
 
 ## 3. Typography & Type Foundries

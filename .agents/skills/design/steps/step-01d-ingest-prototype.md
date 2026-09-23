@@ -23,6 +23,7 @@ Reject the prototype and halt if any criterion fails:
 2. **The 3 critical state moments** — Day 0 (empty), Day 30 (populated), and Error (recovery) exist and are toggleable, not merely described.
 3. **Real design tokens** — colors, type scale, spacing, and radii reference the token layer; ad-hoc values scattered outside the token definition = reject.
 4. **Tactile micro-feedback** — hover/active/focus states, skeletons, or disabled states present.
+5. **Stack guideline (conditional — UI stack gate)** — if the stack gate chose shadcn/Tailwind, the prototype must be component-based and pass `npm run lint` with `@shadcn/lint` (SETUP.md) — zero `shadcn/*` violations, or the prototype is rejected.
 
 On rejection: list each failed criterion with what you observed, write no inventory file, and route back to the prototype sandbox.
 

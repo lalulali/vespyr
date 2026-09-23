@@ -6,6 +6,9 @@ All notable changes to the Vespyr project will be documented in this file.
 
 ## [Unreleased]
 
+### Design UI stack gate (2026-09-23)
+- When no stack preference is recorded, `/design` now detects shadcn/Tailwind intent from project evidence first and asks only when it can't tell; a chosen shadcn stack offers to install the shadcn MCP server (opt-in) and enforces the design-system guideline with `@shadcn/lint` — zero `shadcn/*` violations before any design gate.
+
 ## [2.0.11] - 2026-09-22
 
 ### Implementation Coverage Contract (2026-09-22)

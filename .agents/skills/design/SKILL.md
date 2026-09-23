@@ -48,6 +48,22 @@ Intent triage at gate: Clear (C ≥ 0.85) runs the locked track; Ambiguous (0.50
 
 If unclear, ask: "Are you designing from scratch, refining existing specs, reviewing a design, or turning a prototype into a PRD?"
 
+## UI stack gate (shadcn/Tailwind — owner request 2026-09-23)
+
+Runs only when the user has NO recorded stack preference (prompt / `project-context.md` / `design.md`). Evidence beats questions — detect first:
+
+1. **Detect:** `node .agents/scripts/shadcn_gate.js detect --json`
+   - `stack: shadcn|tailwind` → chosen (evidence: `components.json` / dependencies).
+   - `stack: none` → ask exactly one question: "Use the shadcn/Tailwind stack?" Yes → chosen; No → normal flow. Never ask when evidence already answers; never re-ask once a preference is recorded (write it to `project-context.md`).
+2. **shadcn MCP (only when stack = shadcn):** detect result `mcp: absent | disabled | installed`
+   - `absent`/`disabled` → ask: "Install/enable the shadcn MCP server (browse, search, and install registry components)?" Yes → add/enable in `opencode.json` per https://ui.shadcn.com/docs/mcp:
+     `"mcp": { "shadcn": { "type": "local", "command": ["npx", "shadcn@latest", "mcp"], "enabled": true } }` (or `pnpm dlx shadcn@latest mcp init --client <client>`), then restart the harness. No → continue without it — **MCP never gates design**. Classified `gated` in `.agents/scripts/validate_matrix.js`.
+3. **Guideline lint (stack = shadcn/tailwind):** `@shadcn/lint` is the machine-checkable design guideline.
+   - Not configured → set it up before any UI work: "Read https://github.com/shadcn-ui/lint/blob/main/SETUP.md and set up @shadcn/lint in this project" (confirm installs with the user).
+   - When the stack is chosen, author prototypes/UI as component code (React/Vue/Svelte + Tailwind) — one-off HTML mocks are outside the linter's reach.
+   - After every UI/prototype change run `npm run lint`; **zero `shadcn/*` violations before any gate** (step-01d completeness, handoff, dev loop). The lint error is the fix instruction — loop until green.
+   - Mechanical check: `node .agents/scripts/shadcn_gate.js verify` exits 1 when a chosen stack has no lint configured (test-backed: `tests/test_shadcn_gate.test.js`).
+
 ## Create mode step sequence
 1. Load PRD Brief → `steps/step-01a-load-prd-brief.md`
 2. Define Personas → `steps/step-02a-define-personas.md`
