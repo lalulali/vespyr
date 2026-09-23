@@ -52,7 +52,14 @@ module.exports.uninstall = function (ctx) {
 	const { getGlobalPath } = require("./index.js");
 	const { targetDir, isGlobal, surgicallyCleanupAgentsDir } = ctx;
 	const claudePath = isGlobal ? getGlobalPath("claude") : path.join(targetDir, ".claude");
-	if (fs.existsSync(claudePath)) {
-		surgicallyCleanupAgentsDir(claudePath);
+	try {
+		const stat = fs.lstatSync(claudePath);
+		if (stat.isSymbolicLink()) {
+			fs.unlinkSync(claudePath);
+			return;
+		}
+	} catch (e) {
+		return;
 	}
+	surgicallyCleanupAgentsDir(claudePath);
 };

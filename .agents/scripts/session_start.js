@@ -96,6 +96,24 @@ function detectEngineVersion() {
   return '2.0.11';
 }
 
+function detectLanguage() {
+  try {
+    const { readConfig } = require('./lib/language_resolver');
+    const configPath = path.join(process.cwd(), '.agents', 'config.yaml');
+    const cfg = readConfig(configPath);
+    // Loud failure (DNA 4): an unrecognized on-disk artifacts value must not
+    // silently ship English documents — surface it to stderr at session start.
+    if (cfg.artifactsFallback) {
+      try {
+        process.stderr.write(`[session-start] warning: config.yaml language.artifacts '${cfg.rawArtifacts}' is not a recognized language — falling back to 'en'. Fix with: vespyr lang set <code>\n`);
+      } catch {}
+    }
+    // chat is always auto-mirror (DNA 9 Rule 1) — not a config key.
+    return { chat: 'auto', artifacts: cfg.language.artifacts };
+  } catch {}
+  return { chat: 'auto', artifacts: 'en' };
+}
+
 function detectStack() {
   const root = process.cwd();
   const clues = [];
@@ -138,8 +156,21 @@ function countActiveBlockers() {
   return active.length;
 }
 
-function generateMachineStateBlock({ stack, branch, phase, sprint, blockers, version }) {
+// Single source of truth for the `- Artifact Language:` machine-state line.
+// Used by generateMachineStateBlock (session-start) and refreshArtifactLanguageLine
+// (lang set / reconfigure) so the wording can never drift between the two paths.
+// The directive is deliberately scoped to FILE AUTHORING only — reading,
+// summarizing, or discussing a document is chat and mirrors the user.
+function artifactLanguageLine(artLang) {
+  const code = artLang || 'en';
+  return code === 'en'
+    ? '- Artifact Language: en — write generated artifact FILES (PRDs, specs, ADRs, code comments, commit messages) in English. Chat, summaries, and any discussion ABOUT a document mirror the user.'
+    : `- Artifact Language: ${code} — write this language ONLY when AUTHORING/SAVING a formal artifact file (PRDs, specs, ADRs, code comments, commit messages). AFTER saving, IMMEDIATELY switch back to the user's chat language for your next response — do not let the artifact language leak into conversation. This does NOT apply to chat: reading, summarizing, explaining, analyzing, or answering questions about a document is conversation and MUST use the user's language (the language they last wrote to you in), even if the document itself is in ${code}. When unsure, use the user's language.`;
+}
+
+function generateMachineStateBlock({ stack, branch, phase, sprint, blockers, version, artifactLanguage }) {
   const blockerText = blockers === 1 ? '1 active blocker' : `${blockers} active blockers`;
+  const langLine = artifactLanguageLine(artifactLanguage);
   return [
     '<!-- BEGIN MACHINE STATE -->',
     '## [RUNTIME STATE]',
@@ -149,6 +180,7 @@ function generateMachineStateBlock({ stack, branch, phase, sprint, blockers, ver
     `- Active Sprint: ${sprint || 'none'}`,
     `- Blocker Status: ${blockerText}`,
     `- Engine Version: ${version || '2.0.11'}`,
+    langLine,
     '<!-- END MACHINE STATE -->'
   ].join('\n');
 }
@@ -295,11 +327,12 @@ function syncProjectContext({ agent, domain, goal, ensureMarker = false, recordM
   const branch = detectBranch();
   const stack = detectStack();
   const version = detectEngineVersion();
+  const language = detectLanguage();
 
   let updated = content;
 
   // Splice machine state block
-  const machineBlock = generateMachineStateBlock({ stack, branch, phase, sprint, blockers, version });
+  const machineBlock = generateMachineStateBlock({ stack, branch, phase, sprint, blockers, version, artifactLanguage: language.artifacts });
   updated = spliceMachineState(updated, machineBlock);
 
   // DoD #1 fix (2026-08-25): legacy syncCore/syncDetectedFields passes ran
@@ -333,12 +366,68 @@ function syncProjectContext({ agent, domain, goal, ensureMarker = false, recordM
     branch,
     stack,
     version,
+    language,
     activity: recordMarker ? marker : null
   };
 }
 
+/**
+ * Targeted, side-effect-light refresh of ONLY the `- Artifact Language:` line
+ * inside the machine-state block. Used by `vespyr lang set` / reconfigure so the
+ * moment the config changes, the copy agents read (project-context.md) matches —
+ * without running the full session-start sync (no git detection, no activity marker).
+ *
+ * The artifact language is derived from the config.yaml sitting next to the
+ * given project-context.md (…/.agents/config.yaml), NOT from process.cwd(), so
+ * it stays correct when the caller operates on a target dir other than cwd.
+ *
+ * No-ops safely when project-context.md or the machine-state block is absent
+ * (e.g. `vespyr lang` run outside an installed workspace). Returns true if it
+ * rewrote the line, false otherwise.
+ */
+function refreshArtifactLanguageLine(projectContextPath = PROJECT_CONTEXT) {
+  let content;
+  try {
+    content = fs.readFileSync(projectContextPath, 'utf8');
+  } catch {
+    return false; // no project-context.md — nothing to sync (next session-start will build it)
+  }
+  if (!/<!-- BEGIN MACHINE STATE -->/.test(content) || !/<!-- END MACHINE STATE -->/.test(content)) {
+    return false;
+  }
+
+  // Resolve the config next to this project-context.md:
+  //   <root>/artifacts/memory/project-context.md -> <root>/.agents/config.yaml
+  let artLang = 'en';
+  try {
+    const { readConfig } = require('./lib/language_resolver');
+    const root = path.resolve(path.dirname(projectContextPath), '..', '..');
+    const cfg = readConfig(path.join(root, '.agents', 'config.yaml'));
+    artLang = cfg.language.artifacts || 'en';
+  } catch {}
+
+  const langLine = artifactLanguageLine(artLang);
+
+  let updated;
+  if (/^- Artifact Language:.*$/m.test(content)) {
+    updated = content.replace(/^- Artifact Language:.*$/m, langLine);
+  } else {
+    // Insert the line just before the END marker if it was never present.
+    updated = content.replace(/(\n)(<!-- END MACHINE STATE -->)/, `\n${langLine}\n$2`);
+  }
+  if (updated === content) return false;
+
+  try {
+    atomicWriteFileSync(projectContextPath, updated, 'utf8');
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 module.exports = {
   syncProjectContext,
+  refreshArtifactLanguageLine,
   detectStack,
   detectBranch,
   detectRepository,

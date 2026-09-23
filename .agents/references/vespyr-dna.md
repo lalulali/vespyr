@@ -244,8 +244,6 @@ When authoring Product Requirements Documents (PRDs), Epics, Features, and User 
 
 ---
 
-*(Additional core DNA principles can be appended here as the engine evolves — next is DNA 9).*
-
 ## DNA 8: Owner-Readable Results (Plain-Language Output Contract)
 
 Every result an owner consumes — roundtable synthesis, review verdict, gate report, execution summary, decision ask — is governed here. DNA 7 demystifies *words*; DNA 8 governs *structure*: an output can use only plain words and still be unreadable if it dumps audit data instead of telling the story. The plain-language method is applied implicitly and never labeled (DNA 7 §3).
@@ -260,3 +258,17 @@ Every result an owner consumes — roundtable synthesis, review verdict, gate re
 
 ### Why DNA, not guideline
 A result the owner cannot act on stalls the pipeline just as hard as a broken gate. Every roundtable and eval in this engine is optimized for machine-parseable verdicts; without this DNA the human layer silently rots while the scorer stays green.
+
+---
+
+## DNA 9: Language & Localization Protocol (Chat vs. Artifact Boundary)
+
+> **Natural conversation in chat; deterministic consistency in system artifacts.**
+
+### Rules
+1. **Chat Conversation Layer — always mirror, no config:** Agents naturally mirror the user's conversation language (Indonesian when addressed in Indonesian, English when addressed in English). This is behavioral, not configurable — there is deliberately **no `language.chat` setting**. A user who wants a reply in a different language just asks for it in that language; a persisted chat-language key would be dead weight (its only correct value is "mirror the human").
+2. **Artifact & Code Layer (`language.artifacts`) — applies to FILE AUTHORING only:** Defaults to `en`. When the agent **authors or saves a formal artifact file** — PRDs, specs, ADRs, architecture briefs, code comments/docstrings, git commit messages — the file content MUST be written in `language.artifacts`, regardless of the chat language. **This scope is narrow on purpose:** it covers writing the artifact itself, nothing more. Reading, summarizing, explaining, translating-for-discussion, analyzing, or answering questions ABOUT a document is **conversation, not artifact authoring** — it follows Rule 1 (mirror the user), *even when the document being discussed is in `language.artifacts`*. **Context-momentum guard:** immediately after producing an artifact in `language.artifacts`, snap back to the user's chat language for the very next reply — a long artifact just written in `id` must NOT drag the following conversation into `id`. "The user's language" = the language of the user's most recent message, not the language of the artifact you just wrote. Example: artifacts=`id`, user chats in English, user says "read me this PRD" → the reply/summary is in **English** (chat); user says "update the PRD" → the saved file stays in `id`, but your chat reply about it is still **English**. When an action is ambiguous, use the user's language.
+3. **Task-Level Override:** If the user explicitly requests an artifact in a specific language (e.g., *"tulis PRD ini dalam bahasa Indonesia"*), the explicit prompt instruction overrides `language.artifacts` for that single deliverable only.
+4. **Normalized Codes — one grammar, loud on failure:** The artifacts language reads and writes through `language_resolver.js` (`readConfig` / `writeConfigLanguage` / `normalizeLanguage`) to a valid canonical code (`en`, `id`, `zh-Hans`, `zh-Hant`, `ja`, `ko`, `es`, `pt`, `hi`, `de`, `fr`, `ru`, `ar`). The reader is quote- and comment-tolerant (`artifacts: "id"  # note` resolves to `id`). An unrecognized on-disk value falls back to `en` **loudly** — the CLI status view and `session_start` both surface a warning rather than silently shipping the wrong language (DNA 4: resolution failures are loud).
+5. **Always-synced context — the agent reads the live setting:** The active artifact language is surfaced as `- Artifact Language:` inside the `project-context.md` machine-state block (the copy every agent reads). It refreshes automatically at **every session-start** and at **task `complete`** (the enforcement backstop), and immediately when `vespyr lang set` changes it. A user who hand-edits `.agents/config.yaml` directly sees the line update on the next session-start/complete — the same cadence as every other machine-state field (Stack, Phase, Blockers). Agents must obey the current `- Artifact Language:` line at generation time; this is a judged-tier behavior (there is no mechanical prose-language gate), so surfacing it live is what makes compliance reliable.
+

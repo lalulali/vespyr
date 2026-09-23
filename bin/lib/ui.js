@@ -172,6 +172,9 @@ function printWizardSummary() {
 	if (wizardState.name !== undefined) {
 		lines.push(`  Name:      ${wizardState.name}`);
 	}
+	if (wizardState.languageArtifacts !== undefined) {
+		lines.push(`  Artifacts language: ${wizardState.languageArtifacts}`);
+	}
 	if (lines.length > 0) {
 		process.stdout.write(`\n  \x1b[2m── Current Selections ──\x1b[0m\n`);
 		lines.forEach((l) => process.stdout.write(l + "\n"));

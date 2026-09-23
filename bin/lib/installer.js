@@ -49,6 +49,47 @@ function createInstaller(deps) {
 	} = deps;
 	const { handleConflict, createLinkOrCopy } = linkUtils;
 
+	// Shared artifact-language picker (used by fresh install + reconfigure).
+	// Conversation always mirrors the user — there is no chat setting (DNA 9).
+	// Order MUST match LANG_LABELS index-for-index.
+	const LANG_CODES = ["en", "id", "zh-Hans", "zh-Hant", "ja", "ko", "es", "pt", "de", "fr"];
+	const LANG_LABELS = [
+		"English (en)",
+		"Bahasa Indonesia (id)",
+		"简体中文 / Chinese Simplified (zh-Hans)",
+		"繁體中文 / Chinese Traditional (zh-Hant)",
+		"日本語 / Japanese (ja)",
+		"한국어 / Korean (ko)",
+		"Español / Spanish (es)",
+		"Português / Portuguese (pt)",
+		"Deutsch / German (de)",
+		"Français / French (fr)",
+	];
+
+	// Read the artifact language currently on disk (defaults to 'en').
+	function currentArtifactLanguage(targetDir) {
+		try {
+			const { readConfig } = require("../../.agents/scripts/lib/language_resolver.js");
+			return readConfig(path.join(targetDir, ".agents", "config.yaml")).language.artifacts || "en";
+		} catch {
+			return "en";
+		}
+	}
+
+	// Persist the artifact language and immediately sync the copy agents read
+	// (project-context.md machine-state block). Returns the normalized code.
+	function applyArtifactLanguage(targetDir, rawValue) {
+		const { normalizeLanguage, writeConfigLanguage } = require("../../.agents/scripts/lib/language_resolver.js");
+		const norm = normalizeLanguage(rawValue);
+		writeConfigLanguage(path.join(targetDir, ".agents", "config.yaml"), { artifacts: norm.code });
+		try {
+			const { refreshArtifactLanguageLine } = require("../../.agents/scripts/session_start.js");
+			refreshArtifactLanguageLine(path.join(targetDir, "artifacts", "memory", "project-context.md"));
+		} catch {}
+		return norm;
+	}
+
+
 function backupExistingArtifactsDir(targetDir) {
 	const artifactsPath = path.join(targetDir, "artifacts");
 	const backupPath = path.join(targetDir, `artifacts.backup.${Date.now()}`);
@@ -134,6 +175,7 @@ User Nickname: ${userNickname}
 - Active Sprint: none
 - Blocker Status: 0 active blockers
 - Engine Version: ${PKG.version}
+- Artifact Language: en (English — generated documents, specs, code comments, and commit messages; refreshed from .agents/config.yaml at session start)
 <!-- END MACHINE STATE -->
 
 ## Session Activity
@@ -291,8 +333,6 @@ function uninstallHarnesses(targetDir, harnesses, isGlobal) {
 }
 
 function surgicallyCleanupAgentsDir(agentsTarget) {
-	if (!fs.existsSync(agentsTarget)) return;
-
 	try {
 		const stat = fs.lstatSync(agentsTarget);
 		if (stat.isSymbolicLink()) {
@@ -302,6 +342,8 @@ function surgicallyCleanupAgentsDir(agentsTarget) {
 	} catch (e) {
 		return;
 	}
+
+	if (!fs.existsSync(agentsTarget)) return;
 
 	// Delete core agents
 	const agentsSrcDir = path.join(AGENTS_SRC, "agents");
@@ -505,10 +547,13 @@ async function performFreshInstall(targetDir, flags) {
 	let selections = flags.harnesses.length > 0 ? flags.harnesses : [];
 	let method = "symlink";
 	let userNickname = "User";
+	// Artifact language: conversation always mirrors the user (DNA 9 Rule 1),
+	// so the wizard only picks the artifacts (documents/code/commits) language.
+	let languageArtifacts = flags.languageArtifacts || null;
 
 	if (!flags.yes) {
 		let currentStep = 0;
-		const steps = ["harnesses", "scope", "path", "method", "name", "confirm"];
+		const steps = ["harnesses", "scope", "path", "method", "name", "language", "confirm"];
 
 		while (currentStep < steps.length) {
 			const step = steps[currentStep];
@@ -586,6 +631,24 @@ async function performFreshInstall(targetDir, flags) {
 					userNickname.replace(/[^a-zA-Z0-9\s\-_.]/g, "") || "User";
 				wizardState.name = userNickname;
 				currentStep++;
+			} else if (step === "language") {
+				// Artifact output language (PRDs, ADRs, specs, code docs, commits).
+				// Conversation always mirrors the user — there is no chat setting.
+				// Cursor defaults to the already-chosen language (flag or a prior
+				// pass through this step), else English.
+				const preIdx = languageArtifacts ? LANG_CODES.indexOf(languageArtifacts) : 0;
+				const langChoice = await askSingleChoice(
+					"Select the language for generated documents & code comments (chat always mirrors you):",
+					[...LANG_LABELS, "← Back"],
+					preIdx >= 0 ? preIdx : 0,
+				);
+				if (langChoice === LANG_CODES.length) {
+					currentStep--;
+				} else {
+					languageArtifacts = LANG_CODES[langChoice];
+					wizardState.languageArtifacts = languageArtifacts;
+					currentStep++;
+				}
 			} else if (step === "confirm") {
 				clearScreen();
 				log(ASCII_ART);
@@ -597,6 +660,7 @@ async function performFreshInstall(targetDir, flags) {
 				log(`  Target:    ${targetDir}`);
 				log(`  Method:    ${method}`);
 				log(`  Name:      ${userNickname}`);
+				log(`  Artifacts language: ${languageArtifacts || "en"}`);
 				log(`  \x1b[2m────────────────────\x1b[0m\n`);
 
 				const confirmChoice = await askSingleChoice(
@@ -661,6 +725,17 @@ async function performFreshInstall(targetDir, flags) {
 	bootstrapRootDocs(targetDir, projectName, selections);
 	performSyncDocs(targetDir);
 	await installHarnesses(targetDir, selections, method);
+
+	if (languageArtifacts) {
+		try {
+			const { normalizeLanguage, writeConfigLanguage } = require("../../.agents/scripts/lib/language_resolver.js");
+			const norm = normalizeLanguage(languageArtifacts);
+			const configPath = path.join(targetDir, ".agents", "config.yaml");
+			// conversation always mirrors the user (DNA 9 Rule 1); only pin the artifacts language.
+			writeConfigLanguage(configPath, { artifacts: norm.code });
+			log(`  Language: artifact output set to ${norm.code} (${norm.name});`);
+		} catch (e) {}
+	}
 
 	if (!R.dryRun) {
 		printSummary(targetDir, { harnesses: selections });
@@ -744,6 +819,27 @@ async function performUpdate(targetDir, flags) {
 		fs.mkdirSync(agentsTarget, { recursive: true });
 	}
 
+	// Preserve user's existing config.yaml settings (language + step_tracking) across updates
+	const existingConfigPath = path.join(agentsTarget, "config.yaml");
+	let savedConfig = null;
+	if (fs.existsSync(existingConfigPath)) {
+		try {
+			const { readConfig } = require("../../.agents/scripts/lib/language_resolver.js");
+			const cfg = readConfig(existingConfigPath);
+			savedConfig = {
+				artifacts: cfg.language.artifacts,
+				step_tracking: cfg.step_tracking,
+			};
+		} catch (e) {
+			try {
+				const bakDir = path.join(agentsTarget, ".bak");
+				fs.mkdirSync(bakDir, { recursive: true });
+				fs.copyFileSync(existingConfigPath, path.join(bakDir, `config.yaml.corrupted-${Date.now()}`));
+				logWarn("Existing config.yaml was corrupted; backed up to .bak/ and refreshed defaults.");
+			} catch {}
+		}
+	}
+
 	const customized = backupCustomizedFiles(agentsTarget, AGENTS_SRC);
 	if (customized > 0) {
 		log(`  Preserved ${customized} customized file(s) in .agents/.bak/`);
@@ -751,6 +847,17 @@ async function performUpdate(targetDir, flags) {
 
 	removeStaleManifestFiles(targetDir);
 	fs.cpSync(AGENTS_SRC, agentsTarget, { recursive: true, dereference: true });
+
+	// Restore user's custom config settings (language + step_tracking) if present.
+	// The cpSync above overwrote config.yaml with the shipped defaults, so any
+	// hand-edited value must be written back here.
+	if (savedConfig) {
+		try {
+			const { writeConfigLanguage, writeConfigStepTracking } = require("../../.agents/scripts/lib/language_resolver.js");
+			if (savedConfig.artifacts) writeConfigLanguage(existingConfigPath, { artifacts: savedConfig.artifacts });
+			if (savedConfig.step_tracking) writeConfigStepTracking(existingConfigPath, savedConfig.step_tracking);
+		} catch (e) {}
+	}
 
 	writeVersionFile(targetDir);
 	// Pin the just-materialized tree: shipping the repo manifest would
@@ -904,6 +1011,21 @@ async function performReconfigure(targetDir, flags) {
 	let method = detectMethod(targetDir, isGlobal);
 	let userNickname = getExistingUserNickname(targetDir);
 
+	// Artifact language: default to what's already configured. --yes keeps it
+	// unless --language-artifacts is passed; interactive lets you change it.
+	const prevArtifactLanguage = currentArtifactLanguage(targetDir);
+	let languageArtifacts = flags.languageArtifacts || prevArtifactLanguage;
+
+	// step_tracking is user-owned and NOT reconfigured here — but the core
+	// refresh (cpSync) below overwrites config.yaml with the shipped default,
+	// so capture the current value and restore it afterward (same bug class as
+	// the update path). Hand-edited `off` must not silently revert to `silent`.
+	let prevStepTracking = 'off';
+	try {
+		const { readConfig } = require("../../.agents/scripts/lib/language_resolver.js");
+		prevStepTracking = readConfig(path.join(agentsTarget, "config.yaml")).step_tracking || 'off';
+	} catch {}
+
 	if (!flags.yes) {
 		selections = await askChecklist(
 			"Select harness integrations to configure:",
@@ -935,6 +1057,19 @@ async function performReconfigure(targetDir, flags) {
 			userNickname = userNickname.replace(/[^a-zA-Z0-9\s\-_.]/g, "") || "User";
 			updateUserNickname(targetDir, userNickname);
 		}
+
+		// Artifact language — pre-select the current value so "keep as-is" is
+		// the default (cursor starts on the current choice; Enter keeps it).
+		const curIdx = LANG_CODES.indexOf(prevArtifactLanguage);
+		const labels = LANG_LABELS.map((l, i) =>
+			i === curIdx ? `${l}  — current` : l,
+		);
+		const langChoice = await askSingleChoice(
+			"Select the language for generated documents & code comments (chat always mirrors you):",
+			labels,
+			curIdx >= 0 ? curIdx : 0,
+		);
+		languageArtifacts = LANG_CODES[langChoice] || prevArtifactLanguage;
 	}
 
 	// Uninstall deselected harnesses
@@ -982,9 +1117,24 @@ async function performReconfigure(targetDir, flags) {
 
 	await installHarnesses(targetDir, selections, method);
 
-	log(
-		`  Reconfiguration complete. Harnesses: ${selections.join(", ") || "core only"}\n`,
-	);
+	// Apply the artifact language AFTER the core refresh above — the cpSync
+	// overwrote config.yaml with the shipped default (artifacts: en), so we
+	// re-apply the kept/chosen value here and live-sync project-context.
+	if (!isGlobal) {
+		try {
+			const norm = applyArtifactLanguage(targetDir, languageArtifacts);
+			log(`  Artifact language: ${norm.code} (${norm.name}).`);
+		} catch (e) {}
+		// Restore the user's step_tracking (the cpSync reset it to the shipped
+		// default). reconfigure does not change step_tracking, only preserves it.
+		try {
+			const { writeConfigStepTracking } = require("../../.agents/scripts/lib/language_resolver.js");
+			writeConfigStepTracking(path.join(agentsTarget, "config.yaml"), prevStepTracking);
+		} catch (e) {}
+	}
+
+	log(`  Reconfiguration complete.`);
+	log(`  Harnesses: ${selections.join(", ") || "core only"}\n`);
 }
 
 	return {

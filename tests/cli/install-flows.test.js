@@ -78,13 +78,27 @@ describe('Installer flows: uninstall / reconfigure / repair smoothness', () => {
 
     const r = runCli(['uninstall', '--yes'], tmpDir);
     assert.strictEqual(r.status, 0, r.stderr + r.stdout);
-    assert.ok(!fs.existsSync(path.join(tmpDir, '.opencode')), 'harness link removed');
+    assert.throws(() => fs.lstatSync(path.join(tmpDir, '.opencode')), /ENOENT/, 'harness link unlinked from disk');
     assert.ok(!fs.existsSync(path.join(tmpDir, '.agents', 'GUARDRAILS.md')), 'core file removed');
     assert.strictEqual(
       fs.readFileSync(path.join(tmpDir, '.agents', 'my-keep.md'), 'utf8'),
       'custom',
     );
     assert.ok(fs.existsSync(path.join(tmpDir, 'artifacts')), 'artifacts preserved');
+  });
+
+  it('pristine uninstall unlinks .opencode from disk even when .agents is deleted', () => {
+    const init = runCli(['init', '--yes', '--harness', 'opencode'], tmpDir);
+    assert.strictEqual(init.status, 0, init.stderr);
+    assert.ok(fs.existsSync(path.join(tmpDir, '.opencode')));
+
+    const r = runCli(['uninstall', '--yes'], tmpDir);
+    assert.strictEqual(r.status, 0, r.stderr + r.stdout);
+    assert.throws(
+      () => fs.lstatSync(path.join(tmpDir, '.opencode')),
+      /ENOENT/,
+      '.opencode must be completely unlinked from disk'
+    );
   });
 
   it('pristine uninstall removes .agents entirely (no shipped residue)', () => {

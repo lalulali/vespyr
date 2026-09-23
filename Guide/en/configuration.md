@@ -12,17 +12,8 @@ Vespyr's configuration lives in `.agents/config.yaml`. It's created during insta
 # .agents/config.yaml
 step_tracking: off          # off | silent | verbose
 
-graph:
-  code:
-    src: src/               # source directories for code-graph (comma-separated)
-  doc:
-    docs:                   # directories to scan for .md documentation
-      - artifacts/input/
-      - artifacts/memory/
-      - artifacts/output/
-    ids:                    # regex patterns for document ID extraction
-      - US-\d+
-      - REQ-\d+
+language:
+  artifacts: en             # fixed language for PRDs, ADRs, specs, code docs, commits
 ```
 
 ### Step Tracking
@@ -32,33 +23,22 @@ Controls step-level audit breadcrumbs during skill execution:
 - `silent` — Writes breadcrumbs to `artifacts/output/step-audit.json`; no output to agent stdout
 - `verbose` — Writes breadcrumbs + prints one-liner per step transition
 
-### Graph Configuration
+### Language
 
-See [Structural Graphs](structural-graphs.md) for a complete guide. Quick reference:
+Sets the language for generated artifacts (see DNA 9). Conversation always mirrors the language you write in — there is no chat setting. Manage it with `vespyr lang`:
 
 | Key | Purpose | Default |
 |-----|---------|---------|
-| `graph.code.src` | Directories to scan for code imports/exports | `src/` |
-| `graph.doc.docs` | Directories/files to scan for documentation | `artifacts/input/`, `artifacts/memory/`, `artifacts/output/` |
-| `graph.doc.ids` | Regex patterns for document ID extraction | `US-\d+`, `REQ-\d+` |
+| `language.artifacts` | Fixed language for PRDs, ADRs, specs, code comments, commits | `en` |
 
-### For Pre-Existing Projects
-
-If your project doesn't follow Vespyr's `artifacts/` convention, configure the doc-graph to scan your docs:
-
-```yaml
-graph:
-  doc:
-    docs:
-      - docs/
-      - README.md
-      - wiki/
-    ids:
-      - JIRA-\d+
-      - '#\d+'
+```
+vespyr lang                          # show current setting
+vespyr lang set id                   # set artifact output to Indonesian
+vespyr lang set en                   # set artifact output to English
+vespyr lang list                     # list supported languages & aliases
 ```
 
-CLI flags (`--src`, `--docs`, `--ids`) override config values for one-off scans.
+Supported: `en, id, zh-Hans, zh-Hant, ja, ko, es, pt, hi, de, fr, ru, ar`. For a one-off document in another language, just ask for it in that language.
 
 ## Custom Agent Declarations (Preview Only)
 

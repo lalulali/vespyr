@@ -62,6 +62,63 @@ describe('Epic 02i: Memory Consolidation & Lifecycle Architecture', () => {
       assert.ok(block.includes('<!-- END MACHINE STATE -->'));
     });
 
+    it('should render the Artifact Language line (default en) in the machine state block', () => {
+      const block = generateMachineStateBlock({
+        stack: 'JavaScript', branch: 'main', phase: 'validation',
+        sprint: 'none', blockers: 0, version: PKG.version
+      });
+      assert.ok(block.includes('- Artifact Language: en'), 'defaults to en when no language passed');
+    });
+
+    it('should render a strong non-en Artifact Language directive (DNA 9 enforcement surface)', () => {
+      const block = generateMachineStateBlock({
+        stack: 'JavaScript', branch: 'main', phase: 'validation',
+        sprint: 'none', blockers: 0, version: PKG.version,
+        artifactLanguage: 'id'
+      });
+      assert.ok(block.includes('- Artifact Language: id'), 'shows the configured code');
+      assert.ok(/ONLY when AUTHORING\/SAVING a formal artifact file/.test(block), 'scopes the directive to file authoring, not chat');
+      assert.ok(/switch back to the user's chat language/.test(block), 'has the context-momentum re-anchor after saving');
+      assert.ok(/reading, summarizing, explaining, analyzing, or answering questions about a document is conversation/.test(block), 'excludes reading/discussing from the artifact language');
+    });
+
+    it('refreshArtifactLanguageLine syncs project-context to the current config (mid-session edit)', () => {
+      const fs = require('fs');
+      const os = require('os');
+      const path = require('path');
+      const { refreshArtifactLanguageLine } = require('../.agents/scripts/session_start.js');
+
+      const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'vespyr-langsync-'));
+      const agentsDir = path.join(dir, '.agents');
+      const memDir = path.join(dir, 'artifacts', 'memory');
+      fs.mkdirSync(agentsDir, { recursive: true });
+      fs.mkdirSync(memDir, { recursive: true });
+      // config says id
+      fs.writeFileSync(path.join(agentsDir, 'config.yaml'), 'step_tracking: off\n\nlanguage:\n  artifacts: id\n', 'utf8');
+      // project-context still says en (stale)
+      const pc = path.join(memDir, 'project-context.md');
+      fs.writeFileSync(pc, '# Project Context\n\n<!-- BEGIN MACHINE STATE -->\n## [RUNTIME STATE]\n- Stack: None\n- Artifact Language: en (English — generated documents, specs, code comments, and commit messages)\n<!-- END MACHINE STATE -->\n', 'utf8');
+
+      const cwd = process.cwd();
+      try {
+        process.chdir(dir); // detectLanguage reads config from cwd
+        const changed = refreshArtifactLanguageLine(pc);
+        assert.strictEqual(changed, true, 'should rewrite the stale line');
+        const after = fs.readFileSync(pc, 'utf8');
+        assert.ok(/- Artifact Language: id —/.test(after), 'project-context now reflects config id');
+        assert.ok(/AUTHORING\/SAVING a formal artifact file/.test(after), 'synced line carries the scoped directive');
+      } finally {
+        process.chdir(cwd);
+        fs.rmSync(dir, { recursive: true, force: true });
+      }
+    });
+
+    it('refreshArtifactLanguageLine no-ops safely when project-context is absent', () => {
+      const { refreshArtifactLanguageLine } = require('../.agents/scripts/session_start.js');
+      const changed = refreshArtifactLanguageLine('/nonexistent/path/project-context.md');
+      assert.strictEqual(changed, false);
+    });
+
     it('should splice machine state block without corrupting human sections', () => {
       const original = `# Project Context\n\n## [IDENTITY]\nUser Nickname: Chris\n\n## [CUSTOM HUMAN NOTES]\nDo not touch this text.\n`;
       const block = generateMachineStateBlock({

@@ -12,17 +12,8 @@ Vespyr 的配置位于 `.agents/config.yaml`。安装时创建，升级时不会
 # .agents/config.yaml
 step_tracking: off          # off | silent | verbose
 
-graph:
-  code:
-    src: src/               # 代码图谱扫描的源目录（逗号分隔）
-  doc:
-    docs:                   # 扫描 .md 文档的目录
-      - artifacts/input/
-      - artifacts/memory/
-      - artifacts/output/
-    ids:                    # 文档 ID 提取的正则模式
-      - US-\d+
-      - REQ-\d+
+language:
+  artifacts: en             # PRD、ADR、规格、代码注释、提交信息的固定语言
 ```
 
 ### 步骤追踪
@@ -32,33 +23,22 @@ graph:
 - `silent` — 写入 `artifacts/output/step-audit.json`；不向智能体输出
 - `verbose` — 写入并每步打印一行到智能体标准输出
 
-### 图谱配置
+### 语言
 
-完整指南请参见[结构图谱](structural-graphs.md)。快速参考：
+设置生成物的语言（见 DNA 9）。对话始终跟随你书写的语言——没有对话语言设置。用 `vespyr lang` 管理：
 
 | 键 | 用途 | 默认值 |
 |-----|---------|---------|
-| `graph.code.src` | 扫描代码导入/导出的目录 | `src/` |
-| `graph.doc.docs` | 扫描文档的目录/文件 | `artifacts/input/`, `artifacts/memory/`, `artifacts/output/` |
-| `graph.doc.ids` | 文档 ID 提取的正则模式 | `US-\d+`, `REQ-\d+` |
+| `language.artifacts` | PRD、ADR、规格、代码注释、提交信息的固定语言 | `en` |
 
-### 用于已有项目
-
-如果你的项目不遵循 Vespyr 的 `artifacts/` 约定，配置文档图谱以扫描你的文档：
-
-```yaml
-graph:
-  doc:
-    docs:
-      - docs/
-      - README.md
-      - wiki/
-    ids:
-      - JIRA-\d+
-      - '#\d+'
+```
+vespyr lang                          # 显示当前设置
+vespyr lang set id                   # 将生成物设为印尼语
+vespyr lang set en                   # 将生成物设为英语
+vespyr lang list                     # 列出支持的语言与别名
 ```
 
-CLI 标志（`--src`、`--docs`、`--ids`）会覆盖配置值，用于一次性扫描。
+支持：`en, id, zh-Hans, zh-Hant, ja, ko, es, pt, hi, de, fr, ru, ar`。若只需某份文档用其他语言，直接用那种语言提出请求即可。
 
 ## 自定义智能体声明（仅限预览）
 

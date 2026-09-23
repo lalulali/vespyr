@@ -119,4 +119,3 @@ artifacts/
 
 - Learn about [Configuration](configuration.md) to customize your setup
 - Explore the [Skills & Workflows](skills-and-workflows.md) catalog
-- Dive into [Structural Graphs](structural-graphs.md) for codebase and document intelligence

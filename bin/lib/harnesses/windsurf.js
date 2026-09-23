@@ -36,14 +36,17 @@ module.exports.uninstall = function uninstallHarnessShape(ctx) {
 	const home = require("os").homedir();
 	const getPath = (localRel) => (isGlobal ? getGlobalPath("windsurf") : path.join(targetDir, localRel));
 		const windsurfTargetDir = getPath(".windsurf");
-		if (fs.existsSync(windsurfTargetDir)) {
-			const workflowsDir = path.join(windsurfTargetDir, "workflows");
-			if (fs.existsSync(workflowsDir)) {
+		try {
+			const wstat = fs.lstatSync(windsurfTargetDir);
+			if (wstat.isSymbolicLink()) {
+				fs.unlinkSync(windsurfTargetDir);
+			} else if (wstat.isDirectory()) {
+				const workflowsDir = path.join(windsurfTargetDir, "workflows");
 				try {
 					const stat = fs.lstatSync(workflowsDir);
 					if (stat.isSymbolicLink()) {
 						fs.unlinkSync(workflowsDir);
-					} else {
+					} else if (stat.isDirectory()) {
 						const skillsSrcDir = path.join(agentsSrc, "skills");
 						if (fs.existsSync(skillsSrcDir)) {
 							const coreSkills = fs.readdirSync(skillsSrcDir);
@@ -57,9 +60,9 @@ module.exports.uninstall = function uninstallHarnessShape(ctx) {
 						removeDirIfEmpty(workflowsDir);
 					}
 				} catch (e) {}
+				removeDirIfEmpty(windsurfTargetDir);
 			}
-			removeDirIfEmpty(windsurfTargetDir);
-		}
+		} catch (e) {}
 		const windsurfRulesPath = isGlobal
 			? path.join(home, ".windsurfrules")
 			: path.join(targetDir, ".windsurfrules");

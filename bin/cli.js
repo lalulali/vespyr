@@ -189,6 +189,7 @@ function parseFlags(argv) {
 		projectName: null,
 		userNickname: null,
 		stack: null,
+		languageArtifacts: null,
 	};
 
 	for (let i = 0; i < args.length; i++) {
@@ -197,6 +198,8 @@ function parseFlags(argv) {
 			flags.command = "init";
 		} else if (arg === "update") {
 			flags.command = "update";
+		} else if (arg === "lang") {
+			flags.command = "lang";
 		} else if (arg === "verify" || arg === "--verify") {
 			flags.verify = true;
 			flags.command = "verify";
@@ -214,6 +217,13 @@ function parseFlags(argv) {
 			flags.command = "reconfigure";
 		} else if (arg === "--json") {
 			flags.json = true;
+		} else if (arg === "--language-artifacts") {
+			const val = args[++i];
+			if (val === undefined || val.startsWith("-")) {
+				console.error("Missing value for flag: --language-artifacts");
+				process.exit(2);
+			}
+			flags.languageArtifacts = val;
 		} else if (arg === "--spec") {
 			const val = args[++i];
 			if (val === undefined || val.startsWith("-")) {
@@ -577,9 +587,12 @@ function askChecklist(
 	});
 }
 
-function askSingleChoice(question, choices) {
+function askSingleChoice(question, choices, initialIndex = 0) {
 	return new Promise((resolve) => {
-		let cursor = 0;
+		let cursor =
+			Number.isInteger(initialIndex) && initialIndex >= 0 && initialIndex < choices.length
+				? initialIndex
+				: 0;
 
 		const stdin = process.stdin;
 		stdin.setRawMode(true);
@@ -1733,6 +1746,100 @@ async function showActionMenu(targetDir, flags) {
 	}
 }
 
+const SUBCOMMAND_HELPS = {
+	init: `vespyr init — Fresh install into target workspace
+
+Usage: npx vespyr init [options]
+
+Options:
+  --target <path>               Target directory (default: current directory)
+  --yes, -y                     Skip prompts, use defaults
+  --harness <names>             Pre-select harnesses (e.g. opencode,claude,cursor)
+  --project-name <name>         Override project name
+  --user-nickname <name>        Name the agent addresses you by
+  --stack <stack>               Override auto-detected technology stack
+  --language-artifacts <lang>   Set default artifact language (default: en)
+  --dry-run                     Preview installation without creating files
+  --help, -h                    Show this help message
+`,
+	update: `vespyr update — Update an existing Vespyr installation
+
+Usage: npx vespyr update [options]
+
+Options:
+  --target <path>               Target directory with existing .agents/ (default: current directory)
+  --yes, -y                     Non-interactive update
+  --dry-run                     Preview changes without modifying files
+  --help, -h                    Show this help message
+`,
+	verify: `vespyr verify — Check file integrity against pinned manifest
+
+Usage: npx vespyr verify [options]
+
+Options:
+  --target <path>               Target directory (default: current directory)
+  --json                        Output machine-readable JSON verification result
+  --help, -h                    Show this help message
+
+Exit codes:
+  0  Verification passed (all files match manifest)
+  1  Tamper detected (missing, modified, or extraneous files)
+  2  Usage or configuration error
+`,
+	audit: `vespyr audit — Run supply-chain security and content integrity scan
+
+Usage: npx vespyr audit [options]
+
+Options:
+  --target <path>               Target directory (default: current directory)
+  --spec <path>                 Custom path to audit-spec.json
+  --json                        Output audit results as JSON
+  --help, -h                    Show this help message
+`,
+	manifest: `vespyr manifest — Generate or regenerate workspace checksums manifest
+
+Usage: npx vespyr manifest [options]
+
+Options:
+  --target <path>               Target directory (default: current directory)
+  --json                        Output manifest as JSON
+  --help, -h                    Show this help message
+`,
+	uninstall: `vespyr uninstall — Remove Vespyr core files safely
+
+Usage: npx vespyr uninstall [options]
+
+Options:
+  --target <path>               Target directory (default: current directory)
+  --yes, -y                     Confirm uninstall without prompting
+  --help, -h                    Show this help message
+`,
+	reconfigure: `vespyr reconfigure — Reconfigure harness integrations and settings
+
+Usage: npx vespyr reconfigure [options]
+
+Options:
+  --target <path>               Target directory (default: current directory)
+  --harness <names>             Update harness selection
+  --language-artifacts <lang>   Change the artifact output language (kept as-is if omitted)
+  --help, -h                    Show this help message
+
+Interactive mode also lets you change the artifact language; the current
+setting is pre-selected. Conversation always mirrors you — there is no chat setting.
+`,
+	lang: `vespyr lang — Manage the artifact output language
+
+Usage:
+  vespyr lang                              Show active artifact language
+  vespyr lang set <language>               Set the artifact output language
+  vespyr lang list                         List all supported languages & aliases
+  vespyr lang --help, -h                   Show this help message
+
+Note: conversation always mirrors your language; there is no chat setting.
+Only generated artifacts (PRDs, specs, ADRs, code comments, commits) are pinned.
+`
+};
+
 async function main() {
 	// 02o.7: `vespyr worktree <create|list|remove> …` — delegate before flag
 	// parsing so parallel-session worktree management works from any directory.
@@ -1752,6 +1859,31 @@ async function main() {
 		}
 	}
 
+	if (process.argv[2] === "lang") {
+		const { executeLangCommand } = require("./lib/config_language_cmd.js");
+		const code = executeLangCommand(process.argv);
+		process.exit(code);
+	}
+
+	if (process.argv[2] === "config") {
+		const sub = process.argv[3];
+		const { executeLangCommand, showLanguageStatus } = require("./lib/config_language_cmd.js");
+		if (sub === "get" && process.argv[4] === "language") {
+			showLanguageStatus();
+			process.exit(0);
+		}
+		if (sub === "set" && process.argv[4] && process.argv[4].startsWith("language.")) {
+			const prop = process.argv[4].split(".")[1];
+			const val = process.argv[5];
+			const code = executeLangCommand(["node", "cli.js", "lang", "set", prop, val]);
+			process.exit(code);
+		}
+		if (sub === "--help" || sub === "-h" || sub === "help") {
+			console.log(`vespyr config — Configuration management\n\nUsage:\n  vespyr config get language\n  vespyr config set language.artifacts <language>\n\nNote: conversation always mirrors your language; only the artifact language is configurable.\n`);
+			process.exit(0);
+		}
+	}
+
 	resetRuntimeState();
 	const flags = parseFlags(process.argv);
 	setState({ dryRun: flags.dryRun });
@@ -1762,6 +1894,10 @@ async function main() {
 	}
 
 	if (flags.help) {
+		if (flags.command && SUBCOMMAND_HELPS[flags.command]) {
+			console.log(SUBCOMMAND_HELPS[flags.command]);
+			process.exit(0);
+		}
 		console.log(`
 vespyr v${VERSION} — AI Agent Team Installer & Integrity Engine
 
@@ -1775,6 +1911,7 @@ Commands:
   verify               Verify integrity of .agents/ against pinned manifest
   audit                Run supply-chain security and content integrity scan
   manifest             Generate .agents/manifest.json checksums file
+  lang                 Manage the artifact output language (conversation always mirrors you)
   worktree <cmd>       Parallel-session worktrees: create <name> | list | remove <name> [--force]
 
 Options:
@@ -1800,6 +1937,8 @@ Examples:
   npx vespyr update --yes             Update existing install
   npx vespyr verify                   Check integrity against manifest
   npx vespyr audit                    Run security scanner
+  npx vespyr lang                     Show language settings
+  npx vespyr lang set id              Set both chat & artifacts to Indonesian
   npx vespyr --yes                    Install with defaults
   npx vespyr --harness opencode,claude  Pre-select harnesses
   npx vespyr --target ./my-project    Install to specific directory

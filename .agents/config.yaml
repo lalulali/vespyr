@@ -1,24 +1,18 @@
 # Vespyr Agent System Configuration
-# This file is part of the agent system, not project output.
-# It exists from install and covers the full lifecycle (discovery → retro).
-# Edit manually — never generated or overwritten by orchestrator_state.js.
+# This file defines global runtime options for the Vespyr Multi-Agent Engine.
+# Edit manually — never generated or overwritten by system scripts.
 
-# Step Tracker — controls step-level audit breadcrumbs
-# off     — write commands exit silently (default); the Step-0 scope gate still errors+exits 1 on bypass, and scope-lock still records gate state
-# silent  — writes breadcrumbs to artifacts/output/step-audit.json; no agent output
-# verbose — writes breadcrumbs + prints one-liner to agent stdout per step transition
-step_tracking: off
+# 1. Step Tracking
+# Controls the audit logging level for agent workflow steps.
+#   off     : (Default) Lightweight mode. The Step-0 scope gate still enforces security, but detailed step transition logs are not written.
+#   silent  : Writes step transition logs silently to `artifacts/output/step-audit.json`.
+#   verbose : Writes step transition logs to `artifacts/output/step-audit.json` and prints real-time updates to stdout.
+step_tracking: silent
 
-# Graph — controls what directories and patterns the code-graph and doc-graph scan.
-# CLI flags (--src, --docs, --ids) override these values.
-graph:
-  code:
-    src: bin/,tools/,githooks/     # `src/` absent on disk — scan real code roots until 03h/graph home decided
-  doc:
-    docs:                          # directories (or single files) scanned for .md
-      - artifacts/input/
-      - artifacts/memory/
-      - artifacts/output/
-    ids:                           # regex patterns for document ID extraction
-      - US-\d+
-      - REQ-\d+
+# 2. Language Settings
+# Language for GENERATED ARTIFACTS — PRDs, ADRs, specs, code docstrings, git commits.
+# Conversation always mirrors the language you write in (there is no chat setting).
+#   artifacts : en   (Enforces one consistent language for all generated documents & code.)
+language:
+  artifacts: en
+

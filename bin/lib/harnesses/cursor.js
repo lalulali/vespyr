@@ -41,14 +41,17 @@ module.exports.uninstall = function uninstallHarnessShape(ctx) {
 	const home = require("os").homedir();
 	const getPath = (localRel) => (isGlobal ? getGlobalPath("cursor") : path.join(targetDir, localRel));
 		const cursorTargetDir = getPath(".cursor");
-		if (fs.existsSync(cursorTargetDir)) {
-			const rulesDir = path.join(cursorTargetDir, "rules");
-			if (fs.existsSync(rulesDir)) {
+		try {
+			const cstat = fs.lstatSync(cursorTargetDir);
+			if (cstat.isSymbolicLink()) {
+				fs.unlinkSync(cursorTargetDir);
+			} else if (cstat.isDirectory()) {
+				const rulesDir = path.join(cursorTargetDir, "rules");
 				try {
 					const stat = fs.lstatSync(rulesDir);
 					if (stat.isSymbolicLink()) {
 						fs.unlinkSync(rulesDir);
-					} else {
+					} else if (stat.isDirectory()) {
 						const agentsSrcDir = path.join(agentsSrc, "agents");
 						if (fs.existsSync(agentsSrcDir)) {
 							const coreAgents = fs
@@ -65,7 +68,7 @@ module.exports.uninstall = function uninstallHarnessShape(ctx) {
 						removeDirIfEmpty(rulesDir);
 					}
 				} catch (e) {}
+				removeDirIfEmpty(cursorTargetDir);
 			}
-			removeDirIfEmpty(cursorTargetDir);
-		}
+		} catch (e) {}
 };

@@ -873,6 +873,7 @@ describe('Test 10: parseFlags()', () => {
       projectName: null,
       userNickname: null,
       stack: null,
+      languageArtifacts: null,
     });
   });
 
@@ -928,6 +929,11 @@ describe('Test 10: parseFlags()', () => {
     assert.strictEqual(result.dryRun, true);
     assert.strictEqual(result.yes, true);
     assert.strictEqual(result.target, './here');
+  });
+
+  it('should handle --language-artifacts', () => {
+    const result = parseFlags(['node', 'cli.js', '--language-artifacts', 'id']);
+    assert.strictEqual(result.languageArtifacts, 'id');
   });
 });
 
@@ -1114,6 +1120,10 @@ describe('Test 14: performUninstall() surgical project cleanup', () => {
     // User-authored rules without the marker must survive uninstall.
     fs.writeFileSync(path.join(tmpDir, '.windsurfrules.user'), 'my own rules');
 
+    // Setup opencode and claude symlinks
+    fs.symlinkSync(path.join(tmpDir, '.agents'), path.join(tmpDir, '.opencode'), 'dir');
+    fs.symlinkSync(path.join(tmpDir, '.agents'), path.join(tmpDir, '.claude'), 'dir');
+
     // Run uninstall
     await performUninstall(tmpDir);
 
@@ -1124,6 +1134,8 @@ describe('Test 14: performUninstall() surgical project cleanup', () => {
     assert.strictEqual(fs.existsSync(path.join(windsurfWorkflowsDir, 'validate-idea')), false);
     assert.strictEqual(fs.existsSync(path.join(tmpDir, '.windsurfrules')), false);
     assert.strictEqual(fs.existsSync(path.join(tmpDir, '.windsurfrules.user')), true, 'user-authored rules without marker survive');
+    assert.throws(() => fs.lstatSync(path.join(tmpDir, '.opencode')), /ENOENT/);
+    assert.throws(() => fs.lstatSync(path.join(tmpDir, '.claude')), /ENOENT/);
 
     // Custom files preserved
     assert.strictEqual(fs.existsSync(path.join(rulesDir, 'my-own-rule.mdc')), true);

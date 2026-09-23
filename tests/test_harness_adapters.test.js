@@ -177,3 +177,88 @@ describe('Registry hygiene', () => {
     }
   });
 });
+
+describe('Dangling symlink removal on uninstall across harnesses', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = makeTempDir();
+    fs.mkdirSync(path.join(tmpDir, '.agents', 'skills'), { recursive: true });
+    fs.writeFileSync(path.join(tmpDir, '.agents', 'skills', '.keep'), '');
+  });
+
+  afterEach(() => {
+    cleanTempDir(tmpDir);
+  });
+
+  it('opencode uninstall unlinks .opencode when link is dangling', () => {
+    const opencode = getAdapter('opencode');
+    opencode.install(silentCtx(tmpDir));
+
+    // Remove target .agents to make .opencode a dangling symlink
+    fs.rmSync(path.join(tmpDir, '.agents'), { recursive: true, force: true });
+    assert.strictEqual(fs.existsSync(path.join(tmpDir, '.opencode')), false);
+    assert.strictEqual(fs.lstatSync(path.join(tmpDir, '.opencode')).isSymbolicLink(), true);
+
+    opencode.uninstall({
+      targetDir: tmpDir,
+      isGlobal: false,
+      surgicallyCleanupAgentsDir: () => {},
+    });
+
+    assert.throws(
+      () => fs.lstatSync(path.join(tmpDir, '.opencode')),
+      /ENOENT/,
+      '.opencode dangling symlink must be unlinked'
+    );
+  });
+
+  it('claude uninstall unlinks .claude when link is dangling', () => {
+    const claude = getAdapter('claude');
+    claude.install(silentCtx(tmpDir));
+
+    // Remove target .agents to make .claude a dangling symlink
+    fs.rmSync(path.join(tmpDir, '.agents'), { recursive: true, force: true });
+    assert.strictEqual(fs.existsSync(path.join(tmpDir, '.claude')), false);
+    assert.strictEqual(fs.lstatSync(path.join(tmpDir, '.claude')).isSymbolicLink(), true);
+
+    claude.uninstall({
+      targetDir: tmpDir,
+      isGlobal: false,
+      surgicallyCleanupAgentsDir: () => {},
+    });
+
+    assert.throws(
+      () => fs.lstatSync(path.join(tmpDir, '.claude')),
+      /ENOENT/,
+      '.claude dangling symlink must be unlinked'
+    );
+  });
+
+  it('kiro uninstall unlinks .kiro/skills when link is dangling', () => {
+    const kiro = getAdapter('kiro');
+    kiro.install(silentCtx(tmpDir));
+
+    // Remove target .agents/skills to make .kiro/skills dangling
+    fs.rmSync(path.join(tmpDir, '.agents', 'skills'), { recursive: true, force: true });
+    assert.strictEqual(fs.existsSync(path.join(tmpDir, '.kiro', 'skills')), false);
+    assert.strictEqual(fs.lstatSync(path.join(tmpDir, '.kiro', 'skills')).isSymbolicLink(), true);
+
+    kiro.uninstall({
+      targetDir: tmpDir,
+      isGlobal: false,
+      agentsSrc: path.join(tmpDir, '.agents'),
+      removeDirIfEmpty: (d) => {
+        try {
+          if (fs.readdirSync(d).length === 0) fs.rmdirSync(d);
+        } catch (e) {}
+      },
+    });
+
+    assert.throws(
+      () => fs.lstatSync(path.join(tmpDir, '.kiro', 'skills')),
+      /ENOENT/,
+      '.kiro/skills dangling symlink must be unlinked'
+    );
+  });
+});

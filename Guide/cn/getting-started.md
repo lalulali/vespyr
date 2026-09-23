@@ -119,4 +119,3 @@ artifacts/
 
 - 了解[配置](configuration.md)以自定义设置
 - 浏览[技能与工作流](skills-and-workflows.md)目录
-- 深入了解[结构图谱](structural-graphs.md)的代码库和文档智能

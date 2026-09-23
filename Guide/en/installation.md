@@ -39,15 +39,14 @@ your-project/
 ├── .agents/              # Agent personas, skills, scripts, config, references
 │   ├── agents/           # 20 agent persona markdown files
 │   ├── skills/           # 43 atomic skill workflows
-│   ├── scripts/          # Orchestrator, graph, memory, telemetry
+│   ├── scripts/          # Orchestrator, memory, telemetry
 │   ├── config.yaml       # Project configuration
 │   └── references/       # Phase table, glossary, contracts
 ├── artifacts/
 │   ├── memory/           # Persistent shared memory
 │   │   ├── project-context.md
 │   │   ├── active-decisions.md
-│   │   ├── lessons-learned.md
-│   │   └── structural/   # Code-graph & doc-graph
+│   │   └── lessons-learned.md
 │   ├── input/            # User-provided raw materials
 │   └── output/           # Agent-generated artifacts (by phase)
 ├── agent.md              # Harness entry point (for OpenCode/Copilot)

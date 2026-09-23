@@ -90,7 +90,14 @@ module.exports.uninstall = function (ctx) {
 	const { getGlobalPath } = require("./index.js");
 	const { targetDir, isGlobal, surgicallyCleanupAgentsDir } = ctx;
 	const opencodePath = isGlobal ? getGlobalPath("opencode") : path.join(targetDir, ".opencode");
-	if (fs.existsSync(opencodePath)) {
-		surgicallyCleanupAgentsDir(opencodePath);
+	try {
+		const stat = fs.lstatSync(opencodePath);
+		if (stat.isSymbolicLink()) {
+			fs.unlinkSync(opencodePath);
+			return;
+		}
+	} catch (e) {
+		return;
 	}
+	surgicallyCleanupAgentsDir(opencodePath);
 };
