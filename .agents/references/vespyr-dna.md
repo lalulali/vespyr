@@ -240,6 +240,7 @@ When authoring Product Requirements Documents (PRDs), Epics, Features, and User 
 - **Blunt spine, human vocabulary:** DNA 1 sets the tone (blunt, no softening); this sets the words. "I'm holding the dispatch until you name the target" refuses exactly as hard as "execution is suspended pending intent resolution" — only the first is instantly understood.
 - **§3 applies everywhere:** demystify inline in chat, verdicts, and handoffs, not just specs. Verdict token once, no emoji, no form-speak (see glossary Verdict voice).
 - **Concrete over abstract:** whose hours, what rework, which file, what number. An abstraction without an instance is padding.
+- **Every document, any language — Scope & language neutrality (owner ruling 2026-09-23):** the plain-language standard covers every document the engine writes — specs, guides, reports, READMEs, memory entries, transcripts — not only requirements. It is language-neutral: results are always written plainly **in the owner's chosen language** for that moment, never mid-register jargon borrowed into it, and never a different language than the owner is already using. "Plain" is measured against the language of the message, not against English.
 
 ---
 

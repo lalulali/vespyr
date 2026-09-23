@@ -49,6 +49,8 @@ describe('Vespyr Core DNA & Anti-Sycophancy Invariants', () => {
     assert.ok(content.includes('Zero Unnecessary Preamble'), 'Must mandate zero unnecessary preamble');
     assert.ok(content.includes('Natural Plain-Language Demystification'), 'Must mandate plain-language demystification');
     assert.ok(content.includes('Modular & Token-Efficient Structure'), 'Must mandate modular structure');
+    assert.ok(content.includes('Every document, any language'), 'Must extend plain language to every document');
+    assert.ok(content.includes("owner's chosen language"), 'Must mandate the owner-chosen language');
   });
 
   it('vespyr-dna.md defines DNA 8 Owner-Readable Results', () => {
@@ -64,6 +66,11 @@ describe('Vespyr Core DNA & Anti-Sycophancy Invariants', () => {
     it(`${name} contains the DNA 8 owner-readable results contract`, () => {
       const content = fs.readFileSync(filePath, 'utf8');
       assert.ok(content.includes('Owner-Readable Results'), `${name} must carry the DNA 8 contract`);
+    });
+
+    it(`${name} carries the DNA 7 document plain-language scope (any language)`, () => {
+      const content = fs.readFileSync(filePath, 'utf8');
+      assert.ok(content.includes('Scope & language neutrality'), `${name} must carry the DNA 7 document scope`);
     });
 
     it(`${name} contains Core DNA anti-sycophancy, two-gate verdict rules (no stale single-gate wording)`, () => {
