@@ -1,4 +1,4 @@
-# Parallel Session Safety & Shared-Memory Serialization (02o)
+# Parallel Session Safety & Shared-Memory Serialization (02q)
 
 **Decision:** Make concurrent agent sessions safe by default. Today, two sessions writing one working tree can silently destroy each other's records — this happened live on 2026-08-28 (a second window overwrote `session-summaries/latest.md` mid-review and renumbered the 02-series while another epic was executing) and caused the 2026-08-14 02f/02g record corruption. This epic makes every shared-state write **serialized (lock-protected), attributed (session-stamped), and recoverable (append-only + derived views)**, and codifies the parallel-work protocol so parallel workers multiply throughput instead of destroying memory.
 

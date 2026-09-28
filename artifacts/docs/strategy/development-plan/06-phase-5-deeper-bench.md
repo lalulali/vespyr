@@ -132,7 +132,7 @@ For each: create agent file (v2 frontmatter, IDENTITY block, channeled mentor, i
 - Uses TRIZ's 40 inventive principles as a generative toolkit when the obvious solutions all have the same root cause.
 - Output: `artifacts/output/{phase}/root-cause-analysis.md` with the system map, contradiction, 3 solutions, recommended one.
 
-**Permissions:** read + question only. May suggest a code investigation, but `@reader` / `@executor` does the actual read.
+**Permissions:** read + question only. May suggest a code investigation; the actual read is done directly or via a harness subagent.
 **Default squad:** none. Optional invoke by `@developer` or `@architect` after 2 failed fix attempts on the same issue.
 **Effort:** ~1.5 days.
 
@@ -148,7 +148,7 @@ For each: create agent file (v2 frontmatter, IDENTITY block, channeled mentor, i
 - Produces drafts in 3 lengths: tweet (280 chars), paragraph (200 words), long-form (1000 words). User picks one.
 - Has a "no-AI-tells" override that loads the `humanize` skill and re-checks every output.
 
-**Permissions:** read + question only. Outputs to `@writer`.
+**Permissions:** read + question only. Writes go direct (human-gated) or via a harness subagent.
 **Default squad:** none. Optional invoke by `@product-manager` (launch copy) / `@technical-writer` (changelog polish) / `@founder` (vision narrative).
 **Effort:** ~1.5 days.
 
@@ -163,7 +163,7 @@ For each: create agent file (v2 frontmatter, IDENTITY block, channeled mentor, i
 - Tests the 3-second rule on every slide: if a viewer can't extract the headline in 3 seconds, the slide fails.
 - Applies the Sparkline structure (Duarte): setup → conflict → resolution, every 3-5 slides.
 - Output: a `presentation-outline.md` (slide-by-slide with title, key visual, speaker note, value-charge from McKee) + a 1-page visual brief.
-- **Hard rule:** never writes the full slide content. Outlines, briefs, and structure only. The user / `@writer` drafts the body.
+- **Hard rule:** never writes the full slide content. Outlines, briefs, and structure only. The user (or a direct write) drafts the body.
 
 **Permissions:** read + question only.
 **Default squad:** none. Optional invoke by `@founder` (investor pitch) / `@product-manager` (launch deck).
@@ -351,12 +351,12 @@ For each: create agent file (v2 frontmatter, IDENTITY block, channeled mentor, i
 - **Ticket Pattern Extraction Engine:** Categorizes incoming support inquiries, Discord posts, and GitHub issues into 3 resolution routes:
   1. *UI/UX Friction* → Feeds design recommendations to `@product-designer`.
   2. *Product Bug / Defect* → Drafts reproducible bug reports for `@developer` / `@qa-engineer`.
-  3. *Documentation Gap* → Drafts self-serve KB articles via `@writer`.
+  3. *Documentation Gap* → Drafts self-serve KB articles (written directly, human-gated).
 - **Known-Issues & Workarounds Log:** Maintains a real-time registry of open issues with verified user workarounds so support handles tickets instantly.
 - **Support Macro Library:** Authors standardized, empathetic response templates for high-frequency inquiries.
 - **Output Artifacts:** `artifacts/output/support/known-issues.md`, `artifacts/output/support/troubleshooting-guide.md`, `artifacts/output/support/faqs.md`, and `artifacts/output/support/macro-library.md`.
 
-**Permissions:** read + bash (for issue trackers and log inspection). No edit (writes through `@writer`).
+**Permissions:** read + bash (for issue trackers and log inspection). No edit (writes are human-gated).
 **Default squad:** new `growth` squad.
 **Complements:** `@technical-writer` (aligns on documentation structure), `@developer` (reproduces reported bugs), `@customer-success` (shares account escalation context).
 **Effort:** ~1.5 days.
@@ -665,7 +665,7 @@ For each skill: create folder + SKILL.md (bootloader) + steps/ (when multi-step)
 
 - [ ] **T2.6** `@content-engineer` (Quin) — Content Pipeline & SEO Editorial Lead
 
-> **Name errata:** earlier drafts used "Quill+" — a collision with `@writer`'s
+> **Name errata:** earlier drafts used "Quill+" — a collision with the (now-removed) writer role's
 > human name "Quill". Renamed to **Quin**.
 
 **Channeled mentor:** Animalz Content Strategy + Brian Dean (Backlinko Data-Driven Editorial) + Ann Handley (Everybody Writes). Speaks like a managing editor — structural, SEO-conscious, audience-first, relentless about actionable value per paragraph.
@@ -678,9 +678,9 @@ For each skill: create folder + SKILL.md (bootloader) + steps/ (when multi-step)
 - **Content Distribution Engine:** Outlines automated repurposing flows (converting long-form technical posts into Twitter/X threads, LinkedIn slide decks, and changelog highlights).
 - **Output Artifacts:** `artifacts/output/marketing/content-calendar.md`, `artifacts/output/marketing/content-pillar-architecture.md`, `artifacts/output/marketing/editorial-briefs/`, and produced Markdown content.
 
-**Permissions:** read + question only. Outputs via `@writer`.
+**Permissions:** read + question only. Writes go direct (human-gated) or via a harness subagent.
 **Default squad:** `growth`.
-**Complements:** `@seo-specialist` (keyword strategy & site audits), `@storyteller` (narrative polish), `@writer` (file output).
+**Complements:** `@seo-specialist` (keyword strategy & site audits), `@storyteller` (narrative polish); file output done directly.
 **Effort:** ~1.5 days.
 
 ---
@@ -872,7 +872,7 @@ For each skill: create folder + SKILL.md (bootloader) + steps/ (when multi-step)
 - **Channeled mentors become a crutch.** Hard rule: 1-5 per persona (validator allows 1-5; prefer 2). Reject 6+.
 - **"21 was already too many" criticism.** Frame as "21 core + 22 opt-in." New personas never in `startup` or `build` by default.
 - **Game-studio squad can't find a real project.** T2 ship-block: a working game project exercises every game persona. If none found, defer to separate minor release.
-- **New personas all want `read + bash`, breaking the reasoning/I/O split.** Hard rule: any persona with `bash` is "thinking + execution" (developer-tier). Every bash command goes through `@executor`. The split is preserved.
+- **New personas all want `read + bash`, breaking the reasoning/I/O split.** Hard rule: any persona with `bash` is "thinking + execution" (developer-tier). Every bash command is an explicit, logged direct call (or harness subagent). The reasoning/execution split is preserved by policy, not by a separate executor persona.
 - **humanize skill too long (565 lines) to be default for many personas.** Cache patterns as `humanize-checklist.md`, invoked by all external-facing personas.
 - **New bench fragments the culture.** Keep T8 in the core module and require every persona/skill builder to declare collaborators, evidence, and escalation before registration.
 

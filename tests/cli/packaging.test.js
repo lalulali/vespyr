@@ -39,11 +39,7 @@ describe('NPX packaging & manifest verification', () => {
       '.agents/scripts/dedupe_validator.js',
       '.agents/scripts/lib/identity.js',
       'evals/roundtable/topics.json',
-      // NOTE(de-circularized): evals/baseline.json was removed — it recorded
-      // mock fixture-recall as quality evidence. The shipped reference is the
-      // explicitly mock-labeled evals/mock-baseline.json (mock_mode:true);
-      // the production path stays empty until a real-adapter run records it.
-      'evals/mock-baseline.json',
+      // Baselines are project-local results under artifacts/evals and are not shipped.
       'evals/suites/agents/core-swarm.json',
       'evals/rubrics/prd-completeness.json',
       'evals/fixtures/simple-js/index.js',
@@ -73,6 +69,10 @@ describe('NPX packaging & manifest verification', () => {
       'evals/roundtable/fixtures/transcripts/rt-003_native_1.md',
       'evals/roundtable/README.md',
       'evals/security/corpus/baseline-2026-08-10.json',
+      'artifacts/evals/mock-baseline.json',
+      'artifacts/evals/rqs-calibration-2026-09-01.json',
+      'evals/artifacts/rqs-calibration-2026-09-01.json',
+      'evals/mock-baseline.json',
       'evals/security/corpus/positive/inj-prompt.md',
       'evals/security/held_out/positive/adv-prompt-override.md',
       '.agents/scripts/test_security_suite.js',
@@ -87,7 +87,8 @@ describe('NPX packaging & manifest verification', () => {
       '.agents/scripts/token_profiler.js',
       '.agents/scripts/fix-squads.js',
       '.agents/scripts/squads.js',
-      '.agents/scripts/migrate-frontmatter-v2.js'
+      '.agents/scripts/migrate-frontmatter-v2.js',
+      '.agents/scripts/setup_git_hooks.js'
     ];
     for (const p of banned) {
       assert.ok(!paths.has(p), `tarball must NOT include ${p}`);

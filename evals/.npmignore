@@ -1,4 +1,8 @@
 security/
 roundtable/fixtures/
 roundtable/README.md
+artifacts/
+results/
+mock-baseline.json
+baseline.json
 *.prev.json

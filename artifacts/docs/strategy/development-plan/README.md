@@ -80,7 +80,7 @@ Three releases. Each is independently shippable. If a release slips, the previou
 | Release | Scope | Calendar | Themes |
 |---|---|---|---|
 | **v2.0** | **Phase 1 only** (Phase 0 = v1.7 dev, already shipped) — identity, skill restructure, artifact rigor, worktree tooling, security-and-integrity (02f) | In progress | T1, T2, T3, T7, T8 |
-| **v2.1** | Phase 2 + 3 + 4 + 6 — hooks, MCP, self-learning, graph, telemetry, modularity, loop engineering | ~6 weeks | T3, T4, T5, T6, T7, T8 |
+| **v2.1** | Phase 2 + 3 + 4 + 6 — hooks, MCP, self-learning, telemetry, modularity, loop engineering | ~6 weeks | T3, T4, T5, T6, T7, T8 |
 | **v2.2** | Phase 5 — Deeper Bench (T1 + T2 + T3 personas) | ~6 weeks | T1, T2, T8 |
 
 **v2.0 ships the differentiators.** The original plan buried Vespyr's 3 unique moats (permission-denial I/O split, Socratic depth, 3-tier memory) in a "T7 Backlog" while spending 138h importing BMAD/Ruflo/ECC patterns. This plan promotes T7 to Phase 0. The differentiators ship first, not last. T8, the UTTERLY SATISFIED working culture, is cross-cutting and applies to every release rather than being deferred to a later phase.
@@ -97,7 +97,7 @@ theme. Themes are capability-shaped, not implementation-shaped.
 |---|---|---|---|
 | **T1** | Agent depth | Role-locked personas with structured customization that survives updates | v2.0, v2.2 |
 | **T2** | Skill atomicity | A skill is a folder of self-contained step files, not a single Markdown blob | v2.0, v2.2 |
-| **T3** | Artifact rigor | Every artifact has a kernel + companions, a status, a hash witness, a traceability graph | v2.0, v2.1 |
+| **T3** | Artifact rigor | Every artifact has a kernel + companions, a status, a hash witness, and traceable links to its sources | v2.0, v2.1 |
 | **T4** | Harness contracts | Policy enforced at the harness layer (hooks), primitives exposed via MCP | v2.1 |
 | **T5** | Self-improvement | Sessions leave patterns → patterns promote to conventions → conventions promote to instincts → instincts auto-load | v2.1 |
 | **T6** | Modularity | Core stays lean. Domain extras ship as installable modules | v2.1 |
@@ -118,12 +118,13 @@ deferred, disabled by a harness, or removed by a module.
 |---|---|---|---|---|
 | **0** | v1.7 (shipped) | T1, T3, T7, T8 | Frontmatter v2, IDENTITY block, customization TOML, thin skills ≥80 lines, entry-point consolidation, phase table, glossary, agent contracts, **+ T7: worktree delegation enforcement + tooling (T7.1b), memory auto-loading, Socratic minimum bar, identity docs; + T8: shared satisfaction contract** | `01-phase-0-foundation.md` |
 | **1** | v2.0 (in progress) | T1, T2, T3, T8 | 5 long skills → folder + steps (develop, validate-idea, retro, design, launch); tri-modal flows; spec-kernel PRD; sprint-status.yaml; ASCII CLI dashboards; 9 domain experts ≥200 lines; code-reviewer 15-item false-positive guard; Ivy design.md + dynamic HTML; **Teaching Partner: @shifu (Kong Qiu) agent + /teach-me + /craft-lesson skills; T8 handoff states; security & integrity architecture (02f); harness honesty (02g); graph/cli modernization (02h); memory consolidation (02i); agent evals (02j); intent triage & anti-premature execution (02k)** | `02-phase-1-skills.md`, `02a`–`02k` sub-plans |
-| **2** | v2.1 | T4, T5, T8 | 13 lifecycle hooks; MCP server (17 first-party tools); **self-learning swarm architecture (03g: 5-stage trajectory distillation, 3-tier progressive cache, 3-signal deduplication, secret scrubbing, zero-loss LSM compaction)**; SHA-256 witness; delegation enforcement; QA as hard gate; **multi-agent orchestration (solo/parallel modes, CLI orchestrator, structured output, T8 runtime validation)** | `03-phase-2-enablement.md`, `03a`–`03g` sub-plans |
-| **3** | v2.1 | T3, T4, T8 | Graph auto-build at 5 lifecycle moments; graph query API; telemetry surface; catalog parity test; "See the Unseen" on all 23 agents (v2.0 state); data analyst CLI tools; **satisfaction health telemetry** | `04-phase-3-observability.md` |
+| **2** | v2.1 | T4, T5, T8 | 13 lifecycle hooks; MCP server (14 first-party tools); **self-learning swarm architecture (03g: 5-stage trajectory distillation, 3-tier progressive cache, 3-signal deduplication, secret scrubbing, zero-loss LSM compaction)**; SHA-256 witness; delegation enforcement; QA as hard gate; **multi-agent orchestration (solo/parallel modes, CLI orchestrator, structured output, T8 runtime validation)** | `03-phase-2-enablement.md`, `03a`–`03g` sub-plans |
+| **3** | v2.1 | T3, T4, T8 | Telemetry surface; catalog parity test; "See the Unseen" on all 23 agents (v2.0 state); data analyst CLI tools; **satisfaction health telemetry** _(graph auto-build + query API removed by owner [NO-GO] 2026-09-24)_ | `04-phase-3-observability.md` |
 | **4** | v2.1 | T6, T8 | install-modules (7 modules); rules/common + per-language; agent-builder/skill-builder/workflow-builder; worked example project; README/AGENTS/QUICK-REFERENCE/CHANGELOG rewrite; **core T8 inheritance and dogfood gate** | `05-phase-4-modularity.md` |
 | **5** | v2.2 | T1, T2, T8 | Deeper Bench: T1 (14 net-new personas + 14 skills + 3 squads), T2 (7 personas + 4 skills), T3 (1 persona); **new-surface T8 validation** | `06-phase-5-deeper-bench.md` |
 | **6** | v2.1 | T4, T7, T8 | Loop Engineering: `/goal` primitive (run-until-verifiable-condition with separate verifier), automations/heartbeat (scheduled task execution, starts with 1 CI-failure triage), loop state on disk; **satisfaction-aware completion** | `07-phase-6-loop-engineering.md` |
 | **7** | v2.3 | T3, T6, T8 | Personal Knowledge Management (PKM) & Knowledge Engine: discovery & exploration tracks for Zettelkasten, PARA, Karpathy LLM-Wiki, and Andy Matuschak Evergreen Notes & Sliding-Pane Navigation | `09-phase-7-pkm-knowledge-engine.md` |
+| **8** | v2.3+ | T2, T8 | Game Development Track (research plan) — proper rebuild of the deleted game-idea skills as stepped skills with Step-0 + SPC gate + eval suite; entry gate: Phase 7 PKM complete | `10-phase-8-game-development-track.md` |
 
 **Total: 3 releases.**
 
@@ -150,7 +151,7 @@ This is the single DoD list.
 ### v2.1 DoD (criteria 9-14)
 
 9. 13 lifecycle hooks registered, env-var-disablable, documented.
-10. MCP tool surface exposes 17 first-party tools (10 from 03a + 6 from 13 + `vespyr_spawn_agent` from 03b), callable from Claude Code or OpenCode.
+10. MCP tool surface exposes 14 first-party tools (7 from `03b` + 6 from `03g` + `vespyr_spawn_agent` from `03c`), callable from Claude Code or OpenCode. _(Was "17 tools" before the graph subsystem removal cut 2 code/artifact-graph tools and their `03b` count from 10 → 7; doc refs corrected from stale "03a/13" to `03b/03g` 2026-09-24.)_
 11. `orchestrator_state.js next` refuses to advance out of `development` without `qa-signoff.md`.
 12. Self-learning works end-to-end (episode → pattern → instinct). `instincts.md` loaded FIRST by `@memory-controller`.
 13. Catalog parity test passes (`npm test` includes `test_catalog_parity.js`). All 23 agent files (v2.0 state) have "See the Unseen" directive + response prefixes. `@data-analyst` has `data_analyzer.js` + `dashboard_generator.js`.
@@ -218,7 +219,7 @@ Principle: **adopt the idea, not the inventory.** We do not want Vespyr to look 
 | BMAD — sprint-status.yaml | T3 | 1 | Layered on pipeline-state.json |
 | BMAD — glossary + agent-contracts | T1, T3 | 0 | One definition per term, owns/doesn't-own table |
 | Ruflo — lifecycle hooks | T4 | 2 | 13 hooks with stable IDs + env-var disable |
-| Ruflo — MCP tool surface | T4 | 2 | 17 first-party tools wrapping existing scripts + new capability tools |
+| Ruflo — MCP tool surface | T4 | 2 | 14 first-party tools wrapping existing scripts + new capability tools |
 | Ruflo — witness/verification | T3 | 2 | SHA-256 (no Ed25519 — overkill for local-first) |
 | Ruflo — self-learning / instincts | T5 | 2 | 3-tier episode → pattern → instinct |
 | Ruflo — delegation enforcement | T1 | 2 | `delegation-policy.md` + `[DIRECT-IO-JUSTIFIED]` + audit |
@@ -331,7 +332,7 @@ The "1-day ECC repackage" pattern is insufficient. Personas that don't clear eit
 | `02i-phase-1-memory-consolidation.md` | Memory persistence consolidation, machine-fenced state blocks, and token bounding |
 | `02j-phase-1-evals-and-agnostic-harness.md` | Agent evals Horizon 1: dogfooding test matrix, deterministic gates, and G-Eval benchmarks |
 | `03a-phase-2-external-skills-research-and-ingestion.md` | External Skills Research & Ingestion: automated discovery, consulting/agency practice skills, pre-install safety gate |
-| `03b-phase-2-mcp-integration-plan.md` | MCP Integration: first-party + 3rd-party MCP servers, 17 tools |
+| `03b-phase-2-mcp-integration-plan.md` | MCP Integration: first-party + 3rd-party MCP servers, 14 tools |
 | `03c-phase-2-multi-agent-orchestration.md` | Multi-Agent Orchestration: solo/parallel mode, CLI orchestrator, structured output |
 | `03d-phase-2-harness-integration.md` | Harness integration: Hermes, OpenClaw, and cross-harness adapters |
 | `03e-phase-2-implementation-specs.md` | Full JS code specifications for Phase 2 scripts and test suites |
@@ -339,7 +340,7 @@ The "1-day ECC repackage" pattern is insufficient. Personas that don't clear eit
 | `03g-phase-2-mcp-implementation.md` | Model Context Protocol (MCP) implementation specs and tool wiring |
 | `03h-phase-2-self-learning-architecture.md` | Self-learning architecture and instinct tracking |
 | `03i-phase-2-release-signing.md` | Release signing and artifact provenance |
-| `04-phase-3-observability.md` | Phase 3: graph query contracts per agent, See the Unseen directives, telemetry protocol |
+| `04-phase-3-observability.md` | Phase 3: See the Unseen directives, telemetry protocol, catalog parity (graph query contracts removed 2026-09-24) |
 | `05-phase-4-modularity.md` | Phase 4: install-modules, rules/ directory structure, builder flows |
 | `06-phase-5-deeper-bench.md` | Phase 5: Deep bench persona charters and skill catalog expansions |
 | `07-phase-6-loop-engineering.md` | Loop Engineering: `/goal` primitive + automations + loop state |
@@ -372,7 +373,7 @@ When a phase is mid-execution and a new constraint emerges (e.g., a phase overru
 | Version | Status | What shipped |
 |---|---|---|
 | v2.2 | Planned | Deeper Bench — ALL tiers (T1+T2+T3: +22 personas, +19 skills, +3 squads) |
-| v2.1 | Planned | Phases 2+3+4+6 (13 hooks, MCP 17 tools, self-learning, witness, graph, telemetry, modularity, loop engineering, T8 runtime gate) — infrastructure only; no Deeper Bench T1 |
+| v2.1 | Planned | Phases 2+3+4+6 (13 hooks, MCP 14 tools, self-learning, witness, telemetry, modularity, loop engineering, T8 runtime gate) — infrastructure only; no Deeper Bench T1 |
 | **v2.0** | **Phase 1 — in progress** | Phases: identity, skill restructure, artifact rigor (02a-02e done; 02f security-and-integrity pending) — 8 DoD criteria |
 | v1.7.x | Stable | `npx create-vespyr` installer, 8 active harnesses |
 | v1.1-v1.6 | Shipped | Per CHANGELOG |
@@ -415,16 +416,16 @@ When a phase is mid-execution and a new constraint emerges (e.g., a phase overru
 | 1 | Load `instincts.md` | 2 | < 50ms | `memory_filter.js` |
 | 2 | Load `project-context.md` + `active-decisions.md` | 0 | < 100ms | `memory_filter.js` |
 | 3 | Pattern pre-fetch (current agent + phase) | 0 | < 100ms | `memory_filter.js --prefetch-patterns` |
-| 4 | Graph freshness check | 3 | < 500ms | `auto_graph.js check` |
-| 5 | Telemetry snapshot (last 7 days) | 3 | < 200ms | `telemetry_surface.js session` |
-| 6 | Loop state check (paused goals, overdue automations) | 6 | < 50ms | `loop-state.json` read |
-| **Total** | | | **< 1000ms** | |
+| 4 | Telemetry snapshot (last 7 days) | 3 | < 200ms | `telemetry_surface.js session` |
+| 5 | Loop state check (paused goals, overdue automations) — _only if Phase 6 ships; not built as of v2.0.11_ | 6 | < 50ms | `loop-state.json` read |
+| **Total** | | | **< 500ms** | |
+
+_(Former step 4 "Graph freshness check" removed with the graph subsystem — owner [NO-GO] 2026-09-24. Budget reclaimed.)_
 
 **Rules:**
 
 - Total session-start overhead must not exceed 1 second
-- Operations 4-6 are non-blocking: if they exceed their budget, they're skipped with a `[SKIPPED: timeout]` marker
-- Graph rebuild (if `[STALE]`) runs in the background, not at session start — it's triggered by the first agent that needs the graph
+- Operations 4-5 are non-blocking: if they exceed their budget, they're skipped with a `[SKIPPED: timeout]` marker
 - The latency budget is tested in CI: `npm test` includes a `test_session_latency.js` that measures the full session-start sequence
 
 ---

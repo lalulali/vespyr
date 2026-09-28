@@ -14,7 +14,7 @@
 
 - `sandbox.mode: main` — full access (for @developer, @devops-engineer)
 - `sandbox.mode: non-main` — restricted toolset per config (all other agents)
-- Per-tool `allow`/`deny` — fine-grained control (@code-reviewer read-only, @writer write-only)
+- Per-tool `allow`/`deny` — fine-grained control (@code-reviewer read-only, @memory-controller memory-write-only)
 - Auto-discovery from `<workspace>/.agents/skills/` (npx vespyr already scaffolds this)
 - `goal()` sub-agent spawning maps to Vespyr's delegation pattern
 - File-based memory (`read_file`/`write_file`) maps directly to `artifacts/memory/*.md`
@@ -29,12 +29,9 @@
 │   │   └── SKILL.md
 │   ├── product-manager/
 │   │   └── SKILL.md
-│   ├── ... (all 21 agents)
+│   ├── ... (all agents — derived from disk; 23 files at v2.0 shipped state)
 │   └── io-agents/
-│       ├── reader/SKILL.md
-│       ├── writer/SKILL.md
-│       ├── executor/SKILL.md
-│       └── memory-controller/SKILL.md
+│       └── memory-controller/SKILL.md   # only surviving I/O agent (reader/writer/executor deleted 2026-08-10)
 └── workflows/
     ├── validate-idea/SKILL.md
     ├── design/SKILL.md
@@ -47,7 +44,7 @@
 ```yaml
 ---
 name: vespyr/agents/founder
-description: "@founder (Elena) — Strategic concept stress-testing with GO/PIVOT/KILL verdict"
+description: "@founder (Elena) — Strategic concept stress-testing with GO/RESHAPE/NO-GO verdict"
 version: "1.0.0"
 author: lalulali/vespyr → OpenClaw adaptation
 openclaw:
@@ -64,7 +61,7 @@ openclaw:
 # @founder (Elena)
 
 > **Role:** Strategic concept stress-testing. Challenges assumptions, evaluates market viability,
-> and delivers a GO/PIVOT/KILL verdict before any resources are committed.
+> and delivers a GO/RESHAPE/NO-GO verdict before any resources are committed.
 
 ## Persona
 
@@ -83,7 +80,7 @@ Or invoke directly in chat: "Run @founder on this idea: [describe]"
 1. Read the idea from user input
 2. Research market and competitors via web_search
 3. Apply Socratic diagnostic questions per validate-idea reference
-4. Produce verdict: GO, PIVOT, or KILL
+4. Produce verdict: GO, RESHAPE, or NO-GO
 5. Write `validation-brief.md` to `artifacts/output/01-discovery/`
 6. Update `artifacts/memory/active-decisions.md`
 7. Return the T8 satisfaction state, evidence, unresolved blockers, and
@@ -114,9 +111,10 @@ When acting as @founder:
 |---|---|---|---|
 | @developer, @devops-engineer | main | (none) | (all) |
 | @code-reviewer | non-main | exec, write, cron, browser | read, apply_patch, web_search |
-| @reader | non-main | exec, write, cron | read |
-| @writer | non-main | exec, cron, browser | read, write |
+| @memory-controller | non-main | exec, cron, browser | read, write (memory paths only) |
 | @founder, @product-manager, etc. | non-main | exec, write | read, web_search |
+
+_(The `@reader`/`@writer`/`@executor` trio was deleted 2026-08-10; reasoning agents now do their own reads/writes/exec via the sandbox modes above, and `@memory-controller` owns memory I/O.)_
 
 Example — @code-reviewer as read-only skill:
 ```yaml
@@ -178,7 +176,7 @@ The Hunt.io finding (17,470 publicly-exposed OpenClaw instances, 2024-era snapsh
 
 ### Implementation roadmap
 
-- [ ] Phase 1 — Agent Persona Skills (2-3h): Convert all 21 agents → `.agents/skills/agents/<name>/SKILL.md`, add sandbox constraints per role
+- [ ] Phase 1 — Agent Persona Skills (2-3h): Convert all agent files (derived from disk; 23 at v2.0 shipped state) → `.agents/skills/agents/<name>/SKILL.md`, add sandbox constraints per role
 - [ ] Phase 2 — Workflow Skills (2-3h): Port top 6 priority workflow skills
 - [ ] Phase 3 — Memory & Integration (1h): Configure file-based memory protocol, test single-agent end-to-end, test multi-agent delegation via `goal()`
 - [ ] Phase 4 — Polish (1-2h): Add Canvas/A2UI output for @product-designer specs, configure sandbox permissions for production use
@@ -195,7 +193,7 @@ The original plan used `curl` from GitHub `main` branch with no version pinning.
 
 ## Hermes — Degraded Mode (cannot enforce permissions)
 
-**Honest assessment (stated upfront, not buried):** Hermes has no permission system. The reasoning/I/O split — Vespyr's #1 differentiator — CANNOT be enforced. The cost-saving architecture (routing @reader/@writer/@executor to cheap models) also doesn't work (single-model per session, "profile switching" is clunky). Hermes users get personas + Socratic methodology + file-based memory only. **This is a degraded-mode integration.**
+**Honest assessment (stated upfront, not buried):** Hermes has no permission system. The reasoning/I/O split — Vespyr's #1 differentiator — CANNOT be enforced. The cost-saving architecture (routing cheap I/O to cheap models) also doesn't work (single-model per session, "profile switching" is clunky). Hermes users get personas + Socratic methodology + file-based memory only. **This is a degraded-mode integration.** _(Note: the `@reader`/`@writer`/`@executor` trio was deleted 2026-08-10; the "I/O split" now means reasoning agents doing their own I/O via harness subagents where available — which Hermes cannot isolate either.)_
 
 ### What works
 
@@ -210,7 +208,7 @@ The original plan used `curl` from GitHub `main` branch with no version pinning.
 | Vespyr feature | Hermes limitation | Impact |
 |---|---|---|
 | Permission-denial (reasoning/I/O split) | No permission system; all agents have all tools | #1 differentiator lost. "Mitigation" is self-discipline + todo() checklist — NOT enforcement. |
-| Cost routing (@reader/@writer to cheap models) | Single model per session; profile switching is clunky | #2 cost-saving architecture lost. `delegate_task()` scopes context but doesn't change model. |
+| Cost routing (cheap I/O to cheap models) | Single model per session; profile switching is clunky | #2 cost-saving architecture lost. `delegate_task()` scopes context but doesn't change model. |
 | @developer constrained context | No subagent isolation; every tool call runs in same session with full context | @developer persona adds value only when review gates are needed; otherwise inline is better. |
 
 ### Directory structure
@@ -221,12 +219,9 @@ The original plan used `curl` from GitHub `main` branch with no version pinning.
 ├── agents/
 │   ├── founder/
 │   │   └── SKILL.md
-│   ├── ... (all 21 agents)
+│   ├── ... (all agents — derived from disk; 23 files at v2.0 shipped state)
 │   └── io-agents/
-│       ├── reader/SKILL.md
-│       ├── writer/SKILL.md
-│       ├── executor/SKILL.md
-│       └── memory-controller/SKILL.md
+│       └── memory-controller/SKILL.md   # only surviving I/O agent (reader/writer/executor deleted 2026-08-10)
 └── skills/
     ├── validate-idea/SKILL.md
     ├── design/SKILL.md
@@ -240,7 +235,7 @@ The original plan used `curl` from GitHub `main` branch with no version pinning.
 ---
 name: vespyr/agents/founder
 version: 1.0.0
-description: "@founder (Elena) — Strategic concept stress-testing with GO/PIVOT/KILL verdict"
+description: "@founder (Elena) — Strategic concept stress-testing with GO/RESHAPE/NO-GO verdict"
 author: lalulali/vespyr → Hermes Agent adaptation
 metadata:
   vespyr:
@@ -324,11 +319,12 @@ delegate_task(
 
 | Upstream Constraint | Hermes "Mitigation" |
 |---|---|
-| @reader: read-only | Self-discipline — document that @reader must NOT edit files. Use todo() checklist. |
-| @writer: write-only | Self-discipline — document that @writer must NOT run commands or read outside scope. |
-| @executor: bash only | Self-discipline — document that @executor must NOT edit files. |
-| @founder: no code | Self-discipline — document that @founder must NOT implement. |
+| @founder / @architect: no code | Self-discipline — document that thinking agents must NOT implement. |
+| @code-reviewer: read-only review | Self-discipline — no auto-fixing; findings only. |
 | @security-engineer: read-only audit | Self-discipline — no auto-fixing of vulnerabilities found. |
+| @memory-controller: memory paths only | Self-discipline — no writes outside `artifacts/memory/`. |
+
+_(The old per-trio rows were dropped — the `@reader`/`@writer`/`@executor` agents no longer exist; reasoning agents now own their I/O, so the constraints are per-reasoning-agent.)_
 
 **These are advisory with todo() enforcement, NOT real enforcement.** Each agent's SKILL.md includes constraint declarations in frontmatter, but the harness cannot enforce them.
 
@@ -384,7 +380,7 @@ When loaded, @memory-controller must:
 
 ### Cost optimization
 
-**The single-model problem:** Hermes runs every tool call on the same model. Vespyr's cost-saving architecture (routing @reader/@writer/@executor to cheap models) doesn't directly translate.
+**The single-model problem:** Hermes runs every tool call on the same model. Vespyr's cost-saving architecture (routing cheap I/O to cheap models) doesn't directly translate.
 
 **Strategy 1 — Profile switching (clunky):**
 ```yaml
@@ -408,16 +404,15 @@ If Hermes adds per-tool model selection, map:
 | @founder | Best (Claude/GPT flagship) | Strategic reasoning |
 | @architect | Best | Complex trade-offs |
 | @developer | Mid-range | Code generation |
-| @reader | Cheapest | Simple reads |
-| @writer | Cheapest | Simple writes |
-| @executor | Cheapest | Command output parsing |
+| @memory-controller | Cheapest | Memory read/write + schema validation |
+| Inline I/O (reads, writes, exec) | Cheapest | Simple I/O the reasoning agent performs directly |
 
 ### Implementation roadmap
 
-- [ ] Phase 1 — Agent Personas (3-4h): Convert all 21 agents → Hermes skills, update master SKILL.md
+- [ ] Phase 1 — Agent Personas (3-4h): Convert all agent files (derived from disk; 23 at v2.0 shipped state) → Hermes skills, update master SKILL.md
 - [ ] Phase 2 — Workflow Skills (2-3h): Port top 6 priority skills
 - [ ] Phase 3 — Memory & Integration (1-2h): Implement memory loading protocol, session hand-off templates, todo() enforcement constraints
-- [ ] Phase 4 — Remaining Skills (2-3h): Port explore-idea, launch, incident, retro, humanize, status, phase, squad, memory, code-graph, doc-graph, elicitation, kanban, round-table, delegate, plan
+- [ ] Phase 4 — Remaining Skills (2-3h): Port explore-idea, launch, incident, retro, humanize, status, phase, memory, elicitation, kanban, round-table, plan (note: `code-graph`/`doc-graph` skills and the `/delegate` skill were removed from the engine — do not port)
 
 ### Conversion pipeline (same supply chain fix as OpenClaw)
 
@@ -428,7 +423,7 @@ If Hermes adds per-tool model selection, map:
 
 ## Both harnesses: shared deliverables
 
-- [ ] Per-harness adapter in `bin/install.js` (writes correct hook config per harness) — v2.1 Phase 2 F2.3
+- [ ] Per-harness adapter in `bin/lib/harnesses/` + `bin/lib/installer.js` (writes correct hook config per harness) — v2.1 Phase 2 F2.3 _(there is no `bin/install.js`; the installer entry is `bin/cli.js` delegating to `bin/lib/installer.js` and the per-harness modules under `bin/lib/harnesses/`)_
 - [ ] Smoke-test plan: "does this install work?" check for each harness
 - [ ] Document harness-specific limitations in `QUICK-REFERENCE.md` (a "Known Limitations" section per harness)
 - [ ] Port `.agents/references/utter-satisfaction.md` and its state vocabulary
@@ -462,7 +457,7 @@ If Hermes adds per-tool model selection, map:
 
 - [ ] OpenClaw integration and sandbox permission isolation
 - [ ] Hermes Agent port (SKILL.md format and delegation adapters)
-- [ ] Multi-harness installer integration (`bin/install.js`)
+- [ ] Multi-harness installer integration (`bin/lib/installer.js` + `bin/lib/harnesses/`)
 - [ ] Cross-harness UTTERLY SATISFIED state preservation
 
 ---

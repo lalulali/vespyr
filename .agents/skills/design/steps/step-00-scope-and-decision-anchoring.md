@@ -28,6 +28,15 @@ node .agents/scripts/step0_staleness.js --report artifacts/output/03-strategy/pa
 
 Reverse mode additionally requires the **SPEC.md Spec Kernel anchor** (`artifacts/output/03-strategy/SPEC.md`); missing kernel → halt (Review 10 §4).
 
+## Prototype track selection (when prototyping is in scope)
+
+Lock one track before prototype work begins:
+
+- **`static-html`** — vanilla HTML/CSS/JS with Tailwind Browser CDN and shadcn-flavored visual tokens/patterns. This is a visual/interaction prototype, not installed shadcn components; React, Next.js, and `@shadcn/lint` are not prerequisites.
+- **`nextjs-component`** — Next.js + React + Tailwind + shadcn source components for an engineering-ready prototype. `@shadcn/lint` is mandatory and the R1 lint gate is mandatory.
+
+An explicit user choice wins. A recorded project preference may provide a default but never overrides the user. If neither exists, pause with a two-track fork and ask which prototype outcome is wanted; do not let `shadcn_gate detect` silently choose a track. Record `Prototype Track` and `Prototype Runtime` through `@memory-controller` before Step 1.
+
 ## 3. Decision Fork
 - **Unambiguous (C ≥ 0.85):** proceed to mode routing (reverse / create / edit / validate) — reverse checked FIRST (A1).
 - **Ambiguous / multi-track (0.50 ≤ C < 0.85):** HALT. Emit the 2–3 Track Fork card — e.g., full create flow vs edit of existing spec vs heuristic-validate only. Each track names its recommended `@agent` + `/skill` handles. Wait for selection. Zero artifact scaffolding to `artifacts/output/` before selection (GUARDRAILS: Anti-Premature Execution).

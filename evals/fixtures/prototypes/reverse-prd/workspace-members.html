@@ -1,398 +1,1699 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="h-full">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
 <title>Orbit — Workspace Members (prototype fixture)</title>
-<style>
-  :root {
-    --color-bg: #f7f7f5;
-    --color-surface: #ffffff;
-    --color-fg: #1c1c1e;
-    --color-muted: #6b6b70;
-    --color-border: #e2e2df;
-    --color-accent: #2f5eff;
-    --color-danger: #c0392b;
-    --color-danger-contrast: #ffffff;
-    --color-skeleton: #ececea;
-    --space-2: 8px;
-    --space-3: 12px;
-    --space-4: 16px;
-    --space-6: 24px;
-    --radius-md: 8px;
-    --radius-lg: 12px;
-    --font-sans: -apple-system, "Segoe UI", Roboto, sans-serif;
-    --shadow-modal: 0 12px 32px rgb(0 0 0 / 18%);
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>◐</text></svg>">
+<!-- Static evaluation fixture: local browser-only simulation. No API, persistence, authentication, or authorization service is implemented. -->
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<style type="text/tailwindcss">
+  @theme inline {
+    --font-sans: var(--app-font-sans);
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --color-card: var(--card);
+    --color-card-foreground: var(--card-foreground);
+    --color-popover: var(--popover);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-primary: var(--primary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-secondary: var(--secondary);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-muted: var(--muted);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-accent: var(--accent);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-destructive: var(--destructive);
+    --color-destructive-foreground: var(--destructive-foreground);
+    --color-border: var(--border);
+    --color-input: var(--input);
+    --color-ring: var(--ring);
+    --color-status-success: var(--status-success);
+    --color-status-info: var(--status-info);
+    --color-status-warning: var(--status-warning);
+    --color-status-danger: var(--status-danger);
+    --color-sidebar: var(--sidebar);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar-primary: var(--sidebar-primary);
+    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    --color-sidebar-border: var(--sidebar-border);
+    --color-sidebar-ring: var(--sidebar-ring);
+    --radius-sm: calc(var(--radius) - 4px);
+    --radius-md: calc(var(--radius) - 2px);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) + 4px);
   }
-  body { margin: 0; font-family: var(--font-sans); color: var(--color-fg); background: var(--color-bg); }
-  header { padding: var(--space-6); background: var(--color-surface); border-bottom: 1px solid var(--color-border); }
-  nav[aria-label="Settings sections"] a { margin-right: var(--space-4); color: var(--color-muted); text-decoration: none; }
-  nav[aria-label="Settings sections"] a[aria-current="page"] { color: var(--color-accent); font-weight: 600; }
-  main { max-width: 880px; margin: 0 auto; padding: var(--space-6); }
-  #state-switcher { display: flex; gap: var(--space-2); margin: var(--space-4) 0; }
-  #state-switcher button { padding: var(--space-2) var(--space-3); border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface); cursor: pointer; }
-  #state-switcher button:hover { border-color: var(--color-accent); }
-  #state-switcher button:active { transform: translateY(1px); }
-  #state-switcher button:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
-  #toolbar { display: flex; gap: var(--space-3); align-items: center; margin-bottom: var(--space-4); }
-  #toolbar input { flex: 1; padding: var(--space-2) var(--space-3); border: 1px solid var(--color-border); border-radius: var(--radius-md); }
-  #toolbar input:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 1px; }
-  button.primary { background: var(--color-accent); color: #fff; border: 0; border-radius: var(--radius-md); padding: var(--space-2) var(--space-4); cursor: pointer; }
-  button.destructive { background: var(--color-danger); color: var(--color-danger-contrast); border: 0; border-radius: var(--radius-md); padding: var(--space-2) var(--space-4); cursor: pointer; }
-  table { width: 100%; border-collapse: collapse; background: var(--color-surface); border-radius: var(--radius-lg); overflow: hidden; }
-  th, td { text-align: left; padding: var(--space-3); border-bottom: 1px solid var(--color-border); }
-  .skeleton { height: 16px; border-radius: var(--radius-md); background: var(--color-skeleton); animation: pulse 1.2s infinite; }
-  .truncate { max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  dialog { border: 0; border-radius: var(--radius-lg); box-shadow: var(--shadow-modal); padding: var(--space-6); width: min(480px, 92vw); }
-  dialog::backdrop { background: rgb(0 0 0 / 40%); }
-  .error { color: var(--color-danger); font-size: 14px; margin-top: var(--space-2); }
-  .banner { border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: var(--space-3); margin-bottom: var(--space-4); background: var(--color-surface); }
-  [hidden] { display: none !important; }
-  h2 { margin-top: var(--space-6); }
-  details.annotation-group { margin-top: var(--space-6); }
-  details.annotation-group > summary { font-weight: 700; cursor: pointer; }
-  details.annotation { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: var(--space-2) var(--space-3); margin: var(--space-2) 0; }
-  details.annotation summary { cursor: pointer; font-weight: 600; }
-  details.annotation pre { white-space: pre-wrap; margin: var(--space-2) 0 0; font-size: 13px; }
-  @keyframes pulse { 50% { opacity: 0.5; } }
-
-  /* platform-responsive: desktop dialog >= 768px; mobile bottom-sheet < 768px */
-  @media (max-width: 767px) {
-    dialog { position: fixed; inset: auto 0 0 0; width: 100%; border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
-    dialog { padding-bottom: calc(var(--space-6) + env(safe-area-inset-bottom)); } /* platform-safe-area */
-    table { display: block; overflow-x: auto; }
+  @custom-variant dark (&:is(.dark *));
+  @layer base {
+    * { @apply border-border outline-ring; }
+    html { @apply scroll-smooth; }
+    body { @apply min-h-full bg-background text-foreground antialiased; }
+    button:not(:disabled), [role="button"]:not([aria-disabled="true"]) { cursor: pointer; }
+    ::selection { @apply bg-primary/15 text-foreground; }
   }
 </style>
+<style>
+  :root {
+    --app-font-sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --background: oklch(1 0 0);
+    --foreground: #111827;
+    --card: oklch(1 0 0);
+    --card-foreground: oklch(0.145 0 0);
+    --popover: oklch(1 0 0);
+    --popover-foreground: oklch(0.145 0 0);
+    --primary: oklch(0.205 0 0);
+    --primary-foreground: oklch(0.985 0 0);
+    --secondary: oklch(0.97 0 0);
+    --secondary-foreground: oklch(0.205 0 0);
+    --muted: oklch(0.97 0 0);
+    --muted-foreground: #4b5563;
+    --accent: oklch(0.95 0.01 250);
+    --accent-foreground: oklch(0.205 0 0);
+    --destructive: #991b1b;
+    --destructive-foreground: #ffffff;
+    --border: #6b7280;
+    --input: #6b7280;
+    --ring: #1d4ed8;
+    --chart-1: oklch(0.42 0.14 41);
+    --chart-2: oklch(0.38 0.1 184);
+    --chart-3: oklch(0.38 0.09 227);
+    --chart-4: oklch(0.43 0.13 84);
+    --chart-5: oklch(0.42 0.14 70);
+    --sidebar: oklch(0.985 0 0);
+    --sidebar-foreground: oklch(0.145 0 0);
+    --sidebar-primary: oklch(0.205 0 0);
+    --sidebar-primary-foreground: oklch(0.985 0 0);
+    --sidebar-accent: oklch(0.94 0.01 250);
+    --sidebar-accent-foreground: oklch(0.145 0 0);
+    --sidebar-border: oklch(0.78 0 0);
+    --sidebar-ring: oklch(0.42 0.18 255);
+    --status-success: #166534;
+    --status-info: #1d4ed8;
+    --status-warning: #92400e;
+    --status-danger: #991b1b;
+    --radius: 0.625rem;
+  }
+  .dark {
+    --background: oklch(0.145 0 0);
+    --foreground: #f9fafb;
+    --card: oklch(0.205 0 0);
+    --card-foreground: oklch(0.985 0 0);
+    --popover: oklch(0.205 0 0);
+    --popover-foreground: oklch(0.985 0 0);
+    --primary: oklch(0.92 0 0);
+    --primary-foreground: oklch(0.205 0 0);
+    --secondary: oklch(0.27 0 0);
+    --secondary-foreground: oklch(0.985 0 0);
+    --muted: oklch(0.27 0 0);
+    --muted-foreground: #d1d5db;
+    --accent: oklch(0.3 0.02 250);
+    --accent-foreground: oklch(0.985 0 0);
+    --destructive: #b91c1c;
+    --destructive-foreground: #ffffff;
+    --border: #9ca3af;
+    --input: #9ca3af;
+    --ring: #93c5fd;
+    --sidebar: oklch(0.205 0 0);
+    --sidebar-foreground: oklch(0.985 0 0);
+    --sidebar-primary: oklch(0.55 0.18 255);
+    --sidebar-primary-foreground: oklch(0.985 0 0);
+    --sidebar-accent: oklch(0.3 0.02 250);
+    --sidebar-accent-foreground: oklch(0.985 0 0);
+    --sidebar-border: oklch(0.48 0 0);
+    --sidebar-ring: oklch(0.82 0.12 255);
+    --status-success: #86efac;
+    --status-info: #93c5fd;
+    --status-warning: #fcd34d;
+    --status-danger: #fca5a5;
+  }
+  [hidden] { display: none !important; }
+  body { overflow-x: hidden; }
+  .prototype-grid {
+    background-image: linear-gradient(to right, color-mix(in oklab, var(--border) 42%, transparent) 1px, transparent 1px), linear-gradient(to bottom, color-mix(in oklab, var(--border) 42%, transparent) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+  .prototype-scrollbar { scrollbar-width: thin; scrollbar-color: color-mix(in oklab, var(--muted-foreground) 40%, transparent) transparent; }
+  .touch-target { min-width: 44px; min-height: 44px; }
+  .selection-hit { display: inline-flex; min-width: 44px; min-height: 44px; align-items: center; justify-content: center; }
+  .selection-hit input { width: 1rem; height: 1rem; }
+  .status-active { color: var(--status-success); }
+  .status-invited { color: var(--status-info); }
+  .status-warning { color: var(--status-warning); }
+  .status-suspended, .status-expired { color: var(--status-danger); }
+  .status-pill { border-radius: 9999px; padding: .25rem .5rem; font-size: .75rem; font-weight: 600; }
+  .status-pill.active { background: color-mix(in oklab, var(--status-success) 13%, transparent); }
+  .status-pill.invited { background: color-mix(in oklab, var(--status-info) 13%, transparent); }
+  .status-pill.suspended, .status-pill.expired { background: color-mix(in oklab, var(--status-danger) 12%, transparent); }
+  .avatar { display: grid; width: 2.25rem; height: 2.25rem; flex: 0 0 auto; place-items: center; border-radius: 9999px; font-size: .7rem; font-weight: 700; }
+  .avatar-owner { background: color-mix(in oklab, var(--chart-1) 18%, var(--card)); color: var(--foreground); }
+  .avatar-admin { background: color-mix(in oklab, var(--chart-2) 18%, var(--card)); color: var(--foreground); }
+  .avatar-member { background: color-mix(in oklab, var(--chart-3) 18%, var(--card)); color: var(--foreground); }
+  .avatar-invite { background: color-mix(in oklab, var(--chart-4) 18%, var(--card)); color: var(--foreground); }
+  .identity-full { min-width: 0; overflow-wrap: anywhere; word-break: break-word; }
+  .mobile-card { overflow: visible; position: relative; }
+  .mobile-card-identity { min-width: 0; flex: 1 1 auto; }
+  .member-actions-menu > summary { list-style: none; }
+  .member-actions-menu > summary::-webkit-details-marker { display: none; }
+  .member-actions-menu[open] { z-index: 50; }
+  .member-actions-menu[open] > summary { background: var(--accent); }
+  .member-actions-menu > [role="menu"] { position: fixed; right: auto; bottom: auto; z-index: 100; min-width: 13rem; max-width: calc(100vw - 1rem); max-height: min(60vh, 24rem); overflow-y: auto; overscroll-behavior: contain; }
+  .member-actions-menu [role="menuitem"] { min-height: 2.75rem; }
+  .member-actions-menu [role="menuitem"][aria-disabled="true"] { opacity: .55; }
+  .column-disclosure > summary { list-style: none; }
+  .column-disclosure > summary::-webkit-details-marker { display: none; }
+  .policy-control[aria-disabled="true"] { cursor: not-allowed; }
+  .policy-reason { color: var(--muted-foreground); font-size: .75rem; overflow-wrap: anywhere; }
+  .destructive-button { background: var(--destructive); color: var(--destructive-foreground); }
+  .dark .text-destructive { color: var(--status-danger); }
+  .dark #member-table-body,
+  .dark #member-table-body tr,
+  .dark #member-table-body td,
+  .dark #member-table-body p { color: var(--foreground); }
+  .dark #member-table-body .role-badge,
+  .dark #member-table-body .table-action { color: var(--secondary-foreground); }
+  .destructive-button:hover { filter: brightness(.92); }
+  .focusable:focus-visible, button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, summary:focus-visible {
+    outline: 3px solid var(--ring);
+    outline-offset: 2px;
+  }
+  dialog { color: var(--foreground); }
+  dialog::backdrop { background: color-mix(in oklab, var(--foreground) 48%, transparent); backdrop-filter: blur(2px); }
+  .modal-sheet { position: fixed; inset: 0; margin: auto; max-height: min(90dvh, 52rem); overflow: auto; }
+  .dialog-inner { padding: 1.5rem; }
+  .toast-surface { box-shadow: 0 12px 32px color-mix(in oklab, var(--foreground) 16%, transparent); }
+  .annotation-classification { border-inline-start: 3px solid var(--status-info); }
+  @keyframes prototype-pulse { 50% { opacity: .45; } }
+  .prototype-skeleton { animation: prototype-pulse 1.4s ease-in-out infinite; }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+  }
+  @media (max-width: 767px) {
+    .desktop-only { display: none !important; }
+    .mobile-only { display: block !important; }
+    .modal-sheet, #mobile-nav-drawer { position: fixed; inset: auto 0 0; margin: auto 0 0; width: 100%; max-width: none; max-height: calc(100dvh - env(safe-area-inset-top, 0px)); border-radius: 1rem 1rem 0 0; padding-bottom: env(safe-area-inset-bottom, 0px); }
+    #members-list { overflow: visible; }
+    .modal-sheet .dialog-inner { padding-bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px)); }
+    #mobile-nav-drawer .dialog-inner { padding-bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px)); }
+    #mobile-member-cards .member-select { width: 44px; height: 44px; }
+    #mobile-member-cards select { min-height: 44px; }
+    #member-role-select, #transfer-owner-select, #bulk-role-value { height: 44px; min-height: 44px; }
+    #invite-email, #invite-role, #invite-message { min-height: 44px; }
+    #member-search, #filter-role, #filter-status, #role-switcher, #workspace-mode-switcher { height: 44px; min-height: 44px; }
+    #select-all-members, #select-all-members-mobile, #fail-next-mutation, [data-column-toggle] { width: 44px; min-width: 44px; height: 44px; }
+    #fail-next-mutation { flex: 0 0 44px; }
+  }
+  /* Interactive focus uses the solid semantic ring below. */
+</style>
 </head>
-<body>
-
-<header>
-  <h1>Settings</h1>
-  <!-- nav-settings-tabs: Settings tabs General / Members / Billing / Integrations; Members active -->
-  <nav id="nav-settings-tabs" aria-label="Settings sections">
-    <a href="#general">General</a>
-    <a href="#members" aria-current="page">Members</a>
-    <a href="#billing">Billing</a>
-    <a href="#integrations">Integrations</a>
-  </nav>
-</header>
-
-<main>
-  <!-- state-switcher: prototype-only control toggling Day 0 (empty) / Day 30 (populated) / Error -->
-  <div id="state-switcher" role="group" aria-label="Prototype state switcher">
-    <button type="button" data-state="empty">Day 0 — Empty</button>
-    <button type="button" data-state="populated">Day 30 — Populated</button>
-    <button type="button" data-state="loading">Loading</button>
-    <button type="button" data-state="error">Error</button>
-  </div>
-
-  <!-- perm-member-readonly: role member sees view-only banner and no invite control -->
-  <section id="perm-member-readonly" class="banner" hidden>
-    You have view-only access to members. Ask an admin to make changes.
-  </section>
-  <!-- perm-sso-scim-note: SSO/SCIM-managed workspace disables manual invites -->
-  <section id="perm-sso-scim-note" class="banner" hidden>
-    This workspace is managed by SSO/SCIM. Manual invites are disabled — members sync from your identity provider.
-  </section>
-  <!-- copy-suspended-banner: suspended member context banner with reason -->
-  <section id="copy-suspended-banner" class="banner" hidden>
-    This member is suspended. They cannot sign in until reactivated. Reason: billing hold.
-  </section>
-
-  <div id="toolbar">
-    <!-- nav-search-filter: search members by name or email; empty-search results state -->
-    <label for="member-search" class="truncate">Search members</label>
-    <input id="member-search" type="search" placeholder="Search by name or email">
-    <!-- copy-invite-cta: primary action label -->
-    <button type="button" class="primary js-open-invite" id="copy-invite-cta">Invite teammate</button>
-  </div>
-
-  <!-- state-loading: skeleton rows while members load -->
-  <section id="state-loading" aria-busy="true" hidden>
-    <div class="skeleton" style="width: 60%"></div>
-    <div class="skeleton" style="width: 80%; margin-top: var(--space-2)"></div>
-    <div class="skeleton" style="width: 70%; margin-top: var(--space-2)"></div>
-  </section>
-
-  <!-- state-error: load failure panel; copy-error-load + Retry -->
-  <section id="state-error" hidden>
-    <p id="copy-error-load">We couldn't load your team.</p>
-    <button type="button" id="retry-load">Retry</button>
-  </section>
-
-  <!-- state-empty: Day 0 empty state -->
-  <section id="state-empty" hidden>
-    <h2 id="copy-empty-title">No teammates yet</h2>
-    <p>Invite your first teammate to start collaborating.</p>
-    <button type="button" class="primary js-open-invite">Invite teammate</button>
-  </section>
-
-  <!-- state-populated: Day 30 table with 24 members and pagination -->
-  <section id="state-populated" hidden>
-    <table>
-      <thead>
-        <tr><th>Member</th><th>Role</th><th>Status</th><th>Last active</th><th aria-label="Actions"></th></tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td class="truncate" title="Alejandra María de la Cruz-Fernández (alejandra.cruz-fernandez@verylongcompanydomain.example)">Alejandra María de la Cruz-Fernández</td>
-          <td>Owner</td><td>Active</td><td>2m ago</td>
-          <td><button type="button" aria-label="Remove Alejandra María de la Cruz-Fernández">Remove</button></td>
-        </tr>
-        <tr id="edge-long-names">
-          <td class="truncate" title="Maximilian Wolfeschlegelsteinhausenbergerdorff (maximilian.wolfeschlegelsteinhausenbergerdorff@subdomain.example.com)">Maximilian Wolfeschlegelsteinhausenbergerdorff</td>
-          <td>Admin</td><td>Active</td><td>Yesterday</td>
-          <td><button type="button" aria-label="Remove Maximilian Wolfeschlegelsteinhausenbergerdorff">Remove</button></td>
-        </tr>
-        <tr id="edge-unicode-names">
-          <td>Amélie 陳大文</td><td>Member</td><td>Active</td><td>3d ago</td>
-          <td><button type="button" aria-label="Remove Amélie 陳大文">Remove</button></td>
-        </tr>
-        <!-- edge-invite-expiry: pending invite expires after 7 days and flips to Expired with Resend -->
-        <tr id="edge-invite-expiry">
-          <td>jane@acme.com</td>
-          <td>
-            <!-- nav-role-change: inline role dropdown with save/cancel; optimistic update with rollback -->
-            <select id="nav-role-change" aria-label="Role for jane@acme.com">
-              <option>Member</option><option>Admin</option>
-            </select>
-          </td>
-          <td>Invited — expires in 7 days</td><td>Never</td>
-          <td><button type="button">Revoke</button></td>
-        </tr>
-        <tr>
-          <td>dmitri@acme.com</td><td>Member</td><td>Expired</td><td>Never</td>
-          <td><button type="button">Resend</button></td>
-        </tr>
-      </tbody>
-    </table>
-    <!-- nav-pagination: 25 rows per page; prev/next + page count -->
-    <nav id="nav-pagination" aria-label="Members pagination">
-      <button type="button" disabled>Previous</button>
-      <span>Page 1 of 1</span>
-      <button type="button" disabled>Next</button>
+<body data-role="owner" data-workspace-mode="normal" data-state-authority="prototype-only">
+<a href="#main-content" class="fixed left-4 top-4 z-[100] min-h-11 -translate-y-24 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground focus:translate-y-0 focus-visible:ring-ring">Skip to content</a>
+<div class="flex min-h-screen bg-muted/30">
+  <aside class="hidden w-64 shrink-0 border-r bg-sidebar text-sidebar-foreground lg:flex lg:flex-col" aria-label="Workspace navigation">
+    <div class="flex h-16 items-center gap-2 border-b px-5">
+      <div class="grid size-8 place-items-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground" aria-hidden="true">◐</div>
+      <div class="min-w-0"><p class="truncate text-sm font-semibold">Orbit Labs</p><p class="truncate text-xs text-muted-foreground">Acme workspace</p></div>
+      <button type="button" class="touch-target ml-auto grid place-items-center rounded-md text-muted-foreground hover:bg-sidebar-accent" aria-label="Switch workspace">↕</button>
+    </div>
+    <nav class="flex-1 space-y-1 p-3" aria-label="Primary">
+      <a href="#overview" class="flex min-h-11 items-center gap-3 rounded-md px-3 text-sm font-medium text-muted-foreground hover:bg-sidebar-accent">Overview</a>
+      <a href="#members" aria-current="page" class="flex min-h-11 items-center gap-3 rounded-md bg-sidebar-accent px-3 text-sm font-medium">Members <span id="sidebar-seat-count" class="ml-auto rounded-full bg-muted px-2 py-0.5 text-xs tabular-nums text-muted-foreground" data-derived="occupied-seats">—</span></a>
+      <a href="#security" class="flex min-h-11 items-center gap-3 rounded-md px-3 text-sm font-medium text-muted-foreground hover:bg-sidebar-accent">Security</a>
+      <a href="#notifications" class="flex min-h-11 items-center gap-3 rounded-md px-3 text-sm font-medium text-muted-foreground hover:bg-sidebar-accent">Notifications</a>
     </nav>
-  </section>
-</main>
-
-<!-- nav-invite-modal: email + role + message; Esc/Cancel closes; dirty close asks confirm -->
-<dialog id="nav-invite-modal" aria-modal="true" aria-labelledby="invite-modal-title">
-  <h2 id="invite-modal-title">Invite teammate</h2>
-  <label for="invite-email">Email</label>
-  <input id="invite-email" type="email" placeholder="name@company.com">
-  <!-- validation-email-format: inline invalid-format error -->
-  <p id="validation-email-format" class="error" hidden>Enter a valid email address.</p>
-  <!-- validation-duplicate-email: duplicate invite error -->
-  <p id="validation-duplicate-email" class="error" hidden>jane@acme.com has already been invited.</p>
-  <!-- validation-max-members: Free plan cap 25/25; invite disabled with upgrade hint -->
-  <p id="validation-max-members" class="error" hidden>Free plan limit reached (25/25). Upgrade to invite more people.</p>
-  <!-- validation-self-invite: self-invite blocked -->
-  <p id="validation-self-invite" class="error" hidden>You're already a member of this workspace.</p>
-  <label for="invite-role">Role</label>
-  <select id="invite-role"><option>Member</option><option>Admin</option></select>
-  <label for="invite-message">Message (optional)</label>
-  <textarea id="invite-message" rows="3" placeholder="Add a note to the invitation email"></textarea>
-  <footer style="display:flex; gap: var(--space-2); justify-content: flex-end; margin-top: var(--space-4);">
-    <button type="button" id="invite-cancel">Cancel</button>
-    <button type="button" class="primary" id="invite-send">Send invite</button>
-  </footer>
+    <div class="border-t p-3"><div class="rounded-lg border bg-background/60 p-3"><div class="mb-2 flex items-center justify-between text-xs"><span id="sidebar-plan-name" class="font-medium">Free plan</span><span id="sidebar-seat-copy" class="text-muted-foreground">—</span></div><div id="sidebar-seat-progress" class="h-1.5 overflow-hidden rounded-full bg-muted" role="progressbar" aria-label="Seat usage" aria-valuemin="0" aria-valuemax="0" aria-valuenow="0"><div id="sidebar-seat-bar" class="h-full rounded-full bg-primary"></div></div><a href="#billing" class="mt-2 inline-flex min-h-11 items-center text-xs font-medium text-primary underline-offset-4 hover:underline">Compare plans</a></div></div>
+  </aside>
+  <div class="flex min-w-0 flex-1 flex-col">
+    <header class="sticky top-0 z-40 flex min-h-16 items-center border-b bg-background/90 px-4 backdrop-blur sm:px-6">
+      <button type="button" id="mobile-nav-trigger" class="touch-target mr-3 grid place-items-center rounded-md text-muted-foreground hover:bg-accent lg:hidden" aria-label="Open navigation" aria-haspopup="dialog" aria-controls="mobile-nav-drawer" aria-expanded="false">☰</button>
+      <div class="hidden items-center gap-2 text-sm sm:flex"><span class="text-muted-foreground">Settings</span><span aria-hidden="true">›</span><span class="font-medium">Members</span></div>
+      <div class="ml-auto flex items-center gap-2"><button type="button" id="theme-toggle" class="touch-target grid place-items-center rounded-md text-muted-foreground hover:bg-accent" aria-label="Toggle color theme">◐</button><button type="button" class="touch-target relative grid place-items-center rounded-md text-muted-foreground hover:bg-accent" aria-label="Notifications, 2 unread">♢<span class="absolute right-1.5 top-1.5 size-2 rounded-full bg-destructive ring-2 ring-background"></span></button><button type="button" class="touch-target grid place-items-center rounded-full bg-primary text-xs font-semibold text-primary-foreground" aria-label="Open account menu for Chris (CR)"><span aria-hidden="true">CR</span></button></div>
+    </header>
+    <main id="main-content" class="flex-1 px-4 py-6 sm:px-6 lg:px-8">
+      <div class="mx-auto max-w-7xl space-y-6">
+        <section id="settings-destinations" class="rounded-xl border bg-card p-4 shadow-sm" aria-labelledby="settings-destinations-title">
+          <div class="flex flex-wrap items-start justify-between gap-3"><div><h2 id="settings-destinations-title" class="text-base font-semibold">Workspace settings destinations</h2><p class="mt-1 max-w-3xl text-sm text-muted-foreground">These are real local destinations in the static fixture. They do not call a service or claim production routing.</p></div><span class="rounded-full border px-2.5 py-1 text-xs font-semibold">Local fixture</span></div>
+          <div class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <article id="overview" tabindex="-1" class="rounded-lg border bg-muted/30 p-3"><h3 class="text-sm font-semibold">Overview</h3><p class="mt-1 text-xs text-muted-foreground">Review seat usage, policy mode, and the local prototype boundary.</p></article>
+            <article id="security" tabindex="-1" class="rounded-lg border bg-muted/30 p-3"><h3 class="text-sm font-semibold">Security</h3><p class="mt-1 text-xs text-muted-foreground">Review the local role, SSO/SCIM, and offline policy simulation.</p></article>
+            <article id="notifications" tabindex="-1" class="rounded-lg border bg-muted/30 p-3"><h3 class="text-sm font-semibold">Notifications</h3><p class="mt-1 text-xs text-muted-foreground">The fixture exposes the notification affordance and local outcome messages only.</p></article>
+            <article id="general" tabindex="-1" class="rounded-lg border bg-muted/30 p-3"><h3 class="text-sm font-semibold">General</h3><p class="mt-1 text-xs text-muted-foreground">Local settings destination with no persistence or account service.</p></article>
+            <article id="billing" tabindex="-1" class="rounded-lg border bg-muted/30 p-3"><h3 class="text-sm font-semibold">Billing</h3><p class="mt-1 text-xs text-muted-foreground">Plan boundaries and seat caps are simulated in this page.</p></article>
+            <article id="integrations" tabindex="-1" class="rounded-lg border bg-muted/30 p-3"><h3 class="text-sm font-semibold">Integrations</h3><p class="mt-1 text-xs text-muted-foreground">No external integration is connected in this static fixture.</p></article>
+          </div>
+        </section>
+        <section id="state-switcher" class="prototype-grid rounded-xl border bg-card/95 p-4 shadow-sm" aria-label="Prototype scenario controls" data-prototype-controls="true">
+          <div class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between"><div><p class="text-sm font-semibold">Prototype controls</p><p id="prototype-boundary-note" class="mt-1 max-w-3xl text-xs text-muted-foreground">Prototype-only local state. This fixture has no API, persistence, authentication, or authorization service; switches and mutations only change this page.</p></div><div class="grid gap-3 sm:grid-cols-3"><div class="space-y-1.5"><label class="text-xs font-medium text-muted-foreground" for="role-switcher">View as</label><select id="role-switcher" class="h-10 w-full rounded-md border bg-background px-3 text-sm shadow-xs"><option value="owner">Owner</option><option value="admin">Admin</option><option value="member">Member</option></select></div><div class="space-y-1.5"><label class="text-xs font-medium text-muted-foreground" for="workspace-mode-switcher">Workspace mode</label><select id="workspace-mode-switcher" class="h-10 w-full rounded-md border bg-background px-3 text-sm shadow-xs"><option value="normal">Normal</option><option value="sso">SSO / SCIM</option><option value="offline">Offline</option></select></div><div class="space-y-1.5"><span class="block text-xs font-medium text-muted-foreground">Current scenario</span><div class="flex min-h-10 items-center gap-2 rounded-md border bg-muted/50 px-3 text-sm"><span id="scenario-indicator" class="size-2 rounded-full bg-status-success"></span><span id="scenario-indicator-copy" data-derived="scenario-summary">Loading local scenario</span></div></div></div></div>
+          <div class="mt-4 flex flex-wrap gap-2" role="group" aria-label="Screen state"><button type="button" data-state="empty" class="touch-target inline-flex items-center rounded-md border bg-background px-3 text-xs font-medium" aria-pressed="false">Day 0 — Empty</button><button type="button" data-state="populated" class="touch-target inline-flex items-center rounded-md border bg-primary px-3 text-xs font-medium text-primary-foreground" aria-pressed="true">Day 30 — Populated</button><button type="button" data-state="loading" class="touch-target inline-flex items-center rounded-md border bg-background px-3 text-xs font-medium" aria-pressed="false">Loading</button><button type="button" data-state="error" class="touch-target inline-flex items-center rounded-md border bg-background px-3 text-xs font-medium" aria-pressed="false">Error</button></div>
+          <div id="plan-scenarios" class="mt-4 border-t pt-4"><div class="flex flex-wrap items-center gap-2"><span class="mr-1 text-xs font-semibold">Plan boundary</span><button type="button" id="free-24-of-25" data-plan-scenario="free24" data-plan-boundary="24/25" class="touch-target inline-flex items-center rounded-md border bg-background px-3 text-xs font-medium" aria-pressed="true">Free · 24/25</button><button type="button" id="free-25-of-25" data-plan-scenario="free25" data-plan-boundary="25/25" class="touch-target inline-flex items-center rounded-md border bg-background px-3 text-xs font-medium" aria-pressed="false">Free · 25/25</button><button type="button" id="team-49-of-50" data-plan-scenario="team49" data-plan-boundary="49/50" class="touch-target inline-flex items-center rounded-md border bg-background px-3 text-xs font-medium" aria-pressed="false">Team · 49/50</button><button type="button" id="team-50-of-50" data-plan-scenario="team50" data-plan-boundary="50/50" class="touch-target inline-flex items-center rounded-md border bg-background px-3 text-xs font-medium" aria-pressed="false">Team · 50/50</button></div><p id="plan-scenario-status" data-derived="plan-feedback" class="mt-2 text-xs text-muted-foreground">One local seat remains on the Free plan.</p></div>
+          <div class="mt-4 flex flex-wrap items-center gap-3 border-t pt-4"><label for="fail-next-mutation" class="flex min-h-11 cursor-pointer items-center gap-2 text-xs font-medium"><input id="fail-next-mutation" data-failure-seam="true" type="checkbox" class="size-4"> <span>Prototype seam: fail next local mutation and show rollback</span></label><span id="mutation-status" class="text-xs text-muted-foreground" data-mutation-status="idle">Mutation status: idle</span></div>
+        </section>
+        <nav id="nav-settings-tabs" class="w-full overflow-x-auto border-b" aria-label="Settings sections"><div class="flex min-w-max items-center gap-6" role="tablist"><a href="#general" role="tab" aria-selected="false" class="flex min-h-11 items-center border-b-2 border-transparent px-1 text-sm font-medium text-muted-foreground">General</a><a href="#members" role="tab" aria-selected="true" class="flex min-h-11 items-center border-b-2 border-primary px-1 text-sm font-medium">Members</a><a href="#billing" role="tab" aria-selected="false" class="flex min-h-11 items-center border-b-2 border-transparent px-1 text-sm font-medium text-muted-foreground">Billing</a><a href="#integrations" role="tab" aria-selected="false" class="flex min-h-11 items-center border-b-2 border-transparent px-1 text-sm font-medium text-muted-foreground">Integrations</a></div></nav>
+        <section id="policy-matrix" class="rounded-xl border bg-card p-4 shadow-sm" aria-labelledby="policy-matrix-title"><div class="flex flex-wrap items-start justify-between gap-3"><div><h2 id="policy-matrix-title" class="text-base font-semibold">Local policy simulation</h2><p class="mt-1 max-w-3xl text-sm text-muted-foreground">Owner: approved membership actions. Admin: invite as Member, revoke/resend invites, and remove a regular Member. Member: read-only. SSO/SCIM: membership is read-only because the identity provider is the source of truth.</p></div><span class="rounded-full border px-2.5 py-1 text-xs font-semibold">Not authorization</span></div><p id="policy-explanation" tabindex="-1" class="mt-3 rounded-md border bg-muted/40 p-3 text-sm" data-policy-decision="allow">Local policy simulation is active.</p><span id="policy-evaluator" data-contract="local-policy-evaluator" class="sr-only">Local policy evaluator reads action, viewer role, target record, and workspace mode.</span></section>
+        <section id="fixture-remediation-contracts" class="rounded-xl border bg-card p-4 shadow-sm" aria-labelledby="fixture-remediation-contracts-title"><h2 id="fixture-remediation-contracts-title" class="text-base font-semibold">Local fixture contracts</h2><p class="mt-1 text-sm text-muted-foreground">These labels identify executable fixture seams; they do not describe a production service. Annotation records are classified as executable-local, annotation-only, or deferred-production.</p><div class="mt-3 grid gap-2 text-xs sm:grid-cols-2 lg:grid-cols-3"><p id="prototype-state-authority" data-contract="prototype-only-state-authority" class="rounded-md border bg-muted/30 p-2"><strong>prototype-state-authority:</strong> one in-page state object drives entities, scenario, filters, selection, mutations, and derived counts.</p><p id="prototype-failure-seam" data-contract="rollback-seam" class="rounded-md border bg-muted/30 p-2"><strong>prototype-failure-seam:</strong> the next local mutation can restore a snapshot.</p><p id="mobile-navigation" data-contract="mobile-navigation" class="rounded-md border bg-muted/30 p-2"><strong>mobile-navigation:</strong> the labelled drawer reaches the same destinations and returns focus.</p><p id="mobile-action-parity" data-contract="mobile-action-parity" class="rounded-md border bg-muted/30 p-2"><strong>mobile-action-parity:</strong> cards use the same local action policy as desktop rows.</p><p id="mobile-selection" data-contract="unique-selection" class="rounded-md border bg-muted/30 p-2"><strong>mobile-selection:</strong> desktop and mobile checkboxes share one entity-ID set.</p><p id="error-association" data-contract="field-error" class="rounded-md border bg-muted/30 p-2"><strong>error-association:</strong> invite errors focus the email field and use one announcement path.</p><p id="dialog-bottom-sheet" data-contract="mobile-dialog" class="rounded-md border bg-muted/30 p-2"><strong>dialog-bottom-sheet:</strong> narrow dialogs bottom-anchor with safe-area padding and dirty-close handling.</p><p id="announcement-owner" data-contract="single-live-region" class="rounded-md border bg-muted/30 p-2"><strong>announcement-owner:</strong> the permanent live region is the sole status announcer.</p><p id="focus-contrast-tokens" data-contract="focus-and-contrast" class="rounded-md border bg-muted/30 p-2"><strong>focus-contrast-tokens:</strong> interactive focus uses a solid ring; chart hues remain decoration.</p><p id="reduced-motion-safeguard" data-contract="reduced-motion" class="rounded-md border bg-muted/30 p-2"><strong>reduced-motion-safeguard:</strong> the fixture keeps the prefers-reduced-motion override.</p></div></section>
+        <section id="perm-member-readonly" class="hidden rounded-lg border border-status-info/30 bg-status-info/10 p-4 text-status-info" hidden><p class="text-sm font-semibold">View-only access</p><p class="mt-1 text-sm">You have view-only access to members. Ask an admin to make changes.</p></section>
+        <section id="perm-sso-scim-note" class="hidden rounded-lg border border-status-info/30 bg-status-info/10 p-4 text-status-info" hidden><p class="text-sm font-semibold">Managed by SSO / SCIM</p><p class="mt-1 text-sm">Membership list and details remain visible, but all local membership, role, ownership, and bulk mutations are disabled because the identity provider is the source of truth.</p></section>
+        <section id="offline-banner" class="hidden rounded-lg border border-status-warning/35 bg-status-warning/10 p-4 text-status-warning" hidden><p class="text-sm font-semibold">You are offline</p><p class="mt-1 text-sm">Reads remain available. Local membership mutations are disabled; this fixture does not queue changes.</p></section>
+        <section id="copy-suspended-banner" class="hidden rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-destructive" hidden><div class="flex items-start gap-3"><span aria-hidden="true">!</span><div><p id="suspended-banner-summary" class="text-sm font-semibold">1 suspended member needs attention</p><p id="suspended-banner-detail" class="mt-1 text-sm">Nadia Okafor cannot sign in because the workspace invoice is on hold.</p><button type="button" data-open-details="usr_nadia" class="touch-target mt-1 text-sm font-medium underline underline-offset-4">Review member</button></div></div></section>
+        <div class="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between"><div><div class="flex flex-wrap items-center gap-2"><h1 class="text-2xl font-semibold tracking-tight">Workspace members</h1><span id="heading-seat-count" class="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground" data-derived="occupied-seats">— seats occupied</span></div><p id="sample-record-note" data-derived="record-counts" class="mt-2 max-w-3xl text-sm text-muted-foreground">Seven named sample records are rendered; additional local records contribute to the seat total only.</p></div><button type="button" id="copy-invite-cta" data-action="invite" data-focus-key="invite-cta" data-policy-control="true" class="touch-target inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground shadow-xs hover:bg-primary/90">＋ Invite teammate</button></div>
+        <section id="seat-usage" class="grid gap-4 rounded-xl border bg-card p-4 shadow-sm md:grid-cols-[minmax(0,1fr)_auto] md:items-center"><div><div class="mb-2 flex flex-wrap items-center justify-between gap-4"><div><p id="seat-plan-name" class="text-sm font-semibold">Free plan</p><p class="text-xs text-muted-foreground">Active members and pending invites count toward this local seat model.</p></div><p class="text-sm font-medium tabular-nums"><span id="seat-used" data-derived="occupied-seats">—</span> / <span id="seat-limit" data-derived="seat-limit">—</span></p></div><div id="seat-progress" class="h-2 overflow-hidden rounded-full bg-muted" role="progressbar" aria-label="Workspace seat usage" aria-valuemin="0" aria-valuemax="0" aria-valuenow="0"><div id="seat-progress-bar" class="h-full rounded-full bg-primary"></div></div></div><div class="flex flex-wrap items-center gap-2 md:justify-end"><span id="seat-feedback" data-derived="remaining-seats" class="rounded-full bg-status-warning/15 px-2.5 py-1 text-xs font-semibold text-status-warning">—</span><span id="pending-invite-count" class="rounded-full border px-2.5 py-1 text-xs font-medium" data-derived="pending-invite-count">—</span><a href="#billing" class="touch-target inline-flex items-center rounded-md border bg-background px-3 text-xs font-medium">View billing</a></div></section>
+        <section id="members-list" class="overflow-hidden rounded-xl border bg-card shadow-sm"><div class="flex flex-col gap-4 border-b p-4 lg:flex-row lg:items-center lg:justify-between"><div><h2 id="members" tabindex="-1" class="text-base font-semibold">Members and invitations</h2><p id="member-results-count" data-derived="results-count" class="mt-1 text-sm text-muted-foreground">Loading local sample…</p></div><div id="toolbar" class="flex flex-col gap-2 sm:flex-row sm:items-center"><div class="relative min-w-0 sm:w-72"><span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" aria-hidden="true">⌕</span><label for="member-search" class="sr-only">Search members by name or email</label><input id="member-search" type="search" placeholder="Search name or email" autocomplete="off" class="h-10 w-full rounded-md border bg-transparent py-1 pl-9 pr-3 text-sm shadow-xs" aria-controls="member-results-container"></div><div id="member-filters" class="flex flex-wrap items-center gap-2"><label for="filter-role" class="sr-only">Filter by role</label><select id="filter-role" class="h-10 rounded-md border bg-background px-3 text-sm"><option value="all">All roles</option><option value="owner">Owner</option><option value="admin">Admin</option><option value="member">Member</option><option value="invited">Invited</option></select><label for="filter-status" class="sr-only">Filter by status</label><select id="filter-status" class="h-10 rounded-md border bg-background px-3 text-sm"><option value="all">All statuses</option><option value="active">Active</option><option value="invited">Invited</option><option value="expired">Expired</option><option value="suspended">Suspended</option></select><button type="button" id="clear-filters" data-clear-filters="true" class="touch-target hidden items-center rounded-md px-2 text-sm font-medium text-muted-foreground hover:bg-accent" hidden>Clear</button></div><details id="column-visibility" class="column-disclosure relative"><summary id="column-visibility-trigger" role="button" class="touch-target inline-flex list-none items-center gap-2 rounded-md border bg-background px-3 text-sm font-medium shadow-xs" aria-controls="column-visibility-panel" aria-expanded="false">▦ Columns</summary><div id="column-visibility-panel" class="absolute right-0 z-30 mt-2 w-52 rounded-md border bg-popover p-2 text-popover-foreground shadow-md" role="group" aria-label="Choose table columns"><label class="flex min-h-11 cursor-pointer items-center gap-2 rounded-sm px-2 text-sm hover:bg-accent"><input type="checkbox" data-column-toggle="role" checked class="size-4"> Role</label><label class="flex min-h-11 cursor-pointer items-center gap-2 rounded-sm px-2 text-sm hover:bg-accent"><input type="checkbox" data-column-toggle="status" checked class="size-4"> Status</label><label class="flex min-h-11 cursor-pointer items-center gap-2 rounded-sm px-2 text-sm hover:bg-accent"><input type="checkbox" data-column-toggle="joined" checked class="size-4"> Joined</label><label class="flex min-h-11 cursor-pointer items-center gap-2 rounded-sm px-2 text-sm hover:bg-accent"><input type="checkbox" data-column-toggle="last-active" checked class="size-4"> Last active</label></div></details></div></div>
+          <div id="selection-summary" class="hidden border-b bg-muted/40 px-4 py-2 text-sm text-muted-foreground" tabindex="-1" hidden><span id="selected-count" data-derived="selected-unique-count">0 selected</span> · Selection is unique by entity ID.</div>
+          <div id="bulk-actions" class="hidden flex-wrap items-center gap-2 border-b bg-muted/40 px-4 py-3" hidden><span class="mr-2 text-sm font-semibold">Bulk actions</span><button type="button" data-action="bulk-revoke" data-policy-control="true" class="touch-target inline-flex items-center rounded-md border bg-background px-3 text-sm font-medium">Revoke selected invites</button><button type="button" data-action="bulk-role" data-policy-control="true" class="touch-target inline-flex items-center rounded-md border bg-background px-3 text-sm font-medium">Change selected roles</button><span id="bulk-revoke-policy-reason" class="policy-reason w-full basis-full" hidden></span><span id="bulk-role-policy-reason" class="policy-reason w-full basis-full" hidden></span><button type="button" data-clear-selection class="touch-target ml-auto inline-flex items-center rounded-md px-3 text-sm font-medium text-muted-foreground hover:bg-accent">Clear selection</button></div>
+          <section id="state-loading" class="space-y-4 p-6" aria-busy="true" aria-label="Loading members" hidden><div class="flex items-center gap-3"><div class="prototype-skeleton size-10 rounded-full bg-muted"></div><div class="flex-1 space-y-2"><div class="prototype-skeleton h-4 w-40 rounded bg-muted"></div><div class="prototype-skeleton h-3 w-64 rounded bg-muted"></div></div></div><div class="prototype-skeleton h-px w-full bg-muted"></div><div class="grid grid-cols-[44px_minmax(0,1fr)_100px_100px] gap-4"><div class="prototype-skeleton h-4 rounded bg-muted"></div><div class="prototype-skeleton h-4 rounded bg-muted"></div><div class="prototype-skeleton h-4 rounded bg-muted"></div><div class="prototype-skeleton h-4 rounded bg-muted"></div></div><div class="grid grid-cols-[44px_minmax(0,1fr)_100px_100px] gap-4"><div class="prototype-skeleton h-4 rounded bg-muted"></div><div class="prototype-skeleton h-4 rounded bg-muted"></div><div class="prototype-skeleton h-4 rounded bg-muted"></div><div class="prototype-skeleton h-4 rounded bg-muted"></div></div></section>
+          <section id="state-error" class="grid min-h-72 place-items-center p-6 text-center" hidden><div class="max-w-sm space-y-4"><div class="mx-auto grid size-11 place-items-center rounded-full bg-destructive/10 text-destructive" aria-hidden="true">!</div><div><h3 class="font-semibold">Members could not be loaded</h3><p id="copy-error-load" class="mt-1 text-sm text-muted-foreground">This prototype could not show its local records. Retry the scenario.</p></div><button type="button" id="retry-load" class="touch-target inline-flex items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground">↻ Retry</button></div></section>
+          <section id="state-empty" class="grid min-h-80 place-items-center p-6 text-center" hidden><div class="max-w-sm space-y-4"><div class="mx-auto grid size-14 place-items-center rounded-2xl border bg-muted/40 text-muted-foreground" aria-hidden="true">＋</div><div><h2 id="copy-empty-title" class="text-lg font-semibold">No teammates yet</h2><p class="mt-2 text-sm text-muted-foreground">Invite your first teammate to start collaborating. You can change their role or remove access at any time.</p></div><button type="button" data-action="invite" data-focus-key="invite-cta" data-policy-control="true" class="touch-target inline-flex items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground">Invite teammate</button></div></section>
+          <section id="state-populated"><div id="member-results-container"><div class="prototype-scrollbar hidden overflow-x-auto md:block"><table class="w-full caption-bottom text-sm"><caption class="sr-only">Workspace members and pending invitations</caption><thead class="bg-muted/50"><tr class="border-b"><th class="w-14 px-4 py-3 text-left"><label class="sr-only" for="select-all-members">Select all visible sample members</label><input id="select-all-members" data-select-all="true" type="checkbox" class="size-4"></th><th class="min-w-72 px-4 py-3 text-left font-medium text-muted-foreground">Member</th><th data-column="role" class="w-32 px-4 py-3 text-left font-medium text-muted-foreground">Role</th><th data-column="status" class="w-36 px-4 py-3 text-left font-medium text-muted-foreground">Status</th><th data-column="joined" class="w-32 px-4 py-3 text-left font-medium text-muted-foreground">Joined</th><th data-column="last-active" class="w-32 px-4 py-3 text-left font-medium text-muted-foreground">Last active</th><th class="w-16 px-4 py-3"><span class="sr-only">Actions</span></th></tr></thead><tbody id="member-table-body"></tbody></table></div><div id="mobile-member-cards" class="divide-y md:hidden"></div></div><div id="state-no-results" class="hidden min-h-72 place-items-center p-6 text-center" hidden><div class="max-w-sm space-y-4"><div class="mx-auto grid size-12 place-items-center rounded-full bg-muted text-muted-foreground" aria-hidden="true">⌕</div><div><h3 class="font-semibold">No members found</h3><p class="mt-1 text-sm text-muted-foreground">Try a different name, email, role, or status.</p></div><button type="button" data-clear-filters="true" class="touch-target rounded-md border bg-background px-3 text-sm font-medium">Clear filters</button></div></div><div class="flex flex-col gap-2 border-t px-4 py-3 sm:flex-row sm:items-center sm:justify-between"><p id="pagination-note" class="text-sm text-muted-foreground">The fixture renders sample rows only; production pagination is deferred.</p><nav id="nav-pagination" class="flex items-center gap-2" aria-label="Members pagination"><button type="button" data-page="previous" class="touch-target inline-flex items-center rounded-md border bg-background px-3 text-sm font-medium" disabled>Previous</button><span id="pagination-label" data-derived="page-count" class="min-w-32 text-center text-sm text-muted-foreground">Sample page 1 of 1</span><button type="button" data-page="next" class="touch-target inline-flex items-center rounded-md border bg-background px-3 text-sm font-medium" disabled>Next</button></nav></div></section>
+        </section>
+        <section class="grid gap-4 md:grid-cols-3"><div class="rounded-xl border bg-card p-4 shadow-sm"><p class="text-sm font-semibold">Local policy matrix</p><p class="mt-2 text-sm text-muted-foreground">The visible policy is a fixture simulation. It is not an authorization boundary.</p></div><div class="rounded-xl border bg-card p-4 shadow-sm"><p class="text-sm font-semibold">Invite lifecycle</p><p class="mt-2 text-sm text-muted-foreground">Pending invites count locally; revoke removes one ID, and resend reuses that ID.</p></div><div class="rounded-xl border bg-card p-4 shadow-sm"><p class="text-sm font-semibold">No telemetry here</p><p class="mt-2 text-sm text-muted-foreground">This static fixture does not emit events, persist drafts, or call a service.</p></div></section>
+      </div>
+    </main>
+  </div>
+</div>
+<dialog aria-modal="true" id="nav-invite-modal" class="modal-sheet w-[calc(100%-2rem)] max-w-lg rounded-xl border bg-background p-0 shadow-lg" aria-labelledby="invite-modal-title" aria-describedby="invite-modal-description">
+  <div class="dialog-inner space-y-6"><div class="space-y-1.5"><h2 id="invite-modal-title" class="text-lg font-semibold">Invite a teammate</h2><p id="invite-modal-description" class="text-sm text-muted-foreground">They'll receive an email with a secure link to join this workspace.</p></div>
+    <form id="invite-form" class="space-y-4" novalidate>
+      <div class="space-y-2"><label for="invite-email" class="text-sm font-medium leading-none">Email address</label><input id="invite-email" name="email" type="email" autocomplete="email" placeholder="name@company.com" class="flex h-10 w-full rounded-md border bg-transparent px-3 py-1 text-sm shadow-xs" data-base-describedby="invite-email-help invite-email-errors" aria-describedby="invite-email-help invite-email-errors" aria-errormessage="invite-email-error-summary"><p id="invite-email-help" class="text-xs text-muted-foreground">Use a work email that is not already a member or pending invite.</p><div id="invite-email-errors" class="space-y-1"><p id="invite-email-error-summary" class="hidden text-sm font-medium text-destructive" hidden></p><p id="validation-email-format" class="hidden text-sm text-destructive" hidden>Enter a valid email address.</p><p id="validation-duplicate-email" class="hidden text-sm text-destructive" hidden>This email already has a pending invite.</p><p id="validation-max-members" class="hidden text-sm text-destructive" hidden>Free plan limit reached (25/25). Upgrade to invite more people.</p><p id="validation-self-invite" class="hidden text-sm text-destructive" hidden>You're already a member of this workspace.</p></div></div>
+      <div class="space-y-2"><label for="invite-role" class="text-sm font-medium leading-none">Role</label><select id="invite-role" name="role" data-base-describedby="policy-explanation" class="flex h-10 w-full rounded-md border bg-transparent px-3 py-1 text-sm shadow-xs"><option value="member">Member — can view and participate</option><option value="admin">Admin — can invite and revoke</option></select><p id="invite-role-policy" class="text-xs text-muted-foreground">Owner can invite an Admin; Admin can invite only a Member.</p></div>
+      <div class="space-y-2"><label for="invite-message" class="text-sm font-medium leading-none">Message <span class="font-normal text-muted-foreground">(optional)</span></label><textarea id="invite-message" name="message" data-base-describedby="policy-explanation" rows="4" placeholder="Add context to the invitation" class="flex min-h-24 w-full resize-y rounded-md border bg-transparent px-3 py-2 text-sm shadow-xs"></textarea><p class="text-xs text-muted-foreground">This local draft is not persisted.</p></div>
+      <div id="invite-cap-summary" class="rounded-md border bg-muted/40 p-3 text-xs text-muted-foreground"><div class="flex items-center justify-between gap-3"><span id="invite-cap-label">Seat available</span><span id="invite-remaining" data-derived="invite-remaining" class="font-semibold text-foreground">—</span></div><div class="mt-2 h-1.5 overflow-hidden rounded-full bg-muted"><div id="invite-cap-bar" class="h-full rounded-full bg-primary"></div></div></div>
+      <div class="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end"><button type="button" id="invite-cancel" data-request-close="true" class="touch-target inline-flex items-center justify-center rounded-md border bg-background px-4 text-sm font-medium shadow-xs">Cancel</button><button type="submit" id="invite-send" data-action="invite-submit" data-policy-control="true" class="touch-target inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground shadow-xs">Send invite</button></div>
+    </form>
+  </div>
 </dialog>
 
-<!-- nav-remove-confirm: destructive confirmation dialog -->
-<dialog id="nav-remove-confirm" aria-modal="true" aria-labelledby="remove-confirm-title">
-  <h2 id="remove-confirm-title">Remove member</h2>
-  <p id="copy-confirm-remove">Remove Jane? They'll lose access immediately.</p>
-  <footer style="display:flex; gap: var(--space-2); justify-content: flex-end;">
-    <button type="button">Cancel</button>
-    <button type="button" class="destructive">Remove</button>
-  </footer>
-</dialog>
+<dialog aria-modal="true" id="nav-invite-discard-confirm" class="modal-sheet w-[calc(100%-2rem)] max-w-md rounded-xl border bg-background p-0 shadow-lg" aria-labelledby="discard-invite-title" aria-describedby="discard-invite-copy"><div class="dialog-inner space-y-5"><div class="space-y-2"><h2 id="discard-invite-title" class="text-lg font-semibold">Discard this invite?</h2><p id="discard-invite-copy" class="text-sm text-muted-foreground">The email, role, and message you entered will be cleared.</p></div><div class="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end"><button type="button" data-request-close="true" class="touch-target inline-flex items-center rounded-md border bg-background px-4 text-sm font-medium">Keep editing</button><button type="button" id="discard-invite" class="destructive-button touch-target inline-flex items-center rounded-md px-4 text-sm font-medium shadow-xs">Discard</button></div></div></dialog>
 
-<!-- copy-toast-success + a11y-live-region: polite announcement of invite outcome -->
-<div id="copy-toast-success" hidden>Invite sent to jane@acme.com</div>
-<div id="a11y-live-region" role="status" aria-live="polite" hidden></div>
+<dialog aria-modal="true" id="nav-remove-confirm" class="modal-sheet w-[calc(100%-2rem)] max-w-md rounded-xl border bg-background p-0 shadow-lg" aria-labelledby="remove-modal-title" aria-describedby="copy-confirm-remove"><div class="dialog-inner space-y-5"><div class="space-y-2"><div class="grid size-10 place-items-center rounded-full bg-destructive/10 text-destructive" aria-hidden="true">!</div><h2 id="remove-modal-title" class="text-lg font-semibold">Remove member?</h2><p id="copy-confirm-remove" class="text-sm text-muted-foreground">Remove Jane? They'll lose access immediately.</p></div><div class="rounded-md border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">This local action removes one entity from both projections. No service call is made.</div><div class="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end"><button type="button" data-request-close="true" class="touch-target inline-flex items-center rounded-md border bg-background px-4 text-sm font-medium">Cancel</button><button type="button" id="remove-confirm" data-action="confirm-remove" data-policy-control="true" class="destructive-button touch-target inline-flex items-center rounded-md px-4 text-sm font-medium">Remove member</button></div></div></dialog>
 
-<details class="annotation-group" id="prototype-annotations">
-<summary>Prototype annotations (22) — collapsed by default; deep-links auto-open the one you asked for</summary>
-<!-- data-member-schema -->
-<details class="annotation">
-<summary>Annotation: data-member-schema</summary>
-<pre id="data-member-schema">
-{"entity":"member","fields":[
-  {"name":"id","type":"string (uuid)"},
-  {"name":"name","type":"string"},
-  {"name":"email","type":"string (lowercased, unique per workspace)"},
-  {"name":"role","type":"enum(owner|admin|member)"},
-  {"name":"status","type":"enum(active|invited|suspended|expired)"},
-  {"name":"joinedAt","type":"ISO-8601 UTC date-time"},
-  {"name":"lastActive","type":"ISO-8601 UTC date-time | null (renders 'Never')"}
-]}
-</pre>
-</details>
-<!-- data-invite-schema -->
-<details class="annotation">
-<summary>Annotation: data-invite-schema</summary>
-<pre id="data-invite-schema">
-{"entity":"invite","fields":[
-  {"name":"id","type":"string (uuid)"},
-  {"name":"email","type":"string (lowercased)"},
-  {"name":"role","type":"enum(owner|admin|member)"},
-  {"name":"invitedBy","type":"member.id"},
-  {"name":"expiresAt","type":"ISO-8601 UTC date-time (+7 days from send)"},
-  {"name":"status","type":"enum(pending|accepted|revoked|expired)"}
-]}
-</pre>
-</details>
-<!-- data-role-enum -->
-<details class="annotation">
-<summary>Annotation: data-role-enum</summary>
-<pre id="data-role-enum">{"enum":"owner|admin|member","owner":"single per workspace","display":"Title Case"}</pre>
-</details>
-<!-- data-status-enum -->
-<details class="annotation">
-<summary>Annotation: data-status-enum</summary>
-<pre id="data-status-enum">{"enum":"active|invited|suspended|expired","display":{"invited":"Invited — expires in 7 days","expired":"Expired"}}</pre>
-</details>
-<!-- data-dates -->
-<details class="annotation">
-<summary>Annotation: data-dates</summary>
-<pre id="data-dates">{"storage":"ISO-8601 UTC","display":"relative for < 7 days, absolute date beyond","null":"lastActive null renders 'Never'"}</pre>
-</details>
+<dialog aria-modal="true" id="nav-member-details" class="modal-sheet max-h-[90dvh] w-[calc(100%-2rem)] max-w-xl rounded-xl border bg-background p-0 shadow-lg" aria-labelledby="member-details-title"><div class="dialog-inner space-y-6"><div class="flex items-start gap-4"><span id="details-avatar" class="avatar avatar-owner">AM</span><div class="min-w-0 flex-1"><h2 id="member-details-title" class="text-lg font-semibold" tabindex="-1">Member details</h2><p id="details-email" class="identity-full text-sm text-muted-foreground"></p></div><button type="button" data-request-close="true" class="touch-target grid place-items-center rounded-md text-muted-foreground hover:bg-accent" aria-label="Close member details">×</button></div><div id="details-suspended" class="hidden rounded-md border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive" hidden>Access is suspended because the workspace invoice is on hold.</div><dl class="grid gap-4 rounded-lg border bg-muted/30 p-4 sm:grid-cols-2"><div><dt class="text-xs text-muted-foreground">Role</dt><dd id="details-role" class="mt-1 text-sm font-medium"></dd></div><div><dt class="text-xs text-muted-foreground">Status</dt><dd id="details-status" class="mt-1 text-sm font-medium"></dd></div><div><dt class="text-xs text-muted-foreground">Joined</dt><dd id="details-joined" class="mt-1 text-sm font-medium">—</dd></div><div><dt class="text-xs text-muted-foreground">Last active</dt><dd id="details-last-active" class="mt-1 text-sm font-medium">—</dd></div></dl><div class="space-y-3"><h3 class="text-sm font-semibold">Local fixture notes</h3><div class="rounded-lg border p-3"><p class="text-sm font-medium">Projection source</p><p class="mt-1 text-xs text-muted-foreground">This record is rendered from the same local entity in desktop and mobile views.</p></div></div><div class="flex justify-end"><button type="button" data-request-close="true" class="touch-target inline-flex items-center rounded-md border bg-background px-4 text-sm font-medium">Close</button></div></div></dialog>
 
-<!-- perm-owner-actions -->
-<details class="annotation">
-<summary>Annotation: perm-owner-actions</summary>
-<pre id="perm-owner-actions">{"role":"owner","allowed":["invite","revoke_invite","change_role","remove_member","transfer_ownership"]}</pre>
-</details>
-<!-- perm-admin-restricted -->
-<details class="annotation">
-<summary>Annotation: perm-admin-restricted</summary>
-<pre id="perm-admin-restricted">{"role":"admin","allowed":["invite","revoke_invite"],"denied":["change_admin_role","remove_admin","remove_owner","transfer_ownership"],"ui":"role dropdown and remove action disabled for admins/owner rows"}</pre>
-</details>
-<!-- perm-session-expired -->
-<details class="annotation">
-<summary>Annotation: perm-session-expired</summary>
-<pre id="perm-session-expired">{"event":"session expired","behavior":"redirect to /signin?next=/settings/members","pending_action":"preserve invite draft in sessionStorage"}</pre>
-</details>
+<dialog aria-modal="true" id="nav-transfer-ownership" class="modal-sheet w-[calc(100%-2rem)] max-w-md rounded-xl border bg-background p-0 shadow-lg" aria-labelledby="transfer-ownership-title" aria-describedby="transfer-ownership-copy"><form id="transfer-ownership-form" class="dialog-inner space-y-5"><div class="space-y-2"><h2 id="transfer-ownership-title" class="text-lg font-semibold">Transfer workspace ownership</h2><p id="transfer-ownership-copy" class="text-sm text-muted-foreground">Ownership moves immediately in this local model. You will become an admin.</p></div><div class="space-y-2"><label for="transfer-owner-select" class="text-sm font-medium">New owner</label><select id="transfer-owner-select" class="flex h-10 w-full rounded-md border bg-transparent px-3 py-1 text-sm shadow-xs"></select><p id="transfer-policy-reason" class="policy-reason" hidden></p></div><div class="rounded-md border border-status-warning/35 bg-status-warning/10 p-3 text-sm text-status-warning">The new owner can manage the approved local membership actions. This is not a production authorization change.</div><div class="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end"><button type="button" data-request-close="true" class="touch-target inline-flex items-center rounded-md border bg-background px-4 text-sm font-medium">Cancel</button><button type="submit" data-action="transfer-submit" data-policy-control="true" class="touch-target inline-flex items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground">Transfer ownership</button></div></form></dialog>
 
-<!-- telemetry-events -->
-<details class="annotation">
-<summary>Annotation: telemetry-events</summary>
-<pre id="telemetry-events">{"events":["members_viewed","invite_sent","invite_revoked","invite_resent","role_changed","member_removed","search_performed"]}</pre>
-</details>
-<!-- telemetry-props -->
-<details class="annotation">
-<summary>Annotation: telemetry-props</summary>
-<pre id="telemetry-props">{"common":{"workspace_id":"string","actor_role":"enum","member_count":"number","source_surface":"settings_members"}}</pre>
-</details>
-<!-- telemetry-pii-rule -->
-<details class="annotation">
-<summary>Annotation: telemetry-pii-rule</summary>
-<pre id="telemetry-pii-rule">{"rule":"emails are SHA-256 hashed before export; names and message bodies never leave the app"}</pre>
-</details>
+<dialog aria-modal="true" id="nav-role-change-dialog" class="modal-sheet w-[calc(100%-2rem)] max-w-md rounded-xl border bg-background p-0 shadow-lg" aria-labelledby="role-change-title" aria-describedby="role-change-copy"><form id="member-role-form" class="dialog-inner space-y-5"><div class="space-y-2"><h2 id="role-change-title" class="text-lg font-semibold">Change role</h2><p id="role-change-copy" class="text-sm text-muted-foreground"></p></div><div class="space-y-2"><label for="member-role-select" class="text-sm font-medium">New role</label><select id="member-role-select" class="flex h-10 w-full rounded-md border bg-transparent px-3 py-1 text-sm shadow-xs"><option value="member">Member</option><option value="admin">Admin</option></select></div><div class="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end"><button type="button" data-request-close="true" class="touch-target inline-flex items-center rounded-md border bg-background px-4 text-sm font-medium">Cancel</button><button type="submit" data-action="role-submit" data-policy-control="true" class="touch-target inline-flex items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground">Save role</button></div></form></dialog>
 
-<!-- perf-list-virtualization -->
-<details class="annotation">
-<summary>Annotation: perf-list-virtualization</summary>
-<pre id="perf-list-virtualization">{"rule":"virtualize the table beyond 100 members","budget":"<= 50 rendered rows in DOM at any time"}</pre>
-</details>
-<!-- perf-search-debounce -->
-<details class="annotation">
-<summary>Annotation: perf-search-debounce</summary>
-<pre id="perf-search-debounce">{"rule":"debounce search input 300ms; cancel in-flight request on new keystroke"}</pre>
-</details>
-<!-- perf-optimistic-updates -->
-<details class="annotation">
-<summary>Annotation: perf-optimistic-updates</summary>
-<pre id="perf-optimistic-updates">{"rule":"role change and remove apply optimistically; rollback + error toast on API failure"}</pre>
-</details>
+<dialog aria-modal="true" id="nav-bulk-role-dialog" class="modal-sheet w-[calc(100%-2rem)] max-w-md rounded-xl border bg-background p-0 shadow-lg" aria-labelledby="bulk-role-title" aria-describedby="bulk-role-copy"><form id="bulk-role-form" class="dialog-inner space-y-5"><div class="space-y-2"><h2 id="bulk-role-title" class="text-lg font-semibold">Change selected roles</h2><p id="bulk-role-copy" class="text-sm text-muted-foreground"></p></div><div class="space-y-2"><label for="bulk-role-value" class="text-sm font-medium">New role</label><select id="bulk-role-value" class="flex h-10 w-full rounded-md border bg-transparent px-3 py-1 text-sm shadow-xs"><option value="member">Member</option><option value="admin">Admin</option></select></div><div class="rounded-md border bg-muted/40 p-3 text-sm text-muted-foreground">The local operation is all-or-nothing. Any ineligible target rejects the whole selection.</div><div class="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end"><button type="button" data-request-close="true" class="touch-target inline-flex items-center rounded-md border bg-background px-4 text-sm font-medium">Cancel</button><button type="submit" data-action="bulk-role-submit" data-policy-control="true" class="touch-target inline-flex items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground">Change roles</button></div></form></dialog>
 
-<!-- a11y-focus-trap -->
-<details class="annotation">
-<summary>Annotation: a11y-focus-trap</summary>
-<pre id="a11y-focus-trap">{"rule":"modal traps Tab/Shift+Tab; Esc closes; focus returns to the trigger element"}</pre>
-</details>
-<!-- a11y-keyboard -->
-<details class="annotation">
-<summary>Annotation: a11y-keyboard</summary>
-<pre id="a11y-keyboard">{"rule":"full keyboard path: Enter submits invite, arrow keys navigate the role menu, Esc closes dialogs"}</pre>
-</details>
-<!-- a11y-contrast -->
-<details class="annotation">
-<summary>Annotation: a11y-contrast</summary>
-<pre id="a11y-contrast">{"rule":"destructive red >= 4.5:1 on white; focus ring visible on light and dark surfaces"}</pre>
-</details>
-<!-- a11y-labels -->
-<details class="annotation">
-<summary>Annotation: a11y-labels</summary>
-<pre id="a11y-labels">{"rule":"icon-only buttons carry aria-label including the member name"}</pre>
-</details>
+<dialog aria-modal="true" id="mobile-nav-drawer" class="modal-sheet w-[calc(100%-2rem)] max-w-sm rounded-xl border bg-background p-0 shadow-lg" aria-labelledby="mobile-nav-title"><div class="dialog-inner"><div class="flex items-center justify-between"><h2 id="mobile-nav-title" class="text-lg font-semibold">Workspace navigation</h2><button type="button" data-request-close="true" class="touch-target grid place-items-center rounded-md border" aria-label="Close navigation">×</button></div><nav class="mt-4 space-y-2" aria-label="Mobile workspace navigation"><a href="#overview" class="flex min-h-11 items-center rounded-md px-3 text-sm font-medium hover:bg-accent">Overview</a><a href="#members" aria-current="page" class="flex min-h-11 items-center rounded-md bg-accent px-3 text-sm font-medium">Members</a><a href="#security" class="flex min-h-11 items-center rounded-md px-3 text-sm font-medium hover:bg-accent">Security</a><a href="#notifications" class="flex min-h-11 items-center rounded-md px-3 text-sm font-medium hover:bg-accent">Notifications</a><a href="#general" class="flex min-h-11 items-center rounded-md px-3 text-sm font-medium hover:bg-accent">General</a><a href="#billing" class="flex min-h-11 items-center rounded-md px-3 text-sm font-medium hover:bg-accent">Billing</a><a href="#integrations" class="flex min-h-11 items-center rounded-md px-3 text-sm font-medium hover:bg-accent">Integrations</a></nav></div></dialog>
 
-<!-- platform-responsive -->
-<details class="annotation">
-<summary>Annotation: platform-responsive</summary>
-<pre id="platform-responsive">{"rule":"desktop dialog >= 768px; mobile bottom-sheet < 768px"}</pre>
-</details>
-<!-- platform-safe-area -->
-<details class="annotation">
-<summary>Annotation: platform-safe-area</summary>
-<pre id="platform-safe-area">{"rule":"bottom-sheet padding respects env(safe-area-inset-bottom)"}</pre>
-</details>
-<!-- platform-browsers -->
-<details class="annotation">
-<summary>Annotation: platform-browsers</summary>
-<pre id="platform-browsers">{"supported":"evergreen Chrome, Safari, Firefox, Edge","unsupported":["IE11"]}</pre>
-</details>
-<!-- platform-offline -->
-<details class="annotation">
-<summary>Annotation: platform-offline</summary>
-<pre id="platform-offline">{"rule":"offline banner shown; mutation actions disabled and queued copy explains why"}</pre>
-</details>
-</details>
+<div class="pointer-events-none fixed inset-x-0 bottom-0 z-[80] flex flex-col items-center gap-2 p-4 sm:items-end"><div id="copy-toast-success" class="toast-surface pointer-events-auto hidden w-full max-w-sm rounded-lg border bg-card p-4 text-card-foreground" hidden><div class="flex items-start gap-3"><span class="avatar avatar-member" aria-hidden="true">✓</span><div class="min-w-0 flex-1"><p id="toast-success-message" class="text-sm font-medium">Local change complete.</p><p class="mt-0.5 text-xs text-muted-foreground">This message is also sent to the single live region.</p></div><button type="button" data-dismiss-toast="true" class="touch-target grid place-items-center rounded-md" aria-label="Dismiss notification">×</button></div></div><div id="toast-error" class="toast-surface pointer-events-auto hidden w-full max-w-sm rounded-lg border border-destructive/30 bg-card p-4 text-card-foreground" hidden><div class="flex items-start gap-3"><span class="avatar avatar-owner" aria-hidden="true">!</span><div class="min-w-0 flex-1"><p id="toast-error-message" class="text-sm font-medium">Local change rolled back.</p><p class="mt-0.5 text-xs text-muted-foreground">The prior local snapshot was restored.</p></div><button type="button" data-dismiss-toast="true" class="touch-target grid place-items-center rounded-md" aria-label="Dismiss error">×</button></div></div></div>
+<div id="a11y-live-region" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
+<div id="runtime-anchor-registry" data-runtime-anchor-proxy="true" class="sr-only" aria-label="Runtime anchor registry">
+  <span data-runtime-anchor-id="edge-invite-expiry" data-runtime-anchor-target="[data-anchor-ref=&quot;edge-invite-expiry&quot;]" tabindex="-1"></span>
+  <span data-runtime-anchor-id="edge-long-names" data-runtime-anchor-target="[data-anchor-ref=&quot;edge-long-names&quot;]" tabindex="-1"></span>
+  <span data-runtime-anchor-id="edge-unicode-names" data-runtime-anchor-target="[data-anchor-ref=&quot;edge-unicode-names&quot;]" tabindex="-1"></span>
+  <span data-runtime-anchor-id="member-actions-menu" data-runtime-anchor-target="[data-anchor-ref=&quot;member-actions-menu&quot;]" tabindex="-1"></span>
+  <span data-runtime-anchor-id="nav-role-change" data-runtime-anchor-target="[data-anchor-ref=&quot;nav-role-change&quot;]" tabindex="-1"></span>
+  <span data-runtime-anchor-id="invite-resend" data-runtime-anchor-target="[data-anchor-ref=&quot;invite-resend&quot;]" tabindex="-1"></span>
+</div>
 
+<details id="prototype-annotations" class="mx-auto mt-6 max-w-7xl rounded-xl border bg-card shadow-sm"><summary class="flex min-h-11 cursor-pointer list-none items-center gap-3 p-4 font-medium"><span class="text-lg" aria-hidden="true">›</span><span>Prototype annotations (22) — classifications are visible and machine-readable</span><span class="ml-auto text-xs font-normal text-muted-foreground">Reverse-PRD evidence, not production verification</span></summary><div class="border-t p-4"><p id="annotation-classification" class="annotation-classification rounded-md bg-muted/40 p-3 text-sm"><strong>Classification contract:</strong> <span data-annotation-classification="executable-local">executable-local</span> means this page demonstrates the behavior; <span data-annotation-classification="annotation-only">annotation-only</span> means evidence text is not runtime proof; <span data-annotation-classification="deferred-production">deferred-production</span> depends on a service, identity, persistence, authorization, or telemetry boundary.</p><div class="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+  <details class="rounded-lg border" data-annotation-id="data-member-schema" data-annotation-classification="annotation-only"><summary class="flex min-h-11 cursor-pointer items-center justify-between gap-2 p-3 text-sm font-medium">Data: member schema <span class="status-pill expired">annotation-only</span></summary><pre id="data-member-schema" class="prototype-scrollbar overflow-x-auto whitespace-pre-wrap p-3 pt-0 text-xs text-muted-foreground">{"entity":"member","fields":["id","name","email","role","status","joinedAt","lastActive"]}</pre><p class="px-3 pb-3 text-xs text-muted-foreground">Reverse-spec shape only; no production schema is implemented.</p></details>
+  <details class="rounded-lg border" data-annotation-id="data-invite-schema" data-annotation-classification="annotation-only"><summary class="flex min-h-11 cursor-pointer items-center justify-between gap-2 p-3 text-sm font-medium">Data: invite schema <span class="status-pill expired">annotation-only</span></summary><pre id="data-invite-schema" class="prototype-scrollbar overflow-x-auto whitespace-pre-wrap p-3 pt-0 text-xs text-muted-foreground">{"entity":"invite","fields":["id","email","role","invitedBy","expiresAt","status"]}</pre><p class="px-3 pb-3 text-xs text-muted-foreground">The local record is a simplified fixture object, not an API contract.</p></details>
+  <details class="rounded-lg border" data-annotation-id="data-role-enum" data-annotation-classification="executable-local"><summary class="flex min-h-11 cursor-pointer items-center justify-between gap-2 p-3 text-sm font-medium">Data: role enum <span class="status-pill active">executable-local</span></summary><pre id="data-role-enum" class="prototype-scrollbar overflow-x-auto whitespace-pre-wrap p-3 pt-0 text-xs text-muted-foreground">{"enum":"owner|admin|member","owner":"exactly one after local transfer"}</pre><p class="px-3 pb-3 text-xs text-muted-foreground">The local transfer path demonstrates one owner; it is not authorization.</p></details>
+  <details class="rounded-lg border" data-annotation-id="data-status-enum" data-annotation-classification="executable-local"><summary class="flex min-h-11 cursor-pointer items-center justify-between gap-2 p-3 text-sm font-medium">Data: status mapping <span class="status-pill active">executable-local</span></summary><pre id="data-status-enum" class="prototype-scrollbar overflow-x-auto whitespace-pre-wrap p-3 pt-0 text-xs text-muted-foreground">{"member":["active","suspended"],"invite":["invited","expired"]}</pre><p class="px-3 pb-3 text-xs text-muted-foreground">Status transitions update both projections in this local model.</p></details>
+  <details class="rounded-lg border" data-annotation-id="data-dates" data-annotation-classification="annotation-only"><summary class="flex min-h-11 cursor-pointer items-center justify-between gap-2 p-3 text-sm font-medium">Data: dates <span class="status-pill expired">annotation-only</span></summary><pre id="data-dates" class="prototype-scrollbar overflow-x-auto whitespace-pre-wrap p-3 pt-0 text-xs text-muted-foreground">{"storage":"ISO-8601 UTC","display":"relative under 7 days","null":"Never"}</pre><p class="px-3 pb-3 text-xs text-muted-foreground">Date formatting is represented by fixture labels, not a production date service.</p></details>
+  <details class="rounded-lg border" data-annotation-id="perm-owner-actions" data-annotation-classification="executable-local"><summary class="flex min-h-11 cursor-pointer items-center justify-between gap-2 p-3 text-sm font-medium">Permissions: owner <span class="status-pill active">executable-local</span></summary><pre id="perm-owner-actions" class="prototype-scrollbar overflow-x-auto whitespace-pre-wrap p-3 pt-0 text-xs text-muted-foreground">{"role":"owner","allowed":["invite","revoke","resend","change_role","remove","reactivate","transfer_ownership"]}</pre><p class="px-3 pb-3 text-xs text-muted-foreground">Simulation only; production enforcement is deferred.</p></details>
+  <details class="rounded-lg border" data-annotation-id="perm-admin-restricted" data-annotation-classification="executable-local"><summary class="flex min-h-11 cursor-pointer items-center justify-between gap-2 p-3 text-sm font-medium">Permissions: admin <span class="status-pill active">executable-local</span></summary><pre id="perm-admin-restricted" class="prototype-scrollbar overflow-x-auto whitespace-pre-wrap p-3 pt-0 text-xs text-muted-foreground">{"role":"admin","allowed":["invite_member","revoke","resend","remove_member"],"denied":["role_change","admin_owner_mutation","reactivate","transfer","bulk_role"]}</pre><p class="px-3 pb-3 text-xs text-muted-foreground">Simulation only; production enforcement is deferred.</p></details>
+  <details class="rounded-lg border" data-annotation-id="perm-session-expired" data-annotation-classification="deferred-production"><summary class="flex min-h-11 cursor-pointer items-center justify-between gap-2 p-3 text-sm font-medium">Permissions: session expiry <span class="status-pill invited">deferred-production</span></summary><pre id="perm-session-expired" class="prototype-scrollbar overflow-x-auto whitespace-pre-wrap p-3 pt-0 text-xs text-muted-foreground">{"event":"session expired","redirect":"/signin","draft":"future production decision"}</pre><p class="px-3 pb-3 text-xs text-muted-foreground">No redirect, session, or draft persistence is implemented here.</p></details>
+  <details class="rounded-lg border" data-annotation-id="telemetry-events" data-annotation-classification="deferred-production"><summary class="flex min-h-11 cursor-pointer items-center justify-between gap-2 p-3 text-sm font-medium">Telemetry: events <span class="status-pill invited">deferred-production</span></summary><pre id="telemetry-events" class="prototype-scrollbar overflow-x-auto whitespace-pre-wrap p-3 pt-0 text-xs text-muted-foreground">{"proposed":["members_viewed","invite_sent","role_changed"]}</pre><p class="px-3 pb-3 text-xs text-muted-foreground">No event sink or collection is implemented.</p></details>
+  <details class="rounded-lg border" data-annotation-id="telemetry-props" data-annotation-classification="deferred-production"><summary class="flex min-h-11 cursor-pointer items-center justify-between gap-2 p-3 text-sm font-medium">Telemetry: properties <span class="status-pill invited">deferred-production</span></summary><pre id="telemetry-props" class="prototype-scrollbar overflow-x-auto whitespace-pre-wrap p-3 pt-0 text-xs text-muted-foreground">{"proposed":["workspace_id","actor_role","member_count","source_surface"]}</pre><p class="px-3 pb-3 text-xs text-muted-foreground">No telemetry properties are exported.</p></details>
+  <details class="rounded-lg border" data-annotation-id="telemetry-pii-rule" data-annotation-classification="deferred-production"><summary class="flex min-h-11 cursor-pointer items-center justify-between gap-2 p-3 text-sm font-medium">Telemetry: privacy <span class="status-pill invited">deferred-production</span></summary><pre id="telemetry-pii-rule" class="prototype-scrollbar overflow-x-auto whitespace-pre-wrap p-3 pt-0 text-xs text-muted-foreground">{"proposed":"hash email before export","implemented":false}</pre><p class="px-3 pb-3 text-xs text-muted-foreground">No hashing, export, or privacy guarantee is implemented.</p></details>
+  <details class="rounded-lg border" data-annotation-id="perf-list-virtualization" data-annotation-classification="deferred-production"><summary class="flex min-h-11 cursor-pointer items-center justify-between gap-2 p-3 text-sm font-medium">Performance: table size <span class="status-pill invited">deferred-production</span></summary><pre id="perf-list-virtualization" class="prototype-scrollbar overflow-x-auto whitespace-pre-wrap p-3 pt-0 text-xs text-muted-foreground">{"virtualize_above":100,"max_rendered_rows":50}</pre><p class="px-3 pb-3 text-xs text-muted-foreground">Virtualization is a production concern; this fixture renders a small sample.</p></details>
+  <details class="rounded-lg border" data-annotation-id="perf-search-debounce" data-annotation-classification="executable-local"><summary class="flex min-h-11 cursor-pointer items-center justify-between gap-2 p-3 text-sm font-medium">Performance: search debounce <span class="status-pill active">executable-local</span></summary><pre id="perf-search-debounce" class="prototype-scrollbar overflow-x-auto whitespace-pre-wrap p-3 pt-0 text-xs text-muted-foreground">{"local_filter_debounce_ms":300,"request_cancellation":"not implemented"}</pre><p class="px-3 pb-3 text-xs text-muted-foreground">Only local filtering is demonstrated; no request is made.</p></details>
+  <details class="rounded-lg border" data-annotation-id="perf-optimistic-updates" data-annotation-classification="executable-local"><summary class="flex min-h-11 cursor-pointer items-center justify-between gap-2 p-3 text-sm font-medium">Performance: rollback <span class="status-pill active">executable-local</span></summary><pre id="perf-optimistic-updates" class="prototype-scrollbar overflow-x-auto whitespace-pre-wrap p-3 pt-0 text-xs text-muted-foreground">{"local_snapshot":true,"failure_seam":true,"service_retry":"deferred-production"}</pre><p class="px-3 pb-3 text-xs text-muted-foreground">The failure seam restores local entities, selection, filters, and page.</p></details>
+  <details class="rounded-lg border" data-annotation-id="a11y-focus-trap" data-annotation-classification="executable-local"><summary class="flex min-h-11 cursor-pointer items-center justify-between gap-2 p-3 text-sm font-medium">Accessibility: focus <span class="status-pill active">executable-local</span></summary><pre id="a11y-focus-trap" class="prototype-scrollbar overflow-x-auto whitespace-pre-wrap p-3 pt-0 text-xs text-muted-foreground">{"dialog":"Tab containment","escape":"dirty-close decision","restore":"opener focus"}</pre><p class="px-3 pb-3 text-xs text-muted-foreground">The static fixture demonstrates local focus behavior; production primitives remain separate.</p></details>
+  <details class="rounded-lg border" data-annotation-id="a11y-keyboard" data-annotation-classification="executable-local"><summary class="flex min-h-11 cursor-pointer items-center justify-between gap-2 p-3 text-sm font-medium">Accessibility: keyboard <span class="status-pill active">executable-local</span></summary><pre id="a11y-keyboard" class="prototype-scrollbar overflow-x-auto whitespace-pre-wrap p-3 pt-0 text-xs text-muted-foreground">{"menus":"Arrow/Home/End/Escape","selection":"Space toggles entity ID","invite":"Enter submits valid form"}</pre><p class="px-3 pb-3 text-xs text-muted-foreground">Browser verification is still required for each production component.</p></details>
+  <details class="rounded-lg border" data-annotation-id="a11y-contrast" data-annotation-classification="annotation-only"><summary class="flex min-h-11 cursor-pointer items-center justify-between gap-2 p-3 text-sm font-medium">Accessibility: contrast <span class="status-pill expired">annotation-only</span></summary><pre id="a11y-contrast" class="prototype-scrollbar overflow-x-auto whitespace-pre-wrap p-3 pt-0 text-xs text-muted-foreground">{"target":"WCAG AA review","measured":false}</pre><p class="px-3 pb-3 text-xs text-muted-foreground">Tokens are safer defaults, not a measured compliance result.</p></details>
+  <details class="rounded-lg border" data-annotation-id="a11y-labels" data-annotation-classification="executable-local"><summary class="flex min-h-11 cursor-pointer items-center justify-between gap-2 p-3 text-sm font-medium">Accessibility: labels <span class="status-pill active">executable-local</span></summary><pre id="a11y-labels" class="prototype-scrollbar overflow-x-auto whitespace-pre-wrap p-3 pt-0 text-xs text-muted-foreground">{"icon_buttons":"full identity and action in accessible name","announcements":"one live region"}</pre><p class="px-3 pb-3 text-xs text-muted-foreground">The local markup names every mutation and selection control.</p></details>
+  <details class="rounded-lg border" data-annotation-id="platform-responsive" data-annotation-classification="executable-local"><summary class="flex min-h-11 cursor-pointer items-center justify-between gap-2 p-3 text-sm font-medium">Platform: responsive <span class="status-pill active">executable-local</span></summary><pre id="platform-responsive" class="prototype-scrollbar overflow-x-auto whitespace-pre-wrap p-3 pt-0 text-xs text-muted-foreground">{"desktop":"dialog centered","mobile":"bottom sheet below 768px","cards":"stacked below 768px"}</pre><p class="px-3 pb-3 text-xs text-muted-foreground">CSS behavior is local; production breakpoints require component review.</p></details>
+  <details class="rounded-lg border" data-annotation-id="platform-safe-area" data-annotation-classification="executable-local"><summary class="flex min-h-11 cursor-pointer items-center justify-between gap-2 p-3 text-sm font-medium">Platform: safe area <span class="status-pill active">executable-local</span></summary><pre id="platform-safe-area" class="prototype-scrollbar overflow-x-auto whitespace-pre-wrap p-3 pt-0 text-xs text-muted-foreground">{"bottom_padding":"env(safe-area-inset-bottom)","minimum_touch_target":"44px"}</pre><p class="px-3 pb-3 text-xs text-muted-foreground">The local sheet includes safe-area padding; device verification remains necessary.</p></details>
+  <details class="rounded-lg border" data-annotation-id="platform-browsers" data-annotation-classification="deferred-production"><summary class="flex min-h-11 cursor-pointer items-center justify-between gap-2 p-3 text-sm font-medium">Platform: browsers <span class="status-pill invited">deferred-production</span></summary><pre id="platform-browsers" class="prototype-scrollbar overflow-x-auto whitespace-pre-wrap p-3 pt-0 text-xs text-muted-foreground">{"production_support_matrix":"not defined by this fixture"}</pre><p class="px-3 pb-3 text-xs text-muted-foreground">No browser support claim is made.</p></details>
+  <details class="rounded-lg border" data-annotation-id="platform-offline" data-annotation-classification="executable-local"><summary class="flex min-h-11 cursor-pointer items-center justify-between gap-2 p-3 text-sm font-medium">Platform: offline <span class="status-pill active">executable-local</span></summary><pre id="platform-offline" class="prototype-scrollbar overflow-x-auto whitespace-pre-wrap p-3 pt-0 text-xs text-muted-foreground">{"reads":"available","local_mutations":"disabled","queue":false}</pre><p class="px-3 pb-3 text-xs text-muted-foreground">Offline mode is a visible local read-only scenario, not a service contract.</p></details>
+</div></div></details>
 <script>
-  // Prototype-only behavior: state switcher + modal wiring + debounce demo.
-  const panels = ['empty', 'loading', 'error', 'populated'];
-  function show(state) {
-    for (const p of panels) document.getElementById('state-' + p).hidden = p !== state;
-  }
-  document.getElementById('state-switcher').addEventListener('click', (e) => {
-    const btn = e.target.closest('button[data-state]');
-    if (btn) show(btn.dataset.state);
-  });
-  document.querySelectorAll('.js-open-invite').forEach((b) => b.addEventListener('click', () => {
-    document.getElementById('nav-invite-modal').showModal();
-  }));
-  document.getElementById('invite-cancel').addEventListener('click', () => {
-    document.getElementById('nav-invite-modal').close();
-  });
-  document.getElementById('member-search').addEventListener('input', debounce(() => {
-    // search_performed telemetry fires here; results update with an empty-search state
-  }, 300));
-  function debounce(fn, ms) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; }
+  // The single authority for this static fixture. It is intentionally in-page only.
+  const $ = (selector, root = document) => root.querySelector(selector);
+  const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
+  const setHidden = (element, hidden) => { if (!element) return; element.hidden = hidden; element.classList.toggle('hidden', hidden); };
+  const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+  const titleCase = (value) => value ? value.charAt(0).toUpperCase() + value.slice(1) : value;
+  const roleLabel = (role) => titleCase(role);
+  const normalizeEmail = (value) => value.trim().toLowerCase();
+  const initials = (name) => name.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => Array.from(part)[0]).join('').toUpperCase();
+  const isSeatBearing = (entity) => entity.kind === 'invite' ? entity.status === 'invited' : entity.status === 'active';
 
-  // A7 deep-link reveal: file.html#anchor lands on the element the statement claims.
-  let revealed = [];
-  function revealForAnchor() {
-    for (const n of revealed) n.hidden = true;  // reset: each anchor shows only its own state
-    revealed = [];
-    const id = decodeURIComponent(location.hash.slice(1));
-    if (!id) return;
-    const el = document.getElementById(id);
-    if (!el) return;
-    const dlg = el.closest('dialog');
-    for (const d of document.querySelectorAll('dialog[open]')) { if (d !== dlg) d.close(); }
-    if (dlg && !dlg.open) dlg.showModal();
-    const section = el.closest('section[id^="state-"]');
-    if (section) show(section.id.replace('state-', ''));
-    let node = el.parentElement;
-    while (node) { if (node.tagName === 'DETAILS') node.open = true; node = node.parentElement; }
-    if (el.hidden) { el.hidden = false; revealed.push(el); }
-    el.scrollIntoView({ block: 'center' });
+  const PLANS = {
+    free24: { label: 'Free plan', limit: 25, target: 24, capCopy: 'Free plan limit reached (25/25). Upgrade to invite more people.' },
+    free25: { label: 'Free plan', limit: 25, target: 25, capCopy: 'Free plan limit reached (25/25). Upgrade to invite more people.' },
+    team49: { label: 'Team plan', limit: 50, target: 49, capCopy: 'Team plan limit reached (50/50). Revoke or let an invite expire before inviting again.' },
+    team50: { label: 'Team plan', limit: 50, target: 50, capCopy: 'Team plan limit reached (50/50). Revoke or let an invite expire before inviting again.' },
+  };
+  const SAMPLE_ENTITIES = [
+    { id: 'usr_alejandra', kind: 'member', name: 'Alejandra María de la Cruz-Fernández', email: 'alejandra.cruz-fernandez@orbit.example', role: 'owner', status: 'active', joined: 'Jan 12, 2025', lastActive: '2m ago', sample: true },
+    { id: 'usr_maximilian', kind: 'member', name: 'Maximilian Wolfeschlegelsteinhausenbergerdorff', email: 'maximilian.wolfeschlegelsteinhausenbergerdorff@subdomain.example.com', role: 'admin', status: 'active', joined: 'Mar 3, 2025', lastActive: 'Yesterday', sample: true },
+    { id: 'usr_amelie', kind: 'member', name: 'Amélie 陳大文', email: 'amelie.chen@orbit.example', role: 'member', status: 'active', joined: 'Aug 19, 2025', lastActive: '3d ago', sample: true },
+    { id: 'usr_nadia', kind: 'member', name: 'Nadia Okafor', email: 'nadia.okafor@orbit.example', role: 'member', status: 'suspended', joined: 'Nov 2, 2025', lastActive: '12d ago', sample: true },
+    { id: 'inv_jane', kind: 'invite', name: 'Jane Cooper', email: 'jane@acme.com', role: 'member', status: 'invited', joined: '—', lastActive: 'Never', sample: true, invitedBy: 'usr_alejandra', expiresInDays: 7 },
+    { id: 'inv_dmitri', kind: 'invite', name: 'Dmitri Volkov', email: 'dmitri@acme.com', role: 'member', status: 'expired', joined: '—', lastActive: 'Never', sample: true, invitedBy: 'usr_alejandra', expiresInDays: 0 },
+    { id: 'usr_priya', kind: 'member', name: 'Priya Raman', email: 'priya.raman@orbit.example', role: 'admin', status: 'active', joined: 'Feb 14, 2025', lastActive: '6h ago', sample: true },
+  ];
+
+  function makeEntities(target) {
+    const entities = SAMPLE_ENTITIES.map((entity) => ({ ...entity, countsTowardSeats: isSeatBearing(entity) }));
+    let occupied = entities.filter((entity) => entity.countsTowardSeats).length;
+    let index = 1;
+    while (occupied < target) {
+      const id = `usr_background_${String(index).padStart(2, '0')}`;
+      entities.push({ id, kind: 'member', name: `Additional member ${String(index).padStart(2, '0')}`, email: `member${String(index).padStart(2, '0')}@orbit.example`, role: 'member', status: 'active', joined: 'Local fixture record', lastActive: 'Not modeled', sample: false, countsTowardSeats: true });
+      occupied += 1;
+      index += 1;
+    }
+    return entities;
   }
+
+  const state = {
+    screen: 'populated',
+    planScenario: 'free24',
+    viewerRole: 'owner',
+    workspaceMode: 'normal',
+    theme: matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light',
+    entities: makeEntities(PLANS.free24.target),
+    filters: { query: '', role: 'all', status: 'all' },
+    page: { number: 1, size: 25 },
+    selection: new Set(),
+    columns: { role: true, status: true, joined: true, 'last-active': true },
+    mutation: { status: 'idle', action: '', snapshot: null, message: '' },
+    failureSeam: false,
+    inviteSequence: 1,
+    derived: null,
+    policyMessage: '',
+    emptySnapshot: null,
+    ui: { pendingRemovalId: null, pendingRoleId: null, pendingTransferId: null, pendingBulkIds: [], dirtyDialog: null, activeMenuId: null },
+  };
+
+  // `prototypeState` is an explicit name for the same object; there is no second store.
+  const prototypeState = state;
+  const roleSwitcher = $('#role-switcher');
+  const workspaceModeSwitcher = $('#workspace-mode-switcher');
+  const searchInput = $('#member-search');
+  const roleFilter = $('#filter-role');
+  const statusFilter = $('#filter-status');
+  const dialogMeta = new Map();
+  let toastTimer = null;
+  let searchTimer = null;
+  let announcementFrame = null;
+  const RUNTIME_ANCHOR_IDS = ['edge-invite-expiry', 'edge-long-names', 'edge-unicode-names', 'member-actions-menu', 'nav-role-change', 'invite-resend'];
+  const REMOVED_ROW_FOCUS_FALLBACK = 'members';
+  const MENU_VIEWPORT_MARGIN = 8;
+
+  // Dynamic row controls keep their authored IDs when rendered. When a filter or mutation removes the row, a stable proxy receives the ID so every seeded deep link remains resolvable.
+  function syncRuntimeAnchors() {
+    RUNTIME_ANCHOR_IDS.forEach((id) => {
+      const proxy = document.querySelector(`[data-runtime-anchor-id="${id}"]`);
+      if (!proxy) return;
+      const candidates = $$(`[data-anchor-ref="${id}"]`);
+      const visibleCandidate = candidates.find((candidate) => isVisibleFocusTarget(candidate));
+      const current = document.getElementById(id);
+      if (visibleCandidate && current === visibleCandidate) {
+        proxy.removeAttribute('id');
+      } else if (visibleCandidate && current !== visibleCandidate) {
+        if (current && current !== proxy) current.removeAttribute('id');
+        visibleCandidate.id = id;
+        proxy.removeAttribute('id');
+      } else if (current && current !== proxy && !isVisibleFocusTarget(current)) {
+        current.removeAttribute('id');
+        proxy.id = id;
+      } else if (!current) {
+        proxy.id = id;
+      }
+    });
+  }
+
+  function plan() { return PLANS[state.planScenario]; }
+  function entityById(id) { return state.entities.find((entity) => entity.id === id) || null; }
+  function seatEntities() { return state.entities.filter((entity) => entity.countsTowardSeats && entity.status !== 'revoked'); }
+  function sampleEntities() { return state.entities.filter((entity) => entity.sample); }
+  function matchesFilters(entity) {
+    const query = state.filters.query.trim().toLowerCase();
+    const queryMatch = !query || entity.name.toLowerCase().includes(query) || entity.email.toLowerCase().includes(query);
+    const roleMatch = state.filters.role === 'all' || (state.filters.role === 'invited' ? entity.kind === 'invite' : entity.role === state.filters.role);
+    const statusMatch = state.filters.status === 'all' || entity.status === state.filters.status;
+    return queryMatch && roleMatch && statusMatch;
+  }
+  function derive() {
+    const seats = seatEntities();
+    const sample = sampleEntities();
+    const filtered = sample.filter(matchesFilters);
+    const limit = plan().limit;
+    return {
+      occupied: seats.length,
+      limit,
+      pending: seats.filter((entity) => entity.kind === 'invite' && entity.status === 'invited').length,
+      totalRecords: state.entities.length,
+      sampleCount: sample.length,
+      visibleCount: filtered.length,
+      filtered,
+      page: state.page.number,
+      pageCount: Math.max(1, Math.ceil(filtered.length / state.page.size)),
+      remaining: Math.max(0, limit - seats.length),
+      percent: Math.min(100, Math.round((seats.length / limit) * 100)),
+    };
+  }
+  function seatOccupiedCopy(value) {
+    return `${value} seat${value === 1 ? '' : 's'} occupied`;
+  }
+  function setDerived(selector, key, value) {
+    $$(selector).forEach((node) => { node.dataset.value = String(value); if (key === 'occupied-seats' && node.id === 'heading-seat-count') node.textContent = seatOccupiedCopy(value); });
+  }
+  function snapshot() {
+    return { entities: state.entities.map((entity) => ({ ...entity })), selection: [...state.selection], filters: { ...state.filters }, page: { ...state.page }, planScenario: state.planScenario, viewerRole: state.viewerRole, workspaceMode: state.workspaceMode, inviteSequence: state.inviteSequence };
+  }
+  function restoreSnapshot(saved) {
+    state.entities = saved.entities.map((entity) => ({ ...entity }));
+    state.selection = new Set(saved.selection);
+    state.filters = { ...saved.filters };
+    state.page = { ...saved.page };
+    state.planScenario = saved.planScenario;
+    state.viewerRole = saved.viewerRole;
+    state.workspaceMode = saved.workspaceMode;
+    state.inviteSequence = saved.inviteSequence;
+  }
+  function captureEmptySnapshot() {
+    return {
+      ...snapshot(),
+      failureSeam: state.failureSeam,
+      mutation: { status: state.mutation.status, action: state.mutation.action, snapshot: null, message: state.mutation.message },
+    };
+  }
+  function restoreEmptySnapshot(saved) {
+    if (!saved) return false;
+    restoreSnapshot(saved);
+    state.failureSeam = saved.failureSeam;
+    state.mutation = { ...saved.mutation, snapshot: null };
+    return true;
+  }
+  function capReason() { return plan().capCopy; }
+  function denied(reason, code = 'denied') { return { allowed: false, reason, code }; }
+  function allowed(reason = 'Allowed by the local prototype policy.') { return { allowed: true, reason, code: 'allow' }; }
+
+  function policyFor(action, targetId = null, extra = {}) {
+    const target = targetId ? entityById(targetId) : null;
+    if (state.workspaceMode === 'sso') return denied('SSO / SCIM manages membership. Local membership, role, ownership, and bulk mutations are disabled; list and details remain available.', 'managed-mode');
+    if (state.workspaceMode === 'offline') return denied('Offline mode keeps reads available but disables local membership mutations. This fixture does not queue changes.', 'offline');
+    if (state.viewerRole === 'member') return denied('Members have view-only access. Ask an Owner or Admin to make changes.', 'member-readonly');
+    if (action === 'invite') {
+      const inviteRole = extra.inviteRole || $('#invite-role')?.value || 'member';
+      if (state.viewerRole === 'admin' && inviteRole === 'admin') return denied('Admin can invite only as Member. Admin invitations are disabled for this local policy.', 'admin-invite-ceiling');
+      if (state.derived && state.derived.occupied >= plan().limit) return denied(capReason(), 'plan-cap');
+      return allowed();
+    }
+    if (action === 'resend' && target?.status === 'expired' && state.derived && state.derived.occupied >= plan().limit) return denied(capReason(), 'plan-cap');
+    if (action === 'reactivate' && state.derived && state.derived.occupied >= plan().limit) return denied(capReason(), 'plan-cap');
+    if (state.viewerRole === 'admin') {
+      if (['revoke', 'resend'].includes(action) && target?.kind === 'invite') return allowed();
+      if (action === 'remove' && target?.kind === 'member' && target.role === 'member') return allowed();
+      return denied('Admin may invite as Member, revoke/resend invites, and remove a regular Member. This target or action is outside that local scope.', 'admin-scope');
+    }
+    if (action === 'revoke' && target?.kind === 'invite' && target.status === 'invited') return allowed();
+    if (action === 'resend' && target?.kind === 'invite' && ['invited', 'expired'].includes(target.status)) return allowed();
+    if (action === 'reactivate' && target?.kind === 'member' && target.status === 'suspended') return allowed();
+    if (action === 'change-role' && target && target.role !== 'owner' && target.status !== 'suspended') return allowed();
+    if (action === 'remove' && target && target.role !== 'owner') return allowed();
+    if (action === 'transfer' && target?.role === 'owner') {
+      if (!Object.prototype.hasOwnProperty.call(extra, 'nextId')) return allowed();
+      if (!extra.nextId) return denied('Choose a currently rendered active sample member before transferring ownership.', 'transfer-target-empty');
+      const next = entityById(extra.nextId);
+      const rendered = state.derived?.filtered?.some((candidate) => candidate.id === next?.id) ?? true;
+      if (!next || !rendered || !next.sample || next.role === 'owner' || next.status !== 'active') return denied('Ownership transfer targets one currently rendered active sample member in this fixture.', 'transfer-target');
+      return allowed();
+    }
+    return denied('This action is not available to the current local viewer or target.', 'policy-scope');
+  }
+  function bulkPolicy(action, ids) {
+    if (state.workspaceMode === 'sso') return denied('SSO / SCIM managed mode rejects all local bulk membership mutations.', 'managed-mode');
+    if (state.workspaceMode === 'offline') return denied('Offline mode disables local bulk mutations and does not queue them.', 'offline');
+    if (state.viewerRole === 'member') return denied('Members cannot use bulk mutations.', 'member-readonly');
+    const targets = ids.map(entityById).filter(Boolean);
+    if (!targets.length) return denied('Select at least one sample entity first.', 'empty-selection');
+    if (action === 'bulk-revoke') {
+      if (targets.some((entity) => entity.kind !== 'invite' || entity.status !== 'invited')) return denied('Bulk revoke is eligible only when every selected entity is a pending invite. Mixed selections are rejected as a whole.', 'bulk-ineligible');
+      return allowed();
+    }
+    if (action === 'bulk-role') {
+      if (state.viewerRole !== 'owner') return denied('Admin cannot change roles. Bulk role changes are reserved for Owner in this local policy.', 'admin-bulk-role');
+      if (targets.some((entity) => entity.role === 'owner' || entity.status === 'suspended')) return denied('Bulk role change cannot include the Owner or a suspended member. The whole selection is rejected.', 'bulk-ineligible');
+      return allowed();
+    }
+    return denied('Unsupported bulk action.', 'policy-scope');
+  }
+  function setPolicyMessage(result) {
+    state.policyMessage = result.reason;
+    const box = $('#policy-explanation');
+    box.textContent = result.reason;
+    box.dataset.policyDecision = result.allowed ? 'allow' : 'deny';
+    box.dataset.policyCode = result.code;
+  }
+  function applyPolicyToControl(control) {
+    if (!control) return;
+    const action = control.dataset.action;
+    let result;
+    if (action === 'invite' || action === 'invite-submit') result = policyFor('invite', null, { inviteRole: $('#invite-role')?.value || 'member' });
+    else if (action === 'bulk-revoke' || action === 'bulk-role' || action === 'bulk-role-submit') result = bulkPolicy(action === 'bulk-role-submit' ? 'bulk-role' : action, [...state.selection]);
+    else if (action === 'confirm-remove') result = policyFor('remove', state.ui.pendingRemovalId);
+    else if (action === 'role-submit') result = policyFor('change-role', state.ui.pendingRoleId);
+    else if (action === 'transfer-submit') result = policyFor('transfer', state.ui.pendingTransferId, { nextId: $('#transfer-owner-select')?.value });
+    else result = policyFor(action, control.dataset.id);
+    control.disabled = !result.allowed;
+    control.setAttribute('aria-disabled', String(!result.allowed));
+    control.dataset.policyDecision = result.allowed ? 'allow' : 'deny';
+    control.dataset.policyCode = result.code;
+    control.dataset.policyReason = result.reason;
+    control.title = result.reason;
+    const policyReasonId = action === 'bulk-revoke' ? 'bulk-revoke-policy-reason' : action === 'bulk-role' ? 'bulk-role-policy-reason' : action === 'transfer-submit' ? 'transfer-policy-reason' : null;
+    const policyReason = policyReasonId ? document.getElementById(policyReasonId) : null;
+    if (policyReason) {
+      policyReason.textContent = result.allowed ? '' : result.reason;
+      setHidden(policyReason, result.allowed);
+      if (!result.allowed) control.setAttribute('aria-describedby', policyReasonId);
+      else if (control.getAttribute('aria-describedby') === policyReasonId) control.setAttribute('aria-describedby', 'policy-explanation');
+    }
+    if (!control.hasAttribute('aria-describedby')) control.setAttribute('aria-describedby', 'policy-explanation');
+    const inlineReason = $('.policy-reason-inline', control);
+    if (inlineReason) inlineReason.textContent = result.allowed ? '' : result.reason;
+  }
+  function showPolicyDenial(result) { setPolicyMessage(result); showToast(result.reason, 'error'); }
+
+  function announce(message, assertive = false) {
+    if (!message) return;
+    const live = $('#a11y-live-region');
+    live.setAttribute('aria-live', assertive ? 'assertive' : 'polite');
+    live.textContent = '';
+    if (announcementFrame) cancelAnimationFrame(announcementFrame);
+    announcementFrame = requestAnimationFrame(() => { live.textContent = message; });
+  }
+  function showToast(message, type = 'success') {
+    const success = $('#copy-toast-success');
+    const error = $('#toast-error');
+    setHidden(type === 'error' ? success : error, true);
+    setHidden(type === 'error' ? error : success, false);
+    $(type === 'error' ? '#toast-error-message' : '#toast-success-message').textContent = message;
+    announce(message, type === 'error');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => setHidden(type === 'error' ? error : success, true), 5000);
+  }
+  function showMutationError(message) { showToast(message || 'The local change was rolled back.', 'error'); }
+
+  function statusText(entity) {
+    if (entity.status === 'invited') return `Invited · ${entity.expiresInDays || 7} days`;
+    return titleCase(entity.status);
+  }
+  function avatarClass(entity) { return entity.role === 'owner' ? 'avatar-owner' : entity.role === 'admin' ? 'avatar-admin' : entity.kind === 'invite' ? 'avatar-invite' : 'avatar-member'; }
+  function policyButton(action, id, label, extra = '') {
+    return `<button type="button" data-action="${action}" data-id="${escapeHtml(id)}" data-policy-control="true" ${extra} class="policy-control touch-target flex min-h-11 w-full items-center gap-2 rounded-sm px-2 text-left text-sm hover:bg-accent">${label}<span class="policy-reason policy-reason-inline ml-auto text-right"></span></button>`;
+  }
+  function menuMarkup(entity, surface, first) {
+    const name = escapeHtml(entity.name);
+    const id = escapeHtml(entity.id);
+    const detailsAnchor = first ? (surface === 'desktop' ? ' id="member-actions-menu" data-anchor-ref="member-actions-menu"' : ' data-anchor-ref="member-actions-menu"') : '';
+    const openDetails = `data-open-details="${id}"`;
+    let items = `<button type="button" role="menuitem" data-action="details" data-id="${id}" data-focus-key="details-${id}-${surface}" ${openDetails} class="touch-target flex min-h-11 w-full items-center rounded-sm px-2 text-left text-sm hover:bg-accent">View details</button>`;
+    if (entity.kind === 'member' && entity.status !== 'suspended') items += policyButton('change-role', entity.id, 'Change role', `data-change-role="${id}" role="menuitem"`);
+    if (entity.kind === 'member') items += policyButton('remove', entity.id, 'Remove', `data-remove-member="${id}" role="menuitem" class="policy-control touch-target flex min-h-11 w-full items-center rounded-sm px-2 text-left text-sm text-destructive hover:bg-destructive/10"`);
+    if (entity.kind === 'member' && entity.status === 'suspended') items += policyButton('reactivate', entity.id, 'Reactivate', `data-reactivate-member="${id}" role="menuitem"`);
+    if (entity.role === 'owner' && entity.status === 'active') items += policyButton('transfer', entity.id, 'Transfer ownership', `data-open-transfer="${id}" data-requires-owner="true" role="menuitem"`);
+    if (entity.kind === 'invite') {
+      if (entity.status === 'invited') items += policyButton('revoke', entity.id, 'Revoke invite', `data-revoke-invite="${id}" role="menuitem"`);
+      if (['invited', 'expired'].includes(entity.status)) items += policyButton('resend', entity.id, 'Resend invite', `data-resend-invite="${id}" role="menuitem"`);
+    }
+    return `<details class="member-actions-menu relative" data-menu-id="${id}-${surface}" data-entity-id="${id}"${detailsAnchor}><summary role="button" data-focus-key="member-actions-${id}-${surface}" class="touch-target grid list-none place-items-center rounded-md border bg-background" aria-label="Actions for ${name}" aria-haspopup="menu" aria-expanded="false"><span aria-hidden="true">⋯</span></summary><div class="absolute right-0 z-30 mt-1 w-56 rounded-md border bg-popover p-1 text-popover-foreground shadow-md" role="menu" aria-label="Actions for ${name}">${items}</div></details>`;
+  }
+  function roleSelect(entity, surface) {
+    const id = entity.id === 'inv_jane' && surface === 'desktop' ? ' id="nav-role-change"' : surface === 'mobile' ? ` id="mobile-role-${entity.id}"` : '';
+    const anchor = entity.id === 'inv_jane' ? ' data-anchor-ref="nav-role-change"' : '';
+    const selected = entity.role === 'admin' ? 'selected' : '';
+    return `<select${id}${anchor} data-role-select="true" data-id="${escapeHtml(entity.id)}" data-focus-key="role-${escapeHtml(entity.id)}-${surface}" data-action="change-role" data-policy-control="true" aria-label="Role for ${escapeHtml(entity.name)}" class="h-10 rounded-md border bg-background px-2 text-xs"><option value="member">Member</option><option value="admin" ${selected}>Admin</option></select>`;
+  }
+  function inviteDirectActions(entity, surface) {
+    if (entity.kind !== 'invite') return '';
+    const id = escapeHtml(entity.id);
+    const name = escapeHtml(entity.name);
+    const buttons = [];
+    if (entity.status === 'invited') buttons.push(`<button type="button" data-action="revoke" data-id="${id}" data-revoke-invite="${id}" data-focus-key="revoke-${id}-${surface}" data-policy-control="true" aria-label="Revoke invite for ${name}" class="policy-control table-action touch-target inline-flex min-h-11 items-center rounded-md border bg-background px-2 text-xs font-medium">Revoke</button>`);
+    if (['invited', 'expired'].includes(entity.status)) buttons.push(`<button type="button" data-action="resend" data-id="${id}" data-resend-invite="${id}" data-focus-key="resend-${id}-${surface}" data-policy-control="true" aria-label="Resend invite for ${name}"${entity.id === 'inv_dmitri' ? (surface === 'desktop' ? ' id="invite-resend" data-anchor-ref="invite-resend"' : ' data-anchor-ref="invite-resend"') : ''} class="policy-control table-action touch-target inline-flex min-h-11 items-center rounded-md border bg-background px-2 text-xs font-medium">Resend</button>`);
+    return `<div class="flex flex-wrap justify-end gap-2">${buttons.join('')}</div>`;
+  }
+  function desktopRow(entity, first) {
+    const id = escapeHtml(entity.id);
+    const name = escapeHtml(entity.name);
+    const email = escapeHtml(entity.email);
+    const longId = entity.id === 'usr_maximilian' ? ' id="edge-long-names" data-anchor-ref="edge-long-names"' : '';
+    const expiryId = entity.id === 'inv_jane' ? ' id="edge-invite-expiry" data-anchor-ref="edge-invite-expiry"' : '';
+    const unicodeId = entity.id === 'usr_amelie' ? ' id="edge-unicode-names" data-anchor-ref="edge-unicode-names" tabindex="-1"' : '';
+    const roleCell = entity.kind === 'invite' ? roleSelect(entity, 'desktop') : `<span class="role-badge inline-flex items-center rounded-full border bg-secondary px-2 py-0.5 text-xs font-medium">${roleLabel(entity.role)}</span>`;
+    const statusClass = entity.status === 'active' ? 'active' : entity.status === 'invited' ? 'invited' : entity.status === 'expired' ? 'expired' : 'suspended';
+    return `<tr data-member-row data-id="${id}" data-entity-id="${id}" data-name="${name}" data-email="${email}" data-role="${escapeHtml(entity.role)}" data-status="${escapeHtml(entity.status)}" data-entity-kind="${entity.kind}" data-protected="${entity.role !== 'member'}" data-source-surface="desktop"${expiryId} class="border-b transition-colors hover:bg-muted/40"><td class="px-4 py-3"><label class="selection-hit"><input type="checkbox" class="member-select" data-select-id="${id}" aria-label="Select ${name}"></label></td><td class="px-4 py-3"><div class="flex min-w-0 items-center gap-3"><span class="avatar ${avatarClass(entity)}"${longId}${unicodeId}>${escapeHtml(initials(entity.name))}</span><div class="identity-full"><p class="font-medium">${name}</p><p class="text-xs text-muted-foreground">${email}</p></div></div></td><td data-column="role" class="px-4 py-3">${roleCell}</td><td data-column="status" class="px-4 py-3"><span class="status-pill ${statusClass} status-${entity.status}">${statusText(entity)}</span></td><td data-column="joined" class="px-4 py-3 text-muted-foreground">${escapeHtml(entity.joined)}</td><td data-column="last-active" class="px-4 py-3 text-muted-foreground">${escapeHtml(entity.lastActive)}</td><td class="px-4 py-3"><div class="flex flex-col items-end gap-2">${inviteDirectActions(entity, 'desktop')}${menuMarkup(entity, 'desktop', first)}</div></td></tr>`;
+  }
+  function mobileCard(entity, first = false) {
+    const id = escapeHtml(entity.id);
+    const name = escapeHtml(entity.name);
+    const email = escapeHtml(entity.email);
+    const unicodeId = entity.id === 'usr_amelie' ? ' data-anchor-ref="edge-unicode-names" tabindex="-1"' : '';
+    const longAnchor = entity.id === 'usr_maximilian' ? ' data-anchor-ref="edge-long-names" tabindex="-1"' : '';
+    const expiryAnchor = entity.id === 'inv_jane' ? ' data-anchor-ref="edge-invite-expiry" tabindex="-1"' : '';
+    const statusClass = entity.status === 'active' ? 'active' : entity.status === 'invited' ? 'invited' : entity.status === 'expired' ? 'expired' : 'suspended';
+    const inviteRole = entity.kind === 'invite' ? `<div class="mt-2"><label class="sr-only" for="mobile-role-${id}">Role for ${name}</label>${roleSelect(entity, 'mobile')}</div>` : '';
+    return `<article data-member-row data-id="${id}" data-entity-id="${id}" data-name="${name}" data-email="${email}" data-role="${escapeHtml(entity.role)}" data-status="${escapeHtml(entity.status)}" data-entity-kind="${entity.kind}" data-protected="${entity.role !== 'member'}" data-source-surface="mobile"${expiryAnchor} class="mobile-card space-y-3 p-4"><div class="flex items-start gap-3"><label class="selection-hit shrink-0"><input type="checkbox" class="member-select" data-select-id="${id}" aria-label="Select ${name}"></label><span class="avatar ${avatarClass(entity)}"${unicodeId}>${escapeHtml(initials(entity.name))}</span><div class="mobile-card-identity"><p class="identity-full font-medium leading-6"${longAnchor}>${name}</p><p class="identity-full text-xs leading-5 text-muted-foreground">${email}</p><div class="mt-2 flex flex-wrap gap-2"><span class="rounded-full border bg-secondary px-2 py-0.5 text-xs">${roleLabel(entity.role)}</span><span class="status-pill ${statusClass} status-${entity.status}">${statusText(entity)}</span></div>${inviteRole}${inviteDirectActions(entity, 'mobile')}</div>${menuMarkup(entity, 'mobile', first)}</div></article>`;
+  }
+  function renderRows(derived) {
+    const list = derived.filtered;
+    $('#member-table-body').innerHTML = list.map((entity, index) => desktopRow(entity, index === 0)).join('');
+    $('#mobile-member-cards').innerHTML = `<div class="flex items-center gap-3 border-b bg-muted/20 px-4 py-3"><label class="selection-hit" for="select-all-members-mobile"><span class="sr-only">Select all visible sample members on mobile</span><input id="select-all-members-mobile" data-select-all="true" type="checkbox" class="size-4"></label><span class="text-sm font-medium">Select visible sample members</span></div>${list.map((entity, index) => mobileCard(entity, index === 0)).join('')}`;
+    $('#member-results-container').hidden = list.length === 0;
+    setHidden($('#state-no-results'), list.length !== 0);
+    $('#state-no-results').classList.toggle('grid', list.length === 0);
+  }
+  function sampleRecordNoun(count) {
+    return count === 1 ? 'sample record' : 'sample records';
+  }
+  function renderCounts(derived) {
+    const label = plan().label;
+    const sampleNoun = sampleRecordNoun(derived.sampleCount);
+    const occupancyCopy = `${derived.occupied} / ${derived.limit}`;
+    $('#sidebar-plan-name').textContent = label;
+    $('#sidebar-seat-copy').textContent = occupancyCopy;
+    $('#sidebar-seat-count').textContent = occupancyCopy;
+    $('#sidebar-seat-progress').setAttribute('aria-valuemax', String(derived.limit));
+    $('#sidebar-seat-progress').setAttribute('aria-valuenow', String(derived.occupied));
+    $('#sidebar-seat-progress').dataset.value = String(derived.occupied);
+    $('#sidebar-seat-bar').style.width = `${derived.percent}%`;
+    $('#seat-plan-name').textContent = label;
+    $('#seat-used').textContent = String(derived.occupied);
+    $('#seat-limit').textContent = String(derived.limit);
+    $('#seat-progress').setAttribute('aria-valuemax', String(derived.limit));
+    $('#seat-progress').setAttribute('aria-valuenow', String(derived.occupied));
+    $('#seat-progress').dataset.value = String(derived.occupied);
+    $('#seat-progress-bar').style.width = `${derived.percent}%`;
+    $('#heading-seat-count').textContent = seatOccupiedCopy(derived.occupied);
+    $('#pending-invite-count').textContent = `${derived.pending} pending invite${derived.pending === 1 ? '' : 's'}`;
+    $('#member-results-count').textContent = `Showing ${derived.visibleCount} of ${derived.sampleCount} ${sampleNoun} · ${derived.occupied} of ${derived.limit} people`;
+    $('#sample-record-note').textContent = `${derived.sampleCount} named ${sampleNoun} ${derived.sampleCount === 1 ? 'is' : 'are'} rendered; ${Math.max(0, derived.totalRecords - derived.sampleCount)} additional local record${derived.totalRecords - derived.sampleCount === 1 ? '' : 's'} contribute to the seat total only.`;
+    const feedback = $('#seat-feedback');
+    feedback.textContent = derived.remaining === 0 ? `${label} limit reached (${derived.occupied}/${derived.limit})` : `${derived.remaining} seat${derived.remaining === 1 ? '' : 's'} left`;
+    feedback.className = derived.remaining === 0 ? 'rounded-full bg-destructive/10 px-2.5 py-1 text-xs font-semibold text-destructive' : 'rounded-full bg-status-warning/15 px-2.5 py-1 text-xs font-semibold text-status-warning';
+    $('#pagination-label').textContent = `Sample page ${derived.page} of ${derived.pageCount}`;
+    $('#pagination-note').textContent = 'The fixture renders sample rows only; production pagination is deferred.';
+    $('#member-results-count').dataset.value = `${derived.visibleCount}/${derived.sampleCount}`;
+    $('#sample-record-note').dataset.value = `${derived.sampleCount}/${derived.totalRecords}`;
+    $('#seat-feedback').dataset.value = String(derived.remaining);
+    $('#pagination-label').dataset.value = `${derived.page}/${derived.pageCount}`;
+    setDerived('[data-derived="occupied-seats"]', 'occupied-seats', derived.occupied);
+    setDerived('[data-derived="seat-limit"]', 'seat-limit', derived.limit);
+    setDerived('[data-derived="pending-invite-count"]', 'pending-invite-count', derived.pending);
+    setDerived('[data-derived="selected-unique-count"]', 'selected-unique-count', state.selection.size);
+  }
+  function renderScreen() {
+    $$('[data-state]').forEach((button) => button.setAttribute('aria-pressed', String(button.dataset.state === state.screen)));
+    ['empty', 'loading', 'error', 'populated'].forEach((name) => setHidden($(`#state-${name}`), name !== state.screen));
+    $('#state-loading').setAttribute('aria-busy', String(state.screen === 'loading'));
+  }
+  function renderScenario() {
+    const role = titleCase(state.viewerRole);
+    const mode = state.workspaceMode === 'sso' ? 'SSO / SCIM' : titleCase(state.workspaceMode);
+    const screen = { empty: 'Day 0', populated: 'Day 30', loading: 'Loading', error: 'Error' }[state.screen];
+    $('#scenario-indicator-copy').textContent = `${role} · ${mode} · ${plan().label} ${state.derived?.occupied ?? 0}/${state.derived?.limit ?? plan().limit} · ${screen}`;
+    $('#scenario-indicator-copy').dataset.value = `${state.derived?.occupied ?? 0}/${state.derived?.limit ?? plan().limit}`;
+    $$('[data-plan-scenario]').forEach((button) => {
+      const active = button.dataset.planScenario === state.planScenario;
+      button.setAttribute('aria-pressed', String(active));
+      button.classList.toggle('bg-primary', active);
+      button.classList.toggle('text-primary-foreground', active);
+      button.classList.toggle('bg-background', !active);
+    });
+    const remaining = state.derived?.remaining ?? 0;
+    $('#plan-scenario-status').textContent = remaining === 0 ? plan().capCopy : `${plan().label}: ${remaining} seat${remaining === 1 ? ' remains' : 's remain'}.`;
+    $('#plan-scenario-status').dataset.value = String(state.derived?.remaining ?? 0);
+  }
+  function defaultPolicyResult() {
+    if (state.workspaceMode === 'sso') return denied('SSO / SCIM manages membership. Local mutations are disabled; list and details remain available.', 'managed-mode');
+    if (state.workspaceMode === 'offline') return denied('Offline mode keeps reads available but disables local mutations and does not queue changes.', 'offline');
+    if (state.viewerRole === 'member') return denied('Members have view-only access. Ask an Owner or Admin to make changes.', 'member-readonly');
+    if (state.derived?.occupied >= plan().limit) return denied(capReason(), 'plan-cap');
+    return allowed('Local policy simulation is active; this is not server authorization.');
+  }
+  function renderPolicy() {
+    setHidden($('#perm-member-readonly'), state.viewerRole !== 'member');
+    setHidden($('#perm-sso-scim-note'), state.workspaceMode !== 'sso');
+    setHidden($('#offline-banner'), state.workspaceMode !== 'offline');
+    const suspendedMembers = state.entities.filter((entity) => entity.kind === 'member' && entity.status === 'suspended');
+    setHidden($('#copy-suspended-banner'), state.workspaceMode !== 'normal' || state.viewerRole === 'member' || suspendedMembers.length === 0);
+    $('#suspended-banner-summary').textContent = `${suspendedMembers.length} suspended member${suspendedMembers.length === 1 ? '' : 's'} need${suspendedMembers.length === 1 ? 's' : ''} attention`;
+    $('#suspended-banner-detail').textContent = suspendedMembers.length === 1 ? `${suspendedMembers[0].name} cannot sign in because the workspace invoice is on hold.` : suspendedMembers.map((member) => member.name).join(', ');
+    const inviteRole = $('#invite-role');
+    const adminOption = $('option[value="admin"]', inviteRole);
+    adminOption.disabled = state.viewerRole !== 'owner';
+    adminOption.textContent = state.viewerRole === 'owner' ? 'Admin — can invite and revoke' : 'Admin — Owner only';
+    if (adminOption.disabled && inviteRole.value === 'admin') inviteRole.value = 'member';
+    $('#invite-role-policy').textContent = state.viewerRole === 'admin' ? 'Admin can invite only as Member in this local policy.' : state.viewerRole === 'member' ? 'Members cannot invite.' : 'Owner can invite an Admin; Admin can invite only a Member.';
+    const inviteFieldsBlocked = state.workspaceMode !== 'normal' || state.viewerRole === 'member';
+    ['#invite-email', '#invite-role', '#invite-message'].forEach((selector) => {
+      const field = $(selector);
+      field.disabled = inviteFieldsBlocked;
+      field.setAttribute('aria-disabled', String(inviteFieldsBlocked));
+      const baseDescribedBy = field.dataset.baseDescribedby || field.getAttribute('aria-describedby') || 'policy-explanation';
+      if (inviteFieldsBlocked && selector !== '#invite-email') field.setAttribute('aria-describedby', [...new Set(`${baseDescribedBy} policy-explanation`.trim().split(/\s+/).filter(Boolean))].join(' '));
+      else field.setAttribute('aria-describedby', baseDescribedBy);
+      field.dataset.policyReason = inviteFieldsBlocked ? 'Manual membership changes are disabled in this local viewer/mode.' : '';
+    });
+    const d = state.derived;
+    $('#invite-cap-label').textContent = d.remaining === 0 ? `${plan().label} limit reached` : 'Seat available';
+    $('#invite-remaining').textContent = d.remaining === 0 ? '0 remaining' : `${d.remaining} remaining`;
+    $('#invite-remaining').dataset.value = String(d.remaining);
+    $('#invite-cap-bar').style.width = `${d.percent}%`;
+    $('#validation-max-members').textContent = capReason();
+    $$('[data-policy-control]').forEach(applyPolicyToControl);
+    setPolicyMessage(defaultPolicyResult());
+  }
+  function renderInviteState() {
+    const d = state.derived;
+    $('#invite-cap-label').textContent = d.remaining === 0 ? `${plan().label} limit reached` : 'Seat available';
+    $('#invite-remaining').textContent = d.remaining === 0 ? '0 remaining' : `${d.remaining} remaining`;
+    $('#invite-cap-bar').style.width = `${d.percent}%`;
+  }
+  function renderSelection(derived) {
+    const visibleIds = new Set(derived.filtered.map((entity) => entity.id));
+    $$('.member-select').forEach((checkbox) => { checkbox.checked = state.selection.has(checkbox.dataset.selectId); });
+    const selectedVisible = [...state.selection].filter((id) => visibleIds.has(id));
+    state.selection = new Set(selectedVisible);
+    const count = state.selection.size;
+    $('#selected-count').textContent = `${count} selected`;
+    $('#selected-count').dataset.value = String(count);
+    setHidden($('#selection-summary'), count === 0);
+    setHidden($('#bulk-actions'), count === 0);
+    const all = derived.filtered.length > 0 && selectedVisible.length === derived.filtered.length;
+    const some = selectedVisible.length > 0 && selectedVisible.length < derived.filtered.length;
+    $$('[data-select-all]').forEach((control) => { control.checked = all; control.indeterminate = some; });
+  }
+  function captureSelectionFocus() {
+    const active = document.activeElement;
+    if (!(active instanceof HTMLInputElement)) return null;
+    if (active.matches('[data-select-all]')) return { kind: 'select-all', surface: active.id === 'select-all-members-mobile' ? 'mobile' : 'desktop' };
+    if (!active.matches('[data-select-id]')) return null;
+    return { kind: 'entity', id: active.dataset.selectId, surface: active.closest('[data-source-surface]')?.dataset.sourceSurface || 'desktop' };
+  }
+  function restoreSelectionFocus(context) {
+    if (!context) return;
+    if (context.kind === 'select-all') {
+      const control = document.getElementById(context.surface === 'mobile' ? 'select-all-members-mobile' : 'select-all-members');
+      if (control && isVisibleFocusTarget(control)) control.focus({ preventScroll: true });
+      return;
+    }
+    const checkbox = $$('.member-select').find((candidate) => candidate.dataset.selectId === context.id && candidate.closest('[data-source-surface]')?.dataset.sourceSurface === context.surface && candidate.getClientRects().length > 0 && !candidate.disabled);
+    checkbox?.focus({ preventScroll: true });
+  }
+  function render() {
+    const selectionFocus = captureSelectionFocus();
+    syncRuntimeAnchors();
+    state.derived = derive();
+    setFilterValues();
+    document.body.dataset.role = state.viewerRole;
+    document.body.dataset.workspaceMode = state.workspaceMode;
+    roleSwitcher.value = state.viewerRole;
+    workspaceModeSwitcher.value = state.workspaceMode;
+    document.documentElement.classList.toggle('dark', state.theme === 'dark');
+    renderScreen();
+    renderRows(state.derived);
+    updateColumnVisibility();
+    renderCounts(state.derived);
+    renderSelection(state.derived);
+    renderPolicy();
+    renderInviteState();
+    renderScenario();
+    $('#fail-next-mutation').checked = state.failureSeam;
+    $('#mutation-status').textContent = `Mutation status: ${state.mutation.status}${state.mutation.message ? ` — ${state.mutation.message}` : ''}`;
+    $('#mutation-status').dataset.mutationStatus = state.mutation.status;
+    syncRuntimeAnchors();
+    restoreSelectionFocus(selectionFocus);
+  }
+  function reconcileSelection() {
+    const visible = new Set(state.derived?.filtered.map((entity) => entity.id) || []);
+    state.selection = new Set([...state.selection].filter((id) => visible.has(id)));
+  }
+  function announceResults() { announce($('#member-results-count').textContent); }
+
+  function focusDescriptorFor(trigger, fallback = 'policy-explanation') {
+    if (!trigger) return { kind: 'fallback', id: fallback };
+    const actionMenu = trigger.closest?.('.member-actions-menu');
+    if (actionMenu) return { kind: 'menu', entityId: actionMenu.dataset.entityId || '', surface: actionMenu.dataset.menuId?.endsWith('-mobile') ? 'mobile' : 'desktop' };
+    if (trigger.dataset.focusKey) return { kind: 'key', key: trigger.dataset.focusKey };
+    if (trigger.id) return { kind: 'id', id: trigger.id };
+    return { kind: 'fallback', id: fallback };
+  }
+  function fallbackFocusFor(dialog) {
+    if (dialog?.id === 'nav-invite-modal') return 'copy-invite-cta';
+    if (dialog?.id === 'mobile-nav-drawer') return 'mobile-nav-trigger';
+    return 'policy-explanation';
+  }
+  function setMobileNavExpanded(dialog, expanded) {
+    if (dialog?.id === 'mobile-nav-drawer') $('#mobile-nav-trigger')?.setAttribute('aria-expanded', String(expanded));
+  }
+  function isVisibleFocusTarget(target) {
+    if (!target?.isConnected || target.disabled || target.hidden || target.getAttribute?.('aria-disabled') === 'true' || target.closest?.('#runtime-anchor-registry')) return false;
+    const rects = Array.from(target.getClientRects?.() || []);
+    if (!rects.some((rect) => rect.width > 0 && rect.height > 0)) return false;
+    const style = window.getComputedStyle?.(target);
+    return style?.display !== 'none' && style?.visibility !== 'hidden' && style?.opacity !== '0';
+  }
+  function resolveFocusTarget(descriptor) {
+    if (!descriptor) return null;
+    if (descriptor.kind === 'key') return $$('[data-focus-key]').find((candidate) => candidate.dataset.focusKey === descriptor.key && isVisibleFocusTarget(candidate)) || null;
+    if (descriptor.kind === 'id') {
+      const target = document.getElementById(descriptor.id);
+      return isVisibleFocusTarget(target) ? target : null;
+    }
+    if (descriptor.kind === 'menu') {
+      const menu = $$('.member-actions-menu').find((candidate) => candidate.dataset.entityId === descriptor.entityId && candidate.dataset.menuId?.endsWith(`-${descriptor.surface}`) && isVisibleFocusTarget(candidate));
+      const summary = menu ? $('summary', menu) : null;
+      return isVisibleFocusTarget(summary) ? summary : null;
+    }
+    const fallback = document.getElementById(descriptor.id);
+    return isVisibleFocusTarget(fallback) ? fallback : null;
+  }
+  function mutationFocusContext(control) {
+    const dialog = control?.closest?.('dialog');
+    const descriptor = dialogMeta.get(dialog)?.focus || focusDescriptorFor(control, REMOVED_ROW_FOCUS_FALLBACK);
+    return {
+      descriptor,
+      // A removed row cannot restore its old action. The members heading is
+      // the stable, visible fallback for revoke/remove and any filtered-away row.
+      fallback: { kind: 'fallback', id: REMOVED_ROW_FOCUS_FALLBACK },
+    };
+  }
+  function restoreMutationFocus(context) {
+    if (!context || document.querySelector('dialog[open]')) return;
+    const target = resolveFocusTarget(context.descriptor) || resolveFocusTarget(context.fallback);
+    target?.focus();
+  }
+  function openDialog(dialog, trigger = null, initial = null) {
+    if (!dialog) return;
+    const sourceMenu = trigger?.closest?.('.member-actions-menu');
+    if (sourceMenu) closeMenu(sourceMenu);
+    const fallback = fallbackFocusFor(dialog);
+    const meta = dialogMeta.get(dialog) || {};
+    meta.trigger = trigger;
+    meta.initial = initial;
+    meta.focus = focusDescriptorFor(trigger, fallback);
+    dialogMeta.set(dialog, meta);
+    setMobileNavExpanded(dialog, true);
+    if (!dialog.open) {
+      dialog.setAttribute('aria-modal', 'true');
+      if (typeof dialog.showModal === 'function') dialog.showModal();
+      else dialog.setAttribute('open', '');
+    }
+    requestAnimationFrame(() => {
+      const target = initial ? $(initial, dialog) : $('input,select,button,[tabindex="0"]', dialog) || resolveFocusTarget(meta.focus);
+      target?.focus({ preventScroll: true });
+    });
+  }
+  function closeNow(dialog) {
+    if (!dialog) return;
+    const meta = dialogMeta.get(dialog) || {};
+    const descriptor = meta.focus || focusDescriptorFor(meta.trigger, fallbackFocusFor(dialog));
+    setMobileNavExpanded(dialog, false);
+    dialog.dataset.focusReturn = descriptor.kind === 'key' ? descriptor.key : descriptor.kind === 'menu' ? `menu-${descriptor.entityId}-${descriptor.surface}` : descriptor.id;
+    dialog.dataset.forceClosing = 'true';
+    if (typeof dialog.close === 'function' && dialog.open) dialog.close();
+    else {
+      dialog.removeAttribute('open');
+      dialog.dispatchEvent(new Event('close'));
+    }
+    delete dialog.dataset.forceClosing;
+    if (dialog.id !== 'nav-invite-discard-confirm') focusLater(descriptor);
+  }
+  function inviteDirty() { return Boolean($('#invite-email').value || $('#invite-message').value || $('#invite-role').value !== 'member'); }
+  function requestClose(dialog) {
+    if (!dialog) return;
+    if (dialog.id === 'nav-invite-modal' && inviteDirty()) {
+      state.ui.dirtyDialog = dialog.id;
+      const confirmation = $('#nav-invite-discard-confirm');
+      if (confirmation.open) {
+        $('button[data-request-close]', confirmation)?.focus();
+        return;
+      }
+      openDialog(confirmation, $('#invite-email'), 'button[data-request-close]');
+      return;
+    }
+    closeNow(dialog);
+  }
+  function restoreOpenDialog(dialog) {
+    if (!dialog || dialog.open) return;
+    const meta = dialogMeta.get(dialog) || {};
+    openDialog(dialog, meta.trigger, dialog.id === 'nav-invite-modal' ? '#invite-email' : meta.initial);
+  }
+  function focusLater(descriptor) {
+    if (!descriptor) return;
+    [0, 50, 150, 300].forEach((delay) => setTimeout(() => {
+      if (document.querySelector('dialog[open]')) return;
+      const focusTarget = resolveFocusTarget(descriptor) || $('#policy-explanation');
+      if (!focusTarget) return;
+      const active = document.activeElement;
+      if (active === document.body || active === document.documentElement || active?.tagName === 'DIALOG' || active === focusTarget) focusTarget.focus({ preventScroll: true });
+    }, delay));
+  }
+  function prepareDialogsForAnchor(id) {
+    const invite = $('#nav-invite-modal');
+    if (invite?.open && inviteDirty()) {
+      if (id === 'nav-invite-modal' || id === 'nav-invite-discard-confirm' || id.startsWith('validation-')) return true;
+      requestClose(invite);
+      return false;
+    }
+    $$('dialog[open]').forEach((dialog) => {
+      if (dialog.id !== id) closeNow(dialog);
+    });
+    return true;
+  }
+  function wireDialogs() {
+    $$('dialog').forEach((dialog) => {
+      const nativeClose = dialog.close.bind(dialog);
+      dialog.close = (...args) => {
+        const forceClosing = dialog.dataset.forceClosing === 'true';
+        if (!forceClosing && dialog.id === 'nav-invite-modal' && dialog.open && inviteDirty()) {
+          requestClose(dialog);
+          return;
+        }
+        nativeClose(...args);
+      };
+      dialog.addEventListener('cancel', (event) => { event.preventDefault(); requestClose(dialog); });
+      dialog.addEventListener('click', (event) => { if (event.target === dialog) requestClose(dialog); });
+      dialog.addEventListener('keydown', (event) => {
+        if (event.key !== 'Tab') return;
+        const focusable = $$('button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), a[href], summary, [tabindex]:not([tabindex="-1"])', dialog).filter((node) => node.getClientRects().length > 0);
+        if (!focusable.length) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+        else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+      });
+      dialog.addEventListener('close', () => {
+        const forceClosing = dialog.dataset.forceClosing === 'true';
+        delete dialog.dataset.forceClosing;
+        setMobileNavExpanded(dialog, dialog.id === 'mobile-nav-drawer' && dialog.open);
+        const meta = dialogMeta.get(dialog) || {};
+        if (!forceClosing && dialog.id === 'nav-invite-modal' && inviteDirty()) {
+          restoreOpenDialog(dialog);
+          return;
+        }
+        if (dialog.id === 'nav-invite-discard-confirm' && meta.trigger?.id === 'invite-email') {
+          state.ui.dirtyDialog = null;
+          [0, 50, 150, 300].forEach((delay) => setTimeout(() => {
+            const invite = $('#nav-invite-modal');
+            if (invite.open && inviteDirty()) $('#invite-email').focus({ preventScroll: true });
+          }, delay));
+        } else if (!forceClosing) {
+          focusLater(meta.focus || focusDescriptorFor(meta.trigger, fallbackFocusFor(dialog)));
+        }
+        dialogMeta.delete(dialog);
+      });
+    });
+  }
+
+  function mutateInvite(email, role) {
+    const id = `inv_new_${state.inviteSequence++}`;
+    state.entities.push({ id, kind: 'invite', name: email.split('@')[0].replace(/[._-]+/g, ' '), email, role, status: 'invited', joined: '—', lastActive: 'Never', sample: true, invitedBy: 'usr_alejandra', expiresInDays: 7, countsTowardSeats: true });
+  }
+  function mutateRole(id, role) { const entity = entityById(id); if (entity) entity.role = role; }
+  function mutateReactivate(id) { const entity = entityById(id); if (entity) { entity.status = 'active'; entity.countsTowardSeats = true; } }
+  function mutateRevoke(id) { state.entities = state.entities.filter((entity) => entity.id !== id); state.selection.delete(id); }
+  function mutateResend(id) { const entity = entityById(id); if (entity) { entity.status = 'invited'; entity.expiresInDays = 7; entity.countsTowardSeats = true; } }
+  function mutateRemove(id) { state.entities = state.entities.filter((entity) => entity.id !== id); state.selection.delete(id); }
+  function mutateTransfer(nextId) {
+    const currentOwner = state.entities.find((entity) => entity.role === 'owner');
+    const nextOwner = entityById(nextId);
+    const rendered = state.derived?.filtered?.some((candidate) => candidate.id === nextOwner?.id) ?? true;
+    if (!currentOwner || !nextOwner || !rendered || !nextOwner.sample || nextOwner.status !== 'active' || currentOwner.id === nextOwner.id) throw new Error('Choose a different currently rendered active sample member as owner.');
+    currentOwner.role = 'admin';
+    nextOwner.role = 'owner';
+  }
+  function runMutation(action, mutate, successMessage, options = {}) {
+    const result = options.policy || allowed();
+    if (!result.allowed) { showPolicyDenial(result); return false; }
+    const focusContext = options.focusContext || null;
+    const saved = snapshot();
+    state.mutation = { status: 'preview', action, snapshot: saved, message: '' };
+    try {
+      mutate();
+      if (state.failureSeam) {
+        state.failureSeam = false;
+        throw new Error('Prototype failure seam: the local mutation was rolled back.');
+      }
+      state.mutation = { status: 'success', action, snapshot: null, message: successMessage };
+      if (options.onSuccess) options.onSuccess();
+      render();
+      restoreMutationFocus(focusContext);
+      showToast(successMessage);
+      return true;
+    } catch (error) {
+      restoreSnapshot(saved);
+      state.mutation = { status: 'failed', action, snapshot: saved, message: error.message };
+      render();
+      restoreMutationFocus(focusContext);
+      showMutationError(error.message);
+      return false;
+    }
+  }
+  function showInviteError(errorId, message) {
+    ['invite-email-error-summary', 'validation-email-format', 'validation-duplicate-email', 'validation-max-members', 'validation-self-invite'].forEach((id) => setHidden($(`#${id}`), true));
+    const summary = $('#invite-email-error-summary');
+    summary.textContent = message;
+    summary.dataset.errorCode = errorId || 'invite-error';
+    setHidden(summary, false);
+    const field = $('#invite-email');
+    field.dataset.baseDescribedby = field.dataset.baseDescribedby || 'invite-email-help invite-email-errors';
+    field.setAttribute('aria-describedby', field.dataset.baseDescribedby);
+    field.setAttribute('aria-invalid', 'true');
+    field.setAttribute('aria-errormessage', 'invite-email-error-summary');
+    field.focus();
+    announce(`Invite not sent. ${message}`, true);
+  }
+  function revealInviteErrorAnchor(id, message) {
+    const target = document.getElementById(id);
+    if (!target) return;
+    target.textContent = message;
+    setHidden(target, false);
+    setHidden($('#invite-email-error-summary'), true);
+    $('#invite-email').setAttribute('aria-errormessage', id);
+  }
+  function clearInviteErrors() {
+    ['invite-email-error-summary', 'validation-email-format', 'validation-duplicate-email', 'validation-max-members', 'validation-self-invite'].forEach((id) => setHidden($(`#${id}`), true));
+    const field = $('#invite-email');
+    field.removeAttribute('aria-invalid');
+    field.removeAttribute('aria-errormessage');
+    field.setAttribute('aria-describedby', field.dataset.baseDescribedby || 'invite-email-help invite-email-errors');
+    $('#invite-email-error-summary').textContent = '';
+    delete $('#invite-email-error-summary').dataset.errorCode;
+  }
+  function submitInvite(event) {
+    event.preventDefault();
+    clearInviteErrors();
+    const email = normalizeEmail($('#invite-email').value);
+    const role = $('#invite-role').value;
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showInviteError('validation-email-format', 'Enter a valid email address.');
+    if (email === 'owner@orbit.example' || email === 'viewer@orbit.example') return showInviteError('validation-self-invite', "You're already a member of this workspace.");
+    if (state.entities.some((entity) => entity.email.toLowerCase() === email && entity.status !== 'revoked')) return showInviteError('validation-duplicate-email', `${email} already has a member or pending invite.`);
+    const policy = policyFor('invite', null, { inviteRole: role });
+    if (!policy.allowed) return showInviteError(policy.code === 'plan-cap' ? 'validation-max-members' : null, policy.reason);
+    const inviteDialog = $('#nav-invite-modal');
+    const inviteFocus = dialogMeta.get(inviteDialog)?.focus || { kind: 'fallback', id: 'copy-invite-cta' };
+    // A final-seat invite disables the opener; retain the opener when possible,
+    // otherwise use the stable enabled Members heading as the post-success target.
+    const focusContext = { descriptor: inviteFocus, fallback: { kind: 'fallback', id: 'members' } };
+    runMutation('invite', () => mutateInvite(email, role), `Invite sent to ${email}`, { policy, focusContext, onSuccess: () => { state.screen = 'populated'; state.emptySnapshot = null; state.filters = { query: '', role: 'all', status: 'all' }; $('#invite-form').reset(); closeNow(inviteDialog); } });
+  }
+
+  function populateDetails(entity) {
+    if (!entity) return;
+    $('#details-avatar').textContent = initials(entity.name);
+    $('#details-avatar').className = `avatar ${avatarClass(entity)}`;
+    $('#member-details-title').textContent = entity.name;
+    $('#details-email').textContent = entity.email;
+    $('#details-role').textContent = roleLabel(entity.role);
+    $('#details-status').textContent = statusText(entity);
+    $('#details-joined').textContent = entity.joined;
+    $('#details-last-active').textContent = entity.lastActive;
+    setHidden($('#details-suspended'), entity.status !== 'suspended');
+  }
+  function populateTransfer(entity) {
+    const visibleIds = new Set((state.derived?.filtered || []).map((candidate) => candidate.id));
+    const next = state.entities.filter((candidate) => visibleIds.has(candidate.id) && candidate.sample && candidate.kind === 'member' && candidate.role !== 'owner' && candidate.status === 'active');
+    $('#transfer-owner-select').innerHTML = next.map((candidate) => `<option value="${escapeHtml(candidate.id)}">${escapeHtml(candidate.name)}</option>`).join('');
+    $('#transfer-ownership-copy').textContent = entity ? `Transfer ownership from ${entity.name}? The previous owner becomes an Admin in this local model.` : 'Ownership moves immediately in this local model.';
+  }
+  function openRoleDialog(entity, opener = null) {
+    if (!entity) return;
+    const policy = policyFor('change-role', entity.id);
+    if (!policy.allowed) return showPolicyDenial(policy);
+    state.ui.pendingRoleId = entity.id;
+    $('#role-change-copy').textContent = `Change the local role for ${entity.name}.`;
+    $('#member-role-select').value = entity.role === 'admin' ? 'admin' : 'member';
+    applyPolicyToControl($('[data-action="role-submit"]'));
+    openDialog($('#nav-role-change-dialog'), opener || $('[data-action="change-role"][data-id="' + entity.id + '"]'), '#member-role-select');
+  }
+  function openBulkRoleDialog() {
+    const policy = bulkPolicy('bulk-role', [...state.selection]);
+    if (!policy.allowed) return showPolicyDenial(policy);
+    state.ui.pendingBulkIds = [...state.selection];
+    $('#bulk-role-copy').textContent = `Apply one role to ${state.ui.pendingBulkIds.length} selected sample entities.`;
+    applyPolicyToControl($('[data-action="bulk-role-submit"]'));
+    openDialog($('#nav-bulk-role-dialog'), $('[data-action="bulk-role"]'), '#bulk-role-value');
+  }
+  function removeConfirmationCopy(entity) {
+    const name = entity?.id === 'inv_jane' ? 'Jane' : (entity?.name || 'this member');
+    return `Remove ${name}? They'll lose access immediately.`;
+  }
+  function handleAction(action, control) {
+    const id = control.dataset.id || control.closest('[data-entity-id]')?.dataset.entityId || null;
+    if (action === 'invite') {
+      const policy = policyFor('invite', null, { inviteRole: $('#invite-role').value });
+      if (!policy.allowed) return showPolicyDenial(policy);
+      clearInviteErrors();
+      return openDialog($('#nav-invite-modal'), control, '#invite-email');
+    }
+    if (action === 'details') {
+      const entity = entityById(id); populateDetails(entity); return openDialog($('#nav-member-details'), control, '#member-details-title');
+    }
+    if (action === 'remove') {
+      const entity = entityById(id); const policy = policyFor('remove', id);
+      if (!policy.allowed) return showPolicyDenial(policy);
+      state.ui.pendingRemovalId = id;
+      $('#copy-confirm-remove').textContent = removeConfirmationCopy(entity);
+      applyPolicyToControl($('[data-action="confirm-remove"]'));
+      return openDialog($('#nav-remove-confirm'), control, '[data-request-close]');
+    }
+    if (action === 'transfer') {
+      const entity = entityById(id);
+      state.ui.pendingTransferId = id;
+      populateTransfer(entity);
+      const policy = policyFor('transfer', id, { nextId: $('#transfer-owner-select').value });
+      applyPolicyToControl($('[data-action="transfer-submit"]'));
+      if (!policy.allowed) return showPolicyDenial(policy);
+      return openDialog($('#nav-transfer-ownership'), control, '#transfer-owner-select');
+    }
+    if (action === 'change-role') {
+      const entity = entityById(id);
+      if (entity?.kind === 'invite') return;
+      return openRoleDialog(entity, control);
+    }
+    if (action === 'revoke') {
+      const entity = entityById(id); const policy = policyFor('revoke', id);
+      if (!policy.allowed) return showPolicyDenial(policy);
+      return runMutation('revoke', () => mutateRevoke(id), `Invite revoked for ${entity?.email || 'member'}.`, { policy, focusContext: mutationFocusContext(control) });
+    }
+    if (action === 'resend') {
+      const entity = entityById(id); const policy = policyFor('resend', id);
+      if (!policy.allowed) return showPolicyDenial(policy);
+      return runMutation('resend', () => mutateResend(id), `Fresh invite sent to ${entity?.email || 'member'}.`, { policy, focusContext: mutationFocusContext(control) });
+    }
+    if (action === 'reactivate') {
+      const entity = entityById(id); const policy = policyFor('reactivate', id);
+      if (!policy.allowed) return showPolicyDenial(policy);
+      return runMutation('reactivate', () => mutateReactivate(id), `${entity?.name || 'Member'} reactivated.`, { policy, focusContext: mutationFocusContext(control) });
+    }
+    if (action === 'confirm-remove') {
+      const idToRemove = state.ui.pendingRemovalId; const entity = entityById(idToRemove); const policy = policyFor('remove', idToRemove);
+      if (!policy.allowed) return showPolicyDenial(policy);
+      return runMutation('remove', () => mutateRemove(idToRemove), `${entity?.name || 'Member'} removed.`, { policy, focusContext: mutationFocusContext(control), onSuccess: () => closeNow($('#nav-remove-confirm')) });
+    }
+    if (action === 'role-submit') {
+      const idToChange = state.ui.pendingRoleId; const entity = entityById(idToChange); const nextRole = $('#member-role-select').value; const policy = policyFor('change-role', idToChange);
+      if (!policy.allowed) return showPolicyDenial(policy);
+      return runMutation('role-change', () => mutateRole(idToChange, nextRole), `${entity?.name || 'Member'} is now ${roleLabel(nextRole)}.`, { policy, focusContext: mutationFocusContext(control), onSuccess: () => closeNow($('#nav-role-change-dialog')) });
+    }
+    if (action === 'transfer-submit') {
+      const nextId = $('#transfer-owner-select').value; const current = state.entities.find((entity) => entity.role === 'owner'); const policy = policyFor('transfer', current?.id, { nextId });
+      if (!policy.allowed) return showPolicyDenial(policy);
+      return runMutation('transfer-ownership', () => mutateTransfer(nextId), `${entityById(nextId)?.name || 'New owner'} is now the workspace owner.`, { policy, focusContext: mutationFocusContext(control), onSuccess: () => { closeNow($('#nav-transfer-ownership')); state.viewerRole = 'admin'; roleSwitcher.value = 'admin'; } });
+    }
+    if (action === 'bulk-revoke') {
+      const ids = [...state.selection]; const policy = bulkPolicy('bulk-revoke', ids);
+      if (!policy.allowed) return showPolicyDenial(policy);
+      return runMutation('bulk-revoke', () => ids.forEach(mutateRevoke), `${ids.length} invite${ids.length === 1 ? '' : 's'} revoked locally.`, { policy, onSuccess: () => { state.selection.clear(); requestAnimationFrame(() => $('#policy-explanation').focus()); } });
+    }
+    if (action === 'bulk-role') return openBulkRoleDialog();
+    if (action === 'bulk-role-submit') {
+      const ids = [...state.ui.pendingBulkIds]; const role = $('#bulk-role-value').value; const policy = bulkPolicy('bulk-role', ids);
+      if (!policy.allowed) return showPolicyDenial(policy);
+      return runMutation('bulk-role', () => ids.forEach((id) => mutateRole(id, role)), `${ids.length} role${ids.length === 1 ? '' : 's'} changed locally.`, { policy, onSuccess: () => { closeNow($('#nav-bulk-role-dialog')); state.selection.clear(); requestAnimationFrame(() => $('#policy-explanation').focus()); } });
+    }
+  }
+  function clearMenuPosition(menu) {
+    const panel = menu ? $('[role="menu"]', menu) : null;
+    if (!panel) return;
+    panel.removeAttribute('data-menu-positioned');
+    ['left', 'top', 'right', 'bottom', 'maxWidth', 'maxHeight'].forEach((property) => { panel.style[property] = ''; });
+  }
+  function positionMenu(menu) {
+    if (!menu?.open) return;
+    const panel = $('[role="menu"]', menu);
+    const trigger = $('summary', menu);
+    if (!panel || !trigger) return;
+    const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
+    const viewportHeight = document.documentElement.clientHeight || window.innerHeight;
+    const margin = Math.min(MENU_VIEWPORT_MARGIN, viewportWidth / 2, viewportHeight / 2);
+    const availableWidth = Math.max(0, viewportWidth - margin * 2);
+    const availableHeight = Math.max(0, viewportHeight - margin * 2);
+    panel.dataset.menuPositioned = 'true';
+    panel.style.maxWidth = `${availableWidth}px`;
+    panel.style.maxHeight = `${Math.min(Math.floor(viewportHeight * 0.6), 384, availableHeight)}px`;
+    panel.style.right = 'auto';
+    panel.style.bottom = 'auto';
+    const panelRect = panel.getBoundingClientRect();
+    const width = Math.min(panelRect.width || Math.min(224, availableWidth), availableWidth);
+    const height = Math.min(panelRect.height || Math.min(384, availableHeight), availableHeight);
+    const summaryRect = trigger.getBoundingClientRect();
+    const preferredTop = summaryRect.bottom + 4;
+    const flippedTop = summaryRect.top - 4 - height;
+    const top = preferredTop + height <= viewportHeight - margin
+      ? preferredTop
+      : flippedTop >= margin
+        ? flippedTop
+        : Math.max(margin, Math.min(preferredTop, viewportHeight - margin - height));
+    const preferredLeft = summaryRect.right - width;
+    const left = Math.max(margin, Math.min(preferredLeft, viewportWidth - margin - width));
+    panel.style.left = `${Math.round(left)}px`;
+    panel.style.top = `${Math.round(top)}px`;
+  }
+  function positionOpenMenus() {
+    $$('.member-actions-menu[open]').forEach(positionMenu);
+  }
+  function openMenu(details, focusIndex = 0) {
+    if (!details) return;
+    closeMenus(details);
+    details.open = true;
+    details.dataset.open = 'true';
+    const trigger = $('summary', details);
+    trigger?.setAttribute('aria-expanded', 'true');
+    positionMenu(details);
+    const items = $$('[role="menuitem"]:not([disabled]):not([aria-disabled="true"])', details);
+    items[Math.max(0, Math.min(focusIndex, items.length - 1))]?.focus();
+  }
+  function closeMenu(menu, restoreFocus = false) {
+    if (!menu) return;
+    menu.open = false;
+    menu.dataset.open = 'false';
+    const trigger = $('summary', menu);
+    trigger?.setAttribute('aria-expanded', 'false');
+    clearMenuPosition(menu);
+    if (restoreFocus) trigger?.focus();
+  }
+  function closeMenus(except = null) {
+    $$('.member-actions-menu[open]').forEach((menu) => {
+      if (menu !== except) closeMenu(menu);
+    });
+  }
+  function menuItems(menu) { return $$('[role="menuitem"]:not([disabled]):not([aria-disabled="true"])', menu); }
+  function handleMenuKeydown(event) {
+    if (event.key === 'Escape' && !document.querySelector('dialog[open]')) {
+      const openMenu = $('.member-actions-menu[open]');
+      if (openMenu) {
+        event.preventDefault();
+        closeMenu(openMenu, true);
+        return;
+      }
+    }
+    const summary = event.target.closest('.member-actions-menu > summary');
+    const menu = event.target.closest('.member-actions-menu');
+    if (summary && menu) {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        closeMenu(menu, true);
+        return;
+      }
+      if (['Enter', ' ', 'ArrowDown', 'ArrowUp'].includes(event.key)) {
+        event.preventDefault();
+        if ((event.key === 'Enter' || event.key === ' ') && menu.open) { closeMenu(menu, true); return; }
+        if (event.key === 'ArrowUp') openMenu(menu, menuItems(menu).length - 1);
+        else openMenu(menu, event.key === 'ArrowDown' ? 0 : 0);
+      }
+      return;
+    }
+    if (!menu || !event.target.matches('[role="menuitem"]')) return;
+    const items = menuItems(menu);
+    const index = items.indexOf(event.target);
+    if (event.key === 'Escape') { event.preventDefault(); closeMenu(menu, true); return; }
+    if (!items.length) return;
+    if (event.key === 'ArrowDown') { event.preventDefault(); items[(index + 1) % items.length].focus(); }
+    if (event.key === 'ArrowUp') { event.preventDefault(); items[(index - 1 + items.length) % items.length].focus(); }
+    if (event.key === 'Home') { event.preventDefault(); items[0].focus(); }
+    if (event.key === 'End') { event.preventDefault(); items[items.length - 1].focus(); }
+  }
+  function wireMenuEvents() {
+    document.addEventListener('keydown', handleMenuKeydown);
+    document.addEventListener('click', (event) => {
+      const summary = event.target.closest('.member-actions-menu > summary');
+      if (summary) {
+        const menu = summary.closest('.member-actions-menu');
+        requestAnimationFrame(() => {
+          summary.setAttribute('aria-expanded', String(menu.open));
+          if (menu.open) positionMenu(menu);
+          else clearMenuPosition(menu);
+        });
+        return;
+      }
+      if (event.target.closest('dialog, .member-actions-menu, #column-visibility')) return;
+      closeMenus();
+      if ($('#column-visibility')?.open) { $('#column-visibility').open = false; $('#column-visibility-trigger').setAttribute('aria-expanded', 'false'); }
+    });
+    document.addEventListener('toggle', (event) => {
+      const details = event.target;
+      if (!(details instanceof HTMLDetailsElement)) return;
+      if (details.classList.contains('member-actions-menu')) {
+        $('summary', details)?.setAttribute('aria-expanded', String(details.open));
+        if (details.open) positionMenu(details);
+        else clearMenuPosition(details);
+      }
+      if (details.id === 'column-visibility') $('#column-visibility-trigger')?.setAttribute('aria-expanded', String(details.open));
+    }, true);
+    $('#column-visibility').addEventListener('keydown', (event) => { if (event.key === 'Escape') { event.preventDefault(); $('#column-visibility').open = false; $('#column-visibility-trigger').focus(); } });
+    document.addEventListener('focusout', (event) => {
+      const menu = event.target.closest('.member-actions-menu');
+      if (!menu) return;
+      setTimeout(() => { if (menu.open && !document.querySelector('dialog[open]') && !menu.contains(document.activeElement)) closeMenu(menu); }, 0);
+    });
+  }
+
+  function setFilterValues() {
+    searchInput.value = state.filters.query;
+    roleFilter.value = state.filters.role;
+    statusFilter.value = state.filters.status;
+    const hasFilters = Boolean(state.filters.query || state.filters.role !== 'all' || state.filters.status !== 'all');
+    setHidden($('#clear-filters'), !hasFilters);
+  }
+  function filterChanged(announceChange = true) {
+    state.page.number = 1;
+    reconcileSelection();
+    render();
+    if (announceChange) announceResults();
+  }
+  function clearFilters() {
+    state.filters = { query: '', role: 'all', status: 'all' };
+    state.selection.clear();
+    setFilterValues();
+    filterChanged(false);
+    announce('Search and filters cleared. Showing the local sample.');
+  }
+  function updateSearchFilterLater() {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => { state.filters.query = searchInput.value; filterChanged(); }, 300);
+  }
+  function updateColumnVisibility() {
+    for (const key of Object.keys(state.columns)) {
+      $$(`[data-column="${key}"]`).forEach((cell) => cell.classList.toggle('hidden', !state.columns[key]));
+      $$(`[data-column-toggle="${key}"]`).forEach((toggle) => { toggle.checked = state.columns[key]; });
+    }
+  }
+  function setPlanScenario(scenario) {
+    if (!PLANS[scenario]) return;
+    state.planScenario = scenario;
+    state.entities = makeEntities(PLANS[scenario].target);
+    state.selection.clear();
+    state.page = { number: 1, size: 25 };
+    state.inviteSequence = 1;
+    state.failureSeam = false;
+    state.screen = 'populated';
+    state.mutation = { status: 'idle', action: '', snapshot: null, message: '' };
+    state.policyMessage = '';
+    state.emptySnapshot = null;
+    render();
+    announce(`${PLANS[scenario].label} boundary loaded: ${state.derived.occupied} of ${state.derived.limit} seats occupied.`);
+  }
+  function setScreen(screen) {
+    if (!['empty', 'populated', 'loading', 'error'].includes(screen)) return;
+    const wasEmpty = state.screen === 'empty';
+    if (screen === 'empty' && !wasEmpty) {
+      state.emptySnapshot = state.emptySnapshot || captureEmptySnapshot();
+      state.entities = [];
+      state.selection.clear();
+      state.page = { number: 1, size: 25 };
+      state.mutation = { status: 'idle', action: '', snapshot: null, message: '' };
+    } else if (screen === 'populated' && state.emptySnapshot) {
+      restoreEmptySnapshot(state.emptySnapshot);
+      state.emptySnapshot = null;
+    } else if (screen === 'populated' && wasEmpty) {
+      state.entities = makeEntities(plan().target);
+      state.selection.clear();
+      state.page = { number: 1, size: 25 };
+      state.filters = { query: '', role: 'all', status: 'all' };
+      state.mutation = { status: 'idle', action: '', snapshot: null, message: '' };
+    }
+    state.screen = screen;
+    render();
+  }
+  function updateTheme() {
+    state.theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+    announce(`${titleCase(state.theme)} theme enabled for this page only.`);
+  }
+  function setActiveNavigation(id) {
+    $$('#nav-settings-tabs [role="tab"]').forEach((tab) => {
+      const active = tab.getAttribute('href') === `#${id}`;
+      tab.setAttribute('aria-selected', String(active));
+      tab.classList.toggle('border-primary', active);
+      tab.classList.toggle('text-muted-foreground', !active);
+    });
+    $$('aside a[href^="#"], #mobile-nav-drawer a[href^="#"]').forEach((link) => {
+      const active = link.getAttribute('href') === `#${id}`;
+      if (active) link.setAttribute('aria-current', 'page');
+      else link.removeAttribute('aria-current');
+      link.classList.toggle('bg-sidebar-accent', active && link.closest('aside') !== null);
+      link.classList.toggle('bg-accent', active && link.closest('#mobile-nav-drawer') !== null);
+    });
+  }
+  function anchorTargetFor(id, anchor) {
+    let target = anchor;
+    const selector = anchor?.dataset?.runtimeAnchorTarget || (anchor?.dataset?.anchorRef ? `[data-anchor-ref="${id}"]` : null);
+    if (selector) {
+      try {
+        const candidates = $$(selector);
+        target = candidates.find((candidate) => isVisibleFocusTarget(candidate)) || null;
+      } catch { target = null; }
+    }
+    if (target && isVisibleFocusTarget(target)) return target;
+    if (anchor?.dataset?.runtimeAnchorProxy || anchor?.dataset?.anchorRef || anchor?.closest?.('#runtime-anchor-registry')) return null;
+    return anchor;
+  }
+  function clearToPopulated() {
+    if (state.screen !== 'populated') setScreen('populated');
+    else if (state.filters.query || state.filters.role !== 'all' || state.filters.status !== 'all') {
+      state.filters = { query: '', role: 'all', status: 'all' };
+      state.selection.clear();
+      render();
+    }
+  }
+  function revealForAnchor() {
+    let id = '';
+    try { id = decodeURIComponent(location.hash.slice(1)); } catch { return; }
+    if (!id) return;
+    if (!prepareDialogsForAnchor(id)) return;
+    setActiveNavigation(id);
+    if (id === 'perm-member-readonly' && state.viewerRole !== 'member') { state.viewerRole = 'member'; roleSwitcher.value = 'member'; render(); }
+    if (id === 'perm-sso-scim-note' && state.workspaceMode !== 'sso') { state.workspaceMode = 'sso'; workspaceModeSwitcher.value = 'sso'; render(); }
+    if (id === 'offline-banner' && state.workspaceMode !== 'offline') { state.workspaceMode = 'offline'; workspaceModeSwitcher.value = 'offline'; render(); }
+    if (id === 'copy-suspended-banner' && (state.viewerRole !== 'owner' || state.workspaceMode !== 'normal')) { state.viewerRole = 'owner'; state.workspaceMode = 'normal'; roleSwitcher.value = 'owner'; workspaceModeSwitcher.value = 'normal'; render(); }
+    if (id === 'bulk-actions' || id === 'selection-summary') {
+      clearToPopulated();
+      state.selection = new Set(['inv_jane']);
+      render();
+    }
+    if (id === 'clear-filters') {
+      clearToPopulated();
+      state.filters = { query: 'jane', role: 'all', status: 'all' };
+      render();
+    }
+    const screenAnchors = { 'state-empty': 'empty', 'state-populated': 'populated', 'state-loading': 'loading', 'state-error': 'error', 'copy-error-load': 'error' };
+    if (screenAnchors[id] && state.screen !== screenAnchors[id]) setScreen(screenAnchors[id]);
+    if (id === 'copy-empty-title' && state.screen !== 'empty') setScreen('empty');
+    if (id === 'members') clearToPopulated();
+    if (['edge-invite-expiry', 'edge-long-names', 'edge-unicode-names', 'member-actions-menu'].includes(id)) clearToPopulated();
+    if (id === 'nav-role-change') {
+      if (state.screen !== 'populated') setScreen('populated');
+      state.filters = { query: '', role: 'invited', status: 'invited' };
+      state.selection.clear();
+      render();
+    }
+    if (id === 'invite-resend') {
+      if (state.screen !== 'populated') setScreen('populated');
+      state.filters = { query: '', role: 'invited', status: 'expired' };
+      state.selection.clear();
+      render();
+    }
+    if (id === 'state-no-results') {
+      if (state.screen !== 'populated') setScreen('populated');
+      state.filters = { query: '__no_matching_member__', role: 'all', status: 'all' };
+      state.selection.clear();
+      render();
+    }
+
+    const errorMessages = {
+      'validation-email-format': 'Enter a valid email address.',
+      'validation-duplicate-email': 'jane@acme.com already has a member or pending invite.',
+      'validation-max-members': 'Free plan limit reached (25/25). Upgrade to invite more people.',
+      'validation-self-invite': "You're already a member of this workspace.",
+    };
+    if (id in errorMessages) {
+      if (id === 'validation-max-members') setPlanScenario('free25');
+      else if (state.screen === 'empty') setScreen('populated');
+      const invite = $('#nav-invite-modal');
+      if (!invite.open) openDialog(invite, null, '#invite-email');
+      if (id === 'validation-duplicate-email') $('#invite-email').value = 'jane@acme.com';
+      if (id === 'validation-self-invite') $('#invite-email').value = 'owner@orbit.example';
+      showInviteError(id, errorMessages[id]);
+      revealInviteErrorAnchor(id, errorMessages[id]);
+    }
+    if (id === 'copy-toast-success') {
+      clearToPopulated();
+      showToast('Invite sent to jane@acme.com.', 'success');
+    }
+    if (id === 'toast-error') {
+      clearToPopulated();
+      state.selection = new Set(['inv_jane']);
+      state.failureSeam = true;
+      runMutation('revoke', () => mutateRevoke('inv_jane'), 'Invite revoked.', { policy: allowed() });
+    }
+    if (id === 'nav-invite-modal') {
+      clearToPopulated();
+      const invite = $('#nav-invite-modal');
+      if (!invite.open) openDialog(invite, null, '#invite-email');
+    }
+    if (id === 'nav-invite-discard-confirm') {
+      clearToPopulated();
+      const invite = $('#nav-invite-modal');
+      if (!invite.open) openDialog(invite, null, '#invite-email');
+      $('#invite-email').value = $('#invite-email').value || 'draft@example.com';
+      const confirmation = $('#nav-invite-discard-confirm');
+      if (!confirmation.open) openDialog(confirmation, $('#invite-email'), 'button[data-request-close]');
+    }
+    if (id === 'nav-remove-confirm') {
+      clearToPopulated();
+      const entity = entityById('inv_jane') || sampleEntities()[0];
+      state.ui.pendingRemovalId = entity?.id || null;
+      $('#copy-confirm-remove').textContent = removeConfirmationCopy(entity);
+      applyPolicyToControl($('[data-action="confirm-remove"]'));
+      const removeDialog = $('#nav-remove-confirm');
+      if (!removeDialog.open) openDialog(removeDialog, null, '[data-request-close]');
+    }
+    if (id === 'nav-member-details') {
+      clearToPopulated();
+      const entity = entityById('usr_alejandra') || sampleEntities()[0];
+      populateDetails(entity);
+      const detailsDialog = $('#nav-member-details');
+      if (!detailsDialog.open) openDialog(detailsDialog, null, '#member-details-title');
+    }
+    if (id === 'nav-transfer-ownership') {
+      clearToPopulated();
+      const owner = state.entities.find((entity) => entity.role === 'owner') || sampleEntities()[0];
+      state.ui.pendingTransferId = owner?.id || null;
+      populateTransfer(owner);
+      applyPolicyToControl($('[data-action="transfer-submit"]'));
+      const transferDialog = $('#nav-transfer-ownership');
+      if (!transferDialog.open) openDialog(transferDialog, null, '#transfer-owner-select');
+    }
+    if (id === 'mobile-nav-drawer') {
+      const drawer = $('#mobile-nav-drawer');
+      if (!drawer.open) openDialog(drawer, null, 'a[href="#overview"]');
+    }
+
+    const anchor = document.getElementById(id);
+    if (!anchor) return;
+    const target = anchorTargetFor(id, anchor);
+    if (!target) return;
+    let node = target;
+    while (node) { if (node.tagName === 'DETAILS') node.open = true; node = node.parentElement; }
+    syncRuntimeAnchors();
+    const dialog = target.closest?.('dialog');
+    if (dialog && !dialog.open) openDialog(dialog, null, dialog.id === 'nav-invite-modal' ? '#invite-email' : null);
+    if (id === 'member-actions-menu') {
+      const menu = target.closest?.('.member-actions-menu') || $('.member-actions-menu');
+      if (menu) openMenu(menu, 0);
+    }
+    requestAnimationFrame(() => {
+      if (!dialog && id !== 'member-actions-menu' && isVisibleFocusTarget(target)) target.focus({ preventScroll: true });
+      target.scrollIntoView?.({ block: 'center' });
+    });
+  }
+  function navigateToHash(hash) {
+    const normalized = hash.startsWith('#') ? hash : `#${hash}`;
+    if (location.hash !== normalized) history.pushState(null, '', normalized);
+    revealForAnchor();
+  }
+
+  document.addEventListener('click', (event) => {
+    const navigationLink = event.target.closest('a[href^="#"]');
+    if (navigationLink) {
+      event.preventDefault();
+      const drawer = navigationLink.closest('#mobile-nav-drawer');
+      if (drawer?.open) closeNow(drawer);
+      navigateToHash(navigationLink.getAttribute('href'));
+      return;
+    }
+    const close = event.target.closest('[data-request-close]');
+    if (close) { event.preventDefault(); requestClose(close.closest('dialog')); return; }
+    const dismiss = event.target.closest('[data-dismiss-toast]');
+    if (dismiss) { setHidden(dismiss.closest('#copy-toast-success, #toast-error'), true); return; }
+    const actionControl = event.target.closest('[data-action]');
+    if (actionControl && actionControl.type !== 'submit' && !actionControl.disabled) { handleAction(actionControl.dataset.action, actionControl); return; }
+    const fallbackDetails = event.target.closest('[data-open-details]');
+    if (fallbackDetails) { const entity = entityById(fallbackDetails.dataset.openDetails); populateDetails(entity); openDialog($('#nav-member-details'), fallbackDetails, '#member-details-title'); }
+  });
+  document.addEventListener('change', (event) => {
+    const selectAllControl = event.target.closest('[data-select-all]');
+    if (selectAllControl) {
+      const visible = state.derived.filtered.map((entity) => entity.id);
+      visible.forEach((id) => selectAllControl.checked ? state.selection.add(id) : state.selection.delete(id));
+      render();
+      announce(`${state.selection.size} unique member${state.selection.size === 1 ? '' : 's'} selected.`);
+      return;
+    }
+    const select = event.target.closest('[data-select-id]');
+    if (select) {
+      if (select.checked) state.selection.add(select.dataset.selectId); else state.selection.delete(select.dataset.selectId);
+      render();
+      announce(`${state.selection.size} unique member${state.selection.size === 1 ? '' : 's'} selected.`);
+      return;
+    }
+    const roleSelectControl = event.target.closest('[data-role-select]');
+    if (roleSelectControl) {
+      const id = roleSelectControl.dataset.id; const nextRole = roleSelectControl.value; const policy = policyFor('change-role', id);
+      if (!policy.allowed) { render(); return showPolicyDenial(policy); }
+      const entity = entityById(id);
+      runMutation('role-change', () => mutateRole(id, nextRole), `${entity?.name || 'Member'} is now ${roleLabel(nextRole)}.`, { policy, focusContext: mutationFocusContext(roleSelectControl) });
+      return;
+    }
+    const column = event.target.closest('[data-column-toggle]');
+    if (column) { state.columns[column.dataset.columnToggle] = column.checked; updateColumnVisibility(); return; }
+  });
+  $$('[data-clear-selection]').forEach((button) => button.addEventListener('click', () => { state.selection.clear(); render(); announce('Selection cleared.'); }));
+  $$('[data-clear-filters]').forEach((button) => button.addEventListener('click', clearFilters));
+  roleFilter.addEventListener('change', () => { state.filters.role = roleFilter.value; setFilterValues(); filterChanged(); });
+  statusFilter.addEventListener('change', () => { state.filters.status = statusFilter.value; setFilterValues(); filterChanged(); });
+  searchInput.addEventListener('input', updateSearchFilterLater);
+  $$('[data-column-toggle]').forEach((toggle) => toggle.addEventListener('change', () => { state.columns[toggle.dataset.columnToggle] = toggle.checked; updateColumnVisibility(); }));
+  $$('[data-state]').forEach((button) => button.addEventListener('click', () => setScreen(button.dataset.state)));
+  $$('[data-plan-scenario]').forEach((button) => button.addEventListener('click', () => setPlanScenario(button.dataset.planScenario)));
+  roleSwitcher.addEventListener('change', () => { state.viewerRole = roleSwitcher.value; render(); announce(`${titleCase(state.viewerRole)} local policy applied.`); });
+  workspaceModeSwitcher.addEventListener('change', () => { state.workspaceMode = workspaceModeSwitcher.value; render(); announce(`${workspaceModeSwitcher.value === 'sso' ? 'SSO / SCIM managed' : titleCase(workspaceModeSwitcher.value)} local mode applied.`); });
+  $('#theme-toggle').addEventListener('click', () => { document.documentElement.classList.toggle('dark'); updateTheme(); });
+  $('#fail-next-mutation').addEventListener('change', (event) => { state.failureSeam = event.target.checked; $('#mutation-status').textContent = state.failureSeam ? 'Mutation status: failure seam armed' : 'Mutation status: idle'; });
+  $('#mobile-nav-trigger').addEventListener('click', (event) => { openDialog($('#mobile-nav-drawer'), event.currentTarget, 'a[href="#overview"]'); });
+  $('#invite-form').addEventListener('submit', submitInvite);
+  $('#invite-email').addEventListener('input', clearInviteErrors);
+  $('#member-role-select').addEventListener('change', () => applyPolicyToControl($('[data-action="role-submit"]')));
+  $('#member-role-form').addEventListener('submit', (event) => { event.preventDefault(); const button = $('[data-action="role-submit"]'); handleAction('role-submit', button); });
+  $('#bulk-role-value').addEventListener('change', () => applyPolicyToControl($('[data-action="bulk-role-submit"]')));
+  $('#bulk-role-form').addEventListener('submit', (event) => { event.preventDefault(); handleAction('bulk-role-submit', $('[data-action="bulk-role-submit"]')); });
+  $('#transfer-owner-select').addEventListener('change', () => applyPolicyToControl($('[data-action="transfer-submit"]')));
+  $('#transfer-ownership-form').addEventListener('submit', (event) => { event.preventDefault(); handleAction('transfer-submit', $('[data-action="transfer-submit"]')); });
+  $('#discard-invite').addEventListener('click', () => { $('#invite-form').reset(); clearInviteErrors(); closeNow($('#nav-invite-discard-confirm')); closeNow($('#nav-invite-modal')); state.ui.dirtyDialog = null; });
+  $('#retry-load').addEventListener('click', () => { setScreen('loading'); setTimeout(() => setScreen('populated'), 700); });
+  $$('[data-page]').forEach((button) => button.addEventListener('click', () => { button.disabled = true; announce('Sample pagination is disabled; production pagination is deferred.'); }));
+
+  $$('[data-annotation-id]').forEach((annotation) => {
+    const pre = $('pre', annotation);
+    if (pre) {
+      pre.dataset.annotationClassification = annotation.dataset.annotationClassification;
+    }
+  });
+  wireDialogs();
+  wireMenuEvents();
   window.addEventListener('hashchange', revealForAnchor);
-  show('empty');
-  revealForAnchor();
+  window.addEventListener('popstate', revealForAnchor);
+  window.addEventListener('resize', () => requestAnimationFrame(() => { syncRuntimeAnchors(); positionOpenMenus(); }));
+  window.addEventListener('scroll', positionOpenMenus, true);
+  setFilterValues();
+  render();
+  requestAnimationFrame(() => { syncRuntimeAnchors(); revealForAnchor(); });
+  window.addEventListener('load', () => { syncRuntimeAnchors(); revealForAnchor(); }, { once: true });
 </script>
 </body>
 </html>

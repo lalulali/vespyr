@@ -224,7 +224,7 @@ Entries meeting any of the following criteria are **NEVER** archived:
 4. Total injected memory context across Tier 1, Tier 2, and Tier 3 never exceeds 1,000 tokens.
 5. All memory context is wrapped in passive T3 data boundaries, eliminating indirect prompt injection.
 6. Automated `/retro` compaction executes loss-free archival to `archive/index.ndjson`, verified by `witness.js`.
-7. All 42 skills pass `spec_check.js` and all memory files pass `witness.js check`.
+7. All skills (derived from disk — 43 at v2.0 shipped state, never hardcoded) pass `spec_check.js` and all memory files pass `witness.js check`.
 
 ---
 

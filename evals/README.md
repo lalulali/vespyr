@@ -1,6 +1,6 @@
 # evals/ — vespyr-eval harness data root
 
-This directory holds everything the standalone evaluation harness (`bin/vespyr-eval.js`, engine in `tools/eval/`) reads and writes. **Rule zero: a mock run is a harness self-test, never quality evidence.** Canned-fixture scores measure the fixture author, not a model. Mock outputs are watermarked `[MOCK]`, runs carry `mock_mode`, and `record-baseline` refuses to save a mock run as the production baseline.
+This directory holds the evaluation harness's code, suites, rubrics, and input fixtures. Generated run results, reports, calibration outputs, and baselines belong in `artifacts/evals/` and are not package inputs. **Rule zero: a mock run is a harness self-test, never quality evidence.** Canned-fixture scores measure the fixture author, not a model. Mock outputs are watermarked `[MOCK]`, runs carry `mock_mode`, and `record-baseline` refuses to save a mock run as the production baseline.
 
 ## Layout
 
@@ -8,13 +8,14 @@ This directory holds everything the standalone evaluation harness (`bin/vespyr-e
 | :--- | :--- |
 | `suites/` | Benchmark suites (`agents/`, `skills/`, `invariants/`, `models/`). Each file: `{suite, description, benchmarks[]}` |
 | `rubrics/` | Tier-1 checklist rubrics, one per dimension (`<dimension>.json` with `_` or `-`). `*.heldout-01.json` are UNREVIEWED held-out candidates (see below) |
-| `mock-baseline.json` | Labeled self-test reference (`mock_mode:true`). Regenerate with `npm run eval:baseline` |
-| `baseline.json` | Production baseline. Absent by default — created only by a real-model `record-baseline` |
-| `fixtures/` | Sandbox fixture trees (`simple-js/`, `dev-tasks/`) for file/command benchmarks |
-| `meta-eval/gold-standard.json` | Meta-evaluation reference |
-| `security/` | Security corpora (`corpus/`, `held_out/`) |
+| `fixtures/` | Sandbox and source fixtures (`simple-js/`, `dev-tasks/`, prototype inputs) for file/command benchmarks |
+| `meta-eval/gold-standard.json` | Meta-evaluation reference input |
+| `security/` | Security corpora and frozen CI oracles (`corpus/`, `held_out/`) |
 | `roundtable/` | Round-table eval topics and fixtures (has its own README) |
-| `artifacts/` | Calibration snapshots (e.g. RQS calibration JSON) |
+
+## Storage boundary
+
+`evals/` contains code and inputs only. Put generated reports, score files, calibration outputs, and run baselines under `artifacts/evals/`; that tree is project-local and ignored by Git. Named fixture reports (for example `fixtures/dev-tasks/spec-coverage/coverage-report.md`) are test inputs and stay with their fixture. The security corpus's frozen baseline JSON files are test oracles consumed by CI, not run outputs, and remain with their corpus until a separate migration is approved.
 
 ## Quickstart
 
@@ -40,7 +41,7 @@ npm run eval:tier0         # deterministic gates only, zero LLM tokens
 
 ```bash
 # Baselines and diffs (real-model runs only)
-node bin/vespyr-eval.js record-baseline --adapter gemini            # writes evals/baseline.json
+node bin/vespyr-eval.js record-baseline --adapter gemini            # writes artifacts/evals/baseline.json
 node bin/vespyr-eval.js diff --suite skills/delivery                # exit 2 on regression
 ```
 
@@ -62,7 +63,7 @@ Subcommands: `run` (default), `record-baseline`, `diff`.
 | `--temp, -t` | `0.0` | 0–2, recorded in provenance |
 | `--min-rqsd` | off | Global RQS-D floor (0–1) for benchmarks with no explicit RQS-D contract; explicit `requireRQSD`/`minRQSD` (incl. `false` opt-outs) always win |
 | `--concurrency, -c` | `4` | 1–64 worker sandboxes |
-| `--baseline, -b` | `evals/baseline.json` | |
+| `--baseline, -b` | `artifacts/evals/baseline.json` | |
 | `--fail-fast` | off | Stops all workers on first failure (reported as `failFastTruncated`) |
 | `--fail-on-regression` / `--no-fail-on-regression` | on | Exit 2 gate |
 | `--tier0` | off | Skip Tier-1 (fast mode) |
@@ -123,7 +124,7 @@ Before trusting any new CLI's scores, run the plumbing check — empty or hangin
 echo "reply with the word OK" | ~/bin/<name>-shim.sh   # expect: OK on stdout, < 60s
 ```
 
-Comparing students: run one suite per CLI with a distinct `--model` tag (e.g. `--model kiro-1`, `--model agy-1`) — the tag is pinned in provenance — then compare reports or `diff` each against its own baseline file (`--baseline evals/baseline.kiro.json`). Prefer least-privilege tool flags (`--trust-tools=read,grep` over approve-everything switches); exam answers are text and rarely need shell access. Start on `invariants/grill-me-spcp` (15 benchmarks = 15 processes) before going wide — 104 benchmarks means 104 agent sessions.
+Comparing students: run one suite per CLI with a distinct `--model` tag (e.g. `--model kiro-1`, `--model agy-1`) — the tag is pinned in provenance — then compare reports or `diff` each against its own baseline file (`--baseline artifacts/evals/baseline.kiro.json`). Prefer least-privilege tool flags (`--trust-tools=read,grep` over approve-everything switches); exam answers are text and rarely need shell access. Start on `invariants/grill-me-spcp` (15 benchmarks = 15 processes) before going wide — 104 benchmarks means 104 agent sessions.
 
 ## How judging works (two tiers)
 
@@ -162,7 +163,7 @@ Anyone who has read the fixtures cannot author independent rubrics — the indep
 **Context firewall.** The blind party MAY read exactly one thing per dimension: the default rubric `evals/rubrics/<dimension>.json` (criterion names, weights, thresholds — the public contract). It MUST NOT read, under any circumstance:
 
 - `evals/suites/**` (fixture and assert vocabulary)
-- `evals/mock-baseline.json` (scores leak the same vocabulary)
+- `artifacts/evals/mock-baseline.json` (scores leak the same vocabulary)
 - `evals/fixtures/**`
 - `evals/rubrics/*.heldout-*.json` (when authoring fresh; when *reviewing* candidates, these are the input)
 
@@ -176,7 +177,7 @@ Anyone who has read the fixtures cannot author independent rubrics — the indep
 ```text
 You are authoring Tier-1 rubric evidence patterns for the `<dimension>` evaluation dimension.
 You MAY read exactly one file: evals/rubrics/<dimension>.json.
-You MUST NOT read evals/suites/**, evals/mock-baseline.json, evals/fixtures/**,
+You MUST NOT read evals/suites/**, artifacts/evals/mock-baseline.json, evals/fixtures/**,
 or any evals/rubrics/*.heldout-*.json file. Do not go looking for examples of
 "what outputs look like" anywhere else in the repo.
 

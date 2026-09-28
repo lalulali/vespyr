@@ -212,7 +212,7 @@ When implementing frontend code, follow strictly the AI Behavior Contract and te
 - **Semantic HTML First:** Use native HTML elements (`<button>`, `<a>`, `<input>`, `<label>`). Never attach `onClick` handlers to non-semantic `<div>` or `<span>` elements without full ARIA keyboard/role patterns.
 - **Keyboard Operability:** Every interactive element MUST be focusable via Tab, triggerable via Enter/Space, and maintain a visible focus indicator (WCAG SC 2.4.13).
 - **Image & Media Resolution:** Every image requires an `alt` attribute (functional/informative images get descriptive `alt`, decorative images require human-confirmed `alt=""`). Audio/video require user controls and fallback transcripts/captions.
-- **Component Primitives:** Use established accessible primitives (Radix, Shadcn, Motion Primitives) instead of building custom parallel implementations.
+- **Component Primitives:** Use established accessible primitives (Radix, Shadcn, Motion Primitives) instead of building custom parallel implementations **when the recorded prototype track is `nextjs-component`**. For `static-html`, follow the recorded vanilla HTML/CSS/JS runtime and do not introduce React/shadcn primitives without a new track decision.
 
 ### Multi-developer mode (worktrees)
 If assigned a developer ID and worktree, you must follow the isolated branch and directory workflow rules defined in the [Multi-Developer Mode (Worktrees) section of the developer guidelines](../references/developer-guidelines.md#1-multi-developer-mode-worktrees).

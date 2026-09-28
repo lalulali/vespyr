@@ -12,3 +12,4 @@ pipeline_simulator.js
 hot_path_analyzer.js
 token_profiler.js
 migrate-frontmatter-v2.js
+setup_git_hooks.js

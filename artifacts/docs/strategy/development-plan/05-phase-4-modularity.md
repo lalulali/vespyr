@@ -33,8 +33,8 @@
       "depends_on": ["io"]
     },
     "io": {
-      "description": "I/O sub-agents + memory infrastructure. REQUIRED closure of every module: delegation hooks (03 F2.1) and every skill invoke @reader/@writer/@executor/@memory-controller.",
-      "agents": ["reader", "writer", "executor", "memory-controller"],
+      "description": "Memory infrastructure. REQUIRED closure of every module: delegation hooks (03 F2.1) and memory operations route through @memory-controller. (The @reader/@writer/@executor trio was deleted 2026-08-10 — reasoning agents do their own I/O via harness subagents; only @memory-controller remains.)",
+      "agents": ["memory-controller"],
       "skills": [],
       "required": true,
       "depends_on": []
@@ -58,9 +58,9 @@
       "depends_on": ["io"]
     },
     "game": {
-      "description": "Game development overlay",
+      "description": "Game development overlay — DEFERRED to Phase 8 (see 10-phase-8-game-development-track.md). The old validate-game-idea/explore-game-idea skills were deleted 2026-09-07; no game skills ship until the Phase 8 rebuild.",
       "agents": [],
-      "skills": ["validate-game-idea", "explore-game-idea"],
+      "skills": [],
       "depends_on": ["io"]
     },
     "memory": {
@@ -70,9 +70,9 @@
       "depends_on": ["io"]
     },
     "orchestration": {
-      "description": "Cross-cutting skills: grill, plan, review, test, kanban, status, phase, squad, delegate, code-graph, doc-graph, help-me",
+      "description": "Cross-cutting skills: grill, plan, review, test, kanban, status, phase, help-me, round-table, elicitation",
       "agents": [],
-      "skills": ["grill-me", "plan", "review", "test", "kanban", "status", "phase", "squad", "delegate", "code-graph", "doc-graph", "help-me", "round-table", "elicitation"],
+      "skills": ["grill-me", "plan", "review", "test", "kanban", "status", "phase", "help-me", "round-table", "elicitation"],
       "depends_on": ["io"]
     }
   },
@@ -164,7 +164,7 @@ Step 3: Pick the icon
 Step 4: Set the permissions (read + question for thinkers; bash + edit for doers)
 Step 5: Write the charter (when to invoke, when NOT, output artifacts)
 ```
-Output: one new agent file via `@writer`, validated by `validate_frontmatter.js`.
+Output: one new agent file (written directly, human-gated), validated by `validate_frontmatter.js`.
 
 **Skill-builder 4-step guided flow:**
 
@@ -174,7 +174,7 @@ Step 2: Identify the steps (max 10)
 Step 3: Pick the mode (single, tri-modal, or chained)
 Step 4: Write the SKILL.md bootloader
 ```
-Uses `@writer` for folder scaffolding. Output: folder + SKILL.md + steps/ + customize.toml.
+Scaffolds the folder directly (human-gated). Output: folder + SKILL.md + steps/ + customize.toml.
 
 **Workflow-builder 6-step guided flow:**
 
@@ -234,7 +234,7 @@ The example is a deliberately trivial project ("a CLI todo list") — the point 
 
 ## F4.11 — Rewrite README.md
 
-- [ ] New sections: "What is Vespyr" (1 paragraph), "The 8 themes" (T1-T8, one line each — T8 is cross-cutting; earlier drafts said "7 themes"), "The phases of v2.0" (link to this folder), "Squads" (table of the current 7 — the 3 Phase 5 squads land in v2.2, not v2.1), "Install" (`npx vespyr`, `--modules`, `mcp start`), "Hooks" (**13 IDs**, env-var disable), "MCP tools" (**17 first-party tools**: 10 from 03a + 6 from 13 + `vespyr_spawn_agent` from 03b; 6 third-party servers — counts must reflect the final v2.1 surface, not 10), "Scripts" (new scripts), "Customization" (2-file TOML), "Vespyr Identity" (3 differentiators — from Phase 0 T7.4), "Roadmap" (link to this folder)
+- [ ] New sections: "What is Vespyr" (1 paragraph), "The 8 themes" (T1-T8, one line each — T8 is cross-cutting; earlier drafts said "7 themes"), "The phases of v2.0" (link to this folder), "Squads" (table of the current 7 — the 3 Phase 5 squads land in v2.2, not v2.1), "Install" (`npx vespyr`, `--modules`, `mcp start`), "Hooks" (**13 IDs**, env-var disable), "MCP tools" (**14 first-party tools**: 7 from `03b` + 6 from `03g` + `vespyr_spawn_agent` from `03c`; 6 third-party servers — counts must reflect the final v2.1 surface post graph-removal, not 10 or 17), "Scripts" (new scripts), "Customization" (2-file TOML), "Vespyr Identity" (3 differentiators — from Phase 0 T7.4), "Roadmap" (link to this folder)
 
 ## F4.12 — Rewrite AGENTS.md (canonical)
 
@@ -264,7 +264,7 @@ The example is a deliberately trivial project ("a CLI todo list") — the point 
 
 **Target:** A non-trivial dogfood project that exercises the full v2.1 pipeline from `/validate-idea` through `/iterate`. The project must:
 
-1. Start with `/validate-idea` → produce a GO/PIVOT/KILL brief
+1. Start with `/validate-idea` → produce a GO/RESHAPE/NO-GO brief
 2. Run `/explore-idea` → market + user research
 3. Run `/design` → spec-kernel PRD + user stories + design.md
 4. Run `/plan` → execution plan with task breakdown
@@ -390,7 +390,7 @@ Only after sign-off with **GO** or **CONDITIONAL** (with conditions satisfied) i
 - [ ] A new workflow can be defined in 10 minutes via `workflow-builder`
 - [ ] `rules/common/` + `rules/typescript/` merged at install time produces correct precedence
 - [ ] A user can disable the orchestration module and still have a working core install
-- [ ] `README.md` reflects v2.0 architecture (8 themes incl. T8, identity section, 13 hooks, 17 MCP tools, modules)
+- [ ] `README.md` reflects v2.0 architecture (8 themes incl. T8, identity section, 13 hooks, 14 MCP tools, modules)
 - [ ] `AGENTS.md` (canonical) surfaces all new contracts
 - [ ] `ROADMAP.md` no longer has the 35-harness table
 - [ ] **Dogfood:** full pipeline exercised end-to-end on a real project; all 10 metrics (M1-M10) measured; integration bugs filed as GitHub issues; **human-in-the-loop validation sign-off** completed in `validation-signoff.md`
@@ -402,7 +402,7 @@ Only after sign-off with **GO** or **CONDITIONAL** (with conditions satisfied) i
 - **Module split breaks existing installs.** `install-modules` is opt-in; default matches current behavior. `core` always required.
 - **Rules merge order is non-obvious.** Document specificity rule in `rules/README.md`; add `validate_rules.js` test.
 - **Example project becomes maintenance burden.** It's an example, not a real product. Update only when schema changes.
-- **Builders produce inconsistent output.** Each builder uses `@writer` with a hardcoded template; output is byte-identical to hand-written.
+- **Builders produce inconsistent output.** Each builder writes directly with a hardcoded template; output is byte-identical to hand-written.
 - **Modules or builders bypass the satisfaction gate.** Keep the protocol in `core`, validate generated manifests/workflows, and test an attempted `BLOCKED` to GO transition.
 
 ### Rollback plan

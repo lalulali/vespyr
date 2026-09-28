@@ -25,6 +25,7 @@ Persist updated design documents, record decisions, and hand off.
 - All artifacts present and valid?
 - No blocking open questions?
 - User stories still aligned with revised PRD?
+- If a prototype is in scope, does `prototype_collab_gate.js verify` still pass for the selected track and reviewed prototype hash?
 
 ## State machine
 ```bash

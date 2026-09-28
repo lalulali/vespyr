@@ -50,7 +50,7 @@
 │  • telemetry_surface.js macro digests: session <150ms, 7-day trends, hot-paths (F3.8)   │
 │  • RQS-J semantic shadow (SRSR/SDS G-Eval κ≥0.7), retry-inflation analytics             │
 │  • /status Telemetry section + /retro hot-path digest                                   │
-│  • Graph observability (auto_graph.js query API) + vespyr web dashboard (04b)           │
+│  • vespyr web dashboard (04b)                                                            │
 │  • Pricing service + cost_usd exact enrichment                                           │
 └────────────────────────────────────────────────────────────────────────────────────────┘
 ```
@@ -386,5 +386,5 @@ interface VespyrTelemetrySpan {
 | `telemetry_surface.js` session/hot-paths/7-day | NOT in 02l | F3.8 `session <150ms`, `hot-paths`, `summary`, `compare` | 04a |
 | `/status` Telemetry section | NOT in 02l | F3.10 append `## Telemetry (last 7 days)` | 04a |
 | `/retro` hot-path digest | NOT in 02l | F3.11 `hot-paths` in Step 1 | 04a |
-| Graph observability | NOT in 02l | `auto_graph.js` + query API | 04/04a |
+| ~~Graph observability~~ | ~~NOT in 02l~~ | ❌ REMOVED (owner [NO-GO] 2026-09-24) | 04/04a |
 | `vespyr web` dashboard | NOT in 02l | `04b` | 04b |

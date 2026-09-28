@@ -23,7 +23,7 @@ Do **not** run this for small spec-side discoveries — those follow the Phase B
 
 1. **Halt engineering.** Stop the dev loop on the falsified model; never patch production code around a broken interaction (designer veto at QA — Review 10 §4).
 2. **Branch Prototype v2 in isolation** — a fresh sandbox that passes the same completeness gate as step-1 (4 criteria + State Switcher). Failing prototypes do not proceed.
-3. **Re-validate** the new interaction with the same usability bar; record falsification + re-validation evidence in the session summary.
+3. **Re-validate** the new interaction with the same usability bar; record falsification + re-validation evidence in the session summary. Re-run `prototype_collab_gate.js verify` after the new designer–tech review; stale or unsigned records block the rollback.
 4. **Re-extract** — re-run step-1 (inventory delta) and step-2 (ledger delta) against Prototype v2. New/removed behaviors become inventory rows; ledger rows are re-anchored or demoted to `[OPEN]` — never silently rewritten.
 5. **Re-run parity** (step-4): metrics + 10-class table + deferrals; `spec_parity.js check` must exit 0.
 6. **Re-witness** — refresh the freeze boundary:
@@ -32,11 +32,12 @@ Do **not** run this for small spec-side discoveries — those follow the Phase B
 7. **Resume engineering** against the new frozen reference; post-handoff contract shifts append `[DELTA-NN]`/`AC-E*` (Phase Boundary Rule).
 
 ## Output
-Updated `prototype-inventory.md`, `requirements.md` (ledger), `parity-report.md` (new witness); Step-0 staleness hook green.
+Updated `prototype-inventory.md`, `requirements.md` (ledger), `parity-report.md` (new witness), and `prototype-collaboration.md` (new track/reviewer evidence); Step-0 staleness hook and collaboration gate green.
 
 ## Halt conditions
 - Prototype v2 fails the completeness gate
 - `spec_parity.js check` exits 1 after re-extraction
 - Re-witness cannot be stamped
+- Prototype v2 collaboration record fails `prototype_collab_gate.js verify`
 
 > **Tracker:** `node .agents/scripts/step_tracker.js complete --skill design-reverse --step 5`

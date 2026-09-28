@@ -135,34 +135,13 @@ External agent skills downloaded from the internet execute with model privileges
 
 Every external skill MUST pass the **4-Tier Ingestion Gate** before being placed in `.agents/skills/`:
 
-```
-External Skill Source (Internet)
-       │
-       ▼
-[ Tier 1: Spec Validator (spec_check.js) ]
-  • Frontmatter parses cleanly
-  • Name matches directory (ASCII kebab, ≤64 chars)
-  • Description bounded (1–1024 chars, no raw folded syntax)
-  • Allowed keys only (agentskills.io spec)
-       │
-       ▼
-[ Tier 2: Bash & Permission Safety Filter ]
-  • Regex scan for destructive shell commands (rm -rf, mkfs, dd)
-  • Prohibit piped network shells (curl ... | bash, wget ... | sh)
-  • Prohibit unauthorized environment variable exfiltration
-       │
-       ▼
-[ Tier 3: Prompt Injection & Instruction Audit ]
-  • Scan for hidden system instructions or role hijacking
-  • Verify no bypass of Vespyr Core DNA or UTTERLY SATISFIED release gates
-       │
-       ▼
-[ Tier 4: Token Economy & Footprint Cap ]
-  • SKILL.md body capped at ≤ 500 lines
-  • Structured references only; no ad-hoc 5,000-token bloat
-       │
-       ▼
-Install Approved → Placed in .agents/skills/
+```mermaid
+flowchart TD
+    S["External Skill Source (Internet)"] --> T1
+    T1["Tier 1: Spec Validator (spec_check.js)<br>• Frontmatter parses cleanly<br>• Name matches directory (ASCII kebab, ≤64 chars)<br>• Description bounded (1–1024 chars)<br>• Allowed keys only (agentskills.io spec)"] --> T2
+    T2["Tier 2: Bash & Permission Safety Filter<br>• Regex scan for destructive shell (rm -rf, mkfs, dd)<br>• Prohibit piped network shells (curl … | bash)<br>• Prohibit env-var exfiltration"] --> T3
+    T3["Tier 3: Prompt Injection & Instruction Audit<br>• Scan for hidden system instructions / role hijacking<br>• Verify no bypass of Core DNA or UTTERLY SATISFIED gates"] --> T4
+    T4["Tier 4: Token Economy & Footprint Cap<br>• SKILL.md body ≤ 500 lines<br>• Structured references only; no 5,000-token bloat"] --> OK["Install Approved → .agents/skills/"]
 ```
 
 Enforcement script: `.agents/scripts/skill_audit.js` (runs in CI and inside the installer).
@@ -270,3 +249,6 @@ It would be a great adition for Sarah. But all documents are in Chinese
   - plan how agents and skills can use the skills natively
   - update the plan, remove obsolete plan
 - ruflo hive mind: https://github.com/ruvnet/ruflo/blob/main/.agents/skills/hive-mind/SKILL.md (can be used to generate ppt too)
+- openspec.dev
+
+> **Direction on record (affects 03f):** Chris's latest intent is to **ingest external token-reduction skills through this 03a pipeline rather than build a bespoke Flint/quick mode in `03f`**. `03f-phase-2-token-effective-mode.md` now carries a banner reflecting this — the ingestion path (registry entry + `skill_audit.js` gate + native agent/skill wiring) is the preferred route; the from-scratch build in 03f is on hold pending Chris's confirmation to formally supersede it. The `interaction-prd` skill (for @product-manager/Sarah) and the ruflo hive-mind skill are candidate M1 survey entries once a translation/vetting pass is scheduled.

@@ -15,7 +15,7 @@ Vespyr's two core multi-agent patterns function ONLY in OpenCode today:
 
 | Pattern | What it does | Harnesses where it works |
 |---|---|---|
-| **I/O Delegation** (Pattern A) | Reasoning agents delegate reads, writes, shell commands, memory operations to narrow I/O sub-agents (@reader, @writer, @executor, @memory-controller) | OpenCode only |
+| **I/O Delegation** (Pattern A) | Reasoning agents delegate reads, writes, shell commands to harness-native subagents (or direct calls); memory operations go through `@memory-controller` | OpenCode only |
 | **Multi-Agent Reasoning** (Pattern B) | Skills invoke multiple reasoning agents (@founder, @architect, @developer, @qa-engineer) that produce independent analysis | OpenCode only |
 
 This means **Vespyr's #1 differentiator (permission-denial I/O split) delivers zero value in 4 of 5 active harnesses**. The Socratic depth (#2 differentiator) evaporates when one LLM roleplays all personas. The 3-tier memory (#3 differentiator) still functions via `@memory-controller` but without the I/O agent that's supposed to marshal it.
@@ -49,7 +49,7 @@ This means **Vespyr's #1 differentiator (permission-denial I/O split) delivers z
 ┌──────────────────────────────────────────────────────────────┐
 │                   Vespyr Skill (e.g., /develop)              │
 │                                                               │
-│  "Delegate to @executor: npm test"                            │
+│  "Run a shell command (e.g. npm test) via harness-native execution"          │
 │  "Invoke @qa-engineer for quality gate"                       │
 │       │                                                       │
 │       ▼                                                       │
@@ -253,7 +253,7 @@ Each adapter reads the Vespyr agent definition, extracts the relevant fields (na
     "agent": {
       "type": "string",
       "description": "Agent name matching Vespyr persona (derived from .agents/agents/*.md at server start — never a hardcoded list)",
-      "enum": ["founder", "product-manager", "product-designer", "architect", "tech-lead", "developer", "code-reviewer", "qa-engineer", "researcher", "user-researcher", "ux-researcher", "data-analyst", "security-engineer", "performance-engineer", "ml-ai-engineer", "ml-ai-ops", "shifu", "devops-engineer", "technical-writer", "reader", "writer", "executor", "memory-controller"]
+      "enum": ["founder", "product-manager", "product-designer", "architect", "tech-lead", "developer", "code-reviewer", "qa-engineer", "researcher", "user-researcher", "ux-researcher", "data-analyst", "security-engineer", "performance-engineer", "ml-ai-engineer", "ml-ai-ops", "shifu", "devops-engineer", "technical-writer", "memory-controller"]
     },
     "prompt": {
       "type": "string",
@@ -307,8 +307,8 @@ Each adapter reads the Vespyr agent definition, extracts the relevant fields (na
 **Target:** A CLI tool that bridges harnesses with shell access to near-M2 quality:
 
 ```bash
-# I/O delegation — @developer's "run tests" becomes:
-npx vespyr agent-run --agent executor --prompt "Run npm test and summarize failures" --model fast
+# Command execution — @developer's "run tests" becomes:
+npx vespyr agent-run --exec "npm test" --summarize
 
 # Multi-agent reasoning — @architect invokes @security-engineer:
 npx vespyr agent-run --agent security-engineer --prompt "Review auth flow" --model premium --context "@./adr-auth.md"
@@ -332,9 +332,9 @@ npx vespyr agent-run --agent developer --prompt "Fix the login bug" --context "@
 **Key design constraints:**
 - **Stateless.** Each invocation is independent. No session memory between calls. The calling harness manages state.
 - **API-agnostic.** Uses the same model provider the harness uses. Detected from environment or config file. Supports OpenAI-compatible APIs, Anthropic, and DeepSeek.
-- **No tools for invoked agents.** Agents invoked via `agent-run` cannot use tools (read, write, bash, edit). They reason and respond only. This prevents side effects from CLI-orchestrated agents. Exception: `@executor` can specify a command that the CLI wrapper runs and summarizes.
+- **No tools for invoked agents.** Agents invoked via `agent-run` cannot use tools (read, write, bash, edit). They reason and respond only. This prevents side effects from CLI-orchestrated agents. Exception: the CLI's `--exec` command-runner mode can run a shell command and summarize it (see "command-runner mode" below) — this is a CLI capability, not an agent persona.
 - **Credential hygiene (F3b.19, 09 R-add):** provider credentials are loaded from environment variables ONLY — never from harness config files that may contain keys. **Every output path redacts key/token/secret patterns** (no credential echo to stdout/stderr → agent context → memory). A no-credential-echo test is part of `test:agent-run`.
-- **Timeout.** Default 30s for reasoning agents, 15s for I/O agents. Configurable via `--timeout`.
+- **Timeout.** Default 30s for reasoning agents, 15s for the `--exec` command-runner. Configurable via `--timeout`.
 - **Provider auto-detection.** The CLI detects the active model provider from the harness configuration. Priority: `VESPYR_PROVIDER` env var → harness config (credentials still env-only) → `.agents/config/models.json` default.
 
 **Model tier configuration** (`.agents/config/models.json`):
@@ -361,7 +361,7 @@ npx vespyr agent-run --agent developer --prompt "Fix the login bug" --context "@
     }
   },
   "agent_tier_map": {
-    "reader": "fast", "writer": "fast", "executor": "fast", "memory-controller": "fast",
+    "memory-controller": "fast",
     "founder": "premium", "product-manager": "premium", "product-designer": "premium",
     "architect": "premium", "developer": "premium", "tech-lead": "premium",
     "code-reviewer": "balanced", "qa-engineer": "balanced", "security-engineer": "balanced",
@@ -375,18 +375,18 @@ npx vespyr agent-run --agent developer --prompt "Fix the login bug" --context "@
 
 > **Config ownership:** `models.json` is the model-tier config (created by F3b.20); `.agents/config.yaml` is the behavior/flint config (Phase 0). Both live under `.agents/config/` — the earlier "model.json" typo is corrected.
 
-**@executor special handling:** The `@executor` agent in CLI mode works differently from other agents:
+**Command-runner mode (`--exec`):** the CLI's shell-execution path works differently from an agent invocation:
 1. The CLI wrapper receives a command (not a question)
-2. If the harness has a specific command to run, the CLI wrapper executes it directly and captures output
+2. The CLI wrapper executes it directly and captures output
 3. The output is summarized (pass/fail counts, first N errors) and returned as structured JSON
-4. The `@executor` agent persona is used only when the command needs interpretation (e.g., "analyze this test output and identify the root cause")
+4. An LLM is invoked only when the command output needs interpretation (e.g., "analyze this test output and identify the root cause") — using a fast-tier model, not a dedicated persona
 
 - [ ] **F3b.19** — Create `.agents/scripts/agent_run.js` (~500-700 lines — the 350-line estimate was under-scoped; 3+ provider API clients + harness-config detection + credential redaction + batch mode): parses flags (`--agent`, `--agents`, `--prompt`, `--context`, `--model`, `--format`, `--timeout`), loads agent persona, builds prompt, calls LLM API, formats output. Supports single-agent and batch multi-agent (sequential) modes. Includes the credential-redaction requirement (env-only creds, no-echo test).
 - [ ] **F3b.20** — Create `.agents/config/models.json` (~60 lines): model tier configuration with agent-to-tier mapping (names derived from `.agents/agents/*.md`).
 - [ ] **F3b.21** — Implement provider auto-detection in `agent_run.js`: detect provider from harness config (opencode.json, Claude Code env, Cursor config) → fallback to `VESPYR_PROVIDER` env var → fallback to `models.json` default → hardcoded fallback. Credentials always come from env vars, never from config files.
 - [ ] **F3b.22** — Add `agent-run` subcommand to `bin/cli.js`: register `npx vespyr agent-run` with full help text, usage examples, model tier documentation, and provider configuration guide.
-- [ ] **F3b.23** — Add `@executor` special handling in CLI mode: when `--agent executor` is called with `--command "npm test"`, the CLI wrapper executes the command directly, captures output, summarizes, and returns structured JSON. The LLM is only invoked if the output needs interpretation.
-- [ ] **F3b.24** — Create test: `npm run test:agent-run` — invokes `agent-run --agent founder --prompt "Is this a good idea: a CLI tool for running agents?" --format json`, verifies structured output, verifies model routing (executor uses fast model, founder uses premium), verifies timeout behavior, verifies batch mode (--agents founder,product-manager), verifies no credential echo in any output path.
+- [ ] **F3b.23** — Add `--exec` command-runner mode in the CLI: when `agent-run --exec "npm test"` is called, the CLI wrapper executes the command directly, captures output, summarizes, and returns structured JSON. An LLM is invoked only if the output needs interpretation. _(This replaces the deleted `@executor` persona — command execution is a CLI capability, not an agent.)_
+- [ ] **F3b.24** — Create test: `npm run test:agent-run` — invokes `agent-run --agent founder --prompt "Is this a good idea: a CLI tool for running agents?" --format json`, verifies structured output, verifies model routing (`--exec` command-runner uses fast model, founder uses premium), verifies timeout behavior, verifies batch mode (--agents founder,product-manager), verifies no credential echo in any output path.
 
 **Estimate:** 14-18 hours (revised from 8-10 — provider auto-detection across harness configs is the rabbit hole)
 
@@ -414,13 +414,13 @@ orchestration available. Agent responses are SIMULATED — weight accordingly.
 → Development/QA phases: WARNING — solo mode produces unreliable results in these phases.
 ```
 
-**I/O delegation in solo mode (Pattern A):**
-When a reasoning agent says "delegate to @executor" and no executor subagent exists:
+**I/O in solo mode (Pattern A):**
+When no subagent mechanism exists and a reasoning agent needs to read a file or run a command:
 - The LLM performs the I/O inline (runs the command or reads the file directly)
-- The output is annotated: `[SOLO-IO: @executor roleplayed — not an independent agent. Output may be hallucinated.]`
-- **No disagreement injection.** You don't want `@executor` to "disagree" about whether `npm test` was run.
+- The output is annotated: `[SOLO-IO: performed inline — not an independent agent. Output may be hallucinated.]`
+- **No disagreement injection.** You don't want an inline command result to "disagree" about whether `npm test` was run.
 - **No confidence downgrade.** It's a command result, not an opinion.
-- The `@executor` persona is loaded but only for its summarization style — not for independent reasoning.
+- Memory operations still route through `@memory-controller` (the one surviving I/O agent); everything else is inline direct I/O.
 
 **Multi-agent reasoning in solo mode (Pattern B):**
 When a skill invokes multiple reasoning agents (@founder, @architect, @qa-engineer):
@@ -493,7 +493,7 @@ When a skill invokes multiple reasoning agents (@founder, @architect, @qa-engine
       "token_cost": 450
     },
     {
-      "name": "executor",
+      "name": "exec-runner",
       "icon": "⚡",
       "type": "io",
       "io_result": "COMPLETE",
@@ -518,7 +518,7 @@ When a skill invokes multiple reasoning agents (@founder, @architect, @qa-engine
 | Field | Reasoning agents | I/O agents |
 |---|---|---|
 | `type` | `"reasoning"` | `"io"` |
-| `verdict` | GO, NO-GO, CONDITIONAL, PIVOT, KILL | Not applicable |
+| `verdict` | GO, RESHAPE, NO-GO, CONDITIONAL | Not applicable |
 | `io_result` | Not applicable | COMPLETE, ERROR, TIMEOUT |
 | `exit_code` | Not applicable | 0 (success), non-zero (failure) |
 | `confidence` | high, medium, low | Not applicable |
@@ -596,7 +596,7 @@ Read harness-capabilities.json
 | `orchestrator_state.js` | Add mode-aware phase gating: block development → QA transition if outputs are solo-mode; add `check-verdict` subcommand for structured output | Medium — state machine |
 | `round-table/SKILL.md` | Replace `--solo` flag with `--mode native|mcp|cli|solo`. Add MCP agent invocation path. Reference solo-mode protocol instead of inline description | Medium — most-used skill |
 | `develop/SKILL.md` | Add mode selection to Step 1. Step 3 (architecture), Step 6 (code review), and Step 7 (QA) all branch on selected mode | High — most complex skill |
-| `delegate/SKILL.md` | Update task mapping table: note that `@reader`/`@writer`/`@executor`/`@memory-controller` require M1, M2, or M3. Add CLI orchestrator invocation syntax | Low |
+| ~~`delegate/SKILL.md`~~ | The `/delegate` skill and the `@reader`/`@writer`/`@executor` trio were removed. Delegation guidance now lives in `.agents/references/delegation-policy.md` (harness subagent / direct; `@memory-controller` for memory). Update it if the CLI-orchestrator syntax needs to be referenced. | Low |
 | `opencode.json` | No structural changes needed — adapter handles this | None |
 | Plan 03a MCP server | Add `vespyr_spawn_agent` tool to `@vespyr/mcp` server (see F3b.13-F3b.18) | Medium — extends existing plan |
 | `phase-table.md` | Add "Minimum Orchestration Mode" column per phase | Low |
@@ -604,7 +604,7 @@ Read harness-capabilities.json
 | `bin/cli.js` | Add `detect`, `sync-agents`, `agent-run` subcommands | Medium |
 
 - [ ] **F3b.37** — Update `workflow.md`: add §1.7 "Multi-Agent Orchestration Modes" (~100 lines) with the M1-M4 mechanism tiers, per-phase mode requirements table, mode selection decision tree, I/O delegation in non-M1 harnesses, solo mode limitations, and the rule that development/QA outputs from solo mode block phase advance.
-- [ ] **F3b.38** — Update `delegation-pattern.md`: rewrite per-harness implementation guides. Replace "create custom hook scripts" with concrete instructions: for Claude Code → `npx vespyr sync-agents --harness claude-code`, for VS Code → `npx vespyr sync-agents --harness vscode`, for shell-only harnesses → `npx vespyr agent-run --agent executor --prompt "..."`. Wire hook enforcement (Phase 2 `pre:bash:delegation`) to recommend `npx vespyr agent-run --agent executor` instead of blocking outright.
+- [ ] **F3b.38** — Update `delegation-pattern.md`: rewrite per-harness implementation guides. Replace "create custom hook scripts" with concrete instructions: for Claude Code → `npx vespyr sync-agents --harness claude-code`, for VS Code → `npx vespyr sync-agents --harness vscode`, for shell-only harnesses → `npx vespyr agent-run --exec "..."`. Wire hook enforcement (Phase 2 `pre:bash:delegation`) to recommend `npx vespyr agent-run --agent executor` instead of blocking outright.
 - [ ] **F3b.39** — Update `round-table/SKILL.md`: add `--mode native|mcp|cli|solo` flag (backward compatible — `--solo` is alias for `--mode solo`). Add MCP agent invocation as Step 1.5 (when M2 is available, spawn agents as parallel MCP tool calls). Reference `solo-mode-protocol.md` and `multi-agent-output-schema.md`.
 - [ ] **F3b.40** — Update `AGENTS.md` and `agent.md.canonical`: add "Multi-Agent Orchestration" section documenting the 4 mechanism tiers, per-harness setup, and mode selection behavior.
 - [ ] **F3b.41** — Test T8 preservation across M1/M2/M3/M4: no adapter may infer `SATISFIED`, drop evidence, hide `BLOCKED`, or let a stale sign-off reach launch.
@@ -680,7 +680,7 @@ This covers the two most capable subagent systems outside OpenCode.
 | Harness detection works on all supported harnesses | `npx vespyr detect` on OpenCode, Claude Code, VS Code, Cursor, Windsurf configs — returns correct mechanism map |
 | Adapter output is valid for each harness | `npm run test:adapters` — validates YAML/JSON syntax, required fields, tool name mappings |
 | CLI orchestrator returns valid structured output | `npx vespyr agent-run --agent founder --prompt "test" --format json` exits 0 with valid schema |
-| CLI orchestrator routes models correctly | `--agent executor` uses fast model, `--agent founder` uses premium model |
+| CLI orchestrator routes models correctly | `--exec` command-runner uses fast model, `--agent founder` uses premium model |
 | MCP agent tool works end-to-end | Start `@vespyr/mcp`, call `vespyr_spawn_agent`, verify structured output |
 | MCP agent tool supports parallel invocation | Call `vespyr_spawn_agent` 3 times in parallel, verify all 3 return correctly |
 | Solo mode injects disagreement (multi-agent) | `npm run test:solo-mode` — consensus-prone scenario, ≥1 agent disagrees |

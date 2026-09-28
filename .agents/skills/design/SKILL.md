@@ -1,8 +1,8 @@
 ---
 name: design
-description: Defines product requirements from validated ideas, then produces detailed developer-ready specs. Supports reverse (prototype-first), create, edit, and validate modes.
+description: Defines product requirements from validated ideas, then produces detailed developer-ready specs. Use for prototype-first, static HTML/Tailwind CDN, Next.js/React/shadcn component prototypes, create, edit, or validate design work; routes the prototype track and requires designer–tech collaboration before handoff.
 metadata:
-  version: "1.1"
+  version: "1.2"
 ---
 
 # Design
@@ -48,21 +48,32 @@ Intent triage at gate: Clear (C ≥ 0.85) runs the locked track; Ambiguous (0.50
 
 If unclear, ask: "Are you designing from scratch, refining existing specs, reviewing a design, or turning a prototype into a PRD?"
 
-## UI stack gate (shadcn/Tailwind — owner request 2026-09-23)
+## Prototype track gate (two supported ways)
 
-Runs only when the user has NO recorded stack preference (prompt / `project-context.md` / `design.md`). Evidence beats questions — detect first:
+The design skill supports two explicit prototype tracks. The user prompt is authoritative; project detection is evidence, not permission to override an explicit request.
 
-1. **Detect:** `node .agents/scripts/shadcn_gate.js detect --json`
-   - `stack: shadcn|tailwind` → chosen (evidence: `components.json` / dependencies).
-   - `stack: none` → ask exactly one question: "Use the shadcn/Tailwind stack?" Yes → chosen; No → normal flow. Never ask when evidence already answers; never re-ask once a preference is recorded (write it to `project-context.md`).
-2. **shadcn MCP (only when stack = shadcn):** detect result `mcp: absent | disabled | installed`
-   - `absent`/`disabled` → ask: "Install/enable the shadcn MCP server (browse, search, and install registry components)?" Yes → add/enable in `opencode.json` per https://ui.shadcn.com/docs/mcp:
-     `"mcp": { "shadcn": { "type": "local", "command": ["npx", "shadcn@latest", "mcp"], "enabled": true } }` (or `pnpm dlx shadcn@latest mcp init --client <client>`), then restart the harness. No → continue without it — **MCP never gates design**. Classified `gated` in `.agents/scripts/validate_matrix.js`.
-3. **Guideline lint (stack = shadcn/tailwind):** `@shadcn/lint` is the machine-checkable design guideline.
-   - Not configured → set it up before any UI work: "Read https://github.com/shadcn-ui/lint/blob/main/SETUP.md and set up @shadcn/lint in this project" (confirm installs with the user).
-   - When the stack is chosen, author prototypes/UI as component code (React/Vue/Svelte + Tailwind) — one-off HTML mocks are outside the linter's reach.
-   - After every UI/prototype change run `npm run lint`; **zero `shadcn/*` violations before any gate** (step-01d completeness, handoff, dev loop). The lint error is the fix instruction — loop until green.
-   - Mechanical check: `node .agents/scripts/shadcn_gate.js verify` exits 1 when a chosen stack has no lint configured (test-backed: `tests/test_shadcn_gate.test.js`).
+| Track | Use when | Runtime | UI contract | Lint contract |
+|---|---|---|---|---|
+| `static-html` | Early exploration, visual/interaction validation, or a quick prototype | Vanilla HTML/CSS/JS + Tailwind Browser CDN | shadcn-flavored visual language: semantic tokens, familiar component patterns, responsive states; **not actual shadcn components** | No React, Next.js, or `@shadcn/lint` requirement. Validate the CDN, token layer, states, and interactions in R1. |
+| `nextjs-component` | Engineering-ready prototype, reusable components, or a direct path to implementation | Next.js + React + Tailwind + shadcn source components | Real shadcn components and project `components.json` | `npm run lint` must execute `@shadcn/lint` with zero `shadcn/*` violations. |
+
+At Step 0, resolve the track in this order:
+
+1. An explicit user choice wins (`static HTML/CDN` or `Next.js/React/shadcn`).
+2. A recorded project preference may supply the default, but never overrules an explicit user choice.
+3. If no choice is recorded and prototyping is in scope, pause with a two-track fork: **static HTML** (recommended for simple exploration) or **Next.js component battery** (recommended when the prototype is intended for implementation). Do not silently choose based on `shadcn_gate detect`.
+4. Record the selected track and runtime in `project-context.md` through the memory controller.
+
+Run the deterministic helper with the selected track:
+
+```bash
+node .agents/scripts/shadcn_gate.js detect --track <static-html|nextjs-component> --json
+node .agents/scripts/shadcn_gate.js verify --track <static-html|nextjs-component> --prototype <file> --json
+```
+
+For `static-html`, `verify` checks the HTML source, Tailwind CDN reference, token layer, critical states, feedback states, and absence of an unintended React/Next implementation; `@shadcn/lint` is explicitly not applicable. For `nextjs-component`, it requires a real component source tree, Next/React/Tailwind/shadcn evidence, and an executed clean `npm run lint` path with `@shadcn/lint`. `auto` remains available for detection-only diagnostics, not for a committed prototype decision.
+
+The shadcn MCP remains optional for the `nextjs-component` track; MCP never gates design.
 
 ## Create mode step sequence
 1. Load PRD Brief → `steps/step-01a-load-prd-brief.md`
@@ -71,6 +82,21 @@ Runs only when the user has NO recorded stack preference (prompt / `project-cont
 4. Screen States → `steps/step-04a-screen-states.md`
 5. Design Tokens → `steps/step-05a-design-tokens.md`
 6. Handoff → `steps/step-06a-handoff.md`
+
+## Prototype collaboration checkpoint
+
+Prototyping is a cross-functional phase, not a designer-only artifact. When a prototype is in scope, `@product-designer` and `@tech-lead` must review it before downstream synthesis or handoff. For architecture-impacting work, `@architect` joins the review.
+
+The checkpoint uses `.agents/templates/product/prototype-collaboration-template.md` and records `prototype-collaboration.md` with:
+
+- selected track (`static-html` or `nextjs-component`) and runtime
+- prototype URL/file and the observed states/interactions reviewed
+- token and responsive mapping
+- static-to-component mapping (for `static-html`) or component/API boundary (for `nextjs-component`)
+- accessibility, feasibility, and implementation risks
+- decisions, open questions, and a collaborator state of `SATISFIED` or `BLOCKED`
+
+A missing checkpoint is a handoff failure. Run `node .agents/scripts/prototype_collab_gate.js verify --record <collaboration> --track <track> --prototype <prototype> --scope <handoff|r1-evidence> --json`. The `r1-evidence` scope validates bounded evidence extraction and may preserve an explicit `Implementation handoff: BLOCKED`; the `handoff` scope requires accessibility, feasibility, and aggregate sign-off. Stale, mismatched, unsigned, or out-of-scope records fail closed. Do not convert a static prototype into a component implementation implicitly; record the conversion as a separate decision.
 
 ## Reverse mode step sequence (prototype-first)
 1. Ingest Prototype → `steps/step-01d-ingest-prototype.md`
@@ -92,7 +118,20 @@ Runs only when the user has NO recorded stack preference (prompt / `project-cont
 4. Lock & Handoff → `steps/step-04c-lock-handoff.md`
 
 ## Output artifacts
-`requirements.md`, `user-stories.md`, `product-spec.md`, `product-spec.html`, `design.md`, plus `measurement-plan.md` and `ux-research-report.md` (optional).
+`requirements.md`, `user-stories.md`, `product-spec.md`, `product-spec.html`, `design.md`, plus `measurement-plan.md` and `ux-research-report.md` (optional). When prototyping is in scope, also require `prototype-collaboration.md` with the selected track/runtime and designer–tech disposition.
+
+## Canonical document contracts
+
+Create and reverse mode use the same document formats. The templates are authoritative; a compact report is not an acceptable substitute for `requirements.md` or `user-stories.md`.
+
+| Artifact | Canonical source | Required output |
+|---|---|---|
+| `requirements.md` | `.agents/templates/product/prd-template.md` | Preserve the numbered PRD structure (§§1–14). Reverse mode fills §14 with the Evidence Ledger and mirrors `[OPEN]` questions to §12; create mode leaves reverse-only material explicitly not applicable. |
+| `user-stories.md` | `.agents/templates/product/user-story-template.md` | Preserve the backlog tree, Epic → Feature → Story hierarchy, metadata, Business/Technical Requirements, Gherkin `AC-H`/`AC-U`/`AC-E`, UI/UX notes, data notes, out-of-scope items, and open questions. |
+| `product-spec.md` / `design.md` | `.agents/templates/product/product-spec-template.md` / `.agents/templates/product/design.md` | Use the existing screen-spec and design-token templates; do not replace them with an evidence summary. |
+
+In reverse mode, every authored persona, FR/NFR, story, acceptance criterion, screen state, and token decision must cite one or more `L-NN` Evidence Ledger rows. Keep the template's `Traces to PRD` field and append the ledger IDs to that field (or to the AC evidence line); do not replace the FR reference. A missing template section or required story field is a handoff failure, not a formatting preference.
+
 ## State & memory integration
 At start, run: `node .agents/scripts/orchestrator_state.js status` then `next`. Also: `@memory-controller load product-manager [design — {feature}]`
 
@@ -104,4 +143,4 @@ At start, run: `node .agents/scripts/orchestrator_state.js status` then `next`. 
 **Status:** active
 ```
 
-**Memory:** Final step in each mode closes with `@memory-controller session-write` — mandatory per GUARDRAILS §Session Continuity.
+**Memory:** Final step in each mode closes with `@memory-controller session-write` — mandatory per GUARDRAILS §Session Continuity. Include the selected prototype track, runtime, and collaboration disposition when prototyping was in scope.

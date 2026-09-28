@@ -44,7 +44,7 @@ Options:
   --min-rqsd <float>          Global RQS-D floor (0..1) for benchmarks with no explicit
                             RQS-D contract; explicit requireRQSD/minRQSD wins.
   --concurrency, -c <int>    Number of concurrent worker sandboxes (default: 4)
-  --baseline, -b <path>      Path to baseline.json (default: evals/baseline.json)
+  --baseline, -b <path>      Path to baseline.json (default: artifacts/evals/baseline.json)
   --fail-fast                Stop immediately on first failure
   --fail-on-regression       Exit with code 2 if regression detected against baseline (default: true)
   --tier0                    Run deterministic static checks only (fast mode, zero LLM tokens)
@@ -245,7 +245,7 @@ async function main() {
       // fixture-recall numbers are a self-test reference, not a quality
       // reference. Explicit --baseline override = explicit intent.
       if (runResults.mockMode && path.resolve(options.baseline) === path.resolve(DEFAULT_BASELINE_PATH)) {
-        console.error("Refusing to record a mock run as evals/baseline.json (would launder fixture-recall as quality evidence).");
+        console.error("Refusing to record a mock run as artifacts/evals/baseline.json (would launder fixture-recall as quality evidence).");
         console.error("Re-run with a real adapter, or pass an explicit --baseline <mock-baseline-path> for self-test references.");
         process.exit(2);
       }

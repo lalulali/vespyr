@@ -51,6 +51,13 @@ PHASE -1: VALIDATION
   │
 ```
 
+### Prototype handoff edge
+
+When a prototype is in scope, the strategy-to-development edge is:
+
+`@product-designer + @tech-lead → prototype-collaboration.md → prototype_collab_gate.js verify → @tech-lead/@architect → @developer`
+
+The direct designer-to-developer route is valid only when no prototype is in scope or the collaboration gate passes. A `static-html` prototype remains a vanilla implementation track; a `nextjs-component` prototype requires source components and the shadcn lint path.
 
 ---
 

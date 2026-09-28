@@ -1,4 +1,4 @@
-# Record Integrity Recovery — Dev-Plan Checkbox Reconciliation & Harness-Scope Alignment (02m)
+# Record Integrity Recovery — Dev-Plan Checkbox Reconciliation & Harness-Scope Alignment (02p)
 
 **Decision:** Vespyr adopts a mechanical-evidence standard for every dev-plan checkbox: a box may be checked only when a reproducible command (grep/ls/git show/test run) proves its claim on disk at check time. This plan reconciles the ~54 falsely-stamped boxes found in the 2026-08-23 audit, rebuilds the two 02g tooling items that were never built, aligns the harness matrix to the owner's five-shape scope under the architect's emitter/symlink classification, and bootstraps the missing sign-off machinery. Single-author serial execution is a **binding constraint**, not a recommendation — the root cause of this recovery was concurrent sessions clobbering shared state.
 
@@ -15,7 +15,7 @@
 
 **Field evidence (owner manual test, 2026-08-24):** *"copilot… use .agents in global installation but did not read .agents for autocomplete. it can read .agents but did not show it in autocomplete"* → Copilot consumes `~/.agents/skills` functionally but does not list them in autocomplete/picker (**functional-but-invisible**). Consequences: matrix doc sets user expectations accordingly; DoD smoke criteria assert functional activation, not autocomplete visibility; no architecture impact.
 
-**No open questions remain — plan is execution-ready.
+**No open questions remain — plan is execution-ready.**
 
 **Budget:** 34.5h authoring serial (incl. 0.5h prelude discipline item; WS-D re-scoped 2026-08-24 per C1–C7 and owner decisions C2=B/C4=A/C3=YES — emitter work cut, native-read verification + compliance audit retained), single-writer, commit-after-every-build-item. No parallel lanes. No stretch estimate — if it exceeds 40h, stop and replan with Chris.
 
@@ -24,8 +24,6 @@
 ## 1. Mandate & Scope
 
 **Mandate (from Chris):** Mechanical re-verification of every dev-plan checkbox after proven systemic record corruption; recovery, not blame. Concurrent 02f+02g sessions over one working tree produced clobbered records; the sweep confirmed ~54 false boxes across 8 documents and a repo-wide governance hole (`utter-satisfaction.md` holds **zero** per-epic sign-off records).
-
-bump version
 
 ### 1.1 In scope
 
@@ -73,7 +71,7 @@ bump version
 
 - **WS-A — Record reconciliation:** truthful 02g §7.3 (cite `dcf028e` text verbatim); per-class disposition of every false box — *correct-in-place* (factual errors: line counts, file inventories), *mark-superseded* (delegation/tri-modal/persona deletions legitimately undone by later epics but left checked), *convert-to-build-item* (claims whose underlying work is still wanted, e.g., methods.csv completion).
 - **WS-B — Doc truth scrub:** real three-active-plus-dormant harness matrix replacing eight-harness marketing; kill stale template filename references; re-point 02g §3.4 to this plan until a tested matrix exists.
-- **WS-C — Tooling rebuild decisions:** F1.69 delegation lint as additive `compile_skills.js` hook (trio-invocation ban, delegation-path requirement where applicable, persona-marking whitelist) — REBUILD recommended, fraud-prevention value proven this week; F1.70 measurement cycle baseline — REBUILD-lite; delegation-path line rollout costed against formal ADR-descope alternative — rollout only for skills retaining delegation semantics.
+- **WS-C — Tooling rebuild decisions:** F1.69 delegation lint as additive `compile_skills.js` hook (trio-invocation ban, delegation-path requirement where applicable) — REBUILD recommended, fraud-prevention value proven this week. **[Note 2026-09-24: R0.2 shipped the lint ban-only — the trio personas were removed outright, so the originally-planned "persona-marking whitelist" was dropped as unnecessary.]** F1.70 measurement cycle baseline — REBUILD-lite; delegation-path line rollout costed against formal ADR-descope alternative — rollout only for skills retaining delegation semantics.
 - **WS-D — Harness alignment:** five shapes only — OpenCode native-symlink (verify/regression-test), Claude Code CONFIG-FILE-ONLY, Kiro HYBRID (emit steering from `.agents/templates/system/vespyr-steering.md.canonical` + symlink `.kiro/skills`), GitHub Copilot GENERATE-TARGET (enable registry entry, smoke test), Antigravity ZERO-WORK (read-and-adopt verification), Codex NEW minimal emitter (AGENTS.md pointer + optional `.codex/config.toml` emission; speculative machinery excluded). Strike 02h residue.
 - **WS-E — Provenance hardening:** commit-sweep untracked canonical artifacts; codify single-writer execution discipline (one epic per window; no overlapping-path sessions; commit-per-build-item; history.md attestation line per commit batch; worktree-per-session convention noted for future parallelism); bootstrap real per-epic sign-offs in `utter-satisfaction.md`, starting with this plan's own gate.
 
@@ -94,6 +92,7 @@ bump version
 | R1.6 | Reconcile remaining smalls: 02a×2, 02b×2, 02d×5, 02i×1, 02j×1 | 1.5h | R1.3 |
 | R1.7 | WS-B scrub: README.md:113 + Guide/en/installation.md:8 → three-active-plus-dormant matrix | 1.5h | R1.3 |
 | R1.8 | WS-B scrub: stale `opencode.json.template` refs; 02g §3.4 re-point to this plan | 1h | R1.7 |
+| ~~R1.9~~ | _(intentionally vacant — an earlier draft's R1.9 was folded into R1.8/R1.10; the ID is retired, not missing. Downstream IDs keep their numbers to preserve dependency + critical-path references. Noted 2026-09-24.)_ | — | — |
 | R1.10 | F1.70 rebuild-lite: `.agents/state/delegation-log.json` baseline via `delegation_audit.js`; weekly cadence note; post-v2.0.0 review date 2026-09-30 | 1.5h | R0.2 |
 | R1.11 | Delegation-path decision gate: cost rollout (~37 skills, ~4h) vs ADR descope amendment (~1h); execute chosen path for skills retaining delegation semantics only | 4h | R1.10 |
 | R1.12 | Copilot (C1/C2 **RESOLVED=B**): verify native `.agents/skills/` discovery; **CUT `transpileCopilotYAML()` + its `cli.js` wiring remnants** (dead code — stale YAML format, no remaining consumer); record persona-adoption-via-root-AGENTS.md as the Copilot persona mechanism in matrix doc | 1h | — |
@@ -130,7 +129,7 @@ Done when **all** pass:
 1. `grep -c "\[x\].*delegation" artifacts/docs/strategy/development-plan/02-phase-1-skills.md` returns only superseded-annotated lines; every corrected box carries a dated evidence-command comment
 2. 02g §7.3 status line quotes `git show dcf028e` PARTIALLY EXECUTED accounting verbatim
 3. `wc -l` outputs cited in 02c/02h match live files (shifu.md=393±edits, documented)
-4. Lint: `node .agents/scripts/compile_skills.js --check` fails a planted trio-invocation fixture and passes persona-marking fixture (test committed)
+4. Lint: `node .agents/scripts/compile_skills.js --check` fails a planted trio-invocation fixture and passes a clean tree. **[Reconciled 2026-09-24: R0.2 executed with the trio removed outright, so there is no persona-marking whitelist — the lint is ban-only. The earlier "passes persona-marking fixture" clause is retired.]**
 5. `.agents/state/delegation-log.json` exists with baseline date + `reviewDate: 2026-09-30`
 6. Delegation-path decision recorded as ADR or executed rollout; `grep -rl "^Delegation path:" .agents/skills/ | wc -l` equals the number stated in the decision
 7. `cli.js --help` lists exactly the five owned shapes; Copilot + Antigravity resolve skills natively from `.agents/skills/` (zero skill emission present); **no `.github/agents/*.agent.md` emission present (C2=B) and `transpileCopilotYAML` absent from codebase**; Copilot smoke asserts functional skill activation — agent applies a skill from `.agents/skills/` — NOT autocomplete visibility (field evidence 2026-08-24); Cursor/Windsurf entries commented with post-v2 label; C6 non-conflict note present in matrix doc; C5 audit report covers 42/42 SKILL.md

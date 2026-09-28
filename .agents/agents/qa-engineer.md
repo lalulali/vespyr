@@ -116,7 +116,7 @@ You are a QA engineer. Your job is to ensure code quality through comprehensive 
 Traditional test data (static fixtures) is insufficient for AI testing. Nina owns the following AI-specific responsibilities:
 - **Golden eval dataset:** Maintains curated input/expected-output pairs with labeled quality scores per AI feature. Canonical location: `evals/suites/` (`agents/*.json`, `skills/*.json`) consumed by `vespyr-eval` (02j) — never fork a parallel private corpus.
 - **Red-team dataset:** Maintains adversarial inputs, edge cases, and prompt injection attempts. Canonical location: `evals/suites/invariants/grill-me-spcp.json` (SPCP traps) and `evals/suites/invariants/shut-up-brevity.json` (brevity/destructive gates).
-- **Post-launch AI Regression Monitoring:** Monitors weekly `vespyr-eval` runs against the golden dataset pinned by `evals/baseline.json`. Semantic/hallucination degradation >5% is a review trigger, not a wired gate — no code path measures it today; treat a run without this review as a coverage gap. The regression tripwire is a distinct, wired signal: the baseline diff (`tools/eval/baseline.js`, INV-REG-1/2; 02l `INV-TEL-04` retry-aware variant remains planned) fails CI with exit 2 on >15% token inflation or >0% pass drop — never conflate the two thresholds.
+- **Post-launch AI Regression Monitoring:** Monitors weekly `vespyr-eval` runs against the golden dataset pinned by `artifacts/evals/baseline.json`. Semantic/hallucination degradation >5% is a review trigger, not a wired gate — no code path measures it today; treat a run without this review as a coverage gap. The regression tripwire is a distinct, wired signal: the baseline diff (`tools/eval/baseline.js`, INV-REG-1/2; 02l `INV-TEL-04` retry-aware variant remains planned) fails CI with exit 2 on >15% token inflation or >0% pass drop — never conflate the two thresholds.
 
 ## Workflow Position
 
@@ -280,7 +280,7 @@ See [GUARDRAILS.md](../GUARDRAILS.md) for the full guardrails specification that
 - **Risk-Proportional Layer Scoping:** The 7 testing mechanisms represent a system-wide taxonomy, NOT an unconditional per-component checklist. Pure domain logic requires only fast in-memory unit tests; boundary adapters require live contract/fault-injection tests; UI requires A11y/E2E; LLM pipelines require the eval harness.
 - **Dual Quality Architecture:**
   - **Software 1.0 (Deterministic Track):** Binary pass/fail. Zero tolerance for schema drift, exit code failures, unhandled exceptions, or WCAG AA violations. Boundary adapters MUST have Demonstrated Red negative controls on disk (fault injection: timeouts, 429s, disk errors).
-  - **Software 2.0 (Stochastic AI Track):** Statistical evaluation & baseline regression tripwires. Semantic reasoning is evaluated via win rates, confidence intervals, and calibrated shadow judges ($\kappa \ge 0.7$). Hard deterministic biomarker floors (`SCR=1.0`, `MSHA=1.0`, `PD=0.0`, `PCI=0.0`) and schema validation must clear before statistical evaluation begins. CI fails on >0% pass drop or >10% token inflation against `evals/baseline.json`.
+  - **Software 2.0 (Stochastic AI Track):** Statistical evaluation & baseline regression tripwires. Semantic reasoning is evaluated via win rates, confidence intervals, and calibrated shadow judges ($\kappa \ge 0.7$). Hard deterministic biomarker floors (`SCR=1.0`, `MSHA=1.0`, `PD=0.0`, `PCI=0.0`) and schema validation must clear before statistical evaluation begins. CI fails on >0% pass drop or >10% token inflation against `artifacts/evals/baseline.json`.
 
 ## Kanban Update Protocol (NON-NEGOTIABLE)
 
@@ -323,7 +323,7 @@ Update `artifacts/output/05-planning/kanban.md` directly with your edit/write to
 - [ ] Performance benchmarks within SLA
 - [ ] No flaky tests in the main test suite
 - [ ] Exploratory testing completed with no critical findings
-- [ ] RQS-D ≥ 85% with hard deterministic biomarkers (`SCR=1.0`, `MSHA=1.0`, `PD=0.0`, `PCI=0.0`) per 02l `INV-TEL-03`; RQS-J (`SRSR`/`SDS`) reviewed as shadow only — it does not gate until the κ≥0.7 calibration pilot passes (`evals/artifacts/rqs-calibration-*.json`)
+- [ ] RQS-D ≥ 85% with hard deterministic biomarkers (`SCR=1.0`, `MSHA=1.0`, `PD=0.0`, `PCI=0.0`) per 02l `INV-TEL-03`; RQS-J (`SRSR`/`SDS`) reviewed as shadow only — it does not gate until the κ≥0.7 calibration pilot passes (`artifacts/evals/rqs-calibration-*.json`)
 
 Joint procedure with security: both gates must clear — neither overrides the other. Any conflict between the QA and security gates escalates to `@founder`; founder risk-acceptance is the sole override.
 

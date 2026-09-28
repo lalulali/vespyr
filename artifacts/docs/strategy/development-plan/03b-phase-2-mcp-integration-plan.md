@@ -9,8 +9,8 @@
 ## 1. Principles
 
 1. **Free & local-first.** All default MCP servers are open-source, run locally, require zero API keys or paid accounts.
-2. **Curation over coverage.** 5 default servers. Each must directly serve at least one of Vespyr's 21 personas. Add a server only when multiple personas need it and `@executor` can't provide the same capability cleanly.
-3. **MCP complements sub-agents, not replaces them.** `@executor` still owns shell I/O. MCP servers provide structured data that shell commands can't return cleanly (DOM trees, typed diffs, LSP diagnostics).
+2. **Curation over coverage.** 5 default servers. Each must directly serve at least one of Vespyr's personas (20 advertised / 23 agent files). Add a server only when multiple personas need it and a harness-native subagent (or direct call) can't provide the same capability cleanly.
+3. **MCP complements native I/O, not replaces it.** Harness-native subagents (or direct calls) still own shell I/O. MCP servers provide structured data that shell commands can't return cleanly (DOM trees, typed diffs, LSP diagnostics).
 4. **Hard context caps.** Every MCP response is truncated to 2,000 tokens max before entering the LLM context.
 5. **UTTERLY SATISFIED is preserved.** MCP tools may return evidence and validation results, but they cannot infer approval, erase blockers, or bypass the canonical satisfaction and release gate.
 
@@ -20,10 +20,10 @@
 
 | Operation | Who handles it | Why |
 |---|---|---|
-| Read/write files, run shell commands | `@reader`, `@writer`, `@executor` | Simple I/O, no structured output needed |
-| Pipeline status/next, squad ops, agent resolve | `@executor` | Shell one-liners, JSON output already clean |
+| Read/write files, run shell commands | harness subagent / direct | Simple I/O, no structured output needed |
+| Pipeline status/next, agent resolve | harness execution / direct | Shell one-liners, JSON output already clean |
 | Memory load/write/search/session-diff | `@vespyr/mcp` (1st-party) | Ranked search, diffs, dedup — not shell-friendly |
-| Code/artifact graph queries | `@vespyr/mcp` (1st-party) | Graph traversal with subgraph filtering |
+| ~~Code/artifact graph queries~~ | ❌ removed | Graph subsystem cut (owner [NO-GO] 2026-09-24); no graph MCP tools |
 | Elicitation methods | `@vespyr/mcp` (1st-party) | Ranked method matching against catalog |
 | Task history, persona fidelity check | `@vespyr/mcp` (1st-party) | Similarity lookup + rule matching — new capabilities |
 | Web search, fetch, crawl | Hound MCP | Multi-engine keyless search + Cloudflare bypass + PDF/OCR |
@@ -32,7 +32,7 @@
 | Type checks, lint, auto-imports | LSP/Ruff MCP | Language servers return structured diagnostics |
 | UI component scaffolding | Shadcn MCP | Registry search + code generation |
 
-**Rule:** If `@executor` can do it with a one-liner and clean output, don't add an MCP server for it.
+**Rule:** If a harness-native subagent (or a direct call) can do it with a one-liner and clean output, don't add an MCP server for it.
 
 ---
 
@@ -42,7 +42,7 @@
 
 | # | Server | License | Personas | Capability |
 |---|---|---|---|---|
-| 1 | **`@vespyr/mcp`** (1st-party) | MIT | All agents | 10 tools: 5 wrappers (memory, code graph, elicitation) + 5 capability tools (memory_search, session_diff, artifact_graph, task_history, fidelity_check). See §3a. |
+| 1 | **`@vespyr/mcp`** (1st-party) | MIT | All agents | 7 tools: 3 wrappers (memory load/write, elicitation) + 4 capability tools (memory_search, session_diff, task_history, fidelity_check). See §3a. _(2 graph tools removed 2026-09-24.)_ |
 | 2 | **Playwright MCP** | Apache 2.0 | `@qa-engineer`, `@product-designer`, `@ux-researcher` | Headless browser: DOM inspection, screenshots, E2E tests. |
 | 3 | **Git MCP** | GPL v2 | `@developer`, `@code-reviewer` | Structured diffs, commit logs, blame, file history as JSON. |
 | 4 | **LSP/Ruff MCP** | MIT | `@developer`, `@architect`, `@code-reviewer` | Type diagnostics, symbol definitions, formatting for TS/JS/Python. |
@@ -59,15 +59,15 @@
 
 ### Rejected
 
-Linear/Jira (paid SaaS), Postgres/SQLite (risk in dev loops), Snyk (paid), Storybook (redundant with Shadcn). Fallbacks: `kanban.md`/`sprint-status.yaml` for project tracking, `npm audit`/`pip audit` via `@executor` for security.
+Linear/Jira (paid SaaS), Postgres/SQLite (risk in dev loops), Snyk (paid), Storybook (redundant with Shadcn). Fallbacks: `kanban.md`/`sprint-status.yaml` for project tracking, `npm audit`/`pip audit` via a harness-native shell call for security.
 
 ---
 
 ## 3a. First-Party `@vespyr/mcp` Tools
 
-The `@vespyr/mcp` server exposes 10 tools. Five wrap existing scripts to provide structured, typed access. Five are **new capability tools** — things agents need that `@executor` can't do with a shell one-liner.
+The `@vespyr/mcp` server exposes 7 tools. Three wrap existing scripts to provide structured, typed access. Four are **new capability tools** — things agents need that a plain shell call can't do cleanly. _(The former code-graph and artifact-graph tools were removed with the graph subsystem, owner [NO-GO] 2026-09-24.)_
 
-Tools that remain as simple shell calls (`@executor` handles them fine today) are [listed below](#shell-one-liners-kept-as-executor-calls) and *not* MCP-wrapped.
+Tools that remain as simple shell calls (a harness-native call handles them fine today) are [listed below](#shell-one-liners-kept-as-executor-calls) and *not* MCP-wrapped.
 
 ### Memory (4 tools)
 
@@ -79,27 +79,13 @@ Tools that remain as simple shell calls (`@executor` handles them fine today) ar
 
 `memory_load` surfaces the right context tier before each session. `memory_write` deduplicates then appends — prevents duplicate entries from flooding `lessons-learned.md`.
 
-`memory_search` is the biggest single win. Today an agent that needs a pattern either reads every memory file (hundreds of tokens wasted) or delegates to `@reader` for raw regex. This returns 3–5 ranked snippets using sparse retrieval (BM25) across all memory files. **80%+ token savings on memory lookups.**
+`memory_search` is the biggest single win. Today an agent that needs a pattern either reads every memory file (hundreds of tokens wasted) or runs a raw regex read via a harness-native subagent. This returns 3–5 ranked snippets using sparse retrieval (BM25) across all memory files. **80%+ token savings on memory lookups.**
 
 | # | Tool | Source | Input | Output | Primary Personas |
 |---|---|---|---|---|---|
 | 4 | `session_diff` | **New** | `since` (timestamp\|"last") | `{ added[], removed[], changed[], unchanged[] }` | All agents |
 
 On session start, agents re-read `project-context.md`, `active-decisions.md`, `lessons-learned.md` even when nothing changed. `session_diff` computes the delta from the last recorded session — **reduces startup context from ~800 tokens to ~50**.
-
-### Code Graph (2 tools)
-
-| # | Tool | Source | Input | Output | Primary Personas |
-|---|---|---|---|---|---|
-| 6 | `code_graph_query` | Wrap: graph query | `symbol` (e.g. `"auth.login"`) | `{ callers[], callees[] }` | `@developer`, `@architect`, `@code-reviewer` |
-
-`code_graph_scan` builds or incrementally updates a dependency graph, returning hotspots (highly-connected nodes likely to break). `code_graph_query` performs targeted lookups — "who calls this function?" or "what does this function depend on?"
-
-### Artifact Graph (1 tool)
-
-| # | Tool | Source | Input | Output | Primary Personas |
-|---|---|---|---|---|---|
-
 
 ### Elicitation (1 tool)
 
@@ -120,11 +106,11 @@ Returns the top-N elicitation methods (from a catalog of 60+) matched to the giv
 
 `fidelity_check` scans the agent's last output against its persona contract (Socratic stance, delegation rules, guardrails) and flags violations. Gives reasoning agents a self-audit before they ship output to the user. Complement to Phase 2 hooks — hooks block at the harness layer, this warns at the agent layer.
 
-### Shell One-Liners (Kept as `@executor` Calls)
+### Shell One-Liners (Kept as Harness-Native Calls)
 
 These 5 tools are simple CLI invocations — no new capability from MCP wrapping:
 
-| Operation | `@executor` call |
+| Operation | Shell call |
 |---|---|
 | Pipeline status | `node orchestrator_state.js status` |
 | Pipeline next | `node orchestrator_state.js next` |
@@ -153,7 +139,7 @@ These 5 tools are simple CLI invocations — no new capability from MCP wrapping
 
 | Failure | Behavior |
 |---|---|
-| MCP server fails to start | Log warning, disable tool for session, agent falls back to `@executor` shell equivalent |
+| MCP server fails to start | Log warning, disable tool for session, agent falls back to a direct harness-native shell call |
 | Tool call times out (>30s) | Return timeout error to agent, agent retries once or falls back |
 | Tool returns malformed response | Truncation layer catches, returns `[MCP ERROR: malformed response]` |
 | Server crashes mid-session | Harness restarts server on next tool call (standard MCP reconnect behavior) |
@@ -164,11 +150,11 @@ These 5 tools are simple CLI invocations — no new capability from MCP wrapping
 
 ### Step 1: First-party `@vespyr/mcp` server (priority: high)
 
-The internal MCP server delivers two things: structured access to existing scripts (5 wraps) and new capabilities agents can't get via shell (5 new tools).
+The internal MCP server delivers two things: structured access to existing scripts (3 wraps) and new capabilities agents can't get via shell (4 new tools).
 
 **Problem:** `opencode.json` currently registers zero first-party MCP tools. All internal operations require shelling out to raw scripts. Worse, agents cannot do ranked memory search, session diffs, task lookups, or persona fidelity checks at all.
 
-**Target:** See §3a for the full 10-tool catalog. 5 tools wrap existing scripts (memory_load, memory_write, code_graph_scan, code_graph_query, elicitation_methods). 5 tools require new scripts (memory_search, session_diff, artifact_graph, task_history, fidelity_check).
+**Target:** See §3a for the full 7-tool catalog. 3 tools wrap existing scripts (memory_load, memory_write, elicitation_methods). 4 tools require new scripts (memory_search, session_diff, task_history, fidelity_check). _(The former code_graph/artifact_graph tools were removed with the graph subsystem.)_
 
 **New script dependencies:**
 
@@ -183,8 +169,8 @@ The internal MCP server delivers two things: structured access to existing scrip
 
 - [ ] Create `packages/mcp/` monorepo path (`package.json`, `tsconfig.json`, `src/server.ts`, `src/tools/`, `src/transport.ts`, `README.md`)
 - [ ] Implement MCP server (`src/server.ts`, ~300 lines): JSON-RPC over stdio, tool registration, per-tool error handling
-- [ ] Implement 5 wrapper tools (each ~60 lines, thin wrapper around existing scripts)
-- [ ] Implement 5 capability tools + their backing scripts (~440 new lines across 5 scripts)
+- [ ] Implement 3 wrapper tools (each ~60 lines, thin wrapper around existing scripts)
+- [ ] Implement 4 capability tools + their backing scripts (~380 new lines across 4 scripts)
 - [ ] Register in `opencode.json` under `mcpServers`
 - [ ] Add `mcp start` / `mcp list-tools` / `mcp test <tool>` subcommands to `bin/cli.js`
 - [ ] Add truncation middleware (2,000 token cap) in the server response handler
@@ -279,13 +265,13 @@ npx vespyr install-module reddit-mcp
 | `@vespyr/mcp` tools return correct data | Unit tests in `packages/mcp/tests/` against known script outputs |
 | `memory_search` returns ranked results | Query "auth pattern" returns snippet from `lessons-learned.md` ranked above `patterns-and-conventions.md` |
 | `session_diff` reports only deltas | Run on clean project → all files unchanged. Add entry to memory → only that file shown as changed. |
-| `fidelity_check` catches violations | Feed agent output with direct shell call → flags "use @executor for shell commands." |
+| `fidelity_check` catches violations | Feed agent output with direct shell call → flags "run shell via a harness-native call, not inline." |
 | `task_history` finds similar tasks | Query "implement auth" returns prior auth tasks with hours + agent + outcome |
 | Hound MCP works for web research | `@researcher` runs `smart_search` + `smart_fetch`, returns cited markdown content |
 | Playwright MCP works in QA flow | `@qa-engineer` runs `/test` on a sample project, produces `qa-signoff.md` |
 | Git MCP returns structured diffs | `@code-reviewer` runs `/review`, diff output is JSON not raw bash |
 | Context stays under cap | Inspect truncated logs in `artifacts/tmp/mcp-logs/` during test runs |
-| Error fallback works | Kill MCP server mid-session, verify agent falls back to `@executor` |
+| Error fallback works | Kill MCP server mid-session, verify agent falls back to a direct harness-native shell call |
 
 ---
 
@@ -296,7 +282,7 @@ npx vespyr install-module reddit-mcp
 - [ ] Core `@vespyr/mcp` tools implemented (`memory_search`, `session_diff`, `fidelity_check`, `task_history`, etc.)
 - [ ] Third-party MCP integration configured (Hound, Playwright, Git, shadcn, GitHub, Figma)
 - [ ] Installer MCP auto-registration in `bin/cli.js`
-- [ ] Fallback handling from MCP tools to `@executor` bash utilities
+- [ ] Fallback handling from MCP tools to harness-native bash calls
 
 ---
 

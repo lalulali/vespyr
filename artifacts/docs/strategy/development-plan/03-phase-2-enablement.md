@@ -34,8 +34,8 @@
 | `UserPromptSubmit` | `route:task` | Run a routing pass: classify the user query, suggest a squad or agent, surface the suggestion to the calling agent. |
 | `PreToolUse` (Bash) | `pre:bash:safety` | Block destructive commands (`rm -rf /`, `diskutil eraseDisk`, `mkfs.*`, etc.) — the GUARDRAILS rules are enforced at the harness layer. Must support `exit 2` to block. |
 | `PreToolUse` (Bash) | `pre:bash:tmux` | If a long-running test is launched, suggest tmux to free the main thread. |
-| `PreToolUse` (Bash) | `pre:bash:delegation` | If the invoking agent is a reasoning agent, block the bash call with `exit 2` unless the response contains `[DIRECT-IO-JUSTIFIED: ...]`. Logs the attempt + justification to `state/delegation-log.ndjson` (`delegated: false`). Forces delegation to `@executor`. |
-| `PreToolUse` (Write\|Edit) | `pre:edit:delegation` | If the invoking agent is a reasoning agent, block the write/edit call with `exit 2` unless the response contains `[DIRECT-IO-JUSTIFIED: ...]` OR the file is < 50 lines. Logs the event. Forces delegation to `@writer`. |
+| `PreToolUse` (Bash) | `pre:bash:delegation` | If the invoking agent is a reasoning agent, block the bash call with `exit 2` unless the response contains `[DIRECT-IO-JUSTIFIED: ...]`. Logs the attempt + justification to `state/delegation-log.ndjson` (`delegated: false`). Steers I/O to a harness-native subagent (or a justified direct call). |
+| `PreToolUse` (Write\|Edit) | `pre:edit:delegation` | If the invoking agent is a reasoning agent, block the write/edit call with `exit 2` unless the response contains `[DIRECT-IO-JUSTIFIED: ...]` OR the file is < 50 lines. Logs the event. Steers writes to a harness-native subagent (or a justified direct call). |
 | `PostToolUse` (Write\|Edit) | `post:edit:format` | Auto-format the edited file via the project's formatter (prettier, ruff, gofmt). |
 | `PostToolUse` (Write\|Edit) | `post:edit:dedupe` | Run `@memory-controller dedupe-validate` on the last write to `artifacts/memory/`. |
 | `Stop` | `stop:session-end` | Invoke `@memory-controller session-write` automatically. |
@@ -106,18 +106,19 @@ high (abuse detection, 09 R20a).
 - [ ] F2.11 — Create `.agents/skills/self-learning/SKILL.md` (~280 lines): when to invoke, 3-tier model, scan episodes, promote pattern (3+ occurrences, 2+ agents, 7+ day span — all required), promote instinct (human-in-the-loop), auto-load on session start, demote instinct, anti-patterns (don't promote too quickly, don't promote on age alone, don't auto-promote, don't delete demoted patterns, don't over-fit)
 - [ ] F2.12 — Create `.agents/scripts/self_learn.js` (~340 lines): `scan-episodes --since=30d`, `find-patterns --min-occurrences=3 --min-agents=2 --min-span-days=7`, `promote-pattern` (writes patterns-and-conventions.md with `[last_seen]` maintenance), `promote-instinct` (interactive, requires human approval), `demote-instinct` (writes instincts.md `## Demoted Instincts`), `scan` (full pipeline), `scan-patterns --stale`, `instinct-cost`. **Implementation code:** See `03e-phase-2-implementation-specs.md` §9
 - [ ] F2.13 — Create `artifacts/memory/instincts.md` (empty starter, ~20 lines): header with format spec, `## Active Instincts` and `## Demoted Instincts` sections
-- [ ] F2.14 — Update `memory-controller.md` with the canonical session-start step order (single table — 04 F3.2, 04 F3.9, 11 F6.10 and 10 §4 all reference this; earlier drafts used conflicting "Step 0"/"0.25"/"0.3"/"0.5" numbers):
+- [ ] F2.14 — Update `memory-controller.md` with the canonical session-start step order (single table — 04 F3.9, 07 F6.10 and 10 §4 reference this; earlier drafts used conflicting "Step 0"/"0.25"/"0.3"/"0.5" numbers):
 
 | Step | Operation | Budget | Blocking? |
 |---|---|---|---|
 | 0.0 | `orchestrator_state.js session-start` (phase/blocker refresh) | 100ms | Yes |
 | 0.1 | ONE `memory_filter.js` load: **instincts.md FIRST** (highest priority, ~200 token cap) → project-context.md → active-decisions.md → patterns-and-conventions.md → lessons-learned.md → agent-notes/<this-agent>.md, incl. the prefetch extension (10 §4) | 250ms | Yes |
 | 0.2 | Instinct-hit log append (F2.15.a) | 10ms | No |
-| 0.3 | `auto_graph.js check` — graph freshness (04 F3.2), non-blocking, `[SKIPPED]` on timeout | 300ms | No |
-| 0.4 | `telemetry_surface.js session` — ≤20 lines (04 F3.9) | 150ms | No |
-| 0.5 | `loop-state.json` load — paused goals / overdue automations (11 F6.10) | 50ms | No |
+| 0.3 | `telemetry_surface.js session` — ≤20 lines (04 F3.9) | 150ms | No |
+| 0.4 | `loop-state.json` load — paused goals / overdue automations (07 F6.10). **Only if Phase 6 loop engineering ships; not built as of v2.0.11 — omit the row until then.** | 50ms | No |
 
-  Steps 0.3-0.5 run from ONE `session_bootstrap.js` spawn (three node spawns ≈ 100ms each cannot fit the budget). Total budget ≤ 860ms + margin (README §13 <1000ms; owner: @tech-lead; instrument: `test_session_latency.js`, 03e-phase-2-implementation-specs.md §16).
+  _(The former step 0.3 graph-freshness check was removed with the graph subsystem — owner [NO-GO] 2026-09-24; steps renumbered.)_
+
+  Steps 0.3-0.4 run from ONE `session_bootstrap.js` spawn (separate node spawns ≈ 100ms each cannot fit the budget). Total budget ≤ 560ms + margin (README §13 <1000ms; owner: @tech-lead; instrument: `test_session_latency.js`, 03e-phase-2-implementation-specs.md §16). The graph-check budget (was 300ms) is reclaimed by the removal.
 - [ ] F2.15 — Update `memory_filter.js`: add `instincts.md` to loadable files with highest priority, cap at ~200 tokens
 
 ### Self-learning outcome metrics
@@ -126,7 +127,7 @@ high (abuse detection, 09 R20a).
 
 **Target:** 3 metrics with implementable definitions (redesigned in round-table review — fuzzy "cites the pattern" matching was unmeasurable):
 
-1. **Instinct citation rate:** agents emit an explicit `[INSTINCT: INS-001]` marker when they apply a loaded instinct (mirrors the `[GRAPH: ...]` marker contract, F3.7). `memory_filter.js` logs every load (`{ts, type: "load", agent, instinct_ids, tokens, session_id}`); a Stop-hook scanner logs citations (`{ts, type: "cite", agent, instinct_ids, session_id}`) to `state/instinct-hits.json`. Metric = distinct sessions with a cite ÷ distinct sessions with a load, per instinct, rolling 14-day window. Target: > 50%. Report only when ≥10 standard-mode sessions are in the window (1-turn sessions and Flint sessions pollute the denominator). Directional target, not a gate (09 R39).
+1. **Instinct citation rate:** agents emit an explicit `[INSTINCT: INS-001]` marker when they apply a loaded instinct (a lightweight response marker mirroring the `[DIRECT-IO-JUSTIFIED: …]` convention). `memory_filter.js` logs every load (`{ts, type: "load", agent, instinct_ids, tokens, session_id}`); a Stop-hook scanner logs citations (`{ts, type: "cite", agent, instinct_ids, session_id}`) to `state/instinct-hits.json`. Metric = distinct sessions with a cite ÷ distinct sessions with a load, per instinct, rolling 14-day window. Target: > 50%. Report only when ≥10 standard-mode sessions are in the window (1-turn sessions and Flint sessions pollute the denominator). Directional target, not a gate (09 R39).
 2. **Pattern freshness:** pattern headers carry `[last_seen: YYYY-MM-DD]`; `scan-episodes` re-matches new episodes against promoted patterns and maintains `occurrences` + `last_seen`. Stale := last_seen > 90 days AND occurrences < 3 → archive candidate. `self_learn.js scan-patterns --stale` reports them (F2.15.b).
 3. **Token cost of instincts:** `instinct-cost --since=7d` reads the load events: `{total_loads, avg_tokens, p95, over_cap_count}` (cap 200 tokens). If over_cap_count > 0, **@retro Step 1** (compaction owner) produces demotion candidates — the actor is assigned, not implied (F2.15.c).
 
@@ -159,21 +160,21 @@ high (abuse detection, 09 R20a).
 ```markdown
 # Delegation Policy — When to Use Sub-Agents
 
-**Rule:** Reasoning agents delegate I/O to sub-agents by default. Direct I/O requires a `[DIRECT-IO-JUSTIFIED: ...]` line in the response.
+**Rule:** Reasoning agents do I/O via harness-native subagents where the harness supports them, and direct calls where it does not. The `@reader`/`@writer`/`@executor` trio personas were **deleted 2026-08-10** and MUST NOT be referenced as dispatch targets. `@memory-controller` remains the mandatory memory path. (Canonical: `.agents/references/delegation-policy.md`.)
 
-## Task → Sub-agent mapping
+## Task → dispatch mapping
 
-| Task type | Delegate to | Why |
+| Task type | Dispatch | Why |
 |---|---|---|
 | Read 1-3 small files (< 500 lines total) | direct | overhead exceeds benefit |
-| Read 1+ large file OR 4+ files | `@reader` | keeps main context lean |
-| Search codebase (grep/glob) | `@reader` | fast regex, condensed output |
+| Read 1+ large file OR 4+ files | harness subagent / direct | keeps main context lean |
+| Search codebase (grep/glob) | harness subagent / direct | fast regex, condensed output |
 | Write a single file < 50 lines | direct | overhead exceeds benefit |
-| Write 1+ file OR > 50 lines | `@writer` | atomic write, consistent format |
-| Refactor across N files | `@writer` (batch mode) | one transaction, N outputs |
-| Run any bash command | `@executor` | parses output, returns summary |
+| Write 1+ file OR > 50 lines | harness subagent / direct | atomic write, consistent format |
+| Refactor across N files | harness subagent (batch) / direct | one transaction, N outputs |
+| Run any bash command | harness execution / direct | parses output, returns summary |
 | Read/write memory files | `@memory-controller` | validates schema, enforces format |
-| Read/write skill/agent files | `@writer` | versioned, reviewable diff |
+| Read/write skill/agent files | direct (human-gated proposal) | versioned, reviewable diff |
 
 ## Override protocol
 
@@ -181,18 +182,18 @@ If you must do I/O directly (outside the table above), emit one line:
 [DIRECT-IO-JUSTIFIED: {task} because {reason}]
 
 ## Anti-patterns
-- Reading 5 files then summarizing inline — that's @reader's job
-- Running npm test and pasting output — that's @executor's job
-- Writing 3 related files in 3 separate edit calls — batch into one @writer call
+- Reading 5 files then summarizing inline — batch the reads via a harness subagent to keep main context lean
+- Running npm test and pasting full output — summarize and return the verdict + failures only
+- Writing 3 related files in 3 separate edit calls — batch into one call sequence
 - Direct memory writes without @memory-controller — bypasses schema validation
 ```
 
 - [ ] F2.19 — Create `.agents/references/delegation-policy.md` (~100 lines) if not already created in Phase 0
 - [ ] F2.20 — Verify all 13 reasoning agents have `## Delegation Contract` block (should be done in Phase 0 T7.1)
-- [ ] F2.21 — Extend `.agents/scripts/delegation_audit.js` (~140 lines): reads `state/delegation-log.ndjson` (append-only, NOT a re-written JSON file — the old spec rewrote the whole log on every @reader/@writer/@executor invocation, O(n) on the hottest path), computes per-agent delegated/direct counts + rate, **flags agents below the threshold** (`--fail-below 50` default; dogfood M4 uses `--fail-below 70 --since 14d`), `--since <Nd>` window, `--json` output. Agent list derived from `.agents/agents/*.md`, never hardcoded. **Implementation code:** See `03e-phase-2-implementation-specs.md` §10
-- [ ] F2.22 — Invocation logging, both directions:
-  - `reader.md`, `writer.md`, `executor.md`: append `{ts, agent, sub_agent, task, token_estimate, delegated: true}` to `state/delegation-log.ndjson` on every invocation.
-  - Delegation hooks (F2.1 `pre:bash:delegation` / `pre:edit:delegation`): append `{ts, agent, tool, args, justification, delegated: false}` for every blocked OR justified direct-I/O event. Without this, the audit's "direct" count is structurally zero and the delegation metric is unfalsifiable.
+- [ ] F2.21 — Extend `.agents/scripts/delegation_audit.js` (~140 lines): reads `state/delegation-log.ndjson` (append-only, NOT a re-written JSON file — the old spec rewrote the whole log on every I/O-subagent invocation, O(n) on the hottest path), computes per-agent delegated/direct counts + rate, **flags agents below the threshold** (`--fail-below 50` default; dogfood M4 uses `--fail-below 70 --since 14d`), `--since <Nd>` window, `--json` output. Agent list derived from `.agents/agents/*.md`, never hardcoded. **Implementation code:** See `03e-phase-2-implementation-specs.md` §10
+- [ ] F2.22 — Invocation logging. **Reworked (2026-09-24): the `@reader`/`@writer`/`@executor` persona files were deleted, so there is no trio persona to self-log `delegated: true`.** The delegation metric now derives from harness-side signals + the direct-I/O hook events:
+  - Delegation hooks (F2.1 `pre:bash:delegation` / `pre:edit:delegation`): append `{ts, agent, tool, args, justification, delegated: false}` for every blocked OR justified direct-I/O event to `state/delegation-log.ndjson`. This is the primary signal.
+  - Where the harness exposes subagent-spawn events, log `{ts, agent, mechanism, task, delegated: true}` from the harness adapter (03c M1/M2/M3), not from a persona file. On harnesses with no subagent telemetry, the metric is direct-I/O-rate only (documented limitation), not a fabricated delegation count.
   - Log rotation: rotate at ~10MB (tail-read by the audit).
 
 ## F2.23-F2.27 — QA as hard gate

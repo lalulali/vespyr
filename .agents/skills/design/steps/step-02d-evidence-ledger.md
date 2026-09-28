@@ -10,10 +10,11 @@ output_contract:
 
 # Step 2 — Evidence Ledger (Reverse Mode)
 
-Build the Evidence Ledger in `requirements.md` before any synthesis. Every behavioral statement gets a `path#id` anchor; gaps become `[OPEN]` questions for the owner — never filled by inference (DNA 5 applied to specs).
+Initialize `requirements.md` from the complete `.agents/templates/product/prd-template.md` before writing the Evidence Ledger. The ledger is §14 of that same full PRD, not a standalone compact report. Preserve §§1–13 as placeholders until synthesis, mirror every `[OPEN]` question to §12, and never fill an evidence gap by inference (DNA 5 applied to specs). Every behavioral statement gets a `path#id` anchor.
 
 ## Prerequisites
 - `prototype-inventory.md` exists with anchored rows (step-1).
+- `artifacts/output/03-strategy/prototype-collaboration.md` records the selected track and designer–tech disposition, and `prototype_collab_gate.js verify` passes before synthesis.
 - SPEC.md Spec Kernel loaded (`artifacts/output/03-strategy/SPEC.md`).
 
 ## Process

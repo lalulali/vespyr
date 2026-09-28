@@ -25,6 +25,10 @@ Each agent has a clear scope. Use this table to decide who to invoke. If a task 
 | `@shifu` | Learning paths, tutorials, syllabi, cheatsheets, video scripts, teaching sessions | Product strategy, code, design decisions |
 | `@memory-controller` | Memory reads/writes, context loading, compaction, archival, session summaries | Domain reasoning, task execution, quality judgments |
 
+## Prototype collaboration ownership
+
+When a prototype is in scope, `@product-designer` owns visual fidelity, interaction states, tokens, and the track/runtime decision. `@tech-lead` owns implementability, task feasibility, and the handoff into engineering. Neither can unilaterally clear the handoff: both must provide separate `SATISFIED` sign-offs in `prototype-collaboration.md`, and `prototype_collab_gate.js` must pass. `@architect` owns any system/data-boundary decision that emerges from the review.
+
 ## Motion ownership
 
 Motion is a **capability**, not a separate agent. Ownership (per the row entries above):

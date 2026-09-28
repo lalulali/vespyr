@@ -1,13 +1,13 @@
 /**
  * Baseline Manager & Regression Analyzer for vespyr-eval (WS-4 Task 4.1)
- * Tracks pinned baseline metrics (evals/baseline.json), calculates diffs,
+ * Tracks pinned baseline metrics (artifacts/evals/baseline.json), calculates diffs,
  * and triggers regression alerts / exit code 2 gates (INV-REG-1, INV-REG-2).
  */
 
 const fs = require("fs");
 const path = require("path");
 
-const DEFAULT_BASELINE_PATH = path.join(__dirname, "..", "..", "evals", "baseline.json");
+const DEFAULT_BASELINE_PATH = path.join(__dirname, "..", "..", "artifacts", "evals", "baseline.json");
 
 function harnessVersion() {
   try {
@@ -47,7 +47,7 @@ function computeDatasetHash() {
 function loadBaseline(customPath) {
   let filePath = customPath || DEFAULT_BASELINE_PATH;
   if (!fs.existsSync(filePath)) {
-    const fallbackPath = path.join(__dirname, "..", "..", "evals", "mock-baseline.json");
+    const fallbackPath = path.join(__dirname, "..", "..", "artifacts", "evals", "mock-baseline.json");
     if (!customPath && fs.existsSync(fallbackPath)) {
       filePath = fallbackPath;
     } else {

@@ -25,7 +25,7 @@ The core implementation step. Write code, run tests, get reviewed, merge.
 1. `@developer` implements → `@code-reviewer` reviews → fix if needed → merge
 
 ## Role-based guardrails
-- **FE:** Focus on **visual accuracy, UI polish, and premium user experience**. If any frontend spec is unclear, resolve internally first: consult `@product-designer` for design ambiguity, `@product-manager` for requirement ambiguity. Only escalate to the human user if the persona chain cannot resolve the ambiguity within the swarm.
+- **FE:** Focus on **visual accuracy, UI polish, and premium user experience**. First read the recorded prototype track/runtime. For `static-html`, implement semantic vanilla HTML/CSS/JS and do not introduce React/shadcn primitives without a new track decision. For `nextjs-component`, use the reviewed source-component and `@shadcn/lint` path. If any frontend spec is unclear, resolve internally first: consult `@product-designer` for design ambiguity, `@product-manager` for requirement ambiguity. Only escalate to the human user if the persona chain cannot resolve the ambiguity within the swarm.
 - **BE:** Focus on clean API contracts, model safety, and robust error flows. If any backend spec is unclear, resolve internally first: consult `@product-manager` for requirement ambiguity, `@architect` for technical constraints. Only escalate to the human user if the persona chain cannot resolve the ambiguity within the swarm.
 - **Full-Stack:** Both FE and BE communication channels are available. Apply both visual and backend quality standards.
 

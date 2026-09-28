@@ -4,6 +4,7 @@
 > **Feeds into:** Ivy (@product-designer), Vera (@architect), Grant (@tech-lead), Rex (@developer), Nova (@data-analyst)
 > **Save to:** `artifacts/output/03-strategy/requirements.md`
 > **Paired with:** `SPEC.md` (`.agents/templates/product/SPEC.md`) for distilled agent contract, `user-story-template.md` (`.agents/templates/product/user-story-template.md`) for sprint stories
+> **Prototype track/runtime:** `{static-html | nextjs-component | not in scope}` / `{runtime}`
 
 **Version:** 5
 **Last changed:** 2026-09-22

@@ -25,9 +25,9 @@
 | F6.1-F6.4 | `/goal` (run-until-done + verifier) | Missing | v2.1 |
 | F6.5-F6.8 | Automations (heartbeat) | Missing | v2.1 |
 | F6.9-F6.10 | State (on-disk loop memory) | Partial (3-tier memory exists, no loop-specific state) | v2.1 |
-| — | Skills | Already exists (26 skills) | v2.0 |
-| — | Sub-agents (maker/checker) | Already exists (21 personas, code-reviewer/qa-engineer) | v2.0 |
-| — | Plugins/connectors (MCP) | Phase 2 F2.6-F2.10 | v2.1 |
+| — | Skills | Already exists (43 skills at v2.0 shipped state — count derived from disk) | v2.0 |
+| — | Sub-agents (maker/checker) | Already exists (20 personas / 23 agent files, incl. code-reviewer/qa-engineer) | v2.0 |
+| — | Plugins/connectors (MCP) | Phase 2 (`03b`/`03g`) | v2.1 |
 
 ---
 
@@ -51,7 +51,7 @@ The user gives a verifiable stop condition (e.g., "all tests in test/auth pass a
 
 - [ ] F6.1 — Create `.agents/skills/goal/SKILL.md` (~150 lines):
   - When to invoke: user has a verifiable end condition and wants to walk away
-  - Workflow: (1) Parse stop condition → (2) Plan iterations → (3) Implement via @developer → (4) Run verification via @executor → (5) Invoke @goal-verifier to grade → (6) If not done, loop to (3) → (7) If done, write loop-state + report
+  - Workflow: (1) Parse stop condition → (2) Plan iterations → (3) Implement via @developer → (4) Run verification directly (or via a harness subagent) → (5) Invoke @goal-verifier to grade → (6) If not done, loop to (3) → (7) If done, write loop-state + report
   - Stop condition syntax: shell command that exits 0 (e.g., `npm test -- --grep auth && npm run lint`)
   - Pause/resume/clear semantics: loop-state.json stores current iteration, last failure, next action
   - Hard limit: max 10 iterations per `/goal` invocation (configurable via `VESPYR_GOAL_MAX_ITERATIONS`)
@@ -71,12 +71,12 @@ An automation = prompt + cadence + skill + environment. Runs on a schedule, does
   - Automation definition: name, prompt, cadence (cron or interval), skill to invoke, environment (local checkout or background worktree)
   - Triage inbox: findings land in `artifacts/output/01-discovery/triage/<automation-name>/`
   - Archive: runs that find nothing are archived to `artifacts/output/01-discovery/triage/<automation-name>/archive/`
-  - Anti-patterns: automations that modify code without a human review gate, automations that run all 21 agents, no cadence limit
+  - Anti-patterns: automations that modify code without a human review gate, automations that run the entire agent swarm, no cadence limit
 - [ ] F6.6 — Create `.agents/scripts/automation.js` (~180 lines): `create`, `list`, `run <id>`, `run-all`, `archive <id>`. Stores definitions in `.agents/state/automations.json`. `run` executes the prompt + skill, writes findings to triage inbox. **Implementation code:** See `03e-phase-2-implementation-specs.md` §14
 - [ ] F6.7 — Create starter automation: daily CI-failure triage
   - Prompt: "Read yesterday's CI failures from `.agents/state/ci-log.json` (or GitHub Actions API via MCP), summarize root causes, write findings to triage inbox"
   - Cadence: daily (cron `0 9 * * *` or GitHub Actions schedule)
-  - Skill: none (direct prompt; uses @reader for CI log reads, @writer for triage file writes)
+  - Skill: none (direct prompt; CI log reads and triage-file writes are done directly, human-gated)
   - Environment: background worktree (does not touch local checkout)
   - This is the ONE automation that ships in v2.1. More can be added, but each must clear the same gating as a new persona (Gate A: 3+ community requests, or Gate B: documented token cost analysis)
 - [ ] F6.8 — Integrate with Phase 2 hooks for scheduling
@@ -99,7 +99,7 @@ The model forgets between runs. The repo doesn't. Loop state lives on disk so to
   }
   ```
   Read/written by `goal_check.js`, `automation.js`, and `worktree.js` (Phase 0 T7.1b). Committed to repo (not gitignored) so runs are resumable across machines.
-- [ ] F6.10 — Update `memory-controller.md`: add Step 0.5 "Load loop-state.json" (before full 3-tier load). If `active_goal.status === "paused"`, surface to the user: "You have a paused /goal: <condition> at iteration <N>. Resume?" If `automation_runs` has overdue entries, surface: "Automation <name> is due."
+- [ ] F6.10 — Update `memory-controller.md`: add the loop-state load step per the canonical session-start order table in `03` F2.14 (loop-state is the last non-blocking step there). If `active_goal.status === "paused"`, surface to the user: "You have a paused /goal: <condition> at iteration <N>. Resume?" If `automation_runs` has overdue entries, surface: "Automation <name> is due." _(Note: the exact step number lives in the single canonical table in `03` F2.14 — do not hardcode a divergent "0.5" here.)_
 
 ---
 
@@ -147,7 +147,7 @@ disagreement and routes it to the owner or escalation authority.
 - **Comprehension debt accelerates.** The faster the loop ships code the user didn't write, the wider the gap. Mitigation: `/goal` writes a report at the end (what changed, what passed, what to review). Automations write to a triage inbox for human review — they do not auto-merge. The loop surfaces work; the human reviews it. This is the article's own warning, not a new one.
 - **Cognitive surrender.** "The loop runs itself" is tempting. The user stops having opinions. Mitigation: `/goal` requires a verifiable condition (forces the user to define "done" upfront). Automations require a human review gate before any code modification. The loop is a tool, not an autopilot.
 - **Worktree sprawl.** Orphaned worktrees accumulate. Mitigation: `worktree.js clean-all` (Phase 0 T7.1b) + `stop:session-end` hook (Phase 2 F2.2) can auto-clean stale worktrees. `loop-state.json` tracks active worktrees.
-- **Automations run all 21 agents.** This is the expensive failure mode. Mitigation: each automation invokes ONE skill or ONE agent. No automation spawns the full swarm. The starter automation uses @reader + @writer only.
+- **Automations run the whole swarm.** This is the expensive failure mode. Mitigation: each automation invokes ONE skill or ONE agent. No automation spawns the full swarm. The starter automation only reads CI logs and writes a triage file — no code changes.
 - **A passing command is mistaken for team satisfaction.** Keep technical verification and domain sign-off separate; require the T8 state/evidence record before any release-affecting loop can finish.
 
 ### Rollback plan
@@ -157,7 +157,7 @@ If Phase 6 breaks:
 - **Automations:** `automation.js archive <id>` archives any automation's findings. Delete `.agents/state/automations.json` to remove all automations. The starter automation (CI-failure triage) is the only one that ships; if it causes issues, delete it.
 - **Loop state:** `loop-state.json` is committed to the repo. If it becomes corrupted, delete it — goals and automations reset, but no data is lost (triage files remain on disk).
 
-## Handoff to Phase 3
+## Handoff
 
 - `/goal` is the run-until-done primitive; automations are the heartbeat.
 - Both depend on Phase 2 hooks (for scheduling) and Phase 0 T7.1b worktree tooling (for isolation).
@@ -169,7 +169,7 @@ If Phase 6 breaks:
 ## What this phase does NOT do
 
 - **No auto-merge.** Automations and `/goal` surface work; they do not merge PRs or advance the pipeline without human review. The QA hard gate (Phase 2 F2.23) still applies.
-- **No full-swarm cron.** Each automation invokes one skill or one agent. The 21-agent swarm is not put on a schedule. That's the expensive, dangerous version of this idea.
+- **No full-swarm cron.** Each automation invokes one skill or one agent. The full agent swarm is not put on a schedule. That's the expensive, dangerous version of this idea.
 - **No auto-promotion of loop output to memory.** Loop findings land in the triage inbox. Promoting them to `active-decisions.md` or `lessons-learned.md` is a human action (or a @memory-controller action with explicit user confirmation).
 - **No 35-harness automation port.** Automations run via hooks (Phase 2) or GitHub Actions. Per-harness cron adapters are out of scope. The harness's native scheduling is the scheduler.
 

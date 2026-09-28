@@ -4,6 +4,8 @@
 > **Consumed by:** @developer, @architect, @qa-engineer, @tech-lead
 > **Save to:** `artifacts/output/03-strategy/design.md`
 > **Paired with:** `product-spec-template.md` (screen specs + flows), `motion-spec-template.md` (motion tokens merge here)
+> **Prototype track:** `static-html | nextjs-component | not in scope`
+> **Prototype runtime:** `vanilla HTML/CSS/JS + Tailwind CDN | Next.js + React + Tailwind + shadcn | not in scope`
 > **Version:** 3
 > **Last changed:** 2026-09-05
 

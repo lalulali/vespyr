@@ -15,21 +15,19 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const { spawnSync } = require('child_process');
+const { createFixtureTree } = require('./helpers/reverse_prd_test_fixture');
 
 const ROOT = path.join(__dirname, '..');
 const HOOK = path.join(ROOT, '.agents', 'scripts', 'step0_staleness.js');
 const PARITY = path.join(ROOT, '.agents', 'scripts', 'spec_parity.js');
-const FIX = path.join(ROOT, 'evals', 'fixtures', 'prototypes', 'reverse-prd');
 const REL = {
-  report: 'evals/fixtures/prototypes/reverse-prd/dry-run/parity-report.md',
-  inventory: 'evals/fixtures/prototypes/reverse-prd/dry-run/prototype-inventory.md',
+  report: 'artifacts/evals/reverse-prd/a8/reverse/parity-report.md',
+  inventory: 'artifacts/evals/reverse-prd/a8/reverse/prototype-inventory.md',
   prototype: 'evals/fixtures/prototypes/reverse-prd/workspace-members.html',
 };
 
 function tmpTree() {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'step0-stale-'));
-  fs.cpSync(FIX, path.join(dir, 'evals', 'fixtures', 'prototypes', 'reverse-prd'), { recursive: true });
-  return dir;
+  return createFixtureTree().root;
 }
 
 function runHook(root, extra = []) {

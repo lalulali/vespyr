@@ -8,7 +8,7 @@
 
 ## 1. Purpose
 
-Phase 1 gives every agent a baseline: structured memory, code graphs, web research, E2E testing, diffs, and LSP diagnostics. Phase 2 closes the gaps — MCP servers that give specific agents capabilities they currently lack entirely.
+Phase 1 gives every agent a baseline: structured memory, web research, E2E testing, diffs, and LSP diagnostics. Phase 2 closes the gaps — MCP servers that give specific agents capabilities they currently lack entirely.
 
 **Rule:** Only add an MCP server if at least 2 agents need it.
 
@@ -27,11 +27,11 @@ evidence into approval. The canonical validator remains the source of truth.
 | **@founder** | Hound (research), elicitation | — Covered |
 | **@product-manager** | Hound, `@vespyr/mcp` (memory, pipeline, tasks, artifacts) | — Covered |
 | **@product-designer** | Hound, Playwright (screenshots), Figma (opt-in) | **Accessibility audit.** Cannot verify WCAG compliance or color contrast of designs before handoff. |
-| **@architect** | code_graph, artifact_graph, elicitation | — Covered |
+| **@architect** | artifact links, elicitation | — Covered |
 | **@tech-lead** | task_history, pipeline | — Covered |
-| **@developer** | LSP, Git, Shadcn, code_graph, Hound | **Package vulnerability check.** `npm audit` is a shell command, but flagging transitive dependencies with known CVEs requires structured data. **Bundle analysis.** Cannot see what's bloating the build. |
-| **@code-reviewer** | Git, LSP, code_graph, fidelity_check | **Static analysis.** LSP catches types, but not anti-patterns (cyclomatic complexity, dead code). **Secret detection.** No way to scan for accidentally committed keys/tokens. |
-| **@qa-engineer** | Playwright (E2E, DOM) | **Test coverage reporting.** Must parse coverage JSON manually via `@executor`. **Accessibility testing.** WCAG violations in built pages are invisible. **API testing.** No structured way to validate endpoints. |
+| **@developer** | LSP, Git, Shadcn, Hound | **Package vulnerability check.** `npm audit` is a shell command, but flagging transitive dependencies with known CVEs requires structured data. **Bundle analysis.** Cannot see what's bloating the build. |
+| **@code-reviewer** | Git, LSP, fidelity_check | **Static analysis.** LSP catches types, but not anti-patterns (cyclomatic complexity, dead code). **Secret detection.** No way to scan for accidentally committed keys/tokens. |
+| **@qa-engineer** | Playwright (E2E, DOM) | **Test coverage reporting.** Must parse coverage JSON manually via a harness-native shell call. **Accessibility testing.** WCAG violations in built pages are invisible. **API testing.** No structured way to validate endpoints. |
 | **@researcher** | Hound (search, fetch, crawl, PDF/OCR) | — Covered. Hound handles 100% of researcher tooling. |
 | **@user-researcher** | Hound | — Covered |
 | **@ux-researcher** | Hound, Playwright | **Accessibility audit.** Same gap as `@product-designer`. **Color contrast checker.** WCAG AA/AAA ratio verification on design tokens. |
@@ -39,12 +39,12 @@ evidence into approval. The canonical validator remains the source of truth.
 | **@security-engineer** | Hound (CVE lookup) | **BIG GAP.** Dependency CVE scanning produces unstructured text. Secret detection requires manual grep. No structured threat model output. |
 | **@performance-engineer** | — (nothing specific) | **BIG GAP.** No web performance audit tooling. Cannot get Lighthouse scores, waterfall charts, or bundle size breakdowns without manual browser interaction. |
 | **@ml-engineer** | — (nothing specific) | Low priority — conditional agent, only active when ML is core. |
-| **@devops-engineer** | GitHub (opt-in) | Config validation. Docker/compose/env file syntax checking. Low priority — `@executor` handles most infra ops. |
+| **@devops-engineer** | GitHub (opt-in) | Config validation. Docker/compose/env file syntax checking. Low priority — harness-native shell calls handle most infra ops. |
 | **@technical-writer** | Hound, artifact_graph | **Markdown quality.** No link checking (broken internal links), no spell/grammar linting, no style guide enforcement. |
 
 ### I/O Sub-Agents — Not Applicable
 
-`@memory-controller` are narrow I/O executors. They don't reason or need tool enrichment. MCP is for the 13 reasoning agents.
+`@memory-controller` are narrow I/O executors. They don't reason or need tool enrichment. MCP is for the reasoning agents (19 at v2.0 shipped state).
 
 ---
 
@@ -61,6 +61,8 @@ Based on the gap analysis, 6 new capabilities are needed. Two are new MCP server
 
 ### 3b. New `@vespyr/mcp` Tools (Thin Wrappers)
 
+> **Numbering note (2026-09-24):** the `#11–#16` labels below were assigned when `03b` defined 10 first-party tools. After the graph tools were removed, `03b` defines 7 first-party tools, so these six are logically tools 8–13 of the first-party surface. The labels are kept stable to avoid churn in cross-references; treat them as identifiers, not positions. Running first-party total: **7 (03b) + 6 (03g) = 13**, plus `vespyr_spawn_agent` = **14**.
+
 | # | Tool | Wraps / Uses | Fills Gap For | Input | Output |
 |---|---|---|---|---|---|
 | 11 | `audit_dependencies` | `npm audit --json` / `pip-audit` | `@developer`, `@security-engineer`, `@code-reviewer` | `manager` (`npm`\|`pip`) | `{ vulnerabilities[{ package, severity, cve, fix_version }], summary }` |
@@ -72,13 +74,13 @@ Based on the gap analysis, 6 new capabilities are needed. Two are new MCP server
 
 ### 3c. Rationale Per Tool
 
-**`audit_dependencies`** — Today: `@executor` runs `npm audit`, returns raw JSON or text. Agent must parse, filter false positives, map to files. MCP: returns structured `{ vulnerabilities[], summary, fixable_count }` with pre-filtered noise. Both `@developer` (catch before commit) and `@security-engineer` (block release on critical CVEs) need this.
+**`audit_dependencies`** — Today: a harness-native shell call runs `npm audit`, returns raw JSON or text. Agent must parse, filter false positives, map to files. MCP: returns structured `{ vulnerabilities[], summary, fixable_count }` with pre-filtered noise. Both `@developer` (catch before commit) and `@security-engineer` (block release on critical CVEs) need this.
 
-**`scan_secrets`** — Today: `@executor` runs `gitleaks` and returns full output. MCP: returns typed findings with `secret_type` (AWS key, JWT, private key, etc.) so `@security-engineer` can triage without scanning raw output. `@code-reviewer` uses it as a pre-merge gate.
+**`scan_secrets`** — Today: a harness-native shell call runs `gitleaks` and returns full output. MCP: returns typed findings with `secret_type` (AWS key, JWT, private key, etc.) so `@security-engineer` can triage without scanning raw output. `@code-reviewer` uses it as a pre-merge gate.
 
 **`check_docs`** — Today: link checking is manual. Linting is absent. MCP: returns broken links (404s, stale anchors), markdownlint violations (MD001–MD053), and readability score (Flesch-Kincaid). `@technical-writer` uses it for quality; `@code-reviewer` uses it to catch doc drift in PRs.
 
-**`analyze_bundle`** — Today: `@executor` can run `webpack-bundle-analyzer` but output is an HTML visualization. MCP: returns structured data (`chunks[], largest_modules, duplicates[]`) so `@developer` or `@performance-engineer` can act on findings without opening a browser.
+**`analyze_bundle`** — Today: a harness-native shell call can run `webpack-bundle-analyzer` but output is an HTML visualization. MCP: returns structured data (`chunks[], largest_modules, duplicates[]`) so `@developer` or `@performance-engineer` can act on findings without opening a browser.
 
 **`query_data`** — Today: `@data-analyst` must manually write node scripts for every analysis. MCP: imports CSV/JSON into in-memory SQLite, runs SQL, returns results. `SELECT region, COUNT(*) FROM events GROUP BY region HAVING COUNT(*) > 100` in one call instead of 50 lines of node.
 
@@ -106,10 +108,10 @@ Based on the gap analysis, 6 new capabilities are needed. Two are new MCP server
 | @founder | Hound, elicitation | — | Full |
 | @product-manager | Hound, `@vespyr/mcp` | — | Full |
 | @product-designer | Hound, Playwright, Figma | Axe-core | Full |
-| @architect | code_graph, artifact_graph, elicitation | — | Full |
+| @architect | artifact links, elicitation | — | Full |
 | @tech-lead | task_history, pipeline | — | Full |
-| @developer | LSP, Git, Shadcn, code_graph, Hound | `audit_dependencies`, `analyze_bundle` | Full |
-| @code-reviewer | Git, LSP, code_graph, fidelity_check | `audit_dependencies`, `scan_secrets`, `check_docs` | Full |
+| @developer | LSP, Git, Shadcn, Hound | `audit_dependencies`, `analyze_bundle` | Full |
+| @code-reviewer | Git, LSP, fidelity_check | `audit_dependencies`, `scan_secrets`, `check_docs` | Full |
 | @qa-engineer | Playwright | Lighthouse, Axe-core | Full |
 | @researcher | Hound | — | Full |
 | @user-researcher | Hound | — | Full |

@@ -26,6 +26,10 @@ Work `.agents/templates/product/design.md` in order; do not re-decide here:
 
 `@product-designer` loads `.agents/references/designer-guidelines.md` for component libraries, fonts, and asset tooling (Söhne / Klim, DaisyUI / Tailwind, Haikei SVG, Pangram Pangram / Displaay) once context + style are set.
 
+## Prototype handoff check
+
+If a prototype exists, read `artifacts/output/03-strategy/prototype-collaboration.md` and run `prototype_collab_gate.js verify` before finalizing tokens. Confirm the selected `static-html` or `nextjs-component` track, the runtime, responsive states, reviewer sign-offs, and any owner disposition for `BLOCKED` feasibility issues. A failed validator blocks token finalization. Do not infer that a shadcn-flavored static visual is an installed shadcn component.
+
 ## design.md content
 `artifacts/output/03-strategy/design.md`:
 - **Custom variables** (CSS custom properties / design tokens)

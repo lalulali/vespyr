@@ -2,6 +2,8 @@
 purpose: Full product specification — the developer-ready document produced by @product-designer (Ivy). Covers user flows, screen specs, interactions, visual direction, edge cases, and cross-references.
 audience: @developer, @architect, @tech-lead, @qa-engineer, @technical-writer
 paired_with: design.md (visual design system tokens), product-spec.html (visual showcase)
+prototype_track: "static-html | nextjs-component | not in scope"
+prototype_runtime: "vanilla HTML/CSS/JS + Tailwind CDN | Next.js + React + Tailwind + shadcn | not in scope"
 ---
 
 # {Feature Name} — Product Specification

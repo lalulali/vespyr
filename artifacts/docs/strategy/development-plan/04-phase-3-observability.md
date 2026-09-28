@@ -3,12 +3,13 @@
 > **Release:** v2.1
 > **Calendar:** Week 6
 > **Themes:** T3 (Artifact rigor), T4 (Harness contracts), T8 (UTTERLY SATISFIED culture)
-> **Goal:** Make the graph a first-class tool (auto-build, query API), make telemetry a first-class surface (LLM-consumable digests), prove catalog consistency, give all agents "See the Unseen" observability directives, and make satisfaction health visible without turning it into a vanity score.
+> **Goal:** Make telemetry a first-class surface (LLM-consumable digests), prove catalog consistency, give all agents "See the Unseen" observability directives, and make satisfaction health visible without turning it into a vanity score.
+> **Note (2026-09-24):** the graph work (former F3.1–F3.7: auto-build + query API) was **removed by owner [NO-GO]** — it conflicted with the shipped graph-deprecation decision. See the removal record at F3.1–F3.7 below. The rest of Phase 3 never depended on it.
 
 ## Sub-Plans & Execution Architecture — Aligned to 02l Option A Thin Slice
 
 Phase 3 is divided into two dedicated implementation sub-plans that **import the 02l canonical span schema and defer, not duplicate, Phase-1 thin-slice work**:
-- **`04a-phase-3-observability-engine.md`**: Macro-telemetry surface (`telemetry_surface.js` session <150ms, 7-day digests, hot-paths), RQS-J semantic shadow (SRSR/SDS G-Eval κ≥0.7), and graph query API. **Imports** `tools/telemetry/schema.json` from `02l §5.1`; does not redefine spans.
+- **`04a-phase-3-observability-engine.md`**: Macro-telemetry surface (`telemetry_surface.js` session <150ms, 7-day digests, hot-paths) and RQS-J semantic shadow (SRSR/SDS G-Eval κ≥0.7). **Imports** `tools/telemetry/schema.json` from `02l §5.1`; does not redefine spans. (Graph query API removed — see F3.1–F3.7.)
 - **`04b-phase-3-observability-ui-miniapp.md`**: Zero-dependency local web dashboard and CLI tool (`vespyr web` / `vespyr dashboard`), modular installer options (`--with-dashboard`), and real-time SSE trace DAG waterfall viewer. Reads `tools/telemetry/schema.json` + `spans-*.ndjson` + `rqs_d_score`/`rqs_j_score` shadow.
 
 Single-owner registry: see `02l §11`.
@@ -21,101 +22,21 @@ Single-owner registry: see `02l §11`.
 | F3.8-F3.12 (Observability Engine) | Monolithic Phase 3 | **Detailed in `04a`** | Bifurcated runtime span emission and macro-telemetry surface from Phase 1. |
 | F3.21-F3.23 (Web Dashboard) | Unspecified / CLI-only | **Detailed in `04b`** | Added local-first `vespyr web` CLI tool and modular installer options. |
 
-## F3.1-F3.5 — Graph auto-build at 5 lifecycle moments
+## F3.1-F3.7 — Graph auto-build + query API — ❌ REMOVED (owner [NO-GO], 2026-09-24)
 
-**Source:** Evolution §1.7 | **Theme:** T3
+**Source:** Evolution §1.7, §1.11 | **Theme:** T3 (was) | **Status:** cut from the plan.
 
+The structural graph subsystem (auto-build at lifecycle moments, a typed query API, per-agent "Graph Query Contract" blocks, and the `[GRAPH: …]` marker) was **removed from Phase 3 by owner decision**. The graph was already deleted from the engine in Phase 1 (see `02h-phase-1-graph-shutup-and-cli.md` and `active-decisions.md`), and its absence is enforced by `tests/graph-deprecation.test.js`. Rebuilding it here would have reversed a shipped decision the codebase actively guards, so F3.1–F3.7 are cut, not deferred.
 
-**Target:** Make graph generation automatic at 5 lifecycle moments:
+**What this removal deletes from the plan:**
+- F3.1–F3.5 (graph auto-build script + 5 lifecycle triggers + session-start step 0.3).
+- F3.6–F3.7 (graph query API + the `## Graph Query Contract` blocks on `@architect`, `@tech-lead`, `@code-reviewer`, `@developer`).
+- The `[GRAPH: …]` marker contract everywhere it appeared (F3.7, session-start table, Done-when).
+- The graph rows in the `03` F2.14 session-start table (step 0.3) and README §13 latency budget.
 
-1. **Session start** — `@memory-controller` runs `auto_graph.js check` (file freshness)
-2. **After `/design` sign-off** — doc-graph rebuild (new PRD/ADR links to capture)
-3. **After `/develop` step 3** — code-graph rebuild (new code to capture)
-4. **Before `/retro` step 1** — both rebuilds (so the cycle digest references a current graph)
-5. **On `orchestrator_state.js complete`** — already wired for code-graph; extend to doc-graph
+**What replaces the intent (kept, non-graph):** blast-radius awareness now lives in the "See the Unseen" directives (F3.15) as prose reasoning — agents reason about dependents from `git diff` + targeted `grep`, not a cached graph. No new tooling is scheduled.
 
-**Memory-controller session-start integration (canonical step 0.3 — the full
-order table lives in 03 F2.14; earlier drafts numbered this "Step 0"):**
-
-```markdown
-### Step 0.3: Graph freshness check (non-blocking)
-
-After the memory load (step 0.1), invoke:
-@executor node .agents/scripts/session_bootstrap.js graph  # or auto_graph.js check via the shared bootstrap spawn
-
-Parse the one-line response:
-- [OK] both — no action
-- [STALE] code — run node .agents/scripts/auto_graph.js build code --background (DETACHED — never blocks session start)
-- [STALE] doc — run node .agents/scripts/auto_graph.js build doc --background
-- [STALE] both — run node .agents/scripts/auto_graph.js build both --background
-
-Budget: 300ms; on timeout emit `[SKIPPED: graph check timed out]` and continue.
-After a rebuild completes, inject into the next context load: "Graph rebuilt: {files_indexed} code, {docs_indexed} doc files."
-```
-
-- [ ] F3.1 — Create `.agents/scripts/auto_graph.js` (~160 lines): single-pass cached mtime walk (one walk per check, cache in `graph-last-built.json`, 24h re-walk, skip-list incl. vendor/build/.turbo/coverage), `check` < 500ms on ≤30k files, `build --background` detached mode. **Implementation code:** See `03e-phase-2-implementation-specs.md` §5
-- [ ] F3.2 — Update `memory-controller.md`: insert step 0.3 (graph freshness check) per the canonical order table in 03 F2.14 (text above; the older "Step 0" numbering is retired)
-- [ ] F3.3 — Update `code-graph/SKILL.md` and `doc-graph/SKILL.md`: add `## Auto-invocation triggers` section documenting the 5 lifecycle moments
-- [ ] F3.4 — Update 3 skills to invoke `auto_graph.js` at the right step:
-  - `design/SKILL.md` (step-06/final) → `build doc`
-  - `develop/SKILL.md` (step-03 close) → `build code`
-  - `retro/SKILL.md` (step-01 open) → `build both`
-  - Each trigger appends a tagged entry to `state/graph-builds.log` so "exactly one rebuild per trigger" is testable
-- [ ] F3.5 — Update `orchestrator_state.js` `complete` handler: add doc-graph refresh after existing code-graph refresh. Wrap in try/catch; never block.
-
-## F3.6-F3.7 — Graph query API (replaces raw-JSON reads)
-
-**Source:** Evolution §1.11 | **Theme:** T3
-
-
-**Target:** A typed query API with 9 subcommands. Every agent invokes this, never the raw JSON file. All queries are read-only after a single-flight build lock (concurrent round-table queries cannot race duplicate full builds).
-
-**Graph Query Contract blocks (to add to each reasoning agent):**
-
-**`architect.md` — after the Delegation Contract:**
-```markdown
-## Graph Query Contract
-
-Before proposing ANY structural change:
-
-Emit the result as a "## Blast Radius" section in the ADR. Cost: ~1 query, ~50 tokens output. Without the graph: read every file in src/ and grep for the target — ~5000+ tokens.
-```
-
-**`tech-lead.md` — after the Delegation Contract:**
-```markdown
-## Graph Query Contract
-
-Before breaking the architecture into tasks:
-
-Emit a "## Topology" section in the execution plan citing the graph stats.
-```
-
-**`code-reviewer.md` — after the Delegation Contract:**
-```markdown
-## Graph Query Contract
-
-For every PR review:
-- Identify files changed (git diff --name-only)
-- Flag any change with blast_size > 5 as a "high-blast-radius" finding — these deserve extra scrutiny
-
-This catches refactors that miss dependent callers.
-```
-
-**`developer.md` — after the Delegation Contract:**
-```markdown
-## Graph Query Contract
-
-Before any refactor (rename, signature change, file move):
-- Update every file in the response before committing
-
-Cost: 1 query. Without it: break the build, then re-grep and fix in a second pass (~3x the tokens).
-```
-
-  - `architect.md` — blast-radius before proposing changes (contract block above)
-  - `tech-lead.md` — summary for topology, blast-radius for parallelism (contract block above)
-  - `code-reviewer.md` — blast-radius per changed file (contract block above)
-  - `developer.md` — dependents before any rename/refactor (contract block above)
-  - Add `## Graph Query Contract` block to each of the 4 reasoning agents (text above)
+**If the graph is ever wanted again:** it is a fresh proposal, not a resume of F3.1–F3.7. It must first reverse the deletion decision in `active-decisions.md` with dated rationale and update `tests/graph-deprecation.test.js`, then be re-scoped from scratch.
 
 ## F3.8-F3.12 — Telemetry Surface & Distributed Span Observability (LLM-Consumable & Machine-Verifiable)
 
@@ -146,8 +67,8 @@ Cost: 1 query. Without it: break the build, then re-grep and fix in a second pas
 ```markdown
 ### Step 0.4: Telemetry snapshot
 
-After the graph check, invoke (via the shared session_bootstrap.js spawn):
-@executor node .agents/scripts/telemetry_surface.js session
+After the memory load, invoke (via the shared session_bootstrap.js spawn):
+node .agents/scripts/telemetry_surface.js session
 
 Budget: 150ms; output ≤ 20 lines (never raw event data). Inject the output into the loaded context under a "## Recent Telemetry" heading. This gives the agent cost awareness before it starts spending tokens.
 ```
@@ -265,23 +186,19 @@ a phantom.
 
 ## Done when
 
-- [ ] `auto_graph.js check` returns status in < 500ms on ≤30k files (single-pass cached walk); modifying any file in `src/` or `artifacts/output/` flips `[OK]` → `[STALE]`; `build --background` never blocks a session
-- [ ] `/design`, `/develop`, `/retro` each trigger exactly one rebuild at their specified step (verified via tagged entries in `state/graph-builds.log`)
 - [ ] `telemetry_surface.js session` returns ≤ 20 lines, runs in ≤ 150ms (no string-spread mangling)
 - [ ] `/status` output includes "## Telemetry (last 7 days)"
 - [ ] `/retro` digest includes top 3 hot paths
 - [ ] `npm test` passes, including `test_catalog_parity.js` (derive-from-disk; docs updated in Phase 4 so it passes at done-when — no "expected to fail" line remains), `test_session_latency.js` (F3.21), `test_qa_gate.mjs`, `test_satisfaction.mjs`
-- [ ] `memory-controller` enforces `[GRAPH: ...]` marker for API-related claims (via `fidelity_check.js` rule or grep-test)
 - [ ] All agents (looped over `.agents/agents/`) have "See the Unseen" directive + response identity formatting
 - [ ] `@data-analyst` has access to `data_analyzer.js` and `dashboard_generator.js` (specs committed to 03e-phase-2-implementation-specs.md §17 before implementation)
-- [ ] Graph auto-build and query API functional
 - [ ] T8 satisfaction events emitted with `feedback_id` pairing; `/status` identifies missing evidence, blocked rows, and stale sign-offs without subjective scoring (T-SAT-1..5 pass)
+
+_(Graph auto-build, query API, and the `[GRAPH: …]` marker were removed by owner [NO-GO] 2026-09-24 — see F3.1–F3.7.)_
 
 ## Risks
 
-- **Graph auto-build adds latency.** `check` is a single cached mtime walk, < 500ms on ≤30k files; `build` runs detached (`--background`) and only when `[STALE]`. On repos > 100k files the walk budget is extended via the `find -newer` fallback (10 §5).
 - **Catalog parity test fails on first run.** Expected once — counts are off. The test derives from disk and outputs the diff; the **v2.1 Phase 4 documentation rewrite** (F4.11-F4.14) is the fix, not "the v2.0 release".
-- **Graph query returns too much data.** Each query is sized for LLM consumption; `summary` returns top 5, `blast-radius` returns just names. Single-flight build lock prevents concurrent duplicate builds.
 - **Telemetry surface overwhelms context.** Cap at 20 lines for `session`, 15 for `hot-paths`. Never raw event data. One 150ms budget number everywhere (the <1s claim is retired).
 - **Satisfaction telemetry becomes a popularity contest.** Report coverage, evidence, blockers, revalidation, and resolution time; never rank agents by approval count or speed (negative-assertion fixture).
 
@@ -293,8 +210,6 @@ If Phase 3 breaks:
 
 ## Handoff to Phase 4
 
-- Graph is fresh at session start, after every skill, after every `complete` call.
-- Graph is queryable via typed API; agents never read raw JSON.
 - Telemetry is a first-class surface; cost visible to every agent.
 - Catalog counts tested on every CI run.
 - All agents have observability directives.

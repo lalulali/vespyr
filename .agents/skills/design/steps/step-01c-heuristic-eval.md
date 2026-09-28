@@ -30,6 +30,10 @@ Identify usability issues in the current design before they reach implementation
 9. **Help users recognize, diagnose, recover from errors** — clear error messages?
 10. **Help and documentation** — is help available when needed?
 
+## Prototype gate
+
+If a prototype is in scope, load `artifacts/output/03-strategy/prototype-collaboration.md` and run `prototype_collab_gate.js verify` before evaluating or handing off the design. A missing, stale, mismatched, unsigned, or blocked record is a validation failure, regardless of the heuristic score.
+
 ## Scoring per heuristic
 🟢 Pass — no issues
 🟡 Minor — improvement possible but not blocking

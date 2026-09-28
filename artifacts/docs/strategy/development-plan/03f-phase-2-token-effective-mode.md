@@ -1,7 +1,14 @@
 # Phase N — Flint Mode (Token-Effective Communication)
 
-**Status:** Planned  
+**Status:** Planned — ⚠️ **possibly superseded by the 03a ingestion route (see banner)**
 **Date:** 2026-07-28  
+
+> [!IMPORTANT]
+> **Direction shift on record (2026-09-24; owner note, `03a` §9).** Chris's latest intent is to **ingest existing external token-reduction skills through the `03a` external-skills pipeline instead of building Flint Mode from scratch here.** Before implementing this plan, resolve which route wins:
+> - **Route A (ingest, owner-preferred):** register token-reduction skills (e.g. ponytail/caveman-style) in `external-skills.json`, vet them through `skill_audit.js`, and wire native agent/skill usage — no bespoke `flint.md`/`flint-mode.md` build. `03a` §9 owns the "how the installer works / how agents use them natively" planning.
+> - **Route B (build, this plan):** implement Flint Mode as specified below.
+> Do not build Route B until Chris confirms; if Route A is chosen, this document becomes a design reference for what "good" looks like, and its "Files to Deliver" section is retired. The two levers (Response Ladder + speech compression) and the non-negotiable T8/safety preservation rules below stay valid as acceptance criteria for whichever route ships.
+
 **Inspired by:**
 - [ponytail](https://github.com/DietrichGebert/ponytail) — *load only what the task needs* (input/infrastructure savings)
 - [caveman](https://github.com/juliusbrussee/caveman) — *why use many token when few do trick* (output compression, ~65% output token reduction)
@@ -23,7 +30,7 @@ Vespyr's full stack is expensive in two distinct ways:
 | Memory Tier 1-3 | ~1,000 | Every session (@memory-controller) |
 | Agent persona (7-22KB each) | ~2,000–5,000 | Per agent invocation |
 | Skill SKILL.md + step files | ~400–2,000 | Per skill invocation |
-| Delegation overhead | ~200/hop | Per @reader/@writer/@executor call |
+| Delegation overhead | ~200/hop | Per I/O-subagent hop |
 | **Total minimum** | **~7,000–12,000+** | Before the user's question is processed |
 
 ### Side B — What Gets Said (Output / Communication Style)
@@ -61,7 +68,7 @@ Before loading Vespyr machinery, stop at the first rung that holds:
 
 ```
 1. Just answer?         → yes: respond directly from current context (0 load)
-2. Need to read code?   → yes: direct file read, no @reader delegation
+2. Need to read code?   → yes: direct file read, no subagent hop
 3. Need memory?         → yes: load Tier 1 only (project-context.md, ~200 tokens)
 4. Need a skill?        → yes: stay in Flint Mode, load skill; keep T8, safety, evidence, and release rules
 5. Only then:           → full Vespyr (all tiers, delegation, Socratic, citations)
@@ -174,7 +181,7 @@ To get maximum value from both modes, follow this phased workflow:
 | Concern | `standard` | `flint lite` | `flint full` | `flint ultra` |
 |---|---|---|---|---|
 | Session-start load | ~7,000–12,000+ tokens | ~1,500 tokens | ~800 tokens | ~800 tokens |
-| Delegation | @reader/@writer/@executor | direct I/O | direct I/O | direct I/O |
+| Delegation | harness subagent / direct | direct I/O | direct I/O | direct I/O |
 | Memory | Tier 1–3 | Tier 1 on demand | Tier 1 on demand | none |
 | Skills | all | all (stripped Socratic) | all (stripped Socratic) | none |
 | Socratic stance | yes | no | no | no |
@@ -212,7 +219,7 @@ To get maximum value from both modes, follow this phased workflow:
 
 - **Output savings are real but asymmetric.** The compression skill itself adds ~1–1.5k input tokens per turn. On already-terse workloads, net savings can go negative.
 - **Best ROI:** long conversations, verbose-by-default agents (@developer, @qa), high message-count sprints.
-- **Poor ROI:** single-message queries, @reader/@writer (already terse), skill-heavy invocations where output is mostly code.
+- **Poor ROI:** single-message queries, plain direct I/O (already terse), skill-heavy invocations where output is mostly code.
 - **Ultra is aggressive.** At `ultra`, some context may be lost between agents. Use for isolated tasks, not multi-hop chains.
 
 ---
@@ -293,8 +300,8 @@ shared satisfaction or release contract.
 |---|---|
 | Phase 0 (T7 identity) | T8-compatible modifier — Flint may compress context and prose, but cannot strip the shared satisfaction DNA or release gate |
 | Phase 2 (hooks) | Flint may reduce non-critical context hooks, but safety and satisfaction/release enforcement remain active |
-| `12-step-tracker.md` | Step tracking may be off at `ultra`; satisfaction state tracking and release evidence remain mandatory |
-| Session-start latency budget (README §13) | Flint Mode has its own budget: <50ms (no memory, no graph, no telemetry) |
+| `02a-phase-1-step-tracker.md` | Step tracking may be off at `ultra`; satisfaction state tracking and release evidence remain mandatory |
+| Session-start latency budget (README §13) | Flint Mode has its own budget: <50ms (no memory, no telemetry) |
 | @developer / @qa agents | Primary beneficiaries — high message-count, high output-volume agents gain the most from `flint full`/`ultra` |
 
 ---

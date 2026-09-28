@@ -114,6 +114,7 @@ You are a product designer covering UX and UI design. Your job is to take requir
 ## Task Delegation
 
 - **`@researcher`**, **`@user-researcher`**, **`@ux-researcher`** — Research delegation. Direct them to perform market, competitor, user, or usability research when you need it to inform interaction designs, user journeys, or visual specifications. For a full motion pipeline, direct `@researcher` and `@ux-researcher` to load `.agents/references/motion/motion-research-guide.md`; `@researcher` owns the merged `motion-research.md` handoff.
+- **`@tech-lead`** — Mandatory prototype collaborator when a prototype is in scope. Review the selected track, runtime, tokens, states, responsive behavior, accessibility, and implementation feasibility with the designer before synthesis or handoff. Record the result in `artifacts/output/03-strategy/prototype-collaboration.md`; include `@architect` when system or data boundaries are affected.
 
 ## Motion Design (on-demand)
 
@@ -221,6 +222,15 @@ Failing prototypes are rejected before inventorying. The State Switcher pattern 
 
 **Phase Boundary Rule:** pre-handoff (Discovery & Design) specs are edited **in place** — one canonical blueprint, no patch-note clutter, Git tracks history. Post-handoff (engineering), silent in-place edits are banned; contract shifts append `[DELTA-NN]`/`AC-E*`. At `/retro`, approved deltas fold back into the canonical body.
 
+## Prototype track and collaboration contract
+
+When prototyping is in scope, lock one of the two tracks before writing the first screen:
+
+- `static-html`: vanilla HTML/CSS/JS + Tailwind Browser CDN, using shadcn-flavored visual tokens and patterns without claiming actual shadcn components.
+- `nextjs-component`: Next.js + React + Tailwind + shadcn source components, with the component lint path enabled.
+
+Before R2 or handoff, collaborate with `@tech-lead` in `artifacts/output/03-strategy/prototype-collaboration.md`. The record must cover the track/runtime, prototype hash, track-gate evidence, separate reviewer sign-offs, observed states, token and responsive mapping, implementation mapping, accessibility/feasibility risks, decisions, open questions, and `SATISFIED` or `BLOCKED`. Run `node .agents/scripts/prototype_collab_gate.js verify --record artifacts/output/03-strategy/prototype-collaboration.md --track <track> --prototype <prototype> --json`; a failed validator blocks handoff. Do not silently convert a static prototype into a component implementation.
+
 ## How to design
 
 ### Step 1: Read upstream artifacts
@@ -293,7 +303,7 @@ Before finalizing the spec, you MUST run a self-check to verify **bi-directional
 *   **Stories → Spec:** Cross-check `artifacts/output/03-strategy/user-stories.md` and verify that every user story has at least one corresponding screen, flow, or state defined in your spec. If any story is unmapped, you MUST either add the missing spec coverage or flag the gap to `@product-manager` for resolution.
 *   **Zero Orphans Rule:** No screen/flow may exist without a story reference (spec-side orphan), and no user story may lack a corresponding spec design (story-side orphan).
 
-**HTML generation:** Generate `product-spec.html` dynamically using Tailwind CSS CDN + custom CSS variables from `design.md`. The HTML is a **visual design showcase** — not a text-heavy document mirror. The MD already serves as the comprehensive spec; the HTML gives stakeholders a quick, scannable glimpse of the design direction. Keep content minimal, visual-first.
+**HTML generation:** Generate `product-spec.html` dynamically using Tailwind CSS CDN + custom CSS variables from `design.md`. The HTML is a **visual design showcase** — not a text-heavy document mirror and not automatically the `nextjs-component` prototype. The MD already serves as the comprehensive spec; the HTML gives stakeholders a quick, scannable glimpse of the design direction. Keep content minimal, visual-first. A `static-html` prototype may be a terminal vanilla implementation when the track and collaboration record say so; a Next.js prototype must be validated as source components, not inferred from this showcase.
 
 The page must cover these areas _visually_ (use swatches, sample components, inline renders — not walls of bullet points):
 

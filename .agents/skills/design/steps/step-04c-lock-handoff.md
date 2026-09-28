@@ -45,7 +45,7 @@ Blockers: {critical unresolved issues, or "none"}
 ```
 
 ## Handoff routing
-- **GO** → load `develop`
+- **GO** → first run `prototype_collab_gate.js verify` when a prototype is in scope; load `develop` only when it passes
 - **FIX** → loop back to `steps/step-04a-screen-states.md` or `steps/step-03b-revise.md`
 
 > **Tracker:** `node .agents/scripts/step_tracker.js complete --skill design-validate --step 4`

@@ -6,6 +6,8 @@
 
 **Gate Reviews:** Round table 2026-08-14 (@founder, @ml-ai-engineer, @ml-ai-ops, @architect, @tech-lead, @qa-engineer, @product-manager), unanimous alignment recorded in `artifacts/memory/active-decisions.md`.
 
+**Storage boundary correction (2026-09-24):** `evals/` contains harness code and input fixtures only. Generated reports, score files, calibration outputs, and run baselines belong under `artifacts/evals/`; historical `evals/...` result paths in this plan are superseded. Frozen security-corpus baseline files remain CI oracles with their corpus.
+
 ---
 
 ## 1. Mandate & Strategic Vision

@@ -293,6 +293,7 @@ Executed on-demand for ongoing product management support. You must adhere to th
 ### Workflow C: Reverse Mode — Prototype-First (Review 10 / 02n)
 When a prototype exists and no `requirements.md` yet (reverse is checked FIRST — A1):
 *   **Spec Kernel first:** reverse mode requires `artifacts/output/03-strategy/SPEC.md`; a kernel-less prototype-first run halts.
+*   **Canonical documents for both modes:** write `requirements.md` from `.agents/templates/product/prd-template.md` and `user-stories.md` from `.agents/templates/product/user-story-template.md`; preserve their complete structures instead of producing a compact evidence report. Reverse-only additions live inside those documents (§14 and `L-NN` evidence references).
 *   **Evidence Ledger, not generation:** build `requirements.md` §14 from `prototype-inventory.md` — statement → `path#id` anchor → type → status. No anchor, no fact: unsupported statements are `[OPEN]` questions to the owner, never inferred. Infrastructure/telemetry/DB bounds are `[DEFERRED TO SPEC]`.
 *   **Synthesis is a loop:** re-run create steps 02a→05a with the ledger as fixed input (step-03d) — never one-shot "generate the PRD from the prototype".
 *   **Spec-Delta Protocol (Phase Boundary Rule):** pre-handoff, edit specs in place (single canonical blueprint; Git is the history). Post-handoff, silent in-place edits are banned — append `[DELTA-NN]` in `requirements.md` and `AC-E*` in `user-stories.md`, referenced in code/tests.

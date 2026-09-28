@@ -67,8 +67,8 @@ describe('Install smoke (real tarball -> temp install)', { skip: !ENABLED ? 'set
   });
 
   it('installed .agents/ matches the clean-folder contract', () => {
-    const mustHave = ['.agents/scripts/security-scan.js', 'evals/roundtable/topics.json', 'security/audit-spec.json', 'tools/eval/runner.js', 'evals/baseline.json'];
-    const mustNot = ['.agents/state/session-current.json', 'evals/security/corpus/baseline-2026-08-10.json', '.agents/scripts/test_security_suite.js', 'evals/roundtable/fixtures/coverage-pass.md', 'evals/roundtable/README.md'];
+    const mustHave = ['.agents/scripts/security-scan.js', 'evals/roundtable/topics.json', 'security/audit-spec.json', 'tools/eval/runner.js', 'evals/suites/agents/core-swarm.json'];
+    const mustNot = ['.agents/state/session-current.json', 'evals/security/corpus/baseline-2026-08-10.json', 'artifacts/evals/mock-baseline.json', 'evals/mock-baseline.json', 'evals/artifacts/rqs-calibration-2026-09-01.json', '.agents/scripts/test_security_suite.js', 'evals/roundtable/fixtures/coverage-pass.md', 'evals/roundtable/README.md'];
     for (const p of mustHave) assert.ok(fs.existsSync(path.join(pkgDir, p)), `installed package must have ${p}`);
     for (const p of mustNot) assert.ok(!fs.existsSync(path.join(pkgDir, p)), `installed package must NOT have ${p}`);
   });

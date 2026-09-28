@@ -33,6 +33,19 @@ Every interactive screen must define:
 - **Success state** — confirmation after a completed action
 - **Edge states** — permission denied, offline, expired session
 
+## Prototype collaboration (when applicable)
+
+If any prototype is in scope, pause before design-token work and have `@product-designer` review it with `@tech-lead`. Use `.agents/templates/product/prototype-collaboration-template.md` to record the selected `static-html` or `nextjs-component` track, runtime, responsive/state coverage, implementation mapping, risks, and `SATISFIED` or `BLOCKED` disposition in `artifacts/output/03-strategy/prototype-collaboration.md`. Then run:
+
+```bash
+node .agents/scripts/prototype_collab_gate.js verify \\
+  --record artifacts/output/03-strategy/prototype-collaboration.md \\
+  --track <static-html|nextjs-component> \\
+  --prototype <prototype> --scope r1-evidence --json
+```
+
+A failed validator or `BLOCKED` result requires explicit owner disposition before handoff.
+
 ## Data planning (optional, parallel)
 If analytics instrumentation is needed, invoke `@data-analyst`:
 - Success metrics and instrumentation plan

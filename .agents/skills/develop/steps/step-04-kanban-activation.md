@@ -38,7 +38,7 @@ Updated `artifacts/output/05-planning/kanban.md` with tasks in "To Do" — use t
 - **Memory:** @memory-controller for session-write
 
 ## Halt condition
-PM does not sign off. Re-scope with `@product-manager` before continuing.
+PM does not sign off. Re-scope with `@product-manager` before continuing. If a prototype is in scope, `prototype_collab_gate.js verify` must also pass before moving frontend tasks to `To Do`.
 
 
 

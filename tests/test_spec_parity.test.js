@@ -3,8 +3,8 @@
  * tests/test_spec_parity.test.js — 02n.5 named tests for the parity checker.
  *
  * Structural discipline (08-23 rule): script + named test; the script is
- * exercised against real files in a copied tree — green on the dry-run
- * fixture, red on seeded violations (ghost / orphan / stale witness).
+ * exercised against a generated result tree — green on the minimal fixture,
+ * red on seeded violations (ghost / orphan / stale witness).
  */
 'use strict';
 
@@ -12,23 +12,20 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('fs');
 const path = require('path');
-const os = require('os');
 const { spawnSync } = require('child_process');
+const { createFixtureTree } = require('./helpers/reverse_prd_test_fixture');
 
 const ROOT = path.join(__dirname, '..');
 const SCRIPT = path.join(ROOT, '.agents', 'scripts', 'spec_parity.js');
-const FIX = path.join(ROOT, 'evals', 'fixtures', 'prototypes', 'reverse-prd');
 const REL = {
-  inventory: 'evals/fixtures/prototypes/reverse-prd/dry-run/prototype-inventory.md',
-  requirements: 'evals/fixtures/prototypes/reverse-prd/dry-run/requirements.md',
-  report: 'evals/fixtures/prototypes/reverse-prd/dry-run/parity-report.md',
+  inventory: 'artifacts/evals/reverse-prd/a8/reverse/prototype-inventory.md',
+  requirements: 'artifacts/evals/reverse-prd/a8/reverse/requirements.md',
+  report: 'artifacts/evals/reverse-prd/a8/reverse/parity-report.md',
   prototype: 'evals/fixtures/prototypes/reverse-prd/workspace-members.html',
 };
 
 function tmpTree() {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'spec-parity-'));
-  fs.cpSync(FIX, path.join(dir, 'evals', 'fixtures', 'prototypes', 'reverse-prd'), { recursive: true });
-  return dir;
+  return createFixtureTree().root;
 }
 
 function run(args) {
@@ -44,8 +41,8 @@ function edit(root, rel, fn) {
   fs.writeFileSync(p, fn(fs.readFileSync(p, 'utf8')));
 }
 
-test('spec_parity: dry-run fixture passes ghosts 0 / orphans 0 / grounding 100% / classes 10/10', () => {
-  const res = run(checkArgs(ROOT));
+test('spec_parity: generated result fixture passes ghosts 0 / orphans 0 / grounding 100% / classes 10/10', () => {
+  const res = run(checkArgs(tmpTree()));
   assert.equal(res.status, 0, res.stderr + res.stdout);
   const out = JSON.parse(res.stdout);
   assert.equal(out.pass, true);
@@ -58,7 +55,7 @@ test('spec_parity: dry-run fixture passes ghosts 0 / orphans 0 / grounding 100% 
 
 test('spec_parity: seeded ghost statement turns the gate red', () => {
   const root = tmpTree();
-  edit(root, REL.requirements, (s) => s.replace('#state-empty', '#state-missing'));
+  edit(root, REL.requirements, (s) => s.replace('#state-error', '#state-missing'));
   const res = run(checkArgs(root));
   assert.equal(res.status, 1);
   const out = JSON.parse(res.stdout);
@@ -122,22 +119,23 @@ test('spec_parity: witness field missing on a frozen report is red; absent repor
 
 test('spec_parity: a missing detail class is a red; N/A-with-reason is accepted', () => {
   const root = tmpTree();
-  edit(root, REL.report, (s) => s.replace('| Telemetry | L-35, L-36, L-37 | covered |\n', ''));
+  edit(root, REL.report, (s) => s.replace('| Telemetry | L-01 | covered |\n', ''));
   const red = run(checkArgs(root));
   assert.equal(red.status, 1);
   assert.ok(JSON.parse(red.stdout).violations.some((v) => /Telemetry: missing from the class table/.test(v)));
 
   const root2 = tmpTree();
-  edit(root2, REL.report, (s) => s.replace('| Telemetry | L-35, L-36, L-37 | covered |', '| Telemetry | — | N/A: no telemetry surface in this fixture |'));
+  edit(root2, REL.report, (s) => s.replace('| Telemetry | L-01 | covered |', '| Telemetry | — | N/A: no telemetry surface in this fixture |'));
   const green = run(checkArgs(root2));
   assert.equal(green.status, 0, green.stderr + green.stdout);
 });
 
 test('spec_parity: anchor grammar resolution is frozen (A11)', () => {
   const { resolveAnchor } = require(path.join(ROOT, '.agents', 'scripts', 'spec_parity.js'));
-  assert.equal(resolveAnchor(ROOT, `${REL.prototype}#state-empty`).ok, true);
-  assert.equal(resolveAnchor(ROOT, `${REL.prototype}#does-not-exist`).ok, false);
-  assert.equal(resolveAnchor(ROOT, 'no-hash-anchor').ok, false);
-  assert.equal(resolveAnchor(ROOT, '/absolute/path#id').ok, false);
-  assert.equal(resolveAnchor(ROOT, `${REL.inventory}#INV-01`).ok, true, 'non-file prototypes anchor to inventory rows');
+  const root = tmpTree();
+  assert.equal(resolveAnchor(root, `${REL.prototype}#state-empty`).ok, true);
+  assert.equal(resolveAnchor(root, `${REL.prototype}#does-not-exist`).ok, false);
+  assert.equal(resolveAnchor(root, 'no-hash-anchor').ok, false);
+  assert.equal(resolveAnchor(root, '/absolute/path#id').ok, false);
+  assert.equal(resolveAnchor(root, `${REL.inventory}#INV-01`).ok, true, 'non-file prototypes anchor to inventory rows');
 });

@@ -1,6 +1,6 @@
 # Phase 3a — Observability Engine & Macro-Telemetry Surface (04a)
 
-**Decision:** Architect and implement the core runtime observability engine, distributed OpenTelemetry span ingestion pipeline, and LLM-consumable macro-telemetry surface for Phase 3 (v2.1).
+**Decision:** Architect and implement the core runtime observability engine, distributed OpenTelemetry span ingestion pipeline, and LLM-consumable macro-telemetry surface for Phase 3 (v2.1). _(Graph query API scope removed by owner [NO-GO] 2026-09-24 — see §4.)_
 
 ---
 
@@ -24,8 +24,8 @@ In accordance with Round Table 2026-08-21 + 2026-09-01 Option A Thin Slice, obse
 │  PHASE 3a (04a: Macro-Telemetry Surface & Graph Observability)                         │
 │  • telemetry_surface.js: 7-day rolling digests, hot-paths, token heatmaps (F3.8)       │
 │  • RQS-J shadow (SRSR/SDS G-Eval κ≥0.7) + pricing.json cost enrichment                │
-│  • Memory Controller Step 0.4: snapshot <150ms + Graph-Assisted Blast Radius            │
-│  • Graph query API for ADRs/topology + Empirical Cost-per-Verified-Pass               │
+│  • Memory Controller Step 0.4: snapshot <150ms                                          │
+│  • RQS-J shadow (SRSR/SDS G-Eval κ≥0.7) + pricing.json cost enrichment + Cost-per-Pass │
 └────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 *Canonical span schema owned by `02l`; Phase 3 imports — no redefinition.*
@@ -57,22 +57,11 @@ At every session initialization, `@memory-controller` invokes `session_bootstrap
 
 ---
 
-## 4. Graph-Assisted Observability & Query API
+## 4. Graph-Assisted Observability & Query API — ❌ REMOVED (owner [NO-GO], 2026-09-24)
 
-Makes the codebase and documentation dependency graphs queryable via typed subcommands, eliminating 5,000+ token grep walks.
+This section previously scoped a rebuilt structural graph subsystem (`auto_graph.js`, a typed query API, `code-graph`/`doc-graph` rebuilds at 5 lifecycle moments, and per-agent Graph Query Contracts). It was **removed by owner decision**: the graph was already deleted from the engine in Phase 1, and its absence is enforced by `tests/graph-deprecation.test.js` — rebuilding it here would reverse a shipped decision the codebase guards. See the removal record at `04-phase-3-observability.md` F3.1–F3.7.
 
-### 4.1 Lifecycle Moments for Graph Auto-Build (`auto_graph.js`)
-1. **Session start:** `@memory-controller` runs `auto_graph.js check` (cached mtime walk, <500ms).
-2. **After `/design` sign-off:** Doc-graph rebuild captures new PRDs, ADRs, and spec links.
-3. **After `/develop` step 3:** Code-graph rebuild captures new implementation files and symbol dependencies.
-4. **Before `/retro` step 1:** Both code and doc graphs rebuilt so cycle reviews reference current graph statistics.
-5. **On `orchestrator_state.js complete`:** Updates state graph asynchronously in detached background mode.
-
-### 4.2 Graph Query Contracts for Reasoning Agents
-- **`@architect`:** Queries `blast-radius` before authoring ADRs; captures blast radius section in output (<50 tokens).
-- **`@tech-lead`:** Queries `topology` before generating execution breakdowns.
-- **`@code-reviewer`:** Flags any PR diff with `blast_size > 5` for deep regression audit.
-- **`@developer`:** Queries `dependents` before renaming, moving, or refactoring symbols.
+WS-2 (below) and DoD items #2–#3 are cut with it. 04a now scopes the macro-telemetry surface only (§3, §5, WS-1). Blast-radius awareness lives in the "See the Unseen" directives (`04` F3.15) as prose reasoning over `git diff` + targeted `grep`, not a cached graph.
 
 ---
 
@@ -95,18 +84,15 @@ Makes the codebase and documentation dependency graphs queryable via typed subco
 - [ ] **Task 04a.3 (1.5h)**: Update `/status` and `/retro` skills to display 7-day rolling token digests and biomarker health tables.
 - [ ] **Task 04a.4 (1h)**: Update `orchestrator_state.js` to emit throttled per-step cost & biomarker alerts.
 
-### WS-2: Graph Auto-Build & Query API (Budget: 5.5h)
-- [ ] **Task 04a.5 (2h)**: Create `.agents/scripts/auto_graph.js` with cached mtime walk and detached background build.
-- [ ] **Task 04a.6 (1.5h)**: Wire graph auto-build triggers into `design`, `develop`, `retro`, and `orchestrator_state.js`.
-- [ ] **Task 04a.7 (2h)**: Add `## Graph Query Contract` blocks to `@architect`, `@tech-lead`, `@code-reviewer`, and `@developer`.
+### WS-2: Graph Auto-Build & Query API — ❌ REMOVED (owner [NO-GO] 2026-09-24; see §4). Tasks 04a.5–04a.7 are cut. Budget reclaimed: −5.5h.
 
 ---
 
 ## 7. Definition of Done (DoD)
 
 1. `telemetry_surface.js session` executes in <150ms, stitches multi-day sessions across date shards by `session_id`, and injects clean ≤20-line summaries at session start.
-2. `auto_graph.js` maintains fresh code and doc dependency graphs across all 5 lifecycle triggers.
-3. Graph query API responds in <100ms for blast radius and topology queries.
+2. ~~`auto_graph.js` maintains fresh code and doc dependency graphs across all 5 lifecycle triggers.~~ ❌ REMOVED (§4).
+3. ~~Graph query API responds in <100ms for blast radius and topology queries.~~ ❌ REMOVED (§4).
 4. All 6 Telemetry Invariants (`INV-TEL-01..06`) pass automated verification in CI.
 
 ---
@@ -116,5 +102,5 @@ Makes the codebase and documentation dependency graphs queryable via typed subco
 > **Status update (2026-09-01 — Option A alignment):** Prior APPROVED lines remain but now explicitly import canonical `02l` schema. Re-certification against `tools/telemetry/schema.json` import test deferred to 04a implementation; boundary (§1.1 table) locked to thin-slice.
 
 **@ml-ai-ops (Atlas):** APPROVED — Macro-telemetry surface imports `02l` canonical schema; hybrid `INV-TEL-01..05` locked (deferred re-check).  
-**@architect (Vera):** APPROVED — Graph contracts + Phase 1/3 boundary as Option A thin slice.  
+**@architect (Vera):** APPROVED — Phase 1/3 boundary as Option A thin slice. _(Graph contracts withdrawn — graph scope removed 2026-09-24, §4.)_  
 **@qa-engineer (Nina):** APPROVED — Deterministic RQS-D gates (Phase 1) vs RQS-J shadow (Phase 3) split validated.

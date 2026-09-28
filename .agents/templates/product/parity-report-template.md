@@ -3,11 +3,22 @@ report: parity
 feature: "{feature}"
 prototype: "{repo-relative path or source pointer}"
 prototype_type: file
+prototype_track: "static-html | nextjs-component"
+prototype_runtime: "vanilla HTML/CSS/JS + Tailwind CDN | Next.js + React + Tailwind + shadcn"
+prototype_collaboration: "artifacts/output/03-strategy/prototype-collaboration.md"
+collaboration_gate: "PASS"
 inventory: "{inventory path}"
 requirements: "{requirements path}"
 ---
 
 # Parity Report — {feature}
+
+## Prototype track and collaboration
+
+- **Track:** `{static-html | nextjs-component}`
+- **Runtime:** `{runtime}`
+- **Collaboration record:** `{path}`
+- **Collaboration gate:** `{PASS/FAIL}`
 
 Reverse-mode gate (02n step-04d). **Structural tier** (script-computed, test-backed): ghosts / orphans / grounding / 10-class coverage / witness. **Judged tier** (honestly labeled, never claimed structural): anchor semantics (owner sampling, A7) and parity delta vs traditional (A8).
 

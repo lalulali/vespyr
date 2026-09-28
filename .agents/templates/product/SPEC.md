@@ -2,6 +2,8 @@
 purpose: Agent-facing capability contract — the minimum every agent reads before starting work. Distills the full PRD into 5 fields: Why, Capabilities, Constraints, Non-goals, Success signal. A capability without a success criterion is a wish, not a spec.
 audience: @architect, @developer, @tech-lead, @qa-engineer
 paired_with: prd-template.md (full stakeholder PRD for humans)
+prototype_track: "static-html | nextjs-component | not in scope"
+prototype_runtime: "vanilla HTML/CSS/JS + Tailwind CDN | Next.js + React + Tailwind + shadcn | not in scope"
 ---
 
 # {Feature Name} — Spec Kernel

@@ -18,6 +18,7 @@ This skill runs in sequential steps. Each step is a self-contained file with its
 ## Prerequisites
 - Spec-kernel exists at `artifacts/output/03-strategy/` (see spec-kernel-template.md)
 - User stories in `artifacts/output/03-strategy/user-stories.md`
+- If a prototype is in scope, the `@product-designer` + `@tech-lead` `prototype-collaboration.md` record exists and `prototype_collab_gate.js verify --scope handoff` passes for the recorded track and prototype. Do not infer a missing collaboration record from a showcase HTML file.
 
 ## Mode detection
 - Always "create" on first activation.

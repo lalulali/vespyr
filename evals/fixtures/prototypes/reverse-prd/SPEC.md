@@ -14,13 +14,13 @@ Workspace admins at small companies need self-serve control over who is in their
 2. **CAP-2: Invite teammates with a role**
    - intent: send an email invite with a role, with inline validation and clear feedback.
    - success: invite reaches a valid email in under 5 seconds with a success confirmation.
-3. **CAP-3: Manage roles and removal under permission rules**
-   - intent: change roles, revoke invites, remove members — enforced against the viewer's role.
+3. **CAP-3: Manage roles, ownership, and removal under permission rules**
+   - intent: change roles, transfer ownership, revoke or resend invites, and remove members — enforced against the viewer's role.
    - success: every mutation is allowed or denied exactly per the permission matrix with no silent failures.
 
 ## 3. Constraints
 
-1. Free plan caps membership at 25 (including pending invites) — why: pricing boundary must be visible before the API rejects.
+1. Free plan caps membership at 25 and Team plan caps membership at 50 (including pending invites) — why: pricing boundaries must be visible before the API rejects.
 2. Pending invites expire after 7 days — why: stale invites create security ambiguity.
 3. SSO/SCIM-managed workspaces disable manual invites — why: the identity provider is the source of truth.
 
@@ -29,6 +29,7 @@ Workspace admins at small companies need self-serve control over who is in their
 - We are NOT building authentication, SSO, or SCIM itself.
 - We are NOT building the billing/upgrade checkout flow (only the cap hint).
 - We are NOT building an audit log in this cycle.
+- We are NOT building bulk member import; bulk actions are limited to existing members and invitations.
 
 ## 5. Success signal
 

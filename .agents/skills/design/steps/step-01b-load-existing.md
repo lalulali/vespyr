@@ -21,7 +21,8 @@ Read the existing PRD, user stories, and product spec. Understand current state 
 3. Read `artifacts/output/03-strategy/user-stories.md`
 4. Read `artifacts/output/03-strategy/product-spec.md`
 5. Read `artifacts/output/03-strategy/design.md` (if it exists)
-6. Extract key sections and constraints relevant to the requested edit.
+6. If a prototype is in scope, read `artifacts/output/03-strategy/prototype-collaboration.md` and run `prototype_collab_gate.js verify` for its track and prototype before editing.
+7. Extract key sections and constraints relevant to the requested edit.
 7. Ask the user: **"What specifically do you want to refine? The PRD scope, user stories, screen designs, or design system?"**
 
 ## Output

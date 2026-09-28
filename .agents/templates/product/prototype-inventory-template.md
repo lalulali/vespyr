@@ -1,6 +1,9 @@
 ---
 prototype: "<repo-relative path or source pointer (Figma URL, live code)>"
 prototype_type: file
+prototype_track: "static-html | nextjs-component"
+prototype_runtime: "<runtime>"
+prototype_validation: "<track gate command and result>"
 generated: "<YYYY-MM-DD>"
 generator: "@product-designer"
 ---

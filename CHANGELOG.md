@@ -8,6 +8,19 @@ All notable changes to the Vespyr project will be documented in this file.
 
 ## [2.0.11] - 2026-09-22
 
+### Prototype tracks & collaboration review (2026-09-25)
+- Prototyping in `/design` now supports two dedicated tracks: **static HTML** (lightweight exploration with Tailwind CDN and design tokens, without needing React or linter setup) and **component code** (engineering-ready Next.js components with strict design-system lint enforcement).
+- Your explicit choice of prototype track is always respected; project detection never overrides what you ask for.
+- Prototype review is now an explicit collaboration milestone: `@product-designer` and `@tech-lead` review visual fidelity, state coverage (empty, populated, error), design tokens, and technical feasibility before downstream synthesis or engineering handoff. Handing off an unreviewed prototype is blocked until both sign off.
+- Requirements and user stories generated from prototypes or ideas now strictly preserve complete standard structures — partial summaries or flat story lists that omit acceptance criteria can no longer pass quality checks.
+- New `npm run setup:hooks` command configures an automated pre-commit check to ensure code changes pass the full test suite before committing.
+
+### Native language controls (2026-09-24)
+- Chat always follows the language you use; only generated artifacts use a fixed, configurable language.
+- `vespyr lang` shows or changes that language, accepts common aliases, and lists supported choices.
+- Fresh installs and reconfiguration can select the artifact language interactively or with `--language-artifacts`; updates preserve the current choice.
+- CLI subcommands now provide focused help, and the active artifact language stays synchronized with the project context.
+
 ### Rulings + gate boundary fixes (2026-09-23)
 - Owner rulings executed: the "missing parity report = proceed" witness rule is ratified (report-deletion-after-freeze guard filed as open defect D3); the reverse-mode PRD scoring weights are ratified at their current values with the rationale on record, and re-checking them against real data is now a required step of the pending A8 comparison.
 - Plain-language scope extended to every document the engine writes, in any language the owner chooses (DNA 7).
@@ -209,8 +222,9 @@ All notable changes to the Vespyr project will be documented in this file.
 - Skills restructured into small step-based workflows with routers (`develop`, `validate-idea`, `retro`, `design`, `launch`), plus create/edit/validate modes for design and validation.
 - Spec-kernel pattern: a compact five-field spec core (Why / Capabilities / Constraints / Non-goals / Success signal) with typed companion documents; visual design specs generated as HTML.
 - Sprint dashboard with human-readable state and ASCII CLI views.
-- Loop engineering: `/goal` primitives, automated heartbeats, and persistent loop state.
 - Decision trees, failure modes, and escalation rules for domain agents; a 15-item false-positive guard in the code reviewer; method libraries (100 elicitation, 61 brainstorming, 31 validation patterns).
+
+> **Correction (2026-09-24):** an earlier v2.0.0 entry listed "Loop engineering: `/goal` primitives, automated heartbeats, and persistent loop state" as shipped. That was inaccurate — loop engineering was never built (no `/goal` command, `@goal-verifier`, automation/heartbeat scripts, or `loop-state.json` exist on disk). It remains planned for a future release; see `artifacts/docs/strategy/development-plan/07-phase-6-loop-engineering.md`. The line has been removed from this entry.
 - Pipeline enforcement: phase validation at start, completion logging at shutdown.
 
 ### Changed

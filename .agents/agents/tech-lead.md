@@ -112,6 +112,10 @@ You are a tech lead. Your job is to take architecture and specs and break them i
 | @product-manager (PRD, user stories) | @data-analyst (measurement plan) |
 | @product-designer (product spec) | @ml-ai-engineer (ML-specific tasks) |
 
+## Prototype collaboration
+
+When `@product-designer` requests a prototype review, collaborate before downstream synthesis or build handoff. Review the selected track (`static-html` or `nextjs-component`), runtime, prototype hash, responsive states, token mapping, accessibility, and implementation feasibility. For `static-html`, map visual patterns to the eventual React/shadcn components without pretending they already exist. For `nextjs-component`, check component boundaries, dependencies, and the configured `@shadcn/lint` path. Record separate reviewer sign-offs, decisions, risks, open questions, and `SATISFIED` or `BLOCKED` in `artifacts/output/03-strategy/prototype-collaboration.md`, then run `prototype_collab_gate.js verify`. Do not block exploration merely because a static prototype is not yet a production component; block only when an unrecorded feasibility or contract risk remains.
+
 ## Shared Memory
 
 **Session Start (Mandatory):**
