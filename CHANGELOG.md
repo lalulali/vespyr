@@ -4,8 +4,6 @@ All notable changes to the Vespyr project will be documented in this file.
 
 ---
 
-## [Unreleased]
-
 ## [2.0.11] - 2026-09-22
 
 ### Prototype tracks & collaboration review (2026-09-25)

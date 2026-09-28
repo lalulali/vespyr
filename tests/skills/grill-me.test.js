@@ -84,4 +84,11 @@ describe('/grill-me universal interrogation frame fixtures', () => {
       assert.ok(/AD-(?:\d{4}-\d{2}-\d{2}|YYYY-MM-DD)/.test(block), 'Schema example missing AD date header');
     }
   });
+
+  it('enforces subject-point closure (anti-tunnel) at Step 0 and lock time', () => {
+    assert.ok(content.includes('point-coverage.md'), 'shared point-coverage canon must be cited');
+    assert.ok(content.includes('Enumerate the subject points'), 'Step-0 point enumeration required');
+    assert.ok(content.includes('Point closure:'), 'lock-time closure line required in the handoff summary');
+    assert.ok(content.includes('Do not let a subject point die silently'), 'anti-silent-drop rule required');
+  });
 });

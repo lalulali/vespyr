@@ -26,12 +26,23 @@ Every recorded roundtable is a `.md` file named `<topic>_<mode>_<run>.md` (mode:
    ````
 2. **Per-panelist verdict lines**: `[VERDICT: GO|RESHAPE|NO-GO]` (Decision Gate) or `[VERDICT: CONFIRMED|PARTIAL|FALSIFIED]` (Review Gate), as the final line of each position. Legacy `PASS|PIVOT|KILL` in pre-2026-09-02 transcripts normalizes onto `GO|RESHAPE|NO-GO`; dated transcripts are never rewritten.
 3. **Outcome line** in Phase 4: `[SYNTHESIS: GO|RESHAPE|NO-GO]` or `[SYNTHESIS: ADR:<adr-id>]`.
+4. **Point ledger block** (mandated by SKILL.md Phase 4 — 02r anti-tunnel):
+   ````
+   ```roundtable-points
+   points: P1 [agenda], P2 [facet]
+   dispositions:
+   - P1: covered — <one-line outcome>
+   - P2: deferred — owner: @<agent>; reason: ...; revisit: ...
+   ```
+   ````
+   States are closed — `covered | deferred | rejected | out-of-scope`; deferred needs `owner` + `reason`; rejected needs a reason; out-of-scope needs a quoted boundary `"..."` (canon: `.agents/references/point-coverage.md`). The closure gate runs before synthesis: `roundtable_eval.js points --file <transcript>` — exit 1 blocks on undispositioned points, exit 2 on a missing/malformed block. Legacy/pre-02r transcripts without the block are **unscored** by `score` (listed via `pointsUnscored`, never failed — dated transcripts are never rewritten).
 
 ## Commands
 
 ```bash
 node .agents/scripts/roundtable_eval.js coverage --file <transcript.md>   # exit 0/1/2 — live Phase-3 gate
 cat <<'EOF' | node .agents/scripts/roundtable_eval.js coverage            # stdin variant
+node .agents/scripts/roundtable_eval.js points --file <transcript.md>     # exit 0/1/2 — live Phase-4 point-closure gate
 node .agents/scripts/roundtable_eval.js score --dir <dir> [--json]        # offline metrics
 node .agents/scripts/roundtable_eval.js log --mode <native|solo|refused> --topic "..." --agents "@a,@b"
 ```
@@ -41,12 +52,13 @@ node .agents/scripts/roundtable_eval.js log --mode <native|solo|refused> --topic
 | Metric | Definition | Healthy signal |
 |---|---|---|
 | Coverage compliance | share of NATIVE transcripts whose `roundtable-coverage` block parses with zero unchallenged panelists | 1.0 — this one is a hard gate, not a trend. Solo runs are excluded (firewalled dispatch cannot produce cross-challenges by construction); refused runs are log-only |
+| Point coverage compliance | share of transcripts that CARRY a `roundtable-points` block and parse with zero undispositioned points | 1.0 over block-carrying runs — hard gate; no-block transcripts are unscored and listed (legacy/pre-02r are never failed) |
 | Round-1 disagreement | per transcript: `1 − (modal verdict share)` over Decision-Gate verdicts | > 0 on sound premises; zero is an SPC advisory |
 | SPC flag | round-1 unanimity (disagreement = 0) | advisory only — **unanimous `[NO-GO]` on flawed-premise topics is correct behavior**, not sycophancy; read jointly with premise table |
 | Verdict stability | across ≥3 native runs of one topic: share of runs matching the modal `[SYNTHESIS]` | establish baseline first; no gate until then |
 | Solo-vs-native divergence | share of solo runs whose `[SYNTHESIS]` differs from the topic's native modal synthesis | tracked, not gated — quantifies D3's "degraded" claim |
 
-**No thresholds are enforced yet.** Baseline-first applies to the harness itself: record 3 native runs per topic, then set gates from observed distributions. Premature thresholds would be cargo cult.
+**No thresholds are enforced yet.** Baseline-first applies to the harness itself: record 3 native runs per topic, then set gates from observed distributions. Premature thresholds would be cargo cult. Tunnel advisory: same-point `[FOCUS:]` runs of ≥3 exchange rounds without a `[BREADTH:]` checkpoint are reported per transcript (advisory, uncalibrated — depth is legitimate; only silent abandonment is not).
 
 ## Assets vs results (packaging rule)
 

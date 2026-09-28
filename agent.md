@@ -137,9 +137,9 @@ Vespyr organizes complex, multi-agent operations into highly structured **skills
 *   `/shape-up` — Structure and stress-test semi-cooked ideas into design-ready briefs
 *   `/brainstorming` — Select and apply brainstorming methods from a 60-method catalog
 *   `/validation-patterns` — Apply validation methods (smoke tests, concierge MVPs, etc.)
-*   `/design` — PRD and screen specs creation
+*   `/design` — PRD and screen specs creation (reverse/prototype-first, create, edit, validate)
 *   `/motion` — Motion research, motion spec, and implementation handoff
-*   `/develop` — MVP development cycle
+*   `/develop` — MVP development cycle (includes the fidelity review + orphan-AC sweep before QA)
 *   `/launch` — Release readiness and deployment
 *   `/iterate` — Post-launch behavior improvements
 *   `/incident` — Production incident response
@@ -153,7 +153,7 @@ Vespyr organizes complex, multi-agent operations into highly structured **skills
 *   `/phase` — Show/switch phases
 *   `/plan` — Standalone execution planning
 *   `/review` — Standalone code review
-*   `/test` — Run tests, summarize failures
+*   `/test` — Run tests, summarize failures (failure summary lists orphan ACs)
 *   `/kanban` — Display and update Kanban board
 *   `/analyze-data` — General data analysis companion — EDA, dataset provision, visualization mapping, insight extraction, and PM metric co-piloting
 *   `/create-skill` — Create new skills, modify and improve existing skills, and design lightweight skill evals
@@ -187,7 +187,7 @@ To ensure seamless collaboration across different agent steps and avoid context 
 
 Before responding to the user for the first time in any session, **always read `artifacts/memory/project-context.md`** and extract the `User Nickname` field from the `## [IDENTITY]` section. Address the user by their preferred name throughout the conversation. If the file or field is missing, default to `"User"`.
 
-### 🚦 Session Bootstrap (mandatory first action, 02o)
+### 🚦 Session Bootstrap (mandatory first action, 02q)
 
 The **first action of every session** is:
 

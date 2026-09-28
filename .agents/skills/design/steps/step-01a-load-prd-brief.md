@@ -35,6 +35,19 @@ If operating in `semi-autonomous` mode and `FeatureDesignInteraction` is not `fa
 - **Pause** and present to the user for feedback — user can select, add, modify, or delete features
 - In `autonomous` mode or with `FeatureDesignInteraction: false`, skip the pause
 
+## Motion intent gate (halt-and-ask)
+
+After reading the brief, run the deterministic motion-intent detector before drafting requirements:
+
+```bash
+node .agents/scripts/motion_intent_check.js check --json
+```
+
+- `decisionRequired: true` → **HALT and ASK the user** (this is a DNA 4 decision, not a silent action). The brief/PRD signals a motion-led product (an explicit "interactive/creative/motion design website", scroll/WebGL/micro-interaction language, or a Vibrant Brand-First / Conversion Storefront context) but no motion decision is recorded. Ask: *"This looks motion-led ({signals}). Run `/motion` for a proper motion spec, or should I record motion as out of scope?"* Do NOT silently proceed static, and do NOT silently launch `/motion` — the user decides. Record the choice (run `/motion`, or "Motion: not in scope — {reason}") so the detector does not re-prompt.
+- `decisionRequired: false` → proceed. Either no motion signal exists, or the motion decision is already recorded.
+
+The script always exits 0 — it is advisory input to a human-gated decision, never a build failure.
+
 ## Output
 Loaded context: brief summary, feature scope (approved or auto-selected), research key points.
 

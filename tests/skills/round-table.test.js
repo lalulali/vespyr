@@ -53,4 +53,16 @@ describe('Dialectic /round-table Protocol Fixtures', () => {
     assert.ok(content.includes('Zero User Deference & Anti-Flattery'), 'Must specify Zero User Deference');
     assert.ok(content.includes('Roundtable Mode Stays Permanently Active'), 'Must enforce permanent active mode across turns');
   });
+
+  it('enforces the Point Coverage Ledger (anti-tunnel) — intake, tunnel-breaker, closure gate', () => {
+    const content = fs.readFileSync(roundTablePath, 'utf8');
+    assert.ok(content.includes('Point Coverage Ledger'), 'point ledger must be named');
+    assert.ok(content.includes('point-coverage.md'), 'shared canon must be cited');
+    assert.ok(content.includes('POINTS: P1 [agenda]'), 'intake POINTS line mandated');
+    assert.ok(content.includes('[FOCUS: Pn]'), 'per-round focus marker mandated');
+    assert.ok(content.includes('[BREADTH:'), 'breadth checkpoint mandated after 2 consecutive rounds on one point');
+    assert.ok(content.includes('```roundtable-points'), 'dispositions block format pinned');
+    assert.ok(content.includes('roundtable_eval.js points'), 'machine closure gate pinned');
+    assert.ok(content.includes('covered | deferred | rejected | out-of-scope'), 'closed disposition vocabulary pinned');
+  });
 });

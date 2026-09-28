@@ -91,6 +91,25 @@ test('shadcn_gate: nextjs-component track passes with Next.js, Tailwind, and con
   assert.equal(json.pass, true);
 });
 
+test('shadcn_gate (CR-1): lint-theater — an echo lint script with NO @shadcn/lint config/dep fails', () => {
+  const root = dir();
+  fs.writeFileSync(path.join(root, 'components.json'), '{}', 'utf8');
+  // Full component stack + a lint script whose STRING contains "@shadcn/lint",
+  // but no @shadcn/lint dependency and no lint config with shadcn rule markers.
+  // The pre-fix gate treated the script string as execution evidence and passed;
+  // the gate must now reject it (script string is not evidence).
+  fs.writeFileSync(path.join(root, 'package.json'), JSON.stringify({
+    scripts: { lint: 'echo "@shadcn/lint ran"' },
+    dependencies: { next: '^15', react: '^19' },
+    devDependencies: { tailwindcss: '^4' },
+  }), 'utf8');
+  fs.mkdirSync(path.join(root, 'components'), { recursive: true });
+  fs.writeFileSync(path.join(root, 'components', 'page.tsx'), 'export function Page(){ return <button className="rounded-md">Save</button>; }\n', 'utf8');
+  const result = run(root, 'verify', '--track', 'nextjs-component', '--prototype', 'components/page.tsx');
+  assert.equal(result.status, 1, 'echo lint-theater must fail without config evidence');
+  assert.match(JSON.parse(result.stdout).problems.join('\n'), /@shadcn\/lint configuration evidence/);
+});
+
 test('shadcn_gate: components.json marks a shadcn stack; verify red without lint', () => {
   const root = dir();
   fs.writeFileSync(path.join(root, 'components.json'), '{"style":"new-york"}', 'utf8');

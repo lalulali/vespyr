@@ -9,6 +9,9 @@ const { spawnSync } = require("child_process");
 const SCRIPT = path.join(__dirname, "..", ".agents", "scripts", "roundtable_eval.js");
 const {
   parseCoverage,
+  parsePoints,
+  MIN_POINT_FINDING_CHARS,
+  POINT_STATES,
   extractVerdicts,
   extractConcessions,
   extractRounds,
@@ -992,4 +995,155 @@ test("Review06-followup: solo excluded from challenge-compliance, native still g
   const report2 = JSON.parse(res2.stdout);
   assert.strictEqual(report2.coverageComplianceRate, null, "solo-only dir is unmeasured, never a vacuous 1.0");
   assert.deepStrictEqual(report2.soloExcludedFromCompliance, ["t_solo_1.md"]);
+});
+
+// --- 02r: Point Coverage Ledger (anti-tunnel) ---
+
+const POINTS_PASS_FIXTURE = path.join(__dirname, "..", "evals", "roundtable", "fixtures", "points-pass.md");
+const POINTS_FAIL_FIXTURE = path.join(__dirname, "..", "evals", "roundtable", "fixtures", "points-fail.md");
+
+function pointsBlock({
+  points = "P1 [agenda], P2 [facet]",
+  dispositions = [
+    "- P1: covered — a substantive finding long enough for the advisory floor",
+    "- P2: rejected — duplicate of P1",
+  ],
+} = {}) {
+  return ["```roundtable-points", `points: ${points}`, "dispositions:", ...dispositions, "```"].join("\n");
+}
+
+test("02r: points-pass fixture parses clean; points-fail fixture reports the gap", () => {
+  const ok = parsePoints(fs.readFileSync(POINTS_PASS_FIXTURE, "utf8"));
+  assert.strictEqual(ok.present, true);
+  assert.strictEqual(ok.error, null);
+  assert.deepStrictEqual(ok.uncovered, []);
+  assert.strictEqual(ok.points.length, 3);
+  const bad = parsePoints(fs.readFileSync(POINTS_FAIL_FIXTURE, "utf8"));
+  assert.strictEqual(bad.present, true);
+  assert.strictEqual(bad.error, null);
+  assert.deepStrictEqual(bad.uncovered, ["P2"]);
+});
+
+test("02r: points CLI exit contract (0 pass / 1 gap / 2 malformed or missing)", () => {
+  const dir = tmpDir();
+  const pass = path.join(dir, "pass.md");
+  fs.writeFileSync(pass, fs.readFileSync(POINTS_PASS_FIXTURE, "utf8"));
+  let res = runCli("points", "--file", pass);
+  assert.strictEqual(res.status, 0, `stderr: ${res.stderr}`);
+  const fail = path.join(dir, "fail.md");
+  fs.writeFileSync(fail, fs.readFileSync(POINTS_FAIL_FIXTURE, "utf8"));
+  res = runCli("points", "--file", fail);
+  assert.strictEqual(res.status, 1);
+  assert.match(res.stderr, /undispositioned point\(s\): P2/);
+  const noblock = path.join(dir, "noblock.md");
+  fs.writeFileSync(noblock, "# no ledger here\n");
+  res = runCli("points", "--file", noblock);
+  assert.strictEqual(res.status, 2);
+  assert.match(res.stderr, /no ```roundtable-points block found/);
+  const badstate = path.join(dir, "badstate.md");
+  fs.writeFileSync(badstate, pointsBlock({ dispositions: ["- P1: dunno — eh", "- P2: rejected — dup"] }));
+  res = runCli("points", "--file", badstate);
+  assert.strictEqual(res.status, 2);
+  assert.match(res.stderr, /unknown disposition state/);
+  const baddefer = path.join(dir, "baddefer.md");
+  fs.writeFileSync(
+    baddefer,
+    pointsBlock({
+      dispositions: [
+        "- P1: covered — enough characters to clear the advisory floor of forty",
+        "- P2: deferred — reason: no owner given",
+      ],
+    })
+  );
+  res = runCli("points", "--file", baddefer);
+  assert.strictEqual(res.status, 2);
+  assert.match(res.stderr, /deferred requires 'owner:' and 'reason:'/);
+  const badscope = path.join(dir, "badscope.md");
+  fs.writeFileSync(
+    badscope,
+    pointsBlock({
+      dispositions: [
+        "- P1: covered — enough characters to clear the advisory floor of forty",
+        "- P2: out-of-scope — not budget",
+      ],
+    })
+  );
+  res = runCli("points", "--file", badscope);
+  assert.strictEqual(res.status, 2);
+  assert.match(res.stderr, /out-of-scope requires a quoted boundary/);
+  const dup = path.join(dir, "dup.md");
+  fs.writeFileSync(
+    dup,
+    pointsBlock({
+      dispositions: [
+        "- P1: covered — enough characters to clear the advisory floor of forty",
+        "- P1: rejected — again",
+      ],
+    })
+  );
+  res = runCli("points", "--file", dup);
+  assert.strictEqual(res.status, 2);
+  assert.match(res.stderr, /duplicate disposition/);
+});
+
+test("02r: thin findings warn (advisory) without failing; vocabulary is closed", () => {
+  assert.strictEqual(MIN_POINT_FINDING_CHARS, 40);
+  assert.deepStrictEqual(POINT_STATES, ["covered", "deferred", "rejected", "out-of-scope"]);
+  const dir = tmpDir();
+  const f = path.join(dir, "thin.md");
+  fs.writeFileSync(f, pointsBlock({ dispositions: ["- P1: covered — ok", "- P2: rejected — dup of P1"] }));
+  const res = runCli("points", "--file", f);
+  assert.strictEqual(res.status, 0, `stderr: ${res.stderr}`);
+  assert.match(res.stderr, /finding is thin/);
+});
+
+test("02r: score skips legacy no-block transcripts, gates block-carrying ones", () => {
+  const dir = tmpDir();
+  fs.writeFileSync(path.join(dir, "t_native_1.md"), transcript({})); // legacy, no ledger
+  let res = runCli("score", "--dir", dir, "--json");
+  assert.strictEqual(res.status, 0, `stderr: ${res.stderr}`);
+  let report = JSON.parse(res.stdout);
+  assert.strictEqual(report.pointCoverageComplianceRate, null, "no block-carrying transcript = unmeasured");
+  assert.deepStrictEqual(report.pointsUnscored, ["t_native_1.md"]);
+  // Block-carrying transcript with a gap fails the gate.
+  fs.writeFileSync(path.join(dir, "t_native_2.md"), transcript({ extra: fs.readFileSync(POINTS_FAIL_FIXTURE, "utf8") }));
+  res = runCli("score", "--dir", dir, "--json");
+  assert.strictEqual(res.status, 1);
+  report = JSON.parse(res.stdout);
+  assert.strictEqual(report.pointCoverageComplianceRate, 0);
+  assert.ok(report.gate.failures.some((f) => f.includes("point coverage compliance 0 < 1.0")));
+  // Clean ledger passes and legacy stays unscored.
+  fs.writeFileSync(path.join(dir, "t_native_2.md"), transcript({ extra: fs.readFileSync(POINTS_PASS_FIXTURE, "utf8") }));
+  res = runCli("score", "--dir", dir, "--json");
+  assert.strictEqual(res.status, 0, `stdout: ${res.stdout}\nstderr: ${res.stderr}`);
+  report = JSON.parse(res.stdout);
+  assert.strictEqual(report.pointCoverageComplianceRate, 1);
+  assert.deepStrictEqual(report.pointsUnscored, ["t_native_1.md"]);
+});
+
+test("02r: tunnel advisory fires on 3 consecutive same-point rounds; breadth or single point suppresses", () => {
+  const focus3 = "[FOCUS: P1]\n[ROUND: 1]\n[FOCUS: P1]\n[ROUND: 2]\n[FOCUS: P1]\n[ROUND: 2]\n";
+  const t1 = parsePoints(pointsBlock() + "\n" + focus3);
+  assert.deepStrictEqual(t1.tunnelWarnings, ["P1 focused 3 consecutive rounds without a breadth checkpoint"]);
+  const t2 = parsePoints(pointsBlock() + "\n" + focus3 + "[BREADTH: P2 pending — zoom-out ran]\n");
+  assert.deepStrictEqual(t2.tunnelWarnings, [], "a breadth marker suppresses the advisory");
+  const single = parsePoints(
+    pointsBlock({
+      points: "P1 [agenda]",
+      dispositions: ["- P1: covered — a substantive finding long enough for the advisory floor"],
+    }) + "\n" + focus3
+  );
+  assert.deepStrictEqual(single.tunnelWarnings, [], "single-point ledger never tunnels");
+});
+
+test("02r: session cursor carries the point ledger (--points)", () => {
+  const dir = tmpDir();
+  let res = runCliCwd(dir, "session", "begin", "--topic", "t", "--agents", "@a,@b", "--points", "P1 [agenda], P2 [facet]");
+  assert.strictEqual(res.status, 0, `stderr: ${res.stderr}`);
+  res = runCliCwd(dir, "session", "status");
+  assert.strictEqual(JSON.parse(res.stdout).points, "P1 [agenda], P2 [facet]");
+  res = runCliCwd(dir, "session", "update", "--turn", "2", "--points", "P1 [agenda], P2 [facet], P3 [agenda]");
+  assert.strictEqual(res.status, 0, `stderr: ${res.stderr}`);
+  res = runCliCwd(dir, "session", "status");
+  assert.strictEqual(JSON.parse(res.stdout).points, "P1 [agenda], P2 [facet], P3 [agenda]");
 });

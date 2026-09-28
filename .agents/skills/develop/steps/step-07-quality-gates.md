@@ -36,6 +36,14 @@ node .agents/scripts/orchestrator_state.js complete --agent qa-engineer --artifa
 
 Run this gate when `artifacts/output/03-strategy/motion-spec.md` or `artifacts/output/05-planning/motion-handoff.md` exists. Motion work cannot pass QA on generic component tests alone.
 
+**Spec completeness precheck (mechanical, blocking):** before runtime verification, confirm the spec itself is complete and traceable —
+
+```bash
+node .agents/scripts/motion_spec_check.js check --json
+```
+
+Exit 0 is required. It fails on any `MO-###` prompt missing a required field, animating a non-composited property (only `transform`/`opacity`), a non-fade reduced-motion fallback, a non-numeric timing tolerance, a spec-side orphan, or a prompt not referenced in `user-stories.md`. If the spec is incomplete, QA does not proceed — the task returns to `@product-designer`. When `motion-spec.md` is absent the script exits 0 (motion not in scope) and this gate is skipped.
+
 `@qa-engineer` must add a `## Motion Verification` section to `qa-report.md` covering:
 - [ ] Every `MO-###` maps to one spec prompt, one user story, one implementation reference, and one QA assertion.
 - [ ] Timing is within the prompt's numeric tolerance, default `±16ms` unless the prompt documents another tolerance.

@@ -157,6 +157,26 @@ function checkUserStories(text) {
     failures.push('User stories: missing "Story Dependencies Diagram" (Mermaid dependency graph)');
   }
 
+  // CR-3 (co-location): the markers above are satisfied by keyword-smeared prose
+  // that scatters "Story ID:", "**Given**", "AC-H1", etc. anywhere in the doc.
+  // A real user-stories doc has story blocks where a single story owns its own
+  // Given/When/Then acceptance criterion. Require at least one story region
+  // (bounded by a "Story ID:" line up to the next Story ID / Feature / Epic
+  // heading) that contains a complete Given→When→Then triplet in document order.
+  if (hasGherkin) {
+    const storySplit = text.split(/(?=^[-*\s]*\*{0,2}Story ID\b)/mi);
+    const colocated = storySplit.some((block) => {
+      if (!/Story ID/i.test(block)) return false;
+      const g = block.search(/\*\*Given\*\*/i);
+      const w = block.search(/\*\*When\*\*/i);
+      const t = block.search(/\*\*Then\*\*/i);
+      return g >= 0 && w > g && t > w;
+    });
+    if (!colocated) {
+      failures.push('User stories: no single story block owns a complete Given→When→Then acceptance criterion — the Gherkin tokens are scattered, not co-located under a story (off-template keyword-smear is not a valid substitute)');
+    }
+  }
+
   return failures;
 }
 
@@ -169,7 +189,13 @@ function main() {
   }
 
   const root = args.root ? path.resolve(args.root) : process.cwd();
-  const mode = args.mode === 'reverse' ? 'reverse' : (args.mode === 'create' ? 'create' : 'create');
+  // CR-4: an unknown --mode must fail loudly, not silently degrade to `create`
+  // (which runs the weaker ruleset and can hide a missing §14 Evidence Ledger).
+  if (args.mode !== undefined && args.mode !== 'create' && args.mode !== 'reverse') {
+    console.error(`template_conformance: unknown --mode "${args.mode}" (expected create or reverse)`);
+    process.exit(2);
+  }
+  const mode = args.mode === 'reverse' ? 'reverse' : 'create';
   const reqPath = path.resolve(root, args.requirements || DEFAULTS.requirements);
   const usPath = path.resolve(root, args.userStories || DEFAULTS.userStories);
 

@@ -17,6 +17,12 @@
  *   verify  — exit 1 when a component track is selected but its stack/lint
  *             evidence is missing; static-html is exempt from @shadcn/lint
  *
+ * TRUST BOUNDARY: `verify --track nextjs-component` runs the target project's
+ * own `npm run lint` script. Only run this gate against a repository you trust,
+ * exactly as you would `npm test`. The shadcn-rules "executed" evidence is
+ * grounded in an @shadcn/lint dependency or a lint config carrying shadcn rule
+ * markers — never in the lint script string (which could be forged).
+ *
  * Sources: https://github.com/shadcn-ui/lint (SETUP.md, rules shadcn/*),
  *          https://ui.shadcn.com/docs/mcp (shadcn MCP server),
  *          https://opencode.ai/docs/mcp-servers (config shape).
@@ -204,16 +210,32 @@ function validateNext(root, prototypeArg) {
   if (!pkg || !pkg.scripts || typeof pkg.scripts.lint !== 'string') {
     problems.push('nextjs-component requires an npm run lint script');
   } else {
+    // CR-1 (lint-theater fix): the shadcn-rules evidence is grounded in an
+    // actual @shadcn/lint dependency OR a lint config carrying shadcn rule
+    // markers — NEVER in the lint SCRIPT STRING (which `echo @shadcn/lint`
+    // could forge). The script string is not evidence of execution.
+    const hasShadcnLintDep = Boolean(deps['@shadcn/lint']);
+    const hasShadcnLintConfig = fs.readdirSync(root).some(
+      (name) => LINT_CONFIGS.includes(name) && LINT_MARKERS.test(fs.readFileSync(path.join(root, name), 'utf8'))
+    );
+    const shadcnLintConfigured = hasShadcnLintDep || hasShadcnLintConfig;
+
     const run = spawnSync('npm', ['run', 'lint', '--silent'], { cwd: root, encoding: 'utf8', timeout: 120000 });
     const output = `${run.stdout || ''}${run.stderr || ''}`.trim();
-    evidence.lint = { command: 'npm run lint --silent', status: run.status, signal: run.signal || null, output: output.slice(0, 4000) };
+    evidence.lint = {
+      command: 'npm run lint --silent',
+      status: run.status,
+      signal: run.signal || null,
+      output: output.slice(0, 4000),
+      shadcnLintConfigured,
+      configSource: hasShadcnLintDep ? 'package.json @shadcn/lint dependency' : (hasShadcnLintConfig ? 'lint config with shadcn/* rule markers' : null),
+    };
     if (run.error) problems.push(`npm run lint could not execute: ${run.error.message}`);
     else if (run.status !== 0) problems.push('npm run lint failed; component prototype cannot pass the track gate');
-    if (!run.error && !/@shadcn\/lint|shadcn\/|eslint|next\s+lint/i.test(`${pkg.scripts.lint}\n${output}`)) {
-      problems.push('npm run lint did not provide evidence that shadcn lint rules were executed');
-    }
-    if (!deps['@shadcn/lint'] && !fs.readdirSync(root).some((name) => LINT_CONFIGS.includes(name) && fs.readFileSync(path.join(root, name), 'utf8').match(LINT_MARKERS))) {
-      problems.push('nextjs-component requires @shadcn/lint configuration evidence');
+    // Config evidence is the hard requirement; without it there are no shadcn
+    // rules to execute, so the "executed" claim cannot be made.
+    if (!shadcnLintConfigured) {
+      problems.push('nextjs-component requires @shadcn/lint configuration evidence (a package.json @shadcn/lint dependency or a lint config carrying shadcn/* rule markers) — an npm lint SCRIPT alone is not evidence that shadcn rules ran');
     }
   }
   return { problems, evidence };

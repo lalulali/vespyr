@@ -4,6 +4,7 @@
  *
  * Usage:
  *   node roundtable_eval.js coverage --file <transcript.md>   (or pipe the block on stdin)
+ *   node roundtable_eval.js points   --file <transcript.md>   (or pipe the block on stdin; Point Coverage Ledger gate)
  *   node roundtable_eval.js score   --dir <transcripts-dir> [--topics <topics.json>] [--json]
  *   node roundtable_eval.js log     --mode <native|solo|refused> [--tool <name>] [--topic "..."] [--agents "@a,@b"] [--note "..."]
  *       [--topic-id <rt-NNN>] [--synthesis <verdict>] [--coverage-exit <0|1|2>] [--model <name>] [--run-file <path>] [--duration-s <n>]
@@ -20,9 +21,12 @@
  *   - final outcome line [SYNTHESIS: GO|RESHAPE|NO-GO|ADR:<id>] (ADR id case preserved; escalations excluded from stability)
  *   - legacy PASS/PIVOT/KILL (pre 2026-09-02) normalize onto GO/RESHAPE/NO-GO
  *   - filename <topic>_<mode>_<run>.md with mode in {native, solo}
+ *   - fenced block ```roundtable-points: `points:` line (`P1 [agenda], P2 [facet]`) + one `dispositions:` line per point
+ *     (states: covered|deferred|rejected|out-of-scope; canon: .agents/references/point-coverage.md) — blocking closure gate before synthesis
  *
  * Exit codes (coverage): 0 = all panelists challenged, 1 = coverage gap, 2 = missing/malformed block
- * Exit codes (score): 0 = gate pass, 1 = gate failed (coverage compliance < 1.0 over non-solo runs, or flawed-premise hint contradicted), 2 = usage/input error
+ * Exit codes (points):   0 = all ledger points dispositioned, 1 = undispositioned point(s), 2 = missing/malformed block
+ * Exit codes (score): 0 = gate pass, 1 = gate failed (coverage or point-coverage compliance < 1.0, or flawed-premise hint contradicted), 2 = usage/input error
  * Exit codes (log/session): 0 = ok, 2 = usage/input error
  */
 
@@ -42,7 +46,7 @@ const ALL_VERDICTS = [...DECISION_VERDICTS, 'CONFIRMED', 'PARTIAL', 'FALSIFIED']
 const MODES = ['native', 'solo', 'refused'];
 
 function usage() {
-  console.error('Usage: node roundtable_eval.js <coverage|score|log|session> [flags] — see header docblock');
+  console.error('Usage: node roundtable_eval.js <coverage|points|score|log|session> [flags] — see header docblock');
   process.exit(2);
 }
 
@@ -149,6 +153,154 @@ function cmdCoverage(flags) {
   }
   const substantive = result.challenges.filter((c) => c.to !== c.from).length;
   console.log(`[roundtable-eval] coverage OK: ${result.panel.length} panelists, ${substantive} challenge(s), every position challenged`);
+  process.exit(0);
+}
+
+// --- Point Coverage Ledger (02r — anti-tunnel) ---
+// Canon: .agents/references/point-coverage.md. Coverage = zero silent drops
+// against a user-confirmed enumeration; closure gates synthesis on decision
+// surfaces. Machine vocabulary: covered | deferred | rejected | out-of-scope.
+const POINT_STATES = ['covered', 'deferred', 'rejected', 'out-of-scope'];
+// Advisory thinness floor for `covered` findings — never a gate (thinChallenges
+// precedent: edge counts are necessary, not sufficient; calibrate first).
+const MIN_POINT_FINDING_CHARS = 40;
+// Advisory tunnel threshold: same point focused this many consecutive rounds
+// without a breadth marker is reported (uncalibrated — baseline-first).
+const MIN_TUNNEL_RUN = 3;
+
+function readPointsBlock(text) {
+  // First fenced block wins (same documented limitation as coverage).
+  const fence = text.match(/^\s*```\s*roundtable-points[^\n]*\n([\s\S]*?)\n\s*```/mi);
+  return fence ? fence[1] : null;
+}
+
+function extractFocus(text) {
+  const prose = text.replace(/```[\s\S]*?```/g, '');
+  return [...prose.matchAll(/\[FOCUS:\s*(P\d+)\]/gi)].map((m) => m[1].toUpperCase());
+}
+
+function tunnelCheck(text, pointIds) {
+  // Advisory only: depth on one point is legitimate; a silent tunnel is not.
+  // A single-point ledger never tunnels. A breadth marker anywhere in the
+  // (prose) transcript suppresses the report — global suppression is a known
+  // approximation, documented rather than precision-faked.
+  if (!pointIds || pointIds.length < 2) return [];
+  const prose = text.replace(/```[\s\S]*?```/g, '');
+  const focus = extractFocus(text);
+  if (!focus.length) return [];
+  const hasBreadth = /\[BREADTH:/i.test(prose);
+  const warnings = [];
+  let run = 1;
+  for (let i = 1; i <= focus.length; i++) {
+    if (i < focus.length && focus[i] === focus[i - 1]) {
+      run++;
+    } else {
+      if (run >= MIN_TUNNEL_RUN && !hasBreadth) {
+        warnings.push(`${focus[i - 1]} focused ${run} consecutive rounds without a breadth checkpoint`);
+      }
+      run = 1;
+    }
+  }
+  return warnings;
+}
+
+function parsePoints(text) {
+  const warnings = [];
+  const block = readPointsBlock(text);
+  if (!block) return { present: false, error: null, warnings, points: [], dispositions: [], uncovered: [], tunnelWarnings: [] };
+  const fail = (error) => ({ present: true, error, warnings, points: [], dispositions: [], uncovered: [], tunnelWarnings: [] });
+  const pointsLines = block.match(/^\s*points:\s*(.+)$/gm) || [];
+  if (!pointsLines.length) return fail('`points:` line missing from points block');
+  if (pointsLines.length > 1) return fail(`duplicate 'points:' line (${pointsLines.length} found) — multi-turn transcripts must carry exactly one points ledger`);
+  const points = [];
+  for (const raw of pointsLines[0].replace(/^\s*points:\s*/, '').split(',')) {
+    const entry = raw.trim();
+    if (!entry) continue;
+    const m = entry.match(/^(P\d+)\s*\[([a-z-]+)\]$/i);
+    if (!m) return fail(`malformed point entry: '${entry}' (expected 'P<n> [agenda|facet]')`);
+    const id = m[1].toUpperCase();
+    const tag = m[2].toLowerCase();
+    if (tag !== 'agenda' && tag !== 'facet') return fail(`unknown point tag '${tag}' for ${id} (expected agenda|facet)`);
+    points.push({ id, tag });
+  }
+  if (!points.length) return fail('no points declared (a ledger is at least one point)');
+  const seen = new Set();
+  for (const p of points) {
+    if (seen.has(p.id)) return fail(`duplicate point id ${p.id}`);
+    seen.add(p.id);
+  }
+  const dispositions = [];
+  const re = /^\s*[-*]\s*(P\d+)\s*:\s*([a-z-]+)\s*(?:[—–-]\s*(.*))?$/gmi;
+  let m;
+  while ((m = re.exec(block))) {
+    const id = m[1].toUpperCase();
+    const state = m[2].toLowerCase();
+    const detail = (m[3] || '').trim();
+    if (!seen.has(id)) return fail(`disposition references unknown point ${id}`);
+    if (!POINT_STATES.includes(state)) return fail(`unknown disposition state '${state}' for ${id} (expected ${POINT_STATES.join('|')})`);
+    if (state === 'covered' && !detail) return fail(`${id} covered requires a finding`);
+    if (state === 'deferred' && (!/owner\s*:/i.test(detail) || !/reason\s*:/i.test(detail))) return fail(`${id} deferred requires 'owner:' and 'reason:' in the detail`);
+    if (state === 'rejected' && !detail) return fail(`${id} rejected requires a reason`);
+    if (state === 'out-of-scope' && !/"[^"]+"/.test(detail)) return fail(`${id} out-of-scope requires a quoted boundary "..."`);
+    dispositions.push({ id, state, detail });
+  }
+  const byId = {};
+  for (const d of dispositions) {
+    if (byId[d.id]) return fail(`duplicate disposition for ${d.id}`);
+    byId[d.id] = d;
+  }
+  for (const d of dispositions) {
+    if (d.state === 'covered' && d.detail.length < MIN_POINT_FINDING_CHARS) {
+      warnings.push(`${d.id} finding is thin (${d.detail.length} chars < ${MIN_POINT_FINDING_CHARS})`);
+    }
+  }
+  return {
+    present: true,
+    error: null,
+    warnings,
+    points,
+    dispositions,
+    uncovered: points.filter((p) => !byId[p.id]).map((p) => p.id),
+    tunnelWarnings: tunnelCheck(text, points.map((p) => p.id)),
+  };
+}
+
+function cmdPoints(flags) {
+  let text;
+  if (flags.file) {
+    try {
+      text = fs.readFileSync(flags.file, 'utf8');
+    } catch {
+      console.error(`[roundtable-eval] cannot read --file: ${flags.file}`);
+      process.exit(2);
+    }
+  } else if (process.stdin.isTTY) {
+    console.error('[roundtable-eval] no --file and stdin is a TTY — nothing to validate');
+    process.exit(2);
+  } else {
+    text = fs.readFileSync(0, 'utf8');
+  }
+  const result = parsePoints(text);
+  if (!result.present) {
+    console.error('[roundtable-eval] FAIL: no ```roundtable-points block found — emit the Point Coverage Ledger before synthesis (canon: .agents/references/point-coverage.md)');
+    process.exit(2);
+  }
+  if (result.error) {
+    console.error(`[roundtable-eval] FAIL: ${result.error}`);
+    process.exit(2);
+  }
+  for (const w of result.warnings) {
+    console.warn(`[roundtable-eval] warn: ${w}`);
+  }
+  for (const t of result.tunnelWarnings) {
+    console.warn(`[roundtable-eval] warn (tunnel advisory): ${t}`);
+  }
+  if (result.uncovered.length) {
+    console.error(`[roundtable-eval] POINT COVERAGE GAP — undispositioned point(s): ${result.uncovered.join(', ')}`);
+    console.error('[roundtable-eval] Synthesis is blocked. Disposition every point (covered|deferred|rejected|out-of-scope), then re-run.');
+    process.exit(1);
+  }
+  console.log(`[roundtable-eval] point coverage OK: ${result.points.length} point(s), all dispositioned`);
   process.exit(0);
 }
 
@@ -316,15 +468,20 @@ function cmdScore(flags) {
     console.warn(`[roundtable-eval] warn: could not load router rules (${err.message}); falling back to default seats (2)`);
   }
   const entries = loadTranscripts(flags.dir).map((e) => {
-    if (e.refused) return { ...e, verdicts: null, concessions: [], rounds: [], redTeam: null, rosterSeats: null, soloDisclosure: null, coverage: { skipped: 'refused-log-only' }, compliant: null };
-    if (e.nameError) return { ...e, topic: null, mode: null, run: null, verdicts: null, concessions: [], rounds: [], soloDisclosure: null, coverage: { error: e.nameError, warnings: [] }, compliant: false };
+    if (e.refused) return { ...e, verdicts: null, concessions: [], rounds: [], redTeam: null, rosterSeats: null, soloDisclosure: null, coverage: { skipped: 'refused-log-only' }, compliant: null, points: { present: false }, pointsPresent: false, pointsCompliant: null, pointsDetail: 'refused-log-only' };
+    if (e.nameError) return { ...e, topic: null, mode: null, run: null, verdicts: null, concessions: [], rounds: [], soloDisclosure: null, coverage: { error: e.nameError, warnings: [] }, compliant: false, points: { present: false }, pointsPresent: false, pointsCompliant: null, pointsDetail: 'nameError' };
     const text = fs.readFileSync(path.join(flags.dir, e.file), 'utf8');
     const verdicts = extractVerdicts(text);
     const cov = parseCoverage(text, { minSeats: defaultSeats });
+    const pts = parsePoints(text);
     const compliant = !cov.error && !cov.malformed && Array.isArray(cov.uncovered) && cov.uncovered.length === 0;
     const coverageDetail = cov.error
       ? cov.error
       : (cov.uncovered && cov.uncovered.length ? `gap: ${cov.uncovered.join(', ')}` : null);
+    const pointsCompliant = pts.present && !pts.error && pts.uncovered.length === 0;
+    const pointsDetail = !pts.present
+      ? 'no ledger block (unscored — legacy/pre-02r)'
+      : (pts.error ? pts.error : (pts.uncovered.length ? `gap: ${pts.uncovered.join(', ')}` : null));
     return {
       ...e,
       verdicts,
@@ -336,6 +493,10 @@ function cmdScore(flags) {
       coverage: cov,
       coverageDetail,
       compliant,
+      points: pts,
+      pointsPresent: pts.present,
+      pointsCompliant,
+      pointsDetail,
     };
   });
   if (!entries.length) {
@@ -372,6 +533,10 @@ function cmdScore(flags) {
       spcFlag: modalV ? modalV.share === 1 : null,
       coverageCompliant: e.compliant,
       coverageDetail: e.coverageDetail,
+      pointsPresent: e.pointsPresent === true,
+      pointsCompliant: e.pointsCompliant,
+      pointsDetail: e.pointsDetail || null,
+      pointTunnelWarnings: (e.points && e.points.tunnelWarnings) || [],
     };
   });
 
@@ -479,6 +644,22 @@ function cmdScore(flags) {
   if (compliance !== null && compliance < 1.0) {
     gateFailures.push(`coverage compliance ${compliance} < 1.0`);
   }
+  // Point coverage gate (02r): only transcripts CARRYING a ledger block are
+  // scored — legacy/pre-02r transcripts (no block) are surfaced as unscored,
+  // never failed (dated transcripts are never rewritten). Null when no
+  // block-carrying transcript exists (fail-closed reporting, vacuous pass).
+  const pointsScoredRows = rows.filter((r) => !r.refused && r.pointsPresent);
+  const pointsCompliance = pointsScoredRows.length
+    ? Number((pointsScoredRows.filter((r) => r.pointsCompliant).length / pointsScoredRows.length).toFixed(2))
+    : null;
+  if (pointsCompliance !== null && pointsCompliance < 1.0) {
+    gateFailures.push(`point coverage compliance ${pointsCompliance} < 1.0`);
+  }
+  const pointsUnscored = rows.filter((r) => !r.refused && !r.pointsPresent).map((r) => r.file);
+  const pointTunnelWarnings = [];
+  for (const r of rows) {
+    for (const t of r.pointTunnelWarnings || []) pointTunnelWarnings.push(`${r.file}: ${t}`);
+  }
   for (const p of premiseRows || []) {
     if (!p.hint) continue;
     const observed = p.observedSyntheses || [];
@@ -530,6 +711,9 @@ function cmdScore(flags) {
     refusedRuns: rows.filter((r) => r.refused).map((r) => r.file),
     soloExcludedFromCompliance: soloExcluded,
     coverageComplianceRate: compliance,
+    pointCoverageComplianceRate: pointsCompliance,
+    pointsUnscored,
+    pointTunnelWarnings,
     gate: { pass: gateFailures.length === 0, failures: gateFailures },
     spcFlags: rows.filter((r) => r.spcFlag).map((r) => `${r.file}${flawedIds.has(r.topic) ? ' (flawed premise — unanimity expected)' : ''}`),
     totalConcessions: rows.reduce((n, r) => n + (r.concessions || []).length, 0),
@@ -565,6 +749,7 @@ function cmdScore(flags) {
     return;
   }
   console.log(`transcripts: ${report.transcripts}  coverage compliance: ${report.coverageComplianceRate === null ? "n/a (no native runs)" : report.coverageComplianceRate}  mean round-1 disagreement: ${report.meanRound1Disagreement}`);
+  console.log(`point coverage compliance: ${report.pointCoverageComplianceRate === null ? "n/a (no points blocks)" : report.pointCoverageComplianceRate}`);
   console.log(`solo-vs-native divergence: ${report.soloVsNativeDivergence}`);
   console.log(`concessions: ${report.totalConcessions} total; ${report.zeroConcessionCompliant.length} coverage-compliant transcript(s) with zero concessions`);
   if (report.soloDisclosureFailures.length) {
@@ -621,6 +806,18 @@ function cmdScore(flags) {
     console.log('coverage non-compliant transcripts:');
     for (const r of nonCompliant) console.log(`  - ${r.file}: ${r.coverageDetail || 'unknown'}`);
   }
+  if (report.pointsUnscored.length) {
+    console.log(`points unscored (no ledger block — legacy or pre-02r): ${report.pointsUnscored.join(', ')}`);
+  }
+  if (report.pointTunnelWarnings.length) {
+    console.log('tunnel advisory (focus run without breadth checkpoint — uncalibrated):');
+    for (const t of report.pointTunnelWarnings) console.log(`  - ${t}`);
+  }
+  const pointsNonCompliant = rows.filter((r) => r.pointsPresent && !r.pointsCompliant);
+  if (pointsNonCompliant.length) {
+    console.log('point coverage non-compliant transcripts:');
+    for (const r of pointsNonCompliant) console.log(`  - ${r.file}: ${r.pointsDetail || 'unknown'}`);
+  }
   if (report.gate.failures.length) {
     console.log('GATE FAILED:');
     for (const f of report.gate.failures) console.log(`  - ${f}`);
@@ -663,6 +860,7 @@ function cmdSession(flags) {
       turn: 1,
       phase: 'position',
       lastSynthesis: null,
+      points: flags.points || null,
       updated: new Date().toISOString(),
     };
     writePanelState(state);
@@ -689,6 +887,7 @@ function cmdSession(flags) {
       state.phase = flags.phase;
     }
     if (flags.synthesis !== undefined) state.lastSynthesis = flags.synthesis;
+    if (flags.points !== undefined) state.points = flags.points;
     state.updated = new Date().toISOString();
     writePanelState(state);
     console.log(`[roundtable-eval] panel session updated: turn ${state.turn}, phase ${state.phase}`);
@@ -876,6 +1075,7 @@ function cmdLog(flags) {
 if (require.main === module) {
   const { cmd, flags } = parseArgs(process.argv.slice(2));
   if (cmd === 'coverage') cmdCoverage(flags);
+  else if (cmd === 'points') cmdPoints(flags);
   else if (cmd === 'score') cmdScore(flags);
   else if (cmd === 'log') cmdLog(flags);
   else if (cmd === 'session') cmdSession(flags);
@@ -886,6 +1086,13 @@ if (require.main === module) {
 module.exports = {
   readCoverageBlock,
   parseCoverage,
+  readPointsBlock,
+  parsePoints,
+  extractFocus,
+  tunnelCheck,
+  POINT_STATES,
+  MIN_POINT_FINDING_CHARS,
+  MIN_TUNNEL_RUN,
   extractVerdicts,
   extractConcessions,
   extractRounds,

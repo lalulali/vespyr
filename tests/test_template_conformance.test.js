@@ -113,3 +113,38 @@ test('T-CONF-5: missing files fail loudly, never silent-pass', () => {
   assert.strictEqual(r.code, 1);
   assert.match(r.err, /file not found/);
 });
+
+test('T-CONF-6 (CR-3): keyword-smeared prose (all tokens present but not co-located) fails', () => {
+  // Every required marker appears SOMEWHERE, but no story block owns a real
+  // Given→When→Then triplet. The pre-fix gate passed this; it must now fail.
+  const smear = [
+    '# User Stories — Demo',
+    '## Backlog Hierarchy Tree',
+    '```text',
+    'Epic: Demo',
+    '  Feature: Thing',
+    '```',
+    '# Epic: Demo',
+    '## Feature: Thing',
+    'Story ID: US-01 Priority: High Sprint: 1 — Traces to PRD FR-001.',
+    'Business Requirement and Technical Requirement are noted here.',
+    'Acceptance tokens used loosely: **Given** the app, later somewhere **Then** it works, and separately **When** clicked.',
+    'Classes: AC-H1, AC-U1, AC-E1 mentioned in a table row.',
+    '## Story Dependencies Diagram',
+    '```mermaid',
+    'graph TD; US-01-->US-02;',
+    '```',
+    '',
+  ].join('\n');
+  const { files } = tmp({ 'requirements.md': fs.readFileSync(PRD_TEMPLATE, 'utf8'), 'user-stories.md': smear });
+  const r = run(['check', '--mode', 'reverse', '--requirements', files['requirements.md'], '--user-stories', files['user-stories.md'], '--json']);
+  assert.strictEqual(r.code, 1, 'keyword-smear must fail');
+  assert.match(JSON.parse(r.out).failures.join('\n'), /co-located|complete Given→When→Then/);
+});
+
+test('T-CONF-7 (CR-4): unknown --mode fails with exit 2, never silent-degrades to create', () => {
+  const { files } = tmp(conformantPair());
+  const r = run(['check', '--mode', 'GARBAGE', '--requirements', files['requirements.md'], '--user-stories', files['user-stories.md']]);
+  assert.strictEqual(r.code, 2, 'unknown mode must exit 2');
+  assert.match(r.err, /unknown --mode/);
+});

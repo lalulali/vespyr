@@ -46,4 +46,14 @@ If a prototype exists, read `artifacts/output/03-strategy/prototype-collaboratio
 ## Output
 `artifacts/output/03-strategy/design.md`
 
+## Gate check — anti-generic validator (blocking)
+
+`design.md` is only "done" when this command exits 0. It is the mechanical enforcement of the template's Anti-generic rule (prose "✓" is not sufficient — the same disease `template_conformance.js` cures for document structure):
+
+```bash
+node .agents/scripts/anti_generic_check.js check --json
+```
+
+It fails the build on the deterministically detectable tells of default model output: a banned navy dark surface (blue-pushed dark background), a missing/placeholder signature differentiator, an unfilled taste brief (`{adjective}` placeholders left in), a starter Inspiration shelf, and — for a motion-led Product context (Vibrant Brand-First / Conversion Storefront) — empty Motion tables with no recorded skip. A failure means restart from the brief, not polish the generic. It does NOT judge subjective taste — that stays human review; it raises the floor, not the ceiling.
+
 > **Tracker:** `node .agents/scripts/step_tracker.js complete --skill design-create --step 5`

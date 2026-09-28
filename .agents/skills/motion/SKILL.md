@@ -1,6 +1,6 @@
 ---
 name: motion
-description: Orchestrates motion research, motion specification, and an explicit handoff to the standard development workflow for animation-significant products. Use this skill whenever the user mentions motion design, animation, transitions, micro-interactions, motion spec, motion prompts, animated UI, or an animation-heavy surface. Knowledge lives in .agents/references/motion/ and is loaded on demand, never inline.
+description: Orchestrates motion research, motion specification, and an explicit handoff to the standard development workflow for animation-significant products. Use this skill whenever the user mentions motion design, animation, transitions, micro-interactions, motion spec, motion prompts, animated UI, an animation-heavy surface, OR asks for an "interactive website", "creative website", or "motion design website" (these are explicit DNA 4 Clear-intent triggers — activate without waiting for the word "animation"). Knowledge lives in .agents/references/motion/ and is loaded on demand, never inline.
 metadata:
   version: "1.0"
   last_updated: "2026-08-04"
@@ -18,6 +18,7 @@ Runs the motion **design preflow**: **motion research → motion spec → implem
 ## When to use
 
 - "Add motion/animations/transitions to this product"
+- **"Build an interactive / creative / motion design website"** — an explicit request for a motion-led site is a DNA 4 Clear intent (C ≥ 0.85). Ivy activates `/motion` directly, no confirmation needed; do not ship a static spec for it.
 - "Create the motion spec / motion prompts for this feature"
 - "Which animation library should we use?" (delegates tech research to @researcher)
 - Motion is a differentiator of the product (games, marketing sites, animation-heavy apps)
@@ -92,6 +93,7 @@ Ivy outputs:
 - [ ] Every motion prompt has explicit duration, easing, from→to, reduced-motion fallback
 - [ ] Reduced-motion plan is complete (mandatory, non-skippable)
 - [ ] Every motion traces to a user story (zero orphans)
+- [ ] **Prompt completeness + traceability (mechanical):** `node .agents/scripts/motion_spec_check.js check --json` exits 0. It parses the real `motion-spec.md` and fails on any `MO-###` prompt missing a required field, animating a non-composited property (only `transform`/`opacity` allowed), a non-fade reduced-motion fallback, a non-numeric timing tolerance, a spec-side orphan (no `US-###`), or any `MO-###` not referenced in `user-stories.md` (spec'd-but-never-built — the silent-drop defect). This is the enforcer for the "Rex must not improvise timing" anti-pattern — an underspecified prompt is flagged back to Ivy, not shipped.
 - [ ] Full pipeline: `motion-research.md` exists and each recommendation is cited
 - [ ] Lightweight pipeline: `Evidence mode: lightweight` records existing evidence and why dedicated research was not warranted
 - [ ] Accessibility authority: `@ux-researcher` signs off on the motion accessibility plan for full pipelines

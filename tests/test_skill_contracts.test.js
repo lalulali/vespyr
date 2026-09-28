@@ -74,3 +74,28 @@ test("RT-P2-3 follow-up: orphaned coverage fixtures are pinned, not dead", () =>
   const bad = parseCoverage(fail);
   assert.ok(bad.uncovered.length > 0 || bad.malformed, "fail fixture must not pass clean");
 });
+
+// --- 02r: point-coverage canon shared across discussion surfaces ---
+
+test("02r: round-table, elicitation, and grill-me cite the point-coverage canon", () => {
+  const GRILL = read(".agents/skills/grill-me/SKILL.md");
+  for (const [name, skill] of [["round-table", ROUNDTABLE], ["elicitation", ELICITATION], ["grill-me", GRILL]]) {
+    assert.match(skill, /point-coverage\.md/, `${name} must cite the shared point-coverage canon`);
+  }
+  assert.match(ELICITATION, /Critique coverage/);
+  assert.match(ELICITATION, /exactly five lines/);
+});
+
+test("02r: points fixtures parse per contract (presence-gated, closed states)", () => {
+  const { parsePoints } = require("../.agents/scripts/roundtable_eval");
+  const pass = parsePoints(
+    fs.readFileSync(path.join(__dirname, "..", "evals", "roundtable", "fixtures", "points-pass.md"), "utf8")
+  );
+  const fail = parsePoints(
+    fs.readFileSync(path.join(__dirname, "..", "evals", "roundtable", "fixtures", "points-fail.md"), "utf8")
+  );
+  assert.strictEqual(pass.error, null);
+  assert.deepStrictEqual(pass.uncovered, []);
+  assert.deepStrictEqual(fail.uncovered, ["P2"]);
+  assert.strictEqual(parsePoints("# no block").present, false, "no block must be presence-gated, not malformed");
+});

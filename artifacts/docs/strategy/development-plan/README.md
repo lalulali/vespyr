@@ -33,6 +33,7 @@ Every `NN[X]-*.md` file in this directory MUST have a row here; numbers are clai
 | `02o-phase-1-prd-prototype-fidelity.md` | Traditional-direction parity (PRD→prototype fidelity) | **Executed 2026-09-22 — 5/5 countable items** (commits `4ed6a14`…`0065293` — range corrected forward 2026-09-23, the earlier range omitted the 02o.6 commit; B14 precondition met; Review 10 C-package folded; checkpoint 3/5 CONTINUE at `99431be`; suite 547/547). DoD CONFIRMED (orphan sweep + fidelity gate + RTI hardening live); DoD #11 defect filed OPEN (`artifacts/docs/defects/dod-11-qa-signoff-refusal-2026-09-22.md`); engine cut v2.0.11. Authored 2026-09-10 (owner, urgent); roundtable 2026-09-10 → RESHAPE + B1–B20 folded; sequencing owner-confirmed 02n → 02o → 02p → 02q |
 | `02p-phase-1-record-integrity-recovery.md` | Record integrity recovery | Pending (last; formerly 02m, then 02n, then 02o) |
 | `02q-phase-1-parallel-session-safety.md` | Parallel session safety | Executed 2026-08-28 (incl. 02o.7–9 worktree automation; renumbered 02o→02p 2026-09-09, 02p→02q 2026-09-10) |
+| `02r-phase-1-anti-tunnel-point-coverage.md` | Anti-tunnel point coverage (A+) | Authoring + executing 2026-09-28 (owner GO — A+ full scope: shared contract + round-table gate + elicitation/grill-me closures + audit) |
 | `03-phase-2-enablement.md` | Phase 2 enablement | Planned (v2.1) |
 | `03a-phase-2-external-skills-research-and-ingestion.md` | External skills research & ingestion | Planned |
 | `03b-phase-2-mcp-integration-plan.md` | MCP integration | Planned |

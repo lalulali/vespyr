@@ -31,6 +31,7 @@ Final review, architect phase gate, Kanban seeding, and handoff to develop.
 - `product-spec.md` exists ✓
 - `product-spec.html` exists ✓
 - `design.md` exists ✓
+- `design.md` obeys the Anti-generic rule ✓ — **verified by `node .agents/scripts/anti_generic_check.js check` (exit 0)**
 - `prototype-collaboration.md` exists when a prototype was produced ✓
 - All ACs are testable ✓
 - No blocking open questions remain ✓
@@ -45,6 +46,26 @@ node .agents/scripts/template_conformance.js check --mode create --json
 ```
 
 A compact/off-template `requirements.md` (missing §§1–14, FR/NFR tables) or a flat `user-stories.md` (no Epic/Feature hierarchy, missing metadata, single-line ACs) fails this gate. Fix the documents against their templates — do not waive.
+
+## Anti-generic validator (blocking)
+
+The handoff is blocked until this command exits 0 — it is the mechanical enforcement of the two `design.md` checklist lines above (prose "✓" is not sufficient):
+
+```bash
+node .agents/scripts/anti_generic_check.js check --json
+```
+
+A `design.md` with a banned navy dark surface, a missing/placeholder signature differentiator, an unfilled taste brief, a starter Inspiration shelf, or — for a motion-led Product context (Vibrant Brand-First / Conversion Storefront) — empty Motion tables with no recorded skip, fails this gate. This is the enforcement for the reported "always ends up traditional design" defect. Fix by restarting from the brief — do not waive.
+
+## Motion spec validator (blocking when motion is in scope)
+
+When `motion-spec.md` exists, the handoff is additionally blocked until this command exits 0:
+
+```bash
+node .agents/scripts/motion_spec_check.js check --json
+```
+
+It parses the real `motion-spec.md` and fails on any incomplete `MO-###` prompt (missing field, non-composited animated property, non-fade reduced-motion fallback, non-numeric timing tolerance), a spec-side orphan, or a prompt not referenced in `user-stories.md`. When `motion-spec.md` is absent the script exits 0 (motion not in scope) and this line is a no-op.
 
 ## Prototype collaboration validator
 

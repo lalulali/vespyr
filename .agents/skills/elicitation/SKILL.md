@@ -30,6 +30,7 @@ When invoked from another prompt or process:
 2. Apply elicitation methods iteratively to enhance that specific content
 3. Return the enhanced version back when user selects 'x' to proceed and return back
 4. The enhanced content replaces the original section content in the output document
+5. Enumerate the section's critique points before executing and return the Critique coverage line with the enhanced content (canon: `.agents/references/point-coverage.md`)
 
 ---
 
@@ -49,7 +50,7 @@ node .agents/scripts/roundtable_eval.js log --mode <native|solo|refused> --tool 
 
 ### Step 0: Topic Sharpening (Mandatory — before any method)
 
-Sharpening follows the shared contract `.agents/references/step-0-sharpening.md` (restate / fuzz ≤5 / emit / confirm — no manufactured ambiguity, no generic filler). Elicitation-specific: the restated target names the artifact/section under critique plus the question it must answer; the confirmed statement becomes the critique target, the telemetry `--topic`, and the Step 1 matching context.
+Sharpening follows the shared contract `.agents/references/step-0-sharpening.md` (restate / fuzz ≤5 / emit / confirm — no manufactured ambiguity, no generic filler). Elicitation-specific: the restated target names the artifact/section under critique plus the question it must answer; **enumerate the critique points** the confirmed target covers — the distinct claims/sections to be challenged, grouped to ≤7 clusters when the target is large (canon: `.agents/references/point-coverage.md`; closure is disclosure, never a gate). The confirmed statement drives the critique target, the telemetry `--topic`, and the Step 1 matching context.
 
 ### Step 1: Method Registry Loading
 
@@ -146,11 +147,12 @@ Reply with a number (1-5) or method name to execute, **reshuffle** to get new op
 **Case: Proceed**
 
 - Complete elicitation and proceed.
-- **Close with the Sharpening Ledger** — the session's communicable record, exactly four lines:
+- **Close with the Sharpening Ledger** — the session's communicable record, exactly five lines:
   1. Original topic → sharpened topic
   2. Methods executed, each with its outcome marker
   3. What changed in the artifact (one line)
-  4. Residual open questions (max 3, or "none")
+  4. Critique coverage: `{covered}/{total} points` — every enumerated point ends `covered (method)` / `unexamined (disclosed)` / `deferred (owner + reason)` / `out-of-scope ("boundary")`; `none` when all covered (canon: `.agents/references/point-coverage.md`; disclosure, not a gate)
+  5. Residual open questions (max 3, or "none")
 - Return the fully enhanced content back to the invoking skill.
 - The enhanced content becomes the final version for that section.
 - Signal completion back to the invoking skill to continue with the next section.

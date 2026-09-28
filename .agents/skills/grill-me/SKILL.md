@@ -69,6 +69,7 @@ Each move is an interrogation **function**, not an engineering artifact. The sof
 2. Gather the ground-truth material and **explore it before asking anything** — code for software, materials/data/prior attempts otherwise
 3. Instantiate all eight moves in the subject's own terms — one line each — and write them into the decision-log header. *You cannot silently skip a move you were forced to instantiate first.*
 4. Ask the user: *"What worries you most about this?"* — their answer opens the interview and is diagnostic data in itself
+5. **Enumerate the subject points (coverage contract — anti-tunnel; canon: `.agents/references/point-coverage.md`).** From the ground-truth material and the user's answer, list the subject's load-bearing claims/decision points plus every concern the user voiced — typically 3–7; merge or ask the user to rank if the list explodes. Write them into the decision-log header beside the move instantiation (`P1 <claim>`, `P2 <claim>`, …). The eight moves are the lens; these points are the subjects — neither may silently outrun the other.
 
 ### Step 1: Order selection
 
@@ -117,6 +118,7 @@ After all eight moves are dispositioned, scan the log for contradictions:
 - Does a Failure & Recovery answer invalidate a Structure choice?
 - Does Cost rule out something Consequences assumed?
 - Did any Skipped move become load-bearing mid-interview?
+- Did any subject point end unexamined or contradicted by another point's conclusion?
 
 If contradictions surface, present them and ask which move to revisit.
 
@@ -126,6 +128,7 @@ Append a summary block to `artifacts/output/{current-phase}/grill-me-decisions.m
 - Date
 - Subject type + instantiation table (or link to it)
 - Disposition ledger: examined/skipped counts with skip reasons
+- Point closure: every subject point → `covered (move N)` / `deferred (owner + reason)` / `out-of-scope ("boundary")` / `rejected (reason)` — a point with no disposition is a blind spot that survives the session (canon: `.agents/references/point-coverage.md`)
 - Number of decisions resolved
 - Cross-move contradictions found
 - Handoff recommendation (e.g., "ready for /design", "ready to author syllabus", "needs /validate-idea first")
@@ -146,6 +149,7 @@ At end: run `node .agents/scripts/orchestrator_state.js complete --agent founder
 
 - **Do not recite the moves in fixed order like a checklist.** Rigidity belongs in the coverage ledger, not the room.
 - **Do not let a move die silently.** Unasked ≠ skipped. A skip needs a logged reason or it hasn't happened.
+- **Do not let a subject point die silently.** A move can be EXAMINED while one of its subjects was never probed; the point ledger closes that gap at lock time.
 - **Do not ask multiple questions at once.** The interview loses depth if you bundle.
 - **Do not recommend the user's first answer uncritically.** *"That's interesting — what if the opposite is true?"* beats "yes, that works."
 - **Do not soften a probe to keep the mood warm.** The DNA applies double here: the interviewer's job is the uncomfortable question.
