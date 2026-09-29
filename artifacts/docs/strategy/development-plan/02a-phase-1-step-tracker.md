@@ -4,6 +4,8 @@
 **Date:** 2026-07-16  
 **Addresses:** Step drift across multi-agent, multi-step skill execution
 
+> **[RECORD RECONCILIATION 2026-09-29 (02p R1.6)]** Audit (2026-08-23) found 2 false bits in the rollout inventory below (flattened step dirs vs recorded counts; explore-idea/iterate later gained steps). Re-measured with `ls ... \| wc -l`; annotations are dated. Evidence: `02p` §5.1.
+
 ---
 
 ## Problem
@@ -145,17 +147,17 @@ node .agents/scripts/step_tracker.js audit --all
 Rollout status (verified 2026-07-20):
 
 - [x] `shape-up/steps/` (6 steps) — reference skill
-- [x] `develop/steps/` (11 steps, incl. parallel 3a/3b)
-- [x] `design/steps-create/` (6 steps)
-- [x] `design/steps-edit/` (4 steps)
-- [x] `design/steps-validate/` (4 steps)
-- [x] `validate-idea/steps-create/` (7 steps)
-- [x] `validate-idea/steps-edit/` (5 steps)
-- [x] `validate-idea/steps-validate/` (5 steps)
+- [x] `develop/steps/` (11 steps, incl. parallel 3a/3b) — *[02p 2026-09-29: now 13 — `ls .agents/skills/develop/steps/*.md \| wc -l` → 13; steps added by later epics.]*
+- [x] `design/steps-create/` (6 steps) — *SUPERSEDED 2026-09-29 (02p): flattened to `design/steps/`; `ls .agents/skills/design/steps/*.md \| wc -l` → 20.*
+- [x] `design/steps-edit/` (4 steps) — *SUPERSEDED 2026-09-29 (02p): same flatten; see `design/steps/` count above.*
+- [x] `design/steps-validate/` (4 steps) — *SUPERSEDED 2026-09-29 (02p): same flatten; see `design/steps/` count above.*
+- [x] `validate-idea/steps-create/` (7 steps) — *SUPERSEDED 2026-09-29 (02p): flattened to `validate-idea/steps/`; `ls .agents/skills/validate-idea/steps/*.md \| wc -l` → 18.*
+- [x] `validate-idea/steps-edit/` (5 steps) — *SUPERSEDED 2026-09-29 (02p): same flatten; see count above.*
+- [x] `validate-idea/steps-validate/` (5 steps) — *SUPERSEDED 2026-09-29 (02p): same flatten; see count above.*
 - [x] `launch/steps/` (5 steps)
 - [x] `retro/steps/` (5 steps)
-- [x] `explore-idea/` — no `steps/` directory; flow is inline in `SKILL.md`. Needs step files extracted first before tracker calls can be added.
-- [x] `iterate/` — no `steps/` directory; flow is inline in `SKILL.md`. Same as above.
+- [x] `explore-idea/` — no `steps/` directory; flow is inline in `SKILL.md`. Needs step files extracted first before tracker calls can be added. — *[02p 2026-09-29: extraction completed later — `ls .agents/skills/explore-idea/steps/*.md \| wc -l` → 6.]*
+- [x] `iterate/` — no `steps/` directory; flow is inline in `SKILL.md`. Same as above. — *[02p 2026-09-29: extraction completed later — `ls .agents/skills/iterate/steps/*.md \| wc -l` → 7.]*
 
 **Sub-step labels:** Parallel/branching steps use letter suffixes (e.g. `3a`, `3b`). The tracker treats `3a` and `3b` as distinct audit slots. `add-step-tracker-calls.js` captures the full label via `/^step:\s*(\d+[a-z]?)/m`.
 

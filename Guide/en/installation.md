@@ -5,7 +5,7 @@
 ## Prerequisites
 
 - **Node.js** ≥ 18
-- An **AI developer harness** (any of: OpenCode, Claude Code, Cursor, Windsurf, GitHub Copilot, Kiro, Aider, Google Antigravity)
+- An **AI developer harness** — first-class installs for OpenCode, Claude Code, Kiro, and GitHub Copilot; Google Antigravity and Codex read the universal `.agents/` store natively; Aider and Gemini CLI adopt it via `AGENTS.md`. Cursor/Windsurf installs are legacy-cleanup-only pending the Phase-2 redesign.
 - A terminal or IDE with agent invocation support
 
 ## Install
@@ -27,7 +27,7 @@ node bin/cli.js --yes --harness opencode,claude
 
 The interactive CLI wizard walks you through:
 
-1. **Harness selection** — choose your IDE/CLI harness (OpenCode, Claude Code, Cursor, etc.)
+1. **Harness selection** — choose your IDE/CLI harness (OpenCode, Claude Code, Kiro, GitHub Copilot)
 2. **Project target** — which repository to install into (defaults to `cwd`)
 
 ## What Gets Created
@@ -38,7 +38,7 @@ After installation, your project root gets:
 your-project/
 ├── .agents/              # Agent personas, skills, scripts, config, references
 │   ├── agents/           # 20 agent persona markdown files
-│   ├── skills/           # 43 atomic skill workflows
+│   ├── skills/           # 40 atomic skill workflows
 │   ├── scripts/          # Orchestrator, memory, telemetry
 │   ├── config.yaml       # Project configuration
 │   └── references/       # Phase table, glossary, contracts
@@ -49,13 +49,28 @@ your-project/
 │   │   └── lessons-learned.md
 │   ├── input/            # User-provided raw materials
 │   └── output/           # Agent-generated artifacts (by phase)
-├── agent.md              # Harness entry point (for OpenCode/Copilot)
-├── AGENTS.md             # Harness entry point (for Claude/Cursor)
-├── CLAUDE.md             # Harness entry point (for Claude Code/Cursor)
+├── agent.md              # Entry point (agent.md-convention tools)
+├── AGENTS.md             # Universal instruction baseline (Copilot personas ride this)
+├── CLAUDE.md             # Entry point (Claude Code)
 └── README.md             # Project overview
 ```
 
-> **Harness note:** The configuration directory is `.agents/`. Some harnesses expect a different dotfolder (e.g., Claude Code uses `.claude/`). Rename `.agents/` to match your harness if needed.
+> **Harness note:** The canonical configuration directory is `.agents/`. The installer creates the per-harness links your selections need (`.opencode`, `.claude`, `.kiro/skills`, `.github/skills`) — do not rename or move `.agents/`, or those links break.
+
+## Supported harnesses
+
+| Harness | Install | What you get |
+|---|---|---|
+| OpenCode | First-class | `.opencode -> .agents` symlink |
+| Claude Code | First-class | `.claude -> .agents` symlink + `CLAUDE.md` |
+| Kiro | First-class (hybrid) | `.kiro/skills` symlink + `.kiro/steering/vespyr-steering.md` |
+| GitHub Copilot | First-class | `.github/copilot-instructions.md` + `.github/skills -> .agents/skills`; personas ride the root `AGENTS.md` |
+| Google Antigravity | None needed | reads `.agents/skills/` (plus `.agents/rules/`, `.agents/workflows/`) natively |
+| Codex | None needed | reads root `AGENTS.md` and scans `.agents/` skills natively |
+| Cursor / Windsurf | Legacy cleanup | detect/uninstall of old installs only; redesign in Phase 2 |
+| Aider / Gemini CLI | Read-and-adopt | use the root `AGENTS.md` invocation pattern |
+
+**Caveats:** GitHub Copilot consumes personal skills from `~/.agents/skills` but does not list them in autocomplete/picker (functional-but-invisible), and VS Code's `/` picker resolves project skills through the emitted `.github/skills` link — not root `.agents/skills`. Antigravity's `.agents/agents.md` team-file does not collide with Vespyr's `.agents/agents/` persona directory. The canonical, always-current matrix lives at `.agents/references/harness-matrix.md`.
 
 ## Quick Install (Skip Wizard)
 

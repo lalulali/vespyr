@@ -5,6 +5,8 @@
 > **Themes:** T2 (Skill atomicity), T3 (Artifact rigor), T8 (UTTERLY SATISFIED culture)
 > **Goal:** Skills become atomic + tri-modal. Artifacts become kernel + companions. State is dual-format (JSON + YAML). After this phase, Vespyr is "atomic" — skills resume, skills have phases, skills are first-class tools; artifacts are rigorous; and every handoff carries an explicit satisfaction state.
 
+> **[RECORD RECONCILIATION 2026-09-29 (02p R1.4)]** The 2026-08-23 audit found ~31 falsely-stamped boxes in this file (concurrent-session clobber + unreconciled supersession; taxonomy in `artifacts/memory/active-decisions.md` 2026-08-23). Each is now dispositioned — *mark-superseded* (annotation, `[x]` kept only where true), *correct-in-place* (counts fixed), or *convert-to-build-item* (`[ ]` + routed follow-up). Every corrected box carries the dated command that proves it. Nothing is silently rewritten. Full execution log: `02p-phase-1-record-integrity-recovery.md` §5.1.
+
 ## What changed from the original plan
 
 | Item | Original | This file | Why |
@@ -285,10 +287,10 @@ A single file with `if mode == create ... else if mode == edit ...` is what we h
 ### Checklist
 
 - [x] F1.3 — Rewrite `.agents/skills/validate-idea/SKILL.md` as ~50-line router with tri-modal selector
-- [x] F1.4 — Create `steps-create/` (create mode, 7 step files): session-setup, input-analysis, idea-framing, stress-test-r1, stress-test-r2, go-pivot-kill, handoff
-- [x] F1.5 — Create `steps-edit/` (edit mode, 5 step files): load-existing, identify-gaps, revise, stress-test, finalize
-- [x] F1.6 — Create `steps-validate/` (validate/Socratic mode, 5 step files): open-questions, 7-branches, cross-branch-check, decision-log, lock-handoff
-- [x] Test mode detection with adversarial prompts: "validate my new idea" → steps-create/; "edit the existing brief" → steps-edit/; "stress-test the spec" → steps-validate/
+- [x] F1.4 — Create `steps-create/` (create mode, 7 step files): session-setup, input-analysis, idea-framing, stress-test-r1, stress-test-r2, go-pivot-kill, handoff — *SUPERSEDED 2026-09-29 (02p): subfolders flattened to `steps/`; `ls .agents/skills/validate-idea/` → `SKILL.md steps`.*
+- [x] F1.5 — Create `steps-edit/` (edit mode, 5 step files): load-existing, identify-gaps, revise, stress-test, finalize — *SUPERSEDED 2026-09-29 (02p): same flatten — `ls .agents/skills/validate-idea/` → `SKILL.md steps`.*
+- [x] F1.6 — Create `steps-validate/` (validate/Socratic mode, 5 step files): open-questions, 7-branches, cross-branch-check, decision-log, lock-handoff — *SUPERSEDED 2026-09-29 (02p): same flatten — `ls .agents/skills/validate-idea/` → `SKILL.md steps`.*
+- [x] Test mode detection with adversarial prompts: "validate my new idea" → steps-create/; "edit the existing brief" → steps-edit/; "stress-test the spec" → steps-validate/ — *SUPERSEDED 2026-09-29 (02p): mode routing now lives in `SKILL.md` + `steps/`; `ls .agents/skills/validate-idea/` → `SKILL.md steps`.*
 
 ## F1.7-F1.8 — Restructure `retro` skill (253 lines → folder + 5 step files)
 
@@ -371,9 +373,9 @@ Same as F1.3-F1.6: mode detection is automatic, each mode has its own flow, user
 ### Checklist
 
 - [x] F1.9 — Rewrite `.agents/skills/design/SKILL.md` as ~50-line router with tri-modal selector
-- [x] F1.10 — Create `steps-create/` (create mode, 6 step files): load-prd-brief, define-personas, user-stories, screen-states, design-tokens, handoff
-- [x] F1.11 — Create `steps-edit/` (edit mode, 4 step files)
-- [x] F1.12 — Create `steps-validate/` (validate mode, 4 step files)
+- [x] F1.10 — Create `steps-create/` (create mode, 6 step files): load-prd-brief, define-personas, user-stories, screen-states, design-tokens, handoff — *SUPERSEDED 2026-09-29 (02p): subfolders flattened to `steps/`; `ls .agents/skills/design/` → `SKILL.md steps`.*
+- [x] F1.11 — Create `steps-edit/` (edit mode, 4 step files) — *SUPERSEDED 2026-09-29 (02p): same flatten — `ls .agents/skills/design/` → `SKILL.md steps`.*
+- [x] F1.12 — Create `steps-validate/` (validate mode, 4 step files) — *SUPERSEDED 2026-09-29 (02p): same flatten — `ls .agents/skills/design/` → `SKILL.md steps`.*
 - [x] Test mode detection
 
 ## F1.13-F1.14 — Restructure `launch` skill
@@ -742,7 +744,7 @@ Currently matches 5 elicitation methods. Extend to match across all 3 CSVs based
 
 ### Checklist
 
-- [x] F1.21 — Extend `.agents/skills/elicitation/methods.csv` from 70 → 100 methods (added: validation, decision, research, architecture, strategy, quality categories)
+- [ ] F1.21 — Extend `.agents/skills/elicitation/methods.csv` from 70 → 100 methods (added: validation, decision, research, architecture, strategy, quality categories) — **[FALSE ON DISK 2026-09-29 (02p): 98 numbered method rows, not 100 — `grep -c '^[0-9][0-9]*,' .agents/skills/elicitation/methods.csv` → 98. Converted to build item (02p §12 follow-ups, owner @developer); do not re-stamp until the count command returns ≥100.]**
 - [x] F1.22 — Create `.agents/skills/brainstorming/methods.csv` (60 methods: SCAMPER, Six Thinking Hats, Starbursting, Reverse, agent-specific, etc.)
 - [x] F1.23 — Create `.agents/skills/validation-patterns/methods.csv` (30 methods: Smoke Test, Concierge MVP, Wizard of Oz, A/B Test, etc.)
 - [x] F1.24 — Update `.agents/scripts/match_methods.js`: accept `--source elicitation|brainstorming|validation` flag; default: search all 3; return top N with relevance score; added `--top` flag
@@ -819,18 +821,20 @@ The 4-line Delegation Contract injected into reasoning agents says "You delegate
 
 ### Checklist
 
-- [x] Create the delegation block template (frontmatter `delegation:` field + inline `## Delegation` section)
-- [x] Add delegation blocks to all 10 `develop/step-*.md` files
-- [x] Add delegation blocks to all 7 `validate-idea/steps-create/*.md` files
-- [x] Add delegation blocks to all 5 `validate-idea/steps-edit/*.md` files
-- [x] Add delegation blocks to all 5 `validate-idea/steps-validate/*.md` files
-- [x] Add delegation blocks to all 5 `retro/step-*.md` files
-- [x] Add delegation blocks to all 6 `design/steps-create/*.md` files
-- [x] Add delegation blocks to all 4 `design/steps-edit/*.md` files
-- [x] Add delegation blocks to all 4 `design/steps-validate/*.md` files
-- [x] Add delegation blocks to all 5 `launch/step-*.md` files
-- [x] Run CI check: verify every step file in `.agents/skills/**/step*.md` has a `delegation:` field in frontmatter
-- [x] Verify delegation blocks match step content (read-heavy steps delegate reads, write-heavy steps delegate writes)
+> ***[02p — mark-superseded]*** These 12 boxes were true when shipped and were then legitimately undone by the owner-authorized 2026-08-10 re-scope (trio personas deleted; delegation frontmatter stripped repo-wide). The path forms named here (`develop/step-*.md`, `steps-create|edit|validate/`) were later flattened to `steps/`.
+
+- [x] Create the delegation block template (frontmatter `delegation:` field + inline `## Delegation` section) — *SUPERSEDED 2026-09-29 (02p): `grep -rln "^delegation:" .agents/skills/ \| wc -l` → 0.*
+- [x] Add delegation blocks to all 10 `develop/step-*.md` files — *SUPERSEDED 2026-09-29 (02p): `grep -rln "^delegation:" .agents/skills/develop/ \| wc -l` → 0.*
+- [x] Add delegation blocks to all 7 `validate-idea/steps-create/*.md` files — *SUPERSEDED 2026-09-29 (02p): `grep -rln "^delegation:" .agents/skills/validate-idea/ \| wc -l` → 0 (dir also flattened to `steps/`).*
+- [x] Add delegation blocks to all 5 `validate-idea/steps-edit/*.md` files — *SUPERSEDED 2026-09-29 (02p): `grep -rln "^delegation:" .agents/skills/validate-idea/ \| wc -l` → 0.*
+- [x] Add delegation blocks to all 5 `validate-idea/steps-validate/*.md` files — *SUPERSEDED 2026-09-29 (02p): `grep -rln "^delegation:" .agents/skills/validate-idea/ \| wc -l` → 0.*
+- [x] Add delegation blocks to all 5 `retro/step-*.md` files — *SUPERSEDED 2026-09-29 (02p): `grep -rln "^delegation:" .agents/skills/retro/ \| wc -l` → 0.*
+- [x] Add delegation blocks to all 6 `design/steps-create/*.md` files — *SUPERSEDED 2026-09-29 (02p): `grep -rln "^delegation:" .agents/skills/design/ \| wc -l` → 0 (dir also flattened to `steps/`).*
+- [x] Add delegation blocks to all 4 `design/steps-edit/*.md` files — *SUPERSEDED 2026-09-29 (02p): `grep -rln "^delegation:" .agents/skills/design/ \| wc -l` → 0.*
+- [x] Add delegation blocks to all 4 `design/steps-validate/*.md` files — *SUPERSEDED 2026-09-29 (02p): `grep -rln "^delegation:" .agents/skills/design/ \| wc -l` → 0.*
+- [x] Add delegation blocks to all 5 `launch/step-*.md` files — *SUPERSEDED 2026-09-29 (02p): `grep -rln "^delegation:" .agents/skills/launch/ \| wc -l` → 0.*
+- [x] Run CI check: verify every step file in `.agents/skills/**/step*.md` has a `delegation:` field in frontmatter — *SUPERSEDED 2026-09-29 (02p): the lint was never built in this form; its successor is the ban-only delegation lint in `compile_skills.js` (02p R0.2).*
+- [x] Verify delegation blocks match step content (read-heavy steps delegate reads, write-heavy steps delegate writes) — *SUPERSEDED 2026-09-29 (02p): `grep -rln "^delegation:" .agents/skills/ \| wc -l` → 0.*
 - [x] Verify every step file has an `output_contract.citations` field (`required` or `not-required`) per F0.29
 
 ## F1.24.b — Maximize I/O sub-agent utilization & depth
@@ -911,9 +915,9 @@ F1.25 expands 9 *reasoning* domain experts with persona depth, decision trees, a
   - [x] `reader.md` (112 → 150 lines)
   - [x] `writer.md` (136 → 175 lines)
   - [x] `executor.md` (128 → 175 lines)
-- [x] F1.24.b.2 — Update the F1.24.a delegation block template to cite `delegation-policy.md` thresholds (reads/writes/runs conditions + `direct_justified:` field); update the F1.24.a example frontmatter to match
-- [x] F1.24.b.3 — Extend the F1.24.a CI check: flag `@reader` on steps reading 1-3 small files as boilerplate; require `direct_justified:` field (even if `[]`) on every step file; require `output_contract.citations` field per F0.29
-- [x] Verify the 3 sub-agents stay < 200 lines (narrow, not bloated)
+- [x] F1.24.b.2 — Update the F1.24.a delegation block template to cite `delegation-policy.md` thresholds (reads/writes/runs conditions + `direct_justified:` field); update the F1.24.a example frontmatter to match — *SUPERSEDED 2026-09-29 (02p): delegation template + `direct_justified:` machinery removed with the trio personas; `grep -rln "^delegation:" .agents/skills/ \| wc -l` → 0.*
+- [x] F1.24.b.3 — Extend the F1.24.a CI check: flag `@reader` on steps reading 1-3 small files as boilerplate; require `direct_justified:` field (even if `[]`) on every step file; require `output_contract.citations` field per F0.29 — *SUPERSEDED 2026-09-29 (02p): the described CI check never shipped (audit); ban-only delegation lint replaced it (02p R0.2); `grep -rn "direct_justified" .agents/scripts/ \| wc -l` → 0.*
+- [x] Verify the 3 sub-agents stay < 200 lines (narrow, not bloated) — *SUPERSEDED 2026-09-29 (02p): the 3 sub-agents (`reader`/`writer`/`executor`) were deleted 2026-08-10; `ls .agents/agents/ \| grep -Ec '^(reader\|writer\|executor)\.md$'` → 0.*
 - [x] Re-run the F1.24.a content audit to confirm no reasoning-agent concerns (decision trees, memory contracts) leaked into the I/O sub-agents
 
 ---
@@ -1143,7 +1147,7 @@ The skill checks what artifacts exist and adapts — no mode selector needed:
   - `design/SKILL.md` — add `shaped-brief.md` as valid prerequisite; research optional when entering via shape-up
   - `AGENTS.md` — add `/shape-up` to Curated Workflows (after `/explore-game-idea`, before `/design`)
 - [x] Verify each step file is 30-60 lines — **FIXED 2026-07-31 (per CR-002)**: all step files + SKILL.md router now ≤ 500 lines.
-- [x] Verify every step file has frontmatter with `delegation:`, `output_contract.citations:`
+- [x] Verify every step file has frontmatter with `delegation:`, `output_contract.citations:` — *SUPERSEDED 2026-09-29 (02p): `delegation:` frontmatter is absent repo-wide (`grep -rln "^delegation:" .agents/skills/ \| wc -l` → 0); the `output_contract.citations:` half is separately enforced by `spec_check.js`.*
 - [x] Verify SKILL.md router is ≤ 500 lines
 
 - [x] Test: invoke with no prior artifacts → full shaping flow (28/28 assertions in test-shape-up.mjs)
@@ -1426,7 +1430,7 @@ These personas are invoked by step files. The router declares them so the agent 
   - Add "do NOT ask the user" guardrail language
 - [x] F1.32.2 — Update `develop/steps/step-06-dev-loop.md`: remove default human pause; default to internal resolution via persona chain
 - [x] F1.32.3 — Update `develop/SKILL.md`: add harness adherence block (non-negotiable step sequence, QA auto-execution)
-- [x] F1.32.4 — Add `## Persona delegation` to `plan/SKILL.md` (@tech-lead), `review/SKILL.md` (@code-reviewer), `test/SKILL.md` (@qa-engineer), `kanban/SKILL.md` (@product-manager)
+- [x] F1.32.4 — Add `## Persona delegation` to `plan/SKILL.md` (@tech-lead), `review/SKILL.md` (@code-reviewer), `test/SKILL.md` (@qa-engineer), `kanban/SKILL.md` (@product-manager) — *VERIFIED TRUE 2026-09-29 (02p): all four carry the section — `grep -l "## Persona delegation" .agents/skills/{plan,review,test,kanban}/SKILL.md \| wc -l` → 4.*
 - [x] F1.32.5 — Add `## Primary personas` to `design/SKILL.md` router (@product-manager, @product-designer)
 - [x] F1.32.6 — Add the UTTERLY SATISFIED handoff contract to quality and launch steps; unresolved `CHANGES REQUESTED` and `BLOCKED` states stop progression
 - [x] Run content audit: verify all 7 changed files have the intended additions
@@ -1478,9 +1482,9 @@ Upgrade `@product-manager` (Sarah) to operate as a full **AI Product Manager (AI
 - [x] `orchestrator_state.js status`/`next` print ASCII dashboards by default; agents enforce pipeline state checks
   - ASCII dashboard functions (`printDashboard`, `printNextDashboard`) exist in `orchestrator_state.js` ✓
   - Pipeline enforcement rules added to AGENTS.md under "Goal-Driven Execution" (§4)
-- [x] Every step file in `.agents/skills/**/step*.md` has a `delegation:` field in its frontmatter and a `## Delegation` section
-- [x] Delegation blocks are step-specific (read-heavy steps delegate reads to @reader, write-heavy steps delegate writes to @writer, run-heavy steps delegate to @executor)
-- [x] `@reader`, `@writer`, `@executor` each have an `## Output-quality rubric` + `## Failure modes` section (F1.24.b.1); delegation blocks cite `delegation-policy.md` thresholds with a `direct_justified:` field (F1.24.b.2); CI flags boilerplate delegation (F1.24.b.3)
+- [x] Every step file in `.agents/skills/**/step*.md` has a `delegation:` field in its frontmatter and a `## Delegation` section — *SUPERSEDED 2026-09-29 (02p): `grep -rln "^delegation:" .agents/skills/ \| wc -l` → 0.*
+- [x] Delegation blocks are step-specific (read-heavy steps delegate reads to @reader, write-heavy steps delegate writes to @writer, run-heavy steps delegate to @executor) — *SUPERSEDED 2026-09-29 (02p): trio personas deleted; `grep -rn "@reader\|@writer\|@executor" .agents/skills/ \| wc -l` → 0.*
+- [x] `@reader`, `@writer`, `@executor` each have an `## Output-quality rubric` + `## Failure modes` section (F1.24.b.1); delegation blocks cite `delegation-policy.md` thresholds with a `direct_justified:` field (F1.24.b.2); CI flags boilerplate delegation (F1.24.b.3) — *SUPERSEDED 2026-09-29 (02p): persona files and the described CI check are gone; `ls .agents/agents/ \| grep -Ec '^(reader\|writer\|executor)\.md$'` → 0.*
 - [x] Every step file has an `output_contract.citations` field (`required` or `not-required`) per F0.29; CI verifies the field is present
 - [x] `/shape-up` skill exists with SKILL.md router (≤ 500 lines) + 6 step files; cross-skill wiring in `explore-idea`, `design`, and `AGENTS.md` is complete
 
@@ -1527,14 +1531,14 @@ Once Phase 1 is done, every new file in Phase 2+ can assume:
 
 ## Completion Checklist
 
-**Phase 1 Master Skills Plan status: COMPLETE.**
+**Phase 1 Master Skills Plan status: COMPLETE.** *[02p RECONCILE 2026-09-29: amended — the 2026-08-23 sweep found ~31 false boxes in this file; all are now dispositioned (annotations throughout). This banner stands for every item except F1.21 (98/100 methods — open build item) and the superseded delegation / tri-modal-subfolder boxes, which are annotated in place.]*
 
-- [x] Skill directory restructuring with step loaders and tri-modal execution subfolders
+- [x] Skill directory restructuring with step loaders and tri-modal execution subfolders — *[02p 2026-09-29: restructuring VERIFIED (`ls .agents/skills/develop/` → `SKILL.md steps`); the tri-modal subfolder half is SUPERSEDED (flattened to `steps/`).]*
 - [x] Spec-kernel templates and dynamic HTML design specifications
 - [x] Dual-format pipeline state machine (YAML + JSON) with ASCII dashboards
-- [x] Expanded method libraries (100+ elicitation, 60+ brainstorming, 30+ validation patterns)
+- [~] Expanded method libraries (100+ elicitation, 60+ brainstorming, 30+ validation patterns) — *[PARTIAL 2026-09-29 (02p): elicitation = 98 rows (`grep -c '^[0-9][0-9]*,'` → 98; see F1.21); brainstorming = 60 and validation-patterns = 30 → those two true. Box lowered from `[x]` per First Principle 1.]*
 - [x] Modular design thinking skill suite (`/unpack-problem`, `/shape-up`, `/root-cause`, `/research-plan`, `/empathy-map`, `/journey-map`, `/jtbd`, `/discovery-report`)
-- [x] Sub-plan execution: 02a (step-tracker), 02b (memory-fix), 02c (teaching), 02d (ai-team), 02e (agentskills), 02f (security), 02g (harness-honesty) completed; 02h, 02i, 02j in active execution.
+- [x] Sub-plan execution: 02a (step-tracker), 02b (memory-fix), 02c (teaching), 02d (ai-team), 02e (agentskills), 02f (security), 02g (harness-honesty) completed; 02h, 02i, 02j in active execution. — *[FALSE as written 2026-09-29 (02p): 02g's completion claim was killed — see `02g` §7.3; and 02h/02i/02j are executed (02h 2026-08-25, 02i re-certified 2026-08-26, 02j 2026-08-18). Per-plan record status is owned by each sub-plan + 02p.]*
 
 ---
 

@@ -210,7 +210,19 @@ sub-agent mentions. Reports the weekly summary per agent and exits 0.`);
       process.exit(0);
     }
     const rows = summarizeRecords(records, now);
-    printReport(rows, `delegation log: ${path.relative(ROOT, logPath)}`, now, useJson);
+    if (rows.length > 0) {
+      printReport(rows, `delegation log: ${path.relative(ROOT, logPath)}`, now, useJson);
+      process.exit(0);
+    }
+    // Log exists but has no records yet: fall back to session-summary mentions
+    // so the weekly audit is not blinded by an empty baseline (02p fix 2026-09-29).
+    const fallbackRows = scanSessionSummaries(now);
+    printReport(
+      fallbackRows,
+      'session summaries (delegation log present but empty)',
+      now,
+      useJson
+    );
     process.exit(0);
   }
 

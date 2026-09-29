@@ -8,6 +8,8 @@
 
 **✅ RESOLVED (2026-08-24) — harness classification:** Owner refuted the architect's emitter/symlink classification with primary sources (cited in §10): GitHub Copilot and Google Antigravity **natively discover `.agents/skills/`** — canonical placement suffices, zero emission. Architect conceded formally, issued revised classification ([PIVOT]); concessions logged. Consequences binding on WS-D: (C1) zero skill emission for Copilot/Antigravity; (C7) `transpileCopilotYAML()` demoted — retained only if C2 resolves to persona-emission, else cut.
 
+> **[02p 2026-09-29 — field-evidence correction to C1/C7]** The owner's 2026-08-25 VS Code field test showed the `/` picker does not surface root `.agents/skills`; Copilot therefore receives an emitted `.github/skills` link (see matrix). "Zero skill emission" now holds for **Antigravity only**; Copilot's no-persona-emission rule (C2=B: no `.agent.md`) is intact; `transpileCopilotYAML()` was cut (verified absent from code paths).
+
 **✅ ALL OWNER DECISIONS RESOLVED (2026-08-24):**
 - **C2 = B (adoption-ride):** Copilot personas surface via root `AGENTS.md`; **`transpileCopilotYAML()` CUT** during execution (dead code targeting stale YAML format, no remaining consumer). No `.agent.md` emission.
 - **C4 = A (single canonical):** always install personal skills to `~/.agents/skills`; per-tool bridging notes for shapes that don't read it natively (e.g., Antigravity CLI needs `~/.gemini/antigravity-cli/skills/`; VS-code-era tools vary).
@@ -17,7 +19,7 @@
 
 **No open questions remain — plan is execution-ready.**
 
-**Budget:** 34.5h authoring serial (incl. 0.5h prelude discipline item; WS-D re-scoped 2026-08-24 per C1–C7 and owner decisions C2=B/C4=A/C3=YES — emitter work cut, native-read verification + compliance audit retained), single-writer, commit-after-every-build-item. No parallel lanes. No stretch estimate — if it exceeds 40h, stop and replan with Chris.
+**Budget:** 34.5h authoring serial (incl. 0.5h prelude discipline item; WS-D re-scoped 2026-08-24 per C1–C7 and owner decisions C2=B/C4=A/C3=YES — emitter work cut, native-read verification + compliance audit retained), single-writer, commit-after-every-build-item *(suspended 2026-09-29 — owner standing rule; see §5.1/§12)*. No parallel lanes. No stretch estimate — if it exceeds 40h, stop and replan with Chris.
 
 ---
 
@@ -40,7 +42,7 @@
 | Item | Rationale |
 |---|---|
 | Re-opening 02g feature work | Delegation-language rewrite shipped and stays approved; only its *record* was killed |
-| Cursor/Windsurf transpiler work | Owner excluded; `transpileCursorMDC` stays dormant/commented as post-v2 option |
+| Cursor/Windsurf transpiler work | Owner excluded; `transpileCursorMDC` stays dormant/commented as post-v2 option — **[02p 2026-09-29: corrected — both legacy transpilers were cut 2026-08-25 (`5c97065`, `bin/lib/transpilers.js` removed); the post-v2 redesign lives in `03c`]** |
 | Gemini/Aider support | Covered free via AGENTS.md §Invocation single-agent read-and-adopt pattern |
 | cli.js slim-coordinator refactor beyond the five targets | Scope creep; extraction limited to owned shapes |
 | Rewriting history (git filter/rebase) | Records are corrected forward; rewriting published commits repeats the opacity defect |
@@ -72,7 +74,7 @@
 - **WS-A — Record reconciliation:** truthful 02g §7.3 (cite `dcf028e` text verbatim); per-class disposition of every false box — *correct-in-place* (factual errors: line counts, file inventories), *mark-superseded* (delegation/tri-modal/persona deletions legitimately undone by later epics but left checked), *convert-to-build-item* (claims whose underlying work is still wanted, e.g., methods.csv completion).
 - **WS-B — Doc truth scrub:** real three-active-plus-dormant harness matrix replacing eight-harness marketing; kill stale template filename references; re-point 02g §3.4 to this plan until a tested matrix exists.
 - **WS-C — Tooling rebuild decisions:** F1.69 delegation lint as additive `compile_skills.js` hook (trio-invocation ban, delegation-path requirement where applicable) — REBUILD recommended, fraud-prevention value proven this week. **[Note 2026-09-24: R0.2 shipped the lint ban-only — the trio personas were removed outright, so the originally-planned "persona-marking whitelist" was dropped as unnecessary.]** F1.70 measurement cycle baseline — REBUILD-lite; delegation-path line rollout costed against formal ADR-descope alternative — rollout only for skills retaining delegation semantics.
-- **WS-D — Harness alignment:** five shapes only — OpenCode native-symlink (verify/regression-test), Claude Code CONFIG-FILE-ONLY, Kiro HYBRID (emit steering from `.agents/templates/system/vespyr-steering.md.canonical` + symlink `.kiro/skills`), GitHub Copilot GENERATE-TARGET (enable registry entry, smoke test), Antigravity ZERO-WORK (read-and-adopt verification), Codex NEW minimal emitter (AGENTS.md pointer + optional `.codex/config.toml` emission; speculative machinery excluded). Strike 02h residue.
+- **WS-D — Harness alignment:** five shapes only — OpenCode native-symlink (verify/regression-test), Claude Code CONFIG-FILE-ONLY, Kiro HYBRID (emit steering from `.agents/templates/system/vespyr-steering.md.canonical` + symlink `.kiro/skills`), GitHub Copilot GENERATE-TARGET (enable registry entry, smoke test), Antigravity ZERO-WORK (read-and-adopt verification), Codex NEW minimal emitter (AGENTS.md pointer + optional `.codex/config.toml` emission; speculative machinery excluded). Strike 02h residue. **[02p 2026-09-29 — as-built corrections: Claude Code = `.claude -> .agents` symlink + `CLAUDE.md` (02h §10 A2a); Copilot = `.github/copilot-instructions.md` stub + `.github/skills` link (field test); Codex = zero-work native read, no emitter; cursor/windsurf legacy-cleanup only, transpilers cut 2026-08-25. See `.agents/references/harness-matrix.md` + §12.]**
 - **WS-E — Provenance hardening:** commit-sweep untracked canonical artifacts; codify single-writer execution discipline (one epic per window; no overlapping-path sessions; commit-per-build-item; history.md attestation line per commit batch; worktree-per-session convention noted for future parallelism); bootstrap real per-epic sign-offs in `utter-satisfaction.md`, starting with this plan's own gate.
 
 ---
@@ -105,37 +107,67 @@
 
 **Total: 34.5h serial.** Arithmetic: 35.5h − 1h (R1.12 emission-branch work evaporated by C2=B; verification + transpiler-cut remain) = 34.5h. Critical path: R0.1→R0.2→(hijkl execution window)→R1.3→(R1.4‖R1.7)→R1.10→R1.11→R1.16; single-author makes wall-clock = serial sum.
 
+### 5.1 Item ledger — execution evidence (2026-09-29)
+
+> **Execution mode:** single-writer, serial, clean tree at start (`git status --porcelain` → empty). **Commit rule:** the owner's standing rule of 2026-08-25 forbids `git commit`/`push` without a current-turn owner instruction — the plan's commit-per-item cadence is suspended; all work is uncommitted in the working tree, awaiting owner review (see §12). Every command ran from repo root; R0.2 evidence stands from 2026-08-25.
+
+| Item | Disposition 2026-09-29 | Evidence (command → result) |
+|---|---|---|
+| R0.1 ✅ | Adopted; applied across this execution | `grep -c "SUPERSEDED" artifacts/docs/strategy/development-plan/02-phase-1-skills.md` → 27 annotated lines; `02g` §7.3 correction table |
+| R0.2 ✅ | Executed 2026-08-25 (pre-existing) | Clean tree: `node .agents/scripts/compile_skills.js` → "✓ Compiled 40 skills" + lint clean, exit 0; planted probe → exit 1 (2026-08-25 evidence) |
+| R1.1 ✅ | Satisfied — landed earlier via 02q; no new edit needed | `sed -n '141p' .agents/GUARDRAILS.md` → "One epic per window…" rule present; §7.1 here |
+| R1.2 ⛔ | Superseded — ADR-005 absent; `artifacts/output/` is gitignored by design | `find . -name '*adr-005*'` → 0; `git ls-files artifacts/output` → 0 entries |
+| R1.3 ✅ | `02g` §7.3 rewritten (`dcf028e` quote + per-item table + phase-gate restatement) | `git show dcf028e:…02g…` → honest "PARTIALLY EXECUTED" text at line 197; file re-read |
+| R1.4 ✅ | `02-phase-1-skills`: 31 items dispositioned (30 corrected/superseded/false + 1 verified-true) | `grep -c "\[x\].*delegation" …` → 18; unannotated → 0 |
+| R1.5 ✅ | `02c` ×6 + `02h` ×6 dispositioned; counts re-measured | `wc -l .agents/agents/shifu.md` → 395; `grep -c "## Delegation Contract"` ×4 personas → 0/0/0/0; `wc -l bin/cli.js` → 2169 |
+| R1.6 ✅ | Smalls reconciled: `02a` ×2 (+inventory), `02b` ×4, `02d` ×5, `02i` ×1 (already fixed 2026-08-25), `02j` ×2 (incl. 02m-review TL-HO-06) | Per-annotation commands; `02i`: `grep -c HISTORICAL_MEMORY_DATA .agents/scripts/memory_filter.js` → 2 |
+| R1.7 ✅ | README + README_CN + Guide EN/CN aligned (40 skills; matrix-true harness claims) | `grep -n "40 curated skills" README.md`; `grep -rn "opencode.json.template" README.md README_CN.md Guide/` → 0 |
+| R1.8 ✅ | `02g` §3.3/§3.4 re-pointed; stale template refs verified absent | `grep -rn "opencode.json.template" README.md README_CN.md Guide/` → 0 |
+| R1.10 ✅ | Baseline log created + weekly cadence recorded; empty-log fallback patched so the audit is not blinded (see §12 F-6) | `test -f .agents/state/delegation-log.json` → present; `node .agents/scripts/delegation_audit.js` → baseline log read + fallback path active |
+| R1.11 ✅ | DESCOPE recorded (no rollout); stated count = 1 | `grep -rl "^Delegation path:" .agents/skills/` → 1 (`round-table/SKILL.md:27`); decision in `.agents/references/delegation-policy.md` |
+| R1.12 ✅ | Copilot verified; transpiler cut completed (stale test import removed); C2=B recorded in matrix | `grep -rn "transpileCopilotYAML" bin/ tools/ tests/ .agents/scripts/` → 0 (after fix); matrix row |
+| R1.13 ✅ | Kiro hybrid verified | `grep -c "vespyr-steering.md.canonical" bin/lib/harnesses/kiro.js` → 2; `tests/test_harness_adapters.test.js` |
+| R1.14 ✅ | Claude/OpenCode links + Antigravity native read documented | `grep -c "\.claude\|\.opencode" bin/lib/harnesses/claude-code.js bin/lib/harnesses/opencode.js` → 9/9 hits; matrix rows |
+| R1.15 ✅ | Codex = zero-work native read (no adapter by design) — supersedes the "minimal emitter" branch | `grep -c "codex" bin/lib/harnesses/index.js tests/test_harness_adapters.test.js` → comment + 5 test hits |
+| R1.16 ✅ | §5.4 struck; §8 conflicts fixed; registry cleanup verified; C6 note in matrix; DoD pass run | `02h` diff; matrix §C6; §8 below |
+| R1.17 ✅ | Canonical matrix created + guides updated | `wc -l .agents/references/harness-matrix.md` → 47; `grep -n "Supported harnesses" Guide/en/installation.md` → present |
+| R1.18 ✅ | 40/40 SKILL.md pass the agentskills.io spec | `node .agents/scripts/spec_check.js` → "✓ All 40 skills pass agentskills.io spec checks."; report: `artifacts/docs/review/frontmatter-compliance-audit-2026-09-29.md` |
+
+**Final verification (2026-09-29):** `node .agents/scripts/spec_check.js` → "✓ All 40 skills pass agentskills.io spec checks." (exit 0); `node .agents/scripts/compile_skills.js` → "✓ Compiled 40 skills" + zero-handle lint (exit 0); `npm test` → **678 pass / 0 fail** (64 suites); `node bin/cli.js manifest` → 347 files; `node bin/cli.js verify` → "All 348 files verified", exit 0. Independent seats (@developer / @architect / @qa-engineer) reviewed the diff and found **8 defects (D-1–D-8, see §12.2)**; all were fixed, and re-validation verdicts are recorded in `artifacts/output/06-quality/sign-off-history.md`.
+
+> **[Superseded 2026-09-29 (post-02q) — numbers moved; this epic is still uncommitted]** After this closing run the parallel 02q epic landed in the same working tree (+11 tests, manifest re-pinned) and a `compile_skills.js` scrape-filter fix was applied (real-persona allowlist for `key_agents`, removing scraped `@agent-a`/`@a`/`@round-table`/`@shadcn` placeholders). Current disk: `npm test` → **689 pass / 0 fail** (65 suites); `verify` **fails by design** — the manifest pins only 02q's files while 02p's files show as expected drift (two uncommitted epics cannot both be manifest-green at once). The 678/347/348 figures above were true at 02p's closing run; they will only reproduce once 02p is committed on a clean base and the manifest is regenerated for it. No 02p deliverable changed — only the shared-tree verification numbers.
+
 ### 7.1 Sequencing notes — SINGLE-WRITER MANDATE (BINDING)
 
 - **RULED ORDER (2026-08-23, hybrid):** (1) prelude R0.1→R0.2 (~3.5h); (2) owner-preferred feature run: 02h→02i→02j→02k→02l executed to completion under R0.1 rules — 02k/02l apply their CHANGES REQUESTED spec fixes first/during execution; (3) full 02m reconciliation (R1.1–R1.16) last, reconciling each epic once against final on-disk facts.
 - **"Finish" definition during the hijkl window:** all remaining build items executed and stamped only with adjacent command evidence. PROHIBITED until post-reconciliation: any plan-level status banner (`EXECUTED`/`COMPLETE`), phase-gate advancement claims, "closed" assertions in history.md, and dev-plan README status-table changes for h/i/j/k/l.
 - Known-false boxes in h/i/j stay untouched for the 02m final pass unless that epic's own execution directly proves/disproves them — then correct forward with a dated banner, never silently.
 - One epic per time-window. No second agent session touches any path overlapping the active build item. Violations halt the epic.
-- Commit after every build item, message naming the item ID; append one attestation line per batch to `artifacts/memory/session-summaries/history.md`.
+- Commit after every build item, message naming the item ID; append one attestation line per batch to `artifacts/memory/session-summaries/history.md`. *[02p 2026-09-29: superseded by the owner's standing rule 2026-08-25 — no commits without a per-action instruction; attestation consolidated into this plan + memory session-write.]*
 - WS-D gating (final 2026-08-24): all owner decisions resolved — no build item waits on Chris. R1.15 retains its internal C3 verification gate (pre-authorized); everything through R1.11 plus the C5 audit (R1.18) proceeds regardless.
 - Future parallel lanes require git-worktree isolation per session, written as convention before first use.
 
 ### 7.2 Prerequisites (developer checklist)
 
-- [ ] 02g KILL disposition confirmed present in `active-decisions.md` (2026-08-23 entries)
-- [ ] **Owner decisions C2/C4/C3 recorded** (done 2026-08-24, see header) — re-verify header block before starting WS-D
-- [ ] Sweep inventory (§3) re-verified — files move; recount before editing
-- [ ] Git tree clean at start of each work session
+- [x] 02g KILL disposition confirmed present in `active-decisions.md` (2026-08-23 entries) — *verified 2026-09-29 by read*
+- [x] **Owner decisions C2/C4/C3 recorded** (done 2026-08-24, see header) — *re-verified in the header block before WS-D*
+- [x] Sweep inventory (§3) re-verified — files move; recount before editing — *full re-verification 2026-09-29; deltas documented in §5.1 + §12*
+- [x] Git tree clean at start of each work session — *`git status --porcelain` → empty at session start (2026-09-29)*
 
 ## 8. Definition of Done (mechanically verifiable)
 
 Done when **all** pass:
 
-1. `grep -c "\[x\].*delegation" artifacts/docs/strategy/development-plan/02-phase-1-skills.md` returns only superseded-annotated lines; every corrected box carries a dated evidence-command comment
-2. 02g §7.3 status line quotes `git show dcf028e` PARTIALLY EXECUTED accounting verbatim
-3. `wc -l` outputs cited in 02c/02h match live files (shifu.md=393±edits, documented)
-4. Lint: `node .agents/scripts/compile_skills.js --check` fails a planted trio-invocation fixture and passes a clean tree. **[Reconciled 2026-09-24: R0.2 executed with the trio removed outright, so there is no persona-marking whitelist — the lint is ban-only. The earlier "passes persona-marking fixture" clause is retired.]**
-5. `.agents/state/delegation-log.json` exists with baseline date + `reviewDate: 2026-09-30`
-6. Delegation-path decision recorded as ADR or executed rollout; `grep -rl "^Delegation path:" .agents/skills/ | wc -l` equals the number stated in the decision
-7. `cli.js --help` lists exactly the five owned shapes; Copilot + Antigravity resolve skills natively from `.agents/skills/` (zero skill emission present); **no `.github/agents/*.agent.md` emission present (C2=B) and `transpileCopilotYAML` absent from codebase**; Copilot smoke asserts functional skill activation — agent applies a skill from `.agents/skills/` — NOT autocomplete visibility (field evidence 2026-08-24); Cursor/Windsurf entries commented with post-v2 label; C6 non-conflict note present in matrix doc; C5 audit report covers 42/42 SKILL.md
-8. `git ls-files artifacts/output/04-architecture/adr-005-harness-neutral-delegation-contract.md` non-empty
-9. `utter-satisfaction.md` contains ≥1 structured per-epic sign-off record (this plan's gate)
-10. **Process DoD:** zero boxes stamped in this plan without a command-output evidence line adjacent to the stamp
+1. `grep -c "\[x\].*delegation" artifacts/docs/strategy/development-plan/02-phase-1-skills.md` returns only superseded-annotated lines; every corrected box carries a dated evidence-command comment — **[Executed 2026-09-29: 18 matching lines, 0 unannotated (`… | grep -vc "SUPERSEDED\|VERIFIED TRUE"` → 0). Wording corrected: one line (F1.32.4) is VERIFIED-TRUE with evidence, not superseded — the live contract is "superseded OR verified-true".]**
+2. 02g §7.3 status line quotes `git show dcf028e` PARTIALLY EXECUTED accounting verbatim — **[Verified 2026-09-29: rewrite landed; per-item disposition table in `02g` §7.3.]**
+3. `wc -l` outputs cited in 02c/02h match live files (shifu.md=393±edits, documented) — **[Re-verified 2026-09-29: `02c` §6 table re-measured (shifu.md=395, 1,569 total); `02h` counts updated (cli.js=2169).]**
+4. Lint: `node .agents/scripts/compile_skills.js --check` fails a planted trio-invocation fixture and passes a clean tree. **[Reconciled 2026-09-24: R0.2 executed with the trio removed outright, so there is no persona-marking whitelist — the lint is ban-only. The earlier "passes persona-marking fixture" clause is retired.] [Reconciled 2026-09-29: there is no `--check` flag — the lint runs in the default compile path (fail-closed, exit 1). Verified: clean tree → exit 0; planted `@writer` probe → exit 1 with file:line (2026-08-25 evidence). The `--check` spelling is retired.] [Probe-path note 2026-09-29 (QA re-verification): the 2026-08-25 probe path `.agents/skills/shut-up/steps/` no longer exists (shut-up has only `SKILL.md`); re-verification used a shape-up steps probe — same behavior: exit 1 naming file:line, removal → exit 0.]**
+5. `.agents/state/delegation-log.json` exists with baseline date + `reviewDate: 2026-09-30` — **[Verified 2026-09-29: file created (R1.10); `delegation_audit.js` reads it.]**
+6. Delegation-path decision recorded as ADR or executed rollout; `grep -rl "^Delegation path:" .agents/skills/ | wc -l` equals the number stated in the decision — **[Executed 2026-09-29: DESCOPE decision recorded; stated count = 1 (`round-table/SKILL.md:27`).]**
+7. `cli.js --help` lists exactly the five owned shapes; Copilot + Antigravity resolve skills natively from `.agents/skills/` (zero skill emission present); **no `.github/agents/*.agent.md` emission present (C2=B) and `transpileCopilotYAML` absent from codebase**; Copilot smoke asserts functional skill activation — agent applies a skill from `.agents/skills/` — NOT autocomplete visibility (field evidence 2026-08-24); Cursor/Windsurf entries commented with post-v2 label; C6 non-conflict note present in matrix doc; C5 audit report covers 42/42 SKILL.md — **[Reconciled 2026-09-29: shape list is registry truth, not `--help` output (no harness list in `--help`) — 4 installable adapters (opencode/claude/github/kiro) + Antigravity/Codex zero-work native + cursor/windsurf legacy cleanup; Copilot skill emission is NOT zero — `.github/skills` link is emitted for the VS Code picker (field test 2026-08-25) while `.agent.md` emission stays absent (C2=B); `transpileCopilotYAML` absent from code paths (`grep` bin/ tools/ tests/ .agents/scripts/ → 0 after a stale test import was removed); C5 audit covers 40/40 (count corrected from 42); C6 note in `.agents/references/harness-matrix.md`.]**
+8. `git ls-files artifacts/output/04-architecture/adr-005-harness-neutral-delegation-contract.md` non-empty — **[⛔ Superseded 2026-09-29: `artifacts/output/` is gitignored by design (`git ls-files artifacts/output` → 0 entries) and the ADR-005 file no longer exists on disk. Disposition recorded in `02g` §7.3; no commit is possible or meaningful.]**
+9. `utter-satisfaction.md` contains ≥1 structured per-epic sign-off record (this plan's gate) — **[Re-pointed 2026-09-29: records go to `artifacts/output/06-quality/sign-off-history.md` per `.agents/references/utter-satisfaction.md:106` (which forbids appending records to itself). This plan's gate is recorded there as of 2026-09-29 — file created at closure, independent seats' verdicts inside.]**
+10. **Process DoD:** zero boxes stamped in this plan without a command-output evidence line adjacent to the stamp — **[Satisfied 2026-09-29: every stamp in §5.1 carries an adjacent command + result; §7.2 boxes carry evidence.]**
 
 ---
 
@@ -170,11 +202,66 @@ Done when **all** pass:
 
 ## 11. Sign-Off
 
-To be recorded — not claimed — in `.agents/references/utter-satisfaction.md` upon completion, per DoD #9:
+Recorded — not claimed — in `artifacts/output/06-quality/sign-off-history.md` (per DoD #9 as re-pointed 2026-09-29; `.agents/references/utter-satisfaction.md:106` forbids appending records here). Seat states as of 2026-09-29, after independent verification and fix loops:
 
-- [ ] @tech-lead (Grant): plan authored with binding single-writer constraint; all estimates evidence-based
-- [ ] @developer (Rex): sweep data reproduced; reconciliation classes executable as specified
-- [ ] @architect (Vera): emitter classification coherent; canonical-store boundary preserved pending Chris
-- [ ] Chris: emitter-reframe answered; recovery accepted at DoD verification
+- [x] @tech-lead (Grant): plan authored with binding single-writer constraint; execution evidence-stamped (§5.1/§12)
+- [x] @developer (Rex): sweep data reproduced; reconciliation classes executable as specified — *round 1 `CHANGES REQUESTED` (D-1, D-2) → fixed → re-validated*
+- [x] @architect (Vera): emitter/harness classification coherent vs code; canonical-store boundary preserved — *round 1 `CHANGES REQUESTED` (4 record defects) → fixed → re-validated*
+- [x] @qa-engineer (Nina): DoD mechanically verified 10/10 — *round 1 held on DoD #9 (record absent) → record created → re-validated*
+- [ ] Chris: commit authorization for the 23-path working tree (owner card in sign-off-history); recovery accepted at DoD verification
 
-*Author: @tech-lead (Grant), from the 2026-08-23 roundtable forensics. Every checkbox above starts unchecked by design — this plan was born from checkbox fraud and will not reproduce it.*
+*Author: @tech-lead (Grant), from the 2026-08-23 roundtable forensics. Every checkbox above starts unchecked by design — this plan was born from checkbox fraud and will not reproduce it.* (Sign-off states added 2026-09-29 after independent verification — see sign-off-history.)
+
+---
+
+## 12. Execution Log — premise corrections, defects & follow-ups (2026-09-29)
+
+**Executed by:** @tech-lead (Grant), single-writer, serial. Clean tree at start; all work **uncommitted in the working tree** (owner standing rule 2026-08-25 — no commits/pushes without a per-action instruction).
+
+### 12.1 Premise corrections (authoring 2026-08-23/24 → disk 2026-09-29)
+
+1. **Sequencing:** the plan schedules reconciliation last, after `02h→…→02l`. At execution, `02k` (round-table skill) is WIP and `02l` is not started — but every epic in this plan's reconciliation scope is settled (`02h` 2026-08-25; `02i` re-certified 2026-08-26; `02j` 2026-08-18; `02a–02d` long closed). `02k`/`02l` are outside scope and unaffected by this pass; Chris requested execution. No closure stamp is created for k/l.
+2. **Untracked artifacts:** `artifacts/output/` + `artifacts/memory/` are gitignored by design → R1.2 and DoD #8 are impossible as written; ADR-005 is absent from disk. Dispositioned in `02g` §7.3.
+3. **Sign-off home:** `.agents/references/utter-satisfaction.md:106` requires completed records in `artifacts/output/06-quality/sign-off-history.md`; DoD #9 re-pointed and fulfilled at closure.
+4. **Commit rule:** owner standing rule 2026-08-25 requires a per-action instruction; the plan's commit cadence is suspended (§5.1 + §7.1 note).
+5. **Harness layer as-built (02h §10 A2a):** adapters live in `bin/lib/harnesses/*`; the legacy transpilers were cut (`5c97065`); Claude Code = `.claude -> .agents` symlink + `CLAUDE.md`; Copilot = pointer stub + `.github/skills` link (field test 2026-08-25); Codex = zero-work native read; cursor/windsurf are legacy-cleanup-only. `.agents/references/harness-matrix.md` is the canonical record.
+6. **Counts moved:** skills 42→40; personas 21/22→20; `bin/cli.js` 2695→2169 lines. Every corrected count carries its measurement command.
+7. **Doc-sourced rows:** Codex and Antigravity have no code — the matrix labels their sources and re-verification triggers. The OpenCode `postInstall` command sweep has no dedicated test (follow-up F-7).
+
+### 12.2 Independent verification (satisfaction gate)
+
+Three read-only seats reviewed the diff before closure: **@developer (Rex)**, **@architect (Vera)**, **@qa-engineer (Nina)**. All three initially returned `CHANGES REQUESTED`; the defects were real and were fixed before the closing run:
+
+| # | Defect found (seat) | Fix applied |
+|---|---|---|
+| D-1 | §12 referenced but not previously written (Rex, Vera) | This section written; the §5.1 / DoD #4 / `02-phase-1-skills` F1.21 pointers now resolve |
+| D-2 | "`transpileCursorMDC` stays dormant/commented" was false — cut 2026-08-25 (Rex, Vera) | Matrix row + §1.2 corrected; commit `5c97065` cited |
+| D-3 | An empty delegation-log blinded the weekly audit; the policy claimed a fallback that never ran (Vera) | `delegation_audit.js` patched to fall back when the log is empty ("Source: session summaries (delegation log present but empty)"); policy prose corrected; writer gap filed as F-6 |
+| D-4 | DoD #9 asserted the sign-off record existed before it did (Vera, Nina) | Record created at closure in `artifacts/output/06-quality/sign-off-history.md` |
+| D-5 | `[x]` kept on a claim annotated FALSE (Vera) | Lowered to `[~]` (`02-phase-1-skills` "Expanded method libraries") |
+| D-6 | "staged" overstated git state; §7.1/Budget cadence left unannotated (Vera) | Wording fixed ("uncommitted in the working tree"); cadence notes added |
+| D-7 | `02g:213` pointed at a §5.1 test count that did not exist | Final-verification line added to §5.1 |
+| D-8 | R0.2 probe path stale (`shut-up/steps/` no longer exists) (Nina) | Probe-path note added to DoD #4 |
+
+Re-validation verdicts after the fixes are recorded in `artifacts/output/06-quality/sign-off-history.md`.
+
+### 12.3 Follow-ups (convert-to-build-item — deliberately NOT executed here; recovery does not reopen feature work)
+
+| # | Item | Owner | Evidence of need |
+|---|---|---|---|
+| F-1 | Complete `elicitation/methods.csv` 98 → 100 methods (F1.21) | @developer | `grep -c '^[0-9][0-9]*,' .agents/skills/elicitation/methods.csv` → 98 |
+| F-2 | `ml-ai-ops.md` depth 158 → ≥200 lines (audit-named; all 19 other personas pass) | @ml-ai-ops | `wc -l .agents/agents/ml-ai-ops.md` → 158 |
+| F-3 | `bin/cli.js` slim-coordinator (02h T4.1) | @developer | `wc -l bin/cli.js` → 2169 |
+| F-4 | Author `handoff-continuity.json` + `zero-mention-routing.json` (02j TL-HO-06) | @ml-ai-engineer | both files absent on disk |
+| F-5 | Cursor/Windsurf redesign post-v2 (`03c`) | @architect | adapters are legacy-cleanup-only |
+| F-6 | Wire `[DIRECT-IO-JUSTIFIED]` capture into session-write so `delegation-log.json` has a writer | @tech-lead + @devops-engineer | `grep -rn "delegation-log" .agents/scripts bin tools` → audit reads only |
+| F-7 | OpenCode `postInstall` core-command sweep test | @developer | no test references the function |
+
+### 12.4 Closing verification (stamped from the working tree)
+
+- `node .agents/scripts/spec_check.js` → "✓ All 40 skills pass agentskills.io spec checks." (exit 0)
+- `node .agents/scripts/compile_skills.js` → "✓ Compiled 40 skills" + "✓ delegation lint: zero removed-persona handles" (exit 0)
+- `node .agents/scripts/delegation_audit.js` → "Source: session summaries (delegation log present but empty)" — fallback active
+- `node bin/cli.js manifest` → "[OK] Generated manifest … (347 files)"; `node bin/cli.js verify` → "[OK] All 348 files verified", exit 0 *(closing-run figures; superseded post-02q — see §5.1 note: verify now fails by design while 02q's manifest pin and 02p's drift coexist uncommitted)*
+- `npm test` → 678 pass / 0 fail, 64 suites (closing run) *(now 689/0, 65 suites after 02q + the compile_skills scrape-filter fix landed in the same tree)*
+- `git status --porcelain` → all changes uncommitted; **no commits made** (rule 4). Owner decision required to persist.

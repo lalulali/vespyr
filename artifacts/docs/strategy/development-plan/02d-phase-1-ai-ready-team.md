@@ -8,7 +8,9 @@
 > **Personas Covered:** `@product-manager` (Sarah), `@ml-ai-engineer` (Kai), `@ml-ai-ops` (Atlas), `@architect` (Vera), `@qa-engineer` (Nina)
 > **Themes:** T1 (Agent depth), T3 (Artifact rigor & AI-native product strategy), T8 (UTTERLY SATISFIED culture)
 > **Goal:** Evolve Vespyr's core team from a **pure traditional engineering team** into a **Hybrid AI + Traditional Team**. This is NOT a replacement of the existing team—every agent retains 100% of their traditional capabilities while gaining structured AI literacy, AI-specific workflows, and clear ownership boundaries for AI-native features. The shift is additive, not disruptive, and every AI handoff preserves the UTTERLY SATISFIED gate.
-> **Agent count impact:** Current baseline = 21 agents. This plan adds 1 net new agent (`@ml-ai-ops`) and renames 1 (`@ml-engineer` → `@ml-ai-engineer`). Combined with 02c (`@shifu`), v2.0 target = **23 agents**.
+> **Agent count impact:** Current baseline = 21 agents. This plan adds 1 net new agent (`@ml-ai-ops`) and renames 1 (`@ml-engineer` → `@ml-ai-engineer`). Combined with 02c (`@shifu`), v2.0 target = **23 agents**. — *[02p RECONCILE 2026-09-29: final roster is 20 personas (`ls .agents/agents/*.md \| wc -l` → 20); the trio-era target was superseded by the 2026-08-10 re-scope.]*
+
+> **[RECORD RECONCILIATION 2026-09-29 (02p R1.6)]** Audit (2026-08-23) found 5 false claims here, all delegation-era (`@writer`/`@executor` write-path rows, Atlas contract box, verification row). Annotated below; historical text retained. The audit also named "`ml-ai-ops.md` 113<200 lines": current file is **158 lines** (`wc -l .agents/agents/ml-ai-ops.md`) and no live box in this plan claims ≥200 for Atlas (the F1.25 nine all pass) — recorded as a depth backlog observation, not a false box.
 
 ---
 
@@ -399,14 +401,14 @@ downstream_consumers:
 ---
 ```
 
-**Write path:** Atlas has `edit: deny` (no direct file editing). All file writes are delegated to `@writer` via the standard delegation contract:
+**Write path:** Atlas has `edit: deny` (no direct file editing). All file writes are delegated to `@writer` via the standard delegation contract: — *SUPERSEDED 2026-09-29 (02p): the trio delegation model was removed 2026-08-10; writes now use direct-I/O capability language (`grep -c "@writer" .agents/agents/ml-ai-ops.md` → 0). Table corrected in place below.*
 
-| Task | Delegate to |
+| Task | Path (corrected 2026-09-29) |
 |---|---|
-| Write pipeline docs, deployment runbooks | `@writer` |
+| Write pipeline docs, deployment runbooks | direct write (capability language; `@writer` no longer exists) |
 | Read model cards, eval results, architecture | Direct (read: allow) |
-| Run monitoring queries, model health checks, serving commands | `@executor` |
-| Update memory (decisions, lessons) | `@memory-controller` |
+| Run monitoring queries, model health checks, serving commands | direct run |
+| Update memory (decisions, lessons) | `@memory-controller` (unchanged — mandatory memory path) |
 
 **Squad:** none. Optional invoke by `@ml-ai-engineer` when a model, RAG pipeline, or prompt engine moves to production.
 
@@ -635,7 +637,7 @@ Sarah (PM)          Vera (Arch)         Kai (ML Eng)        Atlas (MLOps)       
 - [x] F1.34.8 — Add `## Session Continuity (Mandatory)` section per 02b pattern.
 
 ### @ml-ai-ops (Atlas) — New Persona — ~3 days
-- [x] F1.35.1 — Create `.agents/agents/ml-ai-ops.md` (v2 frontmatter per §C.5, IDENTITY block, channeled mentor, icon, charter, hard rules, delegation contract with `@writer` for file output).
+- [x] F1.35.1 — Create `.agents/agents/ml-ai-ops.md` (v2 frontmatter per §C.5, IDENTITY block, channeled mentor, icon, charter, hard rules, delegation contract with `@writer` for file output). — *SUPERSEDED 2026-09-29 (02p): file exists (158 lines) with frontmatter/IDENTITY/charter; the `@writer` delegation-contract half is gone (`grep -c "@writer" .agents/agents/ml-ai-ops.md` → 0).*
 - [x] F1.35.2 — Document handoff rule from Kai → Atlas in both persona files (artifact-based, no direct call).
 - [x] F1.35.3 — Add to `agent-contracts.md`: owns production serving, monitoring, rollback; does NOT own model/prompt development.
 - [x] F1.35.4 — Add `## Session Continuity (Mandatory)` section per 02b pattern.
@@ -686,7 +688,7 @@ Sarah (PM)          Vera (Arch)         Kai (ML Eng)        Atlas (MLOps)       
 | 3 | Kai's persona loads correctly | Invoke `@ml-ai-engineer` → verify frontmatter loads, icon shows 🤖, channeled mentor includes all 4 names |
 | 4 | Kai produces eval artifacts | Request an eval harness design → verify `ai-pipeline-spec.md` and eval scorecard are produced |
 | 5 | Kai → Atlas handoff works | Kai writes `model-approved-for-production.md` → Atlas reads it and produces a deployment pipeline doc |
-| 6 | Atlas delegates writes to `@writer` | Invoke `@ml-ai-ops` with a deployment task → verify Atlas does NOT write files directly (edit: deny) but produces output via `@writer` |
+| 6 | Atlas delegates writes to `@writer` | Invoke `@ml-ai-ops` with a deployment task → verify Atlas does NOT write files directly (edit: deny) but produces output via `@writer` — *SUPERSEDED 2026-09-29 (02p): `@writer` deleted 2026-08-10; verification premise void (`grep -c "@writer" .agents/agents/ml-ai-ops.md` → 0)* |
 | 7 | Vera writes AI-ADRs | Present an AI feature to `@architect` → verify she produces `adr-NNN-model-selection.md` with fallback path and token cost projection |
 | 8 | Nina runs AI release certification | Present an AI feature for release → verify Nina's checklist includes eval harness, hallucination rate, latency P95, adversarial testing |
 | 9 | All `@ml-engineer` references removed | `grep -r "@ml-engineer" .agents/` returns 0 results (only `@ml-ai-engineer` remains) |

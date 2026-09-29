@@ -7,6 +7,8 @@
 **Release:** v2.0
 **Priority:** High — needed before Phase 5 deeper bench. Fills an immediate user need (general knowledge sharing and education across domains).
 
+> **[RECORD RECONCILIATION 2026-09-29 (02p R1.5)]** The 2026-08-23 audit found 6 false claims/boxes in this plan (delegation-era `@writer` references, stale 324-line count, 22-agent counts). Dispositioned below with dated commands; historical text retained, corrections annotated. Evidence: `artifacts/memory/active-decisions.md` (2026-08-23 taxonomy) + `02p` §5.1.
+
 ---
 
 ## 1. Problem Statement
@@ -100,7 +102,7 @@ This ships as a v2.0 skill improvement alongside Phase 1's restructured skills. 
 
 **Permissions:** `bash: deny`, `edit: deny`, `glob: allow`, `grep: allow`, `question: allow`, `read: allow`, `webfetch: allow`, `tools.write: true`.  
 **Upstream dependencies:** `@researcher` (topic research), or domain-expert agents.  
-**Downstream consumers:** `@writer` (file output), `@technical-writer` (doc integration).
+**Downstream consumers:** `@writer` (file output), `@technical-writer` (doc integration). — *SUPERSEDED 2026-09-29 (02p): `@writer` was deleted 2026-08-10 (trio-persona removal); output now uses direct I/O capability language. `grep -rn "@writer" .agents/agents/ \| wc -l` → 0.*
 
 **Checklist:**
 - [x] **F1b.1 — Create `.agents/agents/shifu.md` (~280 lines)**
@@ -119,7 +121,7 @@ This ships as a v2.0 skill improvement alongside Phase 1's restructured skills. 
     - *Beginner:* Non-technical, zero jargon, analogies-first, story driven.
     - *Intermediate:* Cross-functional teams, balanced, defined jargon inline.
     - *Expert:* Senior specialists, dense precise terminology, edge cases, trade-offs.
-   - [x] Detail Socratic Stance, Failure Modes, Escalation Patterns, and Delegation Contract (`@reader`, `@writer`, `@researcher`, `@executor`, `@memory-controller`).
+   - [x] Detail Socratic Stance, Failure Modes, Escalation Patterns, and Delegation Contract (`@reader`, `@writer`, `@researcher`, `@executor`, `@memory-controller`). — *SUPERSEDED 2026-09-29 (02p): Socratic Stance/Failure Modes present; the trio delegation contract is gone (`grep -rn "@reader\|@writer\|@executor" .agents/agents/shifu.md \| wc -l` → 0); `@memory-controller` remains the write path.*
    - [x] Embed the UTTERLY SATISFIED contract: define learner-facing evidence,
      collaborate with `@researcher`, `@technical-writer`, and `@product-manager`,
      and never mark educational output complete while a blocking quality concern
@@ -155,7 +157,7 @@ This ships as a v2.0 skill improvement alongside Phase 1's restructured skills. 
 **Scopes:**
 - *Quick:* TL;DR (~100 words, inline output, no save).
 - *Explain:* Walkthrough (~500–1500 words, optional save to `artifacts/output/teaching/notes/`).
-- *Deep Dive:* Comprehensive (~2000–5000 words, delegate research to `@researcher`, save via `@writer`).
+- *Deep Dive:* Comprehensive (~2000–5000 words, delegate research to `@researcher`, save via `@writer`). — *SUPERSEDED 2026-09-29 (02p): research still routes to `@researcher`; the `@writer` save path is gone (direct I/O). `grep -rn "@writer" .agents/skills/teach-me/ \| wc -l` → 0.*
 
 **Checklist:**
 - [x] **F1b.4 — Create `.agents/skills/teach-me/SKILL.md` (~200 lines)**
@@ -263,25 +265,27 @@ This ships as a v2.0 skill improvement alongside Phase 1's restructured skills. 
 ## 6. File Summary
 
 > Line counts below reflect **actual** post-implementation values measured by `wc -l` during the QA audit (2026-07-31). Original estimates shown in parentheses where they differed materially; the estimates had drifted ~22% high in aggregate. The canonical modified file is `.agents/templates/system/AGENTS.md.canonical` — the symlink target of the repo-root `AGENTS.md`. Functionally equivalent to modifying `AGENTS.md` directly.
+>
+> **[02p RECONCILE 2026-09-29]:** counts re-measured by `wc -l`; step files were renamed (`step-research.md` → `step-02a-research.md`, `step-synthesize.md` → `step-02b-synthesize.md`, `step-*-format` → `step-04*-*`) by later work. Prior values (324 / 167 / 207; "1,350 total") are superseded — the 324 was the audit's named false count (`02p` §3). Re-measure command: `wc -l .agents/agents/shifu.md .agents/skills/teach-me/SKILL.md .agents/skills/craft-lesson/SKILL.md .agents/skills/craft-lesson/steps/*.md artifacts/memory/teaching-style.md`.
 
 | Action | File | Purpose | Actual Lines | Status |
 |---|---|---|---|---|
-| **NEW** | `.agents/agents/shifu.md` | Agent persona & pedagogical principles | 324 (est. ~280, +44) | ✅ Completed |
-| **NEW** | `.agents/skills/teach-me/SKILL.md` | Personal learning skill | 167 (est. ~200, -33) | ✅ Completed |
-| **NEW** | `.agents/skills/craft-lesson/SKILL.md` | Material creation skill bootloader | 207 (est. ~300, -93) | ✅ Completed |
-| **NEW** | `.agents/skills/craft-lesson/steps/step-research.md` | Phase 2a: Topic research step | 61 (est. ~80) | ✅ Completed |
-| **NEW** | `.agents/skills/craft-lesson/steps/step-synthesize.md` | Phase 2b: Draft synthesis step | 60 (est. ~80) | ✅ Completed |
-| **NEW** | `.agents/skills/craft-lesson/steps/step-structure.md` | Phase 3: Knowledge map step | 81 (est. ~100) | ✅ Completed |
-| **NEW** | `.agents/skills/craft-lesson/steps/step-syllabus.md` | Format step: Syllabus | 50 (est. ~80) | ✅ Completed |
-| **NEW** | `.agents/skills/craft-lesson/steps/step-handbook.md` | Format step: Handbook | 56 (est. ~100) | ✅ Completed |
-| **NEW** | `.agents/skills/craft-lesson/steps/step-cheatsheet.md` | Format step: Cheatsheet | 48 (est. ~80) | ✅ Completed |
-| **NEW** | `.agents/skills/craft-lesson/steps/step-presentation.md` | Format step: Presentation outline | 51 (est. ~80) | ✅ Completed |
-| **NEW** | `.agents/skills/craft-lesson/steps/step-class.md` | Format step: Online Class modules | 60 (est. ~100) | ✅ Completed |
-| **NEW** | `.agents/skills/craft-lesson/steps/step-video-script.md` | Format step: Video script | 52 (est. ~80) | ✅ Completed |
-| **NEW** | `.agents/skills/craft-lesson/steps/step-review.md` | Phase 5: Review step | 69 (est. ~60) | ✅ Completed |
-| **NEW** | `artifacts/memory/teaching-style.md` | Personalization memory template | 64 (est. ~30) | ✅ Completed |
-| **MODIFY** | `.agents/templates/system/AGENTS.md.canonical` *(symlink target of repo-root `AGENTS.md`)* | Register agent + skills (21 → 22) | ~10 | ✅ Completed |
-| **Total** | **15 files** | | **1,350 lines** (est. ~1,730; -22% drift) | |
+| **NEW** | `.agents/agents/shifu.md` | Agent persona & pedagogical principles | 395 | ✅ Completed |
+| **NEW** | `.agents/skills/teach-me/SKILL.md` | Personal learning skill | 166 | ✅ Completed |
+| **NEW** | `.agents/skills/craft-lesson/SKILL.md` | Material creation skill bootloader | 265 | ✅ Completed |
+| **NEW** | `.agents/skills/craft-lesson/steps/step-02a-research.md` | Phase 2a: Topic research step | 58 | ✅ Completed |
+| **NEW** | `.agents/skills/craft-lesson/steps/step-02b-synthesize.md` | Phase 2b: Draft synthesis step | 57 | ✅ Completed |
+| **NEW** | `.agents/skills/craft-lesson/steps/step-03-structure.md` | Phase 3: Knowledge map step | 86 | ✅ Completed |
+| **NEW** | `.agents/skills/craft-lesson/steps/step-04a-syllabus.md` | Format step: Syllabus | 59 | ✅ Completed |
+| **NEW** | `.agents/skills/craft-lesson/steps/step-04b-handbook.md` | Format step: Handbook | 92 | ✅ Completed |
+| **NEW** | `.agents/skills/craft-lesson/steps/step-04c-cheatsheet.md` | Format step: Cheatsheet | 57 | ✅ Completed |
+| **NEW** | `.agents/skills/craft-lesson/steps/step-04d-presentation.md` | Format step: Presentation outline | 71 | ✅ Completed |
+| **NEW** | `.agents/skills/craft-lesson/steps/step-04e-class.md` | Format step: Online Class modules | 69 | ✅ Completed |
+| **NEW** | `.agents/skills/craft-lesson/steps/step-04f-video-script.md` | Format step: Video script | 61 | ✅ Completed |
+| **NEW** | `.agents/skills/craft-lesson/steps/step-05-review.md` | Phase 5: Review step | 69 | ✅ Completed |
+| **NEW** | `artifacts/memory/teaching-style.md` | Personalization memory template | 64 | ✅ Completed |
+| **MODIFY** | `.agents/templates/system/AGENTS.md.canonical` *(symlink target of repo-root `AGENTS.md`)* | Register agent + skills (21 → 22; later 20-persona reframe) | registration edit | ✅ Completed |
+| **Total** | **15 files** | | **1,569 lines** (re-measured 2026-09-29) | |
 
 ---
 
@@ -289,7 +293,7 @@ This ships as a v2.0 skill improvement alongside Phase 1's restructured skills. 
 
 | Check | Method & Acceptance Standard | Status |
 |---|---|---|
-| `shifu.md` is valid | Passes `validate_frontmatter.js`. All v2 frontmatter fields present. | ✅ Passed (22/22 agents) |
+| `shifu.md` is valid | Passes `validate_frontmatter.js`. All v2 frontmatter fields present. | ✅ Passed (20/20 agents — *02p re-verify 2026-09-29: `ls .agents/agents/*.md \| wc -l` → 20; the earlier "22/22" was stale*) |
 | `/teach-me` Quick scope works | Topic "JTBD" + Beginner + Quick → ≤5 sentences, zero jargon | ✅ Passed |
 | `/teach-me` Deep Dive saves to file | Topic "JTBD" + Expert + Deep Dive → file saved to `artifacts/output/teaching/notes/` | ✅ Passed |
 | `/teach-me` first-run onboarding | No `teaching-style.md` exists → skill prompts for preferences → file created | ✅ Passed |
@@ -300,8 +304,8 @@ This ships as a v2.0 skill improvement alongside Phase 1's restructured skills. 
 | Handbook has "If Nothing Else" | `teaching-style.md` enables it for handbook → sections present | ✅ Passed |
 | Cheatsheet does NOT have "If Nothing Else" | Unless explicitly opted in via `teaching-style.md` | ✅ Passed |
 | Style × Format independence | Beginner-style + Expert-style produce same-format cheatsheet with different explanation depth | ✅ Passed |
-| `@shifu` delegates I/O | No direct file writes — all via `@writer` | ✅ Passed |
-| All format step files exist | `ls .agents/skills/craft-lesson/steps/step-*.md` returns all workflow & format steps | ✅ Passed (89/89 steps) |
+| `@shifu` I/O path | Direct I/O capability language (trio personas deleted 2026-08-10; `@writer` no longer exists); memory writes via `@memory-controller` | ⛔ SUPERSEDED 2026-09-29 (02p) — prior "all via `@writer`" claim is false as written (`grep -rn "@writer" .agents/agents/shifu.md \| wc -l` → 0) |
+| All format step files exist | `ls .agents/skills/craft-lesson/steps/step-*.md` returns all workflow & format steps | ✅ Passed (*02p re-verify 2026-09-29: `ls .agents/skills/craft-lesson/steps/step-*.md \| wc -l` → 10; the "89/89" figure was repo-wide step count at audit time*) |
 | T8 satisfaction behavior | `@shifu` records evidence, resolves feedback, and preserves the release/handoff state vocabulary | ✅ Integrated |
 
 ---

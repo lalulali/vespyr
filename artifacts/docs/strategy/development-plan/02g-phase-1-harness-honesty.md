@@ -81,7 +81,7 @@ The first eight docs in the table sum to 50. `AGENTS.md` contributes 8 additiona
 
 ### 3.3 Mirrors
 
-`.opencode/skills/` mirrors the main catalog; `delegate` verified byte-identical on delegation language (16 lines each). **Every reword must land in both copies** — drift here is a known failure mode (R54).
+`.opencode/skills/` mirrors the main catalog; `delegate` verified byte-identical on delegation language (16 lines each). **Every reword must land in both copies** — drift here is a known failure mode (R54). — *SUPERSEDED 2026-09-29 (02p): `.opencode` was a symlink to `.agents` (same inode), not a copy — corrected by the 2026-08-24 round table; the in-repo symlink was then removed by the 02h §10 refactor, and per-harness links are emitted at install time (`bin/lib/harnesses/opencode.js`). No in-repo mirror exists to keep in sync.*
 
 ### 3.4 What already exists (reuse, don't rebuild)
 
@@ -89,7 +89,7 @@ The first eight docs in the table sum to 50. `AGENTS.md` contributes 8 additiona
 - `delegation-policy.md` (`.agents/references/`) — governs the delegation log convention
 - `delegation_audit.js` — reads `.agents/state/delegation-log.json` (with fallbacks) — the measurement gate
 - `compile_skills.js` — existing skill compilation/lint hook the new delegation-path lint can attach to (F1.69)
-- `03d-phase-2-harness-integration.md` — source of truth for the supported-harness matrix; F1.71 verifies the default-capability claim against it rather than assuming every adapter exposes sub-agents
+- ~~`03d-phase-2-harness-integration.md`~~ — **re-pointed 2026-09-29 (02p R1.8):** the interim tested harness matrix is now `.agents/references/harness-matrix.md` (created by 02p R1.17); `03d` remains the Phase-2 redesign source. F1.71's default-capability claim is verified against the matrix, not assumed.
 
 ---
 
@@ -194,22 +194,25 @@ Next clean IDs after 02f (which ended at F1.57). **Dependencies are explicit, no
 
 ### 7.3 Completion Checklist
 
-**02g plan status: EXECUTED.** Tasks F1.58–F1.68 and verification have been executed across skills, step files, templates, and documentation. `[x]` means verified execution evidence exists on disk.
+> **[CORRECTION 2026-09-29 (02p R1.3) — the `[KILL]` verdict on the "EXECUTED" line stands; record corrected forward.]** The line *"02g plan status: EXECUTED"* was committed 2026-08-14 inside `43f8fa1` (message framed as typo/link fixes), ~30 minutes after `dcf028e` had honestly recorded `PARTIALLY EXECUTED`. The revert carried no evidence change; git archaeology is in `artifacts/memory/active-decisions.md` (2026-08-23 entries) — `@architect`, `@tech-lead`, `@developer` all `[KILL]`. Verbatim from `git show dcf028e:artifacts/docs/strategy/development-plan/02g-phase-1-harness-honesty.md` (line 197):
+>
+> "02g plan status: PARTIALLY EXECUTED — checklist corrected 2026-08-10 after evidence verification. The previous 'COMPLETE — all executed' claim was over-stated: only ADR-005 (F1.58/F1.59) and the smoke matrix (F1.71 partial) have on-disk evidence. Skill rewords (F1.60–64), doc scrubs (F1.66–67), AGENTS.md reframe (F1.68), the delegation lint (F1.69), and the measurement cycle (F1.70) have NO verified execution evidence. Additionally, staged deletions of `@reader`/`@writer`/`@executor` personas + delegation tooling directly contradicted ADR-005's "keep personas" decision and were **reverted to HEAD** (2026-08-10). `[x]` means verified execution evidence exists on disk."
+>
+> Per-item disposition re-verified on disk **2026-09-29** by `02p` (commands run from repo root; `[x]` retained only where a command proves the claim today):
 
-- [x] 02g plan authored and positioned after 02f, before 02h/03
-- [x] Round-table and memory review completed; changes incorporated
-- [x] F1.58 — author and approve ADR-005: harness-neutral delegation contract
-- [x] F1.59 — freeze the canonical delegation-language specification (in ADR-005)
-- [x] F1.60–F1.64 — rewrite skills and step files across `design`, `test`, `unpack-problem`, `craft-lesson`, `validate-idea` to direct I/O and capability-based phrasing (zero dead `@reader`/`@writer`/`@executor` handles in active skill catalog)
-- [x] F1.65 — synchronize `.opencode/skills/` mirrors with `.agents/skills/`
-- [x] F1.66 — scrub English user-facing documentation (`README.md`, `CLAUDE.md`, `Guide/en/*`, `QUICK-REFERENCE.md`)
-- [x] F1.67 — scrub Chinese user-facing documentation (`README_CN.md`, `Guide/cn/*`)
-- [x] F1.68 — reframe `AGENTS.md` and `AGENTS.md.canonical` to 2 differentiators and 20 agent personas with direct I/O
-- [x] F1.69 — verify skill catalog via `compile_skills.js` and `spec_check.js` (43 skills passing)
-- [x] F1.70 — memory protocol standardized on `@memory-controller` as sole specialized persistence sub-agent
-- [x] F1.71 — DoD verification pass: root docs synced, test suite passing (75/75 tests)
+| Item | Status 2026-09-29 | Verifying command → result |
+|---|---|---|
+| Plan authored / round-table + memory review | **VERIFIED** | This file + `active-decisions.md` (2026-08-23, 08-24 entries) |
+| F1.58–F1.59 (ADR-005 + language spec) | **SUPERSEDED / void** — owner ruling 2026-08-10 removed the trio personas; the ADR's "keep personas" contract has no live consumer. The ADR file is not on disk (never git-tracked; `artifacts/output/` is gitignored by design). | `find . -name '*adr-005*' -not -path '*/node_modules/*'` → 0 matches; `git ls-files artifacts/output/ \| wc -l` → 0 |
+| F1.60–F1.64 (capability-based rewords) | **VERIFIED** — zero dead trio handles in skills or personas; fail-closed lint enforces the ban. | `grep -rn '@reader\|@writer\|@executor' .agents/skills/ .agents/agents/ \| wc -l` → 0; `node .agents/scripts/compile_skills.js` → "✓ delegation lint: zero removed-persona handles" |
+| F1.65 (`.opencode/skills` mirror sync) | **SUPERSEDED** — `.opencode` was a symlink to `.agents` (round-table correction 2026-08-24), never a separate tree; the 02h §10 refactor removed the in-repo symlink and emits per-harness links at install time (`bin/lib/harnesses/opencode.js`). | `ls .opencode` → No such file; `git ls-files .opencode \| wc -l` → 0 |
+| F1.66–F1.67 (EN/CN doc scrub) | **VERIFIED** | `grep -rn '@reader\|@writer\|@executor' README.md README_CN.md Guide/en/ Guide/cn/ \| wc -l` → 0 |
+| F1.68 (AGENTS.md reframe) | **VERIFIED** — No-Yes-Men DNA + 20 personas + direct I/O in the canonical source. | `grep -c 'No Yes-Men' .agents/templates/system/AGENTS.md.canonical` → 3 |
+| F1.69 (delegation lint) | **REBUILT 2026-08-25 (02p R0.2)** — ban-only fail-closed lint in `compile_skills.js` (persona-marking whitelist retired with the trio personas). | Planted-probe evidence in `02p` R0.2; clean tree exits 0 |
+| F1.70 (measurement cycle) | **REBUILT-LITE 2026-09-29 (02p R1.10)** — `.agents/state/delegation-log.json` baseline + weekly cadence note; post-v2.0.0 review date 2026-09-30. | `test -f .agents/state/delegation-log.json` → present (see `02p` §5.1) |
+| F1.71 ("75/75 tests") | **FALSIFIED, corrected forward** — no disk provenance for "75/75"; the shipped suite is `tests/run-all.js` via `npm test` (current count stamped in `02p` §5.1). | `grep -rn '75/75' .agents/scripts/ tests/ bin/ \| wc -l` → 0 |
 
-**Phase gate:** Phase 1 development plans (`02f`, `02g`, `02h`, `02i`, `02j`) aligned; ready for downstream Phase 1 completion and Phase 2 entry gate.
+**Phase gate (re-stated 2026-09-29):** 02g's record is now truthful. Downstream Phase 1 completion is gated by `02l` execution + `02p` closure, not by 02g; no new 02g work is authorized (WS-A: recovery, not feature reopen).
 
 ---
 

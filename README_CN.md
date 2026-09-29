@@ -53,7 +53,7 @@ npx vespyr --yes --target /path/to/my-project --harness opencode,claude
 /validate-idea   →   /explore-idea   →   /design   →   /develop   →   /launch
 ```
 
-涵盖从 `/validate-idea`、`/design`、`/round-table` 到 `/shut-up`、`/motion`、`/develop`、`/launch`、`/customize-skill` 和 `/create-skill` 等 43 个端到端工作流（全部通过 CI 校验符合 [agentskills.io](https://agentskills.io) 智能体技能规范）。
+涵盖从 `/validate-idea`、`/design`、`/round-table` 到 `/shut-up`、`/motion`、`/develop`、`/launch`、`/customize-skill` 和 `/create-skill` 等 40 个端到端工作流（全部通过 CI 校验符合 [agentskills.io](https://agentskills.io) 智能体技能规范）。
 - **原型优先逆向模式** — `/design` 将冻结的原型转化为有证据锚定的 PRD：每条陈述都可追溯到 `path#id` 锚点，哈希见证在范围门处拦截过期规格。
 - **实现覆盖契约** — `/develop` 在 QA 前扫描每条验收标准的实现证据：孤儿 AC 会使构建失败，10 个细节类别要么被审计实现，要么显式延期。
 
@@ -114,11 +114,11 @@ validate → explore → design → plan → develop → launch → iterate → 
 
 ## 🧩 核心功能
 
-- **43 个精心策划的技能** — 涵盖从 `/validate-idea`、`/design`、`/round-table` 到 `/shut-up`、`/motion`、`/develop`、`/launch`、`/customize-skill` 和 `/create-skill` 等。
+- **40 个精心策划的技能** — 涵盖从 `/validate-idea`、`/design`、`/round-table` 到 `/shut-up`、`/motion`、`/develop`、`/launch`、`/customize-skill` 和 `/create-skill` 等。
 - **整合的三级记忆与机器状态栅栏** — `project-context.md` 原子状态自动同步、精简的 5 文件共享记忆与阶段边界自动归档压缩。
 - **安全与完整性引擎** — 已签名的 SHA-256 清单校验（`vespyr verify`）、供应链安全审计（`vespyr audit`）、封闭权限注册表与 T3 数据信任边界准入控制。
 - **智能体自定义** — 双文件 TOML 合并。升级时你的覆盖配置保持不变。
-- **多平台支持** — 对 OpenCode、Claude Code、Kiro、GitHub Copilot 提供一等安装支持；通用 `.agents/` 存储可被 Aider、Google Antigravity、Codex 直接读取。
+- **多平台支持** — 对 OpenCode、Claude Code、Kiro、GitHub Copilot 提供一等安装支持；通用 `.agents/` 存储可被 Google Antigravity 与 Codex 原生读取，Aider 与 Gemini CLI 通过根目录 `AGENTS.md` 接入。各平台的验证机制与注意事项见[开发工具矩阵](Guide/cn/installation.md#支持的开发工具)。
 - **11 阶段流水线** — 带强制执行。无越序执行。
 
 [完整技能目录 →](Guide/cn/skills-and-workflows.md) · [自定义 →](Guide/cn/configuration.md)

@@ -4,6 +4,8 @@
 **Date:** 2026-07-29 (Updated: 2026-07-31)
 **Problem:** When agents are invoked individually or through round table, they never update the memory folder.
 
+> **[RECORD RECONCILIATION 2026-09-29 (02p R1.6)]** Audit (2026-08-23) found 2 false boxes here (delegation-contract headers clobbered by the 2026-08-10 re-scope; stale agent counts). Annotated below with dated commands; historical text retained.
+
 ---
 
 ## 📊 Implementation Status Checklist
@@ -12,11 +14,11 @@
   - [x] 1.1 Create `session-summaries/` directory and seed files (`latest.md`, `history.md`)
   - [x] 1.2 Create missing `blockers-and-risks.md`
   - [x] 1.3 Auto-create guard in `memory_filter.js` — `ensureSessionSummaryFiles()` runs at the top of every `filterMemory()` call; silently re-creates `session-summaries/`, `latest.md`, and `history.md` if missing (fresh clone, deletion, or init that skips Phase 1 are all covered)
-- [x] **Phase 2: Agent Persona Fixes (All 21 agents)**
-  - [x] 2.1 Add `## Session Continuity (Mandatory)` section to all 17 reasoning agents
-  - [x] 2.2 Strengthen `## Shared Memory` sections with bold enforcement warnings in 17 reasoning agents
-  - [x] 2.3 Fix missing `## Delegation Contract` headers (`founder`, `technical-writer`, `user-researcher`, `ux-researcher`)
-  - [x] 2.4 Agent file manifest (17 reasoning agents updated, 3 I/O sub-agents skipped by design, 1 memory controller verified)
+- [x] **Phase 2: Agent Persona Fixes (All 21 agents)** — *[02p 2026-09-29: roster is now 20 personas (`ls .agents/agents/*.md \| wc -l` → 20); "21 agents" reflects the pre-2026-08-10 trio era.]*
+  - [x] 2.1 Add `## Session Continuity (Mandatory)` section to all 17 reasoning agents — *[02p re-verify 2026-09-29: 19/20 personas carry it (`grep -l "## Session Continuity" .agents/agents/*.md \| wc -l` → 19); only `memory-controller.md` lacks it (write-path design). Claim narrowed, not false.]*
+  - [x] 2.2 Strengthen `## Shared Memory` sections with bold enforcement warnings in 17 reasoning agents — *[02p re-verify 2026-09-29: `grep -l "## Shared Memory" .agents/agents/*.md \| wc -l` → 18.]*
+  - [x] 2.3 Fix missing `## Delegation Contract` headers (`founder`, `technical-writer`, `user-researcher`, `ux-researcher`) — *SUPERSEDED 2026-09-29 (02p): all four now have zero such headers because the trio-delegation model was removed by the owner-authorized 2026-08-10 re-scope; capability/direct-I/O language replaced it. Evidence: `for p in founder technical-writer user-researcher ux-researcher; do grep -c "## Delegation Contract" .agents/agents/$p.md; done` → 0/0/0/0.*
+  - [x] 2.4 Agent file manifest (17 reasoning agents updated, 3 I/O sub-agents skipped by design, 1 memory controller verified) — *SUPERSEDED 2026-09-29 (02p): the 3 I/O sub-agents no longer exist; current manifest is the 20-persona roster (`ls .agents/agents/*.md \| wc -l` → 20).*
 - [x] **Phase 3: Round Table Memory Integration**
   - [x] 3.1 Add memory context pre-load (`memory_filter.js`) at round table start
   - [x] 3.2 Add decision write (`active-decisions.md`) + `session-write` at round table exit

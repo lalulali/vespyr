@@ -9,8 +9,6 @@ const {
   parseFrontmatter,
   detectState,
   createLinkOrCopy,
-  transpileCopilotYAML,
-  transpileCursorMDC,
   scaffoldArtifacts,
   backupExistingArtifactsDir,
   bootstrapRootDocs,

@@ -5,7 +5,7 @@
 ## 前置条件
 
 - **Node.js** ≥ 18
-- 一个 **AI 开发工具**（任意：OpenCode、Claude Code、Cursor、Windsurf、GitHub Copilot、Kiro、Aider、Google Antigravity）
+- 一个 **AI 开发工具** — OpenCode、Claude Code、Kiro、GitHub Copilot 提供一等安装支持；Google Antigravity 与 Codex 原生读取通用 `.agents/` 目录；Aider 与 Gemini CLI 通过 `AGENTS.md` 接入。Cursor/Windsurf 仅为旧安装清理，重设计推迟至 Phase 2。
 - 支持智能体调用的终端或 IDE
 
 ## 安装
@@ -27,7 +27,7 @@ node bin/cli.js --yes --harness opencode,claude
 
 交互式 CLI 向导将引导你完成：
 
-1. **平台选择** — 选择你的 IDE/CLI 平台（OpenCode、Claude Code、Cursor 等）
+1. **平台选择** — 选择你的 IDE/CLI 平台（OpenCode、Claude Code、Kiro、GitHub Copilot）
 2. **项目目标** — 安装到哪个仓库（默认为当前目录）
 
 ## 创建的文件
@@ -38,25 +38,39 @@ node bin/cli.js --yes --harness opencode,claude
 your-project/
 ├── .agents/              # 智能体角色、技能、脚本、配置、参考
 │   ├── agents/           # 20 个智能体角色 Markdown 文件
-│   ├── skills/           # 43 个原子化技能工作流
-│   ├── scripts/          # 编排器、图谱、记忆、遥测
+│   ├── skills/           # 40 个原子化技能工作流
+│   ├── scripts/          # 编排器、记忆、遥测
 │   ├── config.yaml       # 项目配置
 │   └── references/       # 阶段表、术语表、契约
 ├── artifacts/
 │   ├── memory/           # 持久化共享记忆
 │   │   ├── project-context.md
 │   │   ├── active-decisions.md
-│   │   ├── lessons-learned.md
-│   │   └── structural/   # 代码图谱与文档图谱
+│   │   └── lessons-learned.md
 │   ├── input/            # 用户提供的原始材料
 │   └── output/           # 智能体生成的制品（按阶段）
-├── agent.md              # 平台入口（OpenCode/Copilot 用）
-├── AGENTS.md             # 平台入口（Claude/Cursor 用）
-├── CLAUDE.md             # 平台入口（Claude Code/Cursor 用）
+├── agent.md              # 入口文件（agent.md 约定工具）
+├── AGENTS.md             # 通用指令基线（Copilot 人格随此生效）
+├── CLAUDE.md             # 入口文件（Claude Code）
 └── README.md             # 项目概览
 ```
 
-> **平台说明：** 配置目录为 `.agents/`。部分平台期望不同的文件夹名（如 Claude Code 使用 `.claude/`）。如需匹配，可将 `.agents/` 重命名。
+> **平台说明：** 规范配置目录为 `.agents/`。安装器会按你选择的平台创建对应链接（`.opencode`、`.claude`、`.kiro/skills`、`.github/skills`）——请勿重命名或移动 `.agents/`，否则链接会失效。
+
+## 支持的开发工具
+
+| 开发工具 | 安装方式 | 安装内容 |
+|---|---|---|
+| OpenCode | 一等支持 | `.opencode -> .agents` 符号链接 |
+| Claude Code | 一等支持 | `.claude -> .agents` 符号链接 + `CLAUDE.md` |
+| Kiro | 一等支持（混合） | `.kiro/skills` 符号链接 + `.kiro/steering/vespyr-steering.md` |
+| GitHub Copilot | 一等支持 | `.github/copilot-instructions.md` + `.github/skills -> .agents/skills`；人格通过根目录 `AGENTS.md` 生效 |
+| Google Antigravity | 无需安装 | 原生读取 `.agents/skills/`（及 `.agents/rules/`、`.agents/workflows/`） |
+| Codex | 无需安装 | 原生读取根目录 `AGENTS.md` 并扫描 `.agents/` 技能 |
+| Cursor / Windsurf | 旧安装清理 | 仅探测/卸载旧安装；重设计在 Phase 2 |
+| Aider / Gemini CLI | 读取并采用 | 使用根目录 `AGENTS.md` 调用模式 |
+
+**注意事项：** GitHub Copilot 会在功能上读取 `~/.agents/skills` 的个人技能，但不会在自动补全/选择器中列出（functional-but-invisible）；VS Code 的 `/` 选择器通过安装生成的 `.github/skills` 链接解析项目技能，而非根目录 `.agents/skills`。Antigravity 的 `.agents/agents.md` 团队文件与 Vespyr 的 `.agents/agents/` 人格目录不冲突。权威且持续更新的矩阵见 `.agents/references/harness-matrix.md`。
 
 ## 快速安装（跳过向导）
 
@@ -91,7 +105,7 @@ node bin/cli.js --yes --target /path/to/my-project
 你可以验证安装的供应链完整性与安全合规性：
 
 ```bash
-# 对照已签名的 SHA-256 清单校验 .agents/ 完整性
+# 对照固定的 SHA-256 清单校验 .agents/ 完整性（暂未签名，见 ADR-002 §2.1.1）
 npx vespyr verify
 
 # 运行供应链安全与内容完整性扫描器

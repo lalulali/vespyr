@@ -6,6 +6,8 @@
 
 **Gate Reviews:** Round table 2026-08-14 (@founder, @ml-ai-engineer, @ml-ai-ops, @architect, @tech-lead, @qa-engineer, @product-manager), unanimous alignment recorded in `artifacts/memory/active-decisions.md`.
 
+> **[RECORD RECONCILIATION 2026-09-29 (02p R1.6)]** Audit (2026-08-23) found the `Task 4.4` "pre-commit hooks" claim false, and the 02m final review (2026-09-10) falsified `TL-HO-06` (named suite files absent). Both dispositioned below with dated commands; historical text retained.
+
 **Storage boundary correction (2026-09-24):** `evals/` contains harness code and input fixtures only. Generated reports, score files, calibration outputs, and run baselines belong under `artifacts/evals/`; historical `evals/...` result paths in this plan are superseded. Frozen security-corpus baseline files remain CI oracles with their corpus.
 
 ---
@@ -460,7 +462,7 @@ A CI/CD run triggers a **REGRESSION FAILURE (Exit Code 2)** if:
 - [x] Task 4.1 — Implement `tools/eval/baseline.js` baseline tracking and regression diffing
 - [x] Task 4.2 — Implement rich ASCII console reporter with agent/skill breakdown
 - [x] Task 4.3 — Implement markdown and JSON/NDJSON CI reporters
-- [x] Task 4.4 — Wire `npm run eval` commands into package.json and pre-commit hooks
+- [~] Task 4.4 — Wire `npm run eval` commands into package.json and pre-commit hooks — *[02p RECONCILE 2026-09-29: package.json eval scripts VERIFIED (`grep -n '"eval' package.json` → eval, eval:agents, eval:skills, eval:tier0, eval:invariants, eval:baseline); the pre-commit half is PARTIAL — the shipped installer `.agents/scripts/setup_git_hooks.js` writes a vespyr-managed pre-commit hook that runs `npm test`, NOT `npm run eval` (hook template + `tests/test_git_hooks.test.js`). Previously stamped `[x]`; corrected to `[~]`.]*
 
 ---
 
@@ -520,7 +522,7 @@ A CI/CD run triggers a **REGRESSION FAILURE (Exit Code 2)** if:
    - **Next-Route Trampoline Card:** Emits structured markdown action cards offering explicit execution paths (Formulate Problem, Shaped Delivery, Direct Code, or Codify Workflow).
    - **Context Re-Anchoring:** Downstream agents re-anchor strictly on the compiled brief + Tier 1/2 memory, discarding conversational query debris.
 
-### 13.2 Tier 0 & Tier 1 Handoff Evaluation Suite (`evals/suites/skills/handoff-continuity.json` & `zero-mention-routing.json`)
+### 13.2 Tier 0 & Tier 1 Handoff Evaluation Suite (`evals/suites/skills/handoff-continuity.json` & `zero-mention-routing.json`) — *[02p 2026-09-29: named files absent on disk; see TL-HO-06 note below.]*
 - **T0-ZM-RECALL (Zero-Mention Routing Accuracy $\ge 95\%$):** Asserts 38 natural language benchmark fixtures with zero `@` or `/` syntax correctly resolve to their expected personas and skills.
 - **T0-ZM-BANNER (Persona Adoption Banner):** Asserts output starts with `<emoji> <Name> (@<role>):` when auto-adopting.
 - **T0-HO-UNIVERSAL (Handoff Schema & Path Assertion):** Static AST regex verifying that any session concluding with build intent outputs a valid domain brief and parseable Trampoline Card.
@@ -614,7 +616,7 @@ No skill or agent can be registered into `manifest.json` or committed to disk wi
 - [x] **Task 1.4:** Build Tier 1 semantic evaluation engine with 7 calibrated G-Eval rubrics.
 - [x] **Task 2.1–2.4:** Benchmark suites for all 20 agents (Core Swarm, Domain Experts, Engineering & Ops, Memory Controller).
 - [x] **Task 3.1–3.4:** Benchmark suites for all 38 skill workflows, `/grill-me` SPCP, and `/shut-up` brevity.
-- [x] **Task 4.1–4.4:** Implement `evals/baseline.json` regression tracker, ASCII terminal reporter, CI reporters, and pre-commit hooks.
+- [~] **Task 4.1–4.4:** Implement `evals/baseline.json` regression tracker, ASCII terminal reporter, CI reporters, and pre-commit hooks. — *[02p RECONCILE 2026-09-29: 4.1–4.3 verified on disk (baseline.js, reporters); 4.4 partial per note above — see §5.1.]*
 
 ### Post-02j Hardening 1: Harness-Agnostic Bootstrapping & Init Evals (Case 1)
 - [x] **Task TL-INIT-01:** Delete `.agents/commands/init.md` and scrub all `commands/` references from `manifest.json`, `spec_check.js`, and `compile_skills.js`. **[EXECUTED 2026-09-03]** Evidence: `.agents/commands/init.md` deleted, `bin/cli.js manifest` regenerated (323 files), `bin/cli.js verify` passes 324/324 files clean.
@@ -629,7 +631,7 @@ No skill or agent can be registered into `manifest.json` or committed to disk wi
 - [x] **Task TL-HO-03:** Inject the Zero-Mention Intake Semantic Router Protocol into `AGENTS.md`, `CLAUDE.md`, and `.agents/references/vespyr-dna.md`. *(Executed in 02m — DNA 4)*
 - [x] **Task TL-HO-04:** Update `/unpack-problem`, `/shape-up`, `/design`, and `/develop` to automatically scan and ingest canonical domain briefs. *(Executed in 02m Step 0)*
 - [x] **Task TL-HO-05:** Author `.agents/references/handoff-protocols.md` codifying universal cross-persona transition contracts. *(Executed in 02m Guardrails §22)*
-- [x] **Task TL-HO-06:** Author `evals/suites/skills/handoff-continuity.json` and `evals/suites/invariants/zero-mention-routing.json` in `vespyr-eval`. *(Executed in 02m `invariants/intent-routing.json`)*
+- [ ] **Task TL-HO-06:** Author `evals/suites/skills/handoff-continuity.json` and `evals/suites/invariants/zero-mention-routing.json` in `vespyr-eval`. *(Executed in 02m `invariants/intent-routing.json`)* — **[FALSIFIED 2026-09-10 (02m final review); re-verified 02p 2026-09-29: NEITHER named suite exists — `ls evals/suites/skills/handoff-continuity.json evals/suites/invariants/zero-mention-routing.json` → both "No such file"; the shipped substitute `evals/suites/invariants/intent-routing.json` does not cover the claimed suites. Converted to build item (`02p` §12.3 F-4); box unchecked.]**
 
 ### Post-02j Hardening 3: Eval-Driven Meta-Authoring & Anthropic Patterns (Case 3)
 - [ ] **Task TL-EVAL-01:** Implement `tools/eval/delta-runner.js` supporting concurrent A/B sandbox execution (`with_x` vs `without_x`) and computing $\text{ACL}$, $\text{W/T/L}$, and $\text{TRI}$ metrics.

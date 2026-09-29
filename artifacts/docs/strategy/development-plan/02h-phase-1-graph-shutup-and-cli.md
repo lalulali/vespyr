@@ -283,10 +283,12 @@ The CLI introduces safe, non-destructive engine updates:
 - **Custom Conflict Backups:** If a user has customized an existing skill or agent file, the updater creates `.bak-${YYYYMMDD}` backups (e.g. `SKILL.md.bak-20260814`) rather than silently discarding user changes.
 
 ### 5.4 Expanded Multi-Harness Integration
+> **[STRUCK DOWN 2026-09-29 (02p R1.16)]** SUPERSEDED — do not build. Antigravity reads `.agents/` natively (zero emission); Gemini and Aider are served by the AGENTS.md read-and-adopt pattern; Cursor/Windsurf are legacy-cleanup-only pending `03c`. Scope was cut by the WS-D owner decisions C1/C2 (2026-08-24); the `--harness antigravity` example in §5.5 below is void. Residual verification lives in `02p` R1.12–R1.17 / `02p` harness matrix.
+
 Adds first-class scaffolding for modern AI developer harnesses:
-- **`antigravity`:** Scaffolds `.agents/` + Antigravity configuration shims.
-- **`gemini`:** Generates Gemini CLI configuration templates.
-- **`aider`:** Generates `.aider.conf.yml` and pre-prompt instructions.
+- **`antigravity`:** Scaffolds `.agents/` + Antigravity configuration shims. *(struck — zero work needed)*
+- **`gemini`:** Generates Gemini CLI configuration templates. *(struck — read-and-adopt)*
+- **`aider`:** Generates `.aider.conf.yml` and pre-prompt instructions. *(struck — read-and-adopt)*
 
 ### 5.5 Headless CI/CD Automation Flags
 Enables one-line zero-prompt installation for CI/CD runners:
@@ -338,7 +340,7 @@ To eliminate duplicate file parsing, fragile `process.cwd()` dependencies, and u
 - [~] **Task 3.6**: Author test fixtures verifying `/round-table` pairwise critique enforcement, concession tracking, and anti-sycophantic convergence blocking.
 
 ### WS-4: `bin/cli.js` Modernization, CLI Helpers & NPX Package Verification
-- [ ] **Task 4.1**: Extract CLI helper modules into `bin/lib/` (`detector.js`, `prompts.js`, `transpilers.js`) and slim `bin/cli.js`. *(DEFERRED 2026-08-24: helpers exist but cli.js remains a monolith (2695 lines, zero lib requires); slim-coordinator refactor is unscheduled follow-up work requiring its own estimate.)*
+- [ ] **Task 4.1**: Extract CLI helper modules into `bin/lib/` (`detector.js`, `prompts.js`, `transpilers.js`) and slim `bin/cli.js`. *(DEFERRED 2026-08-24: helpers exist but cli.js remains a monolith (2695 lines at audit); slim-coordinator refactor is unscheduled follow-up work requiring its own estimate. **02p re-verify 2026-09-29:** helpers now live under `bin/lib/` (harness adapters + installer) and `bin/cli.js` consumes them (`bin/cli.js:27` requires `HARNESS_OPTIONS`); `wc -l bin/cli.js` → **2169** lines, so the slim half remains open. `transpilers.js` was cut entirely — see `02p` R1.12.)*
 - [x] **Task 4.2**: Implement `detectStack(targetDir)` helper with multi-language manifest checks.
 - [~] **Task 4.3**: Implement `npx vespyr update` subcommand handling with memory preservation and `.bak-${YYYYMMDD}` conflict backups.
 - [ ] **Task 4.4**: Add Antigravity, Gemini, and Aider to harness options and configuration scaffolding. *(SUPERSEDED 2026-08-24 by `02m` WS-D owner decisions C1/C2 — Antigravity reads `.agents/` natively (zero emission); Copilot personas ride root AGENTS.md; Gemini/Aider covered by the read-and-adopt pattern. Residual scope lives in `02m` R1.12–R1.15, not here.)*
@@ -408,7 +410,8 @@ To eliminate duplicate file parsing, fragile `process.cwd()` dependencies, and u
   - **Evidence (2026-08-24, working tree — awaiting owner commit):** state machine, Phases 1-4, SPC Gate, concession justification, dialogue-stream mandate present per audit F12; asserted by round-table.test.js.
 - [x] Task 3.6 — Author test fixtures verifying `/round-table` pairwise critique and concession justification enforcement
   - **Evidence (2026-08-24, working tree — awaiting owner commit):** honest reframe: unfalsifiable self-substring 'simulation' test removed; fixture pins Phase-2 pairwise mandate, `[CONCESSION: reason]` format, 2-round bound (`round-table.test.js`). Runtime enforcement is orchestrator-level. Marked [~] at §6 for that scope boundary.
-- [x] Task 4.1 — Extract CLI helpers to `bin/lib/` (`detector.js`, `prompts.js`, `transpilers.js`) and slim `bin/cli.js`
+- [~] Task 4.1 — Extract CLI helpers to `bin/lib/` (`detector.js`, `prompts.js`, `transpilers.js`) and slim `bin/cli.js`
+  - **02p RECONCILE 2026-09-29:** helpers exist under `bin/lib/` (detector.js + harness adapters + installer), but the slim-coordinator half is NOT achieved: `wc -l bin/cli.js` → **2169** lines (was 2695 at audit). Remains deferred follow-up work; `transpilers.js` was cut entirely (see R1.12). Body note: §4.2 T4.1.
 - [x] Task 4.2 — Implement `detectStack(targetDir)` helper with multi-language manifest checks
   - **Evidence (2026-08-24, working tree — awaiting owner commit):** detector.js full manifest matrix; integrated into init this window — temp-dir smoke with Cargo.toml logged 'Stack: Rust (auto-detected)' and wrote it to project-context.md.
 - [~] Task 4.3 — Implement `npx vespyr update` with memory preservation and `.bak-${YYYYMMDD}` conflict backups
@@ -417,8 +420,8 @@ To eliminate duplicate file parsing, fragile `process.cwd()` dependencies, and u
   -   - **Evidence (2026-08-24, working tree — awaiting owner commit):** SUPERSEDED (not merely false): zero antigravity/gemini/aider hits confirmed, AND 02m WS-D owner decisions C1/C2 cut this exact scope — Antigravity/Gemini/Aider are served by native read or read-and-adopt; residual verification work lives in 02m R1.12–R1.15.
 - [x] Task 4.5 — Add non-interactive headless CLI parameters (`--project-name`, `--user-nickname`, `--stack`, `--harness`, `--yes`)
   - **Evidence (2026-08-24, working tree — awaiting owner commit):** previously 3-of-5 flags parsed-but-dead. Headless smoke: `init --project-name "Flag Test" --user-nickname "Chris T" --stack "Rust, Tokio" --yes` → project-context.md carries Project/Stack/User Nickname values (grep-verified on generated file). Auto-detect fallback proven via Cargo.toml dir → 'Rust'.
-- [x] Task 4.6 — Run cross-platform initialization and update test matrix across OS fixtures
-  - **Evidence (2026-08-24, working tree — awaiting owner commit):** PARTIAL honesty: E2E install/update/reconfigure/uninstall flows genuinely covered and passing in tests/test_cli.js (Tests 17/19), but win32 paths are explicitly skipped there and no OS matrix runs them — 'cross-platform' remains overstated until a Windows runner executes the suite. Left [~] at §6.
+- [~] Task 4.6 — Run cross-platform initialization and update test matrix across OS fixtures
+  - **Evidence (2026-08-24, working tree — awaiting owner commit):** PARTIAL honesty: E2E install/update/reconfigure/uninstall flows genuinely covered and passing in tests/test_cli.js (Tests 17/19), but win32 paths are explicitly skipped there and no OS matrix runs them — 'cross-platform' remains overstated until a Windows runner executes the suite. Left [~] at §6. *(§8 box aligned to [~] by 02p 2026-09-29.)*
 - [x] Task 4.7 — NPX Packaging & Manifest Verification (`npm pack` dry-run audit and zero-missing-module execution test)
   - **Evidence (2026-08-24, working tree — awaiting owner commit):** previously nonexistent. New `test/cli/packaging.test.js`: real `npm pack --dry-run --json` asserts tarball contains bin entry points, bin/lib helpers, engine scripts, skills; requires each shipped module (zero missing-module errors).
 - [x] Task 5.1 — Build `.agents/scripts/lib/fs_atomic.js` for crash-safe atomic reads and writes
@@ -427,8 +430,8 @@ To eliminate duplicate file parsing, fragile `process.cwd()` dependencies, and u
   - **Evidence (2026-08-24, working tree — awaiting owner commit):** findWorkspaceRoot marker-climb + fallback; tested from nested repo dir and isolated tmp tree.
 - [x] Task 5.3 — Build `.agents/scripts/lib/frontmatter.js` for unified YAML frontmatter parsing and serialization
   - **Evidence (2026-08-24, working tree — awaiting owner commit):** lib contract pinned (arrays, coercion, BOM strip, serializer roundtrip); known behavioral divergence from bin/cli.js local parser documented in fixture comments.
-- [x] Task 5.4 — Build `.agents/scripts/lib/identity.js` for dual-block identity updates in `project-context.md`
-  - **Evidence (2026-08-24, working tree — awaiting owner commit):** HONESTY NOTE: module exists but has zero consumers repo-wide (audit finding, unchanged) — built, not adopted; adoption target is the init/reconfigure flow (see T4.5 wiring as future consumer). Marked [~] at §6.
+- [~] Task 5.4 — Build `.agents/scripts/lib/identity.js` for dual-block identity updates in `project-context.md`
+  - **Evidence (2026-08-24, working tree — awaiting owner commit):** HONESTY NOTE: module exists but has zero consumers repo-wide (audit finding, unchanged) — built, not adopted; adoption target is the init/reconfigure flow (see T4.5 wiring as future consumer). Marked [~] at §6. *(§8 box aligned to [~] by 02p 2026-09-29.)*
 - [x] Task 5.5 — Refactor `orchestrator_state.js`, `archive_manager.js`, `step_tracker.js`, etc. to use `.agents/scripts/lib/`
   - **Evidence (2026-08-24, working tree — awaiting owner commit):** `grep fs.writeFileSync` across the six named scripts → ZERO raw writes (was 1-of-6). archive_manager's hand-rolled tmp+rename now delegates to lib (gains EXDEV/EPERM handling); orchestrator_state's two remaining raw project-context writes converted; session_checkpoint verified write-less by design (plan §5.7 claim corrected). Smokes: archive merge/validate OK, orchestrator status OK.
 - [x] Task 5.6 — Update test suite to verify atomic writes, root resolution, and frontmatter parsing integrity
@@ -515,7 +518,7 @@ Incremental extraction by domain. NOT a big-bang rewrite: each step must leave t
 6. Full suite green after EVERY extraction step (not just at the end)
 7. Every box above stamped with adjacent command evidence at completion time
 
-**Status:** EXECUTED 2026-08-25 — A1–A4, B1–B3, D1–D2 closed with evidence above; C1–C2 landed, C3 Windows-run evidence PENDING EXTERNAL (first push triggers the matrix). Residuals owned: cli.js at 1322 lines vs original ~250 sketch (rationale at DoD #1 amendment); cursor/windsurf redesign deferred to 03c.
+**Status:** EXECUTED 2026-08-25 — A1–A4, B1–B3, D1–D2 closed with evidence above; C1–C2 landed, C3 Windows-run evidence PENDING EXTERNAL (first push triggers the matrix). Residuals owned: cli.js at 1322 lines vs original ~250 sketch (rationale at DoD #1 amendment; **02p re-measure 2026-09-29: `wc -l bin/cli.js` → 2169 — still open**); cursor/windsurf redesign deferred to 03c.
 
 
 
