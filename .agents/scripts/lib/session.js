@@ -6,10 +6,16 @@
  * per write), and a shared session-current.json would merge two PARALLEL
  * windows into one identity — exactly the hazard 02o exists to catch.
  * Resolution order:
- *   1. VESPYR_SESSION_ID env (harness-provided, explicit)
+ *   1. VESPYR_SESSION_ID env (harness-provided, explicit) — trusted ONLY if
+ *      it matches the safe id shape (see VALID_SESSION_ID); an off-shape
+ *      value falls through rather than forging attribution rows.
  *   2. `w-<hash(hostname:ppid)>` — stable per terminal/harness window,
  *      distinct per window, zero coordination (ppid = the harness process
- *      every script invocation from that window shares)
+ *      every script invocation from that window shares). This is a FALLBACK:
+ *      forked-per-call harnesses mint multiple ids per real session, and two
+ *      sessions sharing a ppid collapse to one id — set VESPYR_SESSION_ID to
+ *      a unique-per-session token to get exact attribution (harness contract:
+ *      GUARDRAILS "Parallel Session Protocol").
  * 'unattributed' only if both fail (practically never).
  *
  * latest.md is a DERIVED VIEW of append-only history.md — never a
@@ -36,10 +42,33 @@ function windowSessionId() {
   return `w-${h.slice(0, 12)}`;
 }
 
+// Harness contract: VESPYR_SESSION_ID must be a unique-per-session token of
+// safe id chars only. It is interpolated raw into ledger rows and memory
+// entries, so an unvalidated value (empty, whitespace, or newline-bearing)
+// would forge attribution rows — the same injection class memory_write.js
+// guards for --agent. Reject anything off-shape and fall through to the
+// window id rather than trust it.
+const VALID_SESSION_ID = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/;
+
+function isValidSessionId(v) {
+  return typeof v === 'string' && VALID_SESSION_ID.test(v);
+}
+
+/**
+ * Resolve the session id and its source.
+ * @returns {{ id: string, source: 'explicit'|'window-fallback'|'unattributed' }}
+ */
+function resolveSessionInfo() {
+  const env = process.env.VESPYR_SESSION_ID;
+  if (env !== undefined && isValidSessionId(env)) {
+    return { id: env, source: 'explicit' };
+  }
+  try { return { id: windowSessionId(), source: 'window-fallback' }; } catch { /* fall through */ }
+  return { id: 'unattributed', source: 'unattributed' };
+}
+
 function resolveSessionId() {
-  if (process.env.VESPYR_SESSION_ID) return process.env.VESPYR_SESSION_ID;
-  try { return windowSessionId(); } catch { /* fall through */ }
-  return 'unattributed';
+  return resolveSessionInfo().id;
 }
 
 /** Called once per session (session_start). Idempotent per agent call. */
@@ -118,4 +147,4 @@ function regenerateLatest() {
   return true;
 }
 
-module.exports = { resolveSessionId, windowSessionId, ensureSessionCurrent, regenerateLatest, latestFromHistory, parseLastHistoryEntry };
+module.exports = { resolveSessionId, resolveSessionInfo, isValidSessionId, windowSessionId, ensureSessionCurrent, regenerateLatest, latestFromHistory, parseLastHistoryEntry };

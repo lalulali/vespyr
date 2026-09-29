@@ -109,7 +109,7 @@
   },
   {
     "name": "design",
-    "description": "Defines product requirements from validated ideas, then produces detailed developer-ready specs. Supports reverse (prototype-first), create, edit, and validate modes.",
+    "description": "Defines product requirements from validated ideas, then produces detailed developer-ready specs. Use for prototype-first, static HTML/Tailwind CDN, Next.js/React/shadcn component prototypes, create, edit, or validate design work; routes the prototype track and requires designer–tech collaboration before handoff.",
     "prerequisites": [
       "Reverse mode: artifacts/output/03-strategy/SPEC.md Spec Kernel (Review 10 §4) + a reachable prototype source (HTML mock, code, Figma export, AI-generated prototype); no requirements.md yet.",
       "Create/edit/validate: artifacts/output/01-discovery/validation-brief.md OR idea-brief.md OR shaped-brief.md",
@@ -126,7 +126,9 @@
     ],
     "key_agents": [
       "@product-manager",
-      "@product-designer"
+      "@product-designer",
+      "@tech-lead",
+      "@architect"
     ]
   },
   {
@@ -134,7 +136,8 @@
     "description": "Core MVP workflow — spec review, architecture, planning, implementation, coverage fidelity review, QA, verification, and documentation",
     "prerequisites": [
       "Spec-kernel exists at artifacts/output/03-strategy/ (see spec-kernel-template.md)",
-      "User stories in artifacts/output/03-strategy/user-stories.md"
+      "User stories in artifacts/output/03-strategy/user-stories.md",
+      "If a prototype is in scope, the @product-designer + @tech-lead prototype-collaboration.md record exists and prototype_collab_gate.js verify --scope handoff passes for the recorded track and prototype. Do not infer a missing collaboration record from a showcase HTML file."
     ],
     "outputs": [
       "artifacts/output/05-planning/execution-plan.md",
@@ -144,7 +147,8 @@
     ],
     "key_agents": [
       "@tech-lead",
-      "@developer"
+      "@developer",
+      "@product-designer"
     ]
   },
   {
@@ -364,7 +368,7 @@
   },
   {
     "name": "motion",
-    "description": "Orchestrates motion research, motion specification, and an explicit handoff to the standard development workflow for animation-significant products. Use this skill whenever the user mentions motion design, animation, transitions, micro-interactions, motion spec, motion prompts, animated UI, or an animation-heavy surface. Knowledge lives in .agents/references/motion/ and is loaded on demand, never inline.",
+    "description": "Orchestrates motion research, motion specification, and an explicit handoff to the standard development workflow for animation-significant products. Use this skill whenever the user mentions motion design, animation, transitions, micro-interactions, motion spec, motion prompts, animated UI, an animation-heavy surface, OR asks for an \"interactive website\", \"creative website\", or \"motion design website\" (these are explicit DNA 4 Clear-intent triggers — activate without waiting for the word \"animation\"). Knowledge lives in .agents/references/motion/ and is loaded on demand, never inline.",
     "prerequisites": [
       "  artifacts/output/03-strategy/product-spec.md and design.md exist (from /design), OR the user provides the screens/features in scope.",
       "  Agent references exist (they do — this is a curated skill):",
@@ -472,16 +476,13 @@
     "description": "Orchestrates group discussions between Vespyr agents, enabling natural multi-agent conversations where each agent is a real subagent with independent thinking. Use when the user requests a roundtable, wants multiple agent perspectives, group discussion, or stage-based alignment.",
     "prerequisites": [],
     "outputs": [
+      "artifacts/memory/active-decisions.md",
       "artifacts/memory/patterns-and-conventions.md",
-      "artifacts/memory/lessons-learned.md",
-      "artifacts/memory/active-decisions.md"
+      "artifacts/memory/lessons-learned.md"
     ],
     "key_agents": [
       "@tech-lead",
       "@architect",
-      "@a",
-      "@b",
-      "@c",
       "@founder",
       "@researcher",
       "@product-manager",
@@ -498,8 +499,7 @@
       "@ml-ai-engineer",
       "@ml-ai-ops",
       "@data-analyst",
-      "@shifu",
-      "@round-table"
+      "@shifu"
     ]
   },
   {

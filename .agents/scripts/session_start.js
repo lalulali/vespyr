@@ -457,7 +457,22 @@ if (require.main === module) {
     try {
       withLock(path.join(process.cwd(), '.agents', 'state', 'latest.lock'), () => { regenerateLatest(); });
     } catch { /* non-blocking */ }
-    console.log(JSON.stringify({ success: true, session_id, ...result }));
+    // Surface the attribution source so operators know whether writes this
+    // session are exactly-attributed (VESPYR_SESSION_ID set) or on the
+    // per-window ppid fallback (which forked-per-call harnesses over-count and
+    // shared-ppid sessions under-count). Silent fallback is the hazard.
+    let attribution = { source: 'unattributed', session_id: 'unattributed' };
+    try {
+      const info = require('./lib/session.js').resolveSessionInfo();
+      attribution = { source: info.source, session_id: info.id };
+      if (info.source === 'window-fallback') {
+        console.error(
+          `ℹ️  Attribution: window-fallback (${info.id}). Set VESPYR_SESSION_ID to a ` +
+          `unique-per-session token for exact attribution — see GUARDRAILS "Parallel Session Protocol".`
+        );
+      }
+    } catch { /* non-blocking */ }
+    console.log(JSON.stringify({ success: true, session_id, attribution, ...result }));
   } catch (e) {
     console.error(JSON.stringify({ error: e.message }));
     process.exit(1);

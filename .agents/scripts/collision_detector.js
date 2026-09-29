@@ -15,8 +15,9 @@
  * Usage:
  *   node collision_detector.js [--window-min 10] [--json] [--strict]
  *
- * Exit codes: 0 = no collisions; 1 = collisions detected (or --strict with
- * warnings); telemetry hook: emits `memory_collision` events for 02l spans.
+ * Exit codes: 0 = no collisions; 1 = collisions detected; 2 = collisions
+ * detected under --strict (elevated code for CI gating). Telemetry hook:
+ * emits `memory_collision` events for 02l spans.
  */
 
 'use strict';

@@ -77,14 +77,35 @@ function extractOutputs(text) {
   return Array.from(outputs);
 }
 
+const AGENTS_DIR = path.join(__dirname, '..', 'agents');
+
+/** The real persona set = the .md files under .agents/agents/. key_agents must
+ *  be actual personas, never scraped placeholders. Without this allowlist,
+ *  extractKeyAgents pulled example dialogue tokens (@agent-a, @a/@b/@c) and
+ *  non-persona handles (@round-table the skill, @shadcn the UI toolkit) into
+ *  the catalog — a generated-record defect (02p theme). Computed once. */
+function realPersonaSet() {
+  const set = new Set();
+  try {
+    for (const f of fs.readdirSync(AGENTS_DIR)) {
+      if (f.endsWith('.md')) set.add(`@${f.slice(0, -3)}`);
+    }
+  } catch { /* no agents dir → empty allowlist (drops all, fail-safe) */ }
+  return set;
+}
+const REAL_PERSONAS = realPersonaSet();
+
 function extractKeyAgents(text) {
   const agents = new Set();
-  const ignored = new Set(['memory-controller']);
+  const ignored = new Set(['@memory-controller']);
   const pattern = /@([a-zA-Z0-9_-]+)/g;
   let m;
   const stripped = stripFencedBlocks(text);
   while ((m = pattern.exec(stripped)) !== null) {
-    if (!ignored.has(m[1])) agents.add(`@${m[1]}`);
+    const handle = `@${m[1]}`;
+    // Allowlist: only real personas count as key_agents. Placeholders
+    // (@agent-a, @a) and non-persona handles (@round-table, @shadcn) drop out.
+    if (REAL_PERSONAS.has(handle) && !ignored.has(handle)) agents.add(handle);
   }
   return Array.from(agents);
 }
