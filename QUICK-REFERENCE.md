@@ -107,6 +107,7 @@ Lifecycle Workflows:
   /iterate             Post-launch feature improvements from telemetry/data
   /retro               Post-cycle review & memory compaction
   /incident            Production incident triage and resolution
+  /legal-safety-audit  Compliance drafts + app legal-risk audit (privacy/terms, consent, dark patterns, a11y)
 
 Discovery & Ideation:
   /brainstorming       60-method ideation catalog (SCAMPER, Six Hats, etc.)

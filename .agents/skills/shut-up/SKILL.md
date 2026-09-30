@@ -1,6 +1,6 @@
 ---
 name: shut-up
-description: 'One-shot silent execution mode — executes tasks directly with zero unsolicited critique, no conversational filler, and ultra-minimal output.'
+description: One-shot silent execution mode — executes tasks directly with zero unsolicited critique, no conversational filler, and ultra-minimal output. Use when the user says "shut up and just do it", "no commentary, just execute", "minimal output", or invokes /shut-up with scope already locked.
 compatibility: claude-code opencode kiro antigravity
 allowed-tools: Read Write Edit Grep Glob Bash
 metadata:
@@ -10,7 +10,21 @@ metadata:
 
 # /shut-up — Silent Execution Mode
 
+## What this skill does
+
 One-shot runtime context modifier that executes requests directly and silently with ultra-minimal output and zero conversational lecture.
+
+## When to use
+
+- "Shut up and just do it" / "no commentary, just execute"
+- "Minimal output" / "I don't want the lecture"
+- Any task where scope and requirements are **already locked** and further Socratic probing is friction, not value
+
+## When NOT to use
+
+- Scope is still open and the DNA 4 intent gate has not been passed — silence there is malpractice, not efficiency
+- A destructive or irreversible action is requested without confirmation (see the Destructive Safety Gate Exception below)
+- The user asked for a second opinion, a design critique, or a review
 
 ## Why This Skill Exists
 

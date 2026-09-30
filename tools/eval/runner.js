@@ -271,7 +271,7 @@ async function cannedMockResponse(benchmark) {
       case "design":
         return "## Product Specification\n- Screen States: Empty, Loading, Error, Success.\n- Interactions: User flows and transitions.\n- Components: Design system atomic elements.";
       case "motion":
-        return "## Motion Specification\n- Duration: 200ms.\n- Easing: ease-out-cubic.\n- Trigger: Hover and active states.";
+        return "## Motion Specification\nEvidence mode: lightweight — dedicated research not warranted for micro-interactions only.\n- Duration: 200ms.\n- Easing: ease-out-cubic.\n- Trigger: Hover and active states.\n- Reduced-motion: transition disabled under prefers-reduced-motion, state change only.\nImplementation hands off to /develop; /motion does not implement or certify runtime behaviour.";
       case "validation-patterns":
         return "## Validation Pattern Matrix\n- Pattern: Concierge MVP.\n- Hypothesis: User willingness to pay.\n- Success Metric: 15% conversion.";
       case "develop":
@@ -316,6 +316,16 @@ async function cannedMockResponse(benchmark) {
         return "## Phase Switch Gate\n- Current Phase: validation.\n- Transition: Prerequisites checked.";
       case "memory":
         return "## Memory Search Results\n- Search: Keyword match.\n- Results: 3 relevant historical decisions.\n- Context: Retrieved context.";
+      // 02s: fixtures for the three skills that had benchmarks but no canned
+      // output. Each mirrors the output contract its SKILL.md mandates, in the
+      // same way the fixtures above do — a representative artifact, not a
+      // restatement of the assertion list. Watermarked [MOCK] by the caller.
+      case "help-me":
+        return "## Next Step\n**Project:** vespyr\n**Active Phase:** strategy\n\nYou have a validation brief in artifacts/output/01-discovery/ and nothing downstream of it. The single next action is to turn that into requirements and user stories.\n\n**Run:** `/design`\n\nNot doing anything else first — no extra reading required.";
+      case "humanize":
+        return "## Draft rewrite\nAI coding assistants speed up the boring parts. Code generation is significantly faster, which enhances developer productivity across modern workflows.\n\n## What makes the below so obviously AI generated?\n- \"significantly faster\" and \"enhances\" are significance padding with no measurement attached\n- \"across modern workflows\" is a vague attribution with no source\n\n## Now make it not obviously AI generated.\n\n## Final rewrite\nAI coding assistants speed up the boring parts: config files, test scaffolding, repetitive refactors. They are bad at knowing when they are wrong. I have mass-accepted suggestions that compiled, passed lint, and still did the wrong thing because I stopped paying attention.";
+      case "elicitation":
+        return "## Sharpening Ledger\n1. Original topic → \"is the pricing fine\" → sharpened: \"which assumption, if wrong, breaks the $9/mo price, and what is the evidence for it\"\n2. Methods executed: Pre-Mortem -> [ELICITATION: pre-mortem -> applied]\n3. What changed: the pricing section now names the churn floor it assumes and the metric that would falsify it\n4. Critique coverage: 4/4 points\n5. Residual open questions: competitor floor price is still unsourced\n\nThe $9/mo price is the riskiest call in the plan. Pre-mortem: we launch, conversion is fine, retention is not. The failure path is that solo developers churn at month two once the tool outgrows them, and $9 buys 4 months of use — the price is anchored to a tenure that does not exist. The concrete risk: churn under 3 months makes the LTV below CAC at any acquisition spend.";
       default:
         return "Skill /" + benchmark.skill + " executed with verified output schema.";
     }

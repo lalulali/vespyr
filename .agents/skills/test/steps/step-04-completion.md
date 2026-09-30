@@ -11,6 +11,8 @@ output_contract:
 
 Produce the final test report and close the QA cycle.
 
+
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill test --step 4`
 ## Workflow
 
 ### 4a. Compile test report
@@ -69,3 +71,5 @@ node .agents/scripts/orchestrator_state.js complete --agent qa-engineer --artifa
 ```
 ## Delegation
 - **Memory:** @memory-controller for session-write
+
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill test --step 4`

@@ -1,12 +1,13 @@
 ---
 name: plan
-description: Create an execution plan from existing specs — standalone, outside the full develop cycle
+description: Create an execution plan from existing specs — standalone, outside the full develop cycle. Use when the user says "plan out how we build this", "break this spec into tasks", "how long will this take", or invokes /plan.
 metadata:
   version: "2.0"
   last_updated: "2026-07-10"
 ---
-
 # Plan — Execution Planning
+
+<!-- router-skill -->
 
 ## Persona delegation
 This skill delegates to `@tech-lead`. The tech-lead produces the execution plan (task breakdown, estimates, dependency analysis, parallelism assessment). The skill file provides structure and templates; `@tech-lead` provides the reasoning, decision tree, and memory contract.
@@ -26,6 +27,18 @@ Takes existing product specs and produces a task breakdown with effort estimates
 
 - When no spec exists (run `/design` first)
 - When you need architecture decisions (run the full `/develop` for ADRs)
+
+## Halt conditions
+Any one halts planning and escalates to `@tech-lead`:
+- No `product-spec.md` exists — planning without a spec produces tasks nobody can verify
+- The spec and the existing ADRs contradict each other — resolve the conflict before decomposing; a plan built on an unresolved contradiction schedules the contradiction
+- A single task cannot be estimated between 1 and 4 hours — decompose further, or escalate the uncertainty explicitly rather than inflating the estimate
+
+## Done when
+- `artifacts/output/05-planning/execution-plan.md` exists with a numbered task list, per-task estimates, a dependency graph, and a risk register
+- Every task is independently runnable and sized 1–4h (spikes capped at 2h)
+- Parallelizable tasks are explicitly marked and their worktrees allocated
+- `@tech-lead` has reviewed and approved the plan
 
 ## Prerequisites
 

@@ -11,6 +11,8 @@ output_contract:
 
 Gate check to determine the path forward based on iteration results.
 
+
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill iterate --step 6`
 ## Workflow
 
 ### 6a. Evaluate results
@@ -31,4 +33,4 @@ Maximum 5 iteration cycles before a mandatory `retro` to assess whether the iter
 ## Delegation
 - **Memory:** @memory-controller for session-write
 
-
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill iterate --step 6`

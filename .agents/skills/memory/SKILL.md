@@ -1,6 +1,6 @@
 ---
 name: memory
-description: Search archived memory entries — retrieve historical context that has been compacted
+description: Search archived memory entries — retrieve historical context that has been compacted. Use when the user says "what was the decision we made about X", "show me past lessons on Y", "find the architecture decision for Z", or invokes /memory to search project history.
 metadata:
   version: "2.0"
   last_updated: "2026-07-10"

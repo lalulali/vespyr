@@ -1,12 +1,14 @@
 ---
 name: jtbd
-description: Formulate Jobs-to-be-Done statements and map How Might We opportunity questions in a single canvas
+description: Formulate Jobs-to-be-Done statements and map How Might We opportunity questions in a single canvas. Use when the user says "what job is the user hiring this for", "turn the research into opportunities", "generate How Might We questions", or invokes /jtbd before ideation.
 metadata:
   version: "2.0"
   last_updated: "2026-07-20"
 ---
 
 # Jobs-to-be-Done + How Might We
+
+## What this skill does
 
 Formulates JTBD statements using the "When/I want to/so I can" template and maps HMW opportunity questions for each job. Outputs to `artifacts/output/02-research/jtbd-hmw.md`.
 

@@ -3,11 +3,31 @@ name: design
 description: Defines product requirements from validated ideas, then produces detailed developer-ready specs. Use for prototype-first, static HTML/Tailwind CDN, Next.js/React/shadcn component prototypes, create, edit, or validate design work; routes the prototype track and requires designer–tech collaboration before handoff.
 metadata:
   version: "1.2"
+  last_updated: "2026-09-30"
 ---
-
 # Design
 
+<!-- router-skill -->
+
 Bridges exploration and development. Takes validated ideas and turns them into a PRD with requirements, user stories, and detailed product specs with flows, interactions, and visual direction.
+
+## When to invoke
+- A validated, shaped, or problem-first brief exists at `artifacts/output/01-discovery/` and the user wants requirements, user stories, and screen specs produced from it
+- The user arrives **prototype-first** — a Figma/Stitch export, a hand-coded HTML mock, or a Vespyr-built prototype — with no PRD yet (reverse mode)
+- Specs exist and the user wants them refined (edit mode) or design-reviewed for consistency, accessibility, and gaps (validate mode)
+- The user says "design this", "write the PRD", "turn my prototype into requirements", "review the design", or invokes `/design`
+
+## When NOT to invoke
+- No brief and no prototype exist yet — run `/validate-idea`, `/shape-up`, or `/unpack-problem` first
+- Implementation is the ask and specs already exist and are approved — use `/develop`
+- A PRD exists and only the code is missing, with no design question open
+
+## Halt conditions
+Any one halts the mode and escalates:
+- A prototype is in scope but the `prototype_collaboration.md` checkpoint is missing or unsigned at handoff scope — `prototype_collab_gate.js verify` fails closed; escalate to `@product-designer` + `@tech-lead`
+- The reverse-mode parity gate reports ghost or orphan evidence rows — a requirement that traces to nothing observable is a handoff failure, not a formatting preference
+- The Step 0 staleness check reports a stale, broken, or partial freeze — halt loudly; do not proceed on a broken kernel
+- Create mode is entered on an unvalidated idea at a commitment gate (budget, headcount, or calendar) — escalate to `/grill-me` first per the Intent Escalation Ladder
 
 ## Prerequisites
 - Reverse mode (two sub-tracks):
@@ -17,14 +37,14 @@ Bridges exploration and development. Takes validated ideas and turns them into a
 - `artifacts/output/02-research/market-analysis.md` (optional if entering via `shape-up` with all assumptions verified)
 - `artifacts/output/02-research/competitive-analysis.md` (optional if entering via `shape-up`)
 - `artifacts/output/02-research/user-personas.md` (optional if entering via `shape-up`)
-- `artifacts/output/02-research/journey-maps.md` (optional — user-researcher journey mapping, consumed by screen specs)
+- `artifacts/output/02-research/journey-map.md` (optional — written by `/journey-map`, consumed by screen specs)
 - `artifacts/output/02-research/usability-test-kit.md` (optional — ux-researcher kit; results return via ux-research-report.md)
 
 If entering from `shape-up` with all assumptions verified, research artifacts are optional.
 If entering from `explore-idea`, all research artifacts should exist. If any are missing, load `explore-idea` first.
 
 ## Skill chain
-- Prev: `explore-idea`, `shape-up`, or `game-explore-idea`
+- Prev: `explore-idea` or `shape-up`
 - Next: `develop`
 
 ## Primary personas
@@ -42,7 +62,7 @@ These personas are invoked by step files. The router declares them so the agent 
 
 ## Mode selection + routing
 Detect by checking for existing artifacts + parsing user wording:
-**Step 0 — Scope Gate (non-skippable):** anchor scope first via `steps/step-00-scope-and-decision-anchoring.md`; the selected mode is the locked track. Step 0 also runs the staleness hook (`step0_staleness.js` — a stale, broken, or partial freeze witness blocks every mode; script failure halts loudly). `step_tracker.js` exits 1 if Step 1 begins without a locked track.
+**Step 0 — Scope Gate (non-skippable):** anchor scope first via `steps/step-00-scope-and-decision-anchoring.md`; the selected mode is the locked track. Step 0 also runs the staleness hook (`step0_staleness.js` — a stale, broken, or partial baseline hash blocks every mode; script failure halts loudly). `step_tracker.js` exits 1 if Step 1 begins without a locked track.
 Intent triage at gate: Clear (C ≥ 0.85) runs the locked track; Ambiguous (0.50–0.85) halts to a 2–3 Track Fork; Trivial (C < 0.50) executes directly. Gate enforced in all `step_tracking` modes including `off` (DNA 4).
 
 - **Reverse (checked FIRST — A1)** → `prototype-inventory.md` exists ∧ no `requirements.md`; or the user arrives prototype-first (prototype source present, no requirements). Two sub-tracks resolved at Step 0:
@@ -123,7 +143,7 @@ Two sub-tracks share the same synthesis spine (Evidence Ledger → PRD synthesis
 5. Parity Gate → `steps/step-04d-parity-gate.md`
 6. Spike Rollback (only on QA falsification) → `steps/step-05d-sync-contract.md`
 
-**Witness distinction:** the `generated` sub-track uses a **freeze witness** (Vespyr controls the prototype, so it can promise no further change). The `imported` sub-track uses an **import witness** (a SHA-256 of the imported file at ingest) — it proves the imported file is unchanged since ingest but **cannot** detect edits made in the origin design tool (Figma/Stitch). Keeping the imported snapshot in sync with the design tool is a human responsibility; the engine enforces file parity only, never origin parity.
+**What the baseline hash can promise:** both sub-tracks record a SHA-256 of the prototype file and compare against it later, so a drift is always detectable. They differ in how strong that promise is. The `generated` sub-track uses a **prototype baseline hash** — Vespyr made the file, so it can promise nothing will change it. The `imported` sub-track uses an **import baseline hash** — it proves the file you gave me is unchanged since ingest, but **cannot** detect edits made in the origin design tool (Figma/Stitch). Keeping the imported snapshot in sync with the design tool is a human responsibility; the engine enforces file parity only, never origin parity.
 
 ## Edit mode step sequence
 1. Load Existing → `steps/step-01b-load-existing.md`
@@ -136,6 +156,14 @@ Two sub-tracks share the same synthesis spine (Evidence Ledger → PRD synthesis
 2. Consistency Check → `steps/step-02c-consistency-check.md`
 3. Accessibility Check → `steps/step-03c-a11y-check.md`
 4. Lock & Handoff → `steps/step-04c-lock-handoff.md`
+
+## Done when
+- `requirements.md` and `user-stories.md` exist and preserve the canonical template structure — a compact report is not an acceptable substitute
+- `product-spec.md` (plus `design.md`) exists with screen states, design tokens, and accessibility coverage
+- The selected prototype track and runtime are recorded in `project-context.md`
+- `prototype-collaboration.md` exists with a `SATISFIED` disposition whenever prototyping was in scope
+- Reverse mode only: the parity gate passes with zero ghost rows, and every FR/NFR, story, AC, screen state, and token decision cites at least one `L-NN` Evidence Ledger row
+- `@memory-controller session-write` has run
 
 ## Output artifacts
 `requirements.md`, `user-stories.md`, `product-spec.md`, `product-spec.html`, `design.md`, plus `measurement-plan.md` and `ux-research-report.md` (optional). When prototyping is in scope, also require `prototype-collaboration.md` with the selected track/runtime and designer–tech disposition.

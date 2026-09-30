@@ -1,11 +1,13 @@
 ---
 name: shape-up
-description: Structure and stress-test semi-cooked ideas into design-ready briefs. No prerequisites — works at any point in the pipeline.
+description: Structure and stress-test semi-cooked ideas into design-ready briefs. No prerequisites — works at any point in the pipeline. Use when the user says "shape this up", "turn these notes into a brief", "I have a rough pitch", or invokes /shape-up.
 metadata:
   version: "1.0"
+  last_updated: "2026-09-30"
 ---
-
 # Shape Up
+
+<!-- router-skill -->
 
 Takes a semi-cooked idea — a plan, pitch, doc, or set of notes — and shapes it into a structured, loophole-tested, design-ready brief. No prerequisites. Works whether the user skipped early phases entirely or completed them and needs a shaping checkpoint before design.
 
@@ -24,6 +26,27 @@ No explicit modes. The skill checks what artifacts exist and adapts:
 - **Research artifacts exist** (`02-research/*.md`) → synthesizes findings into the brief
 - **Shaped brief already exists** (`01-discovery/shaped-brief.md`) → re-shape mode (post-research re-run)
 
+## When to invoke
+- The user has a semi-cooked idea — a plan, pitch, doc, or scattered notes — and wants it shaped into a brief that `/design` can consume
+- `/explore-idea` has returned findings that need consolidating before specs
+- The user says "shape this up", "turn these notes into a brief", "I have a rough pitch", or invokes `/shape-up`
+- The user wants to re-shape an existing `shaped-brief.md` against new research evidence
+
+## When NOT to invoke
+- There is a validated concept and market evidence already exists — go to `/explore-idea` or `/design` directly
+- The input is a *problem* rather than a proposed solution — use `/unpack-problem`; shaping a solution before the problem is framed launders the assumption
+
+## Halt conditions
+- Stress-test reveals the idea is fundamentally unviable -> recommend `validate-idea` instead
+- Gap analysis surfaces 5+ blocker-severity gaps with no path to resolution
+- User abandons shaping mid-flow (decisions logged, partial brief saved)
+
+## Done when
+- `artifacts/output/01-discovery/shaped-brief.md` exists with the Decision Gate verdict and every assumption explicitly marked verified or unverified
+- Every gap found in Step 3 is either closed with evidence or carried forward as a named open question
+- The handoff step names the next skill and the artifact it consumes
+- `@memory-controller session-write` has run
+
 ## Harness adherence (non-negotiable)
 - Follow the step sequence exactly. Do NOT skip steps or reorder them.
 - Each step file is a contract. Read it fully before executing.
@@ -39,11 +62,6 @@ None. This is a flexible entry point.
 4. **Stress-Test** → `steps/step-04-stress-test.md`
 5. **Decision Alignment** → `steps/step-05-decision-alignment.md`
 6. **Handoff** → `steps/step-06-handoff.md`
-
-## Halt conditions
-- Stress-test reveals the idea is fundamentally unviable → recommend `validate-idea` instead
-- Gap analysis surfaces 5+ blocker-severity gaps with no path to resolution
-- User abandons shaping mid-flow (decisions logged, partial brief saved)
 
 ## Output artifacts
 - `artifacts/output/01-discovery/shaped-brief.md`

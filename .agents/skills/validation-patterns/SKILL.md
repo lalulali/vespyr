@@ -1,6 +1,6 @@
 ---
 name: validation-patterns
-description: Apply validation methods from a 30-method catalog — smoke tests, concierge MVPs, five-second tests, and more
+description: Apply validation methods from a 30-method catalog — smoke tests, concierge MVPs, five-second tests, and more. Use when the user says "how should I validate this", "cheapest way to test demand", "run a smoke test on my concept", or invokes /validation-patterns before committing engineering resources.
 metadata:
   version: "2.0"
   last_updated: "2026-07-20"

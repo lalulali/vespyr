@@ -1,6 +1,6 @@
 # Workflows & Skills
 
-Vespyr organizes multi-agent execution into **20 specialized personas**, structured **skills** (40 curated workflows located in `.agents/skills/`), and a **shared persistent memory layer** (`artifacts/memory/`).
+Vespyr organizes multi-agent execution into **20 specialized personas**, structured **skills** (41 curated workflows located in `.agents/skills/`), and a **shared persistent memory layer** (`artifacts/memory/`).
 
 The canonical pipeline consists of 11 phases (Phase -1…9, see [phase-table.md](./references/phase-table.md)); the core milestone groupings below provide rapid orientation.
 
@@ -64,7 +64,7 @@ Every agent persona adheres to the core system principle:
 
 ---
 
-## 4. Curated Skills Catalog (40 Skills)
+## 4. Curated Skills Catalog (41 Skills)
 
 Skills are invoked via `/skill-name` or by referencing `.agents/skills/[name]/SKILL.md`.
 
@@ -105,6 +105,7 @@ Skills are invoked via `/skill-name` or by referencing `.agents/skills/[name]/SK
 - **`/iterate`**: Post-launch behavior analysis, metric optimization, and incremental shipping.
 - **`/incident`**: Production incident triage, mitigation, root-cause analysis, and post-mortem.
 - **`/retro`**: Post-cycle review, estimate calibration, and memory compaction.
+- **`/legal-safety-audit`**: Legal/compliance safety audit — generates policy drafts (privacy, terms, refund, cookie, consent banner, email footer) and audits the app for consent, data minimization, third-party SDKs, dark patterns, hidden fees, unsupported claims, accessibility, kids-data consent, and data deletion. Produces drafts and flags, never legal advice.
 
 ### 🧭 Swarm Co-Pilot & Challenge
 - **`/help-me`**: Conversational project navigator and recommended slash command router.

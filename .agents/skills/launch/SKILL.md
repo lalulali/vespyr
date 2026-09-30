@@ -1,11 +1,13 @@
 ---
 name: launch
-description: Go-to-market coordination — release readiness, deployment, smoke testing, post-launch monitoring, and completion
+description: Go-to-market coordination — release readiness, deployment, smoke testing, post-launch monitoring, and completion. Use when the user says "ship it", "launch this feature", "deploy to production", "are we ready to release", or invokes /launch once development is complete.
 metadata:
   version: "1.0"
+  last_updated: "2026-09-30"
 ---
-
 # Launch — Multi-Step Workflow
+
+<!-- router-skill -->
 
 Takes a completed feature from development and ships it. The bridge between "code is done" and "users have it."
 
@@ -25,6 +27,19 @@ Takes a completed feature from development and ships it. The bridge between "cod
 - Prev: `develop` (produces working, tested code)
 - Next: `iterate` (post-launch improvements), `retro` (process review), or `incident` (production issues)
 
+## Halt conditions
+Any one is a hard NO-GO on deployment:
+- The UTTERLY SATISFIED team gate has not passed — every active, relevant agent must record `SATISFIED`; an unresolved `CHANGES REQUESTED` or `BLOCKED` blocks the release
+- `qa-signoff.md` is missing or is not `GO`/`CONDITIONAL`
+- A Critical or High security finding is open
+- A rollback plan does not exist for the release
+
+## Done when
+- All five step files are in `stepsCompleted`
+- `artifacts/output/06-launch/launch-log.md` exists
+- Post-launch monitoring thresholds are defined and the smoke test has passed against production
+- `@memory-controller session-write` has run
+
 ## Prerequisites
 - All tasks in `artifacts/output/05-planning/execution-plan.md` are complete
 - Code review passed, QA validated, PM signed off
@@ -36,7 +51,7 @@ Takes a completed feature from development and ships it. The bridge between "cod
 2. **Deploy** — deploy to production → `steps/step-02-deploy.md`
 3. **Smoke Test** — validate production deployment → `steps/step-03-smoke-test.md`
 4. **Monitor** — post-launch observation → `steps/step-04-monitor.md`
-5. **Launch Log** — write completion report → `steps/step-06-launch-log.md`
+5. **Launch Log** — write completion report → `steps/step-05-launch-log.md`
 
 ## State & memory integration
 At start: `node .agents/scripts/orchestrator_state.js status`. If uninitialized, run `init` first, then `next`.

@@ -1,6 +1,6 @@
 ---
 name: craft-lesson
-description: "Create multi-format educational materials (syllabus, handbook, cheatsheet, presentation, class, video script) from topic or draft"
+description: Create multi-format educational materials (syllabus, handbook, cheatsheet, presentation, class, video script) from topic or draft. Use when the user says "build a course", "turn this transcript into a handbook", "make a cheatsheet", "draft a video script", or invokes /craft-lesson.
 metadata:
   capabilities: "curriculum-design, content-synthesis, assessment-creation, pedagogical-structuring"
   version: "1.0"
@@ -8,8 +8,9 @@ metadata:
   author: "@shifu"
   mode: "skill"
 ---
-
 # Craft-Lesson — Multi-Format Educational Material Generator
+
+<!-- router-skill -->
 
 ## What this skill does
 
@@ -34,6 +35,18 @@ This skill delegates pedagogical strategy, objective framing, content sequencing
 - Output directory `artifacts/output/teaching/` accessible for file delivery.
 
 ---
+
+## Halt conditions
+- A Presentation-intake question is unanswered while `presentation` is among the selected formats -> do NOT proceed to Phase 2; `--all` selects formats, it never answers their intake questions for you
+- The Knowledge Map has not been signed off by the user -> format generation is blocked; formats derive from the map, not from ad-hoc per-format invention
+- A format is generated without a human approval on the previous one -> halt; Phase 4 is one-at-a-time by contract, and batching is the exact failure mode this gate exists to stop
+- `teaching-style.md` cannot be written (no `@memory-controller` write access) -> halt; guessing at audience and depth produces material the user cannot use
+
+## Done when
+- Every selected format has been individually generated, presented, and explicitly approved
+- Each approval triggered its own `orchestrator_state.js complete` call — milestones are recorded as they happen, never batched at the end
+- `knowledge-map.md` and all approved deliverables exist under `artifacts/output/teaching/`
+- Step 5's three audit vectors (style fidelity, jargon clarity, pedagogical alignment) have run and the user has confirmed the final summary
 
 ## 2 Input Modes
 
@@ -62,47 +75,24 @@ This skill delegates pedagogical strategy, objective framing, content sequencing
 
 ## 5-Phase Master Workflow
 
-```
-┌─────────────────────────────────────────────────────────┐
-│ Phase 1: Intake & Setup                                 │
-│ Select input mode, audience level & format targets     │
-└──────────────────────────┬──────────────────────────────┘
-                           │
-             ┌─────────────┴─────────────┐
-             ▼                           ▼
-┌────────────────────────┐ ┌──────────────────────────────┐
-│ Phase 2a: Research     │ │ Phase 2b: Synthesize         │
-│ (Topic-Only Path via   │ │ (Draft/Transcript Path       │
-│  step-02a-research.md) │ │  via step-02b-synthesize.md) │
-└────────────┬───────────┘ └────────────┬─────────────────┘
-             │                           │
-             └─────────────┬─────────────┘
-                           ▼
-┌─────────────────────────────────────────────────────────┐
-│ Phase 3: Master Knowledge Map Creation                  │
-│ Bloom's taxonomy tagging, sequencing, "If Nothing Else" │
-│ Output: artifacts/output/teaching/knowledge-map.md      │
-│ (via step-03-structure.md)                              │
-└──────────────────────────┬──────────────────────────────┘
-                           ▼
-┌─────────────────────────────────────────────────────────┐
-│ Phase 4: ONE format at a time + HUMAN VERIFY loop       │
-│  ┌──────────────────────────────────────────────────┐   │
-│  │ GENERATE → PRESENT → PAUSE → VERIFY              │   │
-│  │   ├── approved → RECORD (orchestrator complete)  │   │
-│  │   │            → next format (loop)              │   │
-│  │   └── changes  → revise, re-present, PAUSE again │   │
-│  └──────────────────────────────────────────────────┘   │
-│ Each approval triggers project-context + session sync.  │
-│ Loop until ALL selected formats are individually        │
-│ approved. Do NOT batch-produce formats.                 │
-└──────────────────────────┬──────────────────────────────┘
-                           ▼
-┌───────────────────────────────────────────────────────────┐
-│ Phase 5: Self-Review & Quality Certification              │
-│ Style audit, jargon check, pedagogical verification       │
-│ (via step-05-review.md) — runs AFTER all formats approved │
-└───────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+  P1["Phase 1: Intake &amp; Setup<br/>Select input mode, audience level &amp; format targets"]
+  P2A["Phase 2a: Research<br/>(Topic-Only Path via step-02a-research.md)"]
+  P2B["Phase 2b: Synthesize<br/>(Draft/Transcript Path via step-02b-synthesize.md)"]
+  P3["Phase 3: Master Knowledge Map Creation<br/>Bloom's taxonomy tagging, sequencing,<br/>'If Nothing Else' anchors<br/>Output: artifacts/output/teaching/knowledge-map.md<br/>(via step-03-structure.md)"]
+  P4["Phase 4: ONE format at a time + HUMAN VERIFY loop"]
+  LOOP{"approved?"}
+  NEXT["next format (loop)"]
+  REV["revise, re-present, PAUSE again"]
+  P5["Phase 5: Self-Review &amp; Quality Certification<br/>Style audit, jargon check, pedagogical verification<br/>(via step-05-review.md)<br/>runs AFTER all formats approved"]
+
+  P1 --> P2A --> P3
+  P1 --> P2B --> P3
+  P3 --> P4 --> LOOP
+  LOOP -->|yes| NEXT --> P4
+  LOOP -->|changes requested| REV --> P4
+  LOOP -->|all formats approved| P5
 ```
 
 ---

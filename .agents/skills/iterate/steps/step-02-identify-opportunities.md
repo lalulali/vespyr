@@ -11,6 +11,8 @@ output_contract:
 
 Synthesize analytics insights into a ranked backlog of iteration opportunities.
 
+
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill iterate --step 2`
 ## Workflow
 
 ### 2a. Synthesize — @product-manager
@@ -35,4 +37,4 @@ Write `artifacts/output/07-iteration/iteration-backlog.md` using template:
 ## Delegation
 - **Memory:** @memory-controller for session-write
 
-
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill iterate --step 2`

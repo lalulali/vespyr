@@ -11,6 +11,8 @@ output_contract:
 
 Deploy the iteration and measure its impact against the original hypothesis.
 
+
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill iterate --step 5`
 ## Workflow
 
 ### 5a. Deploy — @devops-engineer
@@ -60,3 +62,5 @@ New blockers: {any issues, or "none"}
 
 ## Delegation
 - **Memory:** @memory-controller for lessons-learned and session-write
+
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill iterate --step 5`

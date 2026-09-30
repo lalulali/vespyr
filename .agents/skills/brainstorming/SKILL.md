@@ -1,6 +1,6 @@
 ---
 name: brainstorming
-description: Select and apply brainstorming methods from a 60-method catalog — SCAMPER, Six Thinking Hats, Starbursting, and more
+description: Select and apply brainstorming methods from a 60-method catalog — SCAMPER, Six Thinking Hats, Starbursting, and more. Use when the user says "help me brainstorm", "which brainstorming method should I use", "run a Six Thinking Hats session", or wants creative ideation before committing to a solution. Invoked as /brainstorming.
 metadata:
   version: "2.0"
   last_updated: "2026-07-20"

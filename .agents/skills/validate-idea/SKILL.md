@@ -3,9 +3,11 @@ name: validate-idea
 description: Stress-test product concepts before research. Supports create/edit/validate modes.
 metadata:
   version: "1.0"
+  last_updated: "2026-09-30"
 ---
-
 # Validate Idea
+
+<!-- router-skill -->
 
 ## Harness adherence (non-negotiable)
 - Follow the step sequence for the selected mode exactly. Do NOT skip steps or reorder them.
@@ -24,9 +26,20 @@ If unclear, ask: "Are you starting a new idea, refining an existing brief, or st
 **Step 0 — Scope Gate (non-skippable):** anchor scope first via `steps/step-00-scope-and-decision-anchoring.md`; the selected mode is the locked track. `step_tracker.js` exits 1 if Step 1 begins without a locked track.
 Intent triage at gate: Clear (C ≥ 0.85) runs the locked track; Ambiguous (0.50–0.85) halts to a 2–3 Track Fork; Trivial (C < 0.50) executes directly. Gate enforced in all `step_tracking` modes including `off` (DNA 4).
 
-- **Create** → `steps/step-01a-session-setup.md` → ... → `steps/step-07a-handoff.md` (7 steps: session setup, input analysis, idea framing, stress-test R1, stress-test R2, GO/RESHAPE/NO-GO, handoff)
-- **Edit** → `steps/step-01b-load-existing.md` → ... → `steps/step-05b-finalize.md` (5 steps: load, identify gaps, revise, stress-test, finalize)
-- **Validate** → `steps/step-01c-open-questions.md` → ... → `steps/step-05c-lock-handoff.md` (5 steps: open questions, 7-branch tree, cross-branch check, decision log, lock & handoff)
+- **Create** (7 steps) → `steps/step-01a-session-setup.md` → `steps/step-02a-input-analysis.md` → `steps/step-03a-idea-framing.md` → `steps/step-04a-stress-test-r1.md` → `steps/step-05a-stress-test-r2.md` → `steps/step-06a-go-pivot-kill.md` → `steps/step-07a-handoff.md`
+- **Edit** (5 steps) → `steps/step-01b-load-existing.md` → `steps/step-02b-identify-gaps.md` → `steps/step-03b-revise.md` → `steps/step-04b-stress-test.md` → `steps/step-05b-finalize.md`
+- **Validate** (5 steps) → `steps/step-01c-open-questions.md` → `steps/step-02c-7-branches.md` → `steps/step-03c-cross-branch-check.md` → `steps/step-04c-decision-log.md` → `steps/step-05c-lock-handoff.md`
+
+## When to invoke
+- The user has a concept, pitch, or feature idea that nobody has stress-tested, and wants it challenged before research or engineering time is committed
+- The user says "stress-test this idea", "poke holes in this", "validate this concept", or invokes `/validate-idea`
+- A brief already exists and the user wants it refined (edit mode) or interrogated question-by-question (validate mode)
+- A `problem-space-brief.md` from `/unpack-problem` needs its selected solution concept validated (problem-first entry, create mode)
+
+## When NOT to invoke
+- The user has a *problem*, not an idea — use `/unpack-problem`; there is nothing to validate yet
+- The concept has already passed validation and the ask is market evidence — use `/explore-idea`
+- The ask is to structure raw notes into a brief — use `/shape-up`
 
 ## Prerequisites
 - Create mode: none (this is the entry point)

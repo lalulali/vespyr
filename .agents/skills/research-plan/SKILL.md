@@ -1,12 +1,14 @@
 ---
 name: research-plan
-description: Construct comprehensive research plans with goals, hypotheses, cohort definitions, methodology, and a 2-part interview guide (Profile + Behavioral)
+description: Construct comprehensive research plans with goals, hypotheses, cohort definitions, methodology, and a 2-part interview guide (Profile + Behavioral). Use when the user says "I need to interview users about X", "create a research plan", "what questions should I ask", or invokes /research-plan.
 metadata:
   version: "2.0"
   last_updated: "2026-07-20"
 ---
 
 # Research Plan
+
+## What this skill does
 
 Builds a structured research plan for validating product hypotheses. Outputs to `artifacts/output/02-research/research-plan.md`.
 

@@ -38,7 +38,7 @@ After installation, your project root gets:
 your-project/
 ├── .agents/              # Agent personas, skills, scripts, config, references
 │   ├── agents/           # 20 agent persona markdown files
-│   ├── skills/           # 40 atomic skill workflows
+│   ├── skills/           # 41 atomic skill workflows
 │   ├── scripts/          # Orchestrator, memory, telemetry
 │   ├── config.yaml       # Project configuration
 │   └── references/       # Phase table, glossary, contracts

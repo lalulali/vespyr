@@ -1,6 +1,6 @@
 ---
 name: teach-me
-description: "Personal learning partner: Quick, Explain, or Deep Dive on any topic"
+description: 'Personal learning partner: Quick, Explain, or Deep Dive on any topic. Use when the user says "teach me X", "explain X simply", "deep dive into X", "quick summary of X", or invokes /teach-me.'
 metadata:
   capabilities: "curriculum-design, content-synthesis"
   version: "1.0"

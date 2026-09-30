@@ -1,9 +1,12 @@
 ---
 name: incident
-description: Production incident management — triage, mitigate, root-cause analysis, and post-incident review
+description: Production incident management — triage, mitigate, root-cause analysis, and post-incident review. Use when the user says "the site is down", "error rates are spiking", "we have a production incident", "do a postmortem", or invokes /incident.
 metadata:
   version: "1.0"
+  last_updated: "2026-09-30"
 ---
+
+# Incident — Production Response Workflow
 
 ## What this skill does
 

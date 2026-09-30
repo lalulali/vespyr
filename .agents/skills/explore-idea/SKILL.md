@@ -1,9 +1,13 @@
 ---
 name: explore-idea
-description: Validates a concept through market, competitor, and user research — turns a validated idea into evidence-backed research
+description: Validates a concept through market, competitor, and user research — turns a validated idea into evidence-backed research. Use when the user says "research the market for this", "who are the competitors", "validate this with users", or invokes /explore-idea after the concept is validated.
 metadata:
   version: "1.0"
+  last_updated: "2026-09-30"
 ---
+# Explore Idea — Market, Competitor & User Research
+
+<!-- router-skill -->
 
 ## What this skill does
 
@@ -11,6 +15,30 @@ Takes a validated idea (from `validate-idea`) and runs the research pipeline. Sp
 
 **Previous skill:** `validate-idea` (produces the validation brief with demand evidence and open questions)
 **Next skill:** After research, load `design` to define requirements and create specs.
+
+## When to invoke
+- A validation brief, idea brief, shaped brief, or problem-space brief exists and the user wants market, competitor, and user evidence behind it
+- The user says "research this market", "who are the competitors", "validate this with users", or invokes `/explore-idea`
+- Entering from `shape-up` with a list of unverified assumptions that need evidence, not a broad sweep
+
+## When NOT to invoke
+- The concept itself is still unvalidated and nobody has stress-tested it — run `/validate-idea` first; research cannot rescue a premise that was never tested
+- The ask is a problem ("users are dropping off"), not an idea — use `/unpack-problem`
+- The ask is structuring raw notes or a pitch — use `/shape-up`
+
+## Halt conditions
+Any one halts the pipeline before a verdict is issued:
+- Market research returns a `MARKET VERDICT: NO-GO` — record why and stop; do not synthesize a brief around a dead market
+- The validation brief's premises are contradicted by the research and the conflict cannot be resolved from the evidence — escalate to `@founder` rather than reshaping the verdict to fit
+- More than 1 pivot has been consumed — a third pivot is thrash, not exploration; stop and escalate to `@founder`
+- Research artifacts are missing or partial when the founder review gate opens — the gate cannot certify on absent evidence
+
+## Done when
+- `market-analysis.md`, `competitive-analysis.md`, and `user-personas.md` all exist, each with an attributed source list
+- A parseable `VERDICT: [GO]|[RESHAPE]|[NO-GO] — <reason>` line has been issued
+- The uniformly-positive anti-sycophancy pass has run and either refuted its own strongest counter-hypothesis or recorded it as a documented risk with a revisit trigger
+- `project-context.md` carries the finalized product identity (name, core goal, target audience)
+- `@memory-controller session-write` has run
 
 ## Prerequisites
 
@@ -51,6 +79,8 @@ Research agents (2a, 2b, 2c) produce independent evidence. When the harness supp
 
 ### Phase 1: Synthesize (skip if validation brief exists)
 
+Step file: `steps/step-01-synthesize.md`
+
 **grill-me offer (Path B only — no validation brief):** Before synthesizing, ask the user:
 > "Would you like me to grill you on this concept first (Socratic Q&A, one question at a time) before I produce the idea brief? Or should I proceed with synthesis directly?"
 - **"grill me"** → load `grill-me` skill first; return here after the interview is complete.
@@ -83,6 +113,8 @@ Research agents use the validation brief (or idea brief) as their primary input.
 Steps 2a and 2b can run **in parallel**. Step 2c depends on 2b's output.
 
 #### Step 2a: Market Research ⟨parallel⟩
+
+Step file: `steps/step-02a-market-research.md`
 Invoke `@researcher market` to validate market potential:
 - Market size (TAM, SAM, SOM)
 - Industry trends and growth rates
@@ -102,6 +134,8 @@ node .agents/scripts/orchestrator_state.js complete --agent researcher --artifac
 ```
 
 #### Step 2b: Competitor Analysis ⟨parallel with 2a⟩
+
+Step file: `steps/step-02b-competitor-analysis.md`
 Invoke `@researcher competitive` to map the landscape:
 - Direct and indirect competitors
 - Competitive comparison matrix
@@ -121,6 +155,8 @@ node .agents/scripts/orchestrator_state.js complete --agent researcher --artifac
 ```
 
 #### Step 2c: User Research ⟨after 2b⟩
+
+Step file: `steps/step-02c-user-research.md`
 Invoke `@user-researcher` to validate user needs:
 - Target users and their goals
 - Pain points and workarounds

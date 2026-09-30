@@ -1,6 +1,6 @@
 ---
 name: analyze-data
-description: General data analysis companion — EDA, dataset provision, visualization mapping, insight extraction, metric value evaluation, and PM metric co-piloting
+description: General data analysis companion — EDA, dataset provision, visualization mapping, insight extraction, metric value evaluation, and PM metric co-piloting. Use when the user says "analyze this dataset", "generate mock data", "how should we visualize this", "what insights are in this chart", "is this metric worth measuring", or invokes /analyze-data.
 metadata:
   version: "2.0"
   last_updated: "2026-07-30"
@@ -115,16 +115,20 @@ Partner directly with `@product-manager` to define product metrics, driver trees
 
 #### Step 2: Construct Metric Drivers Tree
 Build a top-down metric hierarchy:
-```
-                    North Star Metric (NSM)
-                               │
-            ┌──────────────────┴──────────────────┐
-     Primary Driver 1                      Primary Driver 2
-            │                                     │
-    ┌───────┴───────┐                     ┌───────┴───────┐
-Input Metric A  Input Metric B        Input Metric C  Input Metric D
-    │               │                     │               │
- [Event 1]       [Event 2]             [Event 3]       [Event 4]
+
+```mermaid
+graph TD
+  NSM["North Star Metric (NSM)"]
+  NSM --> PD1["Primary Driver 1"]
+  NSM --> PD2["Primary Driver 2"]
+  PD1 --> IMA["Input Metric A"]
+  PD1 --> IMB["Input Metric B"]
+  PD2 --> IMC["Input Metric C"]
+  PD2 --> IMD["Input Metric D"]
+  IMA --> E1["Event 1"]
+  IMB --> E2["Event 2"]
+  IMC --> E3["Event 3"]
+  IMD --> E4["Event 4"]
 ```
 
 #### Step 3: Guardrail & Counter Metrics

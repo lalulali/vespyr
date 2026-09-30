@@ -306,5 +306,5 @@
       ]
     }
   ],
-  "note": "Adversarial corpus maintained by @qa-engineer (red-team dataset)."
+  "note": "Adversarial corpus maintained by @qa-engineer (red-team dataset). This suite IS the /grill-me skill coverage — the skills/* suites deliberately do not duplicate it, because these 15 stratified traps are a stronger instrument than a scored /grill-me benchmark would be. See .agents/skills/create-skill/references/evals-schema.md."
 }

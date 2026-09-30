@@ -1,9 +1,12 @@
 ---
 name: status
-description: Quick snapshot of current project state — phase, blockers, memory health, sprint progress
+description: Quick snapshot of current project state — phase, blockers, memory health, sprint progress. Use when the user says "what is the current state", "where did we leave off", "show active blockers", or invokes /status at the start of a session.
 metadata:
   version: "1.0"
+  last_updated: "2026-09-30"
 ---
+
+# Status — Project State Snapshot
 
 ## What this skill does
 

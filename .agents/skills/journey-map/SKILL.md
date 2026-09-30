@@ -1,12 +1,14 @@
 ---
 name: journey-map
-description: Visualize user touchpoints, emotional state transitions, and friction points across current workflows
+description: Visualize user touchpoints, emotional state transitions, and friction points across current workflows. Use when the user says "map the user journey", "where are users getting stuck", "show me the end-to-end experience", or invokes /journey-map before redesigning a flow.
 metadata:
   version: "2.0"
   last_updated: "2026-07-20"
 ---
 
 # Journey Map
+
+## What this skill does
 
 Maps the current-state user journey with touchpoints, emotions, and friction. Outputs to `artifacts/output/02-research/journey-map.md`.
 
@@ -59,13 +61,16 @@ Write `artifacts/output/02-research/journey-map.md`:
 | 1. Awareness | {where} | {what} | 😃/😐/😟 {why} | {pain} | {fix} |
 
 ## Emotional Arc
-```
-😃   |        ████
-😐   |  ████      ████
-😟   |      ████      ████
-     |________________________
-     Awar. Cons. Dec. Onbrd. Use
-```
+| Stage | Emotion | Intensity (1-5) | Driver |
+|-------|---------|------------------|--------|
+| Awareness | 😃/😐/😟 | {n} | {why} |
+| Consideration | 😃/😐/😟 | {n} | {why} |
+| Decision | 😃/😐/😟 | {n} | {why} |
+| Onboarding | 😃/😐/😟 | {n} | {why} |
+| Ongoing use | 😃/😐/😟 | {n} | {why} |
+| Exit | 😃/😐/😟 | {n} | {why} |
+
+**Arc summary:** {one line — where it peaks, where it bottoms out, and the single stage that flips it}
 
 ## Key Friction Points
 1. **{stage}:** {friction} — Impact: {High/Med/Low}

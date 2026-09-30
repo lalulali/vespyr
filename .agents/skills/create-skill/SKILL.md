@@ -10,7 +10,7 @@ metadata:
 
 ## What this skill does
 
-Guides you through creating new Vespyr skills or enhancing existing skills. Helps extract workflows from conversation history or interviews, checks for duplicates, structures the `SKILL.md` file following Vespyr conventions, provisions optional resource/reference directories, and crafts lightweight `evals/evals.json` verification suites.
+Guides you through creating new Vespyr skills or enhancing existing skills. Helps extract workflows from conversation history or interviews, checks for duplicates, structures the `SKILL.md` file following Vespyr conventions (leaf or router), provisions optional resource/reference directories, and adds benchmarks to the centralized `evals/suites/` runner.
 
 ## When to use
 
@@ -18,7 +18,8 @@ Guides you through creating new Vespyr skills or enhancing existing skills. Help
 - "Turn what we just did into a skill"
 - "Package this deployment workflow into a reusable skill"
 - "Rebuild or heavily restructure an existing skill (major rewrites)"
-- "Add test prompts/evals to a skill"
+- "Add benchmarks for a skill" / "write an eval suite for this skill"
+- "Turn this skill into a router that calls step files"
 
 ## When NOT to use
 
@@ -36,12 +37,15 @@ Guides you through creating new Vespyr skills or enhancing existing skills. Help
 ├── SKILL.md (required)
 │   ├── Frontmatter (name, description; optional: license, compatibility, metadata, allowed-tools)
 │   └── Body (Markdown instructions, <500 lines ideal)
+├── steps/      (router skills only — one file per step, each cited by SKILL.md)
 ├── references/ (optional — documentation loaded into context as needed)
 ├── scripts/    (optional — executable helper scripts for deterministic tasks)
-├── resources/  (optional — templates, assets, or static data)
-└── evals/      (optional — verification test cases & expectations)
-    └── evals.json
+└── resources/  (optional — templates, assets, or static data)
 ```
+
+Benchmarks do **not** live in the skill folder. They are centralized suites
+under `evals/suites/<group>/<name>.json`, run by the wired `vespyr-eval` runner.
+See `references/evals-schema.md`.
 
 ---
 
@@ -96,38 +100,49 @@ If the skill requires extra resources:
 - Create subdirectories (`references/`, `scripts/`, `resources/`) as needed.
 - Write supporting documents or scripts into those directories.
 
-### Step 5: Draft Lightweight Evals (Optional & Recommended)
+### Step 5: Add Benchmarks to the Centralized Suite (Recommended)
 
-Skills with verifiable outputs (code transforms, file generation, structured reports) benefit from documented test prompts.
+Skills with verifiable outputs (code transforms, file generation, structured reports) should carry benchmarks. **Benchmarks live in `evals/suites/<group>/<name>.json`, not in the skill folder** — a per-skill `evals/evals.json` is never read by the runner.
 
-Ask the user: *"Would you like to draft 2–3 test evals for this skill?"*
+Ask the user: *"Would you like to add 2–3 benchmarks for this skill?"*
 
-If yes, write `.agents/skills/<skill-name>/evals/evals.json` following `.agents/skills/create-skill/references/evals-schema.md`:
+If yes:
+
+1. Pick the suite matching the skill's domain — `delivery`, `design`, `discovery`, `meta-authoring`, `operations`, or `research`. Full map: `references/evals-schema.md`.
+2. **If the skill already has an invariant suite** (`grill-me`, `shut-up`), extend that instead of adding a scored duplicate.
+3. **Append** to the `benchmarks` array — never rewrite the suite file. Other work may be uncommitted in it.
+4. Give each benchmark a globally unique `id` (`SKILL-<NAME>-<SLUG>`) and assert the **output contract**, not the prose:
 
 ```json
 {
-  "skill_name": "<skill-name>",
-  "evals": [
-    {
-      "id": 1,
-      "prompt": "User prompt testing the skill workflow",
-      "expected_output": "Description of expected final state or deliverable",
-      "expectations": [
-        "The output file contains section X",
-        "No syntax errors occur"
-      ]
-    }
-  ]
+  "id": "SKILL-<NAME>-<SLUG>",
+  "skill": "<skill-name>",
+  "name": "Short human title",
+  "dimension": "prd_completeness",
+  "assertContains": ["<heading the skill must emit>", "<literal command>"],
+  "assertNotContains": ["I cannot", "As an AI"],
+  "prompt": "The literal user prompt to send"
 }
+```
+
+5. Verify every suite still parses — `npm run eval:skills` only loads `skills/delivery`, so it cannot see a break elsewhere:
+
+```bash
+npm run eval 2>&1 | grep -i "malformed suite"   # expect NO output
 ```
 
 ### Step 6: Smoke-Test & Trigger Verification
 
 Verify the skill setup:
-1. Review the `description` field in frontmatter — does it cover all anticipated user trigger phrases?
-2. Run `node .agents/scripts/spec_check.js` — the new skill MUST pass (0 violations) before it is considered valid.
-3. Perform a dry run or manual walk-through against the drafted test prompts.
-4. Validate that `@qa-engineer` (Nina) or `/test` can read and evaluate the skill expectations.
+1. Review the `description` field in frontmatter — does it name the slash command AND the phrases a user would actually type? A description without an explicit trigger cue is the single most common cause of undertriggering, and `spec_check.js` warns on it.
+2. Run `node .agents/scripts/spec_check.js` — the new skill MUST pass with **0 violations and 0 warnings**. Violations are machine-decidable facts (missing H1, a cited `steps/*.md` that does not exist, an unreachable step file, a phantom skill reference, an unbalanced fence, a box-drawing glyph outside a fence, missing `metadata.last_updated`). Do not ship a skill that trips any of them.
+3. If the skill is a **router** (it owns a `steps/` directory), add the `<!-- router-skill -->` marker under its H1 and follow `references/router-skill-template.md` — it must carry `When to invoke`, `Halt conditions`, and `Done when`.
+4. Perform a dry run against the benchmark prompts you added in Step 5.
+5. Regenerate the compiled catalog so `/help-me` sees the new skill:
+   ```bash
+   node .agents/scripts/compile_skills.js
+   git diff -- .agents/skills/help-me/skills-catalog.json   # must list the new skill
+   ```
 
 ### Step 7: Log the Skill Creation
 
@@ -137,20 +152,24 @@ Append an entry to `artifacts/memory/active-decisions.md`:
 ### [DECISION] Created Skill: <skill-name> [date: YYYY-MM-DD]
 **Purpose:** {summary of capability}
 **Path:** .agents/skills/<skill-name>/SKILL.md
-**Evals:** {yes/no}
+**Router:** {yes — owns steps/, carries <!-- router-skill --> | no}
+**Benchmarks:** {suite file + count, or "none — <reason>"}
 ```
 
 ---
 
 ## Anti-patterns
 
-- **Undertriggered descriptions.** Writing vague descriptions like *"How to deploy apps"* instead of *"Deploy and publish web apps. Trigger whenever the user mentions deployment, release, hosting, or shipping to production."*
-- **Bloated SKILL.md files.** Packing 1,000+ lines into `SKILL.md` instead of using `references/`.
+- **Undertriggered descriptions.** Writing vague descriptions like *"How to deploy apps"* instead of *"Deploy and publish web apps. Use when the user says ship it, deploy, release, or invokes /deploy."* The description **is** the router; make it slightly pushy.
+- **Bloated SKILL.md files.** Packing 1,000+ lines into `SKILL.md` instead of using `references/`. The <500-line guideline is a warning, not a preference.
+- **A per-skill `evals/evals.json`.** Nothing reads it. Benchmarks go in `evals/suites/`.
+- **A step file no citation path reaches.** A fully-written contract the router never loads reads as coverage that does not exist. Link it or delete it.
 - **Malicious or unexpected logic.** Skills must adhere to `.agents/GUARDRAILS.md` and principle of least surprise.
 
 ---
 
 ## Reference Resources
 
-- Template: `.agents/skills/create-skill/references/skill-template.md`
-- Evals Schema: `.agents/skills/create-skill/references/evals-schema.md`
+- Leaf-skill template: `.agents/skills/create-skill/references/skill-template.md`
+- Router-skill template: `.agents/skills/create-skill/references/router-skill-template.md`
+- Evals schema (the real `vespyr-eval` suite format): `.agents/skills/create-skill/references/evals-schema.md`

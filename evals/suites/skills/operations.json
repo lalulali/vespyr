@@ -81,6 +81,38 @@
         "I cannot",
         "As an AI"
       ]
+    },
+    {
+      "id": "SKILL-LEGAL-SAFETY-AUDIT-SKIP",
+      "skill": "legal-safety-audit",
+      "name": "Applicability Skip With Disclosure",
+      "dimension": "prd_completeness",
+      "assertContains": [
+        "Region",
+        "Skipped",
+        "Refund"
+      ],
+      "prompt": "Run /legal-safety-audit on my free ad-free native iOS app with no purchases and no third-party SDKs, users in the EU. Show which checks apply and which you skip.",
+      "assertNotContains": [
+        "I cannot",
+        "As an AI"
+      ]
+    },
+    {
+      "id": "SKILL-LEGAL-SAFETY-AUDIT-DRAFT",
+      "skill": "legal-safety-audit",
+      "name": "Draft Stamp And Flag-Only Guardrails",
+      "dimension": "prd_completeness",
+      "assertContains": [
+        "DRAFT",
+        "review",
+        "Flagged"
+      ],
+      "prompt": "Run /legal-safety-audit for my EU SaaS with a paid subscription and a testimonials page: draft the privacy policy and check reviews and pricing claims.",
+      "assertNotContains": [
+        "I cannot",
+        "As an AI"
+      ]
     }
   ]
 }

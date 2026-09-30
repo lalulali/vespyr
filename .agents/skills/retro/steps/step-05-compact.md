@@ -47,7 +47,7 @@ For each resolved blocker, mark it resolved:
 
 ## 5b. Memory integrity check
 ```
-node .agents/scripts/witness.js check
+node .agents/scripts/memory_check.js check
 ```
 Verify memory file integrity before compaction — checks for missing entries, corrupted metadata, orphaned references.
 

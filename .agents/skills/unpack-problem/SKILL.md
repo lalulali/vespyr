@@ -1,12 +1,13 @@
 ---
 name: unpack-problem
-description: Problem-first exploration before solution ideation — supports guided, automated, and combination modes. Facilitated by @product-manager and @user-researcher.
+description: Problem-first exploration before solution ideation — supports guided, automated, and combination modes. Facilitated by @product-manager and @user-researcher. Use when the user says "users are dropping off", "something is wrong but I do not know what", "help me figure out what is broken", or invokes /unpack-problem.
 metadata:
   version: "2.0"
   last_updated: "2026-07-20"
 ---
-
 # Unpack Problem — Tri-Modal Problem Exploration
+
+<!-- router-skill -->
 
 A structured problem-exploration workspace. Unlike `/validate-idea` (which assumes you have an idea), `/unpack-problem` helps you explore the problem space before committing to any solution. Facilitated by `@product-manager` and `@user-researcher`.
 
@@ -34,6 +35,19 @@ If unclear, present the three modes and ask.
 ## Simulated perspectives are hypotheses, never evidence
 
 Automated/combination modes draft empathy maps, journeys, and JTBD from *simulated* user perspectives. These are hypotheses to validate with real users — never present them as evidence. Every simulated artifact carries the `[AUTO-DRAFT: ...]` label (see step-02's dispatch ladder) plus its riskiest assumption, and multi-perspective drafting follows the dispatch ladder in `steps/step-02-analysis-execution.md` instead of roleplaying all segments in one context.
+
+## Halt conditions
+- The user proposes a solution before the problem is framed -> halt. Step 01 enforces zero-solution framing; a jumped-to "we should build X" is a solution in search of a problem and must be sent back to the problem statement
+- A simulated (auto-drafted) artifact is about to be presented as evidence -> halt. Simulated perspectives are hypotheses to validate with real users, and every one carries the `[AUTO-DRAFT: ...]` label plus its riskiest assumption
+- The dispatch ladder is unavailable and multi-perspective drafting would collapse into one shared context -> halt or explicitly mark the output degraded; never silently roleplay all segments in one context
+- No solution concept survives the Step 03 mapping -> the brief ends `[GATE: NO-GO]`; do not manufacture a candidate to satisfy the handoff
+
+## Done when
+- `artifacts/output/02-research/problem-space-brief.md` exists and ends with a parseable `[GATE: GO|RESHAPE|NO-GO — <reason>]` line — a brief without a gate is a document, not a decision
+- The problem statement, root cause, JTBD, and HMW questions are all present and mutually consistent
+- Every simulated artifact carries its `[AUTO-DRAFT: ...]` label and named riskiest assumption
+- The handoff routing names the next skill and the artifact it consumes
+- `@memory-controller session-write` has run
 
 ## Harness adherence (non-negotiable)
 - Follow the step sequence for the selected mode exactly. Do NOT skip steps.

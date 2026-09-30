@@ -1,11 +1,13 @@
 ---
 name: retro
-description: Post-cycle review — extract lessons, calibrate estimates, improve processes, compact memory, and update team knowledge. Consult @ml-ai-engineer where eval harnesses, benchmarks, or biomarker pipelines are under review.
+description: Post-cycle review — extract lessons, calibrate estimates, improve processes, compact memory, and update team knowledge. Consult @ml-ai-engineer where eval harnesses, benchmarks, or biomarker pipelines are under review. Use when the user says "run a retro", "what did we learn this cycle", "calibrate our estimates", or invokes /retro after a cycle or launch.
 metadata:
   version: "1.0"
+  last_updated: "2026-09-30"
 ---
-
 # Retro — Multi-Step Workflow
+
+<!-- router-skill -->
 
 This skill runs in sequential steps. Each step is a self-contained file with its own halt conditions. Load one at a time.
 
@@ -38,7 +40,7 @@ This skill runs in sequential steps. Each step is a self-contained file with its
 5. **Compact** → `steps/step-05-compact.md`
 
 ## Halt conditions
-- Memory integrity check fails (`witness.js check` returns non-zero)
+- Memory integrity check fails (`memory_check.js check` returns non-zero)
 - Pattern scan finds unresolved security or data-loss patterns (escalate to `@tech-lead`)
 - Compaction would archive entries younger than 7 days (skip compaction, report)
 

@@ -1,9 +1,12 @@
 ---
 name: kanban
-description: Display and update the Kanban board — track task progress across phases
+description: Display and update the Kanban board — track task progress across phases. Use when the user says "show me the kanban", "move this task to done", "what is blocked", "add a task", or invokes /kanban.
 metadata:
   version: "1.0"
+  last_updated: "2026-09-30"
 ---
+
+# Kanban — Task Board Display & Update
 
 ## Persona delegation
 This skill delegates to `@product-manager`. The pm manages backlog prioritization, task state transitions, blocker resolution, and Kanban board structure. The skill file provides the display format; `@product-manager` provides the decisions on task movement, priority ordering, and blocker escalation.

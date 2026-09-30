@@ -1,12 +1,14 @@
 ---
 name: empathy-map
-description: Map user feelings, thoughts, sayings, and doings from observation data into an empathy quadrant canvas
+description: Map user feelings, thoughts, sayings, and doings from observation data into an empathy quadrant canvas. Use when the user says "map out the user experience", "what are users thinking", "build an empathy map", or invokes /empathy-map before designing a feature.
 metadata:
   version: "2.0"
   last_updated: "2026-07-20"
 ---
 
 # Empathy Map
+
+## What this skill does
 
 Structures user observations into an empathy canvas. Outputs to `artifacts/output/02-research/empathy-map.md`.
 

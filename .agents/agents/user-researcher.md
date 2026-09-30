@@ -286,7 +286,7 @@ See [GUARDRAILS.md](../GUARDRAILS.md) for the full guardrails specification that
 |----------|----------|
 | Research plan & interview guide (for the human to run) | `artifacts/output/02-research/research-plan.md` |
 | User personas & research report (synthesized from human-gathered data) | `artifacts/output/02-research/user-personas.md` |
-| User journey maps | Within research report or `artifacts/output/02-research/journey-maps.md` |
+| User journey maps | Within research report or `artifacts/output/02-research/journey-map.md` |
 
 ## Conflict Resolution
 - If research findings contradict @founder's assumptions, present the evidence objectively — the founder decides what to do with it

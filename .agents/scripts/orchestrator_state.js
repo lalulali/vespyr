@@ -330,50 +330,49 @@ function writeYaml(lines) {
   }
 }
 
-// ASCII dashboard for 'status' command
+// Markdown dashboard for 'status' command (DNA 6: tables, not ASCII boxes)
 function printDashboard(state) {
-  const icon = (s) => s === 'done' ? '✅' : s === 'in-progress' ? '▶️ ' : s === 'pending' ? '  ' : '  ';
+  const icon = (s) => s === 'done' ? '✅' : s === 'in-progress' ? '▶️' : s === 'pending' ? '·' : '·';
   const name = (state.project && state.project.name) || state.name || 'unnamed';
   const phase = resolveCurrentPhase(state);
-  console.log(`\n╔══════════════════════════════════════════╗`);
-  console.log(`║  Project: ${name.padEnd(28)} ║`);
-  console.log(`║  Phase:   ${phase.padEnd(28)} ║`);
-  console.log(`╠══════════════════════════════════════════╣`);
-  console.log(`║  Phase Pipeline                          ║`);
-  console.log(`╠══════════════════════════════════════════╣`);
+  console.log(`\n## Project: ${name}`);
+  console.log(`**Active phase:** ${phase}\n`);
+  console.log(`| Phase | Status |`);
+  console.log(`|---|---|`);
   if (state.phases) {
     const entries = Object.entries(state.phases);
     for (const [p, v] of entries) {
       const s = typeof v === 'string' ? v : (v.status || 'pending');
-      console.log(`║  ${icon(s)} ${p.padEnd(34)} ║`);
+      console.log(`| ${icon(s)} ${p} | ${s} |`);
     }
   }
-  console.log(`╚══════════════════════════════════════════╝\n`);
+  console.log('');
 }
 
-// ASCII dashboard for 'next' command
+// Markdown dashboard for 'next' command
 function printNextDashboard(state, action) {
   printDashboard(state);
   const current = resolveCurrentPhase(state);
   const phaseObj = state.phases[current];
   const status = phaseObj ? (typeof phaseObj === 'string' ? phaseObj : (phaseObj.status || 'pending')) : 'pending';
-  console.log(`Current phase:  ${current}`);
-  console.log(`Phase status:   ${status}`);
+  console.log(`**Current phase:** ${current}`);
+  console.log(`**Phase status:** ${status}\n`);
   if (action.action === 'generate-artifacts' && (action.artifacts || action.missing)) {
-    console.log(`Action needed:  generate artifacts`);
+    console.log(`**Action needed:** generate artifacts\n`);
     for (const a of (action.artifacts || action.missing)) {
-      console.log(`  - ${a}`);
+      console.log(`- ${a}`);
     }
+    console.log('');
   } else if (action.action === 'advance-phase') {
-    console.log(`Next phase:     ${action.to || 'unknown'}`);
+    console.log(`**Next phase:** ${action.to || 'unknown'}\n`);
   }
   if (action.recommendations) {
-    console.log(`\nRecommendations:`);
+    console.log(`### Recommendations\n`);
     for (const r of action.recommendations) {
-      console.log(`  → ${r}`);
+      console.log(`- ${r}`);
     }
+    console.log('');
   }
-  console.log('');
 }
 
 // Best-effort token estimate from file content via canonical countTokens().

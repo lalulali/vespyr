@@ -3,15 +3,17 @@
  * motion_spec_check.js — Real-artifact validator for motion-spec.md.
  *
  * WHY THIS EXISTS
- * The /motion skill has a strong 73-check test harness (test-motion.mjs), but
- * that harness SIMULATES the pipeline: it re-implements validateMotionPrompt /
- * traceability in JS and runs them against fixtures it writes itself. It proves
- * the skill's logic is internally consistent and the docs carry the right
- * strings — it does NOT parse a real project's motion-spec.md. So a real spec
+ * A standalone /motion test harness once existed (test-motion.mjs, 73 checks) but
+ * it SIMULATED the pipeline: it re-implemented validateMotionPrompt /
+ * traceability in JS and ran them against fixtures it wrote itself. It proved
+ * the skill's logic was internally consistent and the docs carried the right
+ * strings — it did NOT parse a real project's motion-spec.md. So a real spec
  * with an incomplete MO-### prompt (missing reduced-motion fallback, an animated
- * layout property, an orphan prompt) is caught only by the LLM reading the prose
- * gate — the same soft mechanism that let /design ship generic output. This
- * script ports the tested simulation logic onto the real markdown artifact and
+ * layout property, an orphan prompt) was caught only by the LLM reading the prose
+ * gate — the same soft mechanism that let /design ship generic output. That
+ * harness was removed in 02s (dead weight once this script existed, and an
+ * unreferenced second test convention); its logic lives here now. This
+ * script ports that tested logic onto the real markdown artifact and
  * exits 1 when the spec is incomplete, so the /motion Phase 3 gate and /develop
  * step-07 motion QA gate have a mechanical enforcer.
  *
@@ -38,7 +40,7 @@ const DEFAULTS = {
 };
 
 // Required per-prompt fields, keyed by the bold label used in the template.
-// (Mirrors REQUIRED_PROMPT_FIELDS in test-motion.mjs, mapped to markdown labels.)
+// (Carried over from the removed test-motion.mjs harness, mapped to markdown labels.)
 const REQUIRED_FIELDS = [
   'Trigger',
   'Target',
@@ -179,7 +181,7 @@ function checkMotionSpec(specText, userStoriesText) {
     failures.push(...validatePromptBlock(block));
   }
 
-  // Bidirectional traceability (ports validateTraceability from test-motion.mjs).
+  // Bidirectional traceability (ported from the removed test-motion.mjs harness).
   const specStoryRefs = new Set();
   const orphanPrompts = [];
   for (const block of blocks) {

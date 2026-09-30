@@ -1,11 +1,13 @@
 ---
 name: develop
-description: Core MVP workflow — spec review, architecture, planning, implementation, coverage fidelity review, QA, verification, and documentation
+description: Core MVP workflow — spec review, architecture, planning, implementation, coverage fidelity review, QA, verification, and documentation. Use when the user says "build this", "implement the approved plan", "start development", "run the dev cycle", or invokes /develop after planning is complete.
 metadata:
   version: "1.1"
+  last_updated: "2026-09-30"
 ---
-
 # Develop — Multi-Step Workflow
+
+<!-- router-skill -->
 
 This skill runs in sequential steps. Each step is a self-contained file with its own halt conditions. Load one at a time.
 

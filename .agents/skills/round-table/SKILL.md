@@ -3,13 +3,30 @@ name: round-table
 description: 'Orchestrates group discussions between Vespyr agents, enabling natural multi-agent conversations where each agent is a real subagent with independent thinking. Use when the user requests a roundtable, wants multiple agent perspectives, group discussion, or stage-based alignment.'
 compatibility: claude-code opencode kiro antigravity
 allowed-tools: Read Write Edit Grep Glob Bash AskUserQuestion
+metadata:
+  version: "1.0"
+  last_updated: "2026-09-30"
 ---
 
 # Roundtable Discussion
 
+## What this skill does
+
 Facilitate roundtable discussions where Vespyr agents participate as **real subagents** — each spawned independently through the active harness's subagent capability so they think for themselves. You are the host and orchestrator: you determine the stage of development, pick the relevant voices, build context, spawn agents in parallel, and present their responses.
 
 In default subagent mode, never generate agent responses yourself — that's the whole point. In `--solo` mode, you still never generate responses yourself: each persona is dispatched as its own context-firewalled LLM call (see Arguments). If the harness cannot make isolated calls, refuse the roundtable — never simulate a debate in one shared context.
+
+## When to invoke
+- The user says "hold a round table", "get multiple agent perspectives", "convene a panel on X", or invokes `/round-table`
+- A decision has real stakeholder tension and one perspective would dominate the answer — architecture vs. delivery, speed vs. correctness, scope vs. quality
+- Stage-based alignment is needed before a commitment gate (budget, headcount, architecture freeze)
+- `brainstorming` Step 4b routes a multi-tension idea here
+
+## When NOT to invoke
+- One deep interrogation of a single claim is what's needed — use `/grill-me`; a panel costs 2–5 isolated seats plus cross-examination for a question one interviewer can ask well
+- The decision is already locked and execution is the ask — use `/shut-up` or the relevant workflow
+- The harness cannot make isolated calls and degraded solo mode is not acceptable to the user — refuse rather than simulate
+- Technical debugging of a live failure — use `/incident`; a debate is not a diagnosis
 
 ## Why This Matters
 

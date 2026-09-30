@@ -1,9 +1,13 @@
 ---
 name: iterate
-description: Post-launch feature iteration — analyze user data, prioritize improvements, ship incremental value
+description: Post-launch feature iteration — analyze user data, prioritize improvements, ship incremental value. Use when the user says "improve this feature", "iterate based on the data", "what should we build next after launch", or invokes /iterate once the product is live.
 metadata:
   version: "1.0"
+  last_updated: "2026-09-30"
 ---
+# Iterate — Post-Launch Improvement Cycle
+
+<!-- router-skill -->
 
 ## What this skill does
 
@@ -11,6 +15,20 @@ After a product launches, the work shifts from "develop it right" to "make it be
 
 **Previous skill:** `launch` (product is live and monitored)
 **Next skill:** Continue iterating, or load `retro` for process review.
+
+## Halt conditions
+Any one halts the cycle and escalates instead of looping:
+- The same hypothesis is tested twice with no measurable movement — loop variance, not signal; escalate to `@product-manager` to re-scope
+- An iteration would break backwards compatibility for existing users — halt; preserving live behavior outranks the improvement
+- A change turns out to be architectural rather than additive — halt and route to `/design` for the architecture impact, then `/develop`; do not improvise a data-model change inside an iteration
+- 5 iteration cycles have been consumed — `retro` is mandatory before continuing, not optional
+
+## Done when
+- `analytics-insights.md`, `iteration-backlog.md`, `iteration-spec.md`, `iteration-plan.md`, and `iteration-results.md` all exist
+- The hypothesis has a recorded before/after measurement — an unmeasured iteration is not shipped, it is guessed
+- A `[LESSON]` entry is written to `lessons-learned.md` via `@memory-controller`
+- The next action is decided by the Step 6 gate (continue / re-scope / roll back / `retro`), not left implicit
+- `@memory-controller session-write` has run
 
 ## Prerequisites
 
@@ -23,6 +41,8 @@ Before starting, verify:
 
 ### Step 1: Gather Signal
 
+Step file: `steps/step-01-gather-signal.md`
+
 Invoke `@data-analyst` to collect and analyze post-launch data:
 - Feature adoption metrics vs. PRD success criteria
 - User behavior flows (funnel analysis, drop-off points)
@@ -33,6 +53,8 @@ Invoke `@data-analyst` to collect and analyze post-launch data:
 **Output:** `artifacts/output/07-iteration/analytics-insights.md` (Use template: `.agents/templates/quality/analytics-insights-template.md`)
 
 ### Step 2: Identify Opportunities
+
+Step file: `steps/step-02-identify-opportunities.md`
 
 Invoke `@product-manager` to synthesize insights into opportunities:
 - Map data signals to user stories (new, modified, or deprioritized)
@@ -49,6 +71,8 @@ Invoke `@product-manager` to synthesize insights into opportunities:
 Steps 3a and 3b can run **in parallel**.
 
 #### Step 3a: Design Iteration ⟨parallel⟩
+
+Step file: `steps/step-03a-design-iteration.md`
 Invoke `@product-designer` to design improvements:
 - Update user flows based on identified pain points
 - Design A/B test variants (if applicable)
@@ -59,6 +83,8 @@ Invoke `@product-designer` to design improvements:
 **Output:** `artifacts/output/07-iteration/iteration-spec.md` (Use template: `.agents/templates/product/product-spec-template.md` — see `## Cross-References` section for expected structure)
 
 #### Step 3b: Architecture Impact Assessment ⟨parallel⟩
+
+Step file: `steps/step-03b-architecture-impact.md`
 Invoke `@architect` to assess:
 - Does the iteration require architectural changes?
 - Are there data model changes needed?
@@ -69,6 +95,8 @@ Invoke `@architect` to assess:
 **Output:** `artifacts/output/07-iteration/iteration-adr.md` (only if architectural changes needed. Use template: `.agents/templates/architecture/adr-template.md`)
 
 ### Step 4: Plan and Execute
+
+Step file: `steps/step-04-plan-execute.md`
 
 Invoke `@tech-lead` to:
 - Break iteration items into tasks (typically smaller than new features)
@@ -89,6 +117,8 @@ Then execute the same dev loop from `develop`:
 **Output:** `artifacts/output/07-iteration/iteration-plan.md` (Use template: `.agents/templates/planning/execution-plan-template.md`)
 
 ### Step 5: Ship and Measure
+
+Step file: `steps/step-05-ship-measure.md`
 
 Invoke `@devops-engineer` to deploy the iteration.
 Invoke `@data-analyst` to measure the impact:
@@ -118,6 +148,8 @@ New blockers: {any issues, or "none"}
 **Output:** `artifacts/output/07-iteration/iteration-results.md` (Use template: `.agents/templates/planning/iteration-results-template.md`)
 
 ### Step 6: Decide Next Action (gate)
+
+Step file: `steps/step-06-decide-next.md`
 
 Based on results:
 - **Positive signal:** Continue iterating on adjacent improvements → back to Step 1

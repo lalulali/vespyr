@@ -11,6 +11,8 @@ output_contract:
 
 Design improvements based on identified opportunities. Runs in parallel with step 3b.
 
+
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill iterate --step 3a`
 ## Workflow
 
 ### 3a.1 Design — @product-designer
@@ -34,4 +36,4 @@ Write `artifacts/output/07-iteration/iteration-spec.md` using template:
 ## Delegation
 - **Memory:** @memory-controller for session-write
 
-
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill iterate --step 3a`

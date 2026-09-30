@@ -1,12 +1,14 @@
 ---
 name: discovery-report
-description: Compile design thinking and research outputs into a unified report with dynamic usability testing scoring
+description: Compile design thinking and research outputs into a unified report with dynamic usability testing scoring. Use when the user says "compile everything we learned", "pull the research into one report", "write the discovery report", or invokes /discovery-report before presenting findings to stakeholders.
 metadata:
   version: "2.0"
   last_updated: "2026-07-20"
 ---
 
 # Discovery Report
+
+## What this skill does
 
 Compiles research and design thinking outputs into a single unified report. Dynamically includes or excludes the Usability Testing (UT) Score section based on available data. Outputs to `artifacts/output/02-research/`.
 
@@ -41,60 +43,27 @@ Synthesize findings into a unified narrative. Focus on connections: how does the
 - Include the SUS (System Usability Scale) score if calculated
 
 **If no usability testing data:**
-- Output `user-research-report.md` without the UT section
+- Output `user-research-report.md` without the UT sections — but keep Research Methods Used and Open Questions (see Step 3)
 - Note: "Usability testing not yet conducted. Recommend running usability tests before finalizing design specs."
 
 ### Step 3: Output
 
-Write the appropriate output file.
+Write the appropriate output file, following the canonical template:
 
-#### When UT data exists → `usability-report.md`
-```markdown
-# Usability Report — {product/feature}
-**Date:** YYYY-MM-DD
+**`.agents/templates/discovery/discovery-report.md`**
 
-## Executive Summary
-{2-3 paragraph synthesis of all findings}
+That template is the single source of truth for the report shape. Do not inline a copy here — a copy drifts, and a drifted copy is how a report ends up shipping without its methods or its open questions.
 
-## Usability Testing Results
-| Task | Completion Rate | Avg Time | Errors | Satisfaction |
-|------|----------------|----------|--------|-------------|
+The template handles both branches; you choose the output filename and drop the sections that have no data:
 
-## SUS Score
-**Score:** {N}/100
-**Interpretation:** {grade: A-F}
+| Situation | Output file | Template sections to include |
+|---|---|---|
+| UT data exists | `artifacts/output/02-research/usability-report.md` | All of them, including `## Usability Testing Results (if available)` and `## SUS Score (if available)`. Title: "Usability Report" |
+| No UT data | `artifacts/output/02-research/user-research-report.md` | Omit both UT sections. Keep `## Research Methods Used` and `## Open Questions` — they are what makes the report reviewable. Title: "User Research Report" |
 
-## Key Insights
-1. {insight} — Evidence: {data point}
-2. {insight} — Evidence: {data point}
+**Never drop `## Research Methods Used` or `## Open Questions` because there is no UT data.** They are the provenance and the unresolved-questions record; a report without them cannot be challenged, only believed. When no UT data exists, add this line under Recommendations rather than removing a section:
 
-## Recommendations
-| Priority | Recommendation | Based On |
-|----------|---------------|----------|
-| P0 | {critical fix} | {data source} |
-```
-
-#### When no UT data → `user-research-report.md`
-```markdown
-# User Research Report — {product/feature}
-**Date:** YYYY-MM-DD
-
-## Executive Summary
-{2-3 paragraph synthesis}
-
-## Research Methods Used
-| Method | Artifact | Key Finding |
-|--------|----------|------------|
-
-## Key Insights
-1. {insight} — Source: {artifact}
-
-## Open Questions
-1. {question} — Recommended method: {research method}
-
-## Recommendations for Next Phase
-- Usability testing recommended before design finalization
-```
+> Usability testing not yet conducted. Recommend running usability tests before finalizing design specs.
 
 ## State machine integration
 At start: Run `node .agents/scripts/orchestrator_state.js status`

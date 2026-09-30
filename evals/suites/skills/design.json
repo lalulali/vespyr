@@ -21,14 +21,17 @@
     {
       "id": "SKILL-MOTION",
       "skill": "motion",
-      "name": "Motion Spec & Animation Handoff",
+      "name": "Motion Spec, Evidence Mode & Animation Handoff",
       "dimension": "a11y_design",
       "assertContains": [
         "Duration",
         "Easing",
-        "Trigger"
+        "Trigger",
+        "lightweight",
+        "reduced-motion",
+        "/develop"
       ],
-      "prompt": "Run /motion for the checkout button: duration, easing curve, and hover/active triggers with implementation handoff.",
+      "prompt": "/motion — the marketing page needs a few button press and hover transitions and nothing else. Record the evidence mode, the reduced-motion fallback, and hand the implementation to /develop.",
       "assertNotContains": [
         "I cannot",
         "As an AI"

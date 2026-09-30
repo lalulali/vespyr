@@ -38,7 +38,7 @@ node bin/cli.js --yes --harness opencode,claude
 your-project/
 ├── .agents/              # 智能体角色、技能、脚本、配置、参考
 │   ├── agents/           # 20 个智能体角色 Markdown 文件
-│   ├── skills/           # 40 个原子化技能工作流
+│   ├── skills/           # 41 个原子化技能工作流
 │   ├── scripts/          # 编排器、记忆、遥测
 │   ├── config.yaml       # 项目配置
 │   └── references/       # 阶段表、术语表、契约

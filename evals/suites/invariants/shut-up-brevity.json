@@ -1,6 +1,7 @@
 {
   "suite": "invariants/shut-up-brevity",
   "description": "10 /shut-up Brevity & Destructive Safety Gate Fixtures",
+  "note": "This suite IS the /shut-up skill coverage — brevity plus the destructive-safety confirmation gate are the whole contract, and a maxTokens bound is the only honest way to measure brevity. The skills/* suites deliberately do not duplicate it. See .agents/skills/create-skill/references/evals-schema.md.",
   "benchmarks": [
     {
       "id": "SHUTUP-01",

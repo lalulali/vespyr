@@ -3,11 +3,32 @@ name: elicitation
 description: 'Push the LLM to reconsider, refine, and improve its recent output. Use when user asks for deeper critique or mentions a known deeper critique method, e.g. socratic, first principles, pre-mortem, red team. Consult @ml-ai-engineer where eval prompts or scored judgements are under review.'
 metadata:
   version: "1.0"
+  last_updated: "2026-09-30"
 ---
 
 # Advanced Elicitation
 
+## What this skill does
+
 **Goal:** Push the LLM to reconsider, refine, and improve its recent output — always against a sharpened, user-confirmed target (Step 0), never a vague one.
+
+Loads the method registry (`methods.csv`), matches the top 5 methods against the sharpened target, and runs the chosen critique method — in-context for single-persona methods, as real dispatched subagents for multi-persona ones. Ends every session with a five-line Sharpening Ledger so the critique is auditable after the fact.
+
+## When to invoke
+- "Push back on what you just wrote" / "critique this section" / "improve this output"
+- The user names a deeper-critique method by name — pre-mortem, red team, first principles, Socratic, steelman, devil's advocate
+- Output was produced moments ago and you want it examined before it is committed to a document
+- A single agent's blind spot is suspected and a second independent perspective is cheaper than a full panel (for multi-stakeholder tension, use `/round-table` instead)
+
+## When NOT to use
+- The artifact is already committed and shipped — critique cannot unwrite it; use `/retro` or `/incident`
+- The user wants a verdict on a *decision*, not a critique of *text* — use `/grill-me`
+- The ask is a panel with genuinely opposed stakeholder positions — use `/round-table`; elicitation critiques one artifact, it does not seat personas
+- There is no ground-truth material to critique against — a critique with nothing to check is taste, not analysis
+
+## When invoked indirectly
+
+When another skill or process calls this one mid-flight, apply the methods to the section just produced, then return the enhanced content to the caller with the Critique coverage line. Do not open the options menu — an indirect invocation wants the work done, not a chooser.
 
 ---
 
@@ -28,7 +49,7 @@ When invoked from another prompt or process:
 
 1. Receive or review the current section content that was just generated
 2. Apply elicitation methods iteratively to enhance that specific content
-3. Return the enhanced version back when user selects 'x' to proceed and return back
+3. Return the enhanced version back when the user selects 'x' to proceed
 4. The enhanced content replaces the original section content in the output document
 5. Enumerate the section's critique points before executing and return the Critique coverage line with the enhanced content (canon: `.agents/references/point-coverage.md`)
 

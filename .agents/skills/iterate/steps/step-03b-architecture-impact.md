@@ -11,6 +11,8 @@ output_contract:
 
 Assess whether iteration changes require architectural modifications. Runs in parallel with step 3a.
 
+
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill iterate --step 3b`
 ## Workflow
 
 ### 3b.1 Assess — @architect
@@ -36,4 +38,4 @@ If no changes needed, skip this artifact.
 ## Delegation
 - **Memory:** @memory-controller for session-write
 
-
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill iterate --step 3b`

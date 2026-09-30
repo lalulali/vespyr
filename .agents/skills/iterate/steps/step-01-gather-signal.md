@@ -13,6 +13,8 @@ output_contract:
 
 Collect and analyze post-launch data to understand how users are interacting with the feature.
 
+
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill iterate --step 1`
 ## Workflow
 
 ### 1a. Collect data — @data-analyst
@@ -30,4 +32,4 @@ Invoke `@data-analyst` to collect and analyze post-launch data:
 ## Delegation
 - **Memory:** @memory-controller for session-write
 
-
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill iterate --step 1`

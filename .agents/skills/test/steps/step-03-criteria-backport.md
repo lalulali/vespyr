@@ -12,6 +12,8 @@ output_contract:
 
 Append newly discovered scenarios and test findings back to the project's acceptance criteria. This closes the QA → Product feedback loop, ensuring edge cases captured during testing are formalized into requirements.
 
+
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill test --step 3`
 ## Workflow
 
 ### 3a. Consolidate findings
@@ -69,3 +71,4 @@ If test findings reveal requirements that the PRD/SPEC doesn't address, update `
 ## Delegation
 - **Memory:** @memory-controller for session-write
 
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill test --step 3`

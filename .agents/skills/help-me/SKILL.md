@@ -3,7 +3,10 @@ name: help-me
 description: Dynamic next-step navigator — evaluates project state, checks skill catalog, codebase/doc graphs, and provides a tailored navigation report with recommended slash commands.
 metadata:
   version: "1.0"
+  last_updated: "2026-09-30"
 ---
+
+# Help Me — Next-Step Navigator
 
 ## What this skill does
 

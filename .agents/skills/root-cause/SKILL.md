@@ -8,6 +8,8 @@ metadata:
 
 # Root Cause Analysis
 
+## What this skill does
+
 Facilitates structured root cause discovery using Socratic techniques. Outputs to `artifacts/output/02-research/root-cause-analysis.md`.
 
 ## Persona delegation

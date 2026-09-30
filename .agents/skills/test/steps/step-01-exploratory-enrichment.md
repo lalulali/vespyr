@@ -11,6 +11,8 @@ output_contract:
 
 Before running tests, `@qa-engineer` enriches the acceptance criteria by identifying scenarios the product spec missed.
 
+
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill test --step 1`
 ## Workflow
 
 ### 1a. Load baseline
@@ -64,3 +66,4 @@ Write `artifacts/output/05-execution/quality/enrichment-findings.md`:
 ## Delegation
 - **Memory:** @memory-controller for session-write
 
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill test --step 1`

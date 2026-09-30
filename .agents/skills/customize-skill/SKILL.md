@@ -29,7 +29,7 @@ Helps you customize an existing Vespyr skill. You describe what feels wrong or w
 
 ## Prerequisites
 
-- The skill exists under `.agents/skills/<skill-name>/` (and its harness mirror, e.g. `.opencode/skills/<skill-name>/`)
+- The skill exists under `.agents/skills/<skill-name>/` — this is the single source of truth; there is no per-harness mirror to keep in sync
 - You know which skill you want to customize and roughly what should change
 
 ---
@@ -51,16 +51,18 @@ Example intents:
 
 ### Step 2: Locate the Skill Files
 
-Inspect the skill directory. Note: skills are mirrored across harness folders (`.agents/skills/` and `.opencode/skills/`) — identify every copy of the skill that needs the same change.
+Inspect the skill directory. `.agents/skills/<skill-name>/` is the only copy — every harness reads it, so there is no mirror to keep in sync and no second file to edit.
 
 ```
 .agents/skills/<skill-name>/
-├── SKILL.md         (required — frontmatter + body)
-├── references/      (docs loaded on demand)
-├── scripts/         (helper scripts)
-├── resources/       (templates, assets, static data)
-└── evals/evals.json (verification test cases)
+├── SKILL.md      (required — frontmatter + body)
+├── steps/        (router skills: one file per step, each cited by SKILL.md)
+├── references/   (docs loaded on demand)
+├── scripts/      (helper scripts)
+└── resources/    (templates, assets, static data)
 ```
+
+Verification test cases do **not** live in the skill folder. They are centralized suites under `evals/suites/<group>/<name>.json` and run via `npm run eval` — see `.agents/skills/create-skill/references/evals-schema.md`.
 
 Read the current `SKILL.md` frontmatter and body before editing. Understand the existing structure before touching anything.
 
@@ -71,16 +73,17 @@ Read the current `SKILL.md` frontmatter and body before editing. Understand the 
 | Triggering behavior | `SKILL.md` frontmatter `description` |
 | Workflow steps, tone, guardrails | `SKILL.md` body |
 | Large domain content | `references/<topic>.md` (add/update, keep SKILL.md lean) |
+| A single workflow step | `steps/step-NN-<name>.md` |
 | Deterministic helper logic | `scripts/` |
 | Templates/assets | `resources/` |
-| Test prompts & expectations | `evals/evals.json` |
+| Test prompts & expectations | `evals/suites/<group>/<name>.json` (centralized, not per-skill) |
 
 ### Step 4: Apply Surgical Edits
 
 - **Triggering first.** The `description` field is the single highest-leverage edit. It MUST include both what the skill does AND explicit triggering contexts — write it slightly "pushy" with relevant keywords and user phrases so the engine doesn't undertrigger. Single line, 1–1024 chars, no `|`/`>` block scalars.
 - **Body edits minimal.** Change only the sections relevant to the intent. Keep the file under 500 lines; push large additions into `references/`.
 - **Keep conventions.** Preserve the skill's existing structure, headings, and tone. Don't restructure sections that weren't part of the request.
-- **Mirror the change.** Apply the identical edit to every harness copy of the skill (e.g., `.opencode/skills/<skill-name>/SKILL.md`) so copies do not drift.
+- **One file, one edit.** `.agents/skills/<skill-name>/` is the single source of truth — there is no mirror to propagate to.
 
 ### Step 5: Verify
 
@@ -88,9 +91,17 @@ Read the current `SKILL.md` frontmatter and body before editing. Understand the 
    ```bash
    node .agents/scripts/spec_check.js
    ```
+   It also checks link integrity: a cited `steps/*.md` must exist, every file in `steps/` must be reachable, and the body must open with an H1. A violation here is a real broken reference, not a style note.
 2. Review the `description` — does it cover all anticipated user trigger phrases?
-3. Walk through the skill's own test prompts (from `evals/evals.json` if present) against the edited workflow.
-4. Confirm the mirrored copies are identical (e.g., `diff .agents/skills/<name>/SKILL.md .opencode/skills/<name>/SKILL.md`).
+3. If the skill has benchmarks, walk its prompts from the relevant `evals/suites/<group>/<name>.json` against the edited workflow and confirm the suite still loads:
+   ```bash
+   npm run eval 2>&1 | grep -i "malformed suite"   # expect no output
+   ```
+4. If you changed a `description`, regenerate the compiled catalog and confirm the diff matches your intent:
+   ```bash
+   node .agents/scripts/compile_skills.js
+   git diff -- .agents/skills/help-me/skills-catalog.json
+   ```
 
 ### Step 6: Log the Change
 
@@ -111,8 +122,10 @@ Append to `artifacts/memory/active-decisions.md`:
 |---|---|---|
 | Skill still doesn't trigger | Description too vague or lacks user phrases | Rewrite description with exact phrases users say; include synonyms and variations |
 | Spec check fails | Invalid frontmatter (block scalars, list metadata, wrong top-level keys) | Only `name`, `description`, `license`, `compatibility`, `metadata`, `allowed-tools` allowed; `metadata` values are strings only |
+| Spec check reports a phantom step link | The cited filename does not match the file on disk (e.g. `step-06-x.md` cited, `step-05-x.md` exists) | Fix the citation to the real filename. A phantom link makes the agent load nothing and report a false pass. |
+| Spec check reports an unreachable step file | A file in `steps/` that no citation path reaches | Cite it from the router, or delete it. A contract nothing loads reads as coverage that does not exist. |
 | Skill file too long | Large body edits pushed inline | Move extensive content into `references/<topic>.md` |
-| Copies drifted apart | Only one harness folder updated | Diff the mirrors and apply the same edit to all copies |
+| Catalog out of date | `skills-catalog.json` is compiled, not hand-edited | Re-run `node .agents/scripts/compile_skills.js` and review the diff |
 
 ---
 
@@ -120,12 +133,14 @@ Append to `artifacts/memory/active-decisions.md`:
 
 - **Rewriting the whole skill for one tweak.** Change only what the intent requires.
 - **Editing the description without checking trigger phrases.** The description IS the trigger — verify it against real user phrasings.
-- **Forgetting mirrors.** Skills exist in multiple harness folders; updating only one leaves stale copies that still load in other harnesses.
+- **Looking for a mirror to update.** There isn't one. `.agents/skills/` is the single source of truth; hunting for a second copy wastes a step and invites a fabricated edit.
+- **Adding tests inside the skill folder.** Benchmarks are centralized in `evals/suites/`; a per-skill `evals/evals.json` is never read by the runner.
 - **Skipping validation.** Always run `spec_check.js` after edits.
 
 ---
 
 ## Output Artifacts
 
-- Updated `SKILL.md` (and any support files) under `.agents/skills/<skill-name>/` and its harness mirrors
+- Updated `SKILL.md` (and any support files) under `.agents/skills/<skill-name>/` — the single source of truth
+- `.agents/skills/help-me/skills-catalog.json` regenerated if a `description` changed
 - `artifacts/memory/active-decisions.md` (audit log entry)

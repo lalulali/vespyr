@@ -22,6 +22,7 @@ Vespyr organizes complex operations into atomic skills. Each skill is a folder w
 | `/iterate` | 7 | Post-launch behavior improvements |
 | `/retro` | 9 | Post-cycle review and memory compaction |
 | `/incident` | Operational | Production incident response and triage |
+| `/legal-safety-audit` | Operational | Compliance safety audit — generate policy drafts (privacy, terms, refund, cookie) and audit the app for consent, data, dark patterns, accessibility, and deletion risks |
 
 ### Design Thinking & Discovery
 

@@ -1,9 +1,12 @@
 ---
 name: phase
-description: Show current phase, switch phases, list phase artifacts
+description: Show current phase, switch phases, list phase artifacts. Use when the user says "what phase are we in", "switch to the design phase", "what has been produced so far", or invokes /phase.
 metadata:
   version: "1.0"
+  last_updated: "2026-09-30"
 ---
+
+# Phase — Pipeline Phase Control
 
 ## What this skill does
 

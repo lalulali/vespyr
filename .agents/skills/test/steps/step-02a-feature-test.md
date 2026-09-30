@@ -13,6 +13,8 @@ Micro-level testing focused on specific user stories, API contracts, unit valida
 
 Runs in parallel with step 02b.
 
+
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill test --step 2a`
 ## Workflow
 
 ### 2a.1 Detect test framework
@@ -106,3 +108,5 @@ Max 2 fix-test cycles per failure. If a failure persists after 2 fix attempts, e
 
 ## Delegation
 - **Memory:** @memory-controller for session-write
+
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill test --step 2a`

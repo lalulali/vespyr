@@ -12,6 +12,8 @@ output_contract:
 
 Create the execution plan and implement iteration items using the dev loop from `develop`.
 
+
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill iterate --step 4`
 ## Workflow
 
 ### 4a. Plan — @tech-lead + @product-manager
@@ -47,4 +49,4 @@ Run the same dev loop from `develop`:
 ## Delegation
 - **Memory:** @memory-controller for session-write
 
-
+> **Tracker:** `node .agents/scripts/step_tracker.js complete --skill iterate --step 4`
