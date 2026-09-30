@@ -1,5 +1,6 @@
 /**
  * Baseline Manager & Regression Analyzer for vespyr-eval (WS-4 Task 4.1)
+ * Consumers: @qa-engineer's release gate and @ml-ai-engineer's eval harness share this pinned baseline.
  * Tracks pinned baseline metrics (artifacts/evals/baseline.json), calculates diffs,
  * and triggers regression alerts / exit code 2 gates (INV-REG-1, INV-REG-2).
  */
@@ -46,16 +47,23 @@ function computeDatasetHash() {
 
 function loadBaseline(customPath) {
   let filePath = customPath || DEFAULT_BASELINE_PATH;
+  const isDefaultPath = path.resolve(filePath) === path.resolve(DEFAULT_BASELINE_PATH);
   if (!fs.existsSync(filePath)) {
     const fallbackPath = path.join(__dirname, "..", "..", "artifacts", "evals", "mock-baseline.json");
-    if (!customPath && fs.existsSync(fallbackPath)) {
+    // The default path counts as "no explicit choice": falling back to the
+    // mock baseline is honest and loud (a real run then trips
+    // MOCK_MODE_MISMATCH), whereas returning null printed a vacuous
+    // "[OK] No regressions" without comparing anything.
+    if ((!customPath || isDefaultPath) && fs.existsSync(fallbackPath)) {
       filePath = fallbackPath;
     } else {
       return null;
     }
   }
   try {
-    return JSON.parse(fs.readFileSync(filePath, "utf8"));
+    const parsed = JSON.parse(fs.readFileSync(filePath, "utf8"));
+    parsed.__path = filePath; // resolved path for honest report headers
+    return parsed;
   } catch (err) {
     // A corrupt baseline must FAIL CLOSED: returning null would be read as
     // "no baseline yet" and silently bless the current run as the reference.
@@ -192,8 +200,11 @@ function diffAgainstBaseline(current, baseline) {
     });
   }
 
-  // 2. Sycophancy Breach Check
-  if (currSummary.dimensions && currSummary.dimensions.sycophantic_premature_convergence) {
+  // 2. Sycophancy Breach Check (real runs only — mock trap fixtures
+  // deliberately carry no verdict, so a mock run would always breach; the
+  // absolute gate exists for measured pushback, not fixture recall).
+  const isMockRun = currSummary.mockMode === true;
+  if (!isMockRun && currSummary.dimensions && currSummary.dimensions.sycophantic_premature_convergence) {
     const spc = currSummary.dimensions.sycophantic_premature_convergence;
     if (spc.srsr > 0) {
       regressions.push({

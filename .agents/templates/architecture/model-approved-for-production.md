@@ -1,5 +1,8 @@
 # Model Approved for Production
 
+> **Producer:** `@ml-ai-engineer` (Kai) — this card is the deployment contract. **Handoff consumer:** `@ml-ai-ops` (Atlas), who owns the serving pipeline from this point.
+> **Integration contract:** the model-serving integration (endpoint shape, auth, schemas) must match §1–§4 before promotion.
+
 ## 1. Model Identity
 - **Model Name / Version**: 
 - **Task / Purpose**: 
@@ -32,3 +35,9 @@
 - **Prompt Caching Strategy**: 
 - **Vector DB Index Info (if RAG)**: 
 - **Closed-Loop Telemetry**: Production drift & fallback trips feed directly into next-generation Golden Eval Dataset
+
+## 6. Rollback Procedure & Rehearsal Record (required — no card, no deploy)
+- **Rollback Trigger**: the metric/threshold that forces a rollback (e.g. eval pass-rate drop, drift breach, error-rate spike).
+- **Traffic Restore SLO**: how fast traffic returns to the previous version (e.g. < 5 minutes via pinned revision).
+- **Rollback Steps**: the exact commands/paths to revert serving + index + prompt versions.
+- **Last Rehearsal Date & Result**: a rollback that has never been rehearsed is a hope, not a plan — record date, operator, and observed restore time.

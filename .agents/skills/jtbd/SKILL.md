@@ -11,7 +11,7 @@ metadata:
 Formulates JTBD statements using the "When/I want to/so I can" template and maps HMW opportunity questions for each job. Outputs to `artifacts/output/02-research/jtbd-hmw.md`.
 
 ## Persona delegation
-This skill delegates to `@product-manager`. The pm facilitates JTBD formulation and HMW mapping. The skill provides the template; `@product-manager` provides the product thinking and prioritization.
+This skill delegates to `@user-researcher`. The user-researcher facilitates JTBD formulation and HMW mapping from human-gathered research data. The skill provides the template; `@user-researcher` provides the synthesis — and when no human data exists, the outputs are labeled hypotheses to validate (never observed findings).
 
 ## When to use
 - "What job is the user hiring this product for?"
@@ -72,4 +72,4 @@ Write `artifacts/output/02-research/jtbd-hmw.md`:
 
 ## State machine integration
 At start: Run `node .agents/scripts/orchestrator_state.js status`
-At end: Run `node .agents/scripts/orchestrator_state.js complete --agent product-manager --artifact 02-research/jtbd-hmw.md`
+At end: Run `node .agents/scripts/orchestrator_state.js complete --agent user-researcher --artifact 02-research/jtbd-hmw.md`

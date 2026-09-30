@@ -246,7 +246,7 @@ When authoring Product Requirements Documents (PRDs), Epics, Features, and User 
 
 ## DNA 8: Owner-Readable Results (Plain-Language Output Contract)
 
-Every result an owner consumes — roundtable synthesis, review verdict, gate report, execution summary, decision ask — is governed here. DNA 7 demystifies *words*; DNA 8 governs *structure*: an output can use only plain words and still be unreadable if it dumps audit data instead of telling the story. The plain-language method is applied implicitly and never labeled (DNA 7 §3).
+Every result an owner consumes — roundtable synthesis, review verdict, gate report, execution summary, decision ask, **and every ordinary chat reply to the owner** — is governed here. This is not limited to formal deliverables: a normal conversational answer is an owner-facing result and must be just as plain. DNA 7 demystifies *words*; DNA 8 governs *structure*: an output can use only plain words and still be unreadable if it dumps audit data instead of telling the story. The plain-language method is applied implicitly and never labeled (DNA 7 §3).
 
 ### Rules — unconditional for owner-facing results
 1. **One plain sentence first.** Open with what happened in everyday English. No verdict tokens, claim IDs, class letters, amendment codes, commit hashes, or file paths in that first sentence. "Four reviewers checked the work; the work is solid, but three paperwork errors and two bugs need your decisions" passes. "C1 CONFIRMED, C2 PARTIAL, class-B pending" fails.
@@ -255,6 +255,7 @@ Every result an owner consumes — roundtable synthesis, review verdict, gate re
 4. **Machine markers get a human translation.** Gate lines (`[VERDICT: ...]`, `[SYNTHESIS: ...]`, class letters, amendment codes) exist for scorers and records; immediately after each block of them, one plain sentence says the same thing for a human.
 5. **Link, don't cite.** Owner-facing paths are links into the file (plus the section name); bulky evidence lives behind one link (transcript, report, diff) — not pasted into the reply.
 6. **Comprehension test before sending.** Read the draft with the repository closed. If a decision, finding, or outcome needs a file open to decode it, it is not done — rewrite. Brevity that encodes ideas as IDs is jargon wearing a short coat.
+7. **Plain by default in chat — the owner never has to ask.** Being deep in technical work is not an excuse to slip into engine shorthand (verdict tokens, `AC-*` codes, agent IDs, `FinOps`, `SBOM`, phase numbers) in conversation. The first time an unavoidable technical term appears, translate it in-line in the same sentence. If the owner has to request plain language, the default has already failed — treat that request as a defect signal, not a new instruction.
 
 ### Why DNA, not guideline
 A result the owner cannot act on stalls the pipeline just as hard as a broken gate. Every roundtable and eval in this engine is optimized for machine-parseable verdicts; without this DNA the human layer silently rots while the scorer stays green.

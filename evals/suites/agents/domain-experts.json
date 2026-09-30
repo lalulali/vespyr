@@ -26,7 +26,8 @@
         "Pain Points",
         "Jobs to be Done",
         "Behaviors",
-        "Goals"
+        "Goals",
+        "hypothes|unvalidated|limitation|assumption|confidence"
       ],
       "minTokens": 50
     },
@@ -69,6 +70,160 @@
         "properties",
         "funnel",
         "conversion_rate"
+      ],
+      "minTokens": 50
+    },
+    {
+      "id": "AGENT-RESEARCHER-02",
+      "agent": "researcher",
+      "name": "Willingness-to-Pay & Pricing Method",
+      "dimension": "research_grounding",
+      "prompt": "Design the pricing research for a $20/mo B2B tool: which method, what questions, what sample, and how you would report it.",
+      "assertContains": [
+        "van westendorp|gabor|conjoint|willingness",
+        "sample|participants|n=",
+        "estimate|band|range",
+        "\\[1\\]|source"
+      ],
+      "assertNotContains": [],
+      "minTokens": 60
+    },
+    {
+      "id": "AGENT-RESEARCHER-03",
+      "agent": "researcher",
+      "name": "Motion Market & Library Landscape",
+      "dimension": "research_grounding",
+      "prompt": "Research motion library options for a React app: landscape, trade-offs, and evidence.",
+      "assertContains": [
+        "motion|animation|transition",
+        "library|framer|gsap|spring",
+        "trade-?off|bundle|performance",
+        "\\[1\\]|source|benchmark"
+      ],
+      "assertNotContains": [],
+      "minTokens": 60
+    },
+    {
+      "id": "AGENT-USERRESEARCHER-02",
+      "agent": "user-researcher",
+      "name": "Interview Guide Preparation (Human-Run)",
+      "dimension": "research_grounding",
+      "prompt": "Prepare a 30-minute interview guide for freelance designers about invoicing tools. The human will run the sessions.",
+      "assertContains": [
+        "screen|recruit|participant",
+        "behavior|last time|tell me about",
+        "non-leading|open-ended|avoid leading",
+        "hypothes|assumption"
+      ],
+      "assertNotContains": [],
+      "minTokens": 60
+    },
+    {
+      "id": "AGENT-UXRESEARCHER-02",
+      "agent": "ux-researcher",
+      "name": "Usability Test Kit Preparation",
+      "dimension": "prd_completeness",
+      "prompt": "Write 5 usability test tasks in Given/When/Then form with success criteria, a screener, and think-aloud instructions for the human to run.",
+      "assertContains": [
+        "given|task",
+        "success|complete",
+        "participant|recruit",
+        "think-?aloud|moderat|observe"
+      ],
+      "assertNotContains": [],
+      "minTokens": 60
+    },
+    {
+      "id": "AGENT-UXRESEARCHER-03",
+      "agent": "ux-researcher",
+      "name": "Heuristic Evaluation Findings",
+      "dimension": "a11y_design",
+      "prompt": "Evaluate this checkout flow description against Nielsen heuristics; list the top findings with severity.",
+      "assertContains": [
+        "heuristic",
+        "severity|major|minor|catastrophe",
+        "finding|issue|recommend",
+        "WCAG|contrast|keyboard|focus|label"
+      ],
+      "assertNotContains": [],
+      "minTokens": 50
+    },
+    {
+      "id": "AGENT-SHIFU-02",
+      "agent": "shifu",
+      "name": "Assessment & Exercise Design",
+      "dimension": "prd_completeness",
+      "prompt": "Create a 5-question assessment with an exercise for a lesson on HTTP caching.",
+      "assertContains": [
+        "question|quiz|assessment",
+        "answer|rubric|expected",
+        "exercise|practice|task",
+        "objective|learning"
+      ],
+      "assertNotContains": [],
+      "minTokens": 50
+    },
+    {
+      "id": "AGENT-DATAANALYST-02",
+      "agent": "data-analyst",
+      "name": "Synthetic Dataset Generation & Validation",
+      "dimension": "code_quality",
+      "prompt": "Generate a synthetic telemetry dataset (100 events) for a checkout funnel and validate it.",
+      "assertContains": [
+        "event",
+        "synthetic|mock",
+        "schema|field|type",
+        "valid|assert|test|check"
+      ],
+      "assertNotContains": [],
+      "minTokens": 50
+    },
+    {
+      "id": "AGENT-DATAANALYST-03",
+      "agent": "data-analyst",
+      "name": "A/B Experiment Design",
+      "dimension": "prd_completeness",
+      "prompt": "Design an A/B experiment for the new onboarding flow: objective, hypothesis, primary and guardrail metrics, sample size, and success criteria.",
+      "assertContains": [
+        "hypothes",
+        "primary metric|metric",
+        "sample|power|significan",
+        "guardrail|risk"
+      ],
+      "assertNotContains": [],
+      "minTokens": 50
+    },
+    {
+      "id": "AGENT-DATAANALYST-04",
+      "agent": "data-analyst",
+      "name": "Dashboard & Visualization Spec",
+      "dimension": "prd_completeness",
+      "prompt": "Spec the analytics dashboard for the checkout funnel: audience, metrics, chart choices, and empty/loading/error states.",
+      "assertContains": [
+        "dashboard|chart|visual",
+        "metric|kpi|funnel",
+        "empty|loading|error",
+        "audience|decision"
+      ],
+      "assertNotContains": [],
+      "minTokens": 50
+    },
+    {
+      "id": "AGENT-USERRESEARCHER-03",
+      "agent": "user-researcher",
+      "name": "No-Data Refusal & Hypothesis Labeling",
+      "dimension": "research_grounding",
+      "prompt": "Build personas for our fitness app users. We have no interview data or session notes yet.",
+      "assertContains": [
+        "hypothes|assumption|unvalidated|to validate",
+        "no (human|user) data|without data|no sessions|human-run",
+        "label|marked|flag",
+        "next step|run|interview"
+      ],
+      "assertNotContains": [
+        "users said",
+        "participants reported",
+        "our users always"
       ],
       "minTokens": 50
     }

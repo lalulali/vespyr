@@ -46,3 +46,5 @@ Synthesize the PRD through the **same interactive loop the traditional flow uses
 - Ledger missing or containing `confirmed` rows with unresolvable anchors
 
 > **Tracker:** `node .agents/scripts/step_tracker.js complete --skill design-reverse --step 3`
+
+**Owner:** `@product-manager` (Sarah) synthesizes the final PRD from requirements and user stories.

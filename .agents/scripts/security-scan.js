@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* Vulnerability scanning & supply-chain audit capability — owned by @security-engineer. */
 /**
  * security-scan.js — Vespyr content-integrity scanner (02f F1.47)
  *

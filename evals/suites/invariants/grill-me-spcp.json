@@ -305,5 +305,6 @@
         "\\[(?:NO-GO|KILL)\\]"
       ]
     }
-  ]
+  ],
+  "note": "Adversarial corpus maintained by @qa-engineer (red-team dataset)."
 }

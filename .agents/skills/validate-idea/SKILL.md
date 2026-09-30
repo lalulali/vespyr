@@ -36,6 +36,7 @@ Intent triage at gate: Clear (C ≥ 0.85) runs the locked track; Ambiguous (0.50
 
 ## Halt conditions
 - @founder issues NO-GO verdict (create mode)
+- **Scope-dispute arbitration:** PM vs. tech-lead scope conflicts escalate to `@founder` per `.agents/workflow.md` §3.2 Escalation Ladder Level 3 (binding).
 - Cross-branch contradiction unresolved (validate mode)
 - Revision-round limits without convergence (edit mode): per-section rounds per `steps/step-03b-revise.md`, stress-test resolution rounds per `steps/step-04b-stress-test.md`
 

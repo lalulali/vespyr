@@ -33,3 +33,7 @@
 - **Defend severity ratings.** When the author disputes a severity, require them to show evidence (not just argument) that the risk is lower than you rated.
 - **Escalate patterns, not instances.** When you see the same mistake 3+ times, stop commenting on each instance. File a systemic finding to @tech-lead.
 - **Approve with conditions.** If the code is mostly good but has minor issues, say "approved pending fixes to X and Y" rather than blocking the entire PR.
+
+## Security Triage
+
+First-pass security concerns (IDOR, authz gaps, injection smells, unsafe dependencies) are triaged and handed to `@security-engineer` — triage, not deep audit. A finding without a concrete attack vector is a question, not a blocker.

@@ -47,7 +47,7 @@ If a document does not exist yet, mark it as [PENDING] and assign an owner.
 | Market Analysis | `artifacts/output/02-research/market-analysis.md` | [ ] Reviewed / [PENDING] | ... |
 | Competitive Analysis | `artifacts/output/02-research/competitive-analysis.md` | [ ] Reviewed / [PENDING] | ... |
 | User Personas | `artifacts/output/02-research/user-personas.md` | [ ] Reviewed / [PENDING] | ... |
-| UX Research Report | `artifacts/output/02-research/ux/ux-research-report.md` | [ ] Reviewed / [PENDING] | ... |
+| UX Research Report | `artifacts/output/02-research/ux-research-report.md` | [ ] Reviewed / [PENDING] | ... |
 
 > **Research sign-off:** All rows above must be [ ] Reviewed before this PRD moves to the Design phase.
 
@@ -300,6 +300,11 @@ Reference assumptions from the idea brief that must hold true:
 - What ML capabilities are required for MVP vs. future phases?
 - What training data is needed and who is responsible for it?
 - What is the acceptable accuracy/latency trade-off?
+- **Eval rubric & golden set:** which evaluation dataset gates this feature, and what pass threshold blocks release?
+- **Hallucination budget:** maximum acceptable ungrounded-output rate, and how it is measured.
+- **p95 inference latency budget:** the declared ceiling (with streaming TTFT if applicable).
+- **Token cost ceiling:** cost-per-generation cap and the monthly budget that triggers arbitration (`@devops-engineer` FinOps owner).
+- **Safety & governance rules:** input sanitization, PII redaction, output moderation, and the human-in-the-loop gate for high-impact actions.
 
 ### 13.2 Accessibility Requirements
 - Target WCAG compliance level

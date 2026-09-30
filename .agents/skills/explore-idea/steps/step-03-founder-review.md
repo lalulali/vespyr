@@ -29,7 +29,7 @@ Read:
 
 `@founder` evaluates:
 - Does the market validate the opportunity? (Check GO/NO-GO in market analysis)
-- Does user research confirm the target persona and pain points?
+- Does user research confirm the target persona and pain points? Inputs labeled `HYPOTHESIS-ONLY (no human data)` count as `[PARTIAL]` evidence — they can inform the decision but cannot confirm persona fit; require a human-run session before treating it as validated.
 - Does competitive analysis reveal viable positioning?
 - Cross-reference against the validation brief's premises — do premises still hold after research?
 

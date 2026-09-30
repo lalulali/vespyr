@@ -30,6 +30,8 @@ Invoke `@user-researcher` to validate user needs:
 - User personas and journeys
 - "How might we" statements
 
+**Evidence gate (non-negotiable):** this step has no human-run sessions. If the human has not supplied interview notes, transcripts, or survey data, every persona, quote, and "user need" MUST be labeled `HYPOTHESIS-ONLY (no human data)` — never presented as an observed finding, and never given an attributed quote. The founder gate (`step-03`) treats labeled hypotheses as `[PARTIAL]`, not confirmation.
+
 **Context adaptation:**
 - **Startup mode:** Full persona development, jobs-to-be-done, user journeys
 - **Company mode:** Stakeholder interviews, internal workflow analysis, team pain points

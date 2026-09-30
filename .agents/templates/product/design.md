@@ -25,6 +25,14 @@ Users often don't know what they want — or know it but can't write it down. Iv
 - **Color mode:** Default is Both — ship light AND dark token sets. Single-mode only with a written reason in Hard constraints.
 - **Hard constraints:** {existing brand hex that must appear, font license limits, logo clear-space rules}
 
+## Voice & tone
+
+- **Voice (3 adjectives max):** {same three as Brand inputs — the product's voice never changes per screen}
+- **Tone shifts by state:** calm in success, neutral and actionable in errors (never blame the user), warm-but-brief in empty states, explicit about consequences for destructive actions.
+- **AI uncertainty phrasing:** low-confidence output is hedged and labeled, never asserted as fact.
+- **AI fallback phrasing:** when inference fails, the message names the deterministic fallback and the next step.
+- **Citation/groundedness labels:** generated content carries its source label or an explicit "no source found" marker.
+
 ## Product context (what we're building — pick ONE)
 
 Context drives constraints; style drives tokens. A dense ops tool and a launch site can share a style but never share density, motion budget, or tone. Pick the context first — it narrows the style menu to its suggestions, but the final style call stays creative, not mechanical.

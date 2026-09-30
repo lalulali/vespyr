@@ -19,16 +19,17 @@
     {
       "id": "AGENT-PERF-01",
       "agent": "performance-engineer",
-      "name": "Database Query Bottleneck & p95 Latency Profiling",
+      "name": "Hot-Path Profiling & Optimization (engine telemetry)",
       "dimension": "code_quality",
-      "prompt": "Analyze slow Postgres query log and propose index and caching strategy.",
+      "prompt": "Profile the engine's agent hot paths from telemetry: top token consumers, slowest agents, and the optimization you would apply. Include the code change and how you would verify it.",
       "assertContains": [
-        "EXPLAIN",
-        "Index",
-        "p95",
-        "Cache"
+        "token|cost",
+        "hot.?path|slowest|duration",
+        "const|function|code",
+        "test|verify|measur"
       ],
-      "minTokens": 50
+      "minTokens": 50,
+      "assertNotContains": []
     },
     {
       "id": "AGENT-MLAI-01",
@@ -85,6 +86,159 @@
         "schemas:"
       ],
       "minTokens": 50
+    },
+    {
+      "id": "AGENT-SECURITY-02",
+      "agent": "security-engineer",
+      "name": "AI Application Security Audit (Prompt Injection)",
+      "dimension": "code_quality",
+      "prompt": "Audit this RAG chatbot design: user documents are embedded in the index and the agent has a send_email tool. List the attack classes and required controls.",
+      "assertContains": [
+        "injection",
+        "tool|exfiltrat|least privilege",
+        "RAG|retriev|document",
+        "finding|control|mitigat"
+      ],
+      "assertNotContains": [],
+      "minTokens": 60
+    },
+    {
+      "id": "AGENT-SECURITY-03",
+      "agent": "security-engineer",
+      "name": "Dependency & Supply-Chain Review",
+      "dimension": "code_quality",
+      "prompt": "Review a PR that adds expresss@4.18.2 (note the spelling) with a postinstall script. Give the verdict and required steps.",
+      "assertContains": [
+        "typosquat|confusion|look-?alike|spelling",
+        "postinstall|install script",
+        "lockfile|integrity|audit",
+        "critical|block|finding"
+      ],
+      "assertNotContains": [],
+      "minTokens": 50
+    },
+    {
+      "id": "AGENT-SECURITY-04",
+      "agent": "security-engineer",
+      "name": "Cryptography & Session Review",
+      "dimension": "code_quality",
+      "prompt": "Review this auth snippet: JWT verified with the public key, no expiry check, session id not rotated on login. List findings.",
+      "assertContains": [
+        "alg|algorithm|jwt",
+        "expir|nbf",
+        "rotat|fixation",
+        "finding|severity|fix"
+      ],
+      "assertNotContains": [],
+      "minTokens": 50
+    },
+    {
+      "id": "AGENT-PERF-02",
+      "agent": "performance-engineer",
+      "name": "Optimization Recommendation with Measured Evidence",
+      "dimension": "code_quality",
+      "prompt": "A hot path shows 40% of tokens in one agent step. Propose the optimization with the code change, a before/after measurement plan, and a rollback.",
+      "assertContains": [
+        "before|after|baseline",
+        "measur|benchmark|metric",
+        "rollback|revert",
+        "const|function|code"
+      ],
+      "assertNotContains": [],
+      "minTokens": 60
+    },
+    {
+      "id": "AGENT-MLAI-02",
+      "agent": "ml-ai-engineer",
+      "name": "Eval Harness & Golden Set Design",
+      "dimension": "code_quality",
+      "prompt": "Design the eval harness for a support-ticket classifier: golden set, metrics, pass thresholds, and drift checks.",
+      "assertContains": [
+        "golden|eval set|dataset",
+        "precision|recall|f1|accuracy",
+        "threshold|baseline",
+        "drift|regression"
+      ],
+      "assertNotContains": [],
+      "minTokens": 60
+    },
+    {
+      "id": "AGENT-MLAI-03",
+      "agent": "ml-ai-engineer",
+      "name": "Fine-Tuning Decision & Distillation",
+      "dimension": "code_quality",
+      "prompt": "Decide whether to fine-tune or prompt-engineer for our ticket classifier; include the decision criteria and eval plan.",
+      "assertContains": [
+        "fine-?tun|distill",
+        "prompt|few-?shot|baseline",
+        "eval|metric|threshold",
+        "cost|latency|data"
+      ],
+      "assertNotContains": [],
+      "minTokens": 60
+    },
+    {
+      "id": "AGENT-MLAIOPS-02",
+      "agent": "ml-ai-ops",
+      "name": "Rollback Rehearsal & Shadow Promotion",
+      "dimension": "code_quality",
+      "prompt": "Write the promotion plan for a new model version: shadow mode, promotion gates, and a rehearsed rollback.",
+      "assertContains": [
+        "shadow",
+        "rollback",
+        "gate|threshold|criteria",
+        "rehears|drill|test"
+      ],
+      "assertNotContains": [],
+      "minTokens": 60
+    },
+    {
+      "id": "AGENT-DEVOPS-02",
+      "agent": "devops-engineer",
+      "name": "FinOps Budget Alerts & Rightsizing",
+      "dimension": "code_quality",
+      "prompt": "Set up cloud cost monitoring: allocation tags, budget alerts, and a rightsizing recommendation process.",
+      "assertContains": [
+        "budget|alert",
+        "tag|allocation|cost",
+        "rightsiz|utilization|downsize",
+        "dashboard|monitor|report"
+      ],
+      "assertNotContains": [],
+      "minTokens": 50
+    },
+    {
+      "id": "AGENT-DEVOPS-03",
+      "agent": "devops-engineer",
+      "name": "Incident Response & DORA Signals",
+      "dimension": "code_quality",
+      "prompt": "A deploy caused a 5xx spike. Write the incident response plan and the DORA signals you would report afterward.",
+      "assertContains": [
+        "rollback|roll back|revert",
+        "timeline|command|responder",
+        "DORA|MTTR|change failure|deploy",
+        "lesson|post-?incident|retro"
+      ],
+      "assertNotContains": [],
+      "minTokens": 50
+    },
+    {
+      "id": "AGENT-TECHWRITER-02",
+      "agent": "technical-writer",
+      "name": "How-To Guide with Verification (Diátaxis)",
+      "dimension": "code_quality",
+      "prompt": "Write a how-to guide for handling API rate limits in our SDK (Diátaxis mode: how-to), with code and a verification step.",
+      "assertContains": [
+        "how-?to|task",
+        "rate limit|429|retry",
+        "```|code|snippet",
+        "verify|test|check"
+      ],
+      "assertNotContains": [
+        "this tutorial will teach you",
+        "complete list of all parameters"
+      ],
+      "minTokens": 60
     }
   ]
 }

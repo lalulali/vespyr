@@ -67,3 +67,5 @@ Labeled attack fixtures for `security-scan.js`. Every rule has >=1 positive + >=
 - 32 entries on disk (13 positive files + 1 escape symlink + 13 negative files
   + 1 inside symlink + README + 3 baselines; `.DS_Store` removed P2 — was
   special-cased, never a fixture). "36 files" in older docs was stale.
+
+**Maintained by:** `@security-engineer` (Victor) — corpus updates require a human-reviewed commit.

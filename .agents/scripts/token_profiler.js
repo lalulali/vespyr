@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /**
- * Token Profiler — Measures Agent Prompt Sizes and Phase Context Load
+ * Token Profiler
+ * Profiling capability — owned by @performance-engineer. — Measures Agent Prompt Sizes and Phase Context Load
  *
  * Counts words, lines, and estimated tokens for each agent prompt,
  * template, and script. Estimates total context load per pipeline phase.

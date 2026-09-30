@@ -26,6 +26,36 @@
         "END MACHINE STATE"
       ],
       "minTokens": 30
+    },
+    {
+      "id": "AGENT-MEMORY-03",
+      "agent": "memory-controller",
+      "name": "Corrupted Memory Recovery",
+      "dimension": "memory_adherence",
+      "prompt": "project-context.md contains merge-conflict markers. Describe the recovery procedure.",
+      "assertContains": [
+        "quarantine|backup|copy",
+        "merge|conflict|<<<<<<<",
+        "restore|reconstruct|dedupe",
+        "preserve|do not.*overwrite|never"
+      ],
+      "assertNotContains": [],
+      "minTokens": 40
+    },
+    {
+      "id": "AGENT-MEMORY-04",
+      "agent": "memory-controller",
+      "name": "Owner Preference Update (set-preference)",
+      "dimension": "memory_adherence",
+      "prompt": "The owner asks to set a standing preference: replies in Indonesian. Show how it is stored and surfaced.",
+      "assertContains": [
+        "OWNER PREFERENCES|owner preference",
+        "project-context",
+        "Tier 1|session start|load",
+        "set-preference|sanctioned"
+      ],
+      "assertNotContains": [],
+      "minTokens": 40
     }
   ]
 }

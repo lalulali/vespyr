@@ -1,4 +1,6 @@
-you# Architecture Decision Record (ADR) Template
+you# Architecture Decision Record
+
+> ADR writing template — owned by `@architect` (Vera). (ADR) Template
 
 > **Used by:** Vera (@architect)
 > **Feeds into:** Rex (@developer), Grant (@tech-lead), Victor (@security-engineer), Axel (@devops-engineer), Nina (@qa-engineer)
@@ -87,10 +89,12 @@ What did we give up? Every decision has downsides.
 | e.g., Vendor lock-in for managed service | Medium | Data exportable via standard SQL; can migrate to self-hosted if needed |
 | ... | ... | ... |
 
-### 2.4 ML Considerations (if applicable)
-- How does this decision affect ML model training or inference?
-- Does this create data pipeline requirements?
-- Impact on model serving latency or feature availability?
+### 2.4 AI/ML Considerations (required when the feature is AI-native)
+- **Model & provider selection** — which model(s), why, and the replacement path if deprecated.
+- **Retrieval/vector policy (if RAG)** — store choice, embedding model + pinning policy, index refresh cadence.
+- **Deterministic fallback** — what the system does when inference fails or confidence is below threshold (never fail open to raw errors).
+- **Cost projection** — expected token/inference cost at 1x, 10x, and 100x current volume, with the budget ceiling.
+- **Data & access boundary** — what data reaches the model, PII handling/redaction, and model-access controls.
 
 ---
 

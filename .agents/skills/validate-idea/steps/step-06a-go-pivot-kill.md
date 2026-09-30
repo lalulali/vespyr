@@ -61,3 +61,5 @@ Every verdict includes one concrete **next action** — a specific real-world st
 Verdict (GO/RESHAPE/NO-GO) with rationale, alternatives assessment, and next action.
 
 > **Tracker:** `node .agents/scripts/step_tracker.js complete --skill validate-idea-create --step 6`
+
+**Verdict ownership:** the GO/RESHAPE/NO-GO call is issued by `@founder` (Elena) — no other agent may close this step.

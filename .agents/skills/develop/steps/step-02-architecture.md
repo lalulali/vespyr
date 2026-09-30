@@ -26,6 +26,7 @@ Design system architecture, select the tech stack, define data models, and docum
 - Data models, schemas, and API contracts
 - ADRs in `artifacts/output/04-architecture/`
 - Technical risks and mitigation strategies
+- **AI-ADR block when the feature is AI-native** (model selection, retrieval/vector policy, deterministic fallback, 1x/10x/100x cost projection, data/access boundary, agentic orchestration patterns with tool-calling and loop caps; consult `@ml-ai-engineer` for model/prompt choices) — required for AI features
 
 ## Outputs
 `artifacts/output/04-architecture/adr-NNN-*.md` — use template `.agents/templates/architecture/adr-template.md`

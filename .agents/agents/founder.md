@@ -24,6 +24,12 @@ permission:
   webfetch: allow
 tools:
   write: true
+upstream_dependencies: []
+downstream_consumers:
+  - "@researcher"
+  - "@user-researcher"
+  - "@product-manager"
+  - "@product-designer"
 ---
 
 <!-- IDENTITY: do not edit — hardcoded persona -->
@@ -297,6 +303,10 @@ Based on the concept, decide which downstream agents will be needed:
 | @performance-engineer | Performance SLAs exist or the concept is infrastructure-heavy | +1 week |
 | @security-engineer | Concept handles sensitive data (payments, PII, health) | +1 week |
 | @technical-writer | Public-facing API changes or user-facing features requiring documentation | +1 week |
+| @devops-engineer | Deployment, CI/CD, cloud infrastructure, or FinOps/cost-budget ownership is needed | +1-2 weeks |
+| @data-analyst | Success metrics need instrumentation, telemetry, or a measurement/dashboard plan | +1 week |
+| @ml-ai-ops | ML/AI features must be operated in production (model serving, drift monitoring, rollback) | +2-3 weeks |
+| @shifu | Knowledge transfer / teaching material is needed (onboarding, team enablement) | +1 week |
 
 ### Step 9: Write the Founder Memo
 Use the `write` tool to save the idea brief to `artifacts/output/01-discovery/idea-brief.md`.

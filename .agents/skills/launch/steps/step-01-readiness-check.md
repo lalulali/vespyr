@@ -17,7 +17,7 @@ Verify all pre-launch gates have passed. Any red item blocks launch.
 **Checklist — every item must pass:**
 - All acceptance criteria from user stories are met
 - Code review passed with no blocking issues
-- QA validated all acceptance criteria pass
+- QA validated all acceptance criteria pass (`@qa-engineer`)
 - PM signed off on feature completeness
 - UTTERLY SATISFIED team gate is complete: every active, relevant agent is `SATISFIED` with evidence; `NOT ACTIVATED` rows have a specific out-of-scope reason
 - Security review completed (if applicable — see `@security-engineer`)
@@ -26,6 +26,8 @@ Verify all pre-launch gates have passed. Any red item blocks launch.
 - Migration scripts tested and rollback plan exists
 - Feature flags configured (if rolling out incrementally)
 - Monitoring and alerting configured (`@devops-engineer`)
+- Cloud/token cost within budget — over-budget launches need `@devops-engineer` (FinOps owner) arbitration (if applicable)
+- AI features: model card present at `artifacts/output/04-architecture/model-approved-for-production.md` with shadow evidence, drift thresholds, and a rehearsed rollback (`@ml-ai-ops` serves it; pipeline notes live in `artifacts/output/ml-ai-ops/`)
 
 **Any red item blocks launch.** Document yellow items as known risks with mitigation plans.
 

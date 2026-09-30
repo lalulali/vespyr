@@ -167,6 +167,10 @@ Blockers: 0
 ## [IDENTITY]
 User Nickname: ${userNickname}
 
+## [OWNER PREFERENCES]
+Standing preferences the owner has set for how agents work with them. Agents read these at session start and honor them without being reminded. Add or edit lines freely.
+- **Communication:** Reply in plain, everyday language. Translate any unavoidable technical term (verdict tokens, AC codes, agent IDs, FinOps, SBOM, phase numbers) in-line the first time it appears. The owner should never have to ask for plain language — if they do, the default has failed (DNA 8).
+
 <!-- BEGIN MACHINE STATE -->
 ## [RUNTIME STATE]
 - Stack: ${stack || "None"}

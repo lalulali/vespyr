@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* History compaction capability — owned by @memory-controller. */
 /**
  * Archive Manager — Deterministic, Safe JSON Operations for Vespyr Memory Archive
  *

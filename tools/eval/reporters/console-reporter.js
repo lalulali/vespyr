@@ -161,12 +161,12 @@ function renderConsoleReport(runResults, diffReport = null) {
   if (diffReport) {
     lines.push("--- Baseline Regression Diff ---");
     if (diffReport.hasRegression) {
-      lines.push("  [!] REGRESSION DETECTED against baseline:");
+      lines.push(`  [!] REGRESSION DETECTED against ${diffReport.baselinePath || "baseline.json"}:`);
       for (const reg of diffReport.regressions) {
         lines.push(`    * [${reg.type || "UNKNOWN"}] ${reg.message}`);
       }
     } else {
-      lines.push("  [OK] No regressions detected against baseline.json");
+      lines.push(`  [OK] No regressions detected against ${diffReport.baselinePath || "baseline.json"}`);
     }
     for (const imp of diffReport.improvements || []) {
       lines.push(`    + [${imp.type || "IMPROVEMENT"}] ${imp.message}`);

@@ -49,7 +49,7 @@ Gate logic:
 - `@memory-controller load developer [implement {task name}]` — seed context before coding
 - `@memory-controller preflight developer [implement {task name}]` — validate high-risk domains
 - Move task from `### To Do` to `### In Progress` in `artifacts/output/05-planning/kanban.md` upon picking up work
-- Load and digest `product-spec.md` and `user-stories.md` before coding
+- Load and digest `product-spec.md`, `user-stories.md`, and `measurement-plan.md` (when it exists) before coding
 - Write code + tests conforming 100% to verified specs
 - Run lints and unit tests locally
 - Commit to feature branch

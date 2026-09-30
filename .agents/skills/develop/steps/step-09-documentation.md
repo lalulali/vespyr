@@ -17,6 +17,7 @@ Ensure the feature is documented for both developers and end users. APIs, config
 
 ## Agent invocation
 `@technical-writer`:
+- Classify every document into exactly ONE Diátaxis mode — **tutorial** (learning), **how-to** (a task), **reference** (the facts), **explanation** (understanding). Never mix modes in one page; split instead.
 - Document APIs, configs, and interfaces
 - Update README and usage examples
 - Write migration guides if needed

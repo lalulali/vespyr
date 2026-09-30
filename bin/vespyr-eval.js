@@ -251,9 +251,11 @@ async function main() {
       }
       baseline = recordBaseline(runResults, options.baseline);
       diffReport = diffAgainstBaseline(runResults, baseline);
+      if (diffReport) diffReport.baselinePath = path.relative(process.cwd(), options.baseline);
       console.log(`Successfully recorded new baseline to ${options.baseline}`);
     } else {
       diffReport = diffAgainstBaseline(runResults, baseline);
+      if (diffReport) diffReport.baselinePath = path.relative(process.cwd(), (baseline && baseline.__path) || options.baseline);
     }
 
     const reportText = renderReport(options, runResults, diffReport);

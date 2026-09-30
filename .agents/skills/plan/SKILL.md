@@ -107,7 +107,7 @@ If no architecture artifacts exist, flag that ADRs are needed. If ADRs exist, ve
 
 ### Step 4: Break down tasks
 
-For each feature: break into 1-4h tasks, define dependencies, estimate effort, identify risks, mark parallelizable tasks.
+For each feature: break into 1-4h tasks, define dependencies, estimate effort (estimation is the tech-lead deliverable), identify risks, mark parallelizable tasks.
 
 ### Step 5: Write execution plan
 

@@ -1,4 +1,5 @@
 name: Swarm Infrastructure Tests
+# Maintainer: @devops-engineer (Axel) — CI/CD ownership
 
 on:
   push:

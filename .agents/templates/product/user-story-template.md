@@ -106,11 +106,15 @@ Use this format for each modular functional capability under a Feature:
     *   **When** [user action]
     *   **Then** [expected graceful handling or state]
 
-##### ML Acceptance Criteria (AC-ML*) — if applicable
-*   [ ] **AC-ML-1:** [Short Summary of ML Threshold]
-    *   **Given** [prediction input or model state]
+##### AI Acceptance Criteria (AC-AI*) — if applicable
+*   [ ] **AC-AI-1:** [Short Summary of AI Quality Threshold]
+    *   **Given** [prediction/generation input or model state]
     *   **When** [model performs inference]
-    *   **Then** [inference latency, accuracy, or metric meets target]
+    *   **Then** [groundedness/hallucination budget, eval-dataset pass rate, p95 latency, and token cap all meet their declared targets]
+*   [ ] **AC-AI-2:** [Fallback & safety behavior]
+    *   **Given** [low-confidence output, inference failure, or blocked content]
+    *   **When** [the model cannot answer safely]
+    *   **Then** [deterministic fallback or human-in-the-loop gate engages, with the user-facing uncertainty/fallback copy from product-spec.md]
 
 #### UI / UX Notes (if applicable)
 *   **Product Spec Screen Reference:** `[Screen Name or Section inside product-spec.md]`

@@ -76,6 +76,9 @@ graph TD
 - **Empty state:** "{exact string}" — {tone note}
 - **Error state:** "{exact string}" — never blame the user, always name the recovery action
 - **Success state:** "{exact string}"
+- **AI low-confidence / uncertainty:** "{exact string}" — how ungrounded or low-confidence output is worded; never present a guess as fact (required when `@product-manager` declares AC-AI criteria)
+- **AI inference failed / fallback:** "{exact string}" — deterministic fallback message when the model is unavailable
+- **AI citation / groundedness label:** "{exact string}" — how sources or "no source found" are surfaced next to generated content
 
 ## Visual system
 

@@ -21,9 +21,11 @@ Gather hard numbers — kanban state, cycle times, code review cycles, bug count
 
 ## Telemetry surface (Phase 3 wiring)
 ```
-node .agents/scripts/telemetry_surface.js hot-paths
+node .agents/scripts/hot_path_analyzer.js
 ```
-Surfaces the top 3 most frequent agent paths, most common failure points, and highest-latency operations from the last 30 days of telemetry.
+Surfaces the top token consumers per phase, slowest agents, and optimization opportunities from telemetry.
+
+**Telemetry ownership:** `@performance-engineer` maintains the analyzer; `@product-manager` collects the retro numbers.
 
 ## Agent invocation
 `@product-manager` collects:

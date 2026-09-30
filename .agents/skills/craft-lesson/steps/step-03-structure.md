@@ -84,3 +84,5 @@ Present Knowledge Map summary to user and request approval before generating for
 > **Tracker:** `node .agents/scripts/step_tracker.js complete --skill craft-lesson --step structure`
 
 
+
+**Pedagogical structuring:** sequence modules by dependency and Bloom level; every module declares its prerequisite, and no module introduces a concept before its foundation is taught.

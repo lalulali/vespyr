@@ -27,7 +27,7 @@ Check for `artifacts/output/05-planning/kanban.md`.
 
 If it doesn't exist:
 - Recommend running the `develop` skill to initialize it during planning
-- Or create a minimal Kanban with columns: Backlog, In Progress, Review, Done
+- Or create a minimal Kanban with columns: Backlog, To Do, In Progress, Review / QA, Done
 
 ### Step 2: Display
 
@@ -43,7 +43,7 @@ Read and display the current Kanban board. Group by column:
 ### In Progress
 - [ ] Task C (assigned to @developer-1)
 
-### Review
+### Review / QA
 - [ ] Task D (awaiting @code-reviewer)
 
 ### Done

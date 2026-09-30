@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /**
  * Hot Path Analyzer — Identifies Most Expensive Pipeline Paths
+ * Profiling capability — owned by @performance-engineer.
  *
  * Reads telemetry events and identifies:
  * - Highest token consumers per phase

@@ -25,7 +25,7 @@ Confirm the architecture (or strategy specs if architecture was bypassed) suppor
 > **Tracker:** `node .agents/scripts/step_tracker.js begin --skill develop --step 3a`
 1. `@tech-lead` reads architecture artifacts and user stories.
 2. Cross-checks capabilities (CAP-N) against architectural support.
-3. Flags missing interfaces, structural risks, or feasibility issues.
+3. Flags missing interfaces, structural risks, or feasibility issues. **AI features: a missing or incomplete AI-ADR block (fallback, 1x/10x/100x cost, vector/embedding policy, data/access boundary) is a blocking finding** — arch review fails and loops back to `@architect`.
 4. Feeds findings back to `@architect` or `@product-manager` for resolution.
 
 ## Loop limit

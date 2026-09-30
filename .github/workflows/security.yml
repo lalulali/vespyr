@@ -1,4 +1,5 @@
 name: Security & Integrity Gate
+# Maintainer: @devops-engineer (Axel) — CI/CD ownership
 
 # 02f F1.54 / §10 — scanner + corpus + integrity suite as a CI gate.
 # No `pull_request_target` (injection vector, plan §10); fork PRs run with

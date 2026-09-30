@@ -20,6 +20,7 @@ For eval-bearing tracks (judge prompts, scoring rubrics, benchmark suites, harne
 - Steps 02a and 02b are parallelizable but both must complete before step 03.
 - Each step file is a contract. Read it fully before executing.
 - **Coverage sweep (02o):** every failure summary (feature and full-cycle) runs `node .agents/scripts/req_to_impl_check.js` and lists orphan ACs. An unreferenced AC is a defect, not a detail — cite the sweep in the test report and qa-signoff (honestly labeled prose; the phase-advance refusal mechanism is a separately filed defect).
+- **Metric validation (when `artifacts/output/03-strategy/measurement-plan.md` exists):** verify the declared success metrics are actually instrumented before certifying; an uninstrumented success metric is a coverage gap, not a pass.
 
 ## When to use
 - "Run the tests"
@@ -43,3 +44,7 @@ At end: run `node .agents/scripts/orchestrator_state.js complete --agent qa-engi
 - Test report produced at `artifacts/output/05-execution/quality/test-report.md`
 - Enriched acceptance criteria backported to user stories (step 03)
 - Minimum 3 newly discovered edge cases identified (step 01 verification)
+
+## Adversarial & Red-Team Data
+
+AI-feature tests exercise the adversarial and red-team corpora under `evals/suites/invariants/` — a green happy path with no adversarial case is an untested boundary.

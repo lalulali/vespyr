@@ -15,6 +15,8 @@ Bridges exploration and development. Takes validated ideas and turns them into a
 - `artifacts/output/02-research/market-analysis.md` (optional if entering via `shape-up` with all assumptions verified)
 - `artifacts/output/02-research/competitive-analysis.md` (optional if entering via `shape-up`)
 - `artifacts/output/02-research/user-personas.md` (optional if entering via `shape-up`)
+- `artifacts/output/02-research/journey-maps.md` (optional — user-researcher journey mapping, consumed by screen specs)
+- `artifacts/output/02-research/usability-test-kit.md` (optional — ux-researcher kit; results return via ux-research-report.md)
 
 If entering from `shape-up` with all assumptions verified, research artifacts are optional.
 If entering from `explore-idea`, all research artifacts should exist. If any are missing, load `explore-idea` first.

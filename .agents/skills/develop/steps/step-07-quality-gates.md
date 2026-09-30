@@ -24,12 +24,12 @@ QA is a hard gate. Security and performance are conditional gates. They can run 
 
 **Loop limit:** Max 2 QA-dev cycles per bug. If same bug resurfaces after 2 fix attempts, escalate to `@tech-lead`.
 
-**Output:** `artifacts/output/05-execution/quality/qa-report.md`
+**Output:** `artifacts/output/05-execution/quality/test-report.md`
 Structure: `Test Run Summary, Pass/Fail by Suite, Open Defects, Release Recommendation`
 
 Record completion:
 ```bash
-node .agents/scripts/orchestrator_state.js complete --agent qa-engineer --artifact 05-execution/quality/qa-report.md
+node .agents/scripts/orchestrator_state.js complete --agent qa-engineer --artifact 05-execution/quality/test-report.md
 ```
 
 ### 7a. Motion QA (conditional hard gate)
@@ -44,7 +44,7 @@ node .agents/scripts/motion_spec_check.js check --json
 
 Exit 0 is required. It fails on any `MO-###` prompt missing a required field, animating a non-composited property (only `transform`/`opacity`), a non-fade reduced-motion fallback, a non-numeric timing tolerance, a spec-side orphan, or a prompt not referenced in `user-stories.md`. If the spec is incomplete, QA does not proceed — the task returns to `@product-designer`. When `motion-spec.md` is absent the script exits 0 (motion not in scope) and this gate is skipped.
 
-`@qa-engineer` must add a `## Motion Verification` section to `qa-report.md` covering:
+`@qa-engineer` must add a `## Motion Verification` section to `test-report.md` covering:
 - [ ] Every `MO-###` maps to one spec prompt, one user story, one implementation reference, and one QA assertion.
 - [ ] Timing is within the prompt's numeric tolerance, default `±16ms` unless the prompt documents another tolerance.
 - [ ] Trigger, keyboard focus, hover, and state-transition behavior are verified.

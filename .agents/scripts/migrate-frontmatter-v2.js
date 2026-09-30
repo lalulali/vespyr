@@ -1,4 +1,12 @@
 #!/usr/bin/env node
+/**
+ * OBSOLETE (2026-09-30) — do NOT re-run.
+ * Superseded by the agent frontmatter files, which have been the source of
+ * truth since v2.0. The capability and mentor lists embedded below are a stale
+ * snapshot (e.g. pre-02d capability sets) and re-running this script would
+ * REGRESS current personas. Kept only as a historical migration reference;
+ * excluded from the npm tarball.
+ */
 
 const fs = require('fs');
 const path = require('path');

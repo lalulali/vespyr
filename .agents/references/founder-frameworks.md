@@ -106,3 +106,7 @@ Pick 2-4 frameworks based on the idea. Golden Circle + Pre-mortem are defaults â
 **Red flag:** The dependency stack is taller than the value proposition â†’ the idea is fragile.
 
 **Output:** Dealbreakers: __ / Outside control: __ / Stack vs value: __
+
+## Opportunity Assessment Lens
+
+When assessing an opportunity, score it on: urgency of the underlying job, willingness to pay, distribution advantage, and defensibility over 18 months. An opportunity that scores high on none is a hobby, not a business.

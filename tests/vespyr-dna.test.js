@@ -68,6 +68,14 @@ describe('Vespyr Core DNA & Anti-Sycophancy Invariants', () => {
       assert.ok(content.includes('Owner-Readable Results'), `${name} must carry the DNA 8 contract`);
     });
 
+    it(`${name} carries the DNA 8 plain-language chat-default clause (F1 regression guard)`, () => {
+      const content = fs.readFileSync(filePath, 'utf8');
+      assert.ok(
+        content.includes('every ordinary chat reply'),
+        `${name} must carry the DNA 8 chat-reply clause — a stale copy means an install path ships old policy`
+      );
+    });
+
     it(`${name} carries the DNA 7 document plain-language scope (any language)`, () => {
       const content = fs.readFileSync(filePath, 'utf8');
       assert.ok(content.includes('Scope & language neutrality'), `${name} must carry the DNA 7 document scope`);
