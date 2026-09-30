@@ -1,6 +1,6 @@
 {
   "date": "2026-08-10",
-  "scanner_sha256_prefix": "e2d0c28d978ff114",
+  "scanner_sha256_prefix": "71a2f88fe7debd02",
   "spec_sha256_prefix": "f6159bbaa797459b",
   "exit": 1,
   "findings": [
@@ -116,5 +116,5 @@
       "detail": "const query = \"SELECT * FROM users WHERE id = {{user_input}}\";"
     }
   ],
-  "note": "Regenerated 2026-09-08 round-table reshape (BEACON-1 hook-body fix +1 keywordless fixture; drift prefixes pinned and enforced). Reviewed: panel Victor/Scout/Rex, owner Chris."
+  "note": "Regenerated 2026-09-08 round-table reshape (BEACON-1 hook-body fix +1 keywordless fixture; drift prefixes pinned and enforced). Reviewed: panel Victor/Scout/Rex, owner Chris. || Re-pin 2026-09-30 (02s): scanner_sha256_prefix only, e2d0c28d978ff114 -> 71a2f88fe7debd02. Cause: commit 64e659b added ONE comment line to security-scan.js and did not re-pin. Verified unreviewed, not unsound: comment-stripped + whitespace-normalized source hash is IDENTICAL (b42495ce1bb3875b both revisions), and a corpus-root scan with each revision produces byte-identical output (14 findings, same order). spec_sha256_prefix unchanged (f6159bbaa797459b) and the 14 findings below are unchanged. Findings were NOT regenerated. Reviewed: owner Chris (approved 'do 1 and 2'); evidence in artifacts/docs/review/10-canvas-discovery-audit.md and 02s plan correction log. Follow-up NOT done: gate still hashes raw bytes, so any comment edit re-trips it — see Fix B in the 02s plan."
 }
