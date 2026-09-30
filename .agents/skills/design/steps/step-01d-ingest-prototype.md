@@ -59,7 +59,7 @@ On rejection: list each failed criterion with what you observed, write no invent
    ```
 
    Do not proceed on a failed validator. For `r1-evidence`, an explicit `Implementation handoff: BLOCKED` is allowed and must remain visible in the synthesized records; it still blocks `/develop` until the handoff scope passes.
-6. Non-file prototypes (Figma URL, live code): rows anchor to `prototype-inventory.md#INV-NN` and the frontmatter carries `prototype_type: non-file`. The Sync Contract v2 witness (A3) is honestly weaker — labeled at step-04d. A non-file prototype cannot satisfy the local static/Next mechanical proof; obtain an explicit owner-approved weaker evidence disposition.
+6. Non-file prototypes (Figma URL, live code): rows anchor to `prototype-inventory.md#INV-NN` and the frontmatter carries `prototype_type: non-file`. The Sync Contract v2 baseline hash (A3) is honestly weaker — labeled at step-04d. A non-file prototype cannot satisfy the local static/Next mechanical proof; obtain an explicit owner-approved weaker evidence disposition.
 7. Nothing enters the inventory that is not observable in the prototype. Suspected-but-unobserved behavior goes in the session summary as a question, never as a row.
 
 ## Output

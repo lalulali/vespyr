@@ -176,7 +176,7 @@ When an agent discovers an issue with an upstream artifact (spec gap, implementa
 
 ## Freeze Boundary & Rule of Any One (Review 10 / 02n)
 
-- **Freeze Boundary:** once a prototype is frozen and hash-witnessed, the spec is the sole contractual truth and the prototype is an immutable reference. A post-freeze prototype change is a rollback trigger (formal Spike Rollback: halt engineering → Prototype v2 in isolation → re-validate → re-extract → re-witness), never a quiet edit. The Step-0 staleness hook blocks every design mode while a witness is stale, broken, or partial.
+- **Freeze Boundary:** once a prototype is frozen and its baseline hash is recorded, the spec is the sole contractual truth and the prototype is an immutable reference. A post-freeze prototype change is a rollback trigger (formal Spike Rollback: halt engineering → Prototype v2 in isolation → re-validate → re-extract → re-record the baseline hash), never a quiet edit. The Step-0 staleness hook blocks every design mode while the baseline hash is stale, broken, or partial.
 - **Rule of Any One:** if a discovered change triggers ANY single one of — new DB entity, new route/IA navigation shift, new external integration, new user persona/JTBD, or >1 day blast radius — it is strictly rejected as an in-flight delta. Ship the committed baseline and queue the feature for the next cycle, or hard-abort and restart from Discovery. The half-sprint/half-pivot mutant is banned.
 - **Enforcement:** `@founder` rules the binary choice; `@code-reviewer` rejects contract shifts lacking `[DELTA-NN]`/`AC-E*` and PRs sneaking in Rule-of-Any-One triggers; `@product-manager`/`@code-reviewer` enforce the scope matrix literally.
 

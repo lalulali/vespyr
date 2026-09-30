@@ -21,7 +21,7 @@
  * latest.md is a DERIVED VIEW of append-only history.md — never a
  * hand-written second source of truth. regenerateLatest() rebuilds it from
  * the last history entry in the exact byte format orchestrator_state.js
- * historically wrote, so all readers (witness, session_checkpoint,
+ * historically wrote, so all readers (memory_check, session_checkpoint,
  * delegation_audit, compaction_guard, personas) keep parsing it unchanged.
  */
 

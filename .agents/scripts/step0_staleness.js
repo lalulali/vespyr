@@ -2,9 +2,9 @@
 /**
  * step0_staleness.js — Step-0 staleness gate for /design (02n.1).
  *
- * Wraps `spec_parity.js witness check` into the deterministic Step-0 hook:
- *   exit 0  → proceed  (witness fresh, or absent — nothing frozen yet)
- *   exit 1  → BLOCK    (stale / witness field missing on a frozen report / broken)
+ * Wraps `spec_parity.js baseline check` into the deterministic Step-0 hook:
+ *   exit 0  → proceed  (baseline hash fresh, or absent — nothing frozen yet)
+ *   exit 1  → BLOCK    (stale / baseline hash field missing on a frozen report / broken)
  *
  * Fail-loud contract (DoD 3): if this script or spec_parity.js cannot run,
  * the Step-0 prompt must HALT — a bypass is a correctness failure, not a skip.
@@ -35,7 +35,7 @@ function parseArgs(argv) {
 
 function block(reason) {
   console.error(`[BLOCK] Step-0 staleness gate: ${reason}`);
-  console.error('Fix: restore the frozen prototype, or run the step-05d Spike Rollback to re-extract and re-witness.');
+  console.error('Fix: restore the frozen prototype, or run the step-05d Spike Rollback to re-extract and re-record the baseline hash.');
   process.exit(1);
 }
 
@@ -47,7 +47,7 @@ function main() {
     block('spec_parity.js is missing — refusing to proceed silently.');
   }
 
-  const cli = [SCRIPT, 'witness', 'check', '--json'];
+  const cli = [SCRIPT, 'baseline', 'check', '--json'];
   if (args.report) cli.push('--report', String(args.report));
   if (args.inventory) cli.push('--inventory', String(args.inventory));
   if (args.root) cli.push('--root', String(args.root));
@@ -65,13 +65,13 @@ function main() {
   }
 
   if (!out.ok) {
-    block(out.reason || 'witness is not fresh');
+    block(out.reason || 'baseline hash is not fresh');
   }
 
   if (json) {
-    console.log(JSON.stringify({ ok: true, witness: out.witness, report: out.report }, null, 2));
+    console.log(JSON.stringify({ ok: true, baseline: out.baseline, report: out.report }, null, 2));
   } else {
-    console.log(`[OK] Step-0 staleness witness: ${out.witness}`);
+    console.log(`[OK] Step-0 staleness baseline hash: ${out.baseline}`);
   }
   process.exit(0);
 }

@@ -38,7 +38,7 @@ function runHook(root, extra = []) {
 }
 
 function stamp(root) {
-  return spawnSync(process.execPath, [PARITY, 'witness', 'stamp', '--root', root, '--report', REL.report, '--now', '2026-09-22T00:00:00.000Z'], { encoding: 'utf8' });
+  return spawnSync(process.execPath, [PARITY, 'baseline', 'stamp', '--root', root, '--report', REL.report, '--now', '2026-09-22T00:00:00.000Z'], { encoding: 'utf8' });
 }
 
 test('step0 staleness: absent witness (reverse unused) proceeds', () => {
@@ -118,7 +118,7 @@ test('step0 staleness: rollback re-witness cycle reopens the gate (02n.6 probe)'
   fs.appendFileSync(path.join(root, REL.prototype), '\n<!-- prototype v2 after falsified model -->\n');
   const blocked = runHook(root);
   assert.equal(blocked.status, 1, 'post-freeze edit must block at Step 0');
-  assert.equal(stamp(root).status, 0, 'rollback path re-witnesses the new prototype');
+  assert.equal(stamp(root).status, 0, 'rollback path re-records the baseline hash for the new prototype');
   const open = runHook(root);
   assert.equal(open.status, 0, open.stderr);
   assert.match(open.stdout, /fresh/);
@@ -127,7 +127,7 @@ test('step0 staleness: rollback re-witness cycle reopens the gate (02n.6 probe)'
 test('step0 staleness: step-05d is the Spike Rollback protocol, not a steady-state sync loop', () => {
   const step5 = fs.readFileSync(path.join(ROOT, '.agents', 'skills', 'design', 'steps', 'step-05d-sync-contract.md'), 'utf8');
   assert.match(step5, /Spike Rollback Protocol/);
-  assert.match(step5, /Re-witness/);
+  assert.match(step5, /Re-record the baseline hash/);
   assert.match(step5, /\[DELTA-NN\]/);
   assert.doesNotMatch(step5, /Re-runnable sync/);
   const skill = fs.readFileSync(path.join(ROOT, '.agents', 'skills', 'design', 'SKILL.md'), 'utf8');

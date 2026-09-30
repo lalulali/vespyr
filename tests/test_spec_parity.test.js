@@ -86,35 +86,35 @@ test('spec_parity: seeded orphan behavior is red without a deferral and green wi
   assert.deepEqual(JSON.parse(green.stdout).unresolvedOrphans, []);
 });
 
-test('spec_parity: stale prototype witness blocks after the freeze', () => {
+test('spec_parity: a stale prototype baseline hash blocks after the freeze', () => {
   const root = tmpTree();
-  const stamped = run(['witness', 'stamp', '--root', root, '--report', REL.report, '--now', '2026-09-22T00:00:00.000Z']);
+  const stamped = run(['baseline', 'stamp', '--root', root, '--report', REL.report, '--now', '2026-09-22T00:00:00.000Z']);
   assert.equal(stamped.status, 0, stamped.stderr);
-  const fresh = run(['witness', 'check', '--root', root, '--report', REL.report, '--json']);
+  const fresh = run(['baseline', 'check', '--root', root, '--report', REL.report, '--json']);
   assert.equal(fresh.status, 0, fresh.stdout + fresh.stderr);
-  assert.equal(JSON.parse(fresh.stdout).witness, 'fresh');
+  assert.equal(JSON.parse(fresh.stdout).baseline, 'fresh');
 
   fs.appendFileSync(path.join(root, REL.prototype), '\n<!-- prototype drifted after freeze -->\n');
-  const stale = run(['witness', 'check', '--root', root, '--report', REL.report, '--json']);
+  const stale = run(['baseline', 'check', '--root', root, '--report', REL.report, '--json']);
   assert.equal(stale.status, 1);
   const out = JSON.parse(stale.stdout);
-  assert.equal(out.witness, 'stale');
+  assert.equal(out.baseline, 'stale');
   assert.notEqual(out.expected, out.actual);
 });
 
-test('spec_parity: witness field missing on a frozen report is red; absent report is green (never frozen)', () => {
+test('spec_parity: missing baseline-hash field on a frozen report is red; absent report is green (never frozen)', () => {
   const root = tmpTree();
   const reportPath = path.join(root, REL.report);
   fs.writeFileSync(reportPath, fs.readFileSync(reportPath, 'utf8').replace(/^prototype_sha256:.*\n/m, ''));
-  const missing = run(['witness', 'check', '--root', root, '--report', REL.report, '--json']);
+  const missing = run(['baseline', 'check', '--root', root, '--report', REL.report, '--json']);
   assert.equal(missing.status, 1);
-  assert.equal(JSON.parse(missing.stdout).witness, 'missing');
+  assert.equal(JSON.parse(missing.stdout).baseline, 'missing');
 
   const root2 = tmpTree();
   fs.rmSync(path.join(root2, REL.report));
-  const absent = run(['witness', 'check', '--root', root2, '--report', REL.report, '--json']);
+  const absent = run(['baseline', 'check', '--root', root2, '--report', REL.report, '--json']);
   assert.equal(absent.status, 0);
-  assert.equal(JSON.parse(absent.stdout).witness, 'absent');
+  assert.equal(JSON.parse(absent.stdout).baseline, 'absent');
 });
 
 test('spec_parity: a missing detail class is a red; N/A-with-reason is accepted', () => {

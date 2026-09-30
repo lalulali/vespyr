@@ -151,20 +151,26 @@ Do NOT produce a uniform pattern (e.g. always 2 happy / 2 unhappy / 1 edge). A r
 
 For each story, sweep these domain risk categories and write an AC for every one that applies to *this* case. This is how depth scales with complexity: a simple story has few applicable categories; a complex one has many. A category that genuinely does not apply is marked `N/A` — it is not silently skipped.
 
-| Category | Ask for this story: is there a criterion for… |
-|---|---|
-| **Invalid / malformed input** | wrong format, missing required field, out-of-range value? |
-| **Empty / boundary state** | zero items, first-run, max length, min/max quantity, off-by-one? |
-| **Duplicate / idempotency** | double-submit, retry, replay, repeated action? |
-| **Concurrency / race** | two actors, simultaneous edits, in-flight request collision? |
-| **Auth / permission** | unauthenticated, wrong role, expired session, forbidden resource? |
-| **State / lifecycle** | already-used token, expired link, wrong status transition, stale data? |
-| **External dependency failure** | API/service down, timeout, partial response, retry/backoff? |
-| **Rate / abuse limits** | too many attempts, throttling, quota exhaustion? |
-| **Data integrity** | partial write, rollback, orphaned records, referential breakage? |
-| **Localization / encoding** | unicode, RTL, timezone, currency, special characters? |
-| **Accessibility / device** | keyboard-only, screen reader, reduced motion, small viewport, offline? |
-| **Security** | injection, enumeration, sensitive-data exposure, CSRF/replay? |
+| # | Category | Ask for this story: is there a criterion for… |
+|---|---|---|
+| 1 | **Invalid / malformed input** | wrong format, missing required field, out-of-range value? |
+| 2 | **Empty / boundary state** | zero items, first-run, max length, min/max quantity, off-by-one? |
+| 3 | **Duplicate / idempotency** | double-submit, retry, replay, repeated action? |
+| 4 | **Concurrency / race** | two actors, simultaneous edits, in-flight request collision? |
+| 5 | **Write ordering / partial failure** | two writes where the second depends on the first — what if they arrive reversed, or the first commits and the second fails? |
+| 6 | **Auth / permission** | unauthenticated, wrong role, expired session, forbidden resource? |
+| 7 | **State / lifecycle** | already-used token, expired link, wrong status transition, stale data? |
+| 8 | **External dependency failure** | API/service down, timeout, partial response, retry/backoff? |
+| 9 | **Rate / abuse limits** | too many attempts, throttling, quota exhaustion? |
+| 10 | **Data integrity** | partial write, rollback, orphaned records, referential breakage? |
+| 11 | **Clock / time** | timezone, DST, elapsed-time drift, countdown vs server clock, expiry computed on the client? |
+| 12 | **Localization / encoding** | unicode, RTL, timezone, currency, special characters? |
+| 13 | **Accessibility / device** | keyboard-only, screen reader, reduced motion, small viewport, offline? |
+| 14 | **Degraded capability** | the platform or browser lacks the capability — no clipboard API, no push, no storage quota, no WebGL? |
+| 15 | **Observability** | how does anyone know this happened — which event fires, which metric moves, what appears in the log? |
+| 16 | **Security** | injection, enumeration, sensitive-data exposure, CSRF/replay? |
+
+**Why categories 5, 11, 14 and 15 were added (2026-09-30).** `/test` step-01 §1b already asks "what breaks if things happen **out of order**?" and "**delayed**?", and step-03d's own worked example names "clipboard API absent" and "timer drift while backgrounded" — but the sweep had no slot to record those answers, so the risk could only ever land downstream in QA. Categories 5, 11 and 14 close that gap. Category 15 had no home anywhere at all: without it a behavior can be implemented correctly and still be invisible in production. (The additions are numbered 5, 11, 14 and 15 in the table above — not a contiguous block.)
 
 ### 3.3 Mandatory per-story AC Coverage Self-Audit (the reasoning gate)
 
@@ -172,30 +178,95 @@ Every story MUST end its Acceptance Criteria section with an **AC Coverage Self-
 
 Write the block in exactly this labeled form — one line per category, each line resolving to **either** an acceptance-criterion reference **or** a concrete, case-specific reason it does not apply. A bare `N/A` with no reason is not acceptable and fails the gate.
 
+Do **not** wrap the alternatives in angle brackets. The example below shows both options; a real line picks one. Angle brackets are how this file marks a placeholder, and the gate reads them as an unresolved placeholder and fails all 16 lines.
+
 ```
 #### AC Coverage Self-Audit
-- Invalid / malformed input: <AC-U2, AC-U3 | N/A because this story takes no user input>
-- Empty / boundary state: <AC-E1 | N/A because there is no list/collection here>
-- Duplicate / idempotency: <AC-U4 | N/A because the action is read-only>
-- Concurrency / race: <AC-E2 | N/A because it is a single-user, single-session action>
-- Auth / permission: <AC-U1 | N/A because this screen is public pre-auth>
-- State / lifecycle: <AC-U5 | N/A because the entity has no lifecycle states>
-- External dependency failure: <AC-U6 | N/A because no external service is called>
-- Rate / abuse limits: <AC-U7 | N/A because there is no abusable submission>
-- Data integrity: <AC-E3 | N/A because nothing is persisted>
-- Localization / encoding: <AC-E4 | N/A because no free-text is rendered>
-- Accessibility / device: <AC-E5 | N/A, covered globally in product-spec.md §a11y>
-- Security: <AC-U8 | N/A because no sensitive data or state change is exposed>
+- Invalid / malformed input: AC-U2, AC-U3                     ← or: N/A because this story takes no user input
+- Empty / boundary state: AC-E1                              ← or: N/A because there is no list/collection here
+- Duplicate / idempotency: AC-U4                             ← or: N/A because the action is read-only
+- Concurrency / race: AC-E2                                  ← or: N/A because it is a single-user, single-session action
+- Write ordering / partial failure: AC-E3                    ← or: N/A because this is a single atomic write
+- Auth / permission: AC-U1                                   ← or: N/A because this screen is public pre-auth
+- State / lifecycle: AC-U5                                   ← or: N/A because the entity has no lifecycle states
+- External dependency failure: AC-U6                         ← or: N/A because no external service is called
+- Rate / abuse limits: AC-U7                                 ← or: N/A because there is no abusable submission
+- Data integrity: AC-E3                                      ← or: N/A because nothing is persisted
+- Clock / time: AC-E4                                        ← or: N/A because the outcome does not depend on elapsed time
+- Localization / encoding: AC-E4                             ← or: N/A because no free-text is rendered
+- Accessibility / device: AC-E5                              ← or: N/A because this is covered in product-spec.md §a11y
+- Degraded capability: AC-U8                                 ← or: N/A because the platform always provides the capability
+- Observability: AC-E6                                       ← or: N/A because this view emits no event and adds no metric
+- Security: AC-U9                                            ← or: N/A because no sensitive data or state change is exposed
 ```
 
-Rules the gate enforces (all mechanical, none count ACs):
-1. The block header `#### AC Coverage Self-Audit` is present in every story.
-2. Every one of the 12 category labels appears.
-3. Every category line is *resolved*: it names at least one `AC-…` reference **or** gives an `N/A because <reason>` with a real reason. A line left as a placeholder, blank, or bare `N/A` fails.
+Rules the gate enforces (all mechanical):
+1. The heading `#### AC Coverage Self-Audit` is present in every story. A sentence that merely *mentions* the phrase does not count.
+2. Every one of the 16 category labels appears.
+3. Every category line is *resolved*: it names at least one `AC-…` reference **or** gives an `N/A because <reason>` with a real reason. A line left as a placeholder, blank, or bare `N/A` fails. The reason must be at least a few words — `N/A because none` is not a reason.
+4. **Every `AC-…` you reference is one you actually defined in this story.** A dangling reference means the category was resolved on paper against a criterion that does not exist. This is a hard failure.
 
-What this deliberately does NOT do: it does not require a minimum number of ACs, does not forbid a small story, and does not force any H/U/E ratio. If a story honestly has one applicable failure mode, it has one AC there and eleven reasoned N/As — and that passes. If a payment story has failure modes in nine categories, it naturally carries many ACs. Depth follows the reasoning, not a quota.
+**What the gate does and does not count.** It does not count your criteria and sets no target number, no per-story minimum beyond the structure below, and no ratio between happy/unhappy/edge. If a story honestly has one applicable failure mode, it carries one criterion there and fifteen reasoned N/As.
 
-A reviewer (and the parity gate's owner sampling) should challenge a self-audit that marks many categories `N/A` with thin or copy-paste reasons — that is the human check on reasoning quality that no regex can perform.
+One structural requirement does exist and predates this sweep, so state it plainly rather than discovering it at the gate: **the document as a whole must contain at least one `AC-H*`, one `AC-U*` and one `AC-E*`.** That is a document-level shape check, not a per-story quota — it says a product must have a success path, a failure path and a boundary somewhere, and it does not dictate how many of each. A document whose only story is genuinely trivial may still need a second story, or a criterion in another class, to satisfy it.
+
+**Reasons must be specific to the story.** The same N/A wording copy-pasted across three or more stories is flagged as a **warning** — not a failure, because a genuinely repeated situation can legitimately repeat. But three identical reasons almost always mean the sweep was filled in rather than reasoned. Write the reason for *this* story.
+
+**Three patterns the gate warns about** (warnings never fail the build; they exist because the instructions used to say a human should challenge this reasoning and nothing ever asked one to):
+- a story marking **13 or more of 16** categories N/A with no criterion at all;
+- the **same N/A reason** appearing in 3+ stories;
+- **every story in the document carrying an identical AC count** — the "hit-a-quota" tell.
+
+### 3.4 Feature state model — where acceptance criteria actually go missing
+
+The per-story sweep reasons about each story in isolation. That is its blind spot: **the transitions between stories are nobody's job.** A story may pass all sixteen categories while the entity it drives can still be moved from a terminal state back to a draft, or submitted twice through two different stories, and no criterion anywhere forbids it.
+
+So each **Feature** — not each story — carries a state model:
+
+```
+#### State Model
+**Entity:** [entity name]
+
+| From | Event | To | Legal | Criteria |
+|------|-------|----|-------|----------|
+| draft | submit | pending | yes | — |
+| pending | submit (double submit) | pending | no | AC-U4 |
+| pending | cancel | draft | no | AC-U5 |
+| paid | refund | refunded | yes | — |
+| refunded | submit | pending | no | AC-E2 |
+```
+
+**Rules:**
+1. One state model per Feature. If a Feature drives several entities, give each its own table.
+2. List the states the entity can actually occupy. Keep it to the states that exist — padding a model with invented states makes it describe nothing.
+3. Mark every transition `yes` or `no` in the **Legal** column. The gate also reads `N`, `not allowed`, `illegal`, `false` and `❌` as illegal, and `y`, `true`, `legal` and `✓` as legal. **Any other wording is reported as unreadable rather than guessed at**, so write `yes` or `no` and you will never be surprised.
+4. **Every `no` row MUST name the acceptance criterion that forbids it** in the Criteria column, and **that criterion must exist in this document.** A blank or dash fails, and so does pointing at a criterion you never wrote — a transition covered by a criterion that does not exist forbids nothing. This is the whole point of the state model.
+5. A model with **zero** illegal transitions fails too. If the Feature genuinely has no state machine — a static pricing page, a pure read-only view — do not invent one to satisfy the gate. **Split it into its own Feature-free section, or add the one illegal transition that really exists** (a double submit, a re-entry after completion, a cancel from a terminal state). If a Feature truly admits no illegal transition, it is not a stateful Feature and should be folded into a neighbouring one.
+6. Illegal transitions are where `[derived]` criteria earn their keep in reverse mode — the prototype will not have shown them.
+7. Adding a column to the table is safe: the gate finds `Legal` and `Criteria` by name, not by position.
+
+The gate checks the table mechanically: heading present, table present, at least one illegal row, every illegal row criterion-referenced, and every referenced criterion resolvable.
+
+### 3.5 Deferred-Evidence AC Focus (reverse mode only)
+
+Step 2d's Fidelity Partition deliberately marks infrastructure, telemetry, persistence and DB-bound statements `[DEFERRED TO SPEC]`, because **no prototype can witness them.** That is exactly why they are dangerous: the prototype never showed them, so nothing in the normal authoring flow pushes you to think about them, and they are the rows most likely to end with thin or absent criteria.
+
+In reverse mode, `user-stories.md` therefore carries one document-level block:
+
+```
+## Deferred-Evidence AC Focus (reverse mode only)
+
+| Ledger row | What no prototype could witness | Covered by |
+|------------|--------------------------------|------------|
+| L-03 | telemetry event never emitted on the success path | AC-E4 |
+| L-07 | persistence rollback leaves an orphan row | AC-U6 |
+```
+
+- Every `L-NN` whose §14 status is `[DEFERRED TO SPEC]` must appear here. Copy the ids from `requirements.md` §14 — never renumber.
+- "Covered by" must name criteria that **exist in this document** — naming one you never wrote is a hard failure, because a deferred row covered by a criterion that does not exist is uncovered.
+- If a deferred bound genuinely has no criterion yet, that is a **finding**: write the criterion, or raise an `[OPEN]` question in §14. Do not leave the cell empty.
+
+Delete this section in create mode — there is no ledger to defer from.
 
 ---
 
@@ -323,7 +394,15 @@ A reviewer (and the parity gate's owner sampling) should challenge a self-audit 
 
 ### Canonical DNA 7 Concise User Story Example
 
-Use this format as the gold standard for radical brevity, token efficiency, and clear separation of business outcome, technical contract, and testable Gherkin acceptance criteria:
+Use this format as the gold standard for **prose density** — business outcome, technical contract, and testable Gherkin packed tightly with no filler.
+
+> **This example does NOT satisfy `template_conformance.js`, by design.** It is here to show how much substance fits in few tokens, not to be copied as structure. It is missing four things the gate requires, and copying it verbatim fails the build:
+> 1. Gherkin steps are bare `Given/When/Then`; the gate requires `**Given**` / `**When**` / `**Then**`.
+> 2. No `AC-H*` / `AC-U*` / `AC-E*` identifiers exist, so nothing can be referenced.
+> 3. No `#### AC Coverage Self-Audit` block (§3.3).
+> 4. No per-Feature state model (§3.4).
+>
+> For a document that actually passes the gate, start from `.agents/templates/product/user-story-template.md`. Keep the density; add the structure.
 
 ```markdown
 ### User Story: As a retail user, I want to see only external payment methods so that I am not confused by Kasbon which I cannot use
@@ -341,7 +420,7 @@ The system must completely hide Kasbon from retail users — not gray it out, no
 
 **Acceptance Criteria:**
 
-```gherkin
+    # --- Gherkin below ---
 # Happy Path
 Scenario: Retail user sees only external payment methods on payment screen
   Given a user with user_type = "retail" is authenticated
@@ -360,7 +439,6 @@ Scenario: User flag is missing or null on user record
   Then the system defaults to retail behavior (no Kasbon shown)
   And an error is logged for the missing user flag
   And external payment methods are shown normally
-```
 
 ### User Story: As a retail user, I want to submit checkout payments safely so that I am never charged twice if my connection stutters or I tap twice
 <!-- Redmine: #7525 | Parent: #7516 -->
@@ -378,7 +456,7 @@ The system must guarantee zero double-charges. If a customer clicks "Pay" multip
 
 **Acceptance Criteria:**
 
-```gherkin
+    # --- Gherkin below ---
 # Happy Path
 Scenario: User taps pay once on a stable connection
   Given a cart total of Rp 150.000 with a unique checkout session key
@@ -398,7 +476,6 @@ Scenario: Network retries after successful charge
   When the app retries sending key "order-key-999" due to a timeout
   Then the payment provider is NOT charged a second time
   And the system returns the original Order #501 confirmation
-```
 ```
 
 ---

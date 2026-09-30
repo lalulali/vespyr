@@ -26,18 +26,18 @@ Do **not** run this for small spec-side discoveries — those follow the Phase B
 3. **Re-validate** the new interaction with the same usability bar; record falsification + re-validation evidence in the session summary. Re-run `prototype_collab_gate.js verify` after the new designer–tech review; stale or unsigned records block the rollback.
 4. **Re-extract** — re-run step-1 (inventory delta) and step-2 (ledger delta) against Prototype v2. New/removed behaviors become inventory rows; ledger rows are re-anchored or demoted to `[OPEN]` — never silently rewritten.
 5. **Re-run parity** (step-4): metrics + 10-class table + deferrals; `spec_parity.js check` must exit 0.
-6. **Re-witness** — refresh the freeze boundary:
-   - **file prototype:** `node .agents/scripts/spec_parity.js witness stamp --report <report> --prototype <prototype>` (new SHA-256)
+6. **Re-record the baseline hash** — refresh the freeze boundary:
+   - **file prototype:** `node .agents/scripts/spec_parity.js baseline stamp --report <report> --prototype <prototype>` (new SHA-256)
    - **non-file prototype:** pointer + access timestamp + inventory snapshot hash (A3 — honestly weaker; labeled in the report)
 7. **Resume engineering** against the new frozen reference; post-handoff contract shifts append `[DELTA-NN]`/`AC-E*` (Phase Boundary Rule).
 
 ## Output
-Updated `prototype-inventory.md`, `requirements.md` (ledger), `parity-report.md` (new witness), and `prototype-collaboration.md` (new track/reviewer evidence); Step-0 staleness hook and collaboration gate green.
+Updated `prototype-inventory.md`, `requirements.md` (ledger), `parity-report.md` (new baseline hash), and `prototype-collaboration.md` (new track/reviewer evidence); Step-0 staleness hook and collaboration gate green.
 
 ## Halt conditions
 - Prototype v2 fails the completeness gate
 - `spec_parity.js check` exits 1 after re-extraction
-- Re-witness cannot be stamped
+- The baseline hash cannot be re-stamped
 - Prototype v2 collaboration record fails `prototype_collab_gate.js verify`
 
 > **Tracker:** `node .agents/scripts/step_tracker.js complete --skill design-reverse --step 5`

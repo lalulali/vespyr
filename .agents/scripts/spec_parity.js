@@ -8,7 +8,7 @@
  *                   (allowed only with an owner+date deferral in parity-report.md)
  *   - Grounding   : resolvable ÷ (resolvable + ghosts); [OPEN] rows are exempt
  *   - 10 classes  : parity-report.md class table — covered-with-evidence or N/A-with-reason
- *   - Witness     : prototype hash (file) / inventory snapshot hash (non-file) vs report
+ *   - Baseline    : prototype hash (file) / inventory snapshot hash (non-file) vs report
  *
  * Frozen anchor grammar (A11): `path#id` — one `#`; repo-relative POSIX path;
  * id token `^[A-Za-z][A-Za-z0-9._:-]*$`; HTML/SVG anchors are `id="..."`,
@@ -17,8 +17,8 @@
  *
  * Usage:
  *   node .agents/scripts/spec_parity.js check [--inventory P] [--requirements P] [--report P] [--root R] [--json] [--metrics-only]
- *   node .agents/scripts/spec_parity.js witness stamp [--report P] [--prototype P] [--inventory P] [--pointer URL] [--now ISO] [--json]
- *   node .agents/scripts/spec_parity.js witness check [--report P] [--inventory P] [--root R] [--json]
+ *   node .agents/scripts/spec_parity.js baseline stamp [--report P] [--prototype P] [--inventory P] [--pointer URL] [--now ISO] [--json]
+ *   node .agents/scripts/spec_parity.js baseline check [--report P] [--inventory P] [--root R] [--json]
  *
  * Exit: 0 pass/absent, 1 gate violation, 2 usage/IO error.
  */
@@ -359,7 +359,7 @@ function updateFrontmatter(data, body, updates) {
   return serializeFrontmatter(merged, body);
 }
 
-function cmdWitnessStamp(args) {
+function cmdBaselineStamp(args) {
   const root = path.resolve(args.root || process.cwd());
   const reportPath = path.resolve(root, args.report || DEFAULTS.report);
   if (!fs.existsSync(reportPath)) {
@@ -398,68 +398,68 @@ function cmdWitnessStamp(args) {
   fs.writeFileSync(reportPath, updateFrontmatter(data, body, updates));
   const out = { report: path.relative(root, reportPath), updated: updates };
   if (args.json) console.log(JSON.stringify(out, null, 2));
-  else console.log(`spec_parity: witness stamped in ${path.relative(root, reportPath)} (${updates.prototype_type})`);
+  else console.log(`spec_parity: baseline hash stamped in ${path.relative(root, reportPath)} (${updates.prototype_type})`);
   process.exit(0);
 }
 
-function cmdWitnessCheck(args) {
+function cmdBaselineCheck(args) {
   const root = path.resolve(args.root || process.cwd());
   const reportPath = path.resolve(root, args.report || DEFAULTS.report);
 
-  const result = { report: path.relative(root, reportPath), witness: 'absent', ok: true, reason: null };
+  const result = { report: path.relative(root, reportPath), baseline: 'absent', ok: true, reason: null };
 
   if (!fs.existsSync(reportPath)) {
     // No report = never frozen: nothing can be stale. A deleted report after a
     // freeze is visible in the scope-lock audit evidence (step_tracker route).
-    result.witness = 'absent';
+    result.baseline = 'absent';
   } else {
     const { data } = parseFrontmatter(fs.readFileSync(reportPath, 'utf8'));
     const prototype = data.prototype;
     const type = data.prototype_type || (prototype && fs.existsSync(path.resolve(root, prototype)) ? 'file' : 'non-file');
     if (!prototype) {
       result.ok = false;
-      result.witness = 'missing';
+      result.baseline = 'missing';
       result.reason = 'parity-report.md has no prototype pointer';
     } else if (type === 'file') {
       const file = path.resolve(root, prototype);
       if (!fs.existsSync(file)) {
-        result.ok = false; result.witness = 'broken'; result.reason = `prototype file missing: ${prototype}`;
+        result.ok = false; result.baseline = 'broken'; result.reason = `prototype file missing: ${prototype}`;
       } else if (!data.prototype_sha256) {
-        result.ok = false; result.witness = 'missing'; result.reason = 'no prototype_sha256 witness stamped';
+        result.ok = false; result.baseline = 'missing'; result.reason = 'no prototype_sha256 baseline hash stamped';
       } else {
         const current = sha256File(file);
         if (current !== data.prototype_sha256) {
-          result.ok = false; result.witness = 'stale';
-          result.reason = 'prototype hash differs from the frozen witness — run the step-05d Spike Rollback (or restore the frozen prototype)';
+          result.ok = false; result.baseline = 'stale';
+          result.reason = 'prototype hash differs from the recorded baseline hash — run the step-05d Spike Rollback (or restore the frozen prototype)';
           result.expected = data.prototype_sha256;
           result.actual = current;
         } else {
-          result.witness = 'fresh';
+          result.baseline = 'fresh';
         }
       }
     } else {
       const inventory = data.inventory;
       if (!inventory || !fs.existsSync(path.resolve(root, inventory))) {
-        result.ok = false; result.witness = 'broken'; result.reason = `inventory missing: ${inventory || '(unset)'}`;
+        result.ok = false; result.baseline = 'broken'; result.reason = `inventory missing: ${inventory || '(unset)'}`;
       } else if (!data.inventory_snapshot_sha256) {
-        result.ok = false; result.witness = 'missing'; result.reason = 'no inventory_snapshot_sha256 witness stamped';
+        result.ok = false; result.baseline = 'missing'; result.reason = 'no inventory_snapshot_sha256 baseline hash stamped';
       } else {
         const current = sha256File(path.resolve(root, inventory));
         if (current !== data.inventory_snapshot_sha256) {
-          result.ok = false; result.witness = 'stale';
-          result.reason = 'inventory snapshot hash differs from the frozen witness (non-file prototype — honestly weaker)';
+          result.ok = false; result.baseline = 'stale';
+          result.reason = 'inventory snapshot hash differs from the recorded baseline hash (non-file prototype — honestly weaker)';
           result.expected = data.inventory_snapshot_sha256;
           result.actual = current;
         } else {
-          result.witness = 'fresh';
+          result.baseline = 'fresh';
         }
       }
     }
   }
 
   if (args.json) console.log(JSON.stringify(result, null, 2));
-  else if (result.ok) console.log(`spec_parity: witness ${result.witness} (${result.report})`);
-  else console.error(`spec_parity: witness ${result.witness} — ${result.reason}`);
+  else if (result.ok) console.log(`spec_parity: baseline hash ${result.baseline} (${result.report})`);
+  else console.error(`spec_parity: baseline hash ${result.baseline} — ${result.reason}`);
 
   process.exit(result.ok ? 0 : 1);
 }
@@ -484,15 +484,15 @@ function main() {
   const [sub, ...rest] = process.argv.slice(2);
   const args = parseArgs(rest);
   if (sub === 'check') return cmdCheck(args);
-  if (sub === 'witness') {
+  if (sub === 'baseline') {
     const action = rest[0];
-    const witnessArgs = parseArgs(rest.slice(1));
-    if (action === 'stamp') return cmdWitnessStamp(witnessArgs);
-    if (action === 'check') return cmdWitnessCheck(witnessArgs);
-    console.error('spec_parity: witness requires "stamp" or "check"');
+    const baselineArgs = parseArgs(rest.slice(1));
+    if (action === 'stamp') return cmdBaselineStamp(baselineArgs);
+    if (action === 'check') return cmdBaselineCheck(baselineArgs);
+    console.error('spec_parity: baseline requires "stamp" or "check"');
     process.exit(2);
   }
-  console.error('Usage:\n  node spec_parity.js check [--inventory P] [--requirements P] [--report P] [--root R] [--json] [--metrics-only]\n  node spec_parity.js witness stamp [--report P] [--prototype P] [--inventory P] [--pointer URL] [--now ISO]\n  node spec_parity.js witness check [--report P] [--inventory P] [--root R] [--json]');
+  console.error('Usage:\n  node spec_parity.js check [--inventory P] [--requirements P] [--report P] [--root R] [--json] [--metrics-only]\n  node spec_parity.js baseline stamp [--report P] [--prototype P] [--inventory P] [--pointer URL] [--now ISO]\n  node spec_parity.js baseline check [--report P] [--inventory P] [--root R] [--json]');
   process.exit(2);
 }
 

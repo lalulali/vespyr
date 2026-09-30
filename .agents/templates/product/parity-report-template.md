@@ -20,7 +20,7 @@ requirements: "{requirements path}"
 - **Collaboration record:** `{path}`
 - **Collaboration gate:** `{PASS/FAIL}`
 
-Reverse-mode gate (02n step-04d). **Structural tier** (script-computed, test-backed): ghosts / orphans / grounding / 10-class coverage / witness. **Judged tier** (honestly labeled, never claimed structural): anchor semantics (owner sampling, A7) and parity delta vs traditional (A8).
+Reverse-mode gate (02n step-04d). **Structural tier** (script-computed, test-backed): ghosts / orphans / grounding / 10-class coverage / baseline hash. **Judged tier** (honestly labeled, never claimed structural): anchor semantics (owner sampling, A7) and parity delta vs traditional (A8).
 
 ## Metrics
 
@@ -30,7 +30,7 @@ Reverse-mode gate (02n step-04d). **Structural tier** (script-computed, test-bac
 | Orphan behaviors | {n} | 0 or owner+date deferral | {PASS/FAIL} |
 | Grounding rate | {%} of non-`[OPEN]` | 100% | {PASS/FAIL} |
 | Detail-class coverage | {n}/10 | 10/10 | {PASS/FAIL} |
-| Witness | {SHA-256 / pointer+timestamp+snapshot hash} | blocks stale at Step-0 | {PASS/FAIL} |
+| Baseline hash | {SHA-256 / pointer+timestamp+snapshot hash} | blocks stale at Step-0 | {PASS/FAIL} |
 
 ## Detail-class coverage
 

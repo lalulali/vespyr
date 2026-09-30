@@ -41,26 +41,26 @@ Count the parity — never feel it. Run `spec_parity.js`, complete the 10-class 
    ```
    Ghosts must be 0; orphans 0-or-deferred; grounding 100% of non-`[OPEN]`.
 4. **Write `parity-report.md`** (template: `.agents/templates/product/parity-report-template.md`) with the selected track, collaboration link, the 5 metrics, the 10-class coverage table (evidence = ledger IDs or anchors; `N/A: reason` allowed), and orphan deferrals (owner + date).
-5. **Freeze boundary** — stamp the witness:
+5. **Freeze boundary** — stamp the baseline hash:
    ```bash
-   node .agents/scripts/spec_parity.js witness stamp --report <report> --prototype <prototype>
+   node .agents/scripts/spec_parity.js baseline stamp --report <report> --prototype <prototype>
    ```
    File prototypes: SHA-256. Non-file prototypes (Figma URL, live code): source pointer + access timestamp + inventory snapshot hash — honestly weaker (A3), labeled as such in the report.
-6. **Gate run** — `spec_parity.js check` (full) must exit 0: ghosts = 0, orphans 0-or-deferred, grounding 100%, classes 10/10, witness stamped.
+6. **Gate run** — `spec_parity.js check` (full) must exit 0: ghosts = 0, orphans 0-or-deferred, grounding 100%, classes 10/10, baseline hash stamped.
 7. **Owner sampling (A7 — judged tier).** Present 3 of N ledger statements to the owner; each anchor is verified to actually support its claim. Record the sampled rows + disposition in the report. Structural gates never claim this check.
 8. **Parity delta vs traditional (A8).** Record the first-run calibration (AC count + detail-class counts); no threshold is invented — owner disposition is mandatory and blocking in the report.
 
 ## Output
-`artifacts/output/03-strategy/parity-report.md` — selected track + collaboration link + metrics + 10-class table + deferrals + witness + sampling + delta; `check` exits 0.
+`artifacts/output/03-strategy/parity-report.md` — selected track + collaboration link + metrics + 10-class table + deferrals + baseline hash + sampling + delta; `check` exits 0.
 
 ## Handoff reminder — AC enrichment (recommended, not blocking)
-This gate proves the spec matches the prototype; it does NOT prove the acceptance criteria are deep. First-pass reverse-mode ACs are typically a happy-path skeleton. Before `/develop`, remind the owner (in plain language) to run the enrichment pass: `/elicitation` on `user-stories.md` → **AC Enrichment Sweep** (crosses each component against the 12 risk categories, adds `[derived]` failure/edge criteria). Record run-or-deferred in the parity report. Do not block handoff on it.
+This gate proves the spec matches the prototype; it does NOT prove the acceptance criteria are deep. First-pass reverse-mode ACs can still be thin on failure and edge handling. If the owner wants a second pair of eyes on the reasoning, mention `/elicitation` on `user-stories.md` → **AC Enrichment Sweep** (crosses each component against the 16 risk categories and attacks the state model's illegal transitions). It is optional — step-03d has already run the sweep, the per-Feature state model and the deferred-evidence focus, so the structure is there. Record run-or-deferred in the parity report. Do not block handoff on it.
 
 ## Halt conditions
 - `template_conformance.js check --mode reverse` exits 1 (off-template PRD or user-stories) — fix, never waive
 - `template_version_guard.js check` exits 1 (template revision metadata copied into a generated document) — remove it and set the document version to 1, never waive
 - `check` exits 1 (ghost / unresolved orphan / class gap) — fix, never waive
-- Witness cannot be stamped (prototype missing / unreadable)
+- Baseline hash cannot be stamped (prototype missing / unreadable)
 - Owner sampling or parity-delta disposition left unrecorded — gate stays open
 - Prototype collaboration record is missing, stale, mismatched, unsigned, `BLOCKED`, or fails `prototype_collab_gate.js verify` — gate stays open
 

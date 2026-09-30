@@ -330,7 +330,7 @@ After the freeze, the prototype is an immutable reference and the spec is the so
 
 **The Half-Sprint, Half-Pivot mutant is banned.** Sprints are never stretched or hybridized to absorb unshaped big features. "Big" means ANY single one of: new DB entity, new route/IA shift, new external integration, new persona/JTBD, or >1 day blast radius (Rule of Any One).
 
-**Freeze Boundary:** a frozen, hash-witnessed prototype that changes after handoff is a rollback trigger (formal Spike Rollback → re-validate → re-extract → re-witness) — never a quiet edit.
+**Freeze Boundary:** a frozen prototype whose recorded baseline hash no longer matches after handoff is a rollback trigger (formal Spike Rollback → re-validate → re-extract → re-record the baseline hash) — never a quiet edit.
 
 ## Guardrails
 

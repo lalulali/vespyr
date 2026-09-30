@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * witness.js — Memory Integrity Checker for Vespyr
+ * memory_check.js — Memory Structure Checker for Vespyr
  *
  * Validates the structure of files under artifacts/memory/ against the memory
  * conventions in memory-controller.md:
@@ -13,7 +13,7 @@
  * Reports per-file PASS/FAIL and exits non-zero if any file fails.
  *
  * Usage:
- *   node witness.js check [--dir artifacts/memory]
+ *   node memory_check.js check [--dir artifacts/memory]
  */
 
 'use strict';
@@ -212,7 +212,7 @@ function main() {
   const args = process.argv.slice(2);
   if (args.includes('--help') || args.includes('-h')) {
     console.log(`Usage:
-  node witness.js check [--dir artifacts/memory]
+  node memory_check.js check [--dir artifacts/memory]
 
 Checks every memory file (core, session-summaries, archive) against
 the memory-entry conventions. Exits non-zero if any file fails.`);

@@ -65,7 +65,7 @@ test('route: no artifacts → create', () => {
   assert.strictEqual(res.status, 0, res.stderr);
   const out = JSON.parse(res.stdout);
   assert.strictEqual(out.route, 'create');
-  assert.strictEqual(out.witness_state, 'absent');
+  assert.strictEqual(out.baseline_state, 'absent');
 });
 
 test('route: inventory present and no requirements → reverse (A1 first)', () => {
@@ -81,7 +81,7 @@ test('route: artifacts present without a witness → edit (never frozen)', () =>
   fs.writeFileSync(path.join(dir, STRATEGY, 'requirements.md'), '# Requirements\n', 'utf8');
   const out = JSON.parse(runRoute(dir).stdout);
   assert.strictEqual(out.route, 'edit');
-  assert.strictEqual(out.witness_state, 'absent');
+  assert.strictEqual(out.baseline_state, 'absent');
 });
 
 test('route: stale witness → rollback (blocked), fresh witness → edit', () => {
@@ -92,14 +92,14 @@ test('route: stale witness → rollback (blocked), fresh witness → edit', () =
   writeReport(dir, 'deadbeef');
 
   const stale = JSON.parse(runRoute(dir).stdout);
-  assert.strictEqual(stale.witness_state, 'stale');
+  assert.strictEqual(stale.baseline_state, 'stale');
   assert.strictEqual(stale.route, 'rollback');
   assert.strictEqual(stale.blocked, true);
 
   const real = crypto.createHash('sha256').update(fs.readFileSync(path.join(dir, 'prototype.html'))).digest('hex');
   writeReport(dir, real);
   const fresh = JSON.parse(runRoute(dir).stdout);
-  assert.strictEqual(fresh.witness_state, 'fresh');
+  assert.strictEqual(fresh.baseline_state, 'fresh');
   assert.strictEqual(fresh.route, 'edit');
   assert.strictEqual(fresh.blocked, false);
 });
@@ -114,13 +114,13 @@ test('route: scope locks record artifact hashes + witness state (recompute vs wi
 
   assert.strictEqual(runLock(dir, 'edit').status, 0);
   const afterRecompute = auditEntries(dir).filter((e) => e.type === 'scope_lock').pop();
-  assert.strictEqual(afterRecompute.witness_state, 'fresh');
+  assert.strictEqual(afterRecompute.baseline_state, 'fresh');
   assert.strictEqual(afterRecompute.route, 'edit');
   assert.ok(afterRecompute.artifacts[`${STRATEGY}/requirements.md`], 'artifact hashes recorded');
 
   fs.appendFileSync(path.join(dir, 'prototype.html'), '<!-- drift -->\n');
   assert.strictEqual(runLock(dir, 'edit').status, 0);
   const afterDrift = auditEntries(dir).filter((e) => e.type === 'scope_lock').pop();
-  assert.strictEqual(afterDrift.witness_state, 'stale');
+  assert.strictEqual(afterDrift.baseline_state, 'stale');
   assert.strictEqual(afterDrift.route, 'rollback');
 });

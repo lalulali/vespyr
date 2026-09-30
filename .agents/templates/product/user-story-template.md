@@ -4,7 +4,7 @@
 > **Feeds into:** Rex (@developer), Nina (@qa-engineer), Grant (@tech-lead), Nova (@data-analyst)
 > **Save to:** `artifacts/output/03-strategy/user-stories.md`
 
-<!-- Template Revision History (Vespyr internal — DO NOT copy into the generated document): template v3 (2026-09-05). The generated user-stories.md's own version starts at 1 on first creation. -->
+<!-- Template Revision History (Vespyr internal — DO NOT copy into the generated document): template v4 (2026-09-30). The generated user-stories.md's own version starts at 1 on first creation. -->
 
 <!-- DOCUMENT VERSION (fill this — belongs to user-stories.md, not the template). First generation = 1; increment on later edits. -->
 **Version:** 1
@@ -13,7 +13,7 @@
 - v1: Initial draft
 
 > [!NOTE]
-> Detailed acceptance criteria guidelines, the canonical `US-001` password recovery example, formatting instructions, and dependency diagram guides are located in [.agents/references/templates/user-story-instructions.md](../references/templates/user-story-instructions.md). Refer to that document when generating user stories.
+> Detailed acceptance criteria guidelines, the canonical `US-001` password recovery example, formatting instructions, and dependency diagram guides are located in [.agents/references/templates/user-story-instructions.md](../../references/templates/user-story-instructions.md). Refer to that document when generating user stories.
 
 > [!IMPORTANT]
 > **User Story Granularity & Content Standards:**
@@ -68,6 +68,23 @@ Use this format for each Feature rolling up under an Epic:
 - **Success Criteria:** [Telemetry, user metrics, or business results indicating success]
 - **FRs:** FR2, FR50, FR51
 
+#### State Model
+<!-- REQUIRED, one per Feature (not per story). The stories below reason about their own
+     slice; nobody enumerates the transitions BETWEEN them, which is exactly where
+     acceptance criteria go missing. Enumerate the entity's states, then list every
+     transition. Mark each one legal or illegal. EVERY illegal transition MUST name the
+     acceptance criterion that forbids it — the gate fails the build otherwise.
+     An entity with no illegal transition is a state model that isn't describing
+     real behaviour. See user-story-instructions.md §3.4. -->
+
+**Entity:** [entity name, e.g. Order]
+
+| From | Event | To | Legal | Criteria |
+|------|-------|----|-------|----------|
+| [state A] | [event 1] | [state B] | yes | — |
+| [state B] | [event 1] again (double submit) | [state B] | no | AC-U1 |
+| [state C] | [event 2] | [state D] | no | AC-E1 |
+
 ---
 
 ### 3. User Story Section
@@ -95,47 +112,67 @@ Use this format for each modular functional capability under a Feature:
 #### Acceptance Criteria
 [Acceptance criteria must be testable, atomic, and formatted using multi-line Given/When/Then steps]
 
+<!-- REVERSE MODE ONLY: every AC must carry a source tag on its own line —
+     `[prototype L-NN]` when the behaviour is witnessed in the prototype, `[derived]`
+     when it is reasoned to complete coverage. The gate enforces this in reverse mode.
+     A `[derived]` AC describes how a correct implementation must behave for behaviour
+     that already exists; it must NOT introduce a new capability. If completing coverage
+     implies a genuinely new capability, raise an `[OPEN]` ledger row instead.
+     In create mode the tags are optional but harmless. -->
+
 ##### Happy Path
-*   [ ] **AC-H1:** [Short Summary of Step]
+*   [ ] **AC-H1:** [Short Summary of Step] `[prototype L-01]`
     *   **Given** [precondition]
     *   **When** [user action]
     *   **Then** [expected outcome]
 
 ##### Unhappy Path
-*   [ ] **AC-U1:** [Short Summary of Failure Handling]
+*   [ ] **AC-U1:** [Short Summary of Failure Handling] `[derived]`
     *   **Given** [failure or invalid condition]
     *   **When** [user action]
     *   **Then** [graceful recovery, error feedback, or safety state]
 
 ##### Edge Cases
-*   [ ] **AC-E1:** [Short Summary of Edge Case]
+*   [ ] **AC-E1:** [Short Summary of Edge Case] `[derived]`
     *   **Given** [boundary/concurrency/security extreme state]
     *   **When** [user action]
     *   **Then** [expected graceful handling or state]
 
 ##### AI Acceptance Criteria (AC-AI*) — if applicable
-*   [ ] **AC-AI-1:** [Short Summary of AI Quality Threshold]
+*   [ ] **AC-AI-1:** [Short Summary of AI Quality Threshold] `[derived]`
     *   **Given** [prediction/generation input or model state]
     *   **When** [model performs inference]
     *   **Then** [groundedness/hallucination budget, eval-dataset pass rate, p95 latency, and token cap all meet their declared targets]
-*   [ ] **AC-AI-2:** [Fallback & safety behavior]
+*   [ ] **AC-AI-2:** [Fallback & safety behavior] `[derived]`
     *   **Given** [low-confidence output, inference failure, or blocked content]
     *   **When** [the model cannot answer safely]
     *   **Then** [deterministic fallback or human-in-the-loop gate engages, with the user-facing uncertainty/fallback copy from product-spec.md]
 
 #### AC Coverage Self-Audit
-<!-- Reason about EVERY category for THIS case. Each line resolves to an AC reference OR "N/A because <concrete reason>". This drives depth; there is no target count. See user-story-instructions.md §3.3. Replace the illustrative values below. -->
-- Invalid / malformed input: AC-U1 covers wrong/missing input
+<!-- Reason about EVERY category for THIS case. Each line resolves to an AC reference OR
+     "N/A because <concrete reason>". This drives depth; there is no target count.
+     Two hard rules the gate checks:
+       1. Every AC you reference here must be one you actually defined above.
+          A dangling reference means the category was resolved on paper only.
+       2. Reasons must be specific to THIS story. The same N/A wording copy-pasted
+          across stories is flagged as a smell — a filled-in sweep, not a reasoned one.
+          See user-story-instructions.md §3.2-§3.3.
+     Replace the illustrative values below. -->
+- Invalid / malformed input: AC-U1 rejects the malformed payload
 - Empty / boundary state: N/A because this story renders no list or bounded quantity
 - Duplicate / idempotency: N/A because the action is read-only and side-effect free
 - Concurrency / race: N/A because this is a single-user, single-session action
-- Auth / permission: AC-U1 rejects the unauthenticated case
-- State / lifecycle: AC-E1 covers the expired/stale state
+- Write ordering / partial failure: N/A because this story performs a single atomic write
+- Auth / permission: N/A because this screen is public pre-auth
+- State / lifecycle: AC-E1 covers the expired or stale state
 - External dependency failure: N/A because no external service is called here
 - Rate / abuse limits: N/A because there is no abusable repeated submission
 - Data integrity: N/A because nothing is persisted by this story
+- Clock / time: N/A because the outcome does not depend on wall-clock or elapsed time
 - Localization / encoding: N/A because no free-text is stored or rendered
-- Accessibility / device: N/A because handled globally in product-spec.md accessibility section
+- Accessibility / device: AC-H1 confirms the semantic markup and focus order
+- Degraded capability: AC-U1 falls back to the inline error state when the service is unreachable
+- Observability: N/A because this read-only view emits no new event and adds no metric
 - Security: N/A because no sensitive data or state change is exposed
 
 #### UI / UX Notes (if applicable)
@@ -154,6 +191,30 @@ Use this format for each modular functional capability under a Feature:
 | Question | Impact if unanswered | Owner | Status |
 |----------|----------------------|-------|--------|
 | ...      | ...                  | ...   | ...    |
+
+---
+
+## Deferred-Evidence AC Focus (reverse mode only)
+
+<!-- REVERSE MODE ONLY. Step 2d's Fidelity Partition marks infrastructure, telemetry,
+     persistence and DB-bound statements `[DEFERRED TO SPEC]` because no prototype can
+     witness them. Those are exactly the rows where acceptance criteria go thin — the
+     prototype never showed them, so nothing pushes the author to think about them.
+     This block forces each deferred row to be answered by a named criterion.
+     The gate fails the build if any `[DEFERRED TO SPEC]` ledger row is missing here.
+     Delete this section in create mode (there is no ledger to defer from). -->
+
+**Deferred ledger rows and the criteria that cover them:**
+
+| Ledger row | What no prototype could witness | Covered by |
+|------------|--------------------------------|------------|
+| L-03 | {infrastructure / telemetry / persistence / DB bound} | AC-U1 |
+| L-07 | {another deferred bound} | AC-E1 |
+
+**Rules:**
+- Every `L-NN` whose §14 status is `[DEFERRED TO SPEC]` gets a row here. Copy the ids from `requirements.md` §14 — do not renumber.
+- "Covered by" must name real criteria that exist in this document. A row pointing at nothing is the exact failure this block exists to prevent.
+- Where a deferred bound genuinely has no criterion yet, that is a finding: write the criterion, or raise an `[OPEN]` question in §14. Do not leave the cell empty.
 
 ---
 
