@@ -47,6 +47,8 @@ node .agents/scripts/template_conformance.js check --mode create --json
 
 A compact/off-template `requirements.md` (missing §§1–14, FR/NFR tables) or a flat `user-stories.md` (no Epic/Feature hierarchy, missing metadata, single-line ACs) fails this gate. Fix the documents against their templates — do not waive.
 
+**Also read the `warnings` array in that `--json` output before you hand off.** Warnings never change the exit code — they mark reasoning that deserves a second look, not defects: a story marking 13+ of 16 risk categories N/A, the same N/A reason reused across 3+ stories, or every story carrying an identical criterion count. Each one is a document that was filled in rather than thought through. Ignoring them defeats the reason they exist, so read them and either fix the reasoning or say explicitly why it is sound.
+
 ## Anti-generic validator (blocking)
 
 The handoff is blocked until this command exits 0 — it is the mechanical enforcement of the two `design.md` checklist lines above (prose "✓" is not sufficient):

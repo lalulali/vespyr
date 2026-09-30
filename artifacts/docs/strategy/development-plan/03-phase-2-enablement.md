@@ -4,7 +4,7 @@
 > **Calendar:** Weeks 5-7 (was "Week 5" — the phase bundles 03 + 03a + 03b ≈ 149-207h; see estimates below)
 > **Themes:** T4 (Harness contracts), T5 (Self-improvement), T8 (UTTERLY SATISFIED culture)
 > **Goal:** Vespyr enforces policy at the harness layer (hooks), tracks its own work (self-learning), has delegation audited (not just documented), makes QA a hard gate, and begins runtime enforcement of the UTTERLY SATISFIED release contract.
-> **Depends on:** Phase 0 T7.1 (delegation policy + contract blocks), Phase 1 (step-file skills — F2.24 rewrites `develop/SKILL.md`; `delegation_audit.js` and `witness.js` exist on disk from Phase 1 and are EXTENDED here), `03e-phase-2-implementation-specs.md` §8-11/§15-16 (canonical code), `08-cross-cutting-utter-satisfaction-dna.md` (gate semantics).
+> **Depends on:** Phase 0 T7.1 (delegation policy + contract blocks), Phase 1 (step-file skills — F2.24 rewrites `develop/SKILL.md`; `delegation_audit.js` and `memory_check.js` exist on disk from Phase 1 and are EXTENDED here), `03e-phase-2-implementation-specs.md` §8-11/§15-16 (canonical code), `08-cross-cutting-utter-satisfaction-dna.md` (gate semantics).
 > **External Skills & Ingestion:** Specified in `03a-phase-2-external-skills-research-and-ingestion.md` — automated discovery, agency/consulting practice skills, and pre-install safety gate.
 > **MCP (external tools):** Specified in `03b-phase-2-mcp-integration-plan.md` — 10 first-party tools (5 wrappers + 5 capability) + 4 third-party servers, all free and local-first.
 
@@ -143,9 +143,9 @@ high (abuse detection, 09 R20a).
 
 **Target:** A lightweight SHA-256 witness system (no Ed25519 — overkill for local-first). Extends the Phase 1 script of the same name (currently a memory-structure validator) rather than creating a new file.
 
-- [ ] F2.16 — Extend `.agents/scripts/witness.js` (~180 lines) with: `sign`, `verify`, `check`, `list`. Storage: `.agents/state/witness.json` — **gitignored, machine-local** (the memory files it signs are gitignored; a committed registry of gitignored inputs was incoherent). Registry covers memory files AND release/evidence artifacts (`qa-report.md`, `utter-satisfaction.json`) so `validate_satisfaction.js` rule 9 has a fingerprint source (F2.28 linkage). **Implementation code:** See `03e-phase-2-implementation-specs.md` §8
-- [ ] F2.17 — Update `memory-controller.md`: after every `write`, invoke `witness.js sign <written-path>` (positional args — §8 has no `--file=` flag). The witness is a history, not a lock. First `[INTEGRITY-WARNING]` on a file is informational; the second occurrence on the same file is blocking (occurrence counter in the registry, reset on re-sign).
-- [ ] F2.18 — Update `retro/SKILL.md` Step 5: run `witness.js check` before compaction. Second occurrence on same file is blocking (exit 1).
+- [ ] F2.16 — Extend `.agents/scripts/memory_check.js` (renamed from `witness.js` on 2026-09-30 — the old name meant three unrelated things) (~180 lines) with: `sign`, `verify`, `check`, `list`. Storage: `.agents/state/witness.json` — **gitignored, machine-local** (the memory files it signs are gitignored; a committed registry of gitignored inputs was incoherent). Registry covers memory files AND release/evidence artifacts (`qa-report.md`, `utter-satisfaction.json`) so `validate_satisfaction.js` rule 9 has a fingerprint source (F2.28 linkage). **Implementation code:** See `03e-phase-2-implementation-specs.md` §8
+- [ ] F2.17 — Update `memory-controller.md`: after every `write`, invoke `memory_check.js sign <written-path>` (positional args — §8 has no `--file=` flag). The witness is a history, not a lock. First `[INTEGRITY-WARNING]` on a file is informational; the second occurrence on the same file is blocking (occurrence counter in the registry, reset on re-sign).
+- [ ] F2.18 — Update `retro/SKILL.md` Step 5: run `memory_check.js check` before compaction. Second occurrence on same file is blocking (exit 1).
 
 **Stated limitation (09 R47 context):** self-referential trust — anyone with repo write access can re-sign entries. Accepted for local-first; the drift monitor covers `.agents/` baselines.
 
@@ -272,7 +272,7 @@ after sign-off invalidates affected rows.
 
 - [ ] 13 hooks registered, env-var-disablable, documented (T-HOOK-1..3 fixture tests pass: disable list, minimal profile = exactly 4, strict = 13)
 - [ ] `/self-learning` runs end-to-end on a real project: `self_learn.js scan` produces a digest at `state/self-learning-digest.md` (named artifact — existence asserted)
-- [ ] `node .agents/scripts/witness.js check` exits 0 on a clean project; a second modification of the same file exits 1 (occurrence tracking)
+- [ ] `node .agents/scripts/memory_check.js check` exits 0 on a clean project; a second modification of the same file exits 1 (occurrence tracking)
 - [ ] `node .agents/scripts/delegation_audit.js --since 7d` shows ≥ 5 sub-agent invocations after a typical `/develop` cycle (fixture-seeded test) AND flags agents below threshold
 - [ ] `orchestrator_state.js next` refuses to advance out of `development` without a valid `qa-signoff.md` (T-GATE-3)
 - [ ] `VESPYR_DISABLED_HOOKS=pre:bash:tmux` actually disables that hook (active-set assertion)
@@ -286,7 +286,7 @@ after sign-off invalidates affected rows.
 ## Risks
 
 - **Hooks break in different harnesses.** Per-harness adapter in `bin/cli.js`; OpenCode has no `hooks` config key — its adapter is a generated plugin (F2.3 + verification tasks V1-V4). CI runs against all 3. Safety hooks `exit 0` by default; `exit 2` only for explicit safety events. Hook crashes fail closed (exit 2), never silently pass.
-- **`witness.js` false positives.** Re-sign on every `@memory-controller write`. Witness is a history, not a lock. First warning is informational; second occurrence on the same file is blocking.
+- **`memory_check.js` false positives.** Re-sign on every `@memory-controller write`. Witness is a history, not a lock. First warning is informational; second occurrence on the same file is blocking.
 - **Self-learning promotes false patterns.** 3+ occurrences, 2+ agents, 7+ day span — all required. Every promotion is human-in-the-loop; instinct promotion requires interactive confirmation.
 - **Delegation audit reveals low rate.** This is the audit's job; don't game the metric.
 - **Delegation hooks block legitimate direct I/O.** The `[DIRECT-IO-JUSTIFIED: ...]` protocol is the escape hatch. If the hook blocks too aggressively, users can disable it via `VESPYR_DISABLED_HOOKS=pre:bash:delegation,pre:edit:delegation`. Justifications are logged, and the audit flags implausible justification rates (the string check is a convenience, not a security boundary — see 09 R20a).
@@ -318,7 +318,7 @@ If Phase 2 breaks:
 
 - [ ] 13 lifecycle hooks registered and configurable per harness
 - [ ] Self-learning engine (`self_learn.js`) and instinct promotion pipeline
-- [ ] Memory witness verification (`witness.js`) for tamper-evident artifacts
+- [ ] Memory witness verification (`memory_check.js`) for tamper-evident artifacts
 - [ ] Delegation enforcement hooks (`pre:bash:delegation`, `pre:edit:delegation`)
 - [ ] QA hard release gate (`qa_check.js` & `validate_satisfaction.js`)
 - [ ] Session-start latency budget enforcement (<1000ms)

@@ -70,7 +70,13 @@ Subcommands: `run` (default), `record-baseline`, `diff`.
 | `--reporter, -r` | `console` | `console\|json\|ndjson\|markdown` |
 | `--output, -o` | stdout | Write report to file |
 
-Exit codes: `0` all green · `1` benchmark failures · `2` baseline regression (or mock run at the default baseline path) · `3` runtime/config error (bad flags, corrupt baseline, zero benchmarks matched).
+Exit codes, **measured run** (a real adapter executed): `0` all green · `1` at least one benchmark failed · `2` baseline regression (also: a mock run pointed at the default baseline path under `record-baseline`) · `3` runtime/config error (bad flags, corrupt baseline, zero benchmarks matched).
+
+Exit codes, **mock run** (`--mock`, no model executed): `0` harness healthy · `2` baseline regression · `3` malformed suite.
+
+A mock run does **not** exit 1 on benchmark failures, and that is deliberate — see Rule zero above. Only 18 of 148 benchmarks declare a `mockOutput`; the other 130 are scored against `cannedMockResponse()`'s "Unmeasured fixture response" string, and traps are handed a stub with no verdict. Grading that is not measuring anything, so counting it as failure is a false negative. The run prints the real split (`18/148 benchmarks supplied their own output; 130 were scored against a canned stub`) so you never have to infer it.
+
+A mock run still gates on the two things it *can* know: every suite loaded, and nothing that used to pass stopped passing. If you want a quality measurement, use a real adapter — that path still exits 1 on any failure, unchanged.
 
 ## Adapters (supported list)
 

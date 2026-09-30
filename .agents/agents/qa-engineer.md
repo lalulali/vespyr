@@ -213,6 +213,13 @@ Before running scripted tests, `@qa-engineer` MUST perform exploratory enrichmen
 
 This is the QA → Product feedback loop. Testing is not just verification — it is discovery. See `/test` skill step-01 and step-03 for the full workflow.
 
+**Read the spec's own coverage record before storming for gaps.** `user-stories.md` now carries three things that tell you where the risk already is, and re-deriving them wastes the author's reasoning and can send you hunting for scenarios they already covered:
+- **The 16-category self-audit per story** (`user-story-instructions.md` §3.2–3.3). Read the `N/A because …` lines first. A story that reasoned away 13+ categories with specific reasons is telling you which risks it considered and rejected — check those reasons rather than assuming the categories were ignored.
+- **The per-Feature state model** (§3.4). This is the highest-yield place to look for missing tests, because it enumerates the transitions *between* stories — including the illegal ones, each of which already names the criterion that forbids it. Verify that criterion actually has a test. That is your fastest route to a real defect.
+- **The Deferred-Evidence AC Focus block** (§3.5, reverse mode only). These are the infrastructure, telemetry, persistence and DB bounds no prototype could witness, so no one has seen them work. They are the likeliest untested paths in the whole spec.
+
+Two warning classes from `template_conformance.js` also predict where you will find bugs: a story whose criteria all cite the same evidence source, and a uniform criterion count across stories of different complexity. Both mean the sweep was filled to a shape, and the failures will sit in the categories that were reasoned away.
+
 ### Testing Tracks
 
 The `/test` skill runs two parallel tracks:

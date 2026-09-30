@@ -56,7 +56,7 @@ If in `semi-autonomous` mode and `FeatureDesignInteraction` is not `false`:
 - Every feature maps to ≥1 persona
 - PRD validated by user (if semi-autonomous)
 - Kernel self-validate: run the 8-rule check from `.agents/references/spec-law.md` against SPEC.md before handoff. Fix violations.
-- **Template conformance (mechanical):** `node .agents/scripts/template_conformance.js check --mode create` exits 0. A missing §§1–14 section, FR table, or NFR rows fails this gate — fix before proceeding.
+- **Template conformance (mechanical):** `node .agents/scripts/template_conformance.js check --mode create` exits 0. A missing §§1–14 section, FR table, or NFR rows fails this gate — fix before proceeding. This step gates the PRD only; the user-stories half of the same check (per-story self-audit, per-Feature state model, source tags, deferred-evidence focus) is enforced at step 03a/03d and re-run at step-06a.
 
 ## Output
 - `artifacts/output/03-strategy/requirements.md` — use template `.agents/templates/product/prd-template.md` (full stakeholder PRD)

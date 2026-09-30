@@ -42,6 +42,7 @@ Load and cross-check every strategy artifact against the user stories. Confirm a
    node .agents/scripts/template_conformance.js check --mode create --json
    ```
    Exit 0 required. If `requirements.md` or `user-stories.md` is off-template (a defect that should have been caught at the design handoff gate), halt and route back to `/design` — do not begin coding against a malformed spec.
+   Then read the `warnings` array from the same `--json` output. Warnings do not affect the exit code and do not block coding, but they mark thin reasoning: a story marking 13+ of 16 risk categories N/A, the same N/A reason copied across 3+ stories, or a uniform criterion count across stories. If the spec you were handed is full of them, raise it with @product-manager before building on it — those are the stories most likely to hide an untested failure mode.
 3. Cross-check ACs against the spec-kernel capabilities (CAP-1, CAP-2, ...).
 4. Confirm all edge cases and scope boundaries are defined.
 5. If a prototype is in scope, verify the collaboration record's track, runtime, prototype hash, and separate designer/tech-lead sign-offs with `prototype_collab_gate.js`; a failed check is a spec-alignment halt.
