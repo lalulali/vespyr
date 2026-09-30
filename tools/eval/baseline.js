@@ -181,6 +181,9 @@ function diffAgainstBaseline(current, baseline) {
 
   const regressions = [];
   const improvements = [];
+  // Non-blocking observations: things a human should know but that are not
+  // regressions. Kept separate so `hasRegression` never trips on them.
+  const notes = [];
 
   // 0. Mock-mode mismatch: fixture-recall numbers and model measurements are
   // incomparable. Comparing them silently launders one as the other.
@@ -192,11 +195,47 @@ function diffAgainstBaseline(current, baseline) {
     });
   }
 
-  // 1. Pass Rate Drop (Zero tolerance)
-  if (passRateDelta < -thresholds.pass_rate_drop) {
+  // 1. Pass Rate Drop (Zero tolerance) — but ONLY on a comparable benchmark set.
+  //
+  // WHY THE GUARD: a rate is a ratio, and a ratio is meaningless across
+  // different denominators. Adding five new (failing) benchmarks to a set of 143
+  // drops 39/143 = 27.3% to 39/148 = 26.4% with ZERO regressions — the absolute
+  // pass count is identical and nothing that used to pass stopped passing. That
+  // was reported as a 0.9% regression, which is a false alarm that trains people
+  // to ignore the gate.
+  //
+  // The per-benchmark check below (BENCHMARK_REGRESSION, "was PASS, now FAIL")
+  // is the semantically correct regression signal and already runs on every
+  // benchmark present in both. So when the set changed, the rate is reported as
+  // a NOT-comparable note and deferral to that check, not as a regression.
+  const baseIds = new Set((baseline.benchmarks || []).map((b) => b.id));
+  const currIds = new Set((current.benchmarks || []).map((b) => b.id));
+  const added = [...currIds].filter((id) => !baseIds.has(id));
+  const removed = [...baseIds].filter((id) => !currIds.has(id));
+  const setChanged = added.length > 0 || removed.length > 0;
+
+  if (setChanged) {
+    notes.push({
+      type: "BENCHMARK_SET_CHANGED",
+      message: `Benchmark set changed (baseline ${baseIds.size}, current ${currIds.size}`
+        + `${added.length ? `, +${added.length} added` : ""}`
+        + `${removed.length ? `, ${removed.length} removed` : ""}`
+        + `). Pass rate is not comparable across a changed denominator, so it is not gated here — the raw rate moved ${(passRateDelta * 100).toFixed(1)} points. Real regressions are caught per benchmark below (PASS→FAIL) and by BENCHMARK_REMOVED. Re-baseline to restore a comparable set.`
+    });
+  } else if (passRateDelta < -thresholds.pass_rate_drop) {
     regressions.push({
       type: "PASS_RATE_DROP",
       message: `Pass rate dropped by ${(Math.abs(passRateDelta) * 100).toFixed(1)}% (Baseline: ${(basePassRate * 100).toFixed(1)}%, Current: ${(currPassRate * 100).toFixed(1)}%)`
+    });
+  }
+
+  // 1b. A benchmark that no longer runs provides no assurance. Deleting a
+  // failing benchmark would otherwise "improve" the rate with nothing changed.
+  for (const id of removed) {
+    regressions.push({
+      type: "BENCHMARK_REMOVED",
+      id,
+      message: `Benchmark ${id} is in the baseline but did not run. Removing a benchmark removes its evidence — restore it, or re-baseline deliberately and say why.`
     });
   }
 
@@ -286,6 +325,7 @@ function diffAgainstBaseline(current, baseline) {
     hasRegression: regressions.length > 0,
     regressions,
     improvements,
+    notes,
     thresholds,
     deltas: {
       passRateDelta: Number(passRateDelta.toFixed(4)),

@@ -277,3 +277,124 @@ test("CLI - record-baseline refuses mock runs at the default path", () => {
   assert.strictEqual(res.status, 2, `stdout: ${res.stdout}\nstderr: ${res.stderr}`);
   assert.match(res.stderr, /Refusing to record a mock run/);
 });
+
+// ---------------------------------------------------------------------------
+// Pass-rate comparability (2026-09-30)
+//
+// A rate is a ratio, and a ratio is meaningless across different denominators.
+// Adding 5 new failing benchmarks to a 143-benchmark set moved 39/143 = 27.3%
+// to 39/148 = 26.4% with the absolute pass count identical and nothing that used
+// to pass having stopped. The harness called that a 0.9% regression and exited 2.
+//
+// A false alarm on a gate is worse than no gate: it trains people to ignore it.
+// The correct regression signal already exists — BENCHMARK_REGRESSION, "was
+// PASS, now FAIL" — and it runs per benchmark, so it needs no denominator.
+// ---------------------------------------------------------------------------
+
+test("Baseline: adding benchmarks is NOT a pass-rate regression", () => {
+  const baseline = {
+    version: "2.0.0",
+    summary: { total_benchmarks: 143, pass_rate: 39 / 143, total_token_spend: 1000, tier1_avg_score: 5.0 },
+    benchmarks: [
+      { id: "BM-01", passed: true, tier1_score: 5.0, tokens: 10 },
+      { id: "BM-02", passed: false, tier1_score: 2.0, tokens: 10 },
+    ]
+  };
+  // Same two benchmarks, same outcomes, plus three new failures. Pass COUNT is
+  // unchanged; only the denominator moved.
+  const current = {
+    total: 5,
+    passRate: 1 / 5,
+    totalTokens: 1000,
+    tier1AvgScore: 5.0,
+    benchmarks: [
+      { id: "BM-01", passed: true, tier1Score: 5.0, tokens: 10 },
+      { id: "BM-02", passed: false, tier1Score: 2.0, tokens: 10 },
+      { id: "BM-03", passed: false, tier1Score: 0, tokens: 10 },
+      { id: "BM-04", passed: false, tier1Score: 0, tokens: 10 },
+      { id: "BM-05", passed: false, tier1Score: 0, tokens: 10 },
+    ]
+  };
+  const diff = diffAgainstBaseline(current, baseline);
+  assert.strictEqual(diff.hasRegression, false, `a larger denominator must not read as a regression: ${JSON.stringify(diff.regressions)}`);
+  assert.strictEqual(diff.regressions.some((r) => r.type === "PASS_RATE_DROP"), false);
+  // ...but the change must still be VISIBLE, not silently swallowed.
+  assert.ok(diff.notes.some((n) => n.type === "BENCHMARK_SET_CHANGED"), "the set change must be reported as a note");
+  assert.match(diff.notes.find((n) => n.type === "BENCHMARK_SET_CHANGED").message, /not comparable/);
+});
+
+test("Baseline: a real PASS→FAIL flip is still a regression on a changed set", () => {
+  // The guard must not become an escape hatch. If a benchmark that used to pass
+  // now fails, that is a regression regardless of how many benchmarks were added.
+  const baseline = {
+    version: "2.0.0",
+    summary: { total_benchmarks: 2, pass_rate: 0.5, total_token_spend: 1000, tier1_avg_score: 5.0 },
+    benchmarks: [
+      { id: "BM-01", passed: true, tier1_score: 5.0, tokens: 10 },
+      { id: "BM-02", passed: false, tier1_score: 2.0, tokens: 10 },
+    ]
+  };
+  const current = {
+    total: 3,
+    passRate: 0,
+    totalTokens: 1000,
+    tier1AvgScore: 5.0,
+    benchmarks: [
+      { id: "BM-01", passed: false, tier1Score: 0, tokens: 10 },
+      { id: "BM-02", passed: false, tier1Score: 2.0, tokens: 10 },
+      { id: "BM-03", passed: false, tier1Score: 0, tokens: 10 },
+    ]
+  };
+  const diff = diffAgainstBaseline(current, baseline);
+  assert.strictEqual(diff.hasRegression, true, "a real regression must still be caught on a changed set");
+  assert.ok(diff.regressions.some((r) => r.type === "BENCHMARK_REGRESSION" && r.id === "BM-01"));
+});
+
+test("Baseline: PASS_RATE_DROP still fires on an unchanged benchmark set", () => {
+  // The control. Without the set-change path, the same rate drop must still gate.
+  const baseline = {
+    version: "2.0.0",
+    summary: { total_benchmarks: 3, pass_rate: 1.0, total_token_spend: 1000, tier1_avg_score: 5.0 },
+    benchmarks: [
+      { id: "BM-01", passed: true, tier1_score: 5.0, tokens: 10 },
+      { id: "BM-02", passed: true, tier1_score: 5.0, tokens: 10 },
+      { id: "BM-03", passed: true, tier1_score: 5.0, tokens: 10 },
+    ]
+  };
+  const current = {
+    total: 3,
+    passRate: 2 / 3,
+    totalTokens: 1000,
+    tier1AvgScore: 5.0,
+    benchmarks: [
+      { id: "BM-01", passed: true, tier1Score: 5.0, tokens: 10 },
+      { id: "BM-02", passed: false, tier1Score: 0, tokens: 10 },
+      { id: "BM-03", passed: true, tier1Score: 5.0, tokens: 10 },
+    ]
+  };
+  const diff = diffAgainstBaseline(current, baseline);
+  assert.ok(diff.regressions.some((r) => r.type === "PASS_RATE_DROP"), "an unchanged set must still gate on rate");
+});
+
+test("Baseline: removing a benchmark is a regression — it removes its evidence", () => {
+  // Deleting a failing benchmark would otherwise 'improve' the rate with nothing
+  // having changed. A benchmark that no longer runs provides no assurance.
+  const baseline = {
+    version: "2.0.0",
+    summary: { total_benchmarks: 2, pass_rate: 0.5, total_token_spend: 1000, tier1_avg_score: 5.0 },
+    benchmarks: [
+      { id: "BM-01", passed: true, tier1_score: 5.0, tokens: 10 },
+      { id: "BM-02", passed: false, tier1_score: 2.0, tokens: 10 },
+    ]
+  };
+  const current = {
+    total: 1,
+    passRate: 1.0,
+    totalTokens: 1000,
+    tier1AvgScore: 5.0,
+    benchmarks: [{ id: "BM-01", passed: true, tier1Score: 5.0, tokens: 10 }]
+  };
+  const diff = diffAgainstBaseline(current, baseline);
+  assert.strictEqual(diff.hasRegression, true, "removing a benchmark must not read as an improvement");
+  assert.ok(diff.regressions.some((r) => r.type === "BENCHMARK_REMOVED" && r.id === "BM-02"));
+});

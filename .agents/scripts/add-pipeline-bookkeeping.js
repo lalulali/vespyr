@@ -2,6 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { editFile, summarize } = require('./lib/safe_edit');
 
 const AGENTS_DIR = path.resolve(__dirname, '..', 'agents');
 
@@ -13,7 +14,7 @@ const REASONING_AGENTS = [
   'user-researcher', 'ux-researcher',
 ];
 
-let count = 0;
+const results = [];
 
 for (const name of REASONING_AGENTS) {
   const filePath = path.join(AGENTS_DIR, name + '.md');
@@ -61,9 +62,16 @@ Never skip these calls. They are required for pipeline state continuity.
   // We want to insert this block right before the next heading (which starts with \n## )
   const updatedContent = content.slice(0, nextHeadingIdx) + '\n\n' + injectedBlock.trim() + '\n' + content.slice(nextHeadingIdx);
 
-  fs.writeFileSync(filePath, updatedContent, 'utf-8');
-  console.log('OK: ' + name);
-  count++;
+  // Both anchors are checked above, so this cannot be a silent no-op — but the
+  // write is still routed through editFile so a no-change is caught and the
+  // write is atomic, matching its sibling migration scripts.
+  const r = editFile(filePath, () => ({ ok: true, reason: null, content: updatedContent }));
+  if (r.ok) {
+    console.log('OK: ' + name);
+  } else {
+    console.error('FAIL: ' + name + ' — ' + r.reason);
+    results.push({ ...r, label: name });
+  }
 }
 
-console.log('\nAdded Pipeline Bookkeeping to ' + count + ' agent(s).');
+process.exit(summarize('Pipeline Bookkeeping', results));

@@ -2,6 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { editFile, summarize } = require('./lib/safe_edit');
 
 const SKILLS_DIR = path.resolve(__dirname, '..', 'skills');
 
@@ -30,6 +31,7 @@ function getStepFiles(dir) {
 const stepFiles = getStepFiles(SKILLS_DIR);
 let modifiedCount = 0;
 let skippedCount = 0;
+const failed = [];
 
 stepFiles.forEach(filePath => {
   let content = fs.readFileSync(filePath, 'utf-8');
@@ -68,28 +70,48 @@ stepFiles.forEach(filePath => {
     skill = `${skill}-${modeMatch[1].trim()}`;
   }
 
-  // Injected begin call
+  const beginCall = `> **Tracker:** \`node .agents/scripts/step_tracker.js begin --skill ${skill} --step ${step}\``;
+
+  // Injected begin call. THREE fallbacks, tried in order. Previously, if all
+  // three anchors were absent the script fell through, added only the `complete`
+  // call, wrote the file, and counted it as modified — leaving a step file with
+  // a half-migrated tracker pair and a success message. An unresolvable insert
+  // point is now a FAILURE and the file is left untouched.
+  let next = null;
   if (content.includes('## Process')) {
-    content = content.replace('## Process', `## Process\n> **Tracker:** \`node .agents/scripts/step_tracker.js begin --skill ${skill} --step ${step}\``);
+    next = content.replace('## Process', `## Process\n${beginCall}`);
   } else {
     const firstHeading2 = content.indexOf('\n## ');
     if (firstHeading2 !== -1) {
-      content = content.slice(0, firstHeading2) + `\n\n> **Tracker:** \`node .agents/scripts/step_tracker.js begin --skill ${skill} --step ${step}\`` + content.slice(firstHeading2);
+      next = content.slice(0, firstHeading2) + `\n\n${beginCall}` + content.slice(firstHeading2);
     } else {
       const endFm = content.indexOf('---', 3);
       if (endFm !== -1) {
-        content = content.slice(0, endFm + 3) + `\n\n> **Tracker:** \`node .agents/scripts/step_tracker.js begin --skill ${skill} --step ${step}\`` + content.slice(endFm + 3);
+        next = content.slice(0, endFm + 3) + `\n\n${beginCall}` + content.slice(endFm + 3);
       }
     }
   }
 
-  // Injected complete call
-  content = content.trim() + `\n\n> **Tracker:** \`node .agents/scripts/step_tracker.js complete --skill ${skill} --step ${step}\`\n`;
+  if (next === null) {
+    const rel = path.relative(SKILLS_DIR, filePath);
+    console.error(`FAIL: ${rel} — no insertion point for the begin call (tried "## Process", the first "## " heading, and end-of-frontmatter). File left untouched.`);
+    failed.push({ ok: false, reason: 'no-insert-point-for-begin-call', path: filePath, label: rel });
+    return;
+  }
 
-  fs.writeFileSync(filePath, content, 'utf-8');
-  modifiedCount++;
+  // Injected complete call
+  next = next.trim() + `\n\n> **Tracker:** \`node .agents/scripts/step_tracker.js complete --skill ${skill} --step ${step}\`\n`;
+
+  const r = editFile(filePath, () => ({ ok: true, reason: null, content: next }));
+  if (r.ok) {
+    modifiedCount++;
+  } else {
+    console.error(`FAIL: ${path.relative(SKILLS_DIR, filePath)} — ${r.reason}`);
+    failed.push({ ...r, label: path.relative(SKILLS_DIR, filePath) });
+  }
 });
 
 console.log(`\nProcessed all step files.`);
 console.log(`Modified: ${modifiedCount}`);
 console.log(`Skipped (already tracked): ${skippedCount}`);
+process.exit(summarize('Step tracker calls', failed));

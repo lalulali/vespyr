@@ -2,6 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { editFile } = require('./lib/safe_edit');
 
 const AGENTS_DIR = path.resolve(__dirname, '..', 'agents');
 
@@ -68,7 +69,16 @@ function addIdentityBlock(filePath) {
   const identityBlock = buildIdentityBlock(fields.icon, fields.humanName, fields.name);
 
   const newContent = `${fmBlock}${identityBlock}${body.trimStart()}`;
-  fs.writeFileSync(filePath, newContent, 'utf-8');
+
+  // This script never used an anchor (it rebuilds from parsed frontmatter), so
+  // it could not hit the silent-no-op bug. It is routed through editFile anyway
+  // so all five migration scripts share one write path: atomic, and a
+  // "successful" edit that changed nothing is reported as a failure.
+  const r = editFile(filePath, () => ({ ok: true, reason: null, content: newContent }));
+  if (!r.ok) {
+    console.error(`FAIL: ${filename} — ${r.reason}`);
+    return false;
+  }
   console.log(`OK: ${filename}`);
   return true;
 }

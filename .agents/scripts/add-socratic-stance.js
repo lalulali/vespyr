@@ -2,6 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { insertBefore, editFile, summarize } = require('./lib/safe_edit');
 
 const AGENTS_DIR = path.resolve(__dirname, '..', 'agents');
 
@@ -38,7 +39,14 @@ function buildStanceBlock(name) {
     '**When to escalate vs. accept:** Escalate when ' + s.escalate + '. Accept when the counter-evidence is stronger than my initial position.\n';
 }
 
-let count = 0;
+// ANCHOR NOTE: this used to be `content.replace('## Delegation Contract', …)`
+// with no check that the anchor existed. `String.replace` returns the original
+// string unchanged when the search string is absent, so a file missing that
+// heading was rewritten byte-identical while the script printed "OK: <name>"
+// and counted it as migrated. Verified on 2026-09-30: same SHA-256 before and
+// after, with a success message. Now an absent anchor is a FAILURE and the file
+// is left untouched.
+const results = [];
 
 for (const name of REASONING_AGENTS) {
   const filePath = path.join(AGENTS_DIR, name + '.md');
@@ -47,7 +55,7 @@ for (const name of REASONING_AGENTS) {
     continue;
   }
 
-  let content = fs.readFileSync(filePath, 'utf-8');
+  const content = fs.readFileSync(filePath, 'utf-8');
 
   if (content.includes('## Socratic Stance')) {
     console.log('SKIP: ' + name + ' — already has Socratic Stance');
@@ -60,14 +68,14 @@ for (const name of REASONING_AGENTS) {
   }
 
   const block = buildStanceBlock(name);
-  content = content.replace(
-    '## Delegation Contract',
-    block + '\n\n## Delegation Contract',
-  );
+  const r = editFile(filePath, (c) => insertBefore(c, '## Delegation Contract', block + '\n\n'));
+  results.push({ ...r, label: name });
 
-  fs.writeFileSync(filePath, content, 'utf-8');
-  console.log('OK: ' + name);
-  count++;
+  if (r.ok) {
+    console.log('OK: ' + name);
+  } else {
+    console.error('FAIL: ' + name + ' — ' + r.reason);
+  }
 }
 
-console.log('\nAdded Socratic Stance to ' + count + ' agent(s).');
+process.exit(summarize('Socratic Stance', results));

@@ -2,6 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { insertAfter, editFile, summarize } = require('./lib/safe_edit');
 
 const AGENTS_DIR = path.resolve(__dirname, '..', 'agents');
 
@@ -61,7 +62,7 @@ const REASONING_AGENTS = [
   'user-researcher', 'ux-researcher',
 ];
 
-let count = 0;
+const results = [];
 
 for (const name of REASONING_AGENTS) {
   const filePath = path.join(AGENTS_DIR, name + '.md');
@@ -70,7 +71,7 @@ for (const name of REASONING_AGENTS) {
     continue;
   }
 
-  let content = fs.readFileSync(filePath, 'utf-8');
+  const content = fs.readFileSync(filePath, 'utf-8');
 
   if (content.includes('## Citation Protocol')) {
     console.log('SKIP: ' + name + ' — already has Citation Protocol');
@@ -82,14 +83,17 @@ for (const name of REASONING_AGENTS) {
     block += '\n' + CITATION_EMPHASIS[name] + '\n';
   }
 
-  content = content.replace(
-    '<!-- /IDENTITY -->',
-    '<!-- /IDENTITY -->' + block,
-  );
+  // ANCHOR NOTE: was a bare `content.replace('<!-- /IDENTITY -->', …)`. With the
+  // anchor absent, `String.replace` returns the string unchanged — the file was
+  // rewritten byte-identical while the script reported "OK" and counted it.
+  const r = editFile(filePath, (c) => insertAfter(c, '<!-- /IDENTITY -->', block));
+  results.push({ ...r, label: name });
 
-  fs.writeFileSync(filePath, content, 'utf-8');
-  console.log('OK: ' + name);
-  count++;
+  if (r.ok) {
+    console.log('OK: ' + name);
+  } else {
+    console.error('FAIL: ' + name + ' — ' + r.reason);
+  }
 }
 
-console.log('\nAdded Citation Protocol to ' + count + ' agent(s).');
+process.exit(summarize('Citation Protocol', results));

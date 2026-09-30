@@ -1150,7 +1150,7 @@ The skill checks what artifacts exist and adapts — no mode selector needed:
 - [x] Verify every step file has frontmatter with `delegation:`, `output_contract.citations:` — *SUPERSEDED 2026-09-29 (02p): `delegation:` frontmatter is absent repo-wide (`grep -rln "^delegation:" .agents/skills/ \| wc -l` → 0); the `output_contract.citations:` half is separately enforced by `spec_check.js`.*
 - [x] Verify SKILL.md router is ≤ 500 lines
 
-- [x] Test: invoke with no prior artifacts → full shaping flow (28/28 assertions in test-shape-up.mjs)
+- [x] Test: invoke with no prior artifacts → full shaping flow (28/28 assertions in test-shape-up.mjs) **[UNVERIFIABLE as of 2026-09-30]** `test-shape-up.mjs` was deleted in 02s T012 as a fake gate — 81 of its 82 assertions tested logic it reimplemented inside its own file against fixtures it wrote itself. The claim is no longer reproducible. Note the original count (28/28) also disagreed with the harness's own report (82 total).
 - [x] Test: invoke after validation brief → incorporates premises (6 assertions, step-02 loads validation-brief.md correctly)
 - [x] Test: invoke after research → synthesizes findings (9 assertions, 3 research files loaded, cross-ref active)
 - [x] Test: double-run (shape → explore → shape → design) (9 assertions, Run2 loads shaped-brief + all 3 research)
@@ -1488,8 +1488,8 @@ Upgrade `@product-manager` (Sarah) to operate as a full **AI Product Manager (AI
 - [x] Every step file has an `output_contract.citations` field (`required` or `not-required`) per F0.29; CI verifies the field is present
 - [x] `/shape-up` skill exists with SKILL.md router (≤ 500 lines) + 6 step files; cross-skill wiring in `explore-idea`, `design`, and `AGENTS.md` is complete
 
-- [x] `/test` skill restructured to separate feature and full-cycle test tracks; QA engineer enrichment flows verified via `test-qa-enrichment.mjs` (104/104 assertions).
-- [x] `/unpack-problem` skill exists with tri-modal SKILL.md router + 4 step files; output brief successfully routes to `/validate-idea`, `/shape-up`, and `/explore-idea`; verified via `test-unpack-problem.mjs` (103/103 assertions).
+- [x] `/test` skill restructured to separate feature and full-cycle test tracks; QA engineer enrichment flows verified via `test-qa-enrichment.mjs` (104/104 assertions). **[MIGRATED 2026-09-30]** The `.mjs` was deleted in 02s T012 as unreferenced; its assertions now run as `tests/skills/test-qa-enrichment.test.js` (100 assertions, wired into `npm test` + CI + pre-commit). This file was the *only* enforcer of the `at least 3 newly discovered scenarios` gate — `grep -rn "3 newly discovered" tests/ .agents/scripts/` returned zero hits after the delete. Original count was 100, not 104.
+- [x] `/unpack-problem` skill exists with tri-modal SKILL.md router + 4 step files; output brief successfully routes to `/validate-idea`, `/shape-up`, and `/explore-idea`; verified via `test-unpack-problem.mjs` (103/103 assertions). **[MIGRATED 2026-09-30]** The `.mjs` was deleted in 02s T012 as unreferenced; its assertions now run as `tests/skills/unpack-problem.test.js` (102 assertions, wired into `npm test` + CI + pre-commit). It is the only enforcer of the `problem-space-brief.md` cross-skill wiring into validate-idea / shape-up / explore-idea. Count is 102, not 103: the original asserted the identical predicate `exploreIdea.includes('problem-space-brief.md')` twice, which carried no additional signal.
 - [x] Modular design thinking skills (`/root-cause`, `/research-plan`, `/empathy-map`, `/journey-map`, `/jtbd`, `/discovery-report`) exist with independent `SKILL.md` facilitators, templates in `.agents/templates/discovery/`, `/help-me` integration, and registration in `AGENTS.md`.
 
 - [x] **T8 handoff contract:** launch readiness and workflow steps carry explicit satisfaction states, evidence, and revalidation requirements; runtime validation remains a Phase 2 deliverable.

@@ -1,7 +1,7 @@
 [
   {
     "name": "analyze-data",
-    "description": "General data analysis companion — EDA, dataset provision, visualization mapping, insight extraction, metric value evaluation, and PM metric co-piloting",
+    "description": "General data analysis companion — EDA, dataset provision, visualization mapping, insight extraction, metric value evaluation, and PM metric co-piloting. Use when the user says \"analyze this dataset\", \"generate mock data\", \"how should we visualize this\", \"what insights are in this chart\", \"is this metric worth measuring\", or invokes /analyze-data.",
     "prerequisites": [],
     "outputs": [
       "artifacts/output/03-strategy/requirements.md",
@@ -16,7 +16,7 @@
   },
   {
     "name": "brainstorming",
-    "description": "Select and apply brainstorming methods from a 60-method catalog — SCAMPER, Six Thinking Hats, Starbursting, and more",
+    "description": "Select and apply brainstorming methods from a 60-method catalog — SCAMPER, Six Thinking Hats, Starbursting, and more. Use when the user says \"help me brainstorm\", \"which brainstorming method should I use\", \"run a Six Thinking Hats session\", or wants creative ideation before committing to a solution. Invoked as /brainstorming.",
     "prerequisites": [],
     "outputs": [
       "artifacts/output/01-discovery/brainstorming-session.md",
@@ -32,7 +32,7 @@
   },
   {
     "name": "craft-lesson",
-    "description": "Create multi-format educational materials (syllabus, handbook, cheatsheet, presentation, class, video script) from topic or draft",
+    "description": "Create multi-format educational materials (syllabus, handbook, cheatsheet, presentation, class, video script) from topic or draft. Use when the user says \"build a course\", \"turn this transcript into a handbook\", \"make a cheatsheet\", \"draft a video script\", or invokes /craft-lesson.",
     "prerequisites": [
       "Input topic name OR existing text draft/transcript file.",
       "@shifu persona configuration (.agents/agents/shifu.md).",
@@ -73,9 +73,7 @@
     "outputs": [
       "artifacts/memory/active-decisions.md"
     ],
-    "key_agents": [
-      "@qa-engineer"
-    ]
+    "key_agents": []
   },
   {
     "name": "customize-agent",
@@ -99,7 +97,7 @@
     "name": "customize-skill",
     "description": "Guided flow for customizing an existing Vespyr skill — describe what to change, locate the skill's SKILL.md and support files, apply surgical edits, and verify triggering plus spec compliance. Use this skill whenever you need to modify, adjust, retune, or refine an existing skill's description, trigger phrases, workflow steps, or resources without rebuilding it from scratch. Trigger on \"customize the X skill\", \"tweak this skill\", \"adjust skill triggering\", \"fix the skill description\", \"make the X skill trigger more often\", \"update the X skill workflow\".",
     "prerequisites": [
-      "The skill exists under .agents/skills/<skill-name>/ (and its harness mirror, e.g. .opencode/skills/<skill-name>/)",
+      "The skill exists under .agents/skills/<skill-name>/ — this is the single source of truth; there is no per-harness mirror to keep in sync",
       "You know which skill you want to customize and roughly what should change"
     ],
     "outputs": [
@@ -118,28 +116,29 @@
       "artifacts/output/02-research/market-analysis.md (optional if entering via shape-up with all assumptions verified)",
       "artifacts/output/02-research/competitive-analysis.md (optional if entering via shape-up)",
       "artifacts/output/02-research/user-personas.md (optional if entering via shape-up)",
-      "artifacts/output/02-research/journey-maps.md (optional — user-researcher journey mapping, consumed by screen specs)",
+      "artifacts/output/02-research/journey-map.md (optional — written by /journey-map, consumed by screen specs)",
       "artifacts/output/02-research/usability-test-kit.md (optional — ux-researcher kit; results return via ux-research-report.md)"
     ],
     "outputs": [
+      "artifacts/output/01-discovery/",
       "artifacts/output/03-strategy/SPEC.md",
       "artifacts/output/01-discovery/validation-brief.md",
       "artifacts/output/02-research/market-analysis.md",
       "artifacts/output/02-research/competitive-analysis.md",
       "artifacts/output/02-research/user-personas.md",
-      "artifacts/output/02-research/journey-maps.md",
+      "artifacts/output/02-research/journey-map.md",
       "artifacts/output/02-research/usability-test-kit.md"
     ],
     "key_agents": [
-      "@product-manager",
       "@product-designer",
       "@tech-lead",
+      "@product-manager",
       "@architect"
     ]
   },
   {
     "name": "develop",
-    "description": "Core MVP workflow — spec review, architecture, planning, implementation, coverage fidelity review, QA, verification, and documentation",
+    "description": "Core MVP workflow — spec review, architecture, planning, implementation, coverage fidelity review, QA, verification, and documentation. Use when the user says \"build this\", \"implement the approved plan\", \"start development\", \"run the dev cycle\", or invokes /develop after planning is complete.",
     "prerequisites": [
       "Spec-kernel exists at artifacts/output/03-strategy/ (see spec-kernel-template.md)",
       "User stories in artifacts/output/03-strategy/user-stories.md",
@@ -159,10 +158,12 @@
   },
   {
     "name": "discovery-report",
-    "description": "Compile design thinking and research outputs into a unified report with dynamic usability testing scoring",
+    "description": "Compile design thinking and research outputs into a unified report with dynamic usability testing scoring. Use when the user says \"compile everything we learned\", \"pull the research into one report\", \"write the discovery report\", or invokes /discovery-report before presenting findings to stakeholders.",
     "prerequisites": [],
     "outputs": [
-      "artifacts/output/02-research/"
+      "artifacts/output/02-research/",
+      "artifacts/output/02-research/usability-report.md",
+      "artifacts/output/02-research/user-research-report.md"
     ],
     "key_agents": [
       "@product-manager"
@@ -182,7 +183,7 @@
   },
   {
     "name": "empathy-map",
-    "description": "Map user feelings, thoughts, sayings, and doings from observation data into an empathy quadrant canvas",
+    "description": "Map user feelings, thoughts, sayings, and doings from observation data into an empathy quadrant canvas. Use when the user says \"map out the user experience\", \"what are users thinking\", \"build an empathy map\", or invokes /empathy-map before designing a feature.",
     "prerequisites": [],
     "outputs": [
       "artifacts/output/02-research/empathy-map.md"
@@ -193,7 +194,7 @@
   },
   {
     "name": "explore-idea",
-    "description": "Validates a concept through market, competitor, and user research — turns a validated idea into evidence-backed research",
+    "description": "Validates a concept through market, competitor, and user research — turns a validated idea into evidence-backed research. Use when the user says \"research the market for this\", \"who are the competitors\", \"validate this with users\", or invokes /explore-idea after the concept is validated.",
     "prerequisites": [
       "*Path A — Has validation brief (recommended):**",
       "  artifacts/output/01-discovery/validation-brief.md exists with a GO verdict",
@@ -263,7 +264,7 @@
   },
   {
     "name": "incident",
-    "description": "Production incident management — triage, mitigate, root-cause analysis, and post-incident review",
+    "description": "Production incident management — triage, mitigate, root-cause analysis, and post-incident review. Use when the user says \"the site is down\", \"error rates are spiking\", \"we have a production incident\", \"do a postmortem\", or invokes /incident.",
     "prerequisites": [],
     "outputs": [
       "artifacts/output/08-incidents/INC-NNN/",
@@ -287,7 +288,7 @@
   },
   {
     "name": "iterate",
-    "description": "Post-launch feature iteration — analyze user data, prioritize improvements, ship incremental value",
+    "description": "Post-launch feature iteration — analyze user data, prioritize improvements, ship incremental value. Use when the user says \"improve this feature\", \"iterate based on the data\", \"what should we build next after launch\", or invokes /iterate once the product is live.",
     "prerequisites": [
       "  Product is live and accessible to users",
       "  Post-launch monitoring period is complete (24-72 hours)",
@@ -303,8 +304,8 @@
       "artifacts/output/07-iteration/iteration-results.md"
     ],
     "key_agents": [
-      "@data-analyst",
       "@product-manager",
+      "@data-analyst",
       "@product-designer",
       "@architect",
       "@tech-lead",
@@ -316,7 +317,7 @@
   },
   {
     "name": "journey-map",
-    "description": "Visualize user touchpoints, emotional state transitions, and friction points across current workflows",
+    "description": "Visualize user touchpoints, emotional state transitions, and friction points across current workflows. Use when the user says \"map the user journey\", \"where are users getting stuck\", \"show me the end-to-end experience\", or invokes /journey-map before redesigning a flow.",
     "prerequisites": [],
     "outputs": [
       "artifacts/output/02-research/journey-map.md"
@@ -327,7 +328,7 @@
   },
   {
     "name": "jtbd",
-    "description": "Formulate Jobs-to-be-Done statements and map How Might We opportunity questions in a single canvas",
+    "description": "Formulate Jobs-to-be-Done statements and map How Might We opportunity questions in a single canvas. Use when the user says \"what job is the user hiring this for\", \"turn the research into opportunities\", \"generate How Might We questions\", or invokes /jtbd before ideation.",
     "prerequisites": [],
     "outputs": [
       "artifacts/output/02-research/jtbd-hmw.md"
@@ -338,7 +339,7 @@
   },
   {
     "name": "kanban",
-    "description": "Display and update the Kanban board — track task progress across phases",
+    "description": "Display and update the Kanban board — track task progress across phases. Use when the user says \"show me the kanban\", \"move this task to done\", \"what is blocked\", \"add a task\", or invokes /kanban.",
     "prerequisites": [],
     "outputs": [
       "artifacts/output/05-planning/kanban.md",
@@ -350,7 +351,7 @@
   },
   {
     "name": "launch",
-    "description": "Go-to-market coordination — release readiness, deployment, smoke testing, post-launch monitoring, and completion",
+    "description": "Go-to-market coordination — release readiness, deployment, smoke testing, post-launch monitoring, and completion. Use when the user says \"ship it\", \"launch this feature\", \"deploy to production\", \"are we ready to release\", or invokes /launch once development is complete.",
     "prerequisites": [
       "All tasks in artifacts/output/05-planning/execution-plan.md are complete",
       "Code review passed, QA validated, PM signed off",
@@ -358,6 +359,7 @@
       "artifacts/output/06-launch/release-readiness.md contains the completed UTTERLY SATISFIED team gate"
     ],
     "outputs": [
+      "artifacts/output/06-launch/launch-log.md",
       "artifacts/output/05-planning/execution-plan.md",
       "artifacts/output/06-launch/release-readiness.md"
     ],
@@ -366,8 +368,27 @@
     ]
   },
   {
+    "name": "legal-safety-audit",
+    "description": "Legal and compliance safety audit for an app so it does not get sued. Generates privacy policy, terms of service, refund, cookie policy plus consent banner and email footer drafts, and audits the app for consent, data minimization, third-party SDKs, dark patterns, hidden fees, fake reviews, unsupported claims, accessibility (alt text, contrast, keyboard), kids-data consent, and data-deletion. Use whenever the user says compliance audit, legal review, \"won't get sued\", GDPR, CCPA, COPPA, privacy policy, terms of service, cookie consent, dark patterns, accessibility audit, or data deletion request.",
+    "prerequisites": [
+      "Access to the app's codebase (for Phase B code inspection).",
+      "The user available to answer the Step-0 app-profile intake."
+    ],
+    "outputs": [
+      "artifacts/output/legal-safety-audit/audit-report.md",
+      "artifacts/output/legal-safety-audit/drafts/"
+    ],
+    "key_agents": [
+      "@technical-writer",
+      "@security-engineer",
+      "@product-designer",
+      "@ux-researcher",
+      "@code-reviewer"
+    ]
+  },
+  {
     "name": "memory",
-    "description": "Search archived memory entries — retrieve historical context that has been compacted",
+    "description": "Search archived memory entries — retrieve historical context that has been compacted. Use when the user says \"what was the decision we made about X\", \"show me past lessons on Y\", \"find the architecture decision for Z\", or invokes /memory to search project history.",
     "prerequisites": [],
     "outputs": [],
     "key_agents": []
@@ -407,7 +428,7 @@
   },
   {
     "name": "phase",
-    "description": "Show current phase, switch phases, list phase artifacts",
+    "description": "Show current phase, switch phases, list phase artifacts. Use when the user says \"what phase are we in\", \"switch to the design phase\", \"what has been produced so far\", or invokes /phase.",
     "prerequisites": [],
     "outputs": [
       "artifacts/output/pipeline-state.json",
@@ -418,14 +439,14 @@
   },
   {
     "name": "plan",
-    "description": "Create an execution plan from existing specs — standalone, outside the full develop cycle",
+    "description": "Create an execution plan from existing specs — standalone, outside the full develop cycle. Use when the user says \"plan out how we build this\", \"break this spec into tasks\", \"how long will this take\", or invokes /plan.",
     "prerequisites": [
       "artifacts/output/03-strategy/product-spec.md exists",
       "Architecture decisions (ADRs) in 04-architecture/ (recommended)"
     ],
     "outputs": [
-      "artifacts/output/03-strategy/product-spec.md",
-      "artifacts/output/05-planning/execution-plan.md"
+      "artifacts/output/05-planning/execution-plan.md",
+      "artifacts/output/03-strategy/product-spec.md"
     ],
     "key_agents": [
       "@tech-lead"
@@ -433,7 +454,7 @@
   },
   {
     "name": "research-plan",
-    "description": "Construct comprehensive research plans with goals, hypotheses, cohort definitions, methodology, and a 2-part interview guide (Profile + Behavioral)",
+    "description": "Construct comprehensive research plans with goals, hypotheses, cohort definitions, methodology, and a 2-part interview guide (Profile + Behavioral). Use when the user says \"I need to interview users about X\", \"create a research plan\", \"what questions should I ask\", or invokes /research-plan.",
     "prerequisites": [],
     "outputs": [
       "artifacts/output/02-research/research-plan.md"
@@ -444,7 +465,7 @@
   },
   {
     "name": "retro",
-    "description": "Post-cycle review — extract lessons, calibrate estimates, improve processes, compact memory, and update team knowledge. Consult @ml-ai-engineer where eval harnesses, benchmarks, or biomarker pipelines are under review.",
+    "description": "Post-cycle review — extract lessons, calibrate estimates, improve processes, compact memory, and update team knowledge. Consult @ml-ai-engineer where eval harnesses, benchmarks, or biomarker pipelines are under review. Use when the user says \"run a retro\", \"what did we learn this cycle\", \"calibrate our estimates\", or invokes /retro after a cycle or launch.",
     "prerequisites": [
       "Completed phase artifact (launch-log.md, incident-postmortem.md, or iteration report)",
       "artifacts/memory/ directory with active entries"
@@ -459,7 +480,7 @@
   },
   {
     "name": "review",
-    "description": "Standalone code review on current changes — outside the dev loop",
+    "description": "Standalone code review on current changes — outside the dev loop. Use when the user says \"review my changes\", \"check this PR\", \"is this code following our patterns\", or invokes /review for a review without the full /develop workflow.",
     "prerequisites": [],
     "outputs": [],
     "key_agents": [
@@ -510,7 +531,7 @@
   },
   {
     "name": "shape-up",
-    "description": "Structure and stress-test semi-cooked ideas into design-ready briefs. No prerequisites — works at any point in the pipeline.",
+    "description": "Structure and stress-test semi-cooked ideas into design-ready briefs. No prerequisites — works at any point in the pipeline. Use when the user says \"shape this up\", \"turn these notes into a brief\", \"I have a rough pitch\", or invokes /shape-up.",
     "prerequisites": [],
     "outputs": [
       "artifacts/output/01-discovery/shaped-brief.md",
@@ -520,14 +541,14 @@
   },
   {
     "name": "shut-up",
-    "description": "One-shot silent execution mode — executes tasks directly with zero unsolicited critique, no conversational filler, and ultra-minimal output.",
+    "description": "One-shot silent execution mode — executes tasks directly with zero unsolicited critique, no conversational filler, and ultra-minimal output. Use when the user says \"shut up and just do it\", \"no commentary, just execute\", \"minimal output\", or invokes /shut-up with scope already locked.",
     "prerequisites": [],
     "outputs": [],
     "key_agents": []
   },
   {
     "name": "sprint-status",
-    "description": "Display and update the sprint-status.yaml pipeline state as a Kanban table",
+    "description": "Display and update the sprint-status.yaml pipeline state as a Kanban table. Use when the user says \"show the sprint status\", \"render the pipeline board\", \"where is the current story\", or invokes /sprint-status.",
     "prerequisites": [],
     "outputs": [
       "artifacts/output/sprint-status.yaml"
@@ -536,7 +557,7 @@
   },
   {
     "name": "status",
-    "description": "Quick snapshot of current project state — phase, blockers, memory health, sprint progress",
+    "description": "Quick snapshot of current project state — phase, blockers, memory health, sprint progress. Use when the user says \"what is the current state\", \"where did we leave off\", \"show active blockers\", or invokes /status at the start of a session.",
     "prerequisites": [],
     "outputs": [
       "artifacts/output/pipeline-state.json",
@@ -546,7 +567,7 @@
   },
   {
     "name": "teach-me",
-    "description": "Personal learning partner: Quick, Explain, or Deep Dive on any topic",
+    "description": "Personal learning partner: Quick, Explain, or Deep Dive on any topic. Use when the user says \"teach me X\", \"explain X simply\", \"deep dive into X\", \"quick summary of X\", or invokes /teach-me.",
     "prerequisites": [
       "Topic or concept specified by user (e.g. /teach-me \"Database Sharding\").",
       "@shifu persona configuration (.agents/agents/shifu.md).",
@@ -563,7 +584,7 @@
   },
   {
     "name": "test",
-    "description": "Run tests, analyze failures, enrich acceptance criteria, and produce structured QA reports — supports feature and full-cycle testing",
+    "description": "Run tests, analyze failures, enrich acceptance criteria, and produce structured QA reports — supports feature and full-cycle testing. Use when the user says \"run the tests\", \"test this feature\", \"did I break anything\", or invokes /test before merging or releasing.",
     "prerequisites": [],
     "outputs": [
       "artifacts/output/03-strategy/measurement-plan.md",
@@ -571,12 +592,13 @@
     ],
     "key_agents": [
       "@qa-engineer",
-      "@ml-ai-engineer"
+      "@ml-ai-engineer",
+      "@tech-lead"
     ]
   },
   {
     "name": "unpack-problem",
-    "description": "Problem-first exploration before solution ideation — supports guided, automated, and combination modes. Facilitated by @product-manager and @user-researcher.",
+    "description": "Problem-first exploration before solution ideation — supports guided, automated, and combination modes. Facilitated by @product-manager and @user-researcher. Use when the user says \"users are dropping off\", \"something is wrong but I do not know what\", \"help me figure out what is broken\", or invokes /unpack-problem.",
     "prerequisites": [],
     "outputs": [
       "artifacts/output/02-research/problem-space-brief.md",
@@ -609,7 +631,7 @@
   },
   {
     "name": "validation-patterns",
-    "description": "Apply validation methods from a 30-method catalog — smoke tests, concierge MVPs, five-second tests, and more",
+    "description": "Apply validation methods from a 30-method catalog — smoke tests, concierge MVPs, five-second tests, and more. Use when the user says \"how should I validate this\", \"cheapest way to test demand\", \"run a smoke test on my concept\", or invokes /validation-patterns before committing engineering resources.",
     "prerequisites": [],
     "outputs": [
       "artifacts/memory/active-decisions.md",
