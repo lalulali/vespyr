@@ -423,6 +423,16 @@ async function executeBenchmark(benchmark, options = {}) {
       (options.executionAdapter && typeof options.executionAdapter === "function") ||
       (sandbox && benchmarkRef.executionCommand)
     );
+    // Where did this output actually come from? Recorded so a report can
+    // separate measured results from canned stubs. "canned" means
+    // cannedMockResponse() supplied it because the benchmark declared neither a
+    // mockOutput nor an executionCommand — i.e. nothing was measured, and its
+    // verdict must not be read as a capability signal.
+    const outputSource = (options.executionAdapter && typeof options.executionAdapter === "function")
+      ? "adapter"
+      : (sandbox && benchmarkRef.executionCommand)
+        ? "command"
+        : (benchmarkRef.mockOutput ? "fixture" : "canned");
     // Token provenance: provider `usage.total_tokens` and the local
     // deterministic counter are INCOMMENSURABLE units (different tokenizers).
     // `tokens` is always the local count (consistent denominator for the 15%
@@ -440,6 +450,7 @@ async function executeBenchmark(benchmark, options = {}) {
       dimension: benchmarkRef.dimension || "general",
       modelTier: options.model || 'inherit',
       mock: !measuredExecution,
+      outputSource,
       passed,
       tier0Passed: t0Result.pass,
       tier1Score: t1Result ? t1Result.score : null,
@@ -576,6 +587,17 @@ async function runEvaluation(options = {}) {
   const passRate = total > 0 ? Number((passed / total).toFixed(4)) : 0;
   const tier0PassedCount = results.filter(r => r.tier0Passed).length;
   const tier0PassRate = total > 0 ? Number((tier0PassedCount / total).toFixed(4)) : 0;
+
+  // HOW MUCH OF THIS RUN WAS ACTUALLY MEASURED.
+  //
+  // In a mock run most benchmarks carry no mockOutput and no executionCommand,
+  // so they are scored against cannedMockResponse()'s explicit "Unmeasured
+  // fixture response" string. Counting those as passes or failures makes the
+  // pass rate a measurement of the stub rather than of anything else — which is
+  // how a permanently-red gate came to be ignored. This count is what the CLI
+  // prints so a reader can see the split instead of inferring it.
+  const withOwnOutput = results.filter(r => r.outputSource && r.outputSource !== "canned").length;
+  const fromCanned = results.length - withOwnOutput;
 
   // Token sums use LOCAL counts only (consistent units); provider figures
   // aggregate separately and never feed the inflation gate.
@@ -738,6 +760,8 @@ async function runEvaluation(options = {}) {
     provenance,
     dimensions,
     unmeasuredDimensions,
+    withOwnOutput,
+    fromCanned,
     benchmarks: results
   };
 }

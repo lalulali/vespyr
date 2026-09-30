@@ -262,8 +262,45 @@ async function main() {
     emitReport(options, reportText);
 
     // Determine exit code
+    //
+    // A MOCK RUN IS NOT A QUALITY GATE. `npm run eval` runs --mock, where no
+    // model executes. 130 of 148 benchmarks have no mockOutput, so they are
+    // scored against cannedMockResponse()'s "Unmeasured fixture response"
+    // string, and adversarial traps are handed a stub that deliberately carries
+    // no verdict — the runner's own comment says "mock runs go RED on traps,
+    // demonstrating harness mechanics rather than laundering fixture-recall as
+    // pushback capability."
+    //
+    // So a red mock run is the DESIGNED behaviour, not a fault. Exiting 1 on it
+    // meant this gate could never pass: the recorded mock baseline itself
+    // contains 104 failures, so `npm run eval` was permanently red and had to
+    // be ignored — which is how the harness and its baselines rotted unnoticed.
+    //
+    // What a mock run CAN honestly assert: the harness executed, the suites
+    // loaded, and nothing that used to pass stopped passing. Those stay gating.
+    // Quality measurement requires a real adapter, where tier 0 and tier 1 are
+    // both meaningful; that path is unchanged and still exits 1 on any failure.
     if (options.subcommand !== "record-baseline" && options.failOnRegression && diffReport && diffReport.hasRegression) {
       process.exit(2);
+    }
+
+    if (runResults.mockMode) {
+      if (runResults.suiteWarnings && runResults.suiteWarnings.length > 0) {
+        console.error("Malformed suite(s) — a mock run must load every suite cleanly:");
+        for (const w of runResults.suiteWarnings) console.error(`  ${w.file} — ${w.error}`);
+        process.exit(3);
+      }
+      const canned = runResults.fromCanned ?? 0;
+      console.log(
+        `\nMock run — harness mechanics only, NOT a quality gate. No model executed, so the` +
+        `\n${runResults.failed} benchmark failure(s) are UNMEASURED, not regressions.`
+      );
+      console.log(
+        `  ${runResults.withOwnOutput ?? 0}/${runResults.total} benchmarks supplied their own output;` +
+        ` ${canned} were scored against a canned stub.`
+      );
+      console.log(`  A quality measurement needs a real adapter (--adapter <real-adapter>); that path still fails on any benchmark failure.`);
+      process.exit(0);
     }
 
     if (runResults.failed > 0) {
