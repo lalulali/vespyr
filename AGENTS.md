@@ -143,6 +143,7 @@ Vespyr organizes complex, multi-agent operations into highly structured **skills
 *   `/launch` — Release readiness and deployment
 *   `/iterate` — Post-launch behavior improvements
 *   `/incident` — Production incident response
+*   `/legal-safety-audit` — Legal/compliance safety audit — generate policy drafts (privacy, terms, refund, cookie) and audit the app for consent, data, dark patterns, accessibility, and deletion risks
 *   `/retro` — Post-cycle review and memory compaction
 *   `/shut-up` — One-shot silent execution mode with zero unsolicited critique and ultra-minimal output
 *   `/help-me` — Conversational project navigator and co-pilot
