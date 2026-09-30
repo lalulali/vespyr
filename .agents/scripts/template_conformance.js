@@ -84,7 +84,7 @@ function presentSectionNumbers(text) {
   return nums;
 }
 
-function checkPRD(text, mode) {
+function checkPRD(text, mode, root) {
   const failures = [];
   const present = presentSectionNumbers(text);
 
@@ -106,6 +106,28 @@ function checkPRD(text, mode) {
   // Reverse mode: §14 must actually contain an anchored Evidence Ledger, not just the heading.
   if (mode === 'reverse' && !/\bL-\d{2,}\b/.test(text)) {
     failures.push('PRD (reverse): §14 Evidence Ledger present but contains no L-NN rows');
+  }
+
+  // DNA 5 — §2 Research Foundation no-fabrication guard (mechanical).
+  // A §2 row may claim "Reviewed" only if the file it cites actually exists on disk.
+  // Fabricated research rows (Reviewed status + invented finding for a non-existent
+  // upstream artifact) are the imported/reverse-mode hallucination this catches.
+  // A row citing a backtick `path` and marked reviewed ([x] or the word "Reviewed"
+  // without a PENDING/ABSENT qualifier) whose path is absent under root => failure.
+  if (root) {
+    const rowRe = /^\|[^|\n]*\|\s*`([^`]+\.md)`\s*\|([^|\n]*)\|/gm;
+    let rm;
+    while ((rm = rowRe.exec(text)) !== null) {
+      const relPath = rm[1].trim();
+      const statusCell = rm[2].trim();
+      const claimsReviewed = /\[x\]/i.test(statusCell) || (/\breviewed\b/i.test(statusCell) && !/\bpending\b/i.test(statusCell) && !/\babsent\b/i.test(statusCell));
+      if (!claimsReviewed) continue;
+      // Resolve the cited artifact path against root; a claimed-reviewed row must resolve.
+      const abs = path.resolve(root, relPath);
+      if (!fs.existsSync(abs)) {
+        failures.push(`PRD §2 Research Foundation: row cites \`${relPath}\` as Reviewed but that file does not exist (DNA 5 fabrication — mark [ABSENT — no upstream research] or [PENDING], never Reviewed)`);
+      }
+    }
   }
 
   return failures;
@@ -177,6 +199,70 @@ function checkUserStories(text) {
     }
   }
 
+  // AC COVERAGE SELF-AUDIT (reasoning gate — NEVER counts acceptance criteria).
+  // Counting ACs was tried twice and failed the same way: any numeric floor
+  // becomes a target the generator optimizes to, producing a uniform pattern
+  // (2/2/1, then 1/1/1). The real defect is missing *reasoning* about failure
+  // modes, not a missing count. So the gate verifies that each story reasoned
+  // about every risk category and resolved each one — either to an AC reference
+  // or to a concrete N/A reason. Depth then follows the reasoning, not a quota.
+  // The machine checks presence + resolution of the self-audit; it does not and
+  // must not judge how many ACs result. Format: user-story-instructions.md §3.3.
+  {
+    const storyBlocks = text.split(/(?=^[-*\s]*\*{0,2}Story ID\b)/mi).filter((b) => /Story ID/i.test(b));
+
+    // The 12 canonical risk categories. Each is matched by a stable leading label.
+    const CATEGORIES = [
+      { label: 'Invalid / malformed input', re: /Invalid\s*\/\s*malformed input/i },
+      { label: 'Empty / boundary state', re: /Empty\s*\/\s*boundary state/i },
+      { label: 'Duplicate / idempotency', re: /Duplicate\s*\/\s*idempotency/i },
+      { label: 'Concurrency / race', re: /Concurrency\s*\/\s*race/i },
+      { label: 'Auth / permission', re: /Auth\s*\/\s*permission/i },
+      { label: 'State / lifecycle', re: /State\s*\/\s*lifecycle/i },
+      { label: 'External dependency failure', re: /External dependency failure/i },
+      { label: 'Rate / abuse limits', re: /Rate\s*\/\s*abuse limits/i },
+      { label: 'Data integrity', re: /Data integrity/i },
+      { label: 'Localization / encoding', re: /Localization\s*\/\s*encoding/i },
+      { label: 'Accessibility / device', re: /Accessibility\s*\/\s*device/i },
+      { label: 'Security', re: /Security/i },
+    ];
+
+    for (const block of storyBlocks) {
+      const idMatch = block.match(/Story ID:\s*\**\s*([A-Za-z0-9-]+)/i);
+      const storyId = idMatch ? idMatch[1] : '(unnamed story)';
+
+      // 1. The self-audit block header must be present.
+      const auditIdx = block.search(/AC Coverage Self-Audit/i);
+      if (auditIdx < 0) {
+        failures.push(`User stories: story ${storyId} is missing its "AC Coverage Self-Audit" block — every story must reason about each risk category (see user-story-instructions.md §3.3). The gate checks reasoning, not AC count.`);
+        continue;
+      }
+      const auditText = block.slice(auditIdx);
+
+      for (const cat of CATEGORIES) {
+        // 2. Each category label must appear in the self-audit.
+        const line = auditText.split('\n').find((l) => cat.re.test(l));
+        if (!line) {
+          failures.push(`User stories: story ${storyId} self-audit is missing the "${cat.label}" category line (all 12 categories must be addressed).`);
+          continue;
+        }
+        // 3. The line must be RESOLVED: either it references an AC (AC-…) or it
+        //    gives an "N/A because <reason>" with a real reason. A bare N/A, a
+        //    placeholder in angle brackets, or an empty value fails — that is the
+        //    signal that no reasoning happened.
+        const value = line.replace(cat.re, '').replace(/^[\s:*\-|]+/, '').trim();
+        const hasAcRef = /AC-[A-Za-z]*\d+/.test(value);
+        const naMatch = value.match(/N\/?A\b\s*(?:because|:|-|—)?\s*(.*)$/i);
+        const naReason = naMatch ? naMatch[1].trim() : '';
+        const isPlaceholder = /^<.*>$/.test(value) || value === '' || /^(N\/?A)$/i.test(value);
+        const resolved = hasAcRef || (naMatch && naReason.length >= 8 && !/^<.*>$/.test(naReason));
+        if (isPlaceholder || !resolved) {
+          failures.push(`User stories: story ${storyId} self-audit line "${cat.label}" is not resolved — it must name an AC (e.g. AC-U3) or give "N/A because <concrete reason>". A bare N/A, placeholder, or blank means the category was not actually reasoned about.`);
+        }
+      }
+    }
+  }
+
   return failures;
 }
 
@@ -206,7 +292,7 @@ function main() {
     result.failures.push(`PRD: file not found: ${path.relative(root, reqPath)}`);
     result.requirements = { path: reqPath, found: false };
   } else {
-    const f = checkPRD(read(reqPath), mode);
+    const f = checkPRD(read(reqPath), mode, root);
     result.requirements = { path: reqPath, found: true, failures: f };
     result.failures.push(...f);
   }

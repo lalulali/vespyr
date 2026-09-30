@@ -35,6 +35,10 @@ If either is missing, the project is uninitialized. **Do not call `@memory-contr
 - Read `.agents/skills/help-me/skills-catalog.json` for the skill index
 - Read `.agents/AGENTS.md` if you need framework context (phases, agents, guardrails)
 - Answer their question directly, citing the relevant skills/agents by name
+- **Prototype-first intent** (e.g., "I have a prototype, help me create the document", "I built this in Figma/Stitch — turn it into a PRD", "I have an HTML mock, generate requirements"): this is `/design` **reverse mode**, not a from-scratch start. Route it:
+  - If they built the prototype **outside Vespyr** (Figma export, Google Stitch, hand-coded HTML) → tell them to place it in `artifacts/input/prototype/` and run `/design`. This is the **imported** sub-track: it reverse-derives the SPEC.md kernel from the prototype (no prior PRD or product-manager flow needed), then synthesizes `requirements.md` + `user-stories.md` through the Evidence Ledger and parity gate. Every requirement traces back to something observable in their prototype.
+  - If **Vespyr generated** the prototype earlier in this project → run `/design`; it takes the **generated** sub-track (uses the existing SPEC.md kernel).
+  - Say the literal command: *"Drop your prototype in `artifacts/input/prototype/`, then run `/design` — it'll reverse-engineer the PRD from it."*
 - If the question implies starting a project, close with `/unpack-problem` (for pain points), `/validate-idea` (for concepts), `/shape-up` (for shaping pitches/notes) as the natural next step
 - Keep the response tight — they asked one thing, not a tour
 
@@ -48,6 +52,7 @@ Respond with this exact short message:
 >   - Run `/unpack-problem` if you have a pain point or symptom (problem-first)
 >   - Run `/validate-idea` if you have an unvalidated concept (pressure-test with `@founder`)
 >   - Run `/shape-up` if you have a raw pitch, doc, or notes (shaping engine with zero prerequisites)
+>   - **Have a prototype already?** Drop it in `artifacts/input/prototype/` and run `/design` — reverse mode turns your own Figma/Stitch/hand-coded prototype into a PRD (no prior PRD needed)
 > - **To learn the framework:** ask *"what skills are available"*, *"how does vespyr work"*, or *"what's the difference between /design and /develop"* — I'll walk you through it
 > - **To load existing state:** run `/status` if you have specs or a codebase already
 

@@ -14,7 +14,7 @@ Vespyr 将复杂操作组织为原子化技能。每个技能是一个文件夹�
 | `/explore-idea` | 0-1 | 市场、竞品和用户调研 |
 | `/unpack-problem` | 0-1 | 在解决方案构思前先探索问题 |
 | `/shape-up` | 1-2 | 将半成品创意塑形为设计就绪简报（独立使用或生命周期桥梁） |
-| `/design` | 2-3 | PRD 和界面规格创建 — reverse（原型优先）、create、edit、validate 模式 |
+| `/design` | 2-3 | PRD 和界面规格创建 — reverse（原型优先：**generated** Vespyr 生成的原型，或 **imported** 你自己的 Figma/Stitch/手写原型）、create、edit、validate 模式 |
 | `/motion` | 2-4 | 动效调研、动效规格，以及移交 `/develop` 的明确流程 |
 | `/plan` | 4 | 独立或冲刺执行计划 |
 | `/develop` | 5 | MVP 开发周期（QA 前含保真评审与孤儿 AC 扫描） |
@@ -134,7 +134,9 @@ Vespyr 的 11 阶段流水线。`.agents/references/phase-table.md` 是权威来
     ├── step-01a-load-prd-brief.md   # 创建模式（当 PRD/规格不存在时运行）
     ├── step-01b-load-existing.md    # 编辑模式（PRD/规格存在且需要修改时）
     ├── step-01c-heuristic-eval.md   # 验证模式（验证现有设计时）
-    ├── step-01d-ingest-prototype.md # 逆向模式（已有原型、尚无 PRD — 证据账本）
+    ├── step-01d-ingest-prototype.md # 逆向模式 · generated 子轨道（Vespyr 生成的原型，已有 SPEC.md 内核）
+    ├── step-01e-ingest-imported.md  # 逆向模式 · imported 子轨道（你自己的 Figma/Stitch/手写原型，放在 artifacts/input/prototype/）
+    ├── step-00e-derive-kernel.md    # 逆向模式 · imported 子轨道（逆向推导 SPEC.md 内核 — 无上游 PM 流程）
     └── ...
 ```
 

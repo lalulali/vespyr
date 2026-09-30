@@ -138,6 +138,7 @@ function scaffoldArtifacts(targetDir, projectName, userNickname = "User", stack 
 		"input/documents",
 		"input/example",
 		"input/flows",
+		"input/prototype",
 	];
 	const allDirs = [
 		"directions",
@@ -621,6 +622,9 @@ async function performFreshInstall(targetDir, flags) {
 				);
 				if (methodChoice === 2) {
 					currentStep--;
+					// Global scope skips the path step on the way forward, so
+					// skip it on the way back too — land on scope, not path.
+					if (wizardState.scope === "Global") currentStep--;
 				} else {
 					method = methodChoice === 0 ? "symlink" : "copy";
 					wizardState.method = method;
@@ -674,7 +678,8 @@ async function performFreshInstall(targetDir, flags) {
 				if (confirmChoice === 0) {
 					break;
 				} else if (confirmChoice === 1) {
-					currentStep = 0;
+					// Back to the previous page (language), not the wizard start.
+					currentStep--;
 				} else {
 					log("\n  Installation cancelled.\n");
 					process.exit(0);

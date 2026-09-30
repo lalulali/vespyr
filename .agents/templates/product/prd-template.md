@@ -6,13 +6,27 @@
 > **Paired with:** `SPEC.md` (`.agents/templates/product/SPEC.md`) for distilled agent contract, `user-story-template.md` (`.agents/templates/product/user-story-template.md`) for sprint stories
 > **Prototype track/runtime:** `{static-html | nextjs-component | not in scope}` / `{runtime}`
 
-**Version:** 5
-**Last changed:** 2026-09-22
+<!--
+TEMPLATE REVISION HISTORY (Vespyr framework internal — DO NOT copy into the generated document).
+This tracks how the *template* itself evolved. It is NOT the version of the PRD you are writing.
+When you generate a real PRD from this template, the document's own version below ALWAYS starts at
+1 on first creation, regardless of the template revision number. Do not carry "v5" (or any template
+revision) into the document's `**Version:**` field.
+- Template v5: Added Evidence Ledger §14 (reverse mode — `path#id` anchors, `[OPEN]` fencing, `[DEFERRED TO SPEC]` fidelity partition)
+- Template v4: Added Research Foundation §2; renumbered all subsequent sections; standardized 03-strategy output paths and DNA 7 concise specifications
+- Template v3: Added Hypothesis of Solution §3; renumbered subsequent sections
+- Template v2: Added ML/AI §11.1, Assumptions to Validate §9.3
+- Template v1: Initial draft
+-->
+
+<!--
+DOCUMENT VERSION (this is the one you fill in — belongs to the PRD, not the template).
+On first generation this is ALWAYS `1`. Increment it only on later edits to this same
+requirements.md (v2, v3, …), appending a dated change-log line each time.
+-->
+**Version:** 1
+**Last changed:** YYYY-MM-DD
 **Change log:**
-- v5: Added Evidence Ledger §14 (reverse mode — `path#id` anchors, `[OPEN]` fencing, `[DEFERRED TO SPEC]` fidelity partition)
-- v4: Added Research Foundation §2; renumbered all subsequent sections; standardized 03-strategy output paths and DNA 7 concise specifications
-- v3: Added Hypothesis of Solution §3; renumbered subsequent sections
-- v2: Added ML/AI §11.1, Assumptions to Validate §9.3
 - v1: Initial draft
 
 Use this template when writing the Product Requirements Document.
@@ -36,20 +50,31 @@ This document is for **management and business teams** — keep it strategic, no
 
 <!--
 Link every upstream research document that informed this PRD.
-Check each box once the document has been reviewed and its key findings are reflected below.
-If a document does not exist yet, mark it as [PENDING] and assign an owner.
+
+NO SOURCE, NO FACT (DNA 5 — hard rule): Mark a row `Reviewed` and write a `Key Finding`
+ONLY for a file that actually exists on disk and that you have read. Never invent a status,
+a finding, or a citation for a file that is not present. Verify each path with the file
+system before filling its row.
+
+- Reverse mode / imported prototype: there is usually NO upstream discovery or research flow,
+  so these files do NOT exist. Do not fabricate them. Mark each absent row
+  `[ABSENT — no upstream research]` with a `—` finding, and add one line above the table:
+  "This PRD was reverse-engineered from an imported prototype; no upstream research artifacts
+  exist. The §14 Evidence Ledger (prototype inventory) is the sole evidence base." Only the
+  Prototype Inventory row may be `Reviewed`, and only if prototype-inventory.md exists.
+- If a document is planned but not yet written, mark it `[PENDING]` and assign an owner.
 -->
 
 | Document | Path | Status | Key Finding (1 sentence) |
 |----------|------|--------|--------------------------|
-| Idea Brief | `artifacts/output/01-discovery/idea-brief.md` | [ ] Reviewed / [PENDING] | ... |
-| Validation Brief | `artifacts/output/01-discovery/validation-brief.md` | [ ] Reviewed / [PENDING] | ... |
-| Market Analysis | `artifacts/output/02-research/market-analysis.md` | [ ] Reviewed / [PENDING] | ... |
-| Competitive Analysis | `artifacts/output/02-research/competitive-analysis.md` | [ ] Reviewed / [PENDING] | ... |
-| User Personas | `artifacts/output/02-research/user-personas.md` | [ ] Reviewed / [PENDING] | ... |
-| UX Research Report | `artifacts/output/02-research/ux-research-report.md` | [ ] Reviewed / [PENDING] | ... |
+| Idea Brief | `artifacts/output/01-discovery/idea-brief.md` | [ ] Reviewed / [PENDING] / [ABSENT] | ... |
+| Validation Brief | `artifacts/output/01-discovery/validation-brief.md` | [ ] Reviewed / [PENDING] / [ABSENT] | ... |
+| Market Analysis | `artifacts/output/02-research/market-analysis.md` | [ ] Reviewed / [PENDING] / [ABSENT] | ... |
+| Competitive Analysis | `artifacts/output/02-research/competitive-analysis.md` | [ ] Reviewed / [PENDING] / [ABSENT] | ... |
+| User Personas | `artifacts/output/02-research/user-personas.md` | [ ] Reviewed / [PENDING] / [ABSENT] | ... |
+| UX Research Report | `artifacts/output/02-research/ux-research-report.md` | [ ] Reviewed / [PENDING] / [ABSENT] | ... |
 
-> **Research sign-off:** All rows above must be [ ] Reviewed before this PRD moves to the Design phase.
+> **Research sign-off:** In create mode, all rows above must be [ ] Reviewed before this PRD moves to the Design phase. In reverse/imported mode, absent upstream research is expected — mark those rows `[ABSENT — no upstream research]` and rely on the §14 Evidence Ledger; never fabricate a Reviewed status.
 
 ## 3. Problem Statement
 
@@ -333,10 +358,10 @@ No anchor, no fact — a statement without resolvable evidence is `[OPEN]`, neve
 ---
 
 **Document info:**
-- Version: 5.0
+- Version: 1
 - Author: @product-manager
 - Date: ...
 - Next review: ...
 - Spec kernel: `artifacts/output/03-strategy/SPEC.md`
 - Companion document: `artifacts/output/03-strategy/user-stories.md`
-- Supersedes: v3.0 (standardized to 03-strategy output paths and DNA 7 concise specifications)
+- Supersedes: none (first generation)

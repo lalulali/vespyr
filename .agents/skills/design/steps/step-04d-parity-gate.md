@@ -28,6 +28,13 @@ Count the parity — never feel it. Run `spec_parity.js`, complete the 10-class 
    node .agents/scripts/template_conformance.js check --mode reverse
    ```
    Exit 0 required. A compact/off-template `requirements.md` or a flat `user-stories.md` (no Epic/Feature hierarchy, no Gherkin AC) halts the gate — this is the mechanical backstop for the step-3 full-template gate.
+   Also run the template-version leak guard on the generated documents (a first-generation doc must be version 1, never the template's revision number):
+   ```bash
+   node .agents/scripts/template_version_guard.js check \
+     --file artifacts/output/03-strategy/requirements.md \
+     --file artifacts/output/03-strategy/user-stories.md
+   ```
+   Exit 0 required. A non-zero exit means the template's internal `Template Revision History` metadata was copied into the document — remove it and set the document version to 1.
 3. **Metrics pass** — fix violations before writing the report:
    ```bash
    node .agents/scripts/spec_parity.js check --inventory <inventory> --requirements <requirements> --report <report> --metrics-only
@@ -46,8 +53,12 @@ Count the parity — never feel it. Run `spec_parity.js`, complete the 10-class 
 ## Output
 `artifacts/output/03-strategy/parity-report.md` — selected track + collaboration link + metrics + 10-class table + deferrals + witness + sampling + delta; `check` exits 0.
 
+## Handoff reminder — AC enrichment (recommended, not blocking)
+This gate proves the spec matches the prototype; it does NOT prove the acceptance criteria are deep. First-pass reverse-mode ACs are typically a happy-path skeleton. Before `/develop`, remind the owner (in plain language) to run the enrichment pass: `/elicitation` on `user-stories.md` → **AC Enrichment Sweep** (crosses each component against the 12 risk categories, adds `[derived]` failure/edge criteria). Record run-or-deferred in the parity report. Do not block handoff on it.
+
 ## Halt conditions
 - `template_conformance.js check --mode reverse` exits 1 (off-template PRD or user-stories) — fix, never waive
+- `template_version_guard.js check` exits 1 (template revision metadata copied into a generated document) — remove it and set the document version to 1, never waive
 - `check` exits 1 (ghost / unresolved orphan / class gap) — fix, never waive
 - Witness cannot be stamped (prototype missing / unreadable)
 - Owner sampling or parity-delta disposition left unrecorded — gate stays open

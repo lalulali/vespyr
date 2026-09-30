@@ -26,7 +26,8 @@ Start from `.agents/templates/product/prd-template.md` and preserve its complete
    cp .agents/templates/product/prd-template.md artifacts/output/03-strategy/requirements.md
    ```
 2. Fill in each of the §§1–14 sections in place. Keep every numbered heading. For a section with no content in create mode, write `_Not applicable in create mode._` (or the reverse-only note for §14) — never delete the heading.
-3. This scaffold-first rule exists because authoring the PRD from scratch lets the document drift off-template (observed in the 2026-09 parity benchmarks). Populating a copied skeleton keeps the structure by construction.
+3. **Document version, not template version.** Set the document's `**Version:**` field to `1` on first generation with `**Last changed:**` = today and a `- v1: Initial draft` change-log line. The `Template Revision History` comment (template v5, etc.) is Vespyr-internal and must never be copied into the document's version field — a brand-new PRD is v1, not v5.
+4. This scaffold-first rule exists because authoring the PRD from scratch lets the document drift off-template (observed in the 2026-09 parity benchmarks). Populating a copied skeleton keeps the structure by construction.
 
 ## Agent invocation
 `@product-manager` synthesizes research into personas:

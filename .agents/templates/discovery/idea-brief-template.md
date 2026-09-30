@@ -154,8 +154,9 @@ Which specialized downstream agents should be activated?
 
 ---
 
+<!-- Template Revision History (Vespyr internal — DO NOT copy into the generated document): template v2.0. The generated document's own version starts at 1 on first creation. -->
 **Document info:**
-- Version: 2.0
+- Version: 1
 - Author: @founder
 - Date: ...
 - Status: Draft / Approved for Research

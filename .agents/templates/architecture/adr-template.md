@@ -168,8 +168,9 @@ Every architectural decision should have a re-evaluation trigger:
 
 ---
 
+<!-- Template Revision History (Vespyr internal — DO NOT copy into the generated document): template v2.0. The generated ADR's own version starts at 1 on first creation. -->
 **Document info:**
-- Version: 2.0
+- Version: 1
 - Author: @architect
 - Date: ...
 - Review date: ...

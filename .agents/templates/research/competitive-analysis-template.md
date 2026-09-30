@@ -135,9 +135,10 @@ Rules:
 
 ---
 
+<!-- Template Revision History (Vespyr internal — DO NOT copy into the generated document): template v2.0 added ML/AI column to feature matrix, §6.4 downstream implications. The generated document's own version starts at 1 on first creation. -->
 **Document info:**
-- Version: 2.0
+- Version: 1
 - Author: @researcher
 - Date: ...
 - Input: `artifacts/output/01-discovery/idea-brief.md` + `artifacts/output/02-research/market-analysis.md`
-- Supersedes: v1.0 (added ML/AI column to feature matrix, §6.4 downstream implications)
+- Supersedes: none (first generation)

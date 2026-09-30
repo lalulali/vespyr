@@ -26,7 +26,21 @@ node .agents/scripts/step0_staleness.js --report artifacts/output/03-strategy/pa
 - **exit 1** (`[BLOCK] ...`) → **HALT**. A stale, broken, or partial freeze witness blocks every mode. Restore the frozen prototype, or run the step-05d Spike Rollback to re-extract and re-witness, before any step executes.
 - **script missing / unexpected failure** → **HALT loudly**. Never proceed silently — a bypassed staleness gate is a correctness failure (DoD 3).
 
-Reverse mode additionally requires the **SPEC.md Spec Kernel anchor** (`artifacts/output/03-strategy/SPEC.md`); missing kernel → halt (Review 10 §4).
+Reverse mode additionally requires the **SPEC.md Spec Kernel anchor** (`artifacts/output/03-strategy/SPEC.md`); missing kernel → halt (Review 10 §4) **for the `generated` sub-track only**. See the prototype-source resolution below — the `imported` sub-track derives the kernel instead of halting.
+
+## Reverse-mode prototype source (resolve before Step 1 — sub-track selection)
+
+Reverse mode has two sub-tracks that differ only in *where the prototype comes from* and *whether a kernel already exists*. Downstream synthesis (Evidence Ledger → PRD synthesis → parity gate) is identical for both.
+
+- **`generated`** — the prototype was produced by Vespyr's own prototype track and lives in the project. A SPEC.md Spec Kernel already exists (forward PM flow). A **freeze witness** in `parity-report.md` gates staleness. Missing kernel → halt. Route Step 1 → `steps/step-01d-ingest-prototype.md`.
+- **`imported`** — the prototype was authored outside Vespyr (Figma export, Google Stitch, hand-coded HTML for pixel-perfect fidelity) and dropped into `artifacts/input/prototype/`. There is no upstream PM flow, so **no SPEC.md kernel exists yet** — reverse mode derives it (`steps/step-00e-derive-kernel.md`) instead of halting. Staleness is gated by an **import witness** (a SHA-256 hash of the imported file taken at ingest). Route Step 1 → `steps/step-01e-ingest-imported.md`.
+
+Resolve the sub-track by evidence:
+- `artifacts/input/prototype/` contains a reachable prototype ∧ no `artifacts/output/03-strategy/SPEC.md` → **`imported`**.
+- A project prototype exists with a SPEC.md kernel (forward flow) → **`generated`**.
+- If both signals are present, ask the owner which source is authoritative; do not guess.
+
+> **Import witness vs freeze witness (honest limitation — do not oversell):** both are stored SHA-256 hashes used as tamper-checks. A **freeze witness** can promise the prototype is the whole truth and won't change, because Vespyr generated and controls it. An **import witness** only proves *the imported file* is unchanged since ingest — it **cannot** see the design tool it came from. If a designer edits Figma/Stitch and does not re-export, the imported file still matches its hash while the real design has moved on. Detecting a design-tool edit is a **human responsibility**; the engine cannot enforce origin parity, only file parity.
 
 ## Prototype track selection (when prototyping is in scope)
 

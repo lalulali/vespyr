@@ -131,9 +131,10 @@ Rules:
 
 ---
 
+<!-- Template Revision History (Vespyr internal — DO NOT copy into the generated document): template v2.0 added §8 for downstream agent implications. The generated document's own version starts at 1 on first creation. -->
 **Document info:**
-- Version: 2.0
+- Version: 1
 - Author: @researcher
 - Date: ...
 - Input: `artifacts/output/01-discovery/idea-brief.md`
-- Supersedes: v1.0 (added §8 for downstream agent implications)
+- Supersedes: none (first generation)

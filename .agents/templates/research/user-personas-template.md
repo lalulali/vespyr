@@ -190,9 +190,10 @@ Rules:
 
 ---
 
+<!-- Template Revision History (Vespyr internal — DO NOT copy into the generated document): template v2.0 added Participant Source, Technology Comfort (incl. AI attitude), Competitive User Alternatives §8, Journey Map Notes. The generated document's own version starts at 1 on first creation. -->
 **Document info:**
-- Version: 2.0
+- Version: 1
 - Author: @user-researcher
 - Date: ...
 - Input: `artifacts/output/01-discovery/idea-brief.md` + `artifacts/output/02-research/competitive-analysis.md`
-- Supersedes: v1.0 (added Participant Source, Technology Comfort including AI attitude, Competitive User Alternatives §8, Journey Map Notes)
+- Supersedes: none (first generation)

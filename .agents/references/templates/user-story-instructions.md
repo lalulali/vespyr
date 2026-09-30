@@ -139,6 +139,64 @@ Acceptance criteria must be atomic, unambiguous, and formatted using highly legi
         *   **When** [user action or system trigger]
         *   **Then** [expected system outcome or state shift]
 
+### 3.1 Depth is exhaustive-per-case, NOT a fixed count
+
+The number of acceptance criteria is driven by the **case**, never by a target number. There is no "right" count — a genuinely simple story (e.g. "log out") may need one unhappy path and no edge case; a complex story (e.g. "checkout payment") may need seven unhappy paths and five edge cases. **When in doubt, be MORE exhaustive, not less.**
+
+Do NOT produce a uniform pattern (e.g. always 2 happy / 2 unhappy / 1 edge). A repeated fixed shape across stories is a tell that coverage was hit-a-quota, not reasoned per case — that is a defect, not a standard. Two stories of different complexity should almost never have identical AC counts.
+
+**This applies with equal force in reverse mode.** A prototype usually renders only the happy path; the PRD must still reach the same exhaustive depth the traditional flow reaches, deriving the unhappy/edge criteria the prototype does not show (tag them `[derived]`). The prototype sets the floor of *evidence*, never the ceiling of *coverage*.
+
+### 3.2 Risk-category completeness sweep (the exhaustiveness driver)
+
+For each story, sweep these domain risk categories and write an AC for every one that applies to *this* case. This is how depth scales with complexity: a simple story has few applicable categories; a complex one has many. A category that genuinely does not apply is marked `N/A` — it is not silently skipped.
+
+| Category | Ask for this story: is there a criterion for… |
+|---|---|
+| **Invalid / malformed input** | wrong format, missing required field, out-of-range value? |
+| **Empty / boundary state** | zero items, first-run, max length, min/max quantity, off-by-one? |
+| **Duplicate / idempotency** | double-submit, retry, replay, repeated action? |
+| **Concurrency / race** | two actors, simultaneous edits, in-flight request collision? |
+| **Auth / permission** | unauthenticated, wrong role, expired session, forbidden resource? |
+| **State / lifecycle** | already-used token, expired link, wrong status transition, stale data? |
+| **External dependency failure** | API/service down, timeout, partial response, retry/backoff? |
+| **Rate / abuse limits** | too many attempts, throttling, quota exhaustion? |
+| **Data integrity** | partial write, rollback, orphaned records, referential breakage? |
+| **Localization / encoding** | unicode, RTL, timezone, currency, special characters? |
+| **Accessibility / device** | keyboard-only, screen reader, reduced motion, small viewport, offline? |
+| **Security** | injection, enumeration, sensitive-data exposure, CSRF/replay? |
+
+### 3.3 Mandatory per-story AC Coverage Self-Audit (the reasoning gate)
+
+Every story MUST end its Acceptance Criteria section with an **AC Coverage Self-Audit** block. This block is the mechanism that drives depth — **not a target count.** The machine never counts your acceptance criteria; it verifies that you *reasoned about every risk category for this specific case*. The number of ACs is then a natural byproduct of that reasoning: a case with many real failure modes yields many ACs; a genuinely simple case yields few. There is no "right" number and no pattern to hit.
+
+Write the block in exactly this labeled form — one line per category, each line resolving to **either** an acceptance-criterion reference **or** a concrete, case-specific reason it does not apply. A bare `N/A` with no reason is not acceptable and fails the gate.
+
+```
+#### AC Coverage Self-Audit
+- Invalid / malformed input: <AC-U2, AC-U3 | N/A because this story takes no user input>
+- Empty / boundary state: <AC-E1 | N/A because there is no list/collection here>
+- Duplicate / idempotency: <AC-U4 | N/A because the action is read-only>
+- Concurrency / race: <AC-E2 | N/A because it is a single-user, single-session action>
+- Auth / permission: <AC-U1 | N/A because this screen is public pre-auth>
+- State / lifecycle: <AC-U5 | N/A because the entity has no lifecycle states>
+- External dependency failure: <AC-U6 | N/A because no external service is called>
+- Rate / abuse limits: <AC-U7 | N/A because there is no abusable submission>
+- Data integrity: <AC-E3 | N/A because nothing is persisted>
+- Localization / encoding: <AC-E4 | N/A because no free-text is rendered>
+- Accessibility / device: <AC-E5 | N/A, covered globally in product-spec.md §a11y>
+- Security: <AC-U8 | N/A because no sensitive data or state change is exposed>
+```
+
+Rules the gate enforces (all mechanical, none count ACs):
+1. The block header `#### AC Coverage Self-Audit` is present in every story.
+2. Every one of the 12 category labels appears.
+3. Every category line is *resolved*: it names at least one `AC-…` reference **or** gives an `N/A because <reason>` with a real reason. A line left as a placeholder, blank, or bare `N/A` fails.
+
+What this deliberately does NOT do: it does not require a minimum number of ACs, does not forbid a small story, and does not force any H/U/E ratio. If a story honestly has one applicable failure mode, it has one AC there and eleven reasoned N/As — and that passes. If a payment story has failure modes in nine categories, it naturally carries many ACs. Depth follows the reasoning, not a quota.
+
+A reviewer (and the parity gate's owner sampling) should challenge a self-audit that marks many categories `N/A` with thin or copy-paste reasons — that is the human check on reasoning quality that no regex can perform.
+
 ---
 
 ### User Story: As a registered user who forgot my password, I want to receive a password reset email, so that I can regain access to my account without contacting support

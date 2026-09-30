@@ -6,8 +6,11 @@
 > **Paired with:** `product-spec-template.md` (screen specs + flows), `motion-spec-template.md` (motion tokens merge here)
 > **Prototype track:** `static-html | nextjs-component | not in scope`
 > **Prototype runtime:** `vanilla HTML/CSS/JS + Tailwind CDN | Next.js + React + Tailwind + shadcn | not in scope`
-> **Version:** 3
-> **Last changed:** 2026-09-05
+
+<!-- Template Revision History (Vespyr internal — DO NOT copy into the generated document): template v3 (2026-09-05). The generated design.md's own version starts at 1 on first creation. -->
+<!-- DOCUMENT VERSION (fill this — belongs to the design.md, not the template). First generation = 1; increment on later edits. -->
+> **Version:** 1
+> **Last changed:** YYYY-MM-DD
 
 ## How to use this file (designer as consultant)
 

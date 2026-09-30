@@ -111,18 +111,24 @@
     "name": "design",
     "description": "Defines product requirements from validated ideas, then produces detailed developer-ready specs. Use for prototype-first, static HTML/Tailwind CDN, Next.js/React/shadcn component prototypes, create, edit, or validate design work; routes the prototype track and requires designer–tech collaboration before handoff.",
     "prerequisites": [
-      "Reverse mode: artifacts/output/03-strategy/SPEC.md Spec Kernel (Review 10 §4) + a reachable prototype source (HTML mock, code, Figma export, AI-generated prototype); no requirements.md yet.",
+      "Reverse mode (two sub-tracks):",
+      "**generated** — Vespyr-built prototype in the project + artifacts/output/03-strategy/SPEC.md Spec Kernel (Review 10 §4); no requirements.md yet.",
+      "**imported** — externally-authored prototype (Figma export, Google Stitch, hand-coded HTML) placed in artifacts/input/prototype/; no SPEC.md required — the kernel is reverse-derived (step-0e); no requirements.md yet.",
       "Create/edit/validate: artifacts/output/01-discovery/validation-brief.md OR idea-brief.md OR shaped-brief.md",
       "artifacts/output/02-research/market-analysis.md (optional if entering via shape-up with all assumptions verified)",
       "artifacts/output/02-research/competitive-analysis.md (optional if entering via shape-up)",
-      "artifacts/output/02-research/user-personas.md (optional if entering via shape-up)"
+      "artifacts/output/02-research/user-personas.md (optional if entering via shape-up)",
+      "artifacts/output/02-research/journey-maps.md (optional — user-researcher journey mapping, consumed by screen specs)",
+      "artifacts/output/02-research/usability-test-kit.md (optional — ux-researcher kit; results return via ux-research-report.md)"
     ],
     "outputs": [
       "artifacts/output/03-strategy/SPEC.md",
       "artifacts/output/01-discovery/validation-brief.md",
       "artifacts/output/02-research/market-analysis.md",
       "artifacts/output/02-research/competitive-analysis.md",
-      "artifacts/output/02-research/user-personas.md"
+      "artifacts/output/02-research/user-personas.md",
+      "artifacts/output/02-research/journey-maps.md",
+      "artifacts/output/02-research/usability-test-kit.md"
     ],
     "key_agents": [
       "@product-manager",
@@ -327,7 +333,7 @@
       "artifacts/output/02-research/jtbd-hmw.md"
     ],
     "key_agents": [
-      "@product-manager"
+      "@user-researcher"
     ]
   },
   {
@@ -560,6 +566,7 @@
     "description": "Run tests, analyze failures, enrich acceptance criteria, and produce structured QA reports — supports feature and full-cycle testing",
     "prerequisites": [],
     "outputs": [
+      "artifacts/output/03-strategy/measurement-plan.md",
       "artifacts/output/05-execution/quality/test-report.md"
     ],
     "key_agents": [

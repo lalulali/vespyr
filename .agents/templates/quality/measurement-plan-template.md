@@ -285,9 +285,10 @@ What personally identifiable information is collected?
 
 ---
 
+<!-- Template Revision History (Vespyr internal — DO NOT copy into the generated document): template v2.0 added ML tracking events, ML dashboard, model monitoring section. The generated document's own version starts at 1 on first creation. -->
 **Document info:**
-- Version: 2.0
+- Version: 1
 - Author: @data-analyst
 - Date: ...
 - Inputs: `artifacts/output/03-strategy/requirements.md` + `artifacts/output/03-strategy/user-stories.md` + `artifacts/output/03-strategy/product-spec.md`
-- Supersedes: v1.0 (added ML tracking events, ML dashboard, model monitoring section)
+- Supersedes: none (first generation)

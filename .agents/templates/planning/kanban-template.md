@@ -69,7 +69,8 @@ Use this template to track modular user stories and tasks through the delivery p
 
 ---
 
+<!-- Template Revision History (Vespyr internal — DO NOT copy into the generated document): template v3.0. The generated board's own version starts at 1 on first creation. -->
 **Document Info:**
-- Version: 3.0
+- Version: 1
 - Author: @product-manager
 - Depends on: `artifacts/output/03-strategy/user-stories.md`

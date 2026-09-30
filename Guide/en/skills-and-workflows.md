@@ -14,7 +14,7 @@ Vespyr organizes complex operations into atomic skills. Each skill is a folder w
 | `/explore-idea` | 0-1 | Market, competitor, and user research |
 | `/unpack-problem` | 0-1 | Problem-first exploration before solution ideation |
 | `/shape-up` | 1-2 | Bridge semi-cooked ideas into design-ready specs (standalone or lifecycle) |
-| `/design` | 2-3 | PRD and screen specs creation — reverse (prototype-first), create, edit, validate |
+| `/design` | 2-3 | PRD and screen specs creation — reverse (prototype-first: **generated** Vespyr prototype or **imported** own Figma/Stitch/hand-coded prototype), create, edit, validate |
 | `/motion` | 2-4 | Motion research, motion specification, and explicit handoff to `/develop` |
 | `/plan` | 4 | Standalone or sprint execution planning |
 | `/develop` | 5 | MVP development cycle (fidelity review + orphan-AC sweep before QA) |
@@ -134,7 +134,9 @@ Some skills auto-detect their mode based on existing artifacts:
     ├── step-01a-load-prd-brief.md   # Create mode (run when no PRD/spec exists)
     ├── step-01b-load-existing.md    # Edit mode (PRD/spec exists and needs changes)
     ├── step-01c-heuristic-eval.md   # Validate mode (validating an existing design)
-    ├── step-01d-ingest-prototype.md # Reverse mode (prototype exists, no PRD yet — Evidence Ledger)
+    ├── step-01d-ingest-prototype.md # Reverse mode · generated sub-track (Vespyr-built prototype, existing SPEC.md kernel)
+    ├── step-01e-ingest-imported.md  # Reverse mode · imported sub-track (your own Figma/Stitch/hand-coded prototype in artifacts/input/prototype/)
+    ├── step-00e-derive-kernel.md    # Reverse mode · imported sub-track (reverse-derives the SPEC.md kernel — no upstream PM flow)
     └── ...
 ```
 
