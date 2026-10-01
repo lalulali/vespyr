@@ -111,7 +111,8 @@ validate → explore → design → plan → develop → launch → iterate → 
 ## 🧩 Key Capabilities
 
 - **41 curated skills** — from `/validate-idea`, `/design`, and `/round-table` to `/shut-up`, `/motion`, `/develop`, `/launch`, `/legal-safety-audit`, `/customize-skill`, and `/create-skill` (all validated against the [agentskills.io](https://agentskills.io) spec via CI)
-- **Prototype-first reverse mode** — `/design` turns a frozen prototype into an evidence-anchored PRD: every statement traces to a `path#id` anchor, and a hash witness blocks stale specs at the scope gate.
+- **Prototype-first reverse mode** — `/design` turns a frozen prototype into an evidence-anchored PRD: every statement traces to a `path#id` anchor, and a recorded baseline hash blocks stale specs at the scope gate.
+- **Acceptance-criteria depth is gated, not advised** — every user story carries a self-audit across 16 risk categories, every feature carries a state model whose illegal transitions each name a real criterion, and in reverse mode every criterion is tagged `[prototype L-NN]` or `[derived]`. Criteria that point at nothing fail the build. Three reasoning smells print as warnings — they never block, but they mark coverage that was filled in rather than reasoned.
 - **Implementation coverage contract** — `/develop` sweeps every acceptance criterion for implementation evidence before QA: orphan ACs fail the build, and the 10 detail classes are audited or explicitly deferred.
 - **Consolidated 3-tier memory & machine fencing** — atomic state syncing in `project-context.md`, streamlined 5-file shared memory, and automatic phase-boundary compaction.
 - **Security & integrity engine** — pinned SHA-256 manifest verification (`vespyr verify`; unsigned interim — accidental-drift detection only, see ADR-002 §2.1.1), supply-chain audit (`vespyr audit`), closed permission registry, and T3 data trust boundary admission control.

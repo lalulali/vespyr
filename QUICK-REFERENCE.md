@@ -86,6 +86,27 @@ QUALITY GATES (in order)
 6. Performance audit        — @performance-engineer
 7. ML/AI validation (opt)   — @ml-ai-engineer / @ml-ai-ops
 
+MECHANICAL GATES (fail the build, not advice)
+──────────────────────────────────────────────────
+npm test                              All tests. Pre-commit hook runs it.
+npx vespyr verify                    Manifest integrity (pinned SHA-256).
+node .agents/scripts/spec_check.js   All skills valid (structure, not just frontmatter).
+node .agents/scripts/template_conformance.js check --mode create|reverse
+                                      Checks artifacts/output/03-strategy/{requirements,
+                                      user-stories}.md by default; override with
+                                      --requirements/--user-stories.
+                                      Enforces: 16-category per-story self-audit,
+                                      per-Feature state model with covered illegal
+                                      transitions, reverse-mode [prototype L-NN] /
+                                      [derived] tags, deferred-evidence focus.
+                                      Emits `warnings` — read them; they never block.
+                                      See user-story-instructions.md §3.2–3.5.
+node .agents/scripts/validate_frontmatter.js   All agent + step-file frontmatter valid.
+node .agents/scripts/security-scan.js          Security findings (audit-only).
+npm run eval                          HARNESS SELF-TEST, not quality. Exits 0 unless
+                                      a suite is malformed or something that used to
+                                      pass regressed. Quality needs a real adapter.
+
 ──────────────────────────────────────────────────
 
 CORE SKILL CATALOG
