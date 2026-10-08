@@ -45,7 +45,7 @@
       "assertContains": [
         "Pattern",
         "Hypothesis",
-        "Success Metric"
+        "Method"
       ],
       "prompt": "Run /validation-patterns to select a validation method for willingness-to-pay with hypothesis and success metric.",
       "assertNotContains": [

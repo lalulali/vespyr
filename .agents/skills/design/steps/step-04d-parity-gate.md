@@ -10,7 +10,18 @@ output_contract:
 
 # Step 4 — Parity Gate (Reverse Mode)
 
-Count the parity — never feel it. Run `spec_parity.js`, complete the 10-class detail checklist, produce `parity-report.md`, and stamp the **freeze boundary** (Review 10 §4). This is the handoff gate: after this step the spec is the contractual truth and the prototype is an immutable reference.
+Count the parity — never feel it. Complete the 10-class detail checklist, produce `parity-report.md`, and stamp the baseline.
+
+```bash
+node .agents/scripts/spec_parity.js check --root . --json          # ghost / orphan accounting
+node .agents/scripts/spec_parity.js baseline stamp --root .        # freeze the baseline hash
+node .agents/scripts/spec_parity.js baseline check --root .        # verify it has not drifted
+```
+
+**The script is `spec_parity.js`.** It was previously named as a bare filename with no
+invocation while every other gate here is written `node .agents/scripts/<name>.js`, so a reader
+looking for "the parity gate" in SKILL.md or step-00 — where it appears only as a step name —
+had nothing to copy, guessed `parity_gate.js`, and got MODULE_NOT_FOUND.p the **freeze boundary** (Review 10 §4). This is the handoff gate: after this step the spec is the contractual truth and the prototype is an immutable reference.
 
 ## Prerequisites
 - Synthesized artifacts (step-3) + ledger + inventory.
@@ -20,7 +31,7 @@ Count the parity — never feel it. Run `spec_parity.js`, complete the 10-class 
 - `spec_parity.js` present; a missing or stubbed script is a loud failure, never a silent skip.
 
 ## Process
-> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill design-reverse --step 4`
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill design-reverse --step 4d`
 
 1. **Track and collaboration check** — confirm the parity report records the selected prototype track/runtime and links `prototype-collaboration.md`; run `prototype_collab_gate.js verify --scope r1-evidence` with the same track and prototype. A missing, stale, mismatched, or unsigned checkpoint halts the gate; an explicit `Implementation handoff: BLOCKED` is carried forward as a release blocker.
 2. **Template conformance (mechanical)** — before parity metrics, confirm the synthesized docs actually follow the canonical templates:

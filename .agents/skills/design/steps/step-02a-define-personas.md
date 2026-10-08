@@ -40,6 +40,15 @@ Start from `.agents/templates/product/prd-template.md` and preserve its complete
 ## Persona count
 - Minimum 1, maximum 3. More than 3 suggests the scope is too broad.
 - Each persona must map to a distinct user segment from the research.
+- **If the brief names an affected user group — a screen-reader user, a keyboard-only user, a
+  blind user, an older user, a user on a slow connection, a user with a cognitive or learning
+  disability — that group gets a persona.** Not a paragraph in the PRD's accessibility
+  section, not an NFR row. A persona, because a persona is what makes a screen state legible:
+  "focus moves to the results heading after submit, and the count is announced" is a decision
+  you can only make if you know who is listening.
+  A blind run on a trial-portal brief had to invent a 68-year-old JAWS user themselves and
+  flag her in the PRD as *inferred from one paragraph of the brief*. If the brief says it, the
+  persona is derivable — write it, and mark the evidence it came from.
 
 ## PRD creation
 With personas and feature scope defined, `@product-manager` generates the PRD:

@@ -67,6 +67,9 @@ When `motion-spec.md` exists, the handoff is additionally blocked until this com
 node .agents/scripts/motion_spec_check.js check --json
 ```
 
+Do **not** add `--require-spec` at handoff. Here an absent `motion-spec.md` legitimately means motion is out of scope for this design, and the check correctly skips. Only `/motion` Phase 3 requires the spec's presence, because Phase 3 is only reachable once motion has been judged in scope.
+```
+
 It parses the real `motion-spec.md` and fails on any incomplete `MO-###` prompt (missing field, non-composited animated property, non-fade reduced-motion fallback, non-numeric timing tolerance), a spec-side orphan, or a prompt not referenced in `user-stories.md`. When `motion-spec.md` is absent the script exits 0 (motion not in scope) and this line is a no-op.
 
 ## Prototype collaboration validator

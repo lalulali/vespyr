@@ -30,7 +30,15 @@ const { withLock } = require('./lib/lock.js');
 const { resolveSessionId, windowSessionId, ensureSessionCurrent } = require('./lib/session.js');
 const path = require('path');
 
-const PROJECT_ROOT = process.cwd();
+// `--root` must be honoured. It was parsed by parseArgs and never read — `args.root` appeared
+// zero times in this file — while every gate script in the engine does honour it, so passing it
+// here is the natural thing to do and it silently did nothing. A flag that is accepted and
+// ignored is worse than an unknown one, which at least errors.
+const ROOT_FLAG_INDEX = process.argv.indexOf('--root');
+const PROJECT_ROOT =
+  ROOT_FLAG_INDEX !== -1 && process.argv[ROOT_FLAG_INDEX + 1] && !process.argv[ROOT_FLAG_INDEX + 1].startsWith('--')
+    ? path.resolve(process.argv[ROOT_FLAG_INDEX + 1])
+    : process.cwd();
 const CONFIG_FILE = path.join(PROJECT_ROOT, '.agents', 'config.yaml');
 const AUDIT_FILE = path.join(PROJECT_ROOT, 'artifacts', 'output', 'step-audit.json');
 const REPORT_FILE = path.join(PROJECT_ROOT, 'artifacts', 'output', 'step-audit-report.md');
@@ -40,13 +48,18 @@ const REPORT_FILE = path.join(PROJECT_ROOT, 'artifacts', 'output', 'step-audit-r
 // ---------------------------------------------------------------------------
 function readConfig() {
   try {
-    if (!fs.existsSync(CONFIG_FILE)) return { step_tracking: 'off' };
+    // An ABSENT config is not the same instruction as `step_tracking: off`. Measured by a
+    // blind run: `begin --step N` from a working tree with no `.agents/config.yaml` exited 0,
+    // printed nothing, and wrote no breadcrumb — the caller read that as "step recorded".
+    // The default stays `off` for portability, but the degradation is now announced, so
+    // "tracked" and "silently discarded" cannot be confused.
+    if (!fs.existsSync(CONFIG_FILE)) return { step_tracking: 'off', configMissing: true };
     const raw = fs.readFileSync(CONFIG_FILE, 'utf8');
     const match = raw.match(/^step_tracking:\s*(\S+)/m);
     const mode = match ? match[1].trim() : 'off';
-    return { step_tracking: mode };
+    return { step_tracking: mode, configMissing: false };
   } catch {
-    return { step_tracking: 'off' };
+    return { step_tracking: 'off', configMissing: true };
   }
 }
 
@@ -118,7 +131,14 @@ function readStepSequence(skill) {
     const fmText = fmMatch[1];
     if (modeFilter) {
       const modeMatch = fmText.match(/^mode:\s*(\S+)/m);
-      if (!modeMatch || modeMatch[1] !== modeFilter) return;
+      // A step with NO mode field is mode-agnostic and belongs to every track.
+      //
+      // It used to be dropped from every track. Measured on /design: step-00 is the
+      // non-skippable scope gate for all four modes, and it carried no `mode:`, so every
+      // mode's step list began at step 1 and the gate SKILL.md calls non-skippable was
+      // invisible to the tracker in all four modes — unlistable and untrackable, while
+      // looking perfectly correct in the file.
+      if (modeMatch && modeMatch[1] !== modeFilter) return;
     }
     const stepMatch = fmText.match(/^step:\s*(\d+[a-z]?)/m);
     const nameMatch = fmText.match(/^name:\s*(.+)$/m);
@@ -262,6 +282,16 @@ function ensureSessionAnchor() {
 // The baseline hash is distinguishable from one taken after a recompute.
 // ---------------------------------------------------------------------------
 const DESIGN_ARTIFACTS = [
+  // The prototype ITSELF is routing evidence. It was missing from this list, which made the
+  // reverse route undetectable on arrival: the only reverse signal was
+  // prototype-inventory.md, and that file is what reverse mode PRODUCES. A bootstrap paradox —
+  // `computeDesignRoute` could never return 'reverse' for a tree that had not already been
+  // routed to reverse. Measured: a tree with `artifacts/input/prototype/p.html` and no
+  // requirements.md returned `route: "create"`, while SKILL.md says reverse is chosen when
+  // "the user arrives prototype-first" and step-00 calls the route output "Deterministic
+  // evidence". A false negative, which is the more dangerous direction: it routes an imported
+  // prototype into create mode instead of reverse.
+  'artifacts/input/prototype',
   'artifacts/output/03-strategy/prototype-inventory.md',
   'artifacts/output/03-strategy/requirements.md',
   'artifacts/output/03-strategy/product-spec.md',
@@ -277,7 +307,18 @@ function designArtifactEvidence() {
   const out = {};
   for (const rel of DESIGN_ARTIFACTS) {
     const p = path.join(PROJECT_ROOT, rel);
-    out[rel] = fs.existsSync(p) ? { present: true, sha256: sha256File(p) } : { present: false, sha256: null };
+    if (!fs.existsSync(p)) { out[rel] = { present: false, sha256: null }; continue; }
+    // A routing input may be a directory (`artifacts/input/prototype/`), so hashing the first
+    // real file inside it is what makes the evidence meaningful rather than merely present.
+    if (fs.statSync(p).isDirectory()) {
+      const entries = fs.readdirSync(p).filter((f) => !f.startsWith('.')).sort();
+      const digest = entries.length
+        ? crypto.createHash('sha256').update(entries.map((f) => `${f}:${sha256File(path.join(p, f))}`).join('\n')).digest('hex')
+        : null;
+      out[rel] = { present: entries.length > 0, sha256: digest, entries: entries.length, kind: 'directory' };
+      continue;
+    }
+    out[rel] = { present: true, sha256: sha256File(p) };
   }
   return out;
 }
@@ -301,10 +342,27 @@ function baselineEvidence() {
 }
 
 function computeDesignRoute(evidence) {
+  const protoDir = evidence.artifacts['artifacts/input/prototype'].present;
   const inv = evidence.artifacts['artifacts/output/03-strategy/prototype-inventory.md'].present;
   const req = evidence.artifacts['artifacts/output/03-strategy/requirements.md'].present;
   const spec = evidence.artifacts['artifacts/output/03-strategy/product-spec.md'].present;
+  const kernel = evidence.artifacts['artifacts/output/03-strategy/SPEC.md'].present;
   const w = evidence.baseline.state;
+
+  // PROTOTYPE-FIRST, ON ARRIVAL. step-00 states the rule directly: "`artifacts/input/prototype/`
+  // contains a reachable prototype AND no `artifacts/output/03-strategy/SPEC.md` → imported",
+  // and SKILL.md says reverse is chosen when "the user arrives prototype-first (prototype source
+  // present, no requirements)". Neither clause was implemented, so the router returned `create`
+  // for exactly the arrival it was documented to detect. This branch implements both.
+  if (protoDir && !kernel) {
+    return {
+      route: 'reverse',
+      reason: inv
+        ? 'prototype present and inventory written — continuing reverse (A1 reverse-first)'
+        : 'prototype present in artifacts/input/prototype/ with no SPEC.md — reverse on arrival ' +
+          '(step-00 imported-sub-track rule); the inventory does not exist yet, which is expected',
+    };
+  }
   if (inv && !req) {
     return { route: 'reverse', reason: 'inventory present and no requirements.md (A1 reverse-first)' };
   }
@@ -335,14 +393,43 @@ function cmdRoute(args) {
   else console.log(`route: ${out.route}${out.blocked ? ' (blocked)' : ''} — ${out.reason}`);
 }
 
+// Per-skill allowed track values. A track recorded with a typo ("creatve") looks identical in
+// the audit to a correct one, and `audit` groups by the raw string — so the typo silently
+// removes the run from the track it claimed. `creative` was measured missing because the
+// SKILL.md help text advertised a value nothing enforced.
+const VALID_TRACKS = {
+  motion: ['full', 'lightweight', 'none', 'creative'],
+  validate_idea: ['create', 'validate', 'brownfield'],
+  explore_idea: ['new-company', 'company-brownfield-internal-permissions', 'company-brownfield-new-product'],
+  unpack_problem: ['guided', 'automated', 'combination'],
+  design: ['create', 'validate', 'edit', 'reverse'],
+};
+
 function cmdScopeLock(args, mode) {
   const { skill, track, agent = 'unknown' } = args;
   if (!skill || !track) {
     console.error('step_tracker: --skill and --track are required for scope-lock');
     process.exit(1);
   }
+  // Validate when we know the skill's vocabulary. An unknown skill is allowed through — the
+  // table is not exhaustive by design, and refusing a track for a skill not listed would
+  // break every skill that has not been catalogued yet.
+  const allowed = VALID_TRACKS[String(skill).toLowerCase()];
+  if (allowed && !allowed.includes(String(track).toLowerCase())) {
+    console.error(
+      `step_tracker: --track "${track}" is not a valid track for ${skill}. Expected one of: ${allowed.join(' | ')}`
+    );
+    console.error('  An unvalidated track is what makes a scope lock unauditable — `audit` groups by the raw string.');
+    process.exit(1);
+  }
   ensureSessionAnchor();
   const session_id = resolveSessionId();
+
+  // Say where the record went. The command used to exit 0 in total silence, which means an
+  // audit trail nobody can locate is not an audit trail — a real-model run hunted for the file
+  // after "recording the decision" and found nothing pointing at it.
+  const auditPath = path.join(PROJECT_ROOT, 'artifacts', 'output', 'step-audit.json');
+
   const entry = {
     type: 'scope_lock',
     skill,
@@ -365,7 +452,13 @@ function cmdScopeLock(args, mode) {
     }
   }
   appendAudit(entry);
-  if (mode === 'verbose') console.log(`🔒 Scope locked: ${skill} — track "${track}" (session: ${session_id})`);
+
+  // Always report the record and where to read it back — not only in verbose mode. Silent
+  // success is indistinguishable from a no-op, and this record is the only thing that makes a
+  // later `audit` able to tell "lightweight was correct" from "research was silently skipped".
+  console.log(`🔒 Scope locked: ${skill} — track "${track}" (session: ${session_id})`);
+  console.log(`   recorded in: ${auditPath}`);
+  console.log(`   read back with: node .agents/scripts/step_tracker.js audit --all`);
 }
 
 // ---------------------------------------------------------------------------
@@ -402,9 +495,19 @@ function cmdBegin(args, mode) {
   const entries = readAudit();
   const prevStepNum = parseInt(String(step).replace(/[a-z]/i, '')) - 1;
   if (prevStepNum > 0) {
-    const prevCompleted = entries.some(
-      e => e.skill === skill && e.type === 'complete' && String(e.step) === String(prevStepNum)
-    );
+    const prevCompleted = entries.some((e) => {
+      if (e.skill !== skill || e.type !== 'complete') return false;
+      const done = String(e.step);
+      // (a) A parent step is satisfied by any of its lettered sub-steps. develop-state.md
+      // documents `"3" means both 3a+3b done`; without this, completing 3a and 3b left "3"
+      // unmet and warned on every subsequent step.
+      if (done === String(prevStepNum)) return true;
+      if (done.replace(/[a-z]/i, '') === String(prevStepNum)) return true;
+      // (b) An explicitly skipped step satisfies the prerequisite. A conditional or optional
+      // step (develop step 2 is conditional, step 5 optional) is *correctly* absent; recording
+      // the skip is how the tracker tells that apart from real drift.
+      return e.skipped === true;
+    });
     if (!prevCompleted && mode !== 'off') {
       const warn = `⚠️  Drift warning: step ${prevStepNum} not marked complete before begin of step ${step}`;
       appendAudit({ type: 'drift_warning', skill, step, prevStep: prevStepNum, agent, ts: new Date().toISOString() });
@@ -440,7 +543,32 @@ function cmdComplete(args, mode) {
   const durationMs = startEntry ? Date.now() - new Date(startEntry.ts).getTime() : null;
   const durationStr = durationMs !== null ? `${Math.round(durationMs / 1000)}s` : 'unknown';
 
-  appendAudit({ type: 'complete', skill: skill || startEntry?.skill, step, agent, ts: new Date().toISOString(), duration: durationStr });
+  // `--skipped "<reason>"` records a step that was deliberately not performed — a conditional
+  // step whose condition is false (develop step 2, Architecture, when ArchitectPhase is absent)
+  // or an optional one with no unknowns (step 5, Spike). Without this, a correct skip is
+  // indistinguishable from real drift and every subsequent step warns.
+  //
+  // A skip is NOT a silent pass: the reason is required, and it is recorded in the audit so a
+  // reader can see what was skipped and why. `--skipped` with no reason is rejected.
+  const skippedReason = typeof args.skipped === 'string' ? args.skipped.trim() : args.skipped === true ? '' : null;
+  if (skippedReason !== null && skippedReason.length < 8) {
+    console.error(
+      'step_tracker: --skipped requires a reason of at least 8 characters, e.g.\n' +
+        '  --skipped "conditional: ArchitectPhase false, no ADRs required"\n' +
+        'A skip with no reason is indistinguishable from an omission.'
+    );
+    process.exit(1);
+  }
+
+  appendAudit({
+    type: 'complete',
+    skill: skill || startEntry?.skill,
+    step,
+    agent,
+    ts: new Date().toISOString(),
+    duration: durationStr,
+    ...(skippedReason !== null ? { skipped: true, skipReason: skippedReason } : {}),
+  });
 
   if (mode === 'verbose') {
     const sequence = skill ? readStepSequence(skill) : [];
@@ -470,11 +598,49 @@ function cmdStatus(args) {
   });
 }
 
+/**
+ * Output artifact paths a skill declares it WRITES, scoped to its `## Output artifacts`
+ * section. This is what makes "ran untracked" decidable: zero step records plus an
+ * artifact on disk means work happened that no record accounts for, which is a different
+ * problem from never having run.
+ *
+ * TWO REASONS THIS IS STRICT, both learned the hard way:
+ *
+ *   1. Scoped to the section, NOT the whole file. A whole-file scan read
+ *      `artifacts/output/02-research/journey-map.md` out of /design's Prerequisites and
+ *      reported "ran untracked" — but that file is /unpack-problem's OUTPUT which /design
+ *      CONSUMES. The first version invented evidence.
+ *   2. Only FULL `artifacts/output/...` paths are probed. Most skills declare bare
+ *      filenames there (`requirements.md`, `product-spec.md`) with no directory, and some
+ *      (`validate-idea`) have no such section at all. Guessing a directory would probe the
+ *      wrong file, so a skill that declares none is reported `unknown` — never "never ran".
+ *
+ * Brace templates like `{feature}` are skipped: they are shapes, not paths.
+ */
+function declaredArtifacts(skillsDir, name) {
+  const md = path.join(skillsDir, name, 'SKILL.md');
+  if (!fs.existsSync(md)) return [];
+  let text;
+  try { text = fs.readFileSync(md, 'utf8'); } catch { return []; }
+
+  const section = text.match(/^##\s*Output artifacts\s*$([\s\S]*?)(?=^##\s|\Z)/mi);
+  if (!section) return [];
+
+  const out = new Set();
+  const re = /artifacts\/output\/[A-Za-z0-9_\-./]+/g;
+  let m;
+  while ((m = re.exec(section[1])) !== null) {
+    const p = m[0].replace(/\/+$/, '');
+    if (!p.includes('{')) out.add(p);
+  }
+  return [...out];
+}
+
 function cmdAudit(args) {
   const { skill, all } = args;
   const entries = readAudit();
-  const skills = all ? [...new Set(entries.map(e => e.skill).filter(Boolean))]
-    : skill ? [skill] : [...new Set(entries.map(e => e.skill).filter(Boolean))];
+  const tracked = [...new Set(entries.map(e => e.skill).filter(Boolean))];
+  const skills = all ? tracked : skill ? [skill] : tracked;
 
   if (skills.length === 0) {
     console.log('No audit data found. Set step_tracking: silent or verbose in .agents/config.yaml first.');
@@ -482,6 +648,69 @@ function cmdAudit(args) {
   }
 
   let report = `# Step Audit Report\nGenerated: ${new Date().toISOString()}\n\n`;
+
+  // UNTRACKED SKILLS (2026-10-06).
+  //
+  // The skill list used to be derived from the audit records themselves, so a skill with
+  // ZERO records could never appear — it was indistinguishable from a skill that does not
+  // exist. Measured on this repo: /design had run and produced results, but held no step
+  // records at all, and `audit --all` listed explore-idea, shape-up and unpack-problem while
+  // saying nothing about /design. A missing skill in a health report reads as "nothing to
+  // report", which is exactly the wrong reading: the honest reading is "ran, untracked".
+  //
+  // Enumerated from the skills DIRECTORY, not the records, so absence becomes visible.
+  if (all || !skill) {
+    const skillsDir = path.join(PROJECT_ROOT, '.agents', 'skills');
+    let onDisk = [];
+    try {
+      onDisk = fs.readdirSync(skillsDir, { withFileTypes: true })
+        .filter(e => e.isDirectory() && fs.existsSync(path.join(skillsDir, e.name, 'SKILL.md')))
+        .map(e => e.name);
+    } catch { /* skills dir unreadable — report tracked only */ }
+
+    // A tracked skill may be recorded under a mode variant (`design-validate`), so match on
+    // the base name too before calling anything untracked.
+    //
+    // Step files live in `<skill>/steps/`, not at the skill root — counting at the root
+    // reported "0" for every skill, which was worse than no column at all. And a skill that
+    // ships no step files is not "untracked", it is simply not step-tracked; listing 38 of
+    // them as untracked buried the one that mattered.
+    const stepFileCount = (name) => {
+      const stepsDir = path.join(skillsDir, name, 'steps');
+      if (!fs.existsSync(stepsDir)) return 0;
+      return fs.readdirSync(stepsDir).filter(f => /^step-.*\.md$/.test(f)).length;
+    };
+    const hasSteps = new Map(onDisk.map(n => [n, stepFileCount(n)]));
+
+    const untracked = onDisk.filter(name =>
+      hasSteps.get(name) > 0 && !tracked.some(t => t === name || t.startsWith(name + '-')));
+    const generic = onDisk.filter(name => hasSteps.get(name) === 0);
+
+    if (untracked.length) {
+      report += `## Untracked skills (${untracked.length})\n\n`;
+      report += `These skills ship step files but have **zero** records in \`step-audit.json\`.\n\n`;
+      report += `The **Evidence** column makes "ran untracked" distinguishable from "never ran":\n`;
+      report += `if the skill declares output artifacts and they exist on disk, it produced work\n`;
+      report += `without being tracked. That is a decidable fact, not a guess.\n\n`;
+      report += `| Skill | Step files | Evidence | Declared artifacts found |\n|---|---|---|---|\n`;
+      for (const n of untracked.sort()) {
+        const declared = declaredArtifacts(skillsDir, n);
+        const found = declared.filter(p => fs.existsSync(path.join(PROJECT_ROOT, p)));
+        const verdict = declared.length === 0
+          ? 'unknown — declares no full artifact path'
+          : found.length > 0
+            ? '⚠️ **ran untracked**'
+            : 'declared artifacts absent — never ran, or cleaned up';
+        report += `| \`${n}\` | ${hasSteps.get(n)} | ${verdict} | ${found.length}/${declared.length}` +
+          (found.length ? ` (${found.slice(0, 2).map(p => `\`${p.split('/').pop()}\``).join(', ')})` : '') + ' |\n';
+      }
+      report += '\n';
+    }
+    if (generic.length) {
+      report += `> ${generic.length} skill(s) ship no \`step-*.md\` files, so they are not step-tracked by design: ` +
+        `${generic.sort().map(n => `\`${n}\``).join(', ')}\n\n`;
+    }
+  }
 
   skills.forEach(s => {
     const sequence = readStepSequence(s);
@@ -549,6 +778,17 @@ const [,, command, ...rest] = process.argv;
 const args = parseArgs(rest);
 const config = readConfig();
 const mode = config.step_tracking || 'off';
+
+// Announce the degradation once, on the write commands where a caller could otherwise believe
+// something was recorded. Behaviour is unchanged — still `off`, still exit 0 — but it is no
+// longer a success that reports nothing.
+if (config.configMissing && ['begin', 'complete'].includes(command)) {
+  console.error(
+    `[WARN] No ${CONFIG_FILE} found (cwd: ${process.cwd()}).\n` +
+      `       step_tracking defaulted to "off": this call recorded NOTHING, despite exiting 0.\n` +
+      `       Run from the project root, or set step_tracking explicitly, if the step should be tracked.`
+  );
+}
 
 // No command → show usage regardless of mode (human error, not an agent call)
 if (!command) {

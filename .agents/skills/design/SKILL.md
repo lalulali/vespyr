@@ -1,6 +1,6 @@
 ---
 name: design
-description: Defines product requirements from validated ideas, then produces detailed developer-ready specs. Use for prototype-first, static HTML/Tailwind CDN, Next.js/React/shadcn component prototypes, create, edit, or validate design work; routes the prototype track and requires designer–tech collaboration before handoff.
+description: Defines product requirements from validated ideas, then produces detailed developer-ready specs. Use when the user says "design this", "write the PRD", "turn my prototype into requirements", "write user stories", "review the design", "design a prototype", or invokes /design. Covers prototype-first entry (static HTML/Tailwind CDN or Next.js/React/shadcn component battery), plus create, edit, and validate modes; routes the prototype track and requires designer–tech collaboration before handoff.
 metadata:
   version: "1.2"
   last_updated: "2026-09-30"
@@ -34,6 +34,31 @@ Any one halts the mode and escalates:
   - **`generated`** — Vespyr-built prototype in the project + `artifacts/output/03-strategy/SPEC.md` Spec Kernel (Review 10 §4); no `requirements.md` yet.
   - **`imported`** — externally-authored prototype (Figma export, Google Stitch, hand-coded HTML) placed in `artifacts/input/prototype/`; no SPEC.md required — the kernel is reverse-derived (step-0e); no `requirements.md` yet.
 - Create/edit/validate: `artifacts/output/01-discovery/validation-brief.md` OR `idea-brief.md` OR `shaped-brief.md`
+
+  **A user prompt is itself a valid brief.** This skill's own trigger is the user saying
+  "design this" or "write the PRD", which produces a prompt and not a file at a canonical
+  path. Requiring the artifact above before create mode can start made the primary trigger
+  unable to reach the primary mode: a blind run on a clinical trial brief had to fabricate an
+  `idea-brief.md` and record a deviation, because the only sanctioned route to the missing
+  file was `/explore-idea` — market and competitive research, irrelevant to an internal,
+  already-funded product.
+
+  **Normalise, do not fabricate.** Write the prompt to the canonical path and label its
+  provenance:
+
+  ```markdown
+  # Idea Brief
+  <!-- DERIVED FROM THE USER PROMPT by /design step 01a. Not produced by /validate-idea,
+       /shape-up, or /unpack-problem. No upstream research was commissioned. -->
+  ```
+
+  Then mark every unavailable upstream artifact `[ABSENT — not commissioned]` rather than
+  running `/explore-idea` to manufacture one. A brief that says which research you skipped,
+  and why, is more useful than market analysis of a market you are not entering.
+
+  Only escalate to `/validate-idea`, `/shape-up`, or `/unpack-problem` when the prompt is
+  genuinely an unvalidated idea at a commitment gate — budget, headcount, or calendar. That
+  is the escalation the Intent Ladder requires; it is not an entry fee.
 - `artifacts/output/02-research/market-analysis.md` (optional if entering via `shape-up` with all assumptions verified)
 - `artifacts/output/02-research/competitive-analysis.md` (optional if entering via `shape-up`)
 - `artifacts/output/02-research/user-personas.md` (optional if entering via `shape-up`)
@@ -143,6 +168,14 @@ Two sub-tracks share the same synthesis spine (Evidence Ledger → PRD synthesis
 5. Parity Gate → `steps/step-04d-parity-gate.md`
 6. Spike Rollback (only on QA falsification) → `steps/step-05d-sync-contract.md`
 
+**Tracking note.** Step 3 above re-runs the create-mode authoring steps `02a`→`05a` with the
+Evidence Ledger as fixed input (see `step-03d-prd-synthesis.md`). Those step files declare
+`mode: create`, so a `--skill design-reverse` tracker listing shows only the `d`/`e` steps and
+omits the synthesis work reverse mode actually performs. That is correct — the files are
+create steps and their tracking labels are shared — but the tracker's list is **not** a
+complete account of what a reverse run does. Track the synthesis loop against
+`design-create` steps 2–5, and use `design-reverse` for steps 0e–5d.
+
 **What the baseline hash can promise:** both sub-tracks record a SHA-256 of the prototype file and compare against it later, so a drift is always detectable. They differ in how strong that promise is. The `generated` sub-track uses a **prototype baseline hash** — Vespyr made the file, so it can promise nothing will change it. The `imported` sub-track uses an **import baseline hash** — it proves the file you gave me is unchanged since ingest, but **cannot** detect edits made in the origin design tool (Figma/Stitch). Keeping the imported snapshot in sync with the design tool is a human responsibility; the engine enforces file parity only, never origin parity.
 
 ## Edit mode step sequence
@@ -158,15 +191,81 @@ Two sub-tracks share the same synthesis spine (Evidence Ledger → PRD synthesis
 4. Lock & Handoff → `steps/step-04c-lock-handoff.md`
 
 ## Done when
-- `requirements.md` and `user-stories.md` exist and preserve the canonical template structure — a compact report is not an acceptable substitute
+Common to all modes:
+- `@memory-controller session-write` has run, and the chat reply stated the outcome as one plain sentence with the consequence and the next action — never a bare gate token
+
+**Create mode:**
+- `requirements.md` and `user-stories.md` exist with at least one **real** story each. A copy of `user-story-template.md` satisfies the template's shape and no requirement — `template_conformance.js` now rejects it, and rejects a story that defines no acceptance criterion
 - `product-spec.md` (plus `design.md`) exists with screen states, design tokens, and accessibility coverage
+- **Every screen state table carries the four accessibility states** — keyboard, screen-reader, zoom/reflow, reduced-motion — as rows with acceptance criteria, not as a note. `step-04a-screen-states.md` defines them. "Accessibility coverage" is not satisfied by an NFR row and a checkbox: a blind run found create mode carried accessibility in exactly one line of prose, and the dedicated a11y step lives in **validate** mode's sequence, so the mode where screens are specified never ran it
+- **If the brief names an affected user group, a persona exists for it** — a persona, not a paragraph, because a persona is what makes a focus order or an announcement a decision rather than a guess
 - The selected prototype track and runtime are recorded in `project-context.md`
 - `prototype-collaboration.md` exists with a `SATISFIED` disposition whenever prototyping was in scope
-- Reverse mode only: the parity gate passes with zero ghost rows, and every FR/NFR, story, AC, screen state, and token decision cites at least one `L-NN` Evidence Ledger row
-- `@memory-controller session-write` has run
+
+**Reverse mode:**
+- The parity gate passes with zero ghost rows, and every FR/NFR, story, AC, screen state, and token decision cites at least one `L-NN` Evidence Ledger row
+
+**Validate mode:**
+- `ux-research-report.md` carries a **Review Gate** verdict — `VERDICT: [CONFIRMED]` / `[PARTIAL]` / `[FALSIFIED]`, bracketed so `tools/eval/lib/ast.js` can read it — preceded by a plain sentence a non-expert can act on
+- The verdict is derived from the 🟢/🟡/🔴 scorecard that is in the same file, so the number in `Because:` matches the findings above it
+
+**Edit mode:**
+- `gap-map.md` carries the Review Gate verdict (`[CONFIRMED]` / `[PARTIAL]` / `[FALSIFIED]`), and every revised section has a change record naming the finding it closed
+- Sections that hit the 2-cycle limit are named as open blocking findings, not carried forward silently
+
+A mode with no completion contract is an unbounded step: the run ends when the agent gets bored, not when the work is done.
 
 ## Output artifacts
-`requirements.md`, `user-stories.md`, `product-spec.md`, `product-spec.html`, `design.md`, plus `measurement-plan.md` and `ux-research-report.md` (optional). When prototyping is in scope, also require `prototype-collaboration.md` with the selected track/runtime and designer–tech disposition.
+
+Full paths, so `step_tracker.js audit` can decide whether this skill ran untracked:
+
+- `artifacts/output/03-strategy/requirements.md`
+- `artifacts/output/03-strategy/user-stories.md`
+- `artifacts/output/03-strategy/product-spec.md`
+- `artifacts/output/03-strategy/product-spec.html`
+- `artifacts/output/03-strategy/design.md`
+- `artifacts/output/03-strategy/gap-map.md` — edit mode; holds the Review Gate verdict
+- `artifacts/output/02-research/ux-research-report.md` — validate mode; also holds its verdict.
+  Required in validate mode, optional in create mode.
+- `artifacts/output/03-strategy/measurement-plan.md` — optional
+- `artifacts/output/03-strategy/prototype-inventory.md` — reverse mode
+- `artifacts/output/03-strategy/parity-report.md` — reverse mode
+- `artifacts/output/03-strategy/prototype-collaboration.md` — whenever prototyping is in scope
+
+Also written: `requirements.md`, `user-stories.md`, `product-spec.md`, `product-spec.html`, `design.md`, plus `measurement-plan.md` and `ux-research-report.md` (optional). When prototyping is in scope, also require `prototype-collaboration.md` with the selected track/runtime and designer–tech disposition.
+
+**Validate mode's verdict lives in `ux-research-report.md`, not a separate file.** That file is required in validate mode — it is the only artifact carrying the gate. It is optional in create mode, where the gate is mechanical (`template_conformance.js`, `anti_generic_check.js`, `prototype_collab_gate.js`) and reports its own pass/fail.
+
+## Two surfaces — every mode
+
+`/design` has four modes and they all end by telling the owner something. The rule is
+stated here once because it applies to **all** of them, not to one step:
+
+- **Document surface** — the canonical artifact carries the machine record: plain sentence
+  first, then the bracketed card. Every gate token must be **bracketed**, because
+  `tools/eval/lib/ast.js` only reads bracketed forms.
+- **Chat surface** — the reply carries the human sentence, the consequence, and the next
+  action. **Never** a gate token, and never a card field (`VERDICT:`, `Survived:`,
+  `Because:`, `Next:`). A reader who has never seen this engine must be able to act on the
+  sentence alone (`.agents/references/vespyr-dna.md` §Two surfaces).
+
+State the consequence, not the label. `[PARTIAL]` is not "partial" — it is "the flow works,
+but six states are unusable with a keyboard and none of that is fixed yet; @product-designer
+owns it."
+
+Per-step detail lives in the step files; this is the contract they all inherit.
+
+## Which gate, when
+
+This skill emits three different gates, and they are not interchangeable. Collapsing them is how a design review ends up reading as a build decision.
+
+| Gate | Emitted by | Vocabulary | Answers |
+|---|---|---|---|
+| **Decision** | never | `[GO]` / `[RESHAPE]` / `[NO-GO]` | *should this be built* — owned by `/validate-idea` and `/shape-up`, **not** by `/design` |
+| **Review** | validate mode (step 04c) | `[CONFIRMED]` / `[PARTIAL]` / `[FALSIFIED]` | *are these existing artifacts sound* |
+| **Collaboration** | prototype checkpoint | `SATISFIED` / `BLOCKED` | *did designer and tech agree on the prototype* |
+
+So `/design` must never write `[GO]` to mean "the design looks fine". Validate mode is judging artifacts that already exist, which is a Review Gate claim (`.agents/references/glossary.md`).
 
 ## Canonical document contracts
 
@@ -181,7 +280,16 @@ Create and reverse mode use the same document formats. The templates are authori
 In reverse mode, every authored persona, FR/NFR, story, acceptance criterion, screen state, and token decision must cite one or more `L-NN` Evidence Ledger rows. Keep the template's `Traces to PRD` field and append the ledger IDs to that field (or to the AC evidence line); do not replace the FR reference. A missing template section or required story field is a handoff failure, not a formatting preference.
 
 ## State & memory integration
-At start, run: `node .agents/scripts/orchestrator_state.js status` then `next`. Also: `@memory-controller load product-manager [design — {feature}]`
+At start, run: `node .agents/scripts/orchestrator_state.js status`, then `next`.
+
+> **Neither `status` nor `next` is read-only.** Both create `artifacts/output/pipeline-state.json`,
+> `artifacts/output/sprint-status.yaml`, and `artifacts/memory/project-context.md` on a tree
+> where they do not exist; `next` can also flip the active phase from `pending` to `in-progress`.
+> Measured from an empty tree: `status` alone creates all three. A blind run was told
+> "`status` alone if you want to look without changing anything" and found otherwise — so that
+> sentence was wrong, and it was my own error, not the reader's.
+>
+> To inspect without writing, read the files directly. There is no read-only variant. Also: `@memory-controller load product-manager [design — {feature}]`
 
 **After PRD + user stories (create step 3 / edit step 3):** Write key product decisions:
 ```

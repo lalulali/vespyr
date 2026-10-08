@@ -33,4 +33,18 @@ Find what's incomplete or misaligned. A spec with screens but no error states, o
 ## Output
 Gap map per artifact: which sections are green/yellow/red.
 
+**Home: `artifacts/output/03-strategy/gap-map.md`.** Write it there, not into the chat and
+not only into memory. Step 03b updates it as it closes findings and step 04b reports against
+it; without a named file the map has nowhere to live, so findings cannot be tracked to
+closure and a later reader cannot tell which gaps were addressed. This is the same defect the
+validate-mode verdict had before it was given a home in `ux-research-report.md`.
+
+Use the table shape:
+
+```
+| Artifact | Section | Grade | Finding | Status | Closed by |
+|----------|---------|-------|---------|--------|-----------|
+| requirements.md | §4 Goals | Red | goals unmeasurable | open | — |
+```
+
 > **Tracker:** `node .agents/scripts/step_tracker.js complete --skill design-edit --step 2`

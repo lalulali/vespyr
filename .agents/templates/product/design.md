@@ -83,13 +83,37 @@ Default model output has a recognizable look, and this file exists to prevent it
 - Violet→blue hero gradients, neon glow cards, and gradient-headline + centered-hero + three-feature-cards page formulas as the whole personality.
 - Single-mode shipping. Both light and dark token sets are the default (§2); a dark-only navy theme is never an acceptable default.
 
-**Differentiator requirement:** every design names ONE signature element (from the brief's Signature moment) that makes it unrecognizable as generic output. If you can't name it, the design isn't done.
+**Differentiator requirement:** every design names ONE signature element (from the brief's Signature moment) that makes it unrecognizable as generic output.
+
+**Exception — trust-first and regulated surfaces.** Where the audience must *not* be impressed
+— clinical and regulatory records, participant portals, safety-critical and financial
+disclosures, anything legal or medical affairs signs off — a memorable surface is a surface
+people start comparing, and "unrecognizable as generic output" inverts into a liability. On
+these, the differentiator is a **constraint made visible** rather than an effect: the one
+component nobody is permitted to restyle, the state that is legally frozen, the thing the
+product refuses to do. Record the register and say why the drama was declined.
+
+A blind run on a Phase III trial portal hit this: the brief's whole point was that the portal
+be unremarkable, the nearest product context was "Sleek Utility — internal tools, dashboards,
+data entry" (wrong audience, and no admin surface existed), and the nearest style was Minimalism
+(right, insufficient). It declared both axes `Custom` and made the frozen clinical instrument
+its differentiator — which is the right answer for that brief and the wrong question for this
+template. If you find yourself adding a WebGL scene to a product that must not feel like a
+campaign, stop: you have not found the register.
+
+If you can't name it, the design isn't done.
 
 ## Design rules (real UI principles — the AI must obey these, not just the tokens)
 
 - Contrast: body text hits WCAG AA (4.5:1) on every surface, including blurred and translucent ones.
 - One primary action per screen; everything else is visually quieter.
-- Touch targets ≥ 44px; spacing comes only from the scale below — no magic numbers.
+- Touch targets: **≥ 24×24 CSS px is the WCAG 2.2 AA floor (SC 2.5.8 Target Size (Minimum))**.
+  44×44 is SC 2.5.5 *Target Size (Enhanced)*, which is **AAA** — recommend it, do not mandate
+  it, and never cite it as an AA requirement. This line previously read "≥ 44px" as a flat rule,
+  which contradicted `steps/step-03c-a11y-check.md`, where the same distinction is stated
+  correctly. A designer following the template and then reviewed by that step was in direct
+  conflict, and compliant designs failed for the wrong reason. Spacing comes only from the
+  scale below — no magic numbers.
 - Max 2 typefaces: headings carry personality, body carries readability.
 - Every interactive element fills all five Component-states cells — no empty cells ship.
 - Motion is transform/opacity only, with a reduced-motion fallback per `motion-spec.md`.

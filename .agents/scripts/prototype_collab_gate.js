@@ -97,14 +97,76 @@ function verify({ root = process.cwd(), recordPath, track, prototypePath, scope 
   }
   if (!prototype) problems.push('record is missing Prototype');
   if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) problems.push('record is missing a YYYY-MM-DD Date');
-  if (gateResult !== 'PASS') problems.push(`track gate result must be PASS, got "${gateResult || 'missing'}"`);
+  // THE TRACK GATE RESULT — and the inversion this replaces.
+  //
+  // This line used to be a flat `gateResult !== 'PASS'`. Measured by a blind run on an imported
+  // prototype that genuinely fails the static-html construction standard: the honest record
+  // (Track gate result: FAIL, with four accurate problems quoted) was REJECTED, while a record
+  // that wrote `Track gate result: PASS` — with its own Evidence paragraph still documenting
+  // `exit 1 / "pass": false / four problems` — PASSED. The gate never re-ran the track gate, so
+  // it could not tell a verified pass from a typed one. A gate that rejects honesty and accepts
+  // an unsupported claim inverts the incentive it exists to create.
+  //
+  // The fix separates two claims this line had conflated:
+  //   "the prototype passes the construction standard"  — required to HAND OFF
+  //   "evidence extraction was authorized anyway"       — the step-01e escape hatch for an
+  //                                                        imported prototype that is deficient,
+  //                                                        which is the normal case for R1
+  //
+  // In `r1-evidence` scope a documented FAIL is therefore accepted — but only when the record
+  // explicitly authorizes bounded extraction and names the blocking finding. Silence is not a
+  // disposition.
+  const escapeAuthorized =
+    /(?:escape hatch|bounded evidence extraction|authorized to proceed|R1 evidence scope authoriz|extraction (?:is|was) authorized)/i.test(text);
+  const namesBlocker = /(?:critical state|missing|absent|incomplete|fails?\b|failure|blocking|PC-\d{2})/i.test(text);
+
+  if (gateResult === 'PASS') {
+    // A typed PASS is not evidence. If the record claims the track gate passed, it must carry
+    // the command it ran and the exit code it got, so a reviewer can reproduce the claim.
+    // The record template carries `Track gate command:` and `Evidence: <exit code>` as SEPARATE
+    // fields, so requiring both on one line was a false positive on a correct record — the
+    // shipped test fixture has them two lines apart. Check for both, anywhere, not adjacency.
+    const hasCommand = /shadcn_gate\.js|track gate command/i.test(text);
+    const hasZeroExit = /exit\s*(?:code\s*)?0\b|"pass":\s*true\b/i.test(text);
+    const hasEvidence = hasCommand && hasZeroExit;
+    if (!hasEvidence) {
+      problems.push(
+        `track gate result claims PASS but the record carries no runnable evidence — quote the ` +
+          `command and its exit 0 (a typed PASS is not a verified PASS; this gate cannot re-run ` +
+          `the track gate itself)`
+      );
+    }
+  } else if (scope === 'r1-evidence' && escapeAuthorized && namesBlocker) {
+    // Accepted: documented FAIL + explicit authorization + a named blocker. This is the path
+    // step-01e describes and which the old rule made unreachable.
+  } else {
+    problems.push(
+      `track gate result must be PASS, got "${gateResult || 'missing'}"` +
+        (gateResult === 'FAIL'
+          ? ' — a FAIL may be accepted in r1-evidence scope, but only when the record explicitly ' +
+            'authorizes bounded evidence extraction under step-01e\'s escape hatch AND names the ' +
+            'blocking finding. Say which, or fix the prototype.'
+          : '')
+    );
+  }
   if (scope === 'handoff') {
     if (aggregateState !== 'SATISFIED') problems.push(`handoff scope requires aggregate disposition SATISFIED, got "${aggregateState || 'missing'}"`);
     if (accessibility !== 'SATISFIED') problems.push(`handoff scope requires accessibility disposition SATISFIED, got "${accessibility || 'missing'}"`);
     if (feasibility !== 'SATISFIED') problems.push(`handoff scope requires feasibility disposition SATISFIED, got "${feasibility || 'missing'}"`);
   } else {
     if (reviewScope !== 'r1-evidence') problems.push(`record review scope must be r1-evidence, got "${reviewScope || 'missing'}"`);
-    if (trackClassification !== 'SATISFIED') problems.push(`R1 evidence scope requires track classification SATISFIED, got "${trackClassification || 'missing'}"`);
+    // Same conflation as the gate-result rule above, one field over. `Track classification`
+    // describes the PROTOTYPE'S QUALITY; `R1 evidence disposition` describes whether bounded
+    // extraction is authorized. An imported prototype with four accurate construction problems
+    // is honestly classified `CHANGES REQUESTED` while its evidence disposition is still
+    // `SATISFIED` — those are different claims and the gate demanded both be satisfied.
+    //
+    // The disposition stays mandatory. The classification may be CHANGES REQUESTED when the
+    // escape hatch is invoked and a blocker is named, because that is the accurate value.
+    const classificationHonest = trackClassification === 'CHANGES REQUESTED' && escapeAuthorized && namesBlocker;
+    if (trackClassification !== 'SATISFIED' && !classificationHonest) {
+      problems.push(`R1 evidence scope requires track classification SATISFIED, got "${trackClassification || 'missing'}"`);
+    }
     if (r1Disposition !== 'SATISFIED') problems.push(`R1 evidence scope requires R1 evidence disposition SATISFIED, got "${r1Disposition || 'missing'}"`);
   }
   if (!implementation) problems.push('record is missing Implementation mapping evidence');

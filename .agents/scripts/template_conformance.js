@@ -162,7 +162,11 @@ const AC_ID = 'AC-[A-Za-z]+-?\\d+';
 const AC_DEF_RE = new RegExp('\\*\\*' + AC_ID + ':\\*\\*', 'g');
 const AC_REF_RE = new RegExp(AC_ID, 'g');
 // Source tag required on every AC in reverse mode.
-const AC_TAG_RE = /\[(prototype\s+L-\d+|derived)\]/i;
+// FINDING H: `[prototype L-06, L-07, L-08]` and `[prototype L-30 — deferred]` had NO
+// sanctioned form. An acceptance criterion genuinely witnessed by three ledger rows could not
+// be tagged without dropping two of them into prose, where nothing machine-readable can see
+// them. Multi-row and annotated tags are legitimate; the grammar said otherwise by omission.
+const AC_TAG_RE = /\[(?:prototype\s+L-\d+(?:\s*,\s*(?:prototype\s+)?L-\d+)*(?:\s*[—–-][^\]]*)?|derived)\]/i;
 
 // R5 smell-detector thresholds. These produce WARNINGS, never failures: they
 // mark reasoning that deserves a second look, they do not define correctness.
@@ -477,6 +481,63 @@ function checkDeferredFocus(usText, prdText, mode) {
   return failures;
 }
 
+
+/**
+ * Placeholder vocabulary, derived from the templates themselves.
+ *
+ * WHY THIS EXISTS — and it is a correction of my own previous fix.
+ * The first attempt at this hole checked for the literal string `US-XXX`. A blind run defeated
+ * it with one substitution:
+ *
+ *     sed 's/US-XXX/US-001/g' user-story-template.md > user-stories.md
+ *
+ * and the blocking create-mode gate printed "✓ template conformance" — exit 0, zero failures —
+ * on a document whose every remaining field was still a placeholder: "As a [type of user],
+ * I want [goal]", AC bodies of "[Short Summary of Step] / [precondition] / [user action] /
+ * [expected outcome]", a state model of "[state A]" / "[event 1]". Checking one token out of
+ * thirty is not a gate; it is a token check wearing a gate's name.
+ *
+ * So the vocabulary is READ FROM THE TEMPLATE rather than hard-coded. If a template gains a
+ * placeholder, this detector gains it in the same commit — the two cannot drift apart.
+ */
+const TEMPLATE_DIR = path.join(__dirname, '..', 'templates', 'product');
+
+/** Tokens that are legitimate in a FINISHED document — status vocabulary, not blanks. */
+const LEGIT_TOKENS = new Set([
+  'OPEN', 'ABSENT', 'PENDING', 'DERIVED', 'DEFERRED TO SPEC', 'derived', 'x', ' ', 'N/A',
+  'ABSENT — no upstream research', 'PENDING — owner to supply', 'prototype L-NN',
+]);
+
+function templatePlaceholders(templateFile) {
+  const p = path.join(TEMPLATE_DIR, templateFile);
+  if (!fs.existsSync(p)) return [];
+  // Fenced blocks demonstrate FORMAT; their contents are not field placeholders.
+  const src = fs.readFileSync(p, 'utf8').replace(/```[\s\S]*?```/g, '');
+  const out = new Set();
+  for (const m of src.matchAll(/\[([^\]\n]{2,80})\]/g)) {
+    const tok = m[1].trim();
+    if (!tok || LEGIT_TOKENS.has(tok)) continue;
+    if (/^[ x]$/.test(tok)) continue;              // checkbox, not a placeholder
+    if (tok.startsWith('!')) continue;             // GitHub alert syntax: > [!NOTE], > [!IMPORTANT]
+    if (src.includes(`[${tok}](`)) continue;        // markdown link text
+    if (/^\d+$/.test(tok)) continue;                // footnote reference
+    out.add(tok);
+  }
+  return [...out];
+}
+
+/** Every template placeholder still present in the artifact, with line and context. */
+function lingeringPlaceholders(text, templateFile) {
+  const found = [];
+  for (const tok of templatePlaceholders(templateFile)) {
+    const idx = text.indexOf(`[${tok}]`);
+    if (idx === -1) continue;
+    const line = text.slice(0, idx).split('\n').length;
+    found.push({ tok, line, context: (text.split('\n')[line - 1] || '').trim().slice(0, 88) });
+  }
+  return found;
+}
+
 function checkUserStories(text, opts = {}) {
   const { mode = 'create', prdText = '' } = opts;
   const failures = [];
@@ -555,6 +616,70 @@ function checkUserStories(text, opts = {}) {
   // must not judge how many ACs result. Format: user-story-instructions.md §3.3.
   {
     const blocks = storyBlocks(text);
+
+    // A create-mode user-stories document that defines NO story is not a scaffold — it is a
+    // missing deliverable, and this is the blocking gate for the mode.
+    //
+    // Measured by a blind run on a clinical-trial brief: step 03a instructs "scaffold first,
+    // then populate", and after `cp user-story-template.md user-stories.md` the blocking gate
+    // reported `ok: true` with zero failures. Verified side by side: a real 21-story document
+    // and the untouched template BOTH produced `userStories.failures: []`. The template's own
+    // skeleton — `## Feature: [Feature Title]`, `### User Story: As a [type of user]...`,
+    // `**Story ID:** US-XXX` — is shaped exactly like a finished story, so every structural
+    // check passed on a document containing nothing.
+    //
+    // This is the worst failure mode a gate can have and the file's own header already names
+    // it: "it disables itself silently and looks green".
+    if (blocks.length === 0) {
+      // Distinguish "nothing here" from "something here in a layout this gate cannot read".
+      // Measured: a blind run on a brownfield brief handed over a readable
+      // `## US-001 — Route a parcel` document with seven acceptance criteria, and this gate
+      // told it "no user story is defined". The rejection was right — the file uses neither
+      // supported layout — but the reason was false, and a false reason sends the author to
+      // fix the wrong thing.
+      const looksLikeStories = /\bUS-\d{2,}\b/.test(text);
+      failures.push(
+        looksLikeStories
+          ? 'User stories: this document defines story IDs (US-###) but no supported story ' +
+            'layout was found. This gate reads `### User Story:` headings, or `- **Story ID:**` ' +
+            'metadata (user-story-instructions.md). A flat `## US-001` heading is neither, so ' +
+            'nothing here is validated — including its acceptance criteria. Reformat to a ' +
+            'supported layout, or run the gate knowing the document is unvalidated.'
+          : 'User stories: no user story is defined. Scaffolding from the template is a starting ' +
+            'point, not a deliverable — populate the stories (user-story-instructions.md). ' +
+            'A copy of user-story-template.md satisfies the template\'s shape and no story.'
+      );
+    }
+
+    // And a story must define at least one real acceptance criterion. The template's example
+    // story carries no `**AC-NN:**` definition at all — only prose telling you what to write.
+    // Same principle the state-model check already applies: "a transition covered by a
+    // criterion that does not exist forbids nothing."
+    for (const block of blocks) {
+      const id = (block.match(/Story ID\**\s*:?\**\s*([A-Za-z0-9-]+)/i) || [, '?'])[1];
+      const defined = [...definedACs(block)];
+      if (defined.length === 0) {
+        failures.push(
+          `User stories: ${id} defines no acceptance criterion. A story with no AC is a ` +
+            `placeholder, not a requirement — write at least one, or delete the story.`
+        );
+      }
+      // Create mode only, and deliberately. A template is *required* to ship placeholder IDs
+      // — that is what a template is — so a universal rule would make the shipped
+      // user-story-template.md fail the gate that validates it, which is the test this repo
+      // already guards with ("canonical templates pass, no false positives").
+      //
+      // Reverse mode has a different and stronger proof that its stories are real: the parity
+      // gate in `step-04d-parity-gate.md`, which fails on ghost and orphan evidence rows. The
+      // Evidence Ledger checks above assume populated stories and are vacuous without them,
+      // which is why the story-count floor and the no-criterion rule stay mode-independent.
+      if (opts.mode !== 'reverse' && /^(?:US-)?(?:XXX|X{3,}|\{|N\/A|TBD)$/i.test(id)) {
+        failures.push(
+          `User stories: ${id} still carries the template's placeholder ID. Assign a real ` +
+            `sequential story ID; a document of US-XXX rows is the template with extra steps.`
+        );
+      }
+    }
 
     // The 16 canonical risk categories. Each is matched by a stable leading label.
     // 12 original + 4 added 2026-09-30 (AC-depth work) because /test step-01 §1b
@@ -666,8 +791,39 @@ function checkUserStories(text, opts = {}) {
             if (!AC_TAG_RE.test(line.slice(from, to))) untagged.push(marks[i].id);
           }
         }
-        if (untagged.length > 0) {
-          failures.push(`User stories (reverse): story ${storyId} has acceptance criteria with no source tag: ${untagged.join(', ')}. Tag each AC \`[prototype L-NN]\` (witnessed in the prototype) or \`[derived]\` (reasoned to complete coverage) — see step-03d §5.`);
+        // A MIXED tag — `[prototype L-10, derived]` — is the one form this gate will not accept,
+        // and a generic "no source tag" is the wrong message for it. Measured: a blind run tagged
+        // a criterion as partly witnessed and partly reasoned and was told it was untagged.
+        // `derived` exists to complete coverage the prototype cannot show, not to blend with what
+        // it does show, so a criterion that is half-witnessed and half-invented is two criteria
+        // wearing one id. Say that, rather than making the author guess which half is missing.
+        const mixed = new Set();
+        {
+          for (const line of body.split('\n')) {
+            for (const m of line.matchAll(/\[([^\]]+)\]/g)) {
+              const inner = m[1];
+              if (/prototype\s+L-\d+/.test(inner) && /(^|[,\s])derived(\s|,|$)/.test(inner)) {
+                const acm = line.match(/\*\*(AC-[A-Za-z]+\d+):\*\*/);
+                if (acm) mixed.add(acm[1]);
+              }
+            }
+          }
+          if (mixed.size > 0) {
+            failures.push(
+              `User stories (reverse): ${[...mixed].join(', ')} carries a MIXED source tag ` +
+                `(\`[prototype L-NN, derived]\`). A criterion that is part witnessed and part ` +
+                `reasoned is two criteria wearing one id: \`derived\` exists to complete coverage ` +
+                `the prototype cannot show, not to blend with what it does show. Split it — one ` +
+                `witnessed criterion, one derived — so each can be verified on its own terms.`
+            );
+          }
+        }
+
+        // One root cause, one complaint. The specific mixed-tag message supersedes the generic
+        // untagged one — reporting the same defect twice buries the one thing to fix.
+        const residual = untagged.filter((id) => !mixed.has(id));
+        if (residual.length > 0) {
+          failures.push(`User stories (reverse): story ${storyId} has acceptance criteria with no source tag: ${residual.join(', ')}. Tag each AC \`[prototype L-NN]\` (witnessed in the prototype) or \`[derived]\` (reasoned to complete coverage) on its own line.`);
         }
       }
 
@@ -728,6 +884,42 @@ function checkUserStories(text, opts = {}) {
 
   failures.push(...checkStateModels(text));
   failures.push(...checkDeferredFocus(text, prdText, mode));
+
+  // Duplicate AC ids. An id that is defined twice cannot be resolved to one criterion, so every
+  // self-audit, coverage row, and evidence reference built on it is ambiguous — and a coverage
+  // claim you cannot resolve is a coverage claim you cannot check. Applies in every mode.
+  {
+    const defRe = /\*\*(AC-[A-Za-z]+\d+):\*\*/g;
+    const counts = new Map();
+    let m;
+    while ((m = defRe.exec(text)) !== null) counts.set(m[1], (counts.get(m[1]) || 0) + 1);
+    const dupes = [...counts].filter(([, n]) => n > 1);
+    if (dupes.length > 0) {
+      failures.push(
+        `User stories: ${dupes.length} acceptance-criterion id(s) are defined more than once ` +
+          `(${dupes.map(([id, n]) => `${id} x${n}`).join(', ')}). A duplicated id cannot be ` +
+          `resolved to one criterion, so its self-audit, coverage row, and evidence reference ` +
+          `are all ambiguous. Renumber so every AC id is unique — or, if two stories genuinely ` +
+          `share one criterion, state that explicitly rather than defining it twice.`
+      );
+    }
+  }
+
+  // CREATE MODE ONLY. A template is *required* to contain placeholders — that is what a
+  // template is — so this must not apply to the reverse-mode fixtures that validate the
+  // templates themselves ("canonical templates pass, no false positives"). Reverse mode's
+  // substantive proof that its content is real is the parity gate in step-04d.
+  if (mode !== 'reverse') {
+    const lingering = lingeringPlaceholders(text, 'user-story-template.md');
+    if (lingering.length > 0) {
+      const sample = lingering.slice(0, 4).map((h) => `line ${h.line}: [${h.tok}]`).join('; ');
+      failures.push(
+        `User stories: ${lingering.length} unfilled template placeholder(s) remain — ${sample}` +
+          `${lingering.length > 4 ? '; …' : ''}. This is the template with substitutions, not a ` +
+          `specification. Replace each placeholder with real content, or delete the field.`
+      );
+    }
+  }
 
   return { failures, warnings };
 }

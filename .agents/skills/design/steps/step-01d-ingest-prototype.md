@@ -41,6 +41,19 @@ Reject the prototype and halt if any criterion fails:
 
 On rejection: list each failed criterion with what you observed, write no inventory file, and route back to the prototype sandbox.
 
+**There is one sanctioned exception, and it is in `step-01e`.** The rule above is correct as
+written for a prototype authored inside this engine. But `step-01e` inherits the same five
+criteria for an **imported** prototype, and an import is frequently deficient by construction —
+hand-coded HTML has no toggleable states and is not expected to. There, a genuinely missing
+critical state resolves to an **explicit owner-approved disposition in the collaboration
+record**, not a halt.
+
+So: prototype authored in-engine and incomplete → reject, write no inventory. Prototype imported
+from outside → the `step-01e` escape hatch. A reader who has read only this file cannot tell the
+two apart and will halt on an import that was always going to be allowed. The blind run that
+died on exactly this is why the distinction is written down here rather than left to be
+discovered from a gate's error message.
+
 ## Process
 > **Tracker:** `node .agents/scripts/step_tracker.js begin --skill design-reverse --step 1`
 

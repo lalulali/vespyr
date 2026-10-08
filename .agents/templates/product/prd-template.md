@@ -74,7 +74,30 @@ system before filling its row.
 | User Personas | `artifacts/output/02-research/user-personas.md` | [ ] Reviewed / [PENDING] / [ABSENT] | ... |
 | UX Research Report | `artifacts/output/02-research/ux-research-report.md` | [ ] Reviewed / [PENDING] / [ABSENT] | ... |
 
-> **Research sign-off:** In create mode, all rows above must be [ ] Reviewed before this PRD moves to the Design phase. In reverse/imported mode, absent upstream research is expected — mark those rows `[ABSENT — no upstream research]` and rely on the §14 Evidence Ledger; never fabricate a Reviewed status.
+> **Research sign-off:** In create mode, **every** row above must reach a terminal state before
+> this PRD moves to the Design phase. There are three, and a blank checkbox is not one:
+>
+> | State | When | Means |
+> |---|---|---|
+> | `[x] Reviewed` | the file exists on disk and you read it | the finding stands |
+> | `[ABSENT — no upstream research]` | no such artifact exists for this project | you checked, it is not there, and you chose not to create it |
+> | `[PENDING — owner to supply]` | it exists but you cannot read it yet | named owner, named blocker |
+>
+> **This box used to demand `[ ] Reviewed` for every row in create mode** — while the
+> no-fabrication rule 20 lines above forbids marking a row Reviewed for a file that does not
+> exist, and while the row template on line 75 already offered `[PENDING]` and `[ABSENT]`. The
+> three rules could not all hold. They could not all hold *because* create mode can now be
+> entered from a user prompt (SKILL.md Prerequisites), which produces no upstream research
+> files at all. A blind run on a clinical-trial brief hit exactly this and had to record a
+> deviation to proceed.
+>
+> `[ABSENT — no upstream research]` is not a weaker `Reviewed`. It is a claim you can defend:
+> you looked, it is not there, and here is why you did not build it. An internal, already-funded,
+> regulated product often legitimately has no market analysis, and saying so in one line beats
+> running a research phase to fill a box.
+>
+> In reverse/imported mode, absent upstream research is expected and the §14 Evidence Ledger is
+> the substitute; never fabricate a Reviewed status in any mode.
 
 ## 3. Problem Statement
 
@@ -222,6 +245,13 @@ CRITICAL RULE FOR PRODUCT MANAGERS:
 1. DO NOT write high-level persona journeys or multi-step scenarios spanning multiple functional domains (e.g. "Rina scans QR, completes form, pays, gets label"). These are user journeys/personas, not developer-ready functional stories.
 2. DO write granular, modular functional capabilities that focus on a single, testable, sprint-ready behavior.
 3. Every requirement must have a dedicated Sprint assignment (e.g., Sprint 1, Sprint 2).
+   Sprint labels are RELATIVE and yours to assign — a requirement with no sprint is unscheduled
+   work. Target DATES are not: if the brief supplies no enrolment date, no regulatory submission
+   date and no launch target, write `date unknown` and name what blocks it. Do not derive a date
+   from a sprint number and do not leave a date cell blank where a reader will assume one was
+   considered. A wrong date in a PRD is worse than a missing one, because someone plans against
+   it. A blind run on a brief with no dates at all reported this table as the most
+   confident-looking fabrication available to it.
 4. DO NOT use previous/legacy persona-based stories. Focus strictly on functional capabilities.
 -->
 

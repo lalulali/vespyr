@@ -30,13 +30,22 @@ The same five criteria as `step-01d` apply — real content topology, the 3 crit
 
 **Imported-source escape hatch (non-interactive exports):** an exported static prototype from a design tool may not ship toggleable JS states — the states may exist as separate frames/screens rather than one interactive file. When the source is a non-interactive export:
 - The 3 critical state moments may be satisfied by **distinct exported screens/frames** (each with its own anchor) rather than toggleable states in one file. Record each as its own `state` row.
-- If a critical state is genuinely absent (not merely non-toggleable), it is a real gap → reject, or obtain an explicit owner-approved disposition recorded in the collaboration record.
+
+**This next rule is not conditional on the escape hatch — it applies to every imported prototype, however it arrived.** It was previously nested under "non-interactive exports", so a hand-coded HTML prototype that was deficient by construction could not use it, and a blind run had to record a deviation to proceed at all.
+
+- If a critical state is genuinely absent (not merely non-toggleable), it is a real gap → reject, or obtain an **explicit owner-approved disposition recorded in the collaboration record**. Name the missing state, name who accepted it, and say what R1 evidence extraction can still establish without it. Silence is not a disposition.
 - Set frontmatter `prototype_type: non-file` when the authoritative source is a live design-tool URL rather than the imported file; the baseline hash is honestly weaker (labeled above and at step-04d).
 
 ## Process
 > **Tracker:** `node .agents/scripts/step_tracker.js begin --skill design-reverse --step 1e`
 
 1. Do NOT modify the imported prototype. It is immutable-on-arrival; treat `artifacts/input/prototype/` as read-only.
+1a. **Set the `Intent` column on every row** — `deliberate`, `accident`, or `unknown`
+   (`prototype-inventory-template.md` §Intent). Default to `unknown`: a prototype shows what
+   happens, never whether anybody chose it. `deliberate` requires an anchor naming who decided;
+   `accident` requires evidence that it is unintended. **Never infer `deliberate` from polish** —
+   freezing an accident into a spec is the most expensive mistake this step can make, and a
+   brief that asks "what is deliberate rather than accident" is asking exactly this question.
 2. `@product-designer` walks the imported prototype: every screen, flow, behavior, state, interaction.
 3. Record one row per observation in `prototype-inventory.md` (template: `.agents/templates/product/prototype-inventory-template.md`): stable row id (`INV-NN`), kind (`screen` | `flow` | `behavior` | `state` | `interaction`), name, anchor `path#id`, observable fact.
    - Frozen anchor grammar (A11): repo-relative POSIX path + one `#` + anchor token. For imported HTML/SVG, anchors are `id="<id>"` attributes; multi-file exports anchor to the specific exported file's `path#id`.

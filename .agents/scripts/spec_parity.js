@@ -117,20 +117,52 @@ function stripTicks(s) {
 function rowsUnderHeading(content, headingRe) {
   const lines = content.split(/\r?\n/);
   let start = -1;
+  let level = 3;
   for (let i = 0; i < lines.length; i++) {
-    if (/^#{1,3}\s/.test(lines[i]) && headingRe.test(lines[i])) { start = i; break; }
+    const m = lines[i].match(/^(#{1,3})\s/);
+    if (m && headingRe.test(lines[i])) { start = i; level = m[1].length; break; }
   }
   if (start === -1) return [];
   const rows = [];
   let seen = false;
+  // SILENT TRUNCATION, measured twice, and both times on real artifacts.
+  //
+  // (a) This loop used to `break` on the first heading of ANY level after the table started. A
+  //     §14 Evidence Ledger split across three sub-headed tables read 28 rows of 41, dropped 13,
+  //     and exited 0 with no warning. A gate that reports a fraction of its input without saying
+  //     so is worse than one that fails: the number it prints is the only number the reader gets.
+  //
+  // (b) It then stopped at the first non-table line. A section that opens with a small pointer
+  //     map, then prose, then the real table — which is exactly what a prototype inventory
+  //     documenting its anchor grammar looks like — read the pointer map, found no row with the
+  //     expected column count, and reported `inventory: 0`.
+  //
+  // So: scan the WHOLE section. A heading at the same or shallower level ends it; a deeper
+  // heading is a subsection and is followed; prose is not a boundary. Each parser then filters
+  // by its own id pattern and minimum column count, so unrelated tables are ignored rather than
+  // terminating the scan.
   for (let i = start + 1; i < lines.length; i++) {
     const line = lines[i];
     const trimmed = line.trim();
-    if (/^#{1,3}\s/.test(line)) { if (seen) break; continue; }
-    if (!trimmed.startsWith('|')) { if (seen) break; continue; }
+    const h = line.match(/^(#{1,6})\s/);
+    if (h) {
+      if (h[1].length <= level) break;   // same or shallower: this section is over
+      continue;                            // deeper: a subsection, keep reading
+    }
+    if (!trimmed.startsWith('|')) continue; // prose between tables is not a section boundary
     const cells = line.split('|').slice(1, -1).map((c) => c.trim());
     if (cells.every((c) => /^:?-{2,}:?$/.test(c))) continue;
-    if (cells.length >= 2 && /^(ID|Metric|Class|Anchor|Detail class|Prototype|Requirement)$/i.test(cells[0])) continue;
+    // A header row is identified STRUCTURALLY — it is the row immediately above a `|---|`
+    // separator — not by a list of expected column names.
+    //
+    // The previous check was `/^(ID|Metric|Class|Anchor|...)$/`, so a document naming its first
+    // column anything else ("Orphan", "Behaviour", "Ref") had its header parsed as data and every
+    // subsequent cell read one column out of step. Found while writing the fixture below: my own
+    // test used `| Orphan |` and the gate silently mis-parsed it.
+    const next = (lines[i + 1] || '').trim();
+    if (/^\|?[\s:|-]+\|/.test(next) && next.includes('-') && cells.some((c) => c.length > 0)) continue;
+    // Name-based skip retained for documents that omit the separator row entirely.
+    if (cells.length >= 2 && /^(ID|Metric|Class|Anchor|Detail class|Prototype|Requirement|Orphan|Behaviour|Behavior|Ref)$/i.test(cells[0])) continue;
     seen = true;
     rows.push(cells);
   }
@@ -261,6 +293,32 @@ function evaluateClassCoverage(root, report, ledger) {
   return problems;
 }
 
+/**
+ * Do two anchor strings point at the same thing?
+ *
+ * 1. If both name an `INV-NN`, that IS the identity — compare it. This is the path that matters:
+ *    an inventory row and its deferral row are the same target written in two documents.
+ * 2. Otherwise normalise: drop any directory prefix, drop a trailing parenthetical annotation,
+ *    and compare the fragment. Case-insensitive, because file paths and ids vary.
+ */
+function sameTarget(a, b, bId) {
+  const idOf = (s) => (String(s || '').match(/\bINV-\d+\b/) || [])[0] || null;
+  const ia = idOf(a);
+  // The inventory row's identity is its ID, not its anchor. Passing only the anchor meant the
+  // id comparison could never fire on one side, so reconciliation silently fell through to the
+  // string path — which is the failure this whole function exists to fix.
+  const ib = idOf(b) || bId || null;
+  if (ia && ib) return ia === ib;
+
+  const norm = (s) => String(s || '')
+    .trim()
+    .replace(/\s*\([A-Z]+-\d+\)\s*$/, '')        // trailing (INV-01) annotation
+    .replace(/^.*\//, '')                           // directory prefix
+    .replace(/^`|`$/g, '')
+    .toLowerCase();
+  return norm(a) !== '' && norm(a) === norm(b);
+}
+
 function evaluateDeferrals(report) {
   const problems = [];
   const bad = report.deferrals.filter((d) => !/^\d{4}-\d{2}-\d{2}$/.test(d.date) || !d.owner);
@@ -305,6 +363,36 @@ function cmdCheck(args) {
   const m = computeMetrics(root, inventoryPath, requirementsPath);
   const violations = [];
 
+  // A HOLLOW PASS. This gate's entire job is reconciling the prototype inventory against the
+  // Evidence Ledger. With zero inventory rows there is nothing to reconcile: `orphans: []` is
+  // vacuous, `deferrals: N` is credited against a document the gate never read, and every other
+  // number in the output is arithmetically valid and substantively empty.
+  //
+  // Measured: a blind run reached `pass: true` with `inventory: 0`, `orphans: []`, and
+  // `deferrals: 28` — and named the pass hollow itself. Nothing here caught it. A gate that
+  // reports success because it read nothing is the worst failure mode this repo has: it converts
+  // an unread input into a green checkmark, and the green checkmark is the only evidence a
+  // reader gets.
+  //
+  // The previous behaviour also made the failure unrecoverable-by-accident: an inventory the
+  // parser cannot read (a renamed heading, a malformed anchor column) is indistinguishable from
+  // an inventory that does not exist.
+  if (m.inventory.length === 0) {
+    violations.push(
+      `inventory rows: 0 — the gate read no prototype inventory, so every reconciliation below is ` +
+        `vacuous (orphans cannot exist, and deferrals are credited against a document that was ` +
+        `never read). Check that ${path.relative(root, inventoryPath)} exists and its table is ` +
+        `under a heading this parser recognises ("Prototype Inventory"). A hollow pass is worse ` +
+        `than a failure: it is a green result with nothing behind it.`
+    );
+  }
+  if (m.ledger.length === 0) {
+    violations.push(
+      `ledger rows: 0 — no Evidence Ledger rows were read, so nothing can be grounded, traced, ` +
+        `or called an orphan. This gate cannot pass on an empty ledger.`
+    );
+  }
+
   if (m.ghosts.length > 0) violations.push(`${m.ghosts.length} ghost statement(s) — gate is 0`);
   if (m.grounding < 1) violations.push(`grounding ${(m.grounding * 100).toFixed(1)}% — gate is 100% of non-[OPEN]`);
 
@@ -312,7 +400,22 @@ function cmdCheck(args) {
   let unresolvedOrphans = m.orphans;
   if (fs.existsSync(reportPath)) {
     report = parseReport(fs.readFileSync(reportPath, 'utf8'));
-    unresolvedOrphans = m.orphans.filter((o) => !report.deferrals.some((d) => d.anchor === o.anchor));
+    // Reconcile orphans against deferrals BY IDENTITY, not by raw string.
+    //
+    // `d.anchor === o.anchor` never matched in practice. Measured on a real reverse-mode
+    // artifact: the deferral recorded
+    //   `artifacts/input/prototype/prototype.html#Tasks</h1>` (INV-01)
+    // while the inventory row carried
+    //   `prototype.html#Tasks</h1>`
+    // — a path-prefix difference AND a trailing `(INV-NN)` annotation. So a deferral with an
+    // owner and a date, written exactly as the template asks, did not defer anything, and the
+    // gate reported 28 orphans against 28 present deferrals.
+    //
+    // That is the punish-honesty pattern this repo keeps hitting: the gate failed a correct
+    // document because its two halves spelled the same target differently. `INV-NN` is the
+    // identity; the anchor is a locator. Compare identities, and normalise anchors only as a
+    // fallback for rows that carry no id.
+    unresolvedOrphans = m.orphans.filter((o) => !report.deferrals.some((d) => sameTarget(d.anchor, o.anchor, o.id)));
     violations.push(...evaluateDeferrals(report));
     violations.push(...evaluateClassCoverage(root, report, m.ledger));
   } else if (!args['metrics-only']) {
@@ -332,6 +435,11 @@ function cmdCheck(args) {
     open: m.open,
     ghosts: m.ghosts.map((g) => g.id),
     orphans: m.orphans.map((o) => o.id),
+    // Both counts, always together. Reporting `orphans: 28` beside `pass: true` with nothing
+    // saying how many were deferred reads as 28 unresolved problems — the reader has no way to
+    // tell a reconciled 28 from an unreconciled 28. The contract is "orphans 0-or-deferred", so
+    // print the two numbers that make it checkable.
+    orphansDeferred: m.orphans.length - unresolvedOrphans.length,
     unresolvedOrphans: unresolvedOrphans.map((o) => o.id),
     grounding: m.grounding,
     classes: report ? report.classes.length : 0,

@@ -18,7 +18,7 @@ Initialize `requirements.md` from the complete `.agents/templates/product/prd-te
 - SPEC.md Spec Kernel loaded (`artifacts/output/03-strategy/SPEC.md`).
 
 ## Process
-> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill design-reverse --step 2`
+> **Tracker:** `node .agents/scripts/step_tracker.js begin --skill design-reverse --step 2d`
 
 1. `@product-manager` reads the inventory and the kernel; the inventory is fixed input — it is not re-interpreted.
 2. For each inventory row, write one ledger row in `requirements.md` §14 (template: `.agents/templates/product/prd-template.md`): `ID` (`L-NN`), `Statement`, `Anchor (path#id)`, `Type` (`prototype` | `user` | `owner`), `Status` (`confirmed` | `[OPEN]` | `[DEFERRED TO SPEC]`).

@@ -21,7 +21,19 @@ Verify these artifacts exist:
 - `artifacts/output/02-research/competitive-analysis.md`
 - `artifacts/output/02-research/user-personas.md`
 
-If any are missing, load `explore-idea` first.
+If any are missing, **check whether the user's prompt already states the brief before reaching for another skill.**
+
+- The prompt states the concrete outcome, the constraints, and the audience → **that is a
+  brief.** Normalise it to `artifacts/output/01-discovery/idea-brief.md` with the
+  `DERIVED FROM THE USER PROMPT` provenance comment, mark unavailable upstream research
+  `[ABSENT — not commissioned]`, and continue. Running `/explore-idea` here produces market
+  and competitive analysis for a product the user may not be launching at all.
+- The prompt is an idea with no outcome, constraints, or audience, and this is a commitment
+  gate (budget, headcount, calendar) → load `explore-idea` first, per the Intent Ladder.
+
+**Do not fabricate an upstream artifact to satisfy a prerequisite.** A labelled brief derived
+from the prompt is honest; an invented `validation-brief.md` is not, and a reviewer cannot
+tell the two apart without the provenance comment.
 
 ## Process
 > **Tracker:** `node .agents/scripts/step_tracker.js begin --skill design-create --step 1`
