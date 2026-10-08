@@ -235,7 +235,12 @@ To maximize reliability, reduce over-engineering, and enforce high-fidelity exec
 *   **Rigorous Verification**: Never claim a task is complete until it has been explicitly verified using automated tests, manual walkthroughs, or system feedback.
 *   **Close the Loop**: Log outcomes and update persistent memory (`lessons-learned.md` or `active-decisions.md`) upon completion.
 *   **Startup Phase Validation**: Before executing any task, check `artifacts/output/sprint-status.yaml` (or `pipeline-state.json`) to verify phase prerequisites are met. If the current project phase has not reached the required phase for the task, halt and report the phase mismatch. Do not execute work out of phase order.
-*   **Shutdown Completion Logging**: After saving deliverables, run `node .agents/scripts/orchestrator_state.js complete --agent <name> --artifact <relative-path>` directly to update the state file and advance the pipeline.
+*   **Shutdown Completion Logging**: After saving deliverables, run `node .agents/scripts/orchestrator_state.js complete --agent <name> --artifact <relative-path>` directly to update the state file and record the artifact in pipeline telemetry.
+    *   **`complete` does NOT advance the phase.** It records the artifact, its version, a token estimate, a history entry and telemetry — nothing more. Moving the pipeline is a separate, deliberate act:
+        ```bash
+        node .agents/scripts/orchestrator_state.js advance   # mark current phase complete, start the next
+        ```
+        Never infer phase completion from an artifact being written. A run that produces three artifacts inside one phase has still finished only that phase, and auto-advancing on completion would skip every phase between them. That failure is what left this repo's board claiming ten `pending` phases while the one phase actually in flight was missing from it entirely.
 
 ### 5. Memory Persistence (Mandatory)
 

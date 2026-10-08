@@ -20,6 +20,8 @@
     "eval:skills": "node bin/vespyr-eval.js run --suite skills/delivery --mock",
     "eval:tier0": "node bin/vespyr-eval.js run --tier0 --mock",
     "eval:invariants": "node bin/vespyr-eval.js run --suite invariants/grill-me-spcp --mock",
+    "eval:gates": "node tools/eval/gate-simulation.js",
+    "eval:scenarios": "node tools/eval/gate-scenarios.js",
     "eval:baseline": "node bin/vespyr-eval.js record-baseline --mock --baseline artifacts/evals/mock-baseline.json",
     "sync-docs": "node bin/cli.js --sync-docs",
     "lint": "node --check bin/cli.js && node --check bin/vespyr-eval.js && node --check tools/eval/runner.js",

@@ -81,6 +81,12 @@ All agents in this system MUST follow these guardrails. This file is the single 
   2. **Restart from beginning** — Tell the user which upstream agent needs to run first (e.g., "`artifacts/output/02-research/` is missing — invoke `@founder` and `@researcher` first").
 - **Default:** If the user does not respond within this turn, choose **Continue** but prominently flag all missing context as `[MISSING]` in your output.
 - Never fabricate requirements, personas, or competitive data from a missing file.
+- **ZERO-CONSUMPTION-ON-FALSIFIED (binding).** Before consuming an upstream artifact, you MUST check whether any Review Gate finding (`[FALSIFIED]` / `[PARTIAL]`) has been recorded against it — in its own `## Socratic validation` section, in `artifacts/memory/active-decisions.md`, or in the session summary. If it has:
+  - `[FALSIFIED]` → the claim is **not** available as fact. Do not build on it, do not summarize it as established, and do not let it satisfy a gate criterion. Either route back to problem discovery or state the blocker in your output.
+  - `[PARTIAL]` → usable only for the part that was reproduced. Name which part.
+  - Re-read the record's own disposition first: a correction record may legitimately be `active` **because it is the correction**. What may never be consumed is a *superseded claim re-asserted as current*, not a record that documents its own falsification.
+  - If no disposition can be found, treat the claim as unverified and say so. Absence of a finding is not a finding of soundness.
+- **Why this is procedural, not a parser.** `[FALSIFIED]` is quoted inside prose narratives constantly — measured over `artifacts/memory/*.md`, the rule "an entry containing `[FALSIFIED]` must not be `active`" flags 6 entries and **0 are true violations** (2 are genuine `[RECORD REVIEW]` corrections, 2 are the records documenting this very invariant). A static checker on token presence would be ~100% false positives, i.e. a fake gate (`point-coverage.md`: "Prose surfaces carry the same vocabulary without a fake gate"). Detection is machine-enforced in `tools/eval/lib/ast.js` (`reviewVerdicts`); **consumption** is enforced here, by name, at the moment it happens. Do not "improve" this into a token-presence lint.
 
 ## Change Request Protocol
 

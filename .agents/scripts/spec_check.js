@@ -191,6 +191,40 @@ function scanChainRefs(body) {
   return bad;
 }
 
+// TEMPLATE / RESOURCE REFERENCE INTEGRITY.
+// A cited path either exists or it does not — machine-decidable, zero false positives.
+// This exists because template/step contract drift is invisible to every other check here:
+// a step can demand `MARKET VERDICT:` from a template that never emits it and still pass,
+// which is exactly how explore-idea ended up in an unbounded re-dispatch loop.
+// Longest-first: `(?:json|ya?ml)` must precede `js` or `catalog.json` matches as `catalog.js`.
+// `.canonical` is included because `templates/system/vespyr-steering.md.canonical` is a real
+// artifact and a reference to it without the suffix is drift.
+const RESOURCE_REF_RE = /(?:^|[\s`'"])((?:\.agents\/)?(?:templates|references|scripts|skills|agents)\/[A-Za-z0-9._/-]+\.(?:json|ya?ml|csv|md|js)(?:\.canonical)?)/g;
+const AGENTS_ROOT = path.join(__dirname, '..');          // <repo>/.agents
+const PROJECT_ROOT = path.join(__dirname, '..', '..');   // <repo>
+
+function scanResourceRefs(body, skillDir) {
+  const missing = [];
+  const seen = new Set();
+  let m;
+  RESOURCE_REF_RE.lastIndex = 0;
+  while ((m = RESOURCE_REF_RE.exec(body)) !== null) {
+    const rel = m[1];
+    if (seen.has(rel)) continue;
+    seen.add(rel);
+    // References appear three ways, and each resolves against a different root:
+    //   `.agents/x/y`  -> repo root      `x/y` -> .agents root or the skill's own dir
+    // A skill citing `references/foo.md` means its own bundled reference, not a global one.
+    const candidates = path.isAbsolute(rel)
+      ? [rel]
+      : rel.startsWith('.agents/')
+        ? [path.join(PROJECT_ROOT, rel)]
+        : [path.join(AGENTS_ROOT, rel), path.join(skillDir || '', rel)];
+    if (!candidates.some((c) => c && fs.existsSync(c))) missing.push({ ref: rel });
+  }
+  return missing;
+}
+
 function stripQuotes(val) {
   if (val.length >= 2) {
     const first = val[0];
@@ -447,6 +481,27 @@ function checkBodyStructure(skillDir, dirName, data, body, report) {
     );
   }
 
+  for (const bad of scanResourceRefs(body, skillDir)) {
+    report.errors.push(
+      `${dirName}: phantom resource reference "${bad.ref}" — no such file under .agents/`
+    );
+  }
+
+  // Step files carry resource references too, and they are where contract drift hides
+  // (a step demanding a marker from a template that never emits it). Scan them as well,
+  // resolving skill-local paths against the skill dir.
+  const stepsDirForRefs = path.join(skillDir, 'steps');
+  if (fs.existsSync(stepsDirForRefs)) {
+    for (const f of fs.readdirSync(stepsDirForRefs).filter((x) => x.endsWith('.md')).sort()) {
+      const stepBody = fs.readFileSync(path.join(stepsDirForRefs, f), 'utf8');
+      for (const bad of scanResourceRefs(stepBody, skillDir)) {
+        report.errors.push(
+          `${dirName}/steps/${f}: phantom resource reference "${bad.ref}" — no such file under .agents/`
+        );
+      }
+    }
+  }
+
   const { unclosed, stray } = scanFences(body);
   if (unclosed !== null) {
     report.errors.push(`${dirName}: unbalanced code fence — opened at line ${unclosed}, never closed`);
@@ -604,6 +659,49 @@ function runStructureSelfTest() {
         fs.writeFileSync(path.join(d, 'SKILL.md'), FM('a') + '# A\n\n1. -> `steps/step-01-real.md`\n2. -> `steps/step-99-ghost.md`\n');
       },
       expect: (r) => r.errors.some((e) => /phantom step link.*step-99-ghost/.test(e)),
+    },
+    {
+      // Regression: template/step contract drift is invisible to every other check, which is
+      // how explore-idea ended up demanding a marker its template never emitted.
+      name: 'phantom resource reference is a violation',
+      build: (d) => {
+        fs.writeFileSync(
+          path.join(d, 'SKILL.md'),
+          FM('a') + '# A\n\nUse `.agents/templates/nope/missing-template.md` for the brief.\n'
+        );
+      },
+      expect: (r) => r.errors.some((e) => /phantom resource reference.*missing-template\.md/.test(e)),
+    },
+    {
+      name: 'phantom resource reference inside a STEP file is a violation',
+      build: (d) => {
+        fs.mkdirSync(path.join(d, 'steps'));
+        fs.writeFileSync(path.join(d, 'steps', 'step-01-a.md'), '# 1\n\nSee `templates/gone/absent.md`.\n');
+        fs.writeFileSync(path.join(d, 'SKILL.md'), FM('a') + '# A\n\n1. -> `steps/step-01-a.md`\n');
+      },
+      expect: (r) => r.errors.some((e) => /steps\/step-01-a\.md: phantom resource reference.*absent\.md/.test(e)),
+    },
+    {
+      name: 'skill-local bundled reference is NOT flagged',
+      build: (d) => {
+        fs.mkdirSync(path.join(d, 'references'));
+        fs.writeFileSync(path.join(d, 'references', 'schema.md'), '# schema\n');
+        fs.writeFileSync(
+          path.join(d, 'SKILL.md'),
+          FM('a') + '# A\n\nFollow `references/schema.md`.\n'
+        );
+      },
+      expect: (r) => !r.errors.some((e) => /phantom resource reference/.test(e)),
+    },
+    {
+      name: 'a .json reference is not truncated to .js',
+      build: (d) => {
+        fs.writeFileSync(
+          path.join(d, 'SKILL.md'),
+          FM('a') + '# A\n\nCompile `.agents/skills/help-me/skills-catalog.json` first.\n'
+        );
+      },
+      expect: (r) => !r.errors.some((e) => /phantom resource reference.*catalog\.js/.test(e)),
     },
     {
       name: 'unreachable step file is a violation',

@@ -49,11 +49,103 @@ When evaluating any user or peer proposal, feature request, or technical stack s
 2. **`[RESHAPE]` — Only the need survived.** Say it plainly: *keep the why, replace the how.* The user problem is real, but the proposed mechanism is over-engineered, hazardous, or unproven. Discard the mechanism, redirect to the zero-cost primitive.
 3. **`[NO-GO]` — Nothing survived.** Say it plainly: *this is not something we should be doing.* The proposal violates a performance, security, complexity, or user-need invariant, or the need itself does not exist. Throw the proposal away and return to problem discovery.
 
+The token is the machine companion, never the message. Each of the three is internal vocabulary a first-time reader cannot act on, so every gate states the verdict as an ordinary sentence **before** emitting the card — see **The Plain Sentence** and **Card depth scales with stakes** below.
+
 **Axis 2 — When does it act?** `NOW` | `GATED` | `NEXT-CYCLE` | `NEVER`
 
 - `[GO]` **must** carry `When:`. A `[GO]` with no `When:` is an illegal verdict — that omission is the exact defect this axis exists to remove.
 - `GATED` requires a **checkable** condition: an owner, a number, and an event ("Phase 1 live 30 days with ≥20 dispatcher users closing ≥80% of anomalies through the queue"). `battle-tested`, `proven`, and `stable` are adjectives, not gates.
 - `[RESHAPE]` implies `NOW` (you build the reshaped mechanism now). `[NO-GO]` implies `NEVER`. Neither restates `When:`.
+
+**The Plain Sentence (non-negotiable, precedes the marker).** The token is the *machine companion*, never the message. Every gate first states the verdict as an ordinary sentence a reader has never seen a gate card before, then emits the card.
+
+**The plain sentence is ATOMIC — one clause that resolves BOTH axes.** This is the single most common way the gate gets misread, and it is always the same mistake: leading with the bare verdict and hedging afterwards.
+
+| | Wrong — reads as "yes, then no" | Right — one clause, both axes |
+|---|---|---|
+| `When: GATED` | **Build this.** It's healthy, but gate it on a week of shadowing. | **Build this once it has run a week of live shadowing.** |
+| `When: NEXT-CYCLE` | **Build this.** Not until next quarter's planning. | **Build this next quarter, during planning.** |
+| `[RESHAPE]` | **Reshape.** The mechanism is wrong. | **Keep the why, replace the how.** The mechanism is wrong. |
+
+A reader takes the first clause and stops. "Build this." followed by a caveat is not a hedge — it is a contradiction, and the caveat is the part that gets dropped. Never split verdict and timing across two sentences.
+
+| Token | Say it like this (canonical, not mandatory wording) |
+|---|---|---|
+| `[GO]` | **Build this.** — or, when `When: GATED`, **Build this once \<checkable condition\>.** |
+| `[RESHAPE]` | **Keep the why, replace the how.** |
+| `[NO-GO]` | **Don't build this.** + the one-line reason it failed |
+
+`When:` appears on the card only for `[GO]` (Axis 2). `[RESHAPE]` and `[NO-GO]` imply `NOW` and `NEVER` and never restate it.
+
+The plain sentence carries the *specifics*; the card carries the *parseable* facts. Neither replaces the other:
+
+> **Keep the why, replace the how.** Busy parents really do lose evenings to meal planning — that part is real. But an app that plans meals doesn't capture it; they'd cancel in a week, and a Saturday grocery-list template already gets them more value than anything you'd build.
+>
+> ```
+> VERDICT: [RESHAPE]
+> Audited : the meal-planning app concept
+> Survived: the need, not the mechanism
+> Because : 400 waitlist signups, 0 paying users, no observed weekly use [^1]
+> Next    : shadow 5 parents on a Saturday before writing code — @founder, Friday
+> ```
+
+**Never** show the user a bare token or a bare card. `[RESHAPE]` is internal vocabulary — a reader who has never seen this engine cannot act on it, so the plain sentence is what actually lands. This is DNA 8's rule applied to gate markers.
+
+**Human wording, not token translation.** The tokens are for the machine. A reader must never receive a decoded label where a consequence belongs.
+
+**The rule: state what happens to this decision, now, for this person. Not what the decision is called.**
+
+The same token legitimately produces different English in different contexts, because the *practical consequence* differs even when the classification doesn't. Never translate a label literally:
+
+| Token | ❌ Literal translation (reader must decode it) | ✅ Context-aware consequence |
+|---|---|---|
+| `[GO]` `NOW` | "Verdict: GO" | **Build this.** |
+| `[GO]` `GATED` | "This is gated." | **Hold it until legal signs off, then it's a go.** · **Don't start until the migration is reversible.** |
+| `[GO]` `NEXT-CYCLE` | "Verdict: next cycle." | **Park it for Q3 planning.** · **Not this sprint — revisit after the launch.** |
+| `[RESHAPE]` | "This needs reshaping." | **Keep the problem, throw the solution.** · **Narrow it to the single-table export.** · **Do this by hand for a fortnight, then decide.** |
+| `[NO-GO]` | "Verdict: NO-GO" | **Don't build this.** |
+
+`[GO]` and `[NO-GO]` are close to universal — "build this" and "don't build this" translate everywhere. The difficulty is concentrated in `[RESHAPE]`, `GATED`, and `NEXT-CYCLE`, because those three carry a *procedure* the reader has to know. If the procedure is not obvious in context, the sentence has failed: say the step, not the label.
+
+**When a label has no human analogue in context, name the consequence and drop the label entirely.** A solo founder does not need "next cycle" — they need "not now, revisit after launch." An enterprise reviewer does not need "gated" — they need "hold until legal signs off." Same token, same machine record, different sentence.
+
+**Never write a bare label as the headline** — not "Reshape.", not "Gated.", not "Verdict: next cycle." A label with no consequence attached is the confusing case in its purest form; `ast.js` catches these forms as non-atomic plain sentences.
+
+**Two surfaces — the chat and the document are not the same place.** This is where the machine half belongs, and it is the only place.
+
+| Surface | Carries | Never carries |
+|---|---|---|
+| **Chat reply to the owner** | The plain sentence, the consequence, the action, links to evidence | **Any token, card, or marker.** No `[GO]`, no `VERDICT:`, no `When:`, no `Survived:`, no `[SPC: …]` |
+| **The document** (brief, ADR, plan, session summary) | Everything: plain sentence **and** the full machine record | — |
+
+**Why.** A reader who has never seen this engine cannot act on `[RESHAPE]`, and every token shown in chat is a decoding task handed to the owner for free. The gates do not read the chat — they read the document. So the machine record has exactly one home, and it is a file.
+
+Concretely, when a gate fires:
+
+- **Chat:** *"Keep the why, replace the how. The pain is real, the mechanism isn't — do this by hand for a fortnight, then decide. Written up in `artifacts/output/01-discovery/validation-brief.md`."* — then stop.
+- **Document:** the same sentence, followed by the full card.
+
+**Never show a card in chat, not even collapsed, not even "for reference."** If it is worth recording it belongs in the document; if it is not worth recording it does not belong anywhere. A half-present card — visible in chat and authoritative in the file — is worse than either, because the reader has to guess which one the gate will actually read.
+
+This does not weaken any invariant: `tools/eval/lib/ast.js` reads documents, so detection, Zero-Blueprint-on-NO-GO, the `When:` axis check, and the plain-sentence metrics all still fire — against the file.
+
+**The card is machine output, not part of the message.** Present the owner-facing result as the plain sentence plus whatever the reader needs to act on. The card follows, visually separated and labelled as the machine record:
+
+> **Build this once it has run a week of live shadowing.** The ordering invariant holds and the migration is reversible, so this is the one to bet on — but the condition is unmet today.
+>
+> <details><summary>Machine record</summary>
+>
+> ```
+> VERDICT: [GO] — When: GATED
+> Audited : the dispatch-queue data model
+> Survived: everything
+> Because : 1.2k req/s on the staging replica, p99 41ms
+> Next    : shadow dispatch for one shift — @architect, 2026-10-11
+> ```
+>
+> </details>
+
+Never let the reader meet `VERDICT: [GO] — When: GATED` as the headline. On its own that line reads as a contradiction — *go, but gated?* — which is precisely the confusion the two-axis split was meant to remove. The axis exists to distinguish "build now" from "healthy but waiting"; the English phrase *"once it has run a week"* carries that distinction by itself.
 
 **The Mandatory Verdict Card** — every gate emits this shape, and each card must be readable on its own by someone who never saw the others:
 
@@ -67,14 +159,36 @@ Next    : <one concrete action, owner, and date>
 
 `Survived:` takes exactly one of `everything` / `the need, not the mechanism` / `nothing`. It is the field that makes two `[GO]`s at different stages impossible to confuse.
 
+**Card depth scales with stakes.** Ceremony is not a fixed cost — a company stack decision and a Sunday hobby idea are not the same decision, and padding a small one with enterprise fields is its own kind of dishonesty. What is **never** negotiable is the plain sentence, the bracketed token, and `When:` on `[GO]`; those are the parseable contract and they carry the safety invariants.
+
+| Decision class | Required | Examples |
+|---|---|---|
+| **Low stakes** — personal, hobby, reversible, throwaway | Plain sentence + `VERDICT:` + `When:` on `[GO]` | weekend project, a learning exercise, a rename |
+| **Medium** — shipped to real users, moderate reversibility | + `Survived:`, `Next` | a feature, a pricing change, a dependency swap |
+| **High** — irreversible, org-wide, spend, security, external commitments | Full 5-field card, `Because:` must be a number/benchmark/command/file | stack selection, data-model choice, launch timing, hiring |
+
+Escalating a verdict to a higher depth never requires a new gate. When unsure of the class, ask: *does a wrong call here cost more than a conversation?* If yes, it is High.
+
+**This rule covers the Review Gate too.** `[CONFIRMED]` / `[PARTIAL]` / `[FALSIFIED]` are exactly as opaque to a first-time reader as `[RESHAPE]` was, so the same plain-sentence-first rule and the same stakes-scaled depth apply — see **Review Gate** below.
+
+A minimal card is still a card, not prose. `[RESHAPE]` and `[NO-GO]` imply `NOW` and `NEVER` respectively and do **not** restate `When:` (Axis 2):
+
+> **Don't build this — nothing here needs building.** Your dog is fine. It's a nice afternoon, not a company.
+>
+> ```
+> VERDICT: [NO-GO]
+> ```
+
 - **ZERO-BLUEPRINT-ON-NO-GO INVARIANT:** Agents are **STRICTLY FORBIDDEN** from generating implementation plans, architecture diagrams, option menus (e.g. "Option A vs Option B"), or compromise workarounds for a `[NO-GO]`ed premise. The only valid outputs are the No-Go Autopsy (empirical proof) plus an optional Surviving follow-ups list (owned open questions and blockers, no gate tokens — see glossary), and termination of the flawed path.
 
 #### Review Gate — claims about existing state (implementation reports, records, checkboxes, sign-offs)
 When auditing whether a claim matches reality on disk, agents must issue:
-1. **`[CONFIRMED]` — Claim Reproduced:** Independent evidence commands reproduce the claim today.
-2. **`[PARTIAL]` — Overstated:** Real work exists but the claim overstates it; name the gaps explicitly.
-3. **`[FALSIFIED]` — Claim Contradicted:** Evidence contradicts the claim as stated.
+1. **`[CONFIRMED]` — Claim Reproduced:** Independent evidence commands reproduce the claim today. Say it plainly: **"Confirmed — I reran it and it holds."**
+2. **`[PARTIAL]` — Overstated:** Real work exists but the claim overstates it; name the gaps explicitly. Say it plainly: **"Partly true — \<what exists> is real, \<what was claimed> is not."**
+3. **`[FALSIFIED]` — Claim Contradicted:** Evidence contradicts the claim as stated. Say it plainly: **"That's not true — \<the evidence> says \<the opposite>."**
    - **ZERO-CONSUMPTION-ON-FALSIFIED INVARIANT:** No downstream phase gate, sign-off, status banner, or plan may consume a `[FALSIFIED]` claim as true. The falsified record is corrected forward with a dated evidence annotation — never silently reverted, never left standing naked.
+
+The bracketed token is the machine companion; the plain sentence is what the reader acts on (see **The Plain Sentence**). A `[FALSIFIED]` handed over as a bare token is a defect even when `tools/eval/lib/ast.js` parses it — the parser proves the marker exists, not that a human understood the record was wrong. Always name the correcting evidence.
 
 #### Legacy vocabulary (2026-08-24 → 2026-09-02) — read-only mapping
 

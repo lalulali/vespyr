@@ -40,7 +40,25 @@ function block(reason) {
 }
 
 function main() {
-  const args = parseArgs(process.argv.slice(2));
+  const argv = process.argv.slice(2);
+
+  // `--help` executed the check. Measured: a blind run probing this script's usage got
+  // `[OK] Step-0 staleness baseline hash: absent` and could not tell a result from a usage line.
+  // A script whose usage probe returns a verdict is a script nobody probes correctly.
+  if (argv.includes('--help') || argv.includes('-h')) {
+    console.log('step0_staleness — freeze/verify the prototype baseline hash before Step 0');
+    console.log('');
+    console.log('Usage: node step0_staleness.js [--report P] [--inventory P] [--root R] [--json]');
+    console.log('');
+    console.log('  --report P    where to write the parity report (default artifacts/output/03-strategy/parity-report.md)');
+    console.log('  --inventory P prototype inventory to hash (default artifacts/output/03-strategy/prototype-inventory.md)');
+    console.log('  --root R      project root (default: cwd)');
+    console.log('  --json        machine-readable result');
+    console.log('  --help        this message');
+    process.exit(0);
+  }
+
+  const args = parseArgs(argv);
   const json = Boolean(args.json);
 
   if (!fs.existsSync(SCRIPT)) {

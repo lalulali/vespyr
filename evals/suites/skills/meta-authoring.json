@@ -10,7 +10,7 @@
       "assertContains": [
         "Concept",
         "Explanation",
-        "Key Takeaways"
+        "Core Takeaways"
       ],
       "prompt": "Run /teach-me for Raft consensus: concept overview, deep-dive explanation, and key takeaways.",
       "assertNotContains": [
@@ -73,7 +73,7 @@
       "dimension": "code_quality",
       "assertContains": [
         "Diff",
-        "Customization",
+        "Surgical Edits",
         "Preserve"
       ],
       "prompt": "Run /customize-skill to retune the brainstorming skill trigger: surgical diff preserving core invariants.",
@@ -153,7 +153,7 @@
       "dimension": "memory_adherence",
       "assertContains": [
         "Current Phase",
-        "Transition"
+        "Switch phase"
       ],
       "prompt": "Run /phase to switch to validation after checking phase prerequisites and transition gates.",
       "assertNotContains": [

@@ -8,9 +8,9 @@
       "name": "Post-Launch Feature Iteration",
       "dimension": "prd_completeness",
       "assertContains": [
-        "Telemetry Analysis",
+        "Gather Signal",
         "Hypothesis",
-        "Change Scope"
+        "before/after"
       ],
       "prompt": "Run /iterate on onboarding telemetry: funnel analysis, hypothesis, and targeted change scope.",
       "assertNotContains": [
@@ -26,7 +26,7 @@
       "assertContains": [
         "Severity",
         "Mitigation",
-        "Post-Mortem"
+        "Post-Incident Review"
       ],
       "prompt": "Run /incident for the P1 auth outage: severity, mitigation rollback, and post-mortem gap.",
       "assertNotContains": [

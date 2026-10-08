@@ -11,7 +11,7 @@
         "Step 1",
         "Implementation",
         "Verification",
-        "Session Complete"
+        "Completion"
       ],
       "prompt": "Run /develop to implement the email-verification endpoint: spec review, execution plan, implementation with tests, review, and session completion.",
       "assertNotContains": [
@@ -41,9 +41,9 @@
       "name": "Standalone Code Review",
       "dimension": "code_quality",
       "assertContains": [
-        "Audit",
+        "Blocking",
         "Findings",
-        "Recommendations"
+        "Non-blocking"
       ],
       "prompt": "Run /review on PR #42 touching session-cookie flags: read-only audit with findings and merge recommendation.",
       "assertNotContains": [

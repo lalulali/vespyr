@@ -15,15 +15,7 @@ const path = require('path');
 // by two audit rounds as "guard ceilings contradicting spec".
 // Dynamic-tier files (blockers-and-risks, session-summaries) carry no hard
 // budget per §2.2 — null tokens means report-only, never a violation.
-const THRESHOLDS = {
-  'project-context.md': { words: 225, tokens: 300 },
-  'active-decisions.md': { words: 300, tokens: 400 },
-  'patterns-and-conventions.md': { words: 375, tokens: 500 },
-  'lessons-learned.md': { words: 375, tokens: 500 },
-  'blockers-and-risks.md': { words: null, tokens: null },
-  'teaching-style.md': { words: null, tokens: null },
-  'session-summaries/latest.md': { words: null, tokens: null }
-};
+const { THRESHOLDS, thresholdsFor } = require('./lib/memory_thresholds.js');
 
 function countWords(content) {
   return content.split(/\s+/).filter(w => w.length > 0).length;
@@ -110,14 +102,30 @@ function main() {
 
   let dir = null;
   let file = null;
-  let wordThreshold = 1000;
-  let tokenThreshold = 1500;
+  // Overrides start undefined, NOT at a hardcoded default. They previously defaulted to
+  // 1000/1500, so `--file <path>` always reported against those numbers and silently
+  // ignored the THRESHOLDS table entirely — the table was dead config for the single most
+  // common invocation. Three copies of the budget existed and the one that ran was not
+  // the one that was configured.
+  let wordThreshold;
+  let tokenThreshold;
 
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--dir') dir = args[i + 1];
     if (args[i] === '--file') file = args[i + 1];
     if (args[i] === '--words') wordThreshold = parseInt(args[i + 1], 10);
     if (args[i] === '--tokens') tokenThreshold = parseInt(args[i + 1], 10);
+  }
+
+  // Fall back to the file's own configured budget, and only then to a whole-directory
+  // neutral default when no file was named.
+  if (file) {
+    const configured = thresholdsFor(file);
+    if (wordThreshold === undefined) wordThreshold = configured.words;
+    if (tokenThreshold === undefined) tokenThreshold = configured.tokens;
+  } else {
+    if (wordThreshold === undefined) wordThreshold = 1000;
+    if (tokenThreshold === undefined) tokenThreshold = 1500;
   }
 
   if (dir) {

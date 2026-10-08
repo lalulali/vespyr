@@ -46,3 +46,4 @@ tmp/
 .agents/state/
 !.agents/state/.npmignore
 .playwright-mcp/
+sandbox/

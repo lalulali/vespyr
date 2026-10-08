@@ -51,6 +51,194 @@ function countTokens(text) {
   return Math.round(words / 0.75);
 }
 
+/** Pull a YYYY-MM-DD out of a decision header, preferring the explicit [date:] tag. */
+function extractSectionDate(headerLine) {
+  const tagged = headerLine.match(/\[date:\s*(\d{4}-\d{2}-\d{2})\]/i);
+  if (tagged) return tagged[1];
+  const ad = headerLine.match(/(20\d{2}-\d{2}-\d{2})/);
+  return ad ? ad[1] : null;
+}
+
+/** Whole days between an ISO date and today. Undated sections return Infinity. */
+function ageInDays(isoDate, now) {
+  if (!isoDate) return Infinity;
+  const then = new Date(`${isoDate}T00:00:00Z`).getTime();
+  if (!Number.isFinite(then)) return Infinity;
+  return Math.floor((now.getTime() - then) / 86400000);
+}
+
+/**
+ * Owner's retention model: history stays findable, the LOADED file holds only recent
+ * decisions, and anything older retires itself into the archive.
+ *
+ * WHY THIS EXISTS. Compaction previously archived a section ONLY when a human had
+ * hand-edited `**Status:**` to resolved/superseded/complete/stale. Measured on this
+ * repo: 121 sections, 120 still `active`, 0 ever resolved — so `compact` archived
+ * nothing, ever, and the file only ever grew. Measured 47,548 tokens against a budget,
+ * which wedged `advance` and `set-phase` outright.
+ *
+ * The fix is NOT to loosen the budget alone — that only moves the cliff. It is to give
+ * compaction a trigger that fires without a human: an entry older than
+ * RETENTION_DAYS retires to artifacts/memory/archive/, where it stays fully readable.
+ * Retirement is not deletion. `/memory` and the ndjson index still find it, and the
+ * section keeps its full original text in the shard.
+ */
+const RETENTION_DAYS = 30;
+
+/**
+ * Translate FINISHED decisions into lessons, and report what looks finished.
+ *
+ * WHY THIS IS SEPARATE FROM compactActiveDecisions(). Two different questions:
+ *
+ *   compactActiveDecisions()  — "is this entry still worth LOADING?" Age-based, moves to
+ *                               the cold archive, keeps the loaded file small.
+ *   flushDecisionsToLessons() — "is this entry still a DECISION?" Completion-based, moves
+ *                               to lessons-learned.md, which IS loaded every session.
+ *
+ * Conflating them would push aged entries into the warm, always-loaded file and make
+ * lessons-learned the next thing to bloat. So this fires only on completion signals, never
+ * on age.
+ *
+ * TWO SIGNALS, both explicit. A guess was measured and rejected: five of this session's
+ * verdict-gate decisions shared the DECISION domain while several remained independently
+ * binding, so "a newer entry exists in the same domain" would have retired live
+ * constraints. Nothing here infers.
+ *
+ *   1. Status is resolved / superseded / complete / stale — set via
+ *      `memory_write.js --resolve`, the sanctioned way (hand-editing memory is prohibited).
+ *   2. Another entry DECLARES `**Supersedes:** <this header>` — written with
+ *      `memory_write.js --supersedes`, so the link is recorded, not guessed.
+ *
+ * Domain-similar older entries are REPORTED as candidates and never moved. Visible beats
+ * clever: an owner can promote a candidate with one command, and nothing binding is
+ * retired by a heuristic.
+ */
+function flushDecisionsToLessons({ dryRun = false } = {}) {
+  const memoryDir = path.join(process.cwd(), 'artifacts', 'memory');
+  const decisionsPath = path.join(memoryDir, 'active-decisions.md');
+  const lessonsPath = path.join(memoryDir, 'lessons-learned.md');
+
+  const result = {
+    translated: [], candidates: [], dryRun,
+    activeBefore: 0, activeAfter: 0,
+    unresolvedSupersedes: []
+  };
+  if (!fs.existsSync(decisionsPath)) return result;
+
+  const raw = fs.readFileSync(decisionsPath, 'utf8');
+  const lines = raw.split('\n');
+  const starts = [];
+  for (let i = 0; i < lines.length; i++) {
+    if (lines[i].startsWith('### ') || lines[i].startsWith('## AD-')) starts.push(i);
+  }
+
+  const sections = starts.map((s, i) => {
+    const end = i + 1 < starts.length ? starts[i + 1] : lines.length;
+    const body = lines.slice(s, end);
+    return {
+      start: s, end, body,
+      header: body[0].replace(/^#{2,3}\s+/, '').replace(/\s+/g, ' ').trim(),
+      domain: (body[0].match(/^#{2,3}\s*\[([A-Z ]+?)\]/) || [, 'DECISION'])[1].trim(),
+      date: (body[0].match(/\[date:\s*(\d{4}-\d{2}-\d{2})\]/) || [, null])[1],
+      statusLine: body.find((l) => /^\s*\*\*Status:\*\*/.test(l)) || ''
+    };
+  });
+  result.activeBefore = sections.length;
+
+  // Signal 2: what do live entries declare they supersede?
+  const supersededTargets = new Set();
+  for (const s of sections) {
+    const decl = s.body.find((l) => /^\s*\*\*Supersedes:\*\*/.test(l));
+    if (!decl) continue;
+    const target = decl.replace(/^\s*\*\*Supersedes:\*\*\s*/, '').replace(/\s+/g, ' ').trim();
+    const match = sections.find((x) => x.header.startsWith(target) || target.startsWith(x.header));
+    if (match) supersededTargets.add(match.header);
+    else result.unresolvedSupersedes.push(target.slice(0, 70));
+  }
+
+  const DONE = /^\s*\*\*Status:\*\*\s*(resolved|superseded|complete|stale)\s*$/i;
+  const toTranslate = [];
+  for (const s of sections) {
+    const byStatus = DONE.test(s.statusLine);
+    const bySuperseded = supersededTargets.has(s.header);
+    if (byStatus || bySuperseded) {
+      s.reason = byStatus ? `status ${s.statusLine.replace(/^\s*\*\*Status:\*\*\s*/i, '').trim()}` : 'declared superseded';
+      toTranslate.push(s);
+    }
+  }
+
+  // Candidates: an entry that has a NEWER sibling in the same domain looks superseded.
+  // REPORTED ONLY, never moved — domain similarity is a heuristic and a newer entry does
+  // not mean an older constraint stopped binding. An owner promotes with --promote.
+  //
+  // Direction matters: the first version asked "does this entry have older siblings?",
+  // which flagged the NEWEST entry in a domain and reported `newer: 0` — exactly the
+  // inverse of the intended signal. Caught by reading the dry-run output, not by the
+  // exit code.
+  const selected = new Set(toTranslate.map((s) => s.header));
+  for (const s of sections) {
+    if (selected.has(s.header)) continue;
+    const newerCount = sections.filter((o) =>
+      o.domain === s.domain && o.date && s.date && o.date > s.date).length;
+    if (newerCount > 0) {
+      result.candidates.push({
+        header: s.header.slice(0, 78), domain: s.domain, date: s.date,
+        newer: newerCount,
+        promote_with: `node .agents/scripts/orchestrator_state.js flush-decisions --promote "<header>"`
+      });
+    }
+  }
+
+  // Populated BEFORE the dry-run early return. It used to be set only on the live path,
+  // so `--dry-run` reported `translated: []` even when it had found entries — a report
+  // that understates what the next real run would do. Same failure shape as the archive
+  // block-scoping bug: correct behaviour, dishonest output.
+  result.wouldTranslate = toTranslate.length;
+  result.pending = toTranslate.map((s) => ({ header: s.header.slice(0, 78), reason: s.reason }));
+
+  if (dryRun || toTranslate.length === 0) {
+    result.activeAfter = result.activeBefore - toTranslate.length;
+    return result;
+  }
+
+  // Move each translated entry into lessons-learned.md as a LESSON, not a verbatim
+  // decision. Framing matters: the value changes from "this is the standing choice" to
+  // "this is what we decided, and here is what it produced".
+  let lessons = fs.existsSync(lessonsPath) ? fs.readFileSync(lessonsPath, 'utf8') : '# Lessons Learned\n';
+  const consume = new Set();
+  const added = [];
+  for (const s of toTranslate) {
+    const titleMatch = s.header.match(/^\[([A-Z ]+?)\]\s*(.*?)(?:\s*\[date:|$)/);
+    const domain = titleMatch ? titleMatch[1].trim() : s.domain;
+    const title = titleMatch ? titleMatch[2].trim() : s.header;
+    const bodyText = s.body.slice(1).join('\n').replace(/\*\*Status:\*\*.*$/m, '').trim();
+    if (lessons.includes(title)) { consume.add(s.header); continue; } // already recorded
+    const lesson =
+      `\n### [LESSON] ${title} [date: ${s.date || 'unknown'}] [agent: @memory-controller]\n` +
+      `**Decision:** ${s.reason}. Originally a [${domain}] entry in active-decisions.md.\n\n` +
+      `${bodyText}\n` +
+      `**Status:** active\n**Session:** flush-decisions\n`;
+    lessons += lesson;
+    added.push(s.header);
+    consume.add(s.header);
+  }
+
+  if (added.length > 0) {
+    fs.writeFileSync(lessonsPath, lessons, 'utf8');
+    // Remove from active-decisions.md — from the bottom up so earlier indexes stay valid.
+    const drop = new Set();
+    for (const s of toTranslate) {
+      if (!consume.has(s.header)) continue;
+      for (let i = s.start; i < s.end; i++) drop.add(i);
+    }
+    const kept = lines.filter((_, i) => !drop.has(i)).join('\n').replace(/\n{3,}/g, '\n\n');
+    atomicWriteFileSync(decisionsPath, kept, 'utf8');
+    result.translated = added;
+  }
+  result.activeAfter = sections.length - toTranslate.length;
+  return result;
+}
+
 function compactActiveDecisions() {
   const memoryDir = path.join(process.cwd(), 'artifacts', 'memory');
   const decisionsPath = path.join(memoryDir, 'active-decisions.md');
@@ -65,6 +253,9 @@ function compactActiveDecisions() {
   const archivedSections = [];
   const headerLines = [];
   let currentSection = null;
+  // Hoisted so the return statement can report them. See the note at the return.
+  let newlyArchived = 0;
+  let duplicatesSkipped = 0;
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
@@ -79,7 +270,10 @@ function compactActiveDecisions() {
       currentSection = {
         header: line.trim(),
         lines: [line],
-        isInactive: false
+        isInactive: false,
+        // Recency is read off the section's own header, not the file mtime, so a
+        // re-append or a bulk edit cannot silently make a fresh decision look old.
+        date: extractSectionDate(line)
       };
     } else if (currentSection) {
       currentSection.lines.push(line);
@@ -106,6 +300,35 @@ function compactActiveDecisions() {
     }
   }
 
+  // AGE-BASED RETIREMENT. After the manual-status pass above, anything still active but
+  // older than RETENTION_DAYS moves to the archive too. This is the trigger that was
+  // missing: with 120 entries all marked `active` and none ever resolved, the manual
+  // path alone archived nothing and the file grew without bound.
+  //
+  // Retirement is NOT deletion and NOT a claim that a decision was wrong. The full
+  // section text is written to the quarterly shard and indexed in index.ndjson, so
+  // `/memory` still finds it. `retiredByAge` is recorded so a future reader can tell an
+  // aged-out entry from one a human deliberately superseded.
+  //
+  // Undated sections are NEVER auto-retired. If an entry carries no parseable date we
+  // cannot claim it is stale, and guessing would silently drop live decisions. Those stay
+  // and are counted in `undatedRetained` so the condition is visible.
+  const nowForAge = new Date();
+  const agedOut = [];
+  const stillActive = [];
+  for (const s of activeSections) {
+    const age = ageInDays(s.date, nowForAge);
+    if (Number.isFinite(age) && age > RETENTION_DAYS) {
+      s.retiredByAge = true;
+      agedOut.push(s);
+    } else {
+      stillActive.push(s);
+    }
+  }
+  for (const s of agedOut) archivedSections.push(s);
+  activeSections.length = 0;
+  activeSections.push(...stillActive);
+
   // If there are inactive sections, shard them into archive/
   if (archivedSections.length > 0) {
     if (!fs.existsSync(archiveDir)) fs.mkdirSync(archiveDir, { recursive: true });
@@ -113,16 +336,58 @@ function compactActiveDecisions() {
     const q = Math.floor(now.getMonth() / 3) + 1;
     const shardFile = path.join(archiveDir, `${now.getFullYear()}-Q${q}-archive.md`);
 
-    const shardEntries = archivedSections.map(s => s.lines.join('\n').trim()).join('\n\n---\n\n');
-    if (!fs.existsSync(shardFile)) {
-      const shardHeader = `# Memory Archive (${now.getFullYear()} Q${q})\n\n`;
-      atomicWriteFileSync(shardFile, shardHeader + shardEntries + '\n', 'utf8');
-    } else {
-      fs.appendFileSync(shardFile, '\n\n---\n\n' + shardEntries + '\n', 'utf8');
+    // DEDUPE AGAINST WHAT IS ALREADY SHARDED (2026-10-05).
+    //
+    // Measured on this repo: 51 sections appeared TWICE in the archive shard and 54 titles
+    // appeared 2-3x in index.ndjson. Cause: the shard was append-only with no identity
+    // check, so retiring an entry, then re-running compaction over a file that still
+    // contained it (or a manual re-run before the source file had been rewritten), appended
+    // the same decision again. Retirement is supposed to be idempotent — once archived,
+    // an entry must never be written twice.
+    //
+    // Identity = the section's header text with whitespace normalised. Header text is
+    // stable for a given decision and does not depend on the entry's body.
+    const normaliseHeader = (h) => String(h).replace(/\s+/g, ' ').trim();
+    const alreadyArchived = new Set();
+    if (fs.existsSync(shardFile)) {
+      for (const line of fs.readFileSync(shardFile, 'utf8').split('\n')) {
+        if (line.startsWith('### ') || line.startsWith('## AD-')) {
+          alreadyArchived.add(normaliseHeader(line));
+        }
+      }
+    }
+    // Same guard for the ndjson index, which is searched by /memory.
+    const alreadyIndexed = new Set();
+    if (fs.existsSync(archiveNdjson)) {
+      for (const line of fs.readFileSync(archiveNdjson, 'utf8').split('\n')) {
+        if (!line.trim()) continue;
+        try { alreadyIndexed.add(normaliseHeader(JSON.parse(line).header || '')); } catch { /* header line */ }
+      }
     }
 
-    // Append to index.ndjson
-    for (const s of archivedSections) {
+    const fresh = archivedSections.filter(s => {
+      const key = normaliseHeader(s.header);
+      if (alreadyArchived.has(key)) return false;
+      alreadyArchived.add(key);
+      return true;
+    });
+    const duplicatesSkippedRun = archivedSections.length - fresh.length;
+    newlyArchived = fresh.length;
+    duplicatesSkipped = duplicatesSkippedRun;
+
+    const shardEntries = fresh.map(s => s.lines.join('\n').trim()).join('\n\n---\n\n');
+    if (fresh.length > 0) {
+      if (!fs.existsSync(shardFile)) {
+        const shardHeader = `# Memory Archive (${now.getFullYear()} Q${q})\n\n`;
+        atomicWriteFileSync(shardFile, shardHeader + shardEntries + '\n', 'utf8');
+      } else {
+        fs.appendFileSync(shardFile, '\n\n---\n\n' + shardEntries + '\n', 'utf8');
+      }
+    }
+
+    // Append to index.ndjson — from `fresh` only, so a repeated compaction cannot
+    // re-index an entry that is already in the shard.
+    for (const s of fresh) {
       const headerText = s.header.replace(/^#{2,3}\s+/, '');
       const idMatch = headerText.match(/\[([A-Z]+)\]\s*([^[]+)/) || headerText.match(/(AD-\d{4}-\d{2}-\d{2})\s*—?\s*(.*)/);
       const domain = idMatch ? idMatch[1] : 'DECISION';
@@ -131,6 +396,9 @@ function compactActiveDecisions() {
       const date = dateMatch ? dateMatch[1] : now.toISOString().split('T')[0];
       const entryObj = {
         id: `ARCH-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+        // header is the dedupe key /memory reads back. Without it, an entry could be
+        // re-indexed on every run because title is truncated to 80 chars.
+        header: s.header,
         title: title.slice(0, 80),
         domain,
         keywords: [domain.toLowerCase(), ...title.toLowerCase().split(/\s+/).filter(w => w.length > 2)],
@@ -160,15 +428,47 @@ function compactActiveDecisions() {
 
   return {
     compacted: archivedSections.length > 0,
+    // `archivedCount` is what the caller cares about: how many entries left the loaded file.
     archivedCount: archivedSections.length,
+    // Reported separately so a repeat run is visible instead of looking like new work.
+    // Hoisted out of the `if` block: these were originally `const` inside it, so the
+    // `typeof x !== 'undefined'` guard below always took the fallback branch and reported
+    // `archivedSections.length` — which made a fully-deduped run indistinguishable from
+    // new work. The archive was correct; only the report lied.
+    newlyArchived,
+    duplicatesSkipped,
     activeCount: activeSections.length,
     tokens,
-    underBudget: tokens <= 400
+    underBudget: tokens <= ACTIVE_DECISIONS_TOKEN_BUDGET
   };
 }
 
 // Canonical phase order — single source of truth: .agents/references/phase-table.md.
 // 11 phases: Validation (Phase -1, pre-phase gate, no folder) + folder phases 0-9.
+/**
+ * Token budget for artifacts/memory/active-decisions.md, checked by compaction and
+ * enforced as a precondition for `advance` / `set-phase`.
+ *
+ * WHY A NAMED CONSTANT AND NOT A LITERAL. The budget was a bare `400` hardcoded in four
+ * places (the check plus three error payloads). Nothing in `.agents/references/` explained
+ * what it was for, so when it wedged the pipeline nobody could tell whether to raise it or
+ * to compact the file — which is exactly what happened: `advance` and `set-phase` both
+ * failed with OVER_BUDGET for weeks against a 47,548-token file, and the 400 was simply
+ * wrong for any real corpus. A gate nobody can reason about is a gate nobody maintains.
+ *
+ * WHAT 2500 BUYS. The owner's stated model: keep active-decision HISTORY findable, and let
+ * the loaded file hold only the most recent live decisions. Measured on this repo, ~1,900
+ * tokens is the floor — the file header plus the current and previous decision sections,
+ * which is the minimum that leaves an agent the decision in flight and the one before it.
+ * That leaves ~600 tokens of headroom for a third section, so the common case (two or three
+ * live decisions) loads without tripping the gate, and a fourth triggers compaction.
+ *
+ * This is a HEADROOM budget, not a target. Compact before you hit it; do not treat the
+ * ceiling as a quota to fill.
+ */
+const ACTIVE_DECISIONS_TOKEN_BUDGET = 2500;
+
+// Canonical phase order — single source of truth: .agents/references/phase-table.md.
 const PHASE_ORDER = [
   'validation', 'discovery', 'research', 'strategy', 'architecture',
   'planning', 'execution', 'launch', 'iteration', 'documentation', 'retro'
@@ -234,6 +534,52 @@ function readYaml() {
   }
 }
 
+/**
+ * Reconcile the state's phases map with PHASE_ORDER.
+ *
+ * WHY THIS EXISTS. Measured on the live repo: `current_phase` was "validation" while
+ * the phases map held only the other 10 keys — no `validation` entry at all. Three
+ * silent failures followed, none of which raised an error:
+ *
+ *   1. syncYaml() renders the phases block by iterating the map, so the ACTIVE phase was
+ *      simply absent. sprint-status.yaml read like a complete 11-phase board with every
+ *      phase `pending`, while the one phase actually in flight was missing from it.
+ *      That is worse than a visible gap: the mirror looked authoritative and was wrong.
+ *   2. advance() marks the current phase complete behind an `if (state.phases[current])`
+ *      guard, so advancing out of a keyless phase silently discarded its completion
+ *      record — `completed_at` stayed null forever.
+ *   3. Nothing warned. The JSON parsed fine; every command exited 0.
+ *
+ * A state file can also be rebuilt from the YAML mirror by readYaml() after the JSON is
+ * lost, and that path reproduces exactly this shape, so the condition is reachable
+ * without any phase ever being advanced.
+ *
+ * Idempotent, and never clobbers an existing entry: missing keys are backfilled as
+ * `pending`, and only a `pending` current phase is promoted to `in-progress`. Existing
+ * statuses, timestamps and agent lists are left untouched.
+ */
+function normalizePhases(state) {
+  if (!state.phases || typeof state.phases !== 'object') state.phases = {};
+  for (const p of PHASE_ORDER) {
+    if (!state.phases[p]) {
+      state.phases[p] = { status: 'pending', started_at: null, completed_at: null, agents: [] };
+    } else if (typeof state.phases[p] === 'string') {
+      // Tolerate the lossy string form the YAML mirror can carry.
+      state.phases[p] = { status: state.phases[p], started_at: null, completed_at: null, agents: [] };
+    }
+  }
+  const current = resolveCurrentPhase(state);
+  const entry = state.phases[current];
+  // Only a pending current phase is promoted. A `complete` current phase is left alone:
+  // that is a real state meaning "finished, awaiting advance", and silently rewriting it
+  // would hide the need to advance.
+  if (entry && entry.status === 'pending') {
+    entry.status = 'in-progress';
+    entry.started_at = entry.started_at || new Date().toISOString();
+  }
+  return state;
+}
+
 function readState() {
   // Source of truth: pipeline-state.json (full state). The YAML mirror is
   // lossy (no artifacts/history/change_requests), so it must never be the
@@ -241,13 +587,13 @@ function readState() {
   // wipe data written by `complete` and `session-write`.
   if (fs.existsSync(STATE_FILE)) {
     try {
-      return JSON.parse(fs.readFileSync(STATE_FILE, 'utf8'));
+      return normalizePhases(JSON.parse(fs.readFileSync(STATE_FILE, 'utf8')));
     } catch (e) {
       // Corrupt JSON: fall through to YAML mirror, then auto-init.
     }
   }
   const yamlState = readYaml();
-  if (yamlState) return yamlState;
+  if (yamlState) return normalizePhases(yamlState);
   if (!fs.existsSync(STATE_FILE)) {
     // Auto-initialize if missing, to prevent "No pipeline state found" errors.
     try {
@@ -301,8 +647,11 @@ function syncYaml(state) {
     '# Phase-level status',
     'phases:',
   ];
-  for (const [p, v] of Object.entries(state.phases || {})) {
-    const status = typeof v === 'string' ? v : (v.status || 'pending');
+  // PHASE_ORDER, not map insertion order — same reason as printDashboard. Emitting the
+  // whole canonical order also guarantees the mirror can never omit a phase again.
+  for (const p of PHASE_ORDER) {
+    const v = (state.phases || {})[p];
+    const status = typeof v === 'string' ? v : (v ? (v.status || 'pending') : 'pending');
     yaml.push(`  ${p}: ${status}`);
   }
   yaml.push('');
@@ -339,12 +688,14 @@ function printDashboard(state) {
   console.log(`**Active phase:** ${phase}\n`);
   console.log(`| Phase | Status |`);
   console.log(`|---|---|`);
-  if (state.phases) {
-    const entries = Object.entries(state.phases);
-    for (const [p, v] of entries) {
-      const s = typeof v === 'string' ? v : (v.status || 'pending');
-      console.log(`| ${icon(s)} ${p} | ${s} |`);
-    }
+  // Render in PHASE_ORDER, not map insertion order. A phase backfilled by
+  // normalizePhases() is appended last, which put `validation` — the FIRST phase —
+  // at the bottom of the board. A pipeline board that does not read in pipeline order
+  // is a list, not a pipeline.
+  for (const p of PHASE_ORDER) {
+    const v = state.phases ? state.phases[p] : null;
+    const s = typeof v === 'string' ? v : (v ? (v.status || 'pending') : 'pending');
+    console.log(`| ${icon(s)} ${p} | ${s} |`);
   }
   console.log('');
 }
@@ -1060,14 +1411,31 @@ function mainDispatch(args) {
         console.error('Warning: Could not write session summary files: ' + e.message);
       }
 
+      // END-OF-SESSION DECISION FLUSH (2026-10-06). A finished decision becomes a lesson
+      // once, at the session boundary, so active-decisions.md holds only standing
+      // choices. This is the only reliable trigger available: there is no sprint concept
+      // in pipeline state (`sprint: None`), so "end of sprint" is not detectable, and
+      // end-of-day is a subset of this since session-write runs many times a day.
+      //
+      // Best-effort and non-blocking: a flush failure must never cost the caller their
+      // session summary. It only acts on entries carrying an explicit completion signal
+      // (status resolved/superseded/complete/stale, or another entry declaring
+      // `**Supersedes:**` it) — never on age, and never on a domain guess.
+      let decisionFlush = null;
+      try {
+        decisionFlush = flushDecisionsToLessons();
+      } catch (e) {
+        decisionFlush = { error: e.message };
+      }
+
       // Refresh project-context.md (Phase / Blockers / Repository / Stack /
       // Session Activity).
       try {
         const goal = workedOn && workedOn !== '(not specified)' ? workedOn.slice(0, 80) : null;
         const result = syncProjectContext({ agent, domain: 'session', goal });
-        console.log(JSON.stringify({ success: true, agent, date, message: 'Session summary written.', ...result }));
+        console.log(JSON.stringify({ success: true, agent, date, message: 'Session summary written.', decisions_flushed: decisionFlush, ...result }));
       } catch (e) {
-        console.log(JSON.stringify({ success: true, agent, date, message: 'Session summary written.' }));
+        console.log(JSON.stringify({ success: true, agent, date, message: 'Session summary written.', decisions_flushed: decisionFlush }));
       }
     }
 
@@ -1146,26 +1514,43 @@ function mainDispatch(args) {
       });
       state.last_updated = new Date().toISOString();
 
-      // R-5 transactional ordering (fixed 2026-08-25): compact + validate
-      // BEFORE the durable commit. A budget violation aborts the transition
-      // with zero partial phase-state writes; compaction itself is content
-      // hygiene on active-decisions.md and persists independently.
+      // Compaction still runs BEFORE the durable commit, so history is tidied as part of
+      // the transition. But an over-budget result no longer BLOCKS the transition.
+      //
+      // WHY (2026-10-05, owner decision). This used to exit 1 on ADVANCE_OVER_BUDGET, and
+      // that produced a deadlock with no in-band recovery: measured 47,548 tokens against a
+      // 400 budget, and even keeping only the current day's entries measured ~7,770 tokens.
+      // So the agent was told "you may not advance the phase" while the only documented
+      // escape — compact memory — provably could not succeed. It was stuck permanently.
+      //
+      // The gate also never prevented bloat. Nothing stopped an agent writing 40,000 tokens;
+      // the failure was simply deferred until the moment work was finished and the board
+      // needed to move. That is not prevention, it is a delayed detonation.
+      //
+      // It also coupled two unrelated questions. "This phase's work is done" is semantic.
+      // "How big is the context" is a cost concern. Blocking the first on the second means
+      // finishing the work and being unable to record that you finished it.
+      //
+      // Now: compact, REPORT, and continue. The budget is visible telemetry and a warning,
+      // not a wall. A gate that can wedge is worse than no gate.
       const compactionResult = compactActiveDecisions();
+      const memoryStatus = {
+        tokens: compactionResult.tokens,
+        budget: ACTIVE_DECISIONS_TOKEN_BUDGET,
+        under_budget: compactionResult.underBudget,
+        retired: compactionResult.archivedCount
+      };
       if (!compactionResult.underBudget) {
+        // Non-blocking. Telemetry only — nothing below this branch changes behaviour.
         recordTelemetry('phase_transition', {
           phase: targetPhase,
-          data: { action: 'advance', from: currentPhase, to: targetPhase, blocked: 'OVER_BUDGET', compaction: compactionResult }
+          data: { action: 'advance', from: currentPhase, to: targetPhase, over_budget: true, compaction: memoryStatus }
         });
-        console.log(JSON.stringify({
-          success: false,
-          error: 'ADVANCE_OVER_BUDGET',
-          from: currentPhase,
-          to: targetPhase,
-          tokens: compactionResult.tokens,
-          budget: 400,
-          hint: 'Compact or archive artifacts/memory/active-decisions.md below 400 tokens, then retry.'
-        }));
-        process.exit(1);
+        console.error(
+          `[warn] active-decisions.md is ${compactionResult.tokens} tokens (budget ${ACTIVE_DECISIONS_TOKEN_BUDGET}). ` +
+          `Phase advanced anyway — this is a cost warning, not a blocker. ` +
+          `Run: node .agents/scripts/orchestrator_state.js compact`
+        );
       }
 
       writeState(state);
@@ -1184,8 +1569,31 @@ function mainDispatch(args) {
         success: true,
         from: currentPhase,
         to: targetPhase,
-        compaction: compactionResult
+        memory: memoryStatus
       }));
+    }
+
+    if (cmd === 'flush-decisions') {
+      const promote = (() => {
+        const i = args.indexOf('--promote');
+        return i !== -1 ? args[i + 1] : null;
+      })();
+      const dry = args.includes('--dry-run');
+      if (promote) {
+        // Promote one REPORTED candidate. Deliberately explicit: candidates are a
+        // heuristic surface, so moving one is a human decision, not an automatic one.
+        const mw = path.join(process.cwd(), '.agents/scripts/memory_write.js');
+        const { spawnSync } = require('child_process');
+        const r = spawnSync(process.execPath, [mw, '--resolve',
+          '--file', 'active-decisions.md', '--header', promote, '--status', 'superseded'],
+          { encoding: 'utf8', cwd: process.cwd() });
+        if (r.status !== 0) {
+          console.log(JSON.stringify({ success: false, error: (r.stderr || '').trim() }));
+          process.exit(1);
+        }
+      }
+      const result = flushDecisionsToLessons({ dryRun: dry });
+      console.log(JSON.stringify({ success: true, ...result }));
     }
 
     if (cmd === 'compact') {
@@ -1235,24 +1643,26 @@ function mainDispatch(args) {
 
       state.last_updated = new Date().toISOString();
 
-      // R-5 transactional ordering (fixed 2026-08-25): see advance — compact
-      // + budget-validate BEFORE the durable commit.
+      // Same non-blocking policy as `advance` (see the long note there). This branch is
+      // the one that wedged hardest: switching to the phase that was ALREADY current
+      // failed, because the guard ran before it checked whether anything needed to change.
       const compactionResult = compactActiveDecisions();
+      const memoryStatus = {
+        tokens: compactionResult.tokens,
+        budget: ACTIVE_DECISIONS_TOKEN_BUDGET,
+        under_budget: compactionResult.underBudget,
+        retired: compactionResult.archivedCount
+      };
       if (!compactionResult.underBudget) {
         recordTelemetry('phase_transition', {
           phase,
-          data: { action: 'set-phase', from: oldPhase, to: phase, blocked: 'OVER_BUDGET', compaction: compactionResult }
+          data: { action: 'set-phase', from: oldPhase, to: phase, over_budget: true, compaction: memoryStatus }
         });
-        console.log(JSON.stringify({
-          success: false,
-          error: 'SET_PHASE_OVER_BUDGET',
-          from: oldPhase,
-          to: phase,
-          tokens: compactionResult.tokens,
-          budget: 400,
-          hint: 'Compact or archive artifacts/memory/active-decisions.md below 400 tokens, then retry.'
-        }));
-        process.exit(1);
+        console.error(
+          `[warn] active-decisions.md is ${compactionResult.tokens} tokens (budget ${ACTIVE_DECISIONS_TOKEN_BUDGET}). ` +
+          `Phase set anyway — this is a cost warning, not a blocker. ` +
+          `Run: node .agents/scripts/orchestrator_state.js compact`
+        );
       }
 
       writeState(state);
@@ -1267,7 +1677,7 @@ function mainDispatch(args) {
         data: { action: 'set-phase', from: oldPhase, to: phase, compaction: compactionResult }
       });
 
-      console.log(JSON.stringify({ success: true, from: oldPhase, to: phase, compaction: compactionResult }));
+      console.log(JSON.stringify({ success: true, from: oldPhase, to: phase, memory: memoryStatus }));
     }
 
     if (cmd === 'validate') {
