@@ -88,8 +88,25 @@ Next step: {launch, iterate, or retro}
 Blockers: {any unresolved issues or "none"}
 ```
 
+## Two surfaces — every step
+
+`/develop` ends by telling the owner two different things, and they must not be confused:
+
+- **Document surface** — `develop-state.md`, `test-report.md`, `coverage-report.md` and
+  `qa-signoff.md` carry the machine record: the verdict, the evidence, the counts. Plain
+  sentence first, then the table.
+- **Chat surface** — the reply carries the plain sentence, the consequence, and the next action.
+  **Never** a gate token, and never a card field (`VERDICT:`, `Status:`, `Disposition:`). A
+  reader who has never seen this engine must be able to act on the sentence alone
+  (`.agents/references/vespyr-dna.md` §Two surfaces).
+
+State the consequence, not the label. `[CONDITIONAL]` is not "conditional" — it is "it ships,
+but the PDF export fails above 500 rows and @developer owns it, due before launch."
+
 ## Done when
+- `develop_completion_check.js check --require-signoff` exits 0
 - All steps in `stepsCompleted`
-- `qa-signoff.md` exists with GO/CONDITIONAL
+- `qa-signoff.md` exists with a bracketed `GO`/`CONDITIONAL` verdict, and every condition it
+  names carries an owner and a date
 - Phase advanced to quality
 

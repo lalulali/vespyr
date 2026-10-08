@@ -29,6 +29,13 @@ PM confirms the prioritized backlog is correct and aligned with sprint deadlines
 - `artifacts/output/05-planning/execution-plan.md`
 
 ## Output
+
+> **Do not clobber step 3b's Task Assignment table.** Step 3b (`backlog-prep`) writes worktree
+> branches and role tags into `kanban.md` before this step runs. Populating the board from
+> `kanban-template.md` must **merge**, preserving that table — a template copy that overwrites
+> it silently discards the worktree allocation, and nothing downstream would notice until a
+> developer found their branch missing.
+
 Updated `artifacts/output/05-planning/kanban.md` with tasks in "To Do" — use template `.agents/templates/planning/kanban-template.md`
 
 ## Memory closeout

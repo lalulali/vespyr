@@ -16,7 +16,26 @@ Finalize the development cycle: verify all completion criteria, write the state,
 
 ## Process
 > **Tracker:** `node .agents/scripts/step_tracker.js begin --skill develop --step 10`
-1. Confirm all completion criteria are met:
+1. **Run the completion gate — this is not a checklist, it is a gate:**
+
+   ```bash
+   node .agents/scripts/develop_completion_check.js check --require-signoff --json
+   ```
+
+   **`--require-signoff` is mandatory.** Without it an absent sign-off is a *skip* and the gate
+   reports `ok: true` with nothing on disk — correct for callers where development completion is
+   not in scope, useless here. Reaching step 10 means the sign-off is in scope, so an absent file
+   is a missing deliverable.
+
+   It fails on: no bracketed verdict; `[NO-GO]`; `[GO]` with named conditions; `[GO]` with open
+   findings; `[CONDITIONAL]` with no conditions, or a condition with no owner or no date; a
+   citation to an artifact that does not exist; and a coverage report older than the newest
+   source change.
+
+   **Never weaken the gate to pass it.** Fix the sign-off. If a rule is genuinely wrong for this
+   project, say so in the handoff rather than editing the rule.
+
+2. Confirm all completion criteria are met:
    - All tasks in execution plan are complete
    - Code review passes with no blocking issues
    - QA validates all acceptance criteria pass (AC-H, AC-U, AC-E)
@@ -24,9 +43,18 @@ Finalize the development cycle: verify all completion criteria, write the state,
    - Documentation is updated
    - Security audit passes (if applicable — zero Critical/High)
    - Performance benchmarks within SLAs (if applicable)
-2. Write final `stepsCompleted` to `artifacts/output/05-execution/develop-state.md`.
-3. Run `node .agents/scripts/orchestrator_state.js complete --agent developer --artifact 05-execution/{feature}.md`.
-4. Run `node .agents/scripts/orchestrator_state.js next` — confirm phase advances to quality.
+3. Write final `stepsCompleted` to `artifacts/output/05-execution/develop-state.md`.
+4. Run `node .agents/scripts/orchestrator_state.js complete --agent developer --artifact 05-execution/{feature}.md`.
+5. Run `node .agents/scripts/orchestrator_state.js next`.
+
+   **Confirm it advanced — or record why it did not. Do not force it.** The phase advances only
+   if the pipeline state was seeded by the earlier phases. A tree initialised fresh reports
+   something like `Active phase: validation / Action needed: generate artifacts — idea-brief.md`,
+   and `next` correctly does nothing. Running `advance` repeatedly to make the token true would
+   walk the pipeline *backwards* through five phases to satisfy a sentence — a blind run refused
+   and recorded the mismatch instead, which is the right call.
+
+   If it did not advance, record the observed phase and the reason in `develop-state.md`.
 
 ## Memory closeout (mandatory per GUARDRAILS §Session Continuity)
 

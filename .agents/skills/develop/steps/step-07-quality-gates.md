@@ -32,7 +32,7 @@ Record completion:
 node .agents/scripts/orchestrator_state.js complete --agent qa-engineer --artifact 05-execution/quality/test-report.md
 ```
 
-### 7a. Motion QA (conditional hard gate)
+### 7b. Motion QA (conditional hard gate)
 
 Run this gate when `artifacts/output/03-strategy/motion-spec.md` or `artifacts/output/05-planning/motion-handoff.md` exists. Motion work cannot pass QA on generic component tests alone.
 
@@ -43,6 +43,8 @@ node .agents/scripts/motion_spec_check.js check --json
 ```
 
 Exit 0 is required. It fails on any `MO-###` prompt missing a required field, animating a non-composited property (only `transform`/`opacity`), a non-fade reduced-motion fallback, a non-numeric timing tolerance, a spec-side orphan, or a prompt not referenced in `user-stories.md`. If the spec is incomplete, QA does not proceed — the task returns to `@product-designer`. When `motion-spec.md` is absent the script exits 0 (motion not in scope) and this gate is skipped.
+
+**Do NOT add `--require-spec` here.** The skip-on-absent behaviour is correct for this caller: `/develop` runs whether or not motion is in scope, so an absent spec means motion was never in scope. Only the `/motion` Phase 3 gate passes `--require-spec`, because Phase 3 is reachable only after motion has been judged in scope — there, an absent spec is a missing deliverable.
 
 `@qa-engineer` must add a `## Motion Verification` section to `test-report.md` covering:
 - [ ] Every `MO-###` maps to one spec prompt, one user story, one implementation reference, and one QA assertion.
@@ -68,7 +70,7 @@ Any missing motion evidence is a QA failure and sends the task back to `@develop
 
 Any unlogged 🔴 CRITICAL or 🟠 HIGH violation blocks release sign-off.
 
-## 7b. Security Audit (conditional)
+## 7d. Security Audit (conditional)
 
 **Auto-decision rule (non-negotiable):** Determine whether this gate applies by checking the spec-kernel and user stories yourself. Do NOT ask the user. If the spec mentions auth, PII, payments, or external APIs → invoke `@security-engineer` automatically. If the spec contains none of these → skip this gate silently and note "Security gate skipped — no auth/sensitive-data/API surface detected."
 
@@ -93,7 +95,7 @@ If any Critical or High findings:
 **Status:** active
 ```
 
-## 7c. Performance Review (conditional)
+## 7e. Performance Review (conditional)
 
 **Auto-decision rule (non-negotiable):** Determine whether this gate applies by checking the spec-kernel and user stories yourself. Do NOT ask the user. If the spec mentions core user paths, large data sets, or performance SLAs → invoke `@performance-engineer` automatically. If the spec contains none of these → skip this gate silently and note "Performance gate skipped — no core-path/data/SLA surface detected."
 
@@ -104,7 +106,41 @@ Invoke `@performance-engineer` when the feature:
 
 **Output:** `artifacts/output/05-execution/quality/performance-report.md`
 
-## 7d. UTTERLY SATISFIED collaboration gate
+### 7f. QA sign-off — the artifact this step never produced
+
+```bash
+node .agents/scripts/orchestrator_state.js complete --agent qa-engineer --artifact 05-execution/quality/qa-signoff.md
+```
+
+Write `artifacts/output/05-execution/quality/qa-signoff.md` from
+`.agents/skills/develop/templates/qa-signoff.md`.
+
+**This file is the terminal gate of the pipeline, and until now nothing produced it.** `/develop`'s
+Done-when required it, `/launch` halts when it is "missing or is not `GO`/`CONDITIONAL`", and
+`qa-engineer.md` specified its contents — but no step, script, or template in the engine wrote
+it. `/develop` would report completion and `/launch` would then halt on a document nobody had
+been asked to author.
+
+Requirements, all enforced by `develop_completion_check.js`:
+
+- **A bracketed verdict** — `VERDICT: [GO]`, `[CONDITIONAL]`, or `[NO-GO]`. Bracketed because
+  `tools/eval/lib/ast.js` reads that form. An unbracketed sentence is not a verdict.
+- **`[NO-GO]` cannot complete a cycle.** It is a verdict, not a completion.
+- **`[GO]` with named conditions is a contradiction** — a condition is a blocking finding, so
+  that state is `[CONDITIONAL]`.
+- **`[CONDITIONAL]` requires every condition to carry an owner and a date.** An unowned
+  condition is a wish; an undated one will be renewed silently.
+- **Every cited artifact must exist on disk.** A sign-off citing evidence that is not present
+  is uncited, not signed off (DNA 5).
+- **Deferrals are capped here.** A deferral row in the coverage report carries an owner and a
+  date; at sign-off it closes or becomes a named condition. It may not be renewed silently.
+- **The coverage report must be newer than the newest source change.** A stale report describes
+  code that no longer exists — `qa-engineer.md` already required the refresh, and nothing
+  enforced it until this gate.
+- **Coverage is counted, not felt.** If no wired tool produced a number, record
+  `coverage: unmeasured` as a spec gap. Never write a percentage you cannot reproduce.
+
+## 7g. UTTERLY SATISFIED collaboration gate
 
 Before leaving quality gates, identify every active agent whose domain is
 affected by the release and collect a satisfaction state using

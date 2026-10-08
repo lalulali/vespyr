@@ -42,6 +42,25 @@ Load and cross-check every strategy artifact against the user stories. Confirm a
    node .agents/scripts/template_conformance.js check --mode create --json
    ```
    Exit 0 required. If `requirements.md` or `user-stories.md` is off-template (a defect that should have been caught at the design handoff gate), halt and route back to `/design` — do not begin coding against a malformed spec.
+
+**Brownfield escape — when there is no `/design` to route back to.** This halt assumes the spec
+came from this engine's own design phase. On a brownfield or inherited project the spec may be
+the owner's own document, in a layout this engine's gate cannot read, with no `/design` run
+reachable. Halting there leaves the owner's actual request unanswered.
+
+When that is the case, **halt on the format but not on the work**:
+
+- Confirm the spec's *content* is complete — every functional requirement has an id, every
+  acceptance criterion is testable. Format is a gate; content is the reason for the gate.
+- Record a labelled deviation in `artifacts/output/05-execution/spec-alignment-check.md`:
+  which gate failed, its exact output, and why the content is nonetheless plannable.
+- Proceed. Do not reformat the owner's document to satisfy a parser, and do not proceed in
+  silence.
+
+A blind run on a brownfield brief handed over `## US-001` headings with seven acceptance
+criteria; the gate reported "no user story is defined" and, followed literally, the run would
+have ended at step 1. It declared the deviation and proceeded — correct, but it had to invent
+the licence to do so. This is that licence, stated.
    Then read the `warnings` array from the same `--json` output. Warnings do not affect the exit code and do not block coding, but they mark thin reasoning: a story marking 13+ of 16 risk categories N/A, the same N/A reason copied across 3+ stories, or a uniform criterion count across stories. If the spec you were handed is full of them, raise it with @product-manager before building on it — those are the stories most likely to hide an untested failure mode.
 3. Cross-check ACs against the spec-kernel capabilities (CAP-1, CAP-2, ...).
 4. Confirm all edge cases and scope boundaries are defined.

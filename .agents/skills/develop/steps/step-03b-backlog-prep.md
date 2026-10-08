@@ -17,7 +17,10 @@ Produce the execution plan: task breakdown, estimates, dependencies, and paralle
 
 ## Inputs
 - `artifacts/output/03-strategy/user-stories.md`
-- `artifacts/output/05-planning/kanban.md`
+- `artifacts/output/05-planning/kanban.md` — **may not exist yet.** This step runs *before*
+  step 4 (Kanban Activation), which populates the board from `kanban-template.md`. If the file
+  is absent, create the Task Assignment table in the shape step 4 expects and note that step 4
+  must merge rather than overwrite it.
 - ADRs from `artifacts/output/04-architecture/` (if they exist)
 
 ## Agent invocation
