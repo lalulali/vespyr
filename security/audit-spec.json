@@ -118,7 +118,7 @@
       "pattern": "[A-Za-z0-9+/]{40,}={0,2}|(\\\\x[0-9a-fA-F]{2}){16,}",
       "severity": "medium",
       "mode": "regex",
-      "known_fp_note": "npm integrity fields (sha512-...) and lockfile hashes are legitimate base64 blobs; excluded as documented known-FP class (02f §10, Nina FP budget). Path exclusions live ONLY in the top-level known_fp_excludes block — F-9 fix 2026-08-23: the former rule-level duplicate here was dead config that had already diverged; single source of truth is top-level.",
+      "known_fp_note": "npm integrity fields (sha512-...) and lockfile hashes are legitimate base64 blobs; excluded as documented known-FP class (02f \u00a710, Nina FP budget). Path exclusions live ONLY in the top-level known_fp_excludes block \u2014 F-9 fix 2026-08-23: the former rule-level duplicate here was dead config that had already diverged; single source of truth is top-level.",
       "known_fp_classes": [
         "camelCase-acronym word runs joined by single / (e.g. Substitute/Combine/Adapt)",
         "URL fragments with repeated slashes or dots (file://, raw.githubusercontent.com)",
@@ -162,7 +162,7 @@
       "entropy": {
         "min_shannon_per_char": 2.6,
         "window": 8,
-        "note": "P2: window is integer 8 (was '8-char sliding' string parsed by accident). threshold 2.6 (max achievable for 8 distinct chars is 3.0; 3.5 was unreachable — rule could never fire). Regex match with entropy < threshold is NOT a finding (negative fixture: AKIA + repeated chars -> ~0.0)."
+        "note": "P2: window is integer 8 (was '8-char sliding' string parsed by accident). threshold 2.6 (max achievable for 8 distinct chars is 3.0; 3.5 was unreachable \u2014 rule could never fire). Regex match with entropy < threshold is NOT a finding (negative fixture: AKIA + repeated chars -> ~0.0)."
       }
     },
     {
@@ -188,7 +188,7 @@
       "pattern": "(curl|wget|Invoke-WebRequest)[^\\n|]*\\| *(?:sudo +)?(sh|bash|powershell|pwsh|iex|cmd)",
       "severity": "medium",
       "mode": "regex",
-      "note": "F-4 (Victor): extended to pwsh/iex/cmd + sudo; iex is canonical PowerShell download-exec. Round-table 2026-09-08: hook paths appended (keywordless curl-pipe hooks exited 0 — extensionless hook filenames never matched the ext glob and vcsMeta skipped content rules; scanner exempts BEACON-1 from the vcsMeta guard)."
+      "note": "F-4 (Victor): extended to pwsh/iex/cmd + sudo; iex is canonical PowerShell download-exec. Round-table 2026-09-08: hook paths appended (keywordless curl-pipe hooks exited 0 \u2014 extensionless hook filenames never matched the ext glob and vcsMeta skipped content rules; scanner exempts BEACON-1 from the vcsMeta guard)."
     }
   ],
   "fault_contract": {
@@ -218,12 +218,12 @@
   },
   "fp_metric": {
     "numerator": "informational findings := rule hits labeled severity low OR known-FP-class (documented per-rule known-FP notes)",
-    "denominator": "corpus files × harness shapes per run (baseline-corpus executions)",
-    "formula": "FP rate = numerator ÷ denominator, frozen corpus only, per harness shape",
+    "denominator": "corpus files \u00d7 harness shapes per run (baseline-corpus executions)",
+    "formula": "FP rate = numerator \u00f7 denominator, frozen corpus only, per harness shape",
     "gate": "NEW-FINDINGS-ONLY vs frozen baseline; new findings labeled, never auto-baselined"
   },
   "known_fp_excludes": {
-    "note": "Path globs whose matches are documented-FP-prone; scanner must not report these paths for the listed rules (02f §10, QA F-9). Plus the scanner's own adversarial corpus (evals/security/corpus/**, evals/security/held_out/**): that content IS what every rule detects, so reporting it makes the gate fire on everything and be ignored. Measured on this repo: 14 findings, one per rule, all from the corpus. INJ-OBFUSC additionally over long filesystem PATHS: its pattern is [A-Za-z0-9+/]{40,} and an absolute macOS path matches it verbatim. Measured: 91 findings, all absolute paths in telemetry NDJSON, a comparison doc and Playwright logs — data, not obfuscation. Excluding data artefacts rather than narrowing the rule, because narrowing it would change what the adversarial corpus tests. The calibration problem is named, not hidden: the rule cannot distinguish a long path from base64.",
+    "note": "Path globs whose matches are documented-FP-prone; scanner must not report these paths for the listed rules (02f \u00a710, QA F-9). Plus the scanner's own adversarial corpus (evals/security/corpus/**, evals/security/held_out/**): that content IS what every rule detects, so reporting it makes the gate fire on everything and be ignored. Measured on this repo: 14 findings, one per rule, all from the corpus. INJ-OBFUSC additionally over long filesystem PATHS: its pattern is [A-Za-z0-9+/]{40,} and an absolute macOS path matches it verbatim. Measured: 91 findings, all absolute paths in telemetry NDJSON, a comparison doc and Playwright logs \u2014 data, not obfuscation. Excluding data artefacts rather than narrowing the rule, because narrowing it would change what the adversarial corpus tests. The calibration problem is named, not hidden: the rule cannot distinguish a long path from base64.",
     "rules": {
       "INJ-OBFUSC": [
         "**/package-lock.json",
@@ -281,6 +281,9 @@
     }
   },
   "scope": {
+    "mode": "include-list",
+    "mode_note": "This repository opts into `include-list`, the fail-OPEN direction, on purpose and with one reason: it is the only repository that contains its own adversarial security fixtures (evals/security/corpus) and its own security documentation, so an exclude-list scan of the whole tree reports prose that DESCRIBES an attack as though it were one.\n\nEvery OTHER repository must use the default `exclude-list`, which fails closed: only declared excluded_trees are skipped, and any new directory is scanned until somebody deliberately excludes it. Do not copy `mode: include-list` into a product repository. Measured reason: with an inclusion allowlist, a hardcoded AKIAIOSFODNN7EXAMPLE in src/config.js was silently dropped and the scan still returned a confident answer.",
+    "default_when_absent": "exclude-list",
     "what_this_is": [
       "THE PRODUCT-CODE SCOPE. A release security scan answers one question: does the code we are",
       "shipping contain a live vulnerability? It is not a whole-repository audit, and a green",
@@ -288,14 +291,14 @@
       "",
       "This block exists because that distinction was being fudged. A blind-run audit wired the",
       "scanner into /launch and it reported 129 findings on this repository. Triaged individually:",
-      "every one was a false positive — 19 on the scanner's own adversarial corpus, 37 on absolute",
+      "every one was a false positive \u2014 19 on the scanner's own adversarial corpus, 37 on absolute",
       "filesystem paths that match the base64 rule, 5 reviewed test fixtures, and the remainder",
       "prose in review documents that DESCRIBE prompt-injection attacks. None was a live defect.",
       "",
       "The honest fix is not to suppress those findings one by one until the number reaches zero.",
       "It is to declare what is actually being scanned, report what was not, and leave the residual",
-      "visible. `artifacts/**` is historical output — review documents, telemetry logs, memory",
-      "archives — and is not shipped code. It is out of scope, with a reason, and the scanner",
+      "visible. `artifacts/**` is historical output \u2014 review documents, telemetry logs, memory",
+      "archives \u2014 and is not shipped code. It is out of scope, with a reason, and the scanner",
       "prints the excluded trees on every run so nobody has to remember."
     ],
     "product_roots": [
@@ -336,6 +339,6 @@
         "reason": "Defines the INJ-* rule patterns as a table. A file that specifies the patterns matches them by construction, exactly like the adversarial corpus. It is a description of the defence, not the defence."
       }
     ],
-    "known_residual": "INJ-OBFUSC cannot distinguish high-entropy base64 from a filesystem path or a slash-separated\nTitleCase list. Its corpus fixture (\"tz0aBaTli/A1fE9yzobOmI3i+mAYW...\") and the false\npositive (\"Substitute/Combine/Adapt/Modify\") are the same shape. Narrowing the rule would\nchange what the adversarial corpus tests, so it was NOT narrowed. Tracked as a rule-table\ndefect owned by @security-engineer, not suppressed.\n\nINJ-PROMPT / INJ-TOOL / INJ-ROLE cannot distinguish an instruction from documentation that\nquotes one. Files such as .agents/TROUBLESHOOTING.md and .agents/skills.md name injection\npatterns while explaining the defence. Those files ARE in scope — they are loaded into agent\ncontext — so they are deliberately NOT excluded. The residual is real and stays visible."
+    "known_residual": "INJ-OBFUSC cannot distinguish high-entropy base64 from a filesystem path or a slash-separated\nTitleCase list. Its corpus fixture (\"tz0aBaTli/A1fE9yzobOmI3i+mAYW...\") and the false\npositive (\"Substitute/Combine/Adapt/Modify\") are the same shape. Narrowing the rule would\nchange what the adversarial corpus tests, so it was NOT narrowed. Tracked as a rule-table\ndefect owned by @security-engineer, not suppressed.\n\nINJ-PROMPT / INJ-TOOL / INJ-ROLE cannot distinguish an instruction from documentation that\nquotes one. Files such as .agents/TROUBLESHOOTING.md and .agents/skills.md name injection\npatterns while explaining the defence. Those files ARE in scope \u2014 they are loaded into agent\ncontext \u2014 so they are deliberately NOT excluded. The residual is real and stays visible."
   }
 }

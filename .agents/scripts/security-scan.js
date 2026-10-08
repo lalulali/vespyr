@@ -227,8 +227,34 @@ function walk(dir, fileList = [], base = dir) {
  */
 function applyProductScope(fileList, spec) {
   const scope = spec && spec.scope;
-  if (!scope || !Array.isArray(scope.product_roots)) return { kept: fileList, excludedCounts: {}, applied: false };
-  const roots = scope.product_roots;
+  // No scope block at all: nothing is excluded, which is the safe direction. Report the mode as
+  // 'exclude-list' rather than 'none', because 'none' reads like "unfiltered and therefore risky"
+  // when the truth is "no exclusions were declared, so none applied". `applied:false` already
+  // carries the first fact; `mode` carries the direction.
+  if (!scope) return { kept: fileList, excludedCounts: {}, excludedByTree: {}, applied: false, mode: 'exclude-list' };
+
+  // DEFAULT MODE IS `exclude-list`, AND THAT IS THE WHOLE POINT.
+  //
+  // The first version of this function filtered by `product_roots` — an INCLUSION allowlist. On
+  // this repo that took the scan from 129 findings to 7, and it looked like the fix. It was the
+  // opposite of the fix, because product_roots is a list of THIS ENGINE's directories and
+  // /launch runs on PRODUCT codebases.
+  //
+  // Measured, on a product tree: a hardcoded `AKIAIOSFODNN7EXAMPLE` in `src/config.js` was
+  // SILENTLY DROPPED. The scan reported the injection it found in .agents/ and reported zero
+  // findings for the credential, and printed `dropped: {"src": 1}`. `src/` is the single most
+  // common source directory in every product that exists.
+  //
+  // An inclusion allowlist fails OPEN: any directory nobody remembered to list is unscanned, and
+  // the failure is invisible because the scan still returns a confident answer. An exclusion list
+  // fails CLOSED: a new directory is scanned until somebody deliberately excludes it, which is
+  // the direction a security scanner must err in.
+  //
+  // So: `exclude-list` is the default and needs no configuration. `include-list` is opt-in, and
+  // only this repository uses it, because only this repository has the noise problem that
+  // motivates it.
+  const mode = scope.mode === 'include-list' ? 'include-list' : 'exclude-list';
+  const roots = Array.isArray(scope.product_roots) ? scope.product_roots : [];
   const rootFiles = Array.isArray(scope.root_files) ? scope.root_files : [];
   // excluded_trees is ENFORCED, not merely declared. An earlier version of this function read
   // only product_roots/root_files, so every entry in excluded_trees -- including the written
@@ -241,6 +267,7 @@ function applyProductScope(fileList, spec) {
     .filter((e) => e && typeof e.path === 'string')
     .map((e) => ({ re: globToRegExp(e.path), path: e.path, reason: e.reason || '(no reason recorded)' }));
   const isExcludedTree = (rel) => excludedTrees.find((e) => e.re.test(rel));
+  // In exclude-list mode there is no "is product" question at all — only "is excluded".
   const isProduct = (rel) => {
     const top = String(rel).split('/')[0];
     return roots.includes(top) || rootFiles.includes(String(rel));
@@ -254,11 +281,11 @@ function applyProductScope(fileList, spec) {
       excludedByTree[hit.path] = (excludedByTree[hit.path] || 0) + 1;
       continue;
     }
-    if (isProduct(f.rel)) { kept.push(f); continue; }
+    if (mode === 'exclude-list' || isProduct(f.rel)) { kept.push(f); continue; }
     const top = String(f.rel).split('/')[0];
     excludedCounts[top] = (excludedCounts[top] || 0) + 1;
   }
-  return { kept, excludedCounts, excludedByTree, applied: true };
+  return { kept, excludedCounts, excludedByTree, applied: true, mode };
 }
 
 // ---------------------------------------------------------------------------
@@ -950,17 +977,22 @@ function main() {
           compose: composeMode,
           // Printed on EVERY run. A green that silently omitted these would read as "the
           // repository passed", which is not what was scanned.
-          scope: scoped.applied
-            ? {
-                applied: true,
-                product_roots: spec.scope.product_roots,
-                excluded_trees: spec.scope.excluded_trees,
-                excluded_file_counts: scoped.excludedCounts,
-                // Files removed BY each declared tree. A declared tree that matches nothing is
-                // itself a signal (typo, or a scope written for a tree that no longer exists).
-                excluded_by_tree: scoped.excludedByTree || {},
-              }
-            : { applied: false },
+          scope: {
+            applied: scoped.applied,
+            // 'exclude-list' errs toward scanning MORE; 'include-list' errs toward scanning LESS.
+            // A reader must be able to see which one produced this result, because the two differ
+            // only in what they silently skip.
+            mode: scoped.mode,
+            fail_direction: scoped.mode === 'include-list'
+              ? 'opens: a directory not listed in product_roots is NOT scanned'
+              : 'closes: only declared excluded_trees are skipped',
+            product_roots: (spec.scope && spec.scope.product_roots) || [],
+            excluded_trees: (spec.scope && spec.scope.excluded_trees) || [],
+            excluded_file_counts: scoped.excludedCounts || {},
+            // Files removed BY each declared tree. A declared tree that matches nothing is itself a
+            // signal (typo, or a scope written for a tree that no longer exists).
+            excluded_by_tree: scoped.excludedByTree || {},
+          },
         },
         null,
         2

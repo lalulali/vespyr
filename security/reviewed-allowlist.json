@@ -10,12 +10,15 @@
     ".agents/skills.md, .agents/agents/security-engineer.md, security/supply-chain-audit-spec.md).",
     "Those files are loaded into agent context, so scanning them is correct; the findings are a",
     "rule-precision problem for the rule owner, not a finding to suppress. Suppressing them would",
-    "hide a real weakness in the rule table behind a green checkmark."
+    "hide a real weakness in the rule table behind a green checkmark.",
+    "  tests/test_security_scan_scope.test.js and tests/test_launch_readiness.test.js contain credential-SHAPED strings on purpose: the first names the measured failure that motivated the fail-closed scope (a real AKIA key in src/config.js was silently dropped, 0 findings reported), and the second needs a token a rule will actually match in order to test the allowlist plumbing end to end. Neither is a credential. Both files were read before adding."
   ],
   "rules": {
     "INJ-SECRET": [
       "tests/test_memory_consolidation.js",
-      ".agents/scripts/test_security_mutation.js"
+      ".agents/scripts/test_security_mutation.js",
+      "tests/test_security_scan_scope.test.js",
+      "tests/test_launch_readiness.test.js"
     ],
     "BEACON-1": [
       ".agents/scripts/test_security_mutation.js"
