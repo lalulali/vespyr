@@ -1,0 +1,27 @@
+{
+  "_comment": [
+    "Reviewed false positives for THIS repository. Every entry below was read individually and",
+    "confirmed to be a test fixture, not a live credential or a live instruction. This file is an",
+    "allowlist for findings a human has looked at and accepted; it is NOT a way to make a gate",
+    "green. If you add a glob here, you are asserting you read what it now suppresses.",
+    "",
+    "Deliberately NOT here: documentation that names attack patterns (.agents/TROUBLESHOOTING.md,",
+    "  INJ-OBFUSC on tests/test_memory_consolidation.js is the jwt.io canonical example token (header alg HS256, payload sub 1234567890 / name John Doe / iat 1516239022), inside a test asserting the secret scrubber removes it.",
+    ".agents/skills.md, .agents/agents/security-engineer.md, security/supply-chain-audit-spec.md).",
+    "Those files are loaded into agent context, so scanning them is correct; the findings are a",
+    "rule-precision problem for the rule owner, not a finding to suppress. Suppressing them would",
+    "hide a real weakness in the rule table behind a green checkmark."
+  ],
+  "rules": {
+    "INJ-SECRET": [
+      "tests/test_memory_consolidation.js",
+      ".agents/scripts/test_security_mutation.js"
+    ],
+    "BEACON-1": [
+      ".agents/scripts/test_security_mutation.js"
+    ],
+    "INJ-OBFUSC": [
+      "tests/test_memory_consolidation.js"
+    ]
+  }
+}

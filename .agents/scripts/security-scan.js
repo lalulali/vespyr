@@ -208,6 +208,59 @@ function walk(dir, fileList = [], base = dir) {
   return fileList;
 }
 
+/**
+ * Apply the spec's product-code scope.
+ *
+ * WHY THIS EXISTS. A release scan answers "does the code we are shipping contain a live
+ * vulnerability" — it is not a whole-repository audit, and a green result must never be read as
+ * "the repository passed". Wiring the scanner into /launch surfaced that distinction the hard way:
+ * 129 findings on this repository, every one triaged as a false positive — 19 on the scanner's
+ * own adversarial corpus, 37 on absolute filesystem paths that match the base64 rule, 5 reviewed
+ * test fixtures, and the rest prose in review documents that DESCRIBE injection attacks.
+ *
+ * Suppressing those one by one until the number reached zero would have produced a green that
+ * meant nothing. Declaring the scope — and PRINTING what was excluded, every run — keeps the
+ * result honest: a reader always learns what was not scanned.
+ *
+ * Returns { kept, excludedCounts, applied }. `applied` is false when the spec declares no scope,
+ * so a spec without this block scans everything exactly as before.
+ */
+function applyProductScope(fileList, spec) {
+  const scope = spec && spec.scope;
+  if (!scope || !Array.isArray(scope.product_roots)) return { kept: fileList, excludedCounts: {}, applied: false };
+  const roots = scope.product_roots;
+  const rootFiles = Array.isArray(scope.root_files) ? scope.root_files : [];
+  // excluded_trees is ENFORCED, not merely declared. An earlier version of this function read
+  // only product_roots/root_files, so every entry in excluded_trees -- including the written
+  // reason for each one -- was decoration. Measured: adding `security/supply-chain-audit-spec.md`
+  // to excluded_trees changed the finding count by zero. A spec that documents an exclusion the
+  // code never performs is worse than no spec at all: it is a claim a reviewer trusts. Same class
+  // as the lstat-mode bug, same lesson -- an exclude that silently does nothing reads as safety.
+  // Exclusions WIN over inclusions, because an explicit exclusion is more specific than a root.
+  const excludedTrees = (Array.isArray(scope.excluded_trees) ? scope.excluded_trees : [])
+    .filter((e) => e && typeof e.path === 'string')
+    .map((e) => ({ re: globToRegExp(e.path), path: e.path, reason: e.reason || '(no reason recorded)' }));
+  const isExcludedTree = (rel) => excludedTrees.find((e) => e.re.test(rel));
+  const isProduct = (rel) => {
+    const top = String(rel).split('/')[0];
+    return roots.includes(top) || rootFiles.includes(String(rel));
+  };
+  const kept = [];
+  const excludedCounts = {};
+  const excludedByTree = {};
+  for (const f of fileList) {
+    const hit = isExcludedTree(f.rel);
+    if (hit) {
+      excludedByTree[hit.path] = (excludedByTree[hit.path] || 0) + 1;
+      continue;
+    }
+    if (isProduct(f.rel)) { kept.push(f); continue; }
+    const top = String(f.rel).split('/')[0];
+    excludedCounts[top] = (excludedCounts[top] || 0) + 1;
+  }
+  return { kept, excludedCounts, excludedByTree, applied: true };
+}
+
 // ---------------------------------------------------------------------------
 // Shannon entropy (INJ-SECRET regex+entropy mode)
 // ---------------------------------------------------------------------------
@@ -628,7 +681,10 @@ function main() {
   }
 
   // Walk the tree
-  const files = walk(rootDir);
+  const walked = walk(rootDir);
+  // Product-code scope. `applied: false` when the spec declares none, so behaviour is unchanged.
+  const scoped = applyProductScope(walked, spec);
+  const files = scoped.kept;
 
   // F-7: any unreadable subtree/file discovered during the walk is a tool
   // failure — exit 2 with a FAULT listing, never a silent partial scan.
@@ -659,7 +715,15 @@ function main() {
         const resolvedRoot = path.resolve(rootDir);
         // Path-boundary guard: /repo/x is inside, /repo-evil/x is not
         const inside = target === resolvedRoot || target.startsWith(resolvedRoot + path.sep);
-        if (!inside) {
+        // F-9 parity for lstat-mode rules. This branch bypassed both exclusion mechanisms, so a
+        // documented-FP path was reported anyway — measured: the scanner's own adversarial
+        // fixture `evals/security/corpus/positive/inj-symlink-escape` kept firing after the whole
+        // eval corpus was excluded for every rule. An exclude that silently does nothing is worse
+        // than no exclude, because the spec claims it and a reviewer trusts the spec.
+        const excluded =
+          (knownFp[rule.id] && knownFp[rule.id].some((m) => m.test(rel))) ||
+          (allowlist[rule.id] && allowlist[rule.id].some((m) => m.test(rel)));
+        if (!inside && !excluded) {
           findings.push({
             rule: rule.id,
             label: rule.label,
@@ -884,6 +948,19 @@ function main() {
           findings: uniqueFindings,
           skipped_node_modules: skipped,
           compose: composeMode,
+          // Printed on EVERY run. A green that silently omitted these would read as "the
+          // repository passed", which is not what was scanned.
+          scope: scoped.applied
+            ? {
+                applied: true,
+                product_roots: spec.scope.product_roots,
+                excluded_trees: spec.scope.excluded_trees,
+                excluded_file_counts: scoped.excludedCounts,
+                // Files removed BY each declared tree. A declared tree that matches nothing is
+                // itself a signal (typo, or a scope written for a tree that no longer exists).
+                excluded_by_tree: scoped.excludedByTree || {},
+              }
+            : { applied: false },
         },
         null,
         2

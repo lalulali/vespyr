@@ -27,14 +27,37 @@ Takes a completed feature from development and ships it. The bridge between "cod
 - Prev: `develop` (produces working, tested code)
 - Next: `iterate` (post-launch improvements), `retro` (process review), or `incident` (production issues)
 
+## Two surfaces — every step
+
+`/launch` ends by telling the owner two different things, and they must not be confused:
+
+- **Document surface** — `release-readiness.md`, `go-nogo-decision.md` and `launch-log.md` carry
+  the machine record: the gate table, the verdict, the scan result. Plain sentence first, then
+  the table.
+- **Chat surface** — the reply carries the plain sentence, the consequence, and the next action.
+  **Never** a gate token, and never a card field (`VERDICT:`, `Disposition:`, `Because:`). A
+  reader who has never seen this engine must be able to act on the sentence alone
+  (`.agents/references/vespyr-dna.md` §Two surfaces).
+
+State the consequence, not the label. `GO` is not "go" — it is "the scan is clean, two
+conditions are open with owners and dates, and here is who closes them before Wednesday."
+
 ## Halt conditions
 Any one is a hard NO-GO on deployment:
 - The UTTERLY SATISFIED team gate has not passed — every active, relevant agent must record `SATISFIED`; an unresolved `CHANGES REQUESTED` or `BLOCKED` blocks the release
-- `qa-signoff.md` is missing or is not `GO`/`CONDITIONAL`
+- `qa-signoff.md` is missing or is not `GO`/`CONDITIONAL` — **checked** by `launch_readiness_check.js`
+- `security-scan.js` exits non-zero, or exits 2 (tool failure). A scanner failure is never read as clean
+- A scan pass is quoted as wider than it is — the scan covers the **product scope** declared in `security/audit-spec.json`
+  (`scope.product_roots`), not the whole repository, and `verdict` is `SKIPPED` rather than `PASS` when launch is out of scope.
+  Branch on `verdict`, never on `ok` alone
 - A Critical or High security finding is open
 - A rollback plan does not exist for the release
 
 ## Done when
+- `launch_readiness_check.js check --require-readiness --require-scan` exits 0 **and** reports `verdict: PASS`
+  (a `SKIPPED` run means `release-readiness.md` is absent — that is not a pass). Pass
+  `--scan-allowlist security/reviewed-allowlist.json` when the repo has one; omitting it scans
+  unfiltered, and a named-but-missing allowlist fails the gate.
 - All five step files are in `stepsCompleted`
 - `artifacts/output/06-launch/launch-log.md` exists
 - Post-launch monitoring thresholds are defined and the smoke test has passed against production
@@ -45,6 +68,10 @@ Any one is a hard NO-GO on deployment:
 - Code review passed, QA validated, PM signed off
 - `qa-signoff.md` exists with GO/CONDITIONAL
 - `artifacts/output/06-launch/release-readiness.md` contains the completed UTTERLY SATISFIED team gate
+
+**All four are checked by `launch_readiness_check.js` at step 01**, with `--require-readiness`.
+Until that gate existed they were prose on a page nobody could falsify — and `security-scan.js`,
+a real 11-rule scanner including `INJ-SECRET`, was invoked by **zero skills**.
 
 ## Step sequence
 1. **Readiness Check** — verify all pre-launch gates → `steps/step-01-readiness-check.md`
