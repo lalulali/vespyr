@@ -5,6 +5,10 @@
 > **Ownership:** You (Ivy) own the motion *spec*. You produce `motion-spec.md` + motion tokens that extend `design.md`. @developer (Rex) owns the motion *framework and code* — your spec must give him a complete, unambiguous motion prompt, not a mood board.
 >
 > **Research first for full pipelines:** Before designing motion for a full pipeline, delegate motion research to `@researcher` and `@ux-researcher` per `motion-research-guide.md`. Lightweight motion may use existing product evidence, but the spec must record its evidence mode and why dedicated research was not warranted. Do not guess accessibility thresholds from taste.
+>
+> **When this file is NOT enough:** for a creative/experiential surface — portfolio, marketing site, interactive landing page, WebGL hero, scroll-driven story — also load `creative-site-playbook.md`. This file's rules are deliberately conservative ("one signature motion per screen", "avoid gimmick inflation") and they are *right* for product UI and *wrong* for a motion-led site. The playbook adds the thesis step, the stack wiring, and the measured page-weight baselines; it does not override §6 below, which stays mandatory on every surface.
+>
+> If the spec references any `AS-###` asset, or you need imagery, 3D, video, or audio that is not already in the repo, also load `motion-asset-generation.md`. It owns route order (client-data → reuse → CSS/SVG → procedural → stock → generated) and the licence traps. **Check the licence before generating, not after** — free-tier output from FLUX dev, Tripo, or Suno cannot ship.
 
 ---
 
@@ -91,6 +95,31 @@ Duration must be proportional to the distance travelled and the importance of th
 
 Choreography is *when* and *in what order* things move — it's where motion design earns its keep.
 
+### These rules are conditional on the register, not universal
+
+A blind run on a credibility-register brief (an investor page where every animation is bound to a
+number a reader can falsify) found these rules **make the thesis false**:
+
+- A 30–80 ms follower stagger means a label arrives 30–80 ms *after* the datum it labels. If the
+  thesis is "every value moves because a measurement changed and resolves to a number the reader
+  can check", then a frame where the label is ahead of the value falsifies it. The run declared a
+  **0 ms offset** and marked follow-through **not applicable** — correctly, and against this file.
+- A spring and a 700–1000 ms "cinematic" entrance are delight devices. On a technical surface
+  they read as persuasion applied to someone who came to verify.
+
+**So: in the expressive register, obey §4 as written. In the credibility register, §4 is a default
+you may decline — and the prompt must say so explicitly.** The rule is not "the skill is wrong";
+it is that **no rule wins on its own**. Where the choreography rules and the thesis's falsifiability
+test conflict, the thesis wins, and the prompt records the override and why:
+
+```
+**Choreography override:** leader/follower stagger declined — a non-zero offset breaks the
+falsification test (label must read the same station as the line at every frame).
+```
+
+The gap run 4 recorded was not that these rules are wrong. It was that the skill gave no way to
+decline them, so a credible surface was produced by the agent auditing its own instructions.
+
 ### Sequencing rules
 - **One leader, followers:** one element leads the transition; others follow with a 30–80ms stagger. Random simultaneous motion = chaos.
 - **Stagger pattern:** `staggerChildren` — 30ms for lists, 60–100ms for heavier cards. The first child should be the most important one.
@@ -116,7 +145,7 @@ Beyond "make it smooth" — motion as a strategic lever:
    - **Optimistic UI:** animate the result immediately, reconcile silently — motion sells responsiveness.
 4. **Motion as emotional state:** empty states that animate slowly and emptily communicate "this is a quiet place" (or inversely, energetic bounces for a vibrant product). Error states should feel urgent but not panic-inducing.
 5. **Context-aware motion (Rex collaboration):** propose *when to animate based on data* — e.g., first-time vs returning users get different entrances; reduced-motion users get the calm path. This is a spec-level decision you make, Rex implements.
-6. **Avoid gimmick inflation:** each screen should have ONE signature motion moment. If a user can't tell you what moves, the design is over-animated.
+6. **Avoid gimmick inflation:** the **page** gets ONE signature motion moment. Per-*screen* framing is wrong for a short multi-section page — three sections would authorise three signature moments. If a user can't tell you what moves, the design is over-animated.
 
 ---
 
@@ -198,7 +227,14 @@ Write files directly; route memory writes through `@memory-controller`. Motion s
 
 ## 9. Motion Technology Ecosystem & Benchmark Catalog
 
-When crafting motion prompts (`MO-###`) for `@developer`, leverage this framework taxonomy to select the right execution engine for each surface:
+> **Register warning.** Every entry below is a precedent for the **expressive** register — several
+> (Kokonut, Bitlit, React Bits, Manus) are explicitly consumer-expressive. A blind run on a
+> technical B2B brief read this table as a mandate and had to dismiss it wholesale. On a
+> credibility surface, treat it as a catalogue of *how effects are built*, not of *what to build*.
+> The credible-register precedents are the client's own material and first-party data — see
+> `motion-asset-generation.md` §1 route 0.
+
+**Pick the execution engine from here.** The catalogue below tells you which library drives a given effect — it does not tell you *whether that effect belongs on this surface*, and "how effects are built" still gets you building effects. Whether to build one is §4/§5 and the register question in `creative-site-playbook.md` §2.
 
 | Ecosystem / Tool | Primary Strengths & Purpose | Motion Prompt Mapping |
 |---|---|---|
@@ -221,7 +257,7 @@ When crafting motion prompts (`MO-###`) for `@developer`, leverage this framewor
 ## Anti-patterns
 
 - Animating layout properties (`width/height/top/left/margin`) — jank, violates Solid Drawing.
-- More than one signature motion per screen — gimmick inflation.
+- More than one signature motion per page — gimmick inflation (this is per *page*, not per screen: three sections on a short page are three chances to over-animate).
 - Five different easing curves per screen — no motion voice.
 - Springs on layout-critical elements — scroll jumps from overshoot.
 - Looping/autoplay motion without reduced-motion handling — vestibular risk.

@@ -8,6 +8,34 @@
 
 ---
 
+## 0. Load order — which of these five files to open
+
+This file is the **general** implementation contract. Two further references exist and are
+**not** optional on creative surfaces. Opening the wrong one is how a WebGL brief gets built
+with CSS transitions.
+
+| The brief is… | Load |
+|---|---|
+| ordinary product UI — components, transitions, micro-interactions | this file only |
+| a creative / experiential surface — scroll choreography, canvas, WebGL, a marketing or portfolio site | this file **+** `creative-site-playbook.md` |
+| any task where the spec has an `AS-###` asset, or you must source/generate media | this file **+** `motion-asset-generation.md` |
+
+**Do not duplicate facts from those files here.** `creative-site-playbook.md` owns the
+Lenis×GSAP sync wiring, the GSAP licensing position, the WebGPURenderer/WebGLRenderer fork,
+and the measured page-weight baselines; `motion-asset-generation.md` owns licence traps, AI
+tool selection, and prompt recipes. If you find a claim duplicated in both places and they
+disagree, the other file is wrong — tell Ivy, do not pick the one you remember.
+
+**The two facts you will get wrong without them**, both measured:
+- **Lenis honours `prefers-reduced-motion` by default** (`respectReducedMotion: true`). Never
+  set it `false`; that silently re-breaks the accessibility gate.
+- **GSAP has no plugin paywall.** Every plugin, including formerly-Club-only ones
+  (SplitText, MorphSVG, DrawSVG, MotionPath, ScrollSmoother), is free for commercial use in
+  the public `gsap` package. Do not emit a GreenSock `.npmrc` token, do not point at
+  `npm.greensock.com`, do not tell the owner a plugin costs money.
+
+---
+
 ## 1. Library Decision Tree
 
 Choose the motion tool by what is being animated — not by preference.

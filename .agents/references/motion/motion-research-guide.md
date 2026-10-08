@@ -3,6 +3,10 @@
 > **When to load:** This file is loaded ONLY when the current task involves motion/animation research (delegated by `@product-designer` or `@developer` via the `/motion` skill). Keep the base persona lean — this is an on-demand reference.
 >
 > **Ownership:** You produce evidence that motion design and implementation decisions can be traced to. `@researcher` owns the merge after both research tracks complete and writes `artifacts/output/02-research/motion-research.md` directly. The merged artifact is consumed by @product-designer (Ivy) for the motion spec and @developer (Rex) for the motion framework.
+>
+> **On the creative track, two research questions are mandatory and usually unanswered:**
+> 1. **Licensing posture.** If any asset will be AI-generated, establish the licence for the *exact tier that will ship from*, before generation. Free-tier output from FLUX dev, Tripo, or Suno cannot ship, and upgrading does not retro-license it. `motion-asset-generation.md` §2 owns the details — your job is to record which tool and which tier, with the date and the licence shown at that moment.
+> 2. **Measured weight baseline.** Do not report a page-weight target from taste. Measure real sites in the same category, report `Content-Length` totals, and state the method's limits. Award-site payloads range from **0.17 MB of images over 14 canvas surfaces** to **17.3 MB of video** — there is no universal number, so the useful output is a measured comparison, not a budget. `creative-site-playbook.md` §6.1 has a worked example of that method.
 
 ---
 
@@ -40,7 +44,22 @@ Run the two tracks in parallel. Do not merge until all five track artifacts exis
 ## 3. Research Questions — @ux-researcher (User & Usability)
 
 ### Perceived performance
-- What does the evidence say about how motion affects *perceived* speed/quality? (e.g., ease-out entry reads faster; skeleton screens beat spinners past ~300ms; optimistic UI feels faster than waiting.)
+- What does the evidence say about how motion affects *perceived* speed/quality **for this audience and this surface**? Start from your own hypothesis, then test it — do not assume the textbook answer:
+
+  > Hypothesis worth testing: for **incidental waits**, **moderate** beats fast beats none (Ding & Kyung). For **deliberate, motivated waits**, faster reads as faster, and ease-out on entry makes content appear to arrive instantly.
+
+  One blind run read the leading examples below as a finding, raced a deliberate 1400 ms draw
+  to satisfy them, and had to invert the conclusion. The examples below are **hypotheses to
+  check, not answers.** Other starting points: skeleton screens beat spinners past ~300ms;
+  optimistic UI feels faster than waiting.
+
+  **These are not universal findings — treat them as hypotheses to check against THIS surface.**
+  A blind run on an investor-facing brief found the opposite for incidental waits: **moderate**
+  beats fast beats none, so "make it feel fast by moving it quickly" would have pushed it to race
+  a deliberate 1400 ms draw. Report the direction the evidence points for the actual surface, and
+  say plainly when there is **no primary source for this audience** rather than transferring a
+  mouse-and-touch number to an investor-comprehension question. `Source: unverified` is a valid
+  finding; a borrowed threshold is not.
 - What duration/easing ranges do users perceive as "instant," "natural," "slow," "laggy"? Translate into design guidance Ivy can tokenize.
 - Which moments matter most for perceived performance (initial load, page transition, action confirmation)?
 
