@@ -194,7 +194,7 @@
   },
   {
     "name": "explore-idea",
-    "description": "Validates a concept through market, competitor, and user research — turns a validated idea into evidence-backed research. Use when the user says \"research the market for this\", \"who are the competitors\", \"validate this with users\", or invokes /explore-idea after the concept is validated.",
+    "description": "Turns a validated concept into evidence-backed market, competitor, and user research. Use when the user says \"research the market for this\", \"who are the competitors\", \"competitive landscape\", \"validate this with users\", \"is this market worth entering\", or invokes /explore-idea — including brownfield entries from /shape-up with unverified assumptions, and problem-first entries from /unpack-problem whose selected concept needs evidence. Emits market-analysis, competitive-analysis, user-personas, and a research-synthesis Decision Gate with cited evidence. Do NOT use to stress-test whether the concept should exist at all (/validate-idea), to structure raw notes (/shape-up), or to design how to run the research (/research-plan).",
     "prerequisites": [
       "*Path A — Has validation brief (recommended):**",
       "  artifacts/output/01-discovery/validation-brief.md exists with a GO verdict",
@@ -220,7 +220,8 @@
       "artifacts/output/01-discovery/idea-brief.md",
       "artifacts/output/02-research/market-analysis.md",
       "artifacts/output/02-research/competitive-analysis.md",
-      "artifacts/output/02-research/user-personas.md"
+      "artifacts/output/02-research/user-personas.md",
+      "artifacts/output/02-research/research-synthesis.md"
     ],
     "key_agents": [
       "@founder",
@@ -531,7 +532,7 @@
   },
   {
     "name": "shape-up",
-    "description": "Structure and stress-test semi-cooked ideas into design-ready briefs. No prerequisites — works at any point in the pipeline. Use when the user says \"shape this up\", \"turn these notes into a brief\", \"I have a rough pitch\", or invokes /shape-up.",
+    "description": "Structure and stress-test a semi-cooked idea into a design-ready brief with a fixed appetite, fenced scope boundaries, and named rabbit holes. No prerequisites — works at any point in the pipeline. Use when the user says \"shape this up\", \"turn these notes into a brief\", \"I have a rough pitch\", \"scope this down\", \"what should I cut\", or invokes /shape-up. Emits shaped-brief.md with the shaping gate. Do NOT use to stress-test whether a concept should exist at all (/validate-idea), to research market or competitors (/explore-idea), to frame a problem you have not stated yet (/unpack-problem), or to turn research into specs (/design).",
     "prerequisites": [],
     "outputs": [
       "artifacts/output/01-discovery/shaped-brief.md",
@@ -598,7 +599,7 @@
   },
   {
     "name": "unpack-problem",
-    "description": "Problem-first exploration before solution ideation — supports guided, automated, and combination modes. Facilitated by @product-manager and @user-researcher. Use when the user says \"users are dropping off\", \"something is wrong but I do not know what\", \"help me figure out what is broken\", or invokes /unpack-problem.",
+    "description": "Problem-first exploration before any solution ideation — guided, automated, or combination modes, facilitated by @product-manager and @user-researcher. Use when the user says \"users are dropping off\", \"something is wrong but I do not know what\", \"help me figure out what is broken\", \"why is conversion low\", or invokes /unpack-problem. Produces a solution-free problem statement, root cause, empathy map, journey map, and JTBD, then gates the candidate solution concept. Do NOT use when the user already has a concept to stress-test (/validate-idea), wants only a 5-Whys on one known cause (/root-cause), is triaging a live production failure (/incident), or wants research designed rather than a problem framed (/research-plan).",
     "prerequisites": [],
     "outputs": [
       "artifacts/output/02-research/problem-space-brief.md",
@@ -614,16 +615,16 @@
   },
   {
     "name": "validate-idea",
-    "description": "Stress-test product concepts before research. Supports create/edit/validate modes.",
+    "description": "Socratic GO/RESHAPE/NO-GO stress-test for a product concept, feature idea, or pitch before any research or engineering spend. Use when the user says \"validate this idea\", \"stress-test my idea\", \"poke holes in this concept\", \"is this idea worth building\", \"should I build this\", \"validate my startup idea\", \"sanity-check my feature idea\", or invokes /validate-idea — including brownfield feature ideas and problem-first entries from /unpack-problem. Emits a validation brief with behavioral demand evidence, quantified status-quo cost, framework scores, and one bracketed Decision-Gate verdict. Do NOT use for market/competitor evidence (/explore-idea), raw-note structuring (/shape-up), problem discovery with no solution yet (/unpack-problem), idea generation (/brainstorming), or a single-claim interrogation (/grill-me).",
     "prerequisites": [
-      "Edit mode: artifacts/output/01-discovery/idea-brief.md or validation-brief.md exists",
-      "Validate mode: artifacts/output/01-discovery/idea-brief.md or validation-brief.md exists",
-      "Problem-first entry: artifacts/output/02-research/problem-space-brief.md from /unpack-problem is accepted as equivalent to idea-brief.md for create mode — the problem brief becomes the idea to validate"
+      "Edit mode: artifacts/output/01-discovery/validation-brief.md exists",
+      "Validate mode: artifacts/output/01-discovery/validation-brief.md exists",
+      "idea-brief.md is an accepted **entry input** in edit/validate mode when no validation-brief.md",
+      "Problem-first entry: artifacts/output/02-research/problem-space-brief.md from /unpack-problem is accepted as the idea to validate — routes to create mode"
     ],
     "outputs": [
-      "artifacts/output/01-discovery/idea-brief.md",
-      "artifacts/output/02-research/problem-space-brief.md",
-      "artifacts/output/01-discovery/validation-brief.md"
+      "artifacts/output/01-discovery/validation-brief.md",
+      "artifacts/output/02-research/problem-space-brief.md"
     ],
     "key_agents": [
       "@founder"

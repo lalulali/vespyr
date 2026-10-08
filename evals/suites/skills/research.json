@@ -5,14 +5,35 @@
     {
       "id": "SKILL-EXPLORE-IDEA",
       "skill": "explore-idea",
-      "name": "Explore Idea Evidence Synthesis",
+      "name": "Explore Idea Emits Cited Evidence and the Market Sub-Gate",
       "dimension": "research_grounding",
       "assertContains": [
-        "Market Analysis",
-        "Competitors",
-        "Findings"
+        "MARKET VERDICT:",
+        "TAM",
+        "SAM",
+        "SOM",
+        "Sources"
       ],
-      "prompt": "Run /explore-idea on usage-based pricing: market analysis, competitor landscape, and differentiators with citations.",
+      "prompt": "Run /explore-idea on usage-based pricing for a B2B analytics product: market analysis with sizing, competitor landscape, and user needs, each claim cited.",
+      "assertNotContains": [
+        "I cannot",
+        "As an AI",
+        "GO WITH CAUTION"
+      ]
+    },
+    {
+      "id": "SKILL-EXPLORE-IDEA-SYNTHESIS",
+      "skill": "explore-idea",
+      "name": "Research Synthesis Carries the Decision Gate",
+      "dimension": "research_grounding",
+      "assertContains": [
+        "research-synthesis.md",
+        "Survived:",
+        "HYPOTHESIS-ONLY",
+        "SPC:",
+        "\\[(?:GO|RESHAPE|NO-GO)\\]"
+      ],
+      "prompt": "Run /explore-idea on the same concept, then write research-synthesis.md with the evidence rollup and the Decision Gate.",
       "assertNotContains": [
         "I cannot",
         "As an AI"
@@ -73,7 +94,7 @@
       "name": "Jobs to be Done & HMW Canvas",
       "dimension": "prd_completeness",
       "assertContains": [
-        "Job Statement",
+        "Job Stories",
         "Outcome",
         "How Might We"
       ],
@@ -90,8 +111,8 @@
       "dimension": "research_grounding",
       "assertContains": [
         "Executive Summary",
-        "Usability Score",
-        "Next Steps"
+        "SUS Score",
+        "Open Questions"
       ],
       "prompt": "Run /discovery-report to synthesize interviews into executive summary, usability score, and design backlog.",
       "assertNotContains": [

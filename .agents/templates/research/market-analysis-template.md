@@ -98,17 +98,29 @@ Reference the founder's idea brief (`artifacts/output/01-discovery/idea-brief.md
 ## 7. Go / No-Go Recommendation
 
 ### 7.1 Verdict
-- [ ] **GO** — Market exists, is large enough, and trends are favorable
-- [ ] **GO WITH CAUTION** — Market exists but with significant risks that must be mitigated
-- [ ] **NO-GO** — Market is too small, shrinking, or saturated
+
+**Required — the line below is machine-read. `step-03` treats it as `[FALSIFIED]` input and re-dispatches
+this step if it is missing or malformed, so omitting it stalls the pipeline.**
+
+```
+MARKET VERDICT: [GO]|[RESHAPE]|[NO-GO] — <one-line reason>
+```
+
+- `[GO]` — Market exists, is large enough, and trends are favorable
+- `[RESHAPE]` — Market is real but **our wedge into it is wrong** — re-target the segment or the buyer,
+  do not abandon the market
+- `[NO-GO]` — Market is too small, shrinking, or saturated
 
 ### 7.2 Rationale
-One paragraph explaining the verdict. Reference specific data points from Sections 2-6.
+One paragraph explaining the verdict. Reference specific data points from Sections 2-6 with `[^N]` citations.
 
-### 7.3 Conditions (if GO WITH CAUTION)
-If the verdict is "GO WITH CAUTION," what must be true before proceeding?
-- [ ] Condition 1
+### 7.3 Conditions (if GO, and the condition is unmet)
+If the verdict carries a gating condition, what must be true before proceeding?
+- [ ] Condition 1 (checkable — an owner, a number, an event)
 - [ ] Condition 2
+
+A verdict of `[GO]` with an unmet condition is legal and is reported as `When: GATED` downstream. Conditions
+must be checkable: `battle-tested`, `proven`, and `stable` are adjectives, not gates.
 
 ## 8. Implications for Downstream Agents
 Briefly note:

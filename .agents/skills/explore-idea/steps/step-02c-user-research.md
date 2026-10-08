@@ -32,14 +32,17 @@ Invoke `@user-researcher` to validate user needs:
 
 **Evidence gate (non-negotiable):** this step has no human-run sessions. If the human has not supplied interview notes, transcripts, or survey data, every persona, quote, and "user need" MUST be labeled `HYPOTHESIS-ONLY (no human data)` — never presented as an observed finding, and never given an attributed quote. The founder gate (`step-03`) treats labeled hypotheses as `[PARTIAL]`, not confirmation.
 
-**Context adaptation:**
-- **Startup mode:** Full persona development, jobs-to-be-done, user journeys
-- **Company mode:** Stakeholder interviews, internal workflow analysis, team pain points
-- **Personal mode:** Self-research — your own pain points and use cases
+**Context adaptation:** use the mode table in `SKILL.md` §Context adaptation — do not restate it here.
 
 ### 2c.3 Output
 
-Write `artifacts/output/02-research/user-personas.md`.
+Write `artifacts/output/02-research/user-personas.md` using
+`.agents/templates/research/user-personas-template.md`. The template defines the artifact's shape —
+do not improvise a different structure, because the synthesis step reads it as gate input.
+
+Every persona, quote, and need must carry its `HYPOTHESIS-ONLY (no human data)` label here if no human
+sessions were supplied — the label is what step-03 reads to decide the evidence is `[PARTIAL]`, so
+dropping it silently upgrades a hypothesis into a finding.
 
 ### 2c.4 Record completion
 

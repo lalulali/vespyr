@@ -4,7 +4,7 @@ name: Intake & Structure
 prerequisites:
   - step-01 completed
 output_contract:
-  citations: not-required
+  citations: required
 ---
 
 # Step 2 — Intake & Structure
@@ -44,8 +44,13 @@ The draft is internal (not yet the final artifact). It captures:
 - **Problem statement:** 1-2 sentences. What pain exists?
 - **Proposed solution:** 1-2 sentences. What are we building?
 - **Target user:** Who specifically? (Name a role, not a category.)
-- **Key assumptions:** Numbered list. Each marked as verified / plausible / unverified.
-- **Scope boundaries:** What's in v1? What's explicitly out?
+- **Key assumptions:** Numbered list. Each marked as verified / plausible / unverified, and each **verified**
+  assumption carries the evidence it was verified against (`[^N]`). An assumption you cannot cite is
+  `plausible` at best — never `verified`.
+- **Appetite:** the fixed timebox this work is worth (e.g. "2 weeks"). Stated as a budget, not an estimate.
+- **Scope boundaries:** Scope In (v1) and Scope Out (non-goals) — these differ.
+- **Rabbit holes:** tempting details that look like scope but are distractions, fenced off explicitly so
+  they do not return mid-build. Naming zero is a finding, not a clean bill of health.
 - **Constraints:** Technical, budget, timeline, team, regulatory.
 - **Open questions:** What do we not know yet?
 

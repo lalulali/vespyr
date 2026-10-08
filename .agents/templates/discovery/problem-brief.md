@@ -44,4 +44,8 @@ audience: @product-manager, @founder, @user-researcher
 - [ ] `/explore-idea` — research market and competitors
 
 ## Decision Gate
-`[GATE: GO|RESHAPE|NO-GO — <reason>]` — the routing decision on the selected solution concept. `[GO]` ready to stress-test; `[RESHAPE]` problem framing needs another pass; `[NO-GO]` problem not worth solving (document why). A brief without this gate is a document, not a decision.
+{One plain sentence — is this problem worth solving, and why}
+
+`VERDICT: [RESHAPE]` / `VERDICT: [NO-GO]`, or `VERDICT: [GO] — When: <NOW|GATED|NEXT-CYCLE>` — the routing decision on the selected solution concept. `[GO]` ready to stress-test; `[RESHAPE]` problem framing needs another pass; `[NO-GO]` problem not worth solving (document why). A brief without this gate is a document, not a decision.
+
+> The token is **bracketed**. Never write `[GATE: GO|RESHAPE|NO-GO]` or `MARKET VERDICT: GO|NO-GO` — `tools/eval/lib/ast.js` matches only literal brackets, so those spellings reach no telemetry and no safety invariant. Format and depth: `.agents/references/vespyr-dna.md` §Decision Gate.

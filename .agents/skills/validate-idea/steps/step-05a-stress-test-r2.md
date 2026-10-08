@@ -54,7 +54,8 @@ PREMISES:
 3. [statement] — agree/disagree?
 ```
 
-Max 2 revision cycles on premises. If you can't agree, note disagreement in brief.
+Max 2 revision cycles on premises. If you can't agree, note disagreement in brief — an unresolved
+premise is `PARTIAL`, not a pass, and it blocks `[GO]` in step 06.
 
 Also ask:
 - **What if this problem doesn't exist?** Could a different framing make this irrelevant?
@@ -62,16 +63,21 @@ Also ask:
 - **Steelman the opposition.** What's the strongest case AGAINST building this?
 
 ## Framework application
-Apply 1-2 frameworks from the founder toolkit:
-- Golden Circle (WHY/HOW/WHAT)
-- Pre-mortem (It failed — what killed it?)
-- First Principles (Strip buzzwords — what's the core mechanism?)
-- Moat & Defensibility (Why can't someone copy this in 3 months?)
-- Unit Economics (Does the math work at 80% of expected price?)
-- Market Timing (Why now and not 3 years ago?)
-- Dependency Stack (What must already exist for this to work?)
 
-Score: 🟢 PASS / 🟡 WEAK / 🔴 FAIL.
+**Full definitions, red flags, and output shapes: `.agents/references/founder-frameworks.md`.**
+Load it — do not work from memory and do not restate it here.
+
+Apply **2–4** frameworks:
+- **Golden Circle — MANDATORY.** A concept with no WHY is a feature, not an idea.
+- **Pre-mortem — MANDATORY.** Forces concrete failure thinking before any investment.
+- Then 0–2 more, chosen by what the idea actually risks: First Principles (buzzword-buried),
+  Moat & Defensibility (feature-level concept), Unit Economics (revenue is central),
+  Market Timing (depends on a recent shift), Dependency Stack (external APIs or behavior change),
+  Opportunity Assessment Lens (scoring urgency + willingness to pay + distribution + defensibility
+  over 18 months — a concept scoring high on none is a hobby, not a business).
+
+Score each framework applied: 🟢 PASS / 🟡 WEAK / 🔴 FAIL, with the red flag that fired (or
+"none" for 🟢). A 🔴 framework blocks `[GO]` — it forces `[RESHAPE]` or `[NO-GO]` in step 06.
 
 ## Output
 Qualified answers for all relevant Qs, synthesized value proposition, premise agreement, framework score.

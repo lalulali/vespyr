@@ -17,11 +17,10 @@ Finalize the brief with the Socratic findings, update the state machine, write s
 
 ## Process
 > **Tracker:** `node .agents/scripts/step_tracker.js begin --skill validate-idea-validate --step 5`
-1. Append a "## Socratic Validation" section to the brief with:
-   - 7-branch scorecard summary
-   - Cross-branch contradictions found and resolved
-   - Verdict reaffirmation or revision
-   - Open questions that remain
+1. Append the `## Socratic validation` section defined in
+   `.agents/templates/discovery/validation-brief-template.md` — the per-branch 🟢/🟡/🔴 scorecard
+   table, cross-branch contradictions found and how each was resolved, and the bracketed verdict
+   disposition. Use the template section verbatim; do not invent a parallel shape.
 
 2. Lock the brief: `artifacts/output/01-discovery/validation-brief.md` is now the canonical record.
 
@@ -36,9 +35,13 @@ node .agents/scripts/orchestrator_state.js complete --agent founder --artifact 0
 - `@memory-controller session-write` — summarize the validation session: what was validated, key decisions, next step, unresolved gaps.
 
 ## Handoff routing
-- Brief affirmed → continue the pipeline from where it was (explore-idea for GO, re-run validate-idea for RESHAPE).
-- Brief revised → the revised verdict determines routing.
-- Irreconcilable contradiction found → escalate to `@founder` for executive decision.
+- Brief affirmed → continue the pipeline from where it was (`explore-idea` for `[GO]`, re-run `validate-idea` for `[RESHAPE]`, `/unpack-problem` for `[NO-GO]`)
+- Brief revised → the revised verdict determines routing
+- Irreconcilable contradiction → **do not escalate to `@founder`**; `@founder` already owns this
+  session, so that is a circular hand-back. Record the contradiction as a blocker in
+  `active-decisions.md` with both branches quoted, leave the verdict at `[RESHAPE]` with the
+  contradiction named as the reason, and route scope arbitration to `@product-manager` per
+  `.agents/workflow.md` §3.2.
 
 ## Done when
 - Socratic validation section appended to brief

@@ -30,16 +30,25 @@ Compile from steps 3 and 4:
    - **Contradicted** → flag as needing further discussion
 
 ### Decision log format
-For each resolved decision, append to `artifacts/memory/active-decisions.md`:
-```markdown
-### [DECISION-{N}] {short title}
-- **Context:** {what prompted this decision}
-- **Decision:** {what was decided}
-- **Rationale:** {why}
-- **Alternatives considered:** {what was rejected and why}
-- **Decided by:** user + @founder (shape-up step 5)
-- **Date:** {date}
+For each resolved decision, write to `active-decisions.md` via `@memory-controller write active-decisions.md` —
+**not** by hand-editing the file, so the entry passes the memory validator.
+
+```bash
+node .agents/scripts/memory_write.js --file active-decisions.md --agent @founder \
+  --domain DECISION \
+  --title "{short title}" \
+  --content "Context: {what prompted this}
+Decision: {what was decided}
+Rationale: {why}
+Alternatives considered: {what was rejected and why}
+Decided by: {user + @founder (shape-up step 5)}" \
+  --status active
 ```
+
+**The header shape is not yours to invent.** `memory_check.js` requires every entry to be
+`### [DOMAIN] {title} [date: YYYY-MM-DD] [agent: @name]` with a `**Status:**` line. A hand-written
+`### [DECISION-1] …` entry fails that validator on three counts (missing `[date:]`, missing
+`[agent:]`, missing `**Status:**`) and will be reported as a corrupt memory file. Use `--domain DECISION`.
 
 ### Deferral handling
 Deferred items are NOT silent omissions. Each gets: 

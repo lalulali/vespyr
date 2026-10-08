@@ -48,7 +48,15 @@ Write `artifacts/output/02-research/problem-space-brief.md` using the template a
 - **Intervention:** {what changes}
 - **Hypothesis:** {testable statement}
 - **Confidence:** {High/Med/Low}
-- **Verdict:** `[VERDICT: GO|RESHAPE|NO-GO]` — {one-line rationale from step 3d}
+- **Verdict:** {one plain sentence — is this problem worth solving, and why}
+- `VERDICT: [RESHAPE]` or `VERDICT: [NO-GO]` — {rationale from step 3d}
+- `VERDICT: [GO] — When: <NOW|GATED|NEXT-CYCLE>` — {rationale from step 3d}
+
+> The verdict token is **bracketed**: `[GO]` / `[RESHAPE]` / `[NO-GO]`. An unbracketed form
+> (`[GATE: GO|…]`, `[VERDICT: GO|…]`) is invisible to `tools/eval/lib/ast.js`, which matches only
+> literal brackets — the gate then reaches no telemetry and no safety invariant.
+> Never write the bare alternation `VERDICT: [GO]|[RESHAPE]|[NO-GO]` as a literal line: a `[GO]`
+> without `When:` is an illegal verdict.
 
 ## Supporting Artifacts
 - [Root cause analysis](root-cause-analysis.md)
@@ -62,7 +70,11 @@ Write `artifacts/output/02-research/problem-space-brief.md` using the template a
 - [ ] `/explore-idea` — research market and competitors
 
 ## Decision Gate
-[GATE: GO|RESHAPE|NO-GO — <reason>] — the selected concept's step-3 `[VERDICT:]` rolled up as the brief's final routing decision. Present the `[HANDOFF: ...]` marker alongside it in the handoff.
+{plain sentence: "this problem is worth solving" / "the framing needs another pass" / "this problem isn't worth solving" — plus the reason}
+
+`VERDICT: [RESHAPE]` or `VERDICT: [NO-GO]` — or `VERDICT: [GO] — When: <NOW|GATED|NEXT-CYCLE>` — the selected concept's step-3 verdict rolled up as the brief's final routing decision. Present the `[HANDOFF: ...]` marker alongside it in the handoff.
+
+Format and depth: `.agents/references/vespyr-dna.md` §Decision Gate — plain sentence first, bracketed token, `When:` on `[GO]`, and card depth scaled to the stakes.
 ```
 
 ### 4b. Memory closeout
@@ -86,7 +98,18 @@ node .agents/scripts/orchestrator_state.js complete --agent product-manager --ar
 
 ## Handoff
 
-The brief ends with a Decision Gate on the selected solution concept, recorded as a parseable marker before the handoff marker: `[GATE: GO|RESHAPE|NO-GO — <reason>]`. `[GO]` = ready to stress-test; `[RESHAPE]` = problem framing needs another pass (re-run steps 1-3); `[NO-GO]` = problem not worth solving — document why and stop. A brief without a gate is a document, not a decision.
+**Write the brief first, then talk.** The brief is the document surface and carries the complete machine
+record — the gate, the `[HANDOFF: …]` marker, and the whole Decision Gate card. The chat reply is the
+human surface: one plain sentence saying whether the problem is worth solving and what happens next, plus
+a link to the brief. Never paste the card into chat (`.agents/references/vespyr-dna.md` §Two surfaces).
+
+The brief ends with a Decision Gate on the selected solution concept: **plain sentence first**, then the bracketed token — `VERDICT: [RESHAPE]` / `VERDICT: [NO-GO]`, or `VERDICT: [GO] — When: <NOW|GATED|NEXT-CYCLE>` — before the handoff marker.
+
+- `[GO]` — "this problem is worth solving" → ready to stress-test
+- `[RESHAPE]` — "the framing needs another pass" → re-run steps 1-3
+- `[NO-GO]` — "this problem isn't worth solving" → document why and stop
+
+A brief without a gate is a document, not a decision. Never emit the unbracketed `[GATE: …]` form — `tools/eval/lib/ast.js` matches only literal brackets, so that spelling reaches no telemetry and no safety invariant.
 
 Present the brief to the user with a clear recommendation, recorded as a parseable marker — `[HANDOFF: validate-idea|shape-up|explore-idea]`:
 - "This concept is ready to test → I recommend loading `/validate-idea`"

@@ -30,7 +30,23 @@ Establish the validation environment: load memory, check for prior artifacts, an
 
 ## Product maturity routing
 - **Greenfield** (no existing product) → full diagnostic, all questions relevant
-- **Brownfield** (existing product/feature) → skip Q1 demand evidence, focus on Q2 status quo, Q4 wedge, Q5 observation
+- **Brownfield** (existing product/feature) → **Q1 is answered from product telemetry, never skipped.**
+
+**Brownfield never skips Q1.** Step 06's `[GO]` gate requires behavioral demand evidence, so a
+route that drops Q1 makes `[GO]` structurally unreachable and forces every brownfield idea to
+`[RESHAPE]` or `[NO-GO]`. Existing products are the *cheapest* place to get behavioral evidence —
+ask for the instrumented version of Q1:
+
+| Brownfield Q1 source | What it proves |
+|---|---|
+| Usage / retention / expansion data | People already spend behavior on the adjacent job |
+| Support tickets, churn reasons, exit interviews | The pain is felt, not imagined |
+| Internal workaround traffic (Slack threads, spreadsheets, shadow tools) | The status quo is expensive |
+| Sales objections and lost-deal reasons | Someone will pay to remove it |
+
+Record the source with the answer (`[^N]` per DNA 5). If no instrument exists, say so and route Q1
+as a **named pre-GO action** in the next-action line — do not silently substitute interest for
+behavior.
 
 ## Output
 Context mode and maturity stored for use in subsequent steps.

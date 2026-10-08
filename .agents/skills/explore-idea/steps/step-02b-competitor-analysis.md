@@ -28,14 +28,13 @@ Invoke `@researcher competitive` to map the landscape:
 - White-space opportunities
 - Pricing and positioning
 
-**Context adaptation:**
-- **Startup mode:** Full competitive landscape
-- **Company mode:** Internal alternatives — what existing tools, teams, or vendors solve this partially? Build vs. buy analysis.
-- **Personal mode:** What open source or free tools exist? What's different about your approach?
+**Context adaptation:** use the mode table in `SKILL.md` §Context adaptation — do not restate it here.
 
 ### 2b.3 Output
 
-Write `artifacts/output/02-research/competitive-analysis.md`.
+Write `artifacts/output/02-research/competitive-analysis.md` using
+`.agents/templates/research/competitive-analysis-template.md`. The template defines the artifact's shape —
+do not improvise a different structure, because the synthesis step and any downstream reader expect it.
 
 Run immediately when complete: `node .agents/scripts/orchestrator_state.js complete --agent researcher --artifact 02-research/competitive-analysis.md`
 

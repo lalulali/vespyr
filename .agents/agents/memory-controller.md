@@ -304,26 +304,124 @@ Format results:
 
 ### Thresholds
 
-| File | Word threshold |
-|------|---------------|
-| `project-context.md` | 500 |
-| `active-decisions.md` | 1,800 |
-| `patterns-and-conventions.md` | 1,500 |
-| `lessons-learned.md` | 1,300 |
-| `blockers-and-risks.md` | 900 |
-| `session-summaries/latest.md` | 600 |
+**Do not restate these numbers here.** The single source of truth is
+`.agents/scripts/lib/memory_thresholds.js`, which both `orchestrator_state.js` and
+`compaction_guard.js` import. Read them with:
+
+```bash
+node -e "console.log(require('./.agents/scripts/lib/memory_thresholds.js').THRESHOLDS)"
+```
+
+A table copied into this file was the fourth copy of the active-decisions budget, in a
+different unit (words) and a different value (1,800w ≈ 1,350 tokens) from the three in
+code — and it was not the copy that ran. Every budget there is derived from the measured
+load of the live files plus ~25% headroom, documented in the module header.
+
+### Which file does an entry belong in
+
+The routing that matters, because getting it wrong is what inflates `active-decisions.md`:
+
+| The entry is… | Goes to |
+| :-- | :-- |
+| A **standing choice** that constrains future work — an architecture decision, a contract, a deliberate rejection | `active-decisions.md` |
+| An **insight or work record** — an audit finding, a bug and its fix, what was tried and rejected, a shipped change | `lessons-learned.md` |
+| A **reusable pattern** others should follow | `patterns-and-conventions.md` |
+| A **live blocker or open risk** | `blockers-and-risks.md` |
+
+`active-decisions.md` is for *critical active design choices and architectural
+constraints*. An audit-session summary is not a standing choice, however true it is — it is
+a record of work completed. Measured 2026-10-05: 6 of its 13 entries were `[PROCESS]` and
+`[TEST]` work records, which is what pushed the file to 7,944 tokens against a 2,500 budget
+and put it past any retention window.
+
+When an entry was filed in the wrong file, move it through the sanctioned path — never by
+editing `artifacts/memory/**` directly (AGENTS.md §Interacting with Memory):
+
+```bash
+node .agents/scripts/memory_write.js --reclassify --from active-decisions.md \
+  --to lessons-learned.md --header "[PROCESS] exact entry title" --reason "work record"
+```
+
+Per the existing principle — *escalate when an entry's intent maps ambiguously between two
+files, never guess* — that rule now covers **decision vs lesson**, which it previously did
+not. It only covered decision vs pattern.
+
+### Operation 3b: Decision → Lesson lifecycle
+
+`active-decisions.md` should hold **only standing constraints that still bind**. A decision
+stops being a decision when it has been implemented, superseded, or overtaken — at that point
+it is history, and history belongs in `lessons-learned.md`.
+
+Two operations, deliberately separate:
+
+| | Question | Trigger | Destination | Loaded? |
+| :-- | :-- | :-- | :-- | :-- |
+| `compact` | is this still worth **loading**? | age > `RETENTION_DAYS` | archive | no |
+| `flush-decisions` | is this still a **decision**? | completion signal | lessons-learned.md | **yes** |
+
+**Never merge them.** Age-sweeping into lessons-learned.md would push ~110 aged entries into
+the file that loads every session, on top of an existing 12,731 tokens. Translation is
+completion-only.
+
+**Two explicit signals. Nothing is inferred.**
+
+```bash
+# 1. This decision is done.
+node .agents/scripts/memory_write.js --resolve --file active-decisions.md \
+  --header "[DECISION] exact title" --status resolved
+
+# 2. Or: this entry replaces an older one (records the link, no guessing).
+node .agents/scripts/memory_write.js --file active-decisions.md --agent @you \
+  --domain DECISION --title "New rule" --content "..." \
+  --supersedes "[DECISION] Old rule [date: 2026-10-01] [agent: @x]"
+```
+
+`flush-decisions` runs automatically at the end of every session (`session-write`), which is
+the only reliable boundary available — there is no sprint concept in pipeline state, so "end of
+sprint" is not detectable. Inspect or promote manually with:
+
+```bash
+node .agents/scripts/orchestrator_state.js flush-decisions --dry-run
+node .agents/scripts/orchestrator_state.js flush-decisions --promote "<header>"
+```
+
+Entries that merely share a domain with a newer entry are reported as **candidates and never
+moved** — domain similarity was measured and rejected as a retirement signal, because several
+same-domain decisions remain independently binding. Promotion is a human call.
+
+**Without `--resolve` / `--supersedes` the flush is dead code.** Measured: 0 of 120 historical
+entries carried a resolvable status, so every status-driven path ever built fired on nothing.
+Mark decisions done as you close them; that is what keeps the file from re-filling.
 
 ### Steps
 
+**Prefer the script over hand-compaction.** `compactActiveDecisions()` in
+`orchestrator_state.js` implements all of this and is idempotent (it skips entries already
+sharded, keyed on the normalised section header — an earlier append-only version wrote 51
+entries into the archive twice). It runs automatically after every memory write.
+
+```bash
+node .agents/scripts/orchestrator_state.js compact
+```
+
 1. Read the file, parse entries by `###` header
-2. Categorize: `active` (status active, age < 90d), `resolved`/`stale` (archive), `critical` (never archive)
-3. Archive resolved/stale entries to `artifacts/memory/archive/YYYY-QN/{filename}` with your write tool
-4. Update archive index directly:
-   ```
-   node .agents/scripts/archive_manager.js append-ndjson --file artifacts/memory/archive/index.ndjson --entry '{...}'
-   ```
-5. Rewrite source file with only kept entries with your write tool
-6. Report: "Compacted {filename}: {N} kept, {N} archived."
+2. Categorize: `active` (status active, age < **RETENTION_DAYS**), `resolved`/`stale`/`complete` (archive), `critical` (never archive).
+   **RETENTION_DAYS is 30**, defined in `orchestrator_state.js` next to the compactor. This
+   document previously said 90 days, which was never implemented — retention only ever
+   fired on a hand-edited status, so on the live repo it archived nothing for its entire
+   life and the file grew to 47,548 tokens.
+3. An entry with **no parseable date is never auto-retired.** Absence of a date is not
+   evidence of staleness, and guessing would silently drop a live decision. Those stay and
+   are counted in `undatedRetained`.
+4. Archive resolved/stale/aged entries to `artifacts/memory/archive/YYYY-QN-archive.md`,
+   preserving full text, and append one row per entry to `artifacts/memory/archive/index.ndjson`.
+   Retirement is **not** deletion — `/memory` still finds archived entries.
+5. Report: `Compacted {filename}: {N} kept, {N} archived ({N} duplicates skipped).`
+
+Hand-compaction is a fallback for files the script does not govern, and must preserve the
+same rules: skip anything already in the archive, and split on section **headers** rather
+than `---` separators — entries contain bare `---` in their bodies, so splitting on the
+separator cuts entries in half.
 
 ---
 

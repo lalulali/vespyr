@@ -1,6 +1,6 @@
 ---
 name: shape-up
-description: Structure and stress-test semi-cooked ideas into design-ready briefs. No prerequisites — works at any point in the pipeline. Use when the user says "shape this up", "turn these notes into a brief", "I have a rough pitch", or invokes /shape-up.
+description: Structure and stress-test a semi-cooked idea into a design-ready brief with a fixed appetite, fenced scope boundaries, and named rabbit holes. No prerequisites — works at any point in the pipeline. Use when the user says "shape this up", "turn these notes into a brief", "I have a rough pitch", "scope this down", "what should I cut", or invokes /shape-up. Emits shaped-brief.md with the shaping gate. Do NOT use to stress-test whether a concept should exist at all (/validate-idea), to research market or competitors (/explore-idea), to frame a problem you have not stated yet (/unpack-problem), or to turn research into specs (/design).
 metadata:
   version: "1.0"
   last_updated: "2026-09-30"
@@ -42,8 +42,12 @@ No explicit modes. The skill checks what artifacts exist and adapts:
 - User abandons shaping mid-flow (decisions logged, partial brief saved)
 
 ## Done when
-- `artifacts/output/01-discovery/shaped-brief.md` exists with the Decision Gate verdict and every assumption explicitly marked verified or unverified
-- Every gap found in Step 3 is either closed with evidence or carried forward as a named open question
+- `artifacts/output/01-discovery/shaped-brief.md` exists with the **shaping gate** recorded in the document — **plain sentence first**, then the bracketed card (`VERDICT: [GO] — When: <NOW|GATED|NEXT-CYCLE>` / `VERDICT: [RESHAPE]` / `VERDICT: [NO-GO]`; format in `.agents/references/vespyr-dna.md` §Decision Gate). The chat reply carries only the plain wording.
+- The brief states **Appetite** (a timebox budget, not an estimate), **Scope In / Scope Out**, and **Rabbit Holes** explicitly fenced — a brief with non-goals but no fenced rabbit holes will get them re-litigated mid-build
+- Every assumption is marked verified / plausible / unverified, and every `verified` one carries the evidence it was verified against
+- The shaping gate is honest about the distinction: this skill gates **shaping readiness**, not concept viability. `[GO]` on shaping readiness is unavailable while any assumption is unverified — that is `[RESHAPE]` (needs evidence). Concept viability belongs to `/validate-idea`.
+- Every gap found in Step 3 is either closed with evidence or carried forward as a named open question with a disposition
+- Every decision written to `active-decisions.md` passes `memory_check.js` (written via `memory_write.js`, not hand-edited)
 - The handoff step names the next skill and the artifact it consumes
 - `@memory-controller session-write` has run
 
@@ -64,8 +68,14 @@ None. This is a flexible entry point.
 6. **Handoff** → `steps/step-06-handoff.md`
 
 ## Output artifacts
+
+The **document** surface — the machine record lives here, and the gates read these files.
+
 - `artifacts/output/01-discovery/shaped-brief.md`
 - `artifacts/memory/active-decisions.md` (appended)
+
+The chat reply is the human surface: plain wording and a link, never a token or card field
+(`.agents/references/vespyr-dna.md` §Two surfaces).
 
 ## State & memory integration
 At start, run: `node .agents/scripts/orchestrator_state.js status`

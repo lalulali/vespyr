@@ -1,6 +1,6 @@
 ---
 name: explore-idea
-description: Validates a concept through market, competitor, and user research — turns a validated idea into evidence-backed research. Use when the user says "research the market for this", "who are the competitors", "validate this with users", or invokes /explore-idea after the concept is validated.
+description: Turns a validated concept into evidence-backed market, competitor, and user research. Use when the user says "research the market for this", "who are the competitors", "competitive landscape", "validate this with users", "is this market worth entering", or invokes /explore-idea — including brownfield entries from /shape-up with unverified assumptions, and problem-first entries from /unpack-problem whose selected concept needs evidence. Emits market-analysis, competitive-analysis, user-personas, and a research-synthesis Decision Gate with cited evidence. Do NOT use to stress-test whether the concept should exist at all (/validate-idea), to structure raw notes (/shape-up), or to design how to run the research (/research-plan).
 metadata:
   version: "1.0"
   last_updated: "2026-09-30"
@@ -28,15 +28,18 @@ Takes a validated idea (from `validate-idea`) and runs the research pipeline. Sp
 
 ## Halt conditions
 Any one halts the pipeline before a verdict is issued:
-- Market research returns a `MARKET VERDICT: NO-GO` — record why and stop; do not synthesize a brief around a dead market
+- Market research returns a `MARKET VERDICT: [NO-GO]` — record why and stop; do not synthesize a brief around a dead market
 - The validation brief's premises are contradicted by the research and the conflict cannot be resolved from the evidence — escalate to `@founder` rather than reshaping the verdict to fit
 - More than 1 pivot has been consumed — a third pivot is thrash, not exploration; stop and escalate to `@founder`
 - Research artifacts are missing or partial when the founder review gate opens — the gate cannot certify on absent evidence
 
 ## Done when
 - `market-analysis.md`, `competitive-analysis.md`, and `user-personas.md` all exist, each with an attributed source list
-- A parseable `VERDICT: [GO]|[RESHAPE]|[NO-GO] — <reason>` line has been issued
-- The uniformly-positive anti-sycophancy pass has run and either refuted its own strongest counter-hypothesis or recorded it as a documented risk with a revisit trigger
+- `research-synthesis.md` exists and carries the evidence rollup, the research-agenda coverage table (every carried-in question with a terminal state — no blanks), and the skill-level Decision Gate
+- `market-analysis.md` ends with a parseable `MARKET VERDICT: [GO]|[RESHAPE]|[NO-GO]` line (2a's gate, distinct from 3c's `VERDICT:`)
+- The skill-level decision is recorded **in `research-synthesis.md`** as a bracketed `VERDICT:` card preceded by its plain sentence (the chat reply carries only the plain wording)
+- The uniformly-positive anti-sycophancy pass has run and either refuted its own strongest counter-hypothesis or recorded it as a documented risk with a revisit trigger — with the `[SPC: …]` marker written into `research-synthesis.md`
+- If every persona rests on `HYPOTHESIS-ONLY` data (the default), that is stated explicitly and carried as a named risk on any `[GO]`
 - `project-context.md` carries the finalized product identity (name, core goal, target audience)
 - `@memory-controller session-write` has run
 
@@ -76,6 +79,20 @@ Research agents (2a, 2b, 2c) produce independent evidence. When the harness supp
 1. **Subagents available** → dispatch 2a and 2b as parallel independent subagents; 2c after 2b completes.
 2. **No subagents, but multiple isolated LLM calls possible** → context-firewalled sequential dispatch with the same data contract.
 3. **Single shared conversation context only** → run sequentially in-context, but label each artifact degraded: "researched in one context — cross-contamination possible; treat cross-references as weaker evidence."
+
+### Context adaptation (single source of truth — steps 2a/2b/2c cite this, they do not restate it)
+
+| Mode | 2a Market | 2b Competitive | 2c User |
+|---|---|---|---|
+| **Startup** | Full external market research | Full competitive landscape | Full personas, JTBD, journeys |
+| **Company** | Internal market analysis — which teams benefit, what budget exists, what was tried | Internal alternatives — existing tools/teams/vendors, build vs buy | Stakeholder interviews, internal workflow, team pain |
+| **Personal** | Lightweight — is anyone else building this? | Open source / free tools; what differs | Self-research — your own pain and use cases |
+
+**Why this lives here and not in each step:** the three step files previously carried verbatim copies of their
+row, so any edit had to be made four times and silently drifted when it was not. Steps cite this table.
+
+**Personal mode still requires evidence discipline.** A lighter scope means fewer sections — same contract:
+citations and the `MARKET VERDICT:` line are still required.
 
 ### Phase 1: Synthesize (skip if validation brief exists)
 
@@ -121,10 +138,7 @@ Invoke `@researcher market` to validate market potential:
 - Target customer segments
 - Market risks and opportunities
 
-**Context adaptation:**
-- **Startup mode:** Full external market research
-- **Company mode:** Internal market analysis — which teams/orgs benefit? What budget exists? What similar initiatives have been tried?
-- **Personal mode:** Lightweight — is anyone else building this? What's the landscape?
+**Context adaptation:** see the mode table in §Context adaptation above.
 
 **Input:** validation brief or idea brief
 **Output:** `artifacts/output/02-research/market-analysis.md`
@@ -142,10 +156,7 @@ Invoke `@researcher competitive` to map the landscape:
 - White-space opportunities
 - Pricing and positioning
 
-**Context adaptation:**
-- **Startup mode:** Full competitive landscape
-- **Company mode:** Internal alternatives — what existing tools, teams, or vendors solve this partially? Build vs. buy analysis.
-- **Personal mode:** What open source or free tools exist? What's different about your approach?
+**Context adaptation:** see the mode table in §Context adaptation above.
 
 **Input:** validation brief or idea brief
 **Output:** `artifacts/output/02-research/competitive-analysis.md`
@@ -163,10 +174,7 @@ Invoke `@user-researcher` to validate user needs:
 - User personas and journeys
 - "How might we" statements
 
-**Context adaptation:**
-- **Startup mode:** Full persona development, jobs-to-be-done, user journeys
-- **Company mode:** Stakeholder interviews, internal workflow analysis, team pain points
-- **Personal mode:** Self-research — your own pain points and use cases
+**Context adaptation:** see the mode table in §Context adaptation above.
 
 **Input:** validation brief or idea brief + `artifacts/output/02-research/competitive-analysis.md`
 **Output:** `artifacts/output/02-research/user-personas.md`
@@ -178,30 +186,42 @@ node .agents/scripts/orchestrator_state.js complete --agent user-researcher --ar
 ### Phase 3: Founder Review (gate)
 
 After all research completes, review findings against the brief:
-- Does the market validate the opportunity? (Check the `MARKET VERDICT: GO|NO-GO — <reason>` line at the end of market-analysis.md)
+- Does the market validate the opportunity? (Check the `MARKET VERDICT: [GO]|[NO-GO]` line at the end of market-analysis.md)
 - Does user research confirm the target persona and pain points?
 - Does competitive analysis reveal viable positioning?
 - **Cross-reference against the validation brief's premises** — do the premises still hold after research?
 
 **Anti-sycophancy gate (SPC):** if all three research artifacts are uniformly positive — no red flags, no disconfirming evidence, no competitive threat — the review has converged prematurely. Before issuing a verdict, run one adversarial pass: name the strongest reason this fails (from the research itself or first principles) and either refute it with evidence or record it as a documented risk. Uniformly rosy research is a red flag, not a green light.
 
-**If research contradicts assumptions**, issue a Decision Gate verdict as a parseable line `VERDICT: [GO]|[RESHAPE]|[NO-GO] — <reason>` (protocol detail in `steps/step-03-founder-review.md`):
-- `[GO]` — premises hold; proceed. A qualified go ("proceed with documented risk") requires the risk named in the brief with its evidence and a revisit trigger — never a silent pass.
-- `[RESHAPE]` — revise brief and re-run Phase 2. A scope adjustment ("refine") is not a verdict — record it as an ADR entry, then re-issue the gate verdict.
-- `[NO-GO]` — research invalidates the concept; document why and stop (return to problem discovery via `/unpack-problem` if a better concept may exist).
+**If research contradicts assumptions**, issue a Decision Gate verdict — **plain sentence first, then the bracketed card** (protocol and depth rules in `steps/step-03-founder-review.md`; format in `.agents/references/vespyr-dna.md` §Decision Gate):
+- `[GO]` — **"Build this."** Premises hold; proceed. A qualified go ("proceed with documented risk") requires the risk named in the brief with its evidence and a revisit trigger — never a silent pass. If `When: GATED`, the sentence is **"Build this once \<checkable condition\> — not before."** — never "Build this." followed by a caveat.
+- `[RESHAPE]` — **"Keep the why, replace the how."** Revise the brief and re-run Phase 2. A scope adjustment ("refine") is not a verdict — record it as an ADR entry, then re-issue the gate verdict with its plain sentence.
+- `[NO-GO]` — **"Don't build this."** Research invalidates the concept; document why and stop (return to problem discovery via `/unpack-problem` if a better concept may exist).
 - Maximum 1 pivot before committing to a direction
 
 ## Output artifacts
+
+These are the **document** surface — the machine record lives here, and the gates read these files.
+
 - `artifacts/output/01-discovery/idea-brief.md` (only if no validation brief existed)
-- `artifacts/output/02-research/market-analysis.md`
+- `artifacts/output/02-research/market-analysis.md` — ends with `MARKET VERDICT:` (2a's gate)
 - `artifacts/output/02-research/competitive-analysis.md`
 - `artifacts/output/02-research/user-personas.md`
+- `artifacts/output/02-research/research-synthesis.md` — the evidence rollup and the skill-level
+  `VERDICT:` gate (3c's gate). **This is the Decision Gate's canonical home** — never write the founder's
+  verdict into another agent's research artifact.
+
+**The chat reply is a different surface and carries human wording only.** Give the owner the finding in a
+sentence, the decision's consequence, and the next action — then name the file. Never put `VERDICT:`,
+`[GO]`/`[RESHAPE]`/`[NO-GO]`, `MARKET VERDICT:`, `When:`, or any card field in the chat. If the record is
+worth keeping it belongs in a document; if it is not worth keeping it belongs nowhere
+(`.agents/references/vespyr-dna.md` §Two surfaces).
 
 ## Handoff to design
 When exploration is complete:
 1. All research artifacts exist and are complete
 2. The concept is validated by evidence
-3. No unresolved GO/NO-GO blockers from research
+3. No unresolved Decision Gate blockers recorded in the research documents
 4. Premises from the validation brief still hold (or have been revised)
 5. Update project context with the finalized product identity:
    ```
@@ -250,7 +270,11 @@ node .agents/scripts/orchestrator_state.js complete --agent founder --artifact 0
 node .agents/scripts/orchestrator_state.js complete --agent researcher --artifact 02-research/market-analysis.md
 node .agents/scripts/orchestrator_state.js complete --agent researcher --artifact 02-research/competitive-analysis.md
 node .agents/scripts/orchestrator_state.js complete --agent user-researcher --artifact 02-research/user-personas.md
+node .agents/scripts/orchestrator_state.js complete --agent founder --artifact 02-research/research-synthesis.md
 ```
+
+`research-synthesis.md` is last because it consumes all three research artifacts; recording it before they
+exist would put a gate on the state machine with no evidence behind it.
 
 Skip any artifact that was not produced (e.g., if the user came in with a validation brief, `idea-brief.md` may be skipped).
 

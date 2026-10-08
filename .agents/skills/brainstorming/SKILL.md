@@ -54,18 +54,22 @@ Load the selected method from `methods.csv`. Apply it step-by-step:
 
 ### Step 4: Gate and write outputs
 
-End the session with a Decision Gate on the strongest idea(s): `[GO]` (ready to stress-test), `[RESHAPE]` (promising but the mechanism needs rebuilding), or `[NO-GO]` (dominated by alternatives). A brainstorm that ends without a gate is a list, not a session.
+End the session with a Decision Gate on the strongest idea(s). The machine record — plain sentence, then the bracketed card — goes to `artifacts/output/01-discovery/brainstorming-session.md`. Format and depth: `.agents/references/vespyr-dna.md` §Decision Gate.
+
+In plain wording the gate is: **"Build this"** (`[GO]`, ready to stress-test), **"Keep the why, replace the how"** (`[RESHAPE]`, promising but the mechanism needs rebuilding), or **"Don't build this"** (`[NO-GO]`, dominated by alternatives). A brainstorm that ends without a gate is a list, not a session. The token is the machine companion, never the message.
+
+**Two surfaces.** The chat reply carries the human sentence and the routing question — **never** `[GO]`, `[RESHAPE]`, `[NO-GO]`, or any card field (`.agents/references/vespyr-dna.md` §Two surfaces). The token stays in the session file where the gates read it.
 
 ### Step 4b: Route the gated idea (mandatory on GO/RESHAPE — do not menu)
 
-The gate verdict locks FIRST — route from the locked verdict, never reshape the verdict to earn a panel. Then count distinct domain tensions in the "What this surfaced" bullets, quoting bullet ids (e.g. tensions from B1/B3):
+The gate verdict locks FIRST — route from the locked verdict, never reshape the verdict to earn a panel. Count distinct domain tensions in the "What this surfaced" bullets, quoting bullet ids (e.g. tensions from B1/B3). Route from the **document's** verdict, then phrase the offer in plain words:
 
-- **`[GO]` + ≥2 tensions, or `[RESHAPE]` spanning ≥2 domains** → roundtable (Discovery roster). Emit exactly: *"Top idea gated [{verdict}]. Next: roundtable with {n} open tensions (from bullets {ids}: {a} vs {b}). Reply 'grill-me instead' to go deep 1-on-1, or 'proceed' to start the roundtable."*
-- **`[GO]` single-bet, or `[RESHAPE]` confined to one domain (state the domain + reason)** → grill-me. Emit exactly: *"Top idea gated [{verdict}]. Next: grill-me on the single bet ({bet}). Reply 'roundtable instead' for a panel, or 'proceed' to start."*
+- **`[GO]` + ≥2 tensions, or `[RESHAPE]` spanning ≥2 domains** → roundtable (Discovery roster). Emit exactly: *"Worth building, but {n} things are still unresolved (bullets {ids}: {a} vs {b}). Next: a roundtable to settle them. Reply 'grill-me instead' to go deep 1-on-1, or 'proceed' to start the roundtable."*
+- **`[GO]` single-bet, or `[RESHAPE]` confined to one domain (state the domain + reason)** → grill-me. Emit exactly: *"Worth building, with one bet left to settle ({bet}). Next: grill-me to go deep on it. Reply 'roundtable instead' for a panel, or 'proceed' to start."*
 - **`[NO-GO]`** → archive + ledger. No build or follow-up routing (Zero-Blueprint rule blocks building, not talking — the user may still ask why it failed or re-propose with new evidence).
 - Cost is part of the choice, state it once: grill-me costs one interviewer call; roundtable costs 2–5 isolated seats plus cross-examination rounds (5–10× tokens and attention). Single-bet/reversible → grill-me; multi-stakeholder/irreversible → pay for the panel.
 - Pass `artifacts/output/01-discovery/brainstorming-session.md` path + the sharpened topic as the subject in either case. Grill-me = one mind going deep (proposer's conviction); roundtable = N independent minds colliding (what no single persona can think).
-- Log every override as `[ROUTING-OVERRIDE: default -> chosen -- reason]` in the session output and the `[BRAINSTORM]` memory entry (append-only routing record; owner `@tech-lead` counts markers per rolling 10 sessions alongside the router log). If overrides exceed ~20% over a rolling 10 sessions, the threshold rule gets revisited (recalibrate count vs kill default).
+- Log every override as `[ROUTING-OVERRIDE: default -> chosen -- reason]` **in the session document and the `[BRAINSTORM]` memory entry** — append-only routing record, never in chat (owner `@tech-lead` counts markers per rolling 10 sessions alongside the router log). If overrides exceed ~20% over a rolling 10 sessions, the threshold rule gets revisited (recalibrate count vs kill default).
 
 Write the session output — sharpened topic, method used, key ideas, gate verdict, open questions — to `artifacts/output/01-discovery/brainstorming-session.md`, then record to memory:
 

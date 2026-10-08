@@ -28,14 +28,23 @@ Invoke `@researcher market` to validate market potential:
 - Target customer segments
 - Market risks and opportunities
 
-**Context adaptation:**
-- **Startup mode:** Full external market research
-- **Company mode:** Internal market analysis — which teams/orgs benefit? What budget exists? What similar initiatives have been tried?
-- **Personal mode:** Lightweight — is anyone else building this? What's the landscape?
+**Context adaptation:** use the mode table in `SKILL.md` §Context adaptation — do not restate it here.
 
 ### 2a.3 Output
 
-Write `artifacts/output/02-research/market-analysis.md`. End the file with a parseable verdict line — `MARKET VERDICT: GO|NO-GO — <reason>` — which Phase 3 (step-03) consumes as its gate input; a missing or malformed line is treated as `[FALSIFIED]` research there.
+Write `artifacts/output/02-research/market-analysis.md` using `.agents/templates/research/market-analysis-template.md`.
+**End the file with the template's §7.1 line verbatim** — `MARKET VERDICT: [GO]|[RESHAPE]|[NO-GO] — <one-line reason>` —
+which Phase 3 (step-03) consumes as its gate input. A missing or malformed line is treated as `[FALSIFIED]`
+research there and re-dispatches this step **once**.
+
+`[RESHAPE]` is the honest answer when the market is real but this wedge into it is wrong — re-target the
+segment or the buyer rather than abandoning a market that is fine. Use it instead of forcing a choice
+between "GO" and "NO-GO".
+
+The token is **bracketed**: `MARKET VERDICT: GO|NO-GO` (unbracketed) is invisible to `tools/eval/lib/ast.js`,
+which matches only literal brackets, so the market gate would reach no telemetry and no safety invariant.
+
+**`market-analysis.md` is the document surface** — the gate line lives there and nowhere else. The chat reply gets the finding in plain words plus the next action, with no token and no marker (`.agents/references/vespyr-dna.md` §Two surfaces).
 
 Run immediately when complete: `node .agents/scripts/orchestrator_state.js complete --agent researcher --artifact 02-research/market-analysis.md`
 
