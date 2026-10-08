@@ -125,9 +125,24 @@ test('T-CONF-4: reverse mode requires §14 Evidence Ledger; create mode does not
   assert.strictEqual(rev.code, 1, 'reverse should fail without §14');
   assert.match(JSON.parse(rev.out).failures.join('\n'), /§14/);
 
+  // The create half asserts what it is actually about: that §14 is NOT required in create mode.
+  //
+  // It previously asserted an overall pass using the RAW story template as its fixture — which
+  // is the defect a blind run found: `cp user-story-template.md user-stories.md` satisfied the
+  // blocking create-mode gate with zero user stories. This test was encoding that bug as an
+  // expectation. The gate now rejects an unpopulated template, so an overall pass is no longer
+  // assertable with this fixture; asserting the §14 rule specifically is both true and robust.
   const b = tmp({ 'requirements.md': without14, 'user-stories.md': us });
   const cre = run(['check', '--mode', 'create', '--requirements', b.files['requirements.md'], '--user-stories', b.files['user-stories.md'], '--json']);
-  assert.strictEqual(cre.code, 0, `create should pass without §14, got:\n${cre.err}`);
+  const creFails = JSON.parse(cre.out || '{}').failures || [];
+  assert.ok(
+    !creFails.some((f) => /§14|Evidence Ledger/.test(f)),
+    `§14 must not be required in create mode, but the gate said: ${JSON.stringify(creFails)}`
+  );
+  assert.ok(
+    creFails.some((f) => /placeholder ID|no user story is defined/i.test(f)),
+    'and the unpopulated template fixture should now be rejected for the reason it deserves'
+  );
 });
 
 test('T-CONF-5: missing files fail loudly, never silent-pass', () => {
@@ -564,8 +579,13 @@ test('T-CONF-25 (R5): reasoning smells print as warnings and do NOT change the e
 test('T-CONF-26 (R5): the same N/A reason reused across 3+ stories is flagged as a smell', () => {
   const oneAC = threeACs();
   const shared = selfAudit({ 'Empty / boundary state': 'N/A because nothing renders a list' });
-  const mkStory = (id) => userStoriesWithStory(oneAC, shared).replace(/US-01/g, id);
-  const doc = mkStory('US-01') + '\n' + mkStory('US-02') + '\n' + mkStory('US-03');
+  // AC ids must be unique per story: `mkStory` renumbered US-01 but left AC-H1/AC-U1/AC-E1
+  // identical across all three, which is a document the gate is right to reject. These
+  // fixtures were wrong before the duplicate check existed — they simply could not fail.
+  const mkStory = (id, n) => userStoriesWithStory(oneAC, shared)
+    .replace(/US-01/g, id)
+    .replace(/AC-([HUE])(\d+)/g, (m, k, num) => `AC-${k}${Number(num) * 10 + n}`);
+  const doc = mkStory('US-01', 1) + '\n' + mkStory('US-02', 2) + '\n' + mkStory('US-03', 3);
   const { files } = tmp({ 'requirements.md': fs.readFileSync(PRD_TEMPLATE, 'utf8'), 'user-stories.md': doc });
   const r = run(['check', '--mode', 'create', '--requirements', files['requirements.md'], '--user-stories', files['user-stories.md'], '--json']);
   assert.strictEqual(r.code, 0, `repeated-reason smell must not fail the build, got exit ${r.code}`);
@@ -574,8 +594,10 @@ test('T-CONF-26 (R5): the same N/A reason reused across 3+ stories is flagged as
 
 test('T-CONF-27 (R5): a uniform AC count across stories is flagged as a smell', () => {
   const oneAC = threeACs();
-  const mkStory = (id) => userStoriesWithStory(oneAC, selfAudit()).replace(/US-01/g, id);
-  const doc = mkStory('US-01') + '\n' + mkStory('US-02') + '\n' + mkStory('US-03');
+  const mkStory = (id, n) => userStoriesWithStory(oneAC, selfAudit())
+    .replace(/US-01/g, id)
+    .replace(/AC-([HUE])(\d+)/g, (m, k, num) => `AC-${k}${Number(num) * 10 + n}`);
+  const doc = mkStory('US-01', 1) + '\n' + mkStory('US-02', 2) + '\n' + mkStory('US-03', 3);
   const { files } = tmp({ 'requirements.md': fs.readFileSync(PRD_TEMPLATE, 'utf8'), 'user-stories.md': doc });
   const r = run(['check', '--mode', 'create', '--requirements', files['requirements.md'], '--user-stories', files['user-stories.md'], '--json']);
   assert.strictEqual(r.code, 0, `uniform-count smell must not fail the build, got exit ${r.code}`);

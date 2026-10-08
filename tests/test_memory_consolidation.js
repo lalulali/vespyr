@@ -180,7 +180,14 @@ describe('Epic 02i: Memory Consolidation & Lifecycle Architecture', () => {
       }));
 
       fs.writeFileSync(path.join(memoryDir, 'project-context.md'), `# Project Context\n\n## [CORE]\nProject: Test\nStack: None\nPhase: validation\nSprint: none\nBlockers: 0\n\n## [IDENTITY]\nUser Nickname: Chris\n`);
-      fs.writeFileSync(path.join(memoryDir, 'active-decisions.md'), `# Active Decisions\n\n### [ARCH] Active Decision [date: 2026-08-18] [agent: @architect]\nActive rationale\n**Status:** active\n\n### [ARCH] Resolved Decision [date: 2026-08-18] [agent: @architect]\nResolved rationale\n**Status:** resolved\n`);
+      // Both entries carry TODAY's date. This test asserts the manual `**Status:** resolved`
+      // path retires exactly one entry; it is not a test of age-based retirement (that has
+      // its own coverage in tests/test_memory_retention.test.js). The fixture previously
+      // hardcoded 2026-08-18, which aged past RETENTION_DAYS and made BOTH entries retire —
+      // so the test passed for the wrong reason until it asserted `retired === 1` and the
+      // age rule correctly returned 2.
+      const today = new Date().toISOString().slice(0, 10);
+      fs.writeFileSync(path.join(memoryDir, 'active-decisions.md'), `# Active Decisions\n\n### [ARCH] Active Decision [date: ${today}] [agent: @architect]\nActive rationale\n**Status:** active\n\n### [ARCH] Resolved Decision [date: ${today}] [agent: @architect]\nResolved rationale\n**Status:** resolved\n`);
     });
 
     afterEach(() => {
@@ -198,9 +205,13 @@ describe('Epic 02i: Memory Consolidation & Lifecycle Architecture', () => {
       assert.strictEqual(result.success, true);
       assert.strictEqual(result.from, 'validation');
       assert.strictEqual(result.to, 'discovery');
-      assert.strictEqual(result.compaction.compacted, true);
-      assert.strictEqual(result.compaction.archivedCount, 1);
-      assert.strictEqual(result.compaction.activeCount, 1);
+      // Field renamed 2026-10-05 from `compaction` to `memory`. The rename made the payload
+      // say what it means: this is a REPORT (tokens vs budget) that accompanies the
+      // transition, not a gate that could veto it. `archivedCount`/`activeCount` moved into
+      // the same block under `retired`. The assertions' intent is unchanged.
+      assert.strictEqual(result.memory.retired, 1,
+        'the resolved decision must still retire on phase advance');
+      assert.ok('under_budget' in result.memory, 'the budget verdict must be reported');
 
       const memoryDir = path.join(tmpDir, 'artifacts', 'memory');
       const decisions = fs.readFileSync(path.join(memoryDir, 'active-decisions.md'), 'utf8');

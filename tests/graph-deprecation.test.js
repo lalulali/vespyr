@@ -46,13 +46,22 @@ for (const token of ['scripts/doc_graph.js', 'scripts/query_graph.js', 'scripts/
 }
 const depBlockPattern = /const DEPRECATED_CORE_FILES\s*=\s*\[[\s\S]*?\];/g;
 
+// Dated historical records are exempt, same rationale as `active-decisions.md`: these
+  // describe a deprecated tool as it was, and rewriting a dated record to satisfy a
+  // forward-looking scanner is falsification, not maintenance.
+  //
+  // `memory/archive` was added 2026-10-05. Age-based retention moves retired decisions
+  // into artifacts/memory/archive/, so without this the scanner started failing on
+  // 51 archived entries the moment compaction ran — flagging text nobody can act on,
+  // because an archive entry is by definition not live guidance.
 const ignoredFiles = [
   '02h-phase-1-graph-shutup-and-cli.md',
   'active-decisions.md',
   'changelog.md',
   'graph-deprecation.test.js',
   'session-summaries',
-  'pipeline-state.json'
+  'pipeline-state.json',
+  'memory/archive'
 ];
 
 function scanDirectory(dir) {

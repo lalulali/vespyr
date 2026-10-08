@@ -90,15 +90,39 @@ describe('Suite: Memory Fix Loop Regressions (2026-08-25)', () => {
 		} catch (e) {
 			code = e.status;
 		}
-		assert.notStrictEqual(code, 0, 'advance must fail closed over budget');
-		assert.strictEqual(JSON.parse(fs.readFileSync(statePath, 'utf8')).current_phase, 'validation', 'phase must NOT have advanced');
-		assert.strictEqual(fs.readFileSync(statePath, 'utf8'), beforeRaw, 'pipeline state must be byte-identical after blocked advance');
+		// INVERTED 2026-10-05 (owner decision). This test previously asserted
+		// `advance must fail closed over budget`, and that fail-closed choice is what wedged
+		// this repo: 47,548 tokens against a 400 budget, with even a single day of entries
+		// measuring ~7,770 — so the agent was told it could not advance the phase while the
+		// only documented escape provably could not succeed. It also never prevented bloat,
+		// since nothing capped writes; the failure was merely deferred until the moment work
+		// was finished. And it coupled a semantic question ("is this phase done") to a cost
+		// concern ("how big is the context").
+		//
+		// The INTENT — protect the pipeline from unbounded memory — is still asserted below.
+		// The mechanism changed from fail-closed to report-and-continue, and the memory is
+		// still bounded by the retention policy that now runs on the WRITE path rather than
+		// on the phase transition it used to veto.
+		assert.strictEqual(code, 0, 'advance must NOT be blocked by memory size');
+		assert.strictEqual(JSON.parse(fs.readFileSync(statePath, 'utf8')).current_phase, 'discovery',
+			'the phase must actually advance — a finished phase must be recordable');
+		assert.notStrictEqual(fs.readFileSync(statePath, 'utf8'), beforeRaw,
+			'state must have been durably written');
 
-		// Under-budget path still advances.
+		// The over-budget condition is still surfaced, not swallowed: a silent success would
+		// be a false assurance.
+		const overOut = JSON.parse(execFileSync(process.execPath, [orch, 'set-phase', '--phase', 'strategy'],
+			{ cwd: tmpDir, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }));
+		assert.ok('memory' in overOut, 'memory report must accompany the transition');
+		assert.ok('under_budget' in overOut.memory, 'the budget verdict must be explicit');
+		assert.ok(overOut.memory.budget > 0, 'the ceiling must be reported so it is visible');
+
+		// Under-budget path still advances. From `strategy` (set above), advance goes to
+		// the next phase in PHASE_ORDER, which is `architecture` — not `strategy`.
 		fs.writeFileSync(decisions, '# Active Decisions\n');
 		const out = JSON.parse(execFileSync(process.execPath, [orch, 'advance'], { cwd: tmpDir, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }));
 		assert.strictEqual(out.success, true);
-		assert.strictEqual(JSON.parse(fs.readFileSync(statePath, 'utf8')).current_phase, 'discovery');
+		assert.strictEqual(JSON.parse(fs.readFileSync(statePath, 'utf8')).current_phase, 'architecture');
 	});
 
 	it('F6: session-start never rewrites human lines outside the machine fence', () => {
