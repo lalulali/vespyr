@@ -11,7 +11,9 @@
     "Those files are loaded into agent context, so scanning them is correct; the findings are a",
     "rule-precision problem for the rule owner, not a finding to suppress. Suppressing them would",
     "hide a real weakness in the rule table behind a green checkmark.",
-    "  tests/test_security_scan_scope.test.js and tests/test_launch_readiness.test.js contain credential-SHAPED strings on purpose: the first names the measured failure that motivated the fail-closed scope (a real AKIA key in src/config.js was silently dropped, 0 findings reported), and the second needs a token a rule will actually match in order to test the allowlist plumbing end to end. Neither is a credential. Both files were read before adding."
+    "  tests/test_security_scan_scope.test.js and tests/test_launch_readiness.test.js contain credential-SHAPED strings on purpose: the first names the measured failure that motivated the fail-closed scope (a real AKIA key in src/config.js was silently dropped, 0 findings reported), and the second needs a token a rule will actually match in order to test the allowlist plumbing end to end. Neither is a credential. Both files were read before adding.",
+    "  F-12 broadened INJ-PROMPT/INJ-TOOL/INJ-ROLE from `**/*.md` to source, config, markup and data files, because a payload in payments.js was invisible while the same bytes in payload.md were caught. That added 13 findings, and all 13 were read individually: they are adversarial test fixtures \u2014 the mutation-payload table in test_security_mutation.js, the scrubber fixtures in test_memory_consolidation.js, the quarantine fixtures in test_memory_fixes.test.js, and the MARKER constant in test_security_scan_scope.test.js. Every one is a deliberately malicious string inside a test asserting it gets blocked. None is a live injection.",
+    "  This is the trade F-12 deliberately makes. A rule that cannot read source produces a clean scan that proves nothing; a noisy rule produces findings a human attributes in one pass. The residual false-positive classes are now visible instead of hiding behind a false green."
   ],
   "rules": {
     "INJ-SECRET": [
@@ -24,6 +26,19 @@
       ".agents/scripts/test_security_mutation.js"
     ],
     "INJ-OBFUSC": [
+      "tests/test_memory_consolidation.js"
+    ],
+    "INJ-PROMPT": [
+      ".agents/scripts/test_security_mutation.js",
+      "tests/test_memory_consolidation.js",
+      "tests/test_memory_fixes.test.js",
+      "tests/test_security_scan_scope.test.js"
+    ],
+    "INJ-TOOL": [
+      ".agents/scripts/test_security_mutation.js"
+    ],
+    "INJ-ROLE": [
+      ".agents/scripts/test_security_mutation.js",
       "tests/test_memory_consolidation.js"
     ]
   }

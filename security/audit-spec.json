@@ -98,18 +98,20 @@
     {
       "id": "INJ-PROMPT",
       "label": "INJ-PROMPT",
-      "path": "**/*.md",
+      "path": "**/*.md,**/*.mdx,**/*.markdown,**/*.txt,**/*.rst,**/*.js,**/*.mjs,**/*.cjs,**/*.jsx,**/*.ts,**/*.tsx,**/*.mts,**/*.cts,**/*.py,**/*.rb,**/*.go,**/*.rs,**/*.java,**/*.kt,**/*.php,**/*.cs,**/*.swift,**/*.sh,**/*.bash,**/*.zsh,**/*.ps1,**/*.sql,**/*.vue,**/*.svelte,**/*.astro,**/*.yml,**/*.yaml,**/*.toml,**/*.ini,**/*.cfg,**/*.conf,**/*.env,**/*.html,**/*.htm,**/*.svg,**/*.xml,**/*.csv,**/*.tsv",
       "pattern": "ignore\\s+(all\\s+|any\\s+)?(previous|prior|earlier)\\s+instructions|disregard\\s+(all\\s+|any\\s+)?(previous|prior)\\s+instructions|forget\\s+(all\\s+|any\\s+)?(previous|prior)\\s+instructions",
       "severity": "high",
-      "mode": "regex"
+      "mode": "regex",
+      "note": "F-12 (blind /launch run 6, 2026-10-09): this rule read only `**/*.md`, so a prompt-injection payload in any source or config file was invisible \u2014 identical bytes gave 2 findings as payload.md and 0 as payload.js, while INJ-SECRET (path `**`) caught a real credential in src/payments.js. A scanner that cannot read source is not a security scanner. Broadened to code, config, markup and data files. Expect more findings: the cost of a blind rule is higher than the cost of a noisy one, and the residual FP classes are now visible instead of hiding behind a clean scan that proved nothing."
     },
     {
       "id": "INJ-TOOL",
       "label": "INJ-TOOL",
-      "path": "**/*.md",
+      "path": "**/*.md,**/*.mdx,**/*.markdown,**/*.txt,**/*.rst,**/*.js,**/*.mjs,**/*.cjs,**/*.jsx,**/*.ts,**/*.tsx,**/*.mts,**/*.cts,**/*.py,**/*.rb,**/*.go,**/*.rs,**/*.java,**/*.kt,**/*.php,**/*.cs,**/*.swift,**/*.sh,**/*.bash,**/*.zsh,**/*.ps1,**/*.sql,**/*.vue,**/*.svelte,**/*.astro,**/*.yml,**/*.yaml,**/*.toml,**/*.ini,**/*.cfg,**/*.conf,**/*.env,**/*.html,**/*.htm,**/*.svg,**/*.xml,**/*.csv,**/*.tsv",
       "pattern": "<(invoke|use_mcp_tool|execute_command|tool_use|antml:invoke)[^>]*>",
       "severity": "high",
-      "mode": "regex"
+      "mode": "regex",
+      "note": "F-12 (blind /launch run 6, 2026-10-09): this rule read only `**/*.md`, so a prompt-injection payload in any source or config file was invisible \u2014 identical bytes gave 2 findings as payload.md and 0 as payload.js, while INJ-SECRET (path `**`) caught a real credential in src/payments.js. A scanner that cannot read source is not a security scanner. Broadened to code, config, markup and data files. Expect more findings: the cost of a blind rule is higher than the cost of a noisy one, and the residual FP classes are now visible instead of hiding behind a clean scan that proved nothing."
     },
     {
       "id": "INJ-OBFUSC",
@@ -129,10 +131,11 @@
     {
       "id": "INJ-ROLE",
       "label": "INJ-ROLE",
-      "path": "**/*.md",
+      "path": "**/*.md,**/*.mdx,**/*.markdown,**/*.txt,**/*.rst,**/*.js,**/*.mjs,**/*.cjs,**/*.jsx,**/*.ts,**/*.tsx,**/*.mts,**/*.cts,**/*.py,**/*.rb,**/*.go,**/*.rs,**/*.java,**/*.kt,**/*.php,**/*.cs,**/*.swift,**/*.sh,**/*.bash,**/*.zsh,**/*.ps1,**/*.sql,**/*.vue,**/*.svelte,**/*.astro,**/*.yml,**/*.yaml,**/*.toml,**/*.ini,**/*.cfg,**/*.conf,**/*.env,**/*.html,**/*.htm,**/*.svg,**/*.xml,**/*.csv,**/*.tsv",
       "pattern": "you\\s+are\\s+now\\s+(the\\s+)?(system|root|superuser)|act\\s+as\\s+(the\\s+)?system\\b|new\\s+system\\s+prompt:",
       "severity": "medium",
-      "mode": "regex"
+      "mode": "regex",
+      "note": "F-12 (blind /launch run 6, 2026-10-09): this rule read only `**/*.md`, so a prompt-injection payload in any source or config file was invisible \u2014 identical bytes gave 2 findings as payload.md and 0 as payload.js, while INJ-SECRET (path `**`) caught a real credential in src/payments.js. A scanner that cannot read source is not a security scanner. Broadened to code, config, markup and data files. Expect more findings: the cost of a blind rule is higher than the cost of a noisy one, and the residual FP classes are now visible instead of hiding behind a clean scan that proved nothing."
     },
     {
       "id": "INJ-TEMPLATE",

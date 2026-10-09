@@ -232,14 +232,30 @@ const CHECKS = {
         failures.push(`The empathy canvas has no ${q} quadrant. All four are required.`);
       }
     }
-    const says = section(text, 'Says');
-    const saysText = says || canvas;
-    if (!QUOTED_RE.test(saysText)) {
-      failures.push(
-        'The `Says` quadrant contains no quoted material and no source link. Says is what the user ' +
-        'verbalized — if there was no interview, say so and declare the basis as a hypothesis rather ' +
-        'than writing a plausible paraphrase and presenting it as something a person said.'
-      );
+    // F-13 (blind /launch run 6, 2026-10-09): this requirement was UNCONDITIONAL, and the gate
+    // therefore forced fabrication. An honest canvas declaring `Evidence basis: hypothesis` with no
+    // interviews failed here — and the cheapest way to pass was to type a quote nobody ever said. The
+    // agent running that audit refused and left the canvas red rather than invent a person.
+    //
+    // A gate that rewards a QUOTE STRING cannot tell a real quote from a typed one. Quotation is
+    // evidence, and evidence is not something a text check can manufacture — so demanding it
+    // unconditionally does not raise honesty, it lowers it.
+    //
+    // What is checkable is the HONESTY of the declaration: if nobody was interviewed, the basis must
+    // say so, and the body must label the content as unvalidated. That is enforced in sharedChecks.
+    // Here, only an INTERVIEWED/OBSERVED basis is required to carry quoted material.
+    const ev = evidenceBasis(text);
+    const claimsObservation = ev && ['interviewed', 'observed', 'support-tickets', 'survey'].includes(ev.basis);
+    if (claimsObservation) {
+      const saysText = section(text, 'Says') || canvas;
+      if (!QUOTED_RE.test(saysText)) {
+        failures.push(
+          `The \`Says\` quadrant contains no quoted material and no source link, but the evidence ` +
+          `basis is \`${ev.basis}\`. That basis claims someone was asked, so the quadrant must show ` +
+          'what they said. If nobody was asked, change the basis to `hypothesis` and label the ' +
+          'content as unvalidated — do not write a plausible paraphrase and present it as a quote.'
+        );
+      }
     }
     if (words(section(text, 'Pains')).length < 5) {
       failures.push('The `## Pains` section is empty. A map with no pains describes a product nobody has.');

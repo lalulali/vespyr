@@ -61,6 +61,7 @@ const DEFAULTS = {
 };
 
 const SCAN = path.join(__dirname, 'security-scan.js');
+const CANVAS_CHECK = path.join(__dirname, 'discovery_canvas_check.js');
 
 function parseArgs(argv) {
   const args = { _: [] };
@@ -457,6 +458,41 @@ function main() {
 
   const failures = checkReadiness(text, root);
   const warnings = [];
+
+  // F-14 (blind /launch run 6, 2026-10-09): /launch never checked the discovery canvases it depends
+  // on. An empathy map declaring `Evidence basis: interviewed` with zero quotes and no source
+  // material reached launch unnoticed, because the canvas had its own gate and nothing called it.
+  //
+  // A gate that exists but is never invoked is the `security-scan.js`-invoked-by-zero-skills defect
+  // again, one layer up. The launch gate is the last mechanical checkpoint before a release, so it
+  // is the right place to notice a research artifact that cannot support the claims built on it.
+  //
+  // Only canvases that EXIST are checked — an absent one is not a launch failure, because a release
+  // may legitimately have no journey map. One that exists and does not conform IS a failure.
+  const CANVASES = [
+    { kind: 'empathy-map', rel: 'artifacts/output/02-research/empathy-map.md' },
+    { kind: 'journey-map', rel: 'artifacts/output/02-research/journey-map.md' },
+    { kind: 'jtbd', rel: 'artifacts/output/02-research/jtbd-hmw.md' },
+    { kind: 'root-cause', rel: 'artifacts/output/02-research/root-cause-analysis.md' },
+  ];
+  for (const c of CANVASES) {
+    const abs = path.resolve(root, c.rel);
+    if (!fs.existsSync(abs)) continue;
+    const r = spawnSync('node', [CANVAS_CHECK, 'check', '--kind', c.kind, '--file', abs, '--json'], {
+      encoding: 'utf8',
+      maxBuffer: 16 * 1024 * 1024,
+    });
+    let j = {};
+    try { j = JSON.parse(r.stdout || '{}'); } catch { j = {}; }
+    if (r.status !== 0) {
+      failures.push(
+        `${c.rel} does not conform to the ${c.kind} contract, and a release is being built on it: ` +
+        `${(j.failures || []).slice(0, 2).join(' ')}` +
+        `${(j.failures || []).length > 2 ? ` (+${j.failures.length - 2} more)` : ''} ` +
+        'Fix with `discovery_canvas_check.js check --kind ' + c.kind + ' --file ' + c.rel + '`.'
+      );
+    }
+  }
 
   // F-10 (blind /launch run 2026-10-08): the scan's SCOPE can silently skip code.
   //
