@@ -121,12 +121,58 @@ function teamGateRows(text) {
     if (!/^\s*\|/.test(line)) continue;
     const cells = line.split('|').slice(1, -1).map((c) => c.trim().replace(/^`|`$/g, ''));
     if (cells.length < 2) continue;
-    const state = cells.find((c) => /SATISFIED|CHANGES REQUESTED|BLOCKED|NOT ACTIVATED/i.test(c));
-    if (!state) continue;
+    const stateCell = cells.find((c) => /SATISFIED|CHANGES REQUESTED|BLOCKED|NOT ACTIVATED/i.test(c));
+    if (!stateCell) continue;
+    const state = stateCell.toUpperCase();
     const agent = cells.find((c) => c.startsWith('@') || /^\S+$/.test(c)) || cells[0];
-    rows.push({ agent: agent.replace(/^\|\s*/, ''), state: state.toUpperCase() });
+    // F-4: capture the REMAINING cells. Previously only the agent and the disposition were read, so
+    // the Evidence column was invisible to this gate and a row could be flipped to SATISFIED while
+    // its own evidence kept saying the work was outstanding.
+    const evidence = cells
+      .filter((c) => c !== stateCell && c !== agent)
+      .join(' ')
+      .trim();
+    rows.push({ agent: agent.replace(/^\|\s*/, ''), state, evidence });
   }
   return rows;
+}
+
+/**
+ * Does a SATISFIED row's own evidence contradict its disposition?
+ *
+ * F-4 (blind /launch run 2026-10-08): measured by flipping @security-engineer to `SATISFIED` while
+ * leaving its Evidence cell reading "key rotation pending". The gate returned PASS. A reviewer
+ * recorded as satisfied, on evidence that says the thing is pending, is not a judgement call — it
+ * is a record that contradicts itself, and a self-contradicting sign-off is not a sign-off.
+ *
+ * NEGATION AND RESOLUTION. A blunt keyword test would flag correct evidence: "no outstanding
+ * issues" is a positive claim that contains "outstanding". So a token only counts when it is NOT
+ * preceded by a negator and the cell carries no resolution word.
+ *
+ * KNOWN LIMIT, stated rather than hidden. This is a word-level heuristic, not a proof. Evidence
+ * phrased in a way none of these tokens recognise ("rotation still to happen", "key work remains")
+ * will pass. It closes the specific forgery — relabel the disposition, leave the evidence — and it
+ * does not pretend to close every way a sign-off can be untrue. The word-level limit is the reason
+ * a launch still needs a human who reads the table.
+ */
+const CONTRADICTION_TOKENS = /\b(pending|outstanding|unresolved|incomplete|todo|tbd|awaiting|blocked|changes requested|not done|not complete|not yet|follow-?up|remediation)\b|\bstill\s+(open|pending|outstanding|blocked|broken|missing)\b|\bremains?\s+(open|pending|outstanding|blocked|to be|to do)\b|\bwork\s+remains?\b/i;
+const NEGATOR_NEAR = /\b(no|not|never|zero|none|nothing|without|nil)\b/i;
+const RESOLUTION_WORDS = /\b(resolved|fixed|closed|complete|completed|done|shipped|landed|verified|retested|green|passed|passing|cleared)\b/i;
+
+function evidenceContradicts(evidence) {
+  const e = String(evidence || '').trim();
+  if (!e) return null; // handled separately: empty evidence is its own failure
+  const m = e.match(CONTRADICTION_TOKENS);
+  if (!m) return null;
+  if (RESOLUTION_WORDS.test(e)) return null;
+  // Negation can sit on either side of the token: "no outstanding issues", "no issues still open",
+  // and "still open: none" are all positive claims. A window either side covers the ways these
+  // records are actually written; a token with no negator anywhere near it is a contradiction.
+  const before = e.slice(Math.max(0, m.index - 28), m.index);
+  const after = e.slice(m.index + m[0].length, m.index + m[0].length + 14);
+  if (NEGATOR_NEAR.test(before)) return null;
+  if (NEGATOR_NEAR.test(after)) return null;
+  return m[0];
 }
 
 function checkReadiness(text, root) {
@@ -183,13 +229,62 @@ function checkReadiness(text, root) {
           `CHANGES REQUESTED or BLOCKED is a hard NO-GO.`
       );
     }
+    // F-4: a SATISFIED row needs evidence, and that evidence must not contradict the disposition.
+    for (const r of rows.filter((x) => x.state === 'SATISFIED')) {
+      if (!r.evidence) {
+        failures.push(
+          `Team gate row "${r.agent}" is SATISFIED with no evidence. A disposition nobody can ` +
+            'check is an assertion, not a sign-off — and this gate is the only thing that ever reads it.'
+        );
+        continue;
+      }
+      const contradiction = evidenceContradicts(r.evidence);
+      if (contradiction) {
+        failures.push(
+          `Team gate row "${r.agent}" is SATISFIED while its own evidence says "${contradiction}" ` +
+            `("${r.evidence}"). A record that contradicts itself is not a sign-off. Either finish the ` +
+            'work, or change the disposition to match what the evidence actually says.'
+        );
+      }
+    }
+
+    // F-6 (blind /launch run 2026-10-08): a table containing ONE reviewer row returned PASS with
+    // zero failures. The gate parsed whatever rows existed and never asked who was MISSING, so the
+    // cheapest way to empty a gate was to delete nineteen rows. Deactivating a reviewer is allowed
+    // and is recorded; deleting one is not the same act and must not be invisible.
+    //
+    // The required roster is the five roles that own a release decision, which is also the set the
+    // skill's own worked example uses. KNOWN LIMIT, stated rather than hidden: a team with a
+    // legitimately different cast must either list these as NOT ACTIVATED with a real reason, or
+    // this list has to be edited. It is a deliberate floor, not a complete model of who matters.
+    const REQUIRED_REVIEWERS = [
+      '@product-manager', '@tech-lead', '@qa-engineer', '@security-engineer', '@devops-engineer',
+    ];
+    const present = new Set(rows.map((r) => String(r.agent).toLowerCase()));
+    const missing = REQUIRED_REVIEWERS.filter((a) => !present.has(a));
+    if (missing.length) {
+      failures.push(
+        `Team gate is missing ${missing.length} required reviewer row(s): ${missing.join(', ')}. ` +
+          'A reviewer can be deactivated, but deleting the row hides the decision instead of ' +
+          'recording it — mark the row NOT ACTIVATED with a specific out-of-scope reason.'
+      );
+    }
+
     const notActivated = rows.filter((r) => /NOT ACTIVATED/i.test(r.state));
     for (const r of notActivated) {
       const line = String(text).split('\n').find((l) => l.includes(r.agent)) || '';
-      if (!/out.of.scope|not applicable|n\/a because|reason/i.test(line)) {
+      const reason = r.evidence || '';
+      // F-5 (blind /launch run 2026-10-08): the accepted pattern included the bare word `reason`,
+      // so an evidence cell containing exactly `reason` satisfied it and the gate returned PASS. A
+      // check that rewards a token rather than a reason is not a check. The token is gone; a
+      // substantive explanation is now required.
+      const SPECIFIC = /out.of.scope|not applicable|n\/a because|does not apply|no (work|surface|change)/i;
+      const words = reason.replace(/[`*_]/g, '').trim().split(/\s+/).filter(Boolean);
+      if (!SPECIFIC.test(reason) || words.length < 4) {
         failures.push(
           `Team gate row "${r.agent}" is NOT ACTIVATED without a specific out-of-scope reason — ` +
-            `blanket deactivation is how a gate gets quietly emptied.`
+            `blanket deactivation is how a gate gets quietly emptied. Writing the word "reason" is ` +
+            `not a reason: say what is out of scope and why (got: "${reason.slice(0, 60)}").`
         );
       }
     }

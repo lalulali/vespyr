@@ -1187,13 +1187,34 @@ function mainDispatch(args) {
       let durationMs = null;
       let checkMemory = false;
       let nextStep = null;
-      for (let i = 1; i < args.length; i += 2) {
-        if (args[i] === '--agent') agent = args[i + 1];
-        if (args[i] === '--artifact') artifact = args[i + 1];
-        if (args[i] === '--tokens') { const v = parseInt(args[i + 1], 10); tokens = Number.isFinite(v) ? v : null; }
-        if (args[i] === '--duration-ms') { const v = parseInt(args[i + 1], 10); durationMs = Number.isFinite(v) ? v : null; }
-        if (args[i] === '--next') nextStep = args[i + 1];
-        if (args[i] === '--check-memory') { checkMemory = true; i -= 1; } // flag, no value
+      // Walk by ONE and consume a value only for flags that take one.
+      //
+      // This loop used to step by two, assuming every flag carries a value. That silently ate the
+      // argument following any unrecognised flag: `complete --dry-run --agent x` lost `--agent`
+      // entirely and reported "Missing --agent". Measured in a blind /launch run (2026-10-08).
+      // A parser that eats its own arguments is how a flag ends up looking accepted while being
+      // silently ignored -- the exact defect this pass has been removing everywhere else.
+      const VALUE_FLAGS = new Set(['--agent', '--artifact', '--tokens', '--duration-ms', '--next']);
+      let dryRun = false;
+      for (let i = 1; i < args.length; i++) {
+        const a = args[i];
+        if (a === '--dry-run') { dryRun = true; continue; }
+        if (a === '--check-memory') { checkMemory = true; continue; }
+        if (VALUE_FLAGS.has(a)) {
+          const v = args[i + 1];
+          if (v === undefined) {
+            console.error(`Missing value for ${a}`);
+            process.exit(2);
+          }
+          i += 1;
+          if (a === '--agent') agent = v;
+          else if (a === '--artifact') artifact = v;
+          else if (a === '--next') nextStep = v;
+          else if (a === '--tokens') { const n = parseInt(v, 10); tokens = Number.isFinite(n) ? n : null; }
+          else if (a === '--duration-ms') { const n = parseInt(v, 10); durationMs = Number.isFinite(n) ? n : null; }
+          continue;
+        }
+        console.error(`Unknown flag for 'complete': ${a} (ignored)`);
       }
       if (!agent || !artifact) {
         console.error('Missing --agent or --artifact');
@@ -1218,6 +1239,39 @@ function mainDispatch(args) {
       // This guarantees telemetry is never empty during real workflow runs.
       if (tokens === null) {
         tokens = estimateTokensFromFile(artifactPath);
+      }
+
+      // --dry-run MEANT NO WRITES.
+      //
+      // Measured (blind /launch run 2026-10-08): `complete --dry-run` wrote to FIVE files --
+      // pipeline-state.json, sprint-status.yaml, three telemetry NDJSON streams, and
+      // artifacts/memory/project-context.md, which is SHARED memory. An agent rehearsing a command
+      // corrupted live state and told nobody, because the flag was accepted and ignored.
+      //
+      // The computation still runs and is still reported, so a dry run rehearses the real logic
+      // rather than being a silent no-op. That is the entire point of the flag.
+      if (dryRun) {
+        console.log(JSON.stringify({
+          dry_run: true,
+          would_write: [
+            'artifacts/output/pipeline-state.json',
+            'artifacts/telemetry/*.ndjson',
+            'artifacts/memory/project-context.md',
+          ],
+          artifact,
+          agent,
+          version,
+          tokens,
+          duration_ms: durationMs,
+          note: 'DRY RUN -- nothing was written. Omit --dry-run to apply.',
+        }, null, 2));
+        if (checkMemory) {
+          const lsw = state.last_session_write;
+          if (!lsw || lsw.agent !== agent) {
+            console.log(`  would warn: no session-write recorded for @${agent}`);
+          }
+        }
+        return;
       }
 
       state.artifacts[artifact] = {

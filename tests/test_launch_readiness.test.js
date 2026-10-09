@@ -375,3 +375,128 @@ test('F-2: CONDITIONAL is also not GO and must not pass silently', () => {
   assert.strictEqual(r.json.verdict, 'FAIL',
     'CONDITIONAL on the go/no-go record is not a ship decision');
 });
+
+/**
+ * F-4: the team gate read the Disposition column and ignored the Evidence column.
+ *
+ * Measured by a blind /launch run (2026-10-08): flipping @security-engineer to `SATISFIED` while
+ * leaving its Evidence cell reading "key rotation pending" produced `verdict: PASS`. The gate parsed
+ * the state token, found the agent name, and never looked at the third column.
+ *
+ * The negation/resolution handling matters as much as the token list, because a blunt keyword test
+ * flags correct evidence: "no outstanding issues" is a positive claim that contains "outstanding".
+ * Both directions are pinned below, including phrasings that put the negation AFTER the token.
+ */
+const gateWith = (evidence) => ({
+  ...COMPLETE,
+  'artifacts/output/06-launch/release-readiness.md': `# Release Readiness
+
+## UTTERLY SATISFIED team gate
+
+| Reviewer | Disposition | Evidence |
+|---|---|---|
+| @product-manager | \`SATISFIED\` | ${evidence} |
+`,
+});
+
+test('F-4: SATISFIED with evidence saying "pending" fails', () => {
+  const r = run(gateWith('key rotation pending'));
+  assert.strictEqual(r.json.verdict, 'FAIL');
+  assert.ok(r.failures.some((f) => /@product-manager.*SATISFIED while its own evidence says/.test(f)),
+    `expected the contradiction to be named, got: ${JSON.stringify(r.failures)}`);
+});
+
+test('F-4: SATISFIED with no evidence cell at all fails', () => {
+  const r = run({ ...COMPLETE, 'artifacts/output/06-launch/release-readiness.md':
+    '# Release Readiness\n\n## UTTERLY SATISFIED team gate\n\n| Reviewer | Disposition |\n|---|---|\n| @product-manager | `SATISFIED` |\n' });
+  assert.strictEqual(r.json.verdict, 'FAIL');
+  assert.ok(r.failures.some((f) => /SATISFIED with no evidence/.test(f)));
+});
+
+test('F-4: legitimate evidence passes, including negated forms of the flagged words', () => {
+  const legit = [
+    'scope agreed', 'qa-signoff.md', 'scan clean', 'rollback rehearsed',
+    'no outstanding issues', 'nothing outstanding', 'nothing pending',
+    'zero open findings', 'without outstanding defects', 'nothing remains open',
+    'still open: none', 'no issues still open', 'no remediation outstanding',
+    'follow-up completed', 'rotation pending, now resolved',
+  ];
+  for (const e of legit) {
+    const r = run(gateWith(e));
+    assert.ok(
+      r.failures.every((f) => !/@product-manager/.test(f)),
+      `false positive on legitimate evidence "${e}": ${JSON.stringify(r.failures)}`
+    );
+  }
+});
+
+test('F-4: each contradictory phrasing is caught', () => {
+  const contradictory = [
+    'key rotation pending', 'retry storm still open', 'follow-up needed',
+    'migration incomplete', 'awaiting sign-off', 'tbd',
+    'remediation outstanding', 'work remains', 'JPY rounding still broken',
+  ];
+  for (const e of contradictory) {
+    const r = run(gateWith(e));
+    assert.ok(
+      r.failures.some((f) => /@product-manager.*while its own evidence says/.test(f)),
+      `missed contradictory evidence "${e}"`
+    );
+  }
+});
+
+/**
+ * F-5 and F-6: the team gate could be emptied by writing a word, or by deleting rows.
+ *
+ * Both found by a blind /launch run (2026-10-08) that probed the gate with the forgery vectors a
+ * dishonest release engineer would actually use.
+ *
+ * F-5: the NOT ACTIVATED check accepted the bare token `reason`, so an evidence cell containing
+ * exactly that word returned PASS. A check that rewards a token rather than a reason is not a check.
+ *
+ * F-6: a table with ONE reviewer row returned PASS with zero failures. The gate parsed whatever rows
+ * existed and never asked who was missing, so the cheapest way to empty a gate was to delete rows.
+ * Deactivating a reviewer is a recorded decision; deleting one hides it.
+ */
+const gate = (rows) => ({
+  ...COMPLETE,
+  'artifacts/output/06-launch/release-readiness.md':
+    `# Release Readiness\n\n## UTTERLY SATISFIED team gate\n\n| Reviewer | Disposition | Evidence |\n|---|---|---|\n${rows}`,
+});
+
+const FULL_ROSTER = [
+  '| @product-manager | `SATISFIED` | scope agreed |',
+  '| @tech-lead | `SATISFIED` | plan approved |',
+  '| @qa-engineer | `SATISFIED` | qa-signoff.md |',
+  '| @devops-engineer | `SATISFIED` | rollback rehearsed |',
+].join('\n');
+
+test('F-5: an evidence cell containing only the word "reason" fails', () => {
+  const r = run(gate(`${FULL_ROSTER}\n| @security-engineer | \`NOT ACTIVATED\` | reason |`));
+  assert.strictEqual(r.json.verdict, 'FAIL');
+  assert.ok(r.failures.some((f) => /NOT ACTIVATED without a specific out-of-scope reason/.test(f)),
+    `expected the bare token to be rejected, got: ${JSON.stringify(r.failures)}`);
+});
+
+test('F-5: a specific out-of-scope reason passes (so the check is not a blanket rejection)', () => {
+  const r = run(gate(`${FULL_ROSTER}\n| @security-engineer | \`NOT ACTIVATED\` | out of scope, no auth surface changed in this release |`));
+  assert.strictEqual(r.json.verdict, 'PASS',
+    `a real reason must be accepted: ${JSON.stringify(r.failures)}`);
+});
+
+test('F-6: a one-row team gate fails and names who is missing', () => {
+  const r = run(gate('| @product-manager | `SATISFIED` | scope agreed |'));
+  assert.strictEqual(r.json.verdict, 'FAIL');
+  const f = r.failures.find((x) => /missing .* required reviewer row/.test(x));
+  assert.ok(f, `expected a missing-reviewer failure, got: ${JSON.stringify(r.failures)}`);
+  assert.match(f, /@tech-lead/);
+  assert.match(f, /@qa-engineer/);
+  assert.match(f, /@security-engineer/);
+  assert.match(f, /@devops-engineer/);
+});
+
+test('F-6: a deactivated reviewer still satisfies the roster (deactivate != delete)', () => {
+  const r = run(gate(`${FULL_ROSTER}\n| @security-engineer | \`NOT ACTIVATED\` | out of scope, no auth surface changed here |`));
+  assert.ok(!r.failures.some((f) => /missing .* required reviewer row/.test(f)),
+    'a NOT ACTIVATED row is present, so the roster must be satisfied');
+});
