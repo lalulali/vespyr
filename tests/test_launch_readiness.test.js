@@ -67,9 +67,13 @@ const SIGNOFF_GO = `# QA Sign-off
 | — | — | — | — |
 `;
 
+// The Blocking? column reads `no` deliberately. This fixture exercises the owner/date rules, so it
+// needs a CONDITIONAL whose conditions are all non-blocking — the legitimately shippable shape.
+// F-9 makes a CONDITIONAL carrying a `Blocking? Yes` row a hard failure: an owner and a date make a
+// defect trackable, not resolved. That case is pinned separately, in the F-9 tests.
 const SIGNOFF_CONDITIONAL = SIGNOFF_GO
   .replace('[GO]', '[CONDITIONAL]')
-  .replace('| — | — | — | — | — |', '| C1 | PDF export fails above 500 rows | @developer | 2026-11-01 | yes |');
+  .replace('| — | — | — | — | — |', '| C1 | PDF export fails above 500 rows | @developer | 2026-11-01 | no |');
 
 const GO_NOGO = `# Go/No-Go
 
@@ -555,4 +559,68 @@ test('F-8: a real rollback plan passes', () => {
   const r = run(withGoNoGo(REAL_ROLLBACK));
   assert.ok(!r.failures.some((f) => /rollback plan/.test(f)),
     `a substantive plan must be accepted: ${JSON.stringify(r.failures)}`);
+});
+
+/**
+ * F-9 and F-10: two forgeries the third blind run (2026-10-08) performed successfully against the
+ * hardened gate, both using nothing but text edits inside the release's own records.
+ *
+ * F-9: adding an owner and a date to a condition already marked `Blocking: Yes` converted the gate
+ * to PASS with the condition still open. The `Blocking?` column was in the template and in every
+ * sign-off the gate had checked, and nothing ever read it. A column nobody reads cannot constrain
+ * anything, and paperwork is not remediation.
+ *
+ * F-10: this repository's own spec uses `mode: include-list`, listing the ENGINE's directories and
+ * deliberately omitting `src`. Pointed at a product tree, the scan dropped `src/` and a live Stripe
+ * key vanished from the findings with `warnings: []`. The spec's mode_note documents this failure in
+ * prose and answers it with "Do not copy this into a product repository" — a sentence nothing
+ * enforced. A scope that drops source-shaped files is now a hard failure instead of a documented risk.
+ */
+const ROSTER_ALL = [
+  '| @product-manager | `SATISFIED` | scope agreed |',
+  '| @tech-lead | `SATISFIED` | plan approved |',
+  '| @qa-engineer | `SATISFIED` | qa-signoff.md |',
+  '| @security-engineer | `SATISFIED` | scan clean |',
+  '| @devops-engineer | `SATISFIED` | rollback rehearsed |',
+].join('\n');
+
+const READY_ALL = `# Release Readiness\n\n## UTTERLY SATISFIED team gate\n\n| Reviewer | Disposition | Evidence |\n|---|---|---|\n${ROSTER_ALL}`;
+
+const GONOGO_ROLLBACK = `# Go/No-Go\n\n**Verdict:** GO\n\n## Rollback\n\nRevert to the previous image in about 4 minutes if the error rate exceeds 2%. Rehearsed 2026-10-08.\n`;
+
+const signoffWith = (blocking) => `# QA Sign-off\n\n**Verdict:** \`VERDICT: [CONDITIONAL]\`\n\n## Conditions\n\n| # | Condition | Owner | Due | Blocking? |\n|---|---|---|---|---|\n| 1 | Webhook retry storms under load | @tech-lead | 2026-10-23 | ${blocking} |\n`;
+
+const forgeryTree = (blocking) => ({
+  'artifacts/output/06-launch/release-readiness.md': READY_ALL,
+  'artifacts/output/06-launch/go-nogo-decision.md': GONOGO_ROLLBACK,
+  'artifacts/output/05-execution/quality/qa-signoff.md': signoffWith(blocking),
+});
+
+test('F-9: a Blocking:Yes condition blocks the gate even with an owner and a date', () => {
+  const r = run(forgeryTree('Yes'));
+  assert.strictEqual(r.json.verdict, 'FAIL');
+  assert.ok(r.failures.some((f) => /marked Blocking: Yes/.test(f)),
+    `expected the blocking condition to be named, got: ${JSON.stringify(r.failures)}`);
+});
+
+test('F-9: the same condition marked No passes (so the check is not a blanket rejection)', () => {
+  const r = run(forgeryTree('No'));
+  assert.ok(!r.failures.some((f) => /Blocking: Yes/.test(f)),
+    `a non-blocking condition must be accepted: ${JSON.stringify(r.failures)}`);
+});
+
+test('F-10: a scope that drops source files fails the gate and names them', () => {
+  const r = run({
+    ...forgeryTree('No'),
+    // A product-shaped tree with a live credential, scanned by a spec whose product_roots omit src.
+    'src/pay.js': 'const K = "' + ['sk', 'live', '4eC39HqLyjWDarjtT1zdp7dc'].join('_') + '";\n',
+    'security/audit-spec.json': JSON.stringify({
+      ...JSON.parse(require('node:fs').readFileSync(path.join(ROOT, 'security/audit-spec.json'), 'utf8')),
+    }, null, 2),
+  });
+  assert.strictEqual(r.json.verdict, 'FAIL',
+    'an inclusion allowlist that skips src/ must not report a clean release');
+  assert.ok(r.failures.some((f) => /silently dropped \d+ source file/.test(f)),
+    `expected the dropped-file failure, got: ${JSON.stringify(r.failures)}`);
+  assert.ok(r.json.scan.scope.dropped_source_files > 0);
 });

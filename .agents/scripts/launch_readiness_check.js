@@ -225,6 +225,22 @@ function checkReadiness(text, root) {
         if (rows.some((r) => !/@[a-z-]+/i.test(r))) {
           failures.push(`qa-signoff.md has ${rows.filter((r) => !/@[a-z-]+/i.test(r)).length} condition(s) with no owner.`);
         }
+        // F-9 (blind /launch run 2026-10-08): a row marked `Blocking? Yes` that also carries an
+        // owner and a date satisfies the two checks above while the condition is STILL OPEN. Measured:
+        // adding an owner and a date to one `Blocking: Yes` row converted the gate to PASS with the
+        // defect unresolved. Paperwork is not remediation.
+        //
+        // The `Blocking?` column existed in the template and in every sign-off the gate had ever
+        // checked, and was never read by anything. A column nobody reads cannot constrain anything.
+        const blockingRows = rows.filter((r) => /\|\s*yes\s*\|\s*$/i.test(r) || /\bblocking\b[^|]*\|\s*yes/i.test(r));
+        if (blockingRows.length) {
+          failures.push(
+            `qa-signoff.md lists ${blockingRows.length} condition(s) marked Blocking: Yes — a ` +
+            'CONDITIONAL verdict carrying a blocking condition is not a GO. The owner and the date ' +
+            'make it trackable; they do not make it resolved. Resolve the condition, or change the ' +
+            'Blocking? column to No and say why it is no longer blocking.'
+          );
+        }
         if (rows.some((r) => !/\d{4}-\d{2}-\d{2}/.test(r))) {
           failures.push(`qa-signoff.md has ${rows.filter((r) => !/\d{4}-\d{2}-\d{2}/.test(r)).length} condition(s) with no date.`);
         }
@@ -435,6 +451,31 @@ function main() {
 
   const failures = checkReadiness(text, root);
   const warnings = [];
+
+  // F-10 (blind /launch run 2026-10-08): the scan's SCOPE can silently skip code.
+  //
+  // Measured: this repository's own spec uses `mode: include-list`, whose product_roots list this
+  // ENGINE's directories and deliberately omits `src`. Pointed at a product tree, the scan dropped
+  // `src/` entirely — and a live Stripe key vanished from the findings, with `warnings: []`. The
+  // spec's own mode_note documents this exact failure in prose and answers it with "Do not copy
+  // `mode: include-list` into a product repository". Nothing enforced that sentence.
+  //
+  // An exclusion list fails closed; an inclusion allowlist fails open. The only way to stop relying
+  // on a reader's good intentions is to make the failure impossible, so a scope that drops
+  // source-shaped files is now a hard failure rather than a documented risk.
+  //
+  // This repository is unaffected: it drops 0 source files, because artifacts/ and sandbox/ are
+  // removed earlier by excluded_trees and never reach the inclusion filter.
+  const scanScope = scan.scope || {};
+  if (scanScope.mode === 'include-list' && (scanScope.dropped_source_files || 0) > 0) {
+    failures.push(
+      `The scan scope silently dropped ${scanScope.dropped_source_files} source file(s) ` +
+      `(e.g. ${(scanScope.dropped_source_sample || []).join(', ')}). An inclusion allowlist skips ` +
+      'every directory nobody remembered to list, and a skipped file cannot fail a check. This spec ' +
+      'is written for the Vespyr engine; pointed at a product tree it skips the product. Use the ' +
+      'default exclude-list scope, or add the tree to product_roots.'
+    );
+  }
 
   // The scan. Enforced only with --require-scan AND a resolvable spec, and this gate refuses to
   // convert a scanner failure into a pass.

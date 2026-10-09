@@ -278,6 +278,12 @@ function applyProductScope(fileList, spec) {
   const kept = [];
   const excludedCounts = {};
   const excludedByTree = {};
+  // Source-shaped files removed by the inclusion filter. Reported because an inclusion allowlist
+  // fails open, and a dropped .js file is the shape of that failure: measured in a blind /launch run
+  // (2026-10-08), running this repository's own include-list spec against a product tree dropped
+  // src/ and a live Stripe key vanished from the findings with `warnings: []`.
+  const CODE_EXT = /\.(?:[cm]?js|jsx|ts|tsx|py|rb|go|rs|java|kt|php|sh|bash|zsh|cs|swift|scala|ex|erl|sql)$/i;
+  const droppedSource = [];
   for (const f of fileList) {
     const hit = isExcludedTree(f.rel);
     if (hit) {
@@ -287,8 +293,14 @@ function applyProductScope(fileList, spec) {
     if (mode === 'exclude-list' || isProduct(f.rel)) { kept.push(f); continue; }
     const top = String(f.rel).split('/')[0];
     excludedCounts[top] = (excludedCounts[top] || 0) + 1;
+    if (CODE_EXT.test(f.rel)) droppedSource.push(f.rel);
   }
-  return { kept, excludedCounts, excludedByTree, applied: true, mode, examined: kept.length };
+  return {
+    kept, excludedCounts, excludedByTree, applied: true, mode,
+    examined: kept.length,
+    droppedSourceCount: droppedSource.length,
+    droppedSourceSample: droppedSource.slice(0, 5),
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -1041,6 +1053,9 @@ function main() {
             // How many files the scan actually opened. Without this, "0 findings" and "0 files"
             // are the same output and an over-broad scope reads as a clean bill of health.
             files_examined: filesExamined,
+            // Only meaningful in include-list mode, where dropping is the dangerous direction.
+            dropped_source_files: scoped.droppedSourceCount || 0,
+            dropped_source_sample: scoped.droppedSourceSample || [],
           },
         },
         null,
