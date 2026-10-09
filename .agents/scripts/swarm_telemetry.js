@@ -18,6 +18,7 @@
  */
 
 const fs = require('fs');
+const { numericFlag } = require('./lib/flag_args');
 const path = require('path');
 const crypto = require('crypto');
 
@@ -763,28 +764,19 @@ function main() {
   }
 
   if (cmd === 'summary') {
-    let days = 7;
-    for (let i = 1; i < args.length; i += 2) {
-      if (args[i] === '--days') days = parseInt(args[i + 1], 10) || 7;
-    }
+    const days = numericFlag(args, '--days', 7, 'summary');
     const summary = generateSummary(days);
     console.log(JSON.stringify(summary, null, 2));
   }
 
   if (cmd === 'spans') {
-    let days = 7;
-    for (let i = 1; i < args.length; i += 2) {
-      if (args[i] === '--days') days = parseInt(args[i + 1], 10) || 7;
-    }
+    const days = numericFlag(args, '--days', 7, 'spans');
     const spans = readSpans(days);
     console.log(JSON.stringify(spans, null, 2));
   }
 
   if (cmd === 'verify') {
-    let days = 7;
-    for (let i = 1; i < args.length; i += 2) {
-      if (args[i] === '--days') days = parseInt(args[i + 1], 10) || 7;
-    }
+    const days = numericFlag(args, '--days', 7, 'verify');
     const v = verifySpans(days);
     console.log(JSON.stringify(v, null, 2));
     // Fail closed on both gates: hybrid exactness AND tier-demotion audit.
@@ -797,10 +789,7 @@ function main() {
   }
 
   if (cmd === 'report') {
-    let days = 30;
-    for (let i = 1; i < args.length; i += 2) {
-      if (args[i] === '--days') days = parseInt(args[i + 1], 10) || 30;
-    }
+    const days = numericFlag(args, '--days', 30, 'report');
     const report = generateReport(days);
     console.log(JSON.stringify(report, null, 2));
   }

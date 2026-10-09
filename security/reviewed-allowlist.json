@@ -26,20 +26,52 @@
       ".agents/scripts/test_security_mutation.js"
     ],
     "INJ-OBFUSC": [
-      "tests/test_memory_consolidation.js"
+      "tests/test_memory_consolidation.js",
+      ".agents/skills/elicitation/methods.csv",
+      ".agents/skills/unpack-problem/steps/step-02-analysis-execution.md"
     ],
     "INJ-PROMPT": [
       ".agents/scripts/test_security_mutation.js",
       "tests/test_memory_consolidation.js",
       "tests/test_memory_fixes.test.js",
-      "tests/test_security_scan_scope.test.js"
+      "tests/test_security_scan_scope.test.js",
+      ".agents/TROUBLESHOOTING.md",
+      ".agents/skills.md",
+      ".agents/agents/security-engineer.md"
     ],
     "INJ-TOOL": [
-      ".agents/scripts/test_security_mutation.js"
+      ".agents/scripts/test_security_mutation.js",
+      ".agents/TROUBLESHOOTING.md",
+      ".agents/skills.md"
     ],
     "INJ-ROLE": [
       ".agents/scripts/test_security_mutation.js",
       "tests/test_memory_consolidation.js"
     ]
-  }
+  },
+  "residual_coverage_loss": [
+    "The seven entries below are per-RULE and per-FILE. That is deliberate: the allowlist is keyed by",
+    "rule, so allowlisting `.agents/skills.md` for INJ-PROMPT does NOT suppress a new INJ-SECRET or",
+    "INJ-ROLE in that same file. A new secret or role-hijack there still fails the gate.",
+    "",
+    "WHAT IS LOST, stated rather than implied: a NEW INJ-PROMPT or INJ-TOOL in those three files, or a",
+    "new INJ-OBFUSC in those two, would be suppressed rather than reported. That is the real cost of",
+    "reviewing a finding instead of changing a rule, and it is why these entries carry per-file reasons",
+    "rather than a blanket exclusion.",
+    "",
+    "WHAT WAS CONSIDERED AND REJECTED: downgrading the rules to advisory severity would close the gate",
+    "with no coverage loss at all \u2014 and would also let a genuine prompt injection in a context-loaded",
+    "agent file ship with a warning attached. Trading a real security control for a green checkmark is",
+    "the exact failure this repository has spent the session removing.",
+    "",
+    "ALSO CONSIDERED AND REJECTED: exempting matches inside Markdown code spans. Every one of these three",
+    "files quotes the payload in backticks \u2014 so it would close all seven \u2014 and it would also hand any",
+    "attacker a trivial bypass: wrap the payload in backticks and the rule stops firing.",
+    "",
+    "The underlying limitation is real and unresolved: INJ-PROMPT and INJ-TOOL cannot distinguish an",
+    "instruction from documentation quoting one, and INJ-OBFUSC's corpus fixture and its false positives",
+    "are the same shape (a base64 blob and a slash-separated TitleCase list are indistinguishable to a",
+    "character-class rule). Narrowing either rule would change what the adversarial corpus tests. The",
+    "honest options were reviewed findings or a weakened control, and this is the reviewed option."
+  ]
 }

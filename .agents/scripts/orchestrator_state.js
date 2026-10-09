@@ -27,6 +27,7 @@
  */
 
 const fs = require('fs');
+const { parseFlagArgs } = require('./lib/flag_args');
 const path = require('path');
 
 const { writeFileSync: atomicWriteFileSync, writeJsonSync, readJsonSync } = require('./lib/fs_atomic.js');
@@ -1744,41 +1745,6 @@ const MUTATING_COMMANDS = new Set([
   'advance', 'set-phase', 'compact', 'sync-context', 'file-cr'
 ]);
 
-/**
- * Parse `--flag value` arguments without consuming the argument that follows an unrecognised flag.
- *
- * Six command parsers in this file used to step `i += 2`, assuming every flag carries a value. That
- * silently ate the next argument after ANY flag the loop did not handle, so `session-write --json
- * --agent x` lost `--agent` and reported a missing value while running with neither. Measured
- * (blind /launch run 4, 2026-10-08) on `complete`; the same shape was present six more times.
- *
- * One implementation, not seven. Every command now walks by ONE and consumes a value only for a flag
- * declared to take one. Unknown flags are reported rather than swallowing their neighbour, and a
- * value flag with no value is a usage error (exit 2) rather than a confusing downstream message.
- */
-function parseFlagArgs(argv, valueFlags, booleanFlags, label) {
-  const values = new Set(valueFlags);
-  const bools = new Set(booleanFlags || []);
-  const out = {};
-  for (let i = 0; i < argv.length; i++) {
-    const a = argv[i];
-    if (!a.startsWith('--')) continue; // positional: every command here is flag-only
-    const key = a.slice(2);
-    if (bools.has(a)) { out[key] = true; continue; }
-    if (values.has(a)) {
-      const v = argv[i + 1];
-      if (v === undefined) {
-        console.error(`Missing value for ${a}`);
-        process.exit(2);
-      }
-      out[key] = v;
-      i += 1;
-      continue;
-    }
-    console.error(`Unknown flag for '${label}': ${a} (ignored)`);
-  }
-  return out;
-}
 
 function main() {
   const args = process.argv.slice(2);

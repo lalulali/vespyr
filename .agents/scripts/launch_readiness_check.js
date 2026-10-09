@@ -56,7 +56,6 @@ const DEFAULTS = {
   readiness: 'artifacts/output/06-launch/release-readiness.md',
   goNoGo: 'artifacts/output/06-launch/go-nogo-decision.md',
   signoff: 'artifacts/output/05-execution/quality/qa-signoff.md',
-  plan: 'artifacts/output/05-planning/execution-plan.md',
   scan: 'security/audit-spec.json',
 };
 

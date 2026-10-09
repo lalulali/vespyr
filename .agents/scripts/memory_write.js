@@ -36,6 +36,7 @@
 'use strict';
 
 const fs = require('fs');
+const { parseFlagArgs } = require('./lib/flag_args');
 const { writeFileSync: atomicWriteFileSync } = require('./lib/fs_atomic.js');
 const { withLock } = require('./lib/lock.js');
 const { resolveSessionId } = require('./lib/session.js');
@@ -507,16 +508,19 @@ function routingAdvisory(file, domain) {
   let file = null, agent = null, domain = null, title = null, content = null;
   let status = 'active', refs = null, supersedes = null;
 
-  for (let i = 0; i < args.length; i += 2) {
-    if (args[i] === '--file') file = args[i + 1];
-    else if (args[i] === '--agent') agent = args[i + 1];
-    else if (args[i] === '--domain') domain = args[i + 1];
-    else if (args[i] === '--title') title = args[i + 1];
-    else if (args[i] === '--content') content = args[i + 1];
-    else if (args[i] === '--status') status = args[i + 1];
-    else if (args[i] === '--refs') refs = args[i + 1];
-    else if (args[i] === '--supersedes') supersedes = args[i + 1];
-  }
+  // Was `i += 2`, which ate the argument after any unrecognised flag. See lib/flag_args.js — a
+  // silently ignored flag does not look like a bug, it looks like a result.
+  const f = parseFlagArgs(args,
+    ['--file', '--agent', '--domain', '--title', '--content', '--status', '--refs', '--supersedes'],
+    [], 'memory-write');
+  file = f.file ?? null;
+  agent = f.agent ?? null;
+  domain = f.domain ?? null;
+  title = f.title ?? null;
+  content = f.content ?? null;
+  status = f.status || 'active';
+  refs = f.refs ?? null;
+  supersedes = f.supersedes ?? null;
 
   // --- Validation ---
   const errors = [];

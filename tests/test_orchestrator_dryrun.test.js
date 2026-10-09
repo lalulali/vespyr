@@ -174,3 +174,34 @@ test('parseFlagArgs: no command handler still steps i += 2 (the shape that cause
   assert.deepStrictEqual(offenders, [],
     'a step-by-two arg loop reappeared; it eats the argument after any unhandled flag');
 });
+
+test('REPO-WIDE: no script steps two at a time over an argument array', () => {
+  // Nine parsers across three files used this shape. Two were measured producing a SILENT WRONG
+  // ANSWER rather than an error — `summary --bogus --days 3` printed a confident 7-day summary
+  // instead of 3 days, exit 0, nothing indicating a problem. A silently ignored flag does not look
+  // like a bug; it looks like a result.
+  const offenders = [];
+  const walk = (dir) => {
+    if (!fs.existsSync(dir)) return;
+    for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+      if (e.name === 'node_modules' || e.name.startsWith('.')) continue;
+      const full = path.join(dir, e.name);
+      if (e.isDirectory()) { walk(full); continue; }
+      if (!/\.(js|cjs|mjs)$/.test(e.name)) continue;
+      fs.readFileSync(full, 'utf8').split('\n').forEach((l, i) => {
+        const code = l.trim();
+        // Comments are excluded on purpose. The fix for this bug is to WRITE DOWN what the bug was,
+        // and a guard that fires on its own explanation has to be silenced by deleting the
+        // explanation — which is how the knowledge gets lost and the bug returns.
+        if (code.startsWith('//') || code.startsWith('*') || code.startsWith('/*')) return;
+        if (/i \+= 2/.test(code) && /(args|argv|process\.argv)/.test(code)) {
+          offenders.push(`${path.relative(REPO, full)}:${i + 1}`);
+        }
+      });
+    }
+  };
+  walk(path.join(REPO, '.agents/scripts'));
+  walk(path.join(REPO, 'bin'));
+  assert.deepStrictEqual(offenders, [],
+    `a step-by-two argument loop reappeared; use lib/flag_args.js parseFlagArgs: ${offenders.join(', ')}`);
+});

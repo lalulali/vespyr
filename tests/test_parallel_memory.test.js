@@ -79,9 +79,11 @@ test('02o DoD#5: falsifiability — lock bypass reproduces corruption (planted-b
   for (const f of ['memory_write.js', 'dedupe_validator.js', 'compaction_guard.js']) {
     fs.copyFileSync(path.join(SCRIPTS, f), path.join(sdir, f));
   }
-  for (const f of ['fs_atomic.js', 'session.js']) {
-    fs.copyFileSync(path.join(SCRIPTS, 'lib', f), path.join(sdir, 'lib', f));
-  }
+  // The whole lib directory, not an enumeration of it. This sandbox listed two files, and adding
+  // `lib/flag_args.js` as a dependency of memory_write.js silently broke it: the require failed,
+  // every writer exited, and the test read a file nobody wrote. An enumeration of a dependency list
+  // is a tripwire that fires on every future dependency.
+  fs.cpSync(path.join(SCRIPTS, 'lib'), path.join(sdir, 'lib'), { recursive: true });
   // Planted bypass: pass-through lock (R0.2 planted-violation pattern) PLUS
   // a widened header-rename window (200ms busy-wait inside the sandbox's
   // fs_atomic). This makes the exists-check→rename race STRUCTURAL rather
