@@ -74,6 +74,11 @@ const SIGNOFF_CONDITIONAL = SIGNOFF_GO
 const GO_NOGO = `# Go/No-Go
 
 **Verdict:** GO — the scan is clean and two conditions are tracked with owners.
+
+## Rollback
+
+If the error rate exceeds 2% for 5 minutes, @devops-engineer reverts the deploy to the previous
+image and reopens billing. Takes about 4 minutes. Rehearsed 2026-10-08.
 `;
 
 function run(files, args = []) {
@@ -348,6 +353,11 @@ const NO_GO_RECORD = `# Go/No-Go
 **Verdict:** NO-GO
 
 We are not shipping. The retry storm under load is still open.
+
+## Rollback
+
+If the error rate exceeds 2% for 5 minutes, @devops-engineer reverts to the previous image in about
+4 minutes. Rehearsed 2026-10-08.
 `;
 
 test('F-2: a recorded NO-GO is a hard failure, not a formality', () => {
@@ -499,4 +509,50 @@ test('F-6: a deactivated reviewer still satisfies the roster (deactivate != dele
   const r = run(gate(`${FULL_ROSTER}\n| @security-engineer | \`NOT ACTIVATED\` | out of scope, no auth surface changed here |`));
   assert.ok(!r.failures.some((f) => /missing .* required reviewer row/.test(f)),
     'a NOT ACTIVATED row is present, so the roster must be satisfied');
+});
+
+/**
+ * F-8: a rollback plan is required, and a heading is not a plan.
+ *
+ * SKILL.md:54 named a missing rollback plan as a hard NO-GO and step-01:123 asks for rollback
+ * CRITERIA — what triggers one, who executes it. Nothing checked any of it, so a five-line go/no-go
+ * with no rollback passed unchanged (blind /launch run 2026-10-08). The body word count matters for
+ * the same reason F-5 did: a heading called "Rollback" followed by "TBD" satisfies a heading check
+ * while providing nothing.
+ */
+const ROSTER = [
+  '| @product-manager | `SATISFIED` | scope agreed |',
+  '| @tech-lead | `SATISFIED` | plan approved |',
+  '| @qa-engineer | `SATISFIED` | qa-signoff.md |',
+  '| @security-engineer | `SATISFIED` | scan clean |',
+  '| @devops-engineer | `SATISFIED` | rollback rehearsed |',
+].join('\n');
+
+const withGoNoGo = (body) => ({
+  'artifacts/output/06-launch/release-readiness.md':
+    `# Release Readiness\n\n## UTTERLY SATISFIED team gate\n\n| Reviewer | Disposition | Evidence |\n|---|---|---|\n${ROSTER}`,
+  'artifacts/output/06-launch/go-nogo-decision.md': `# Go/No-Go\n\n**Verdict:** GO\n\n${body}`,
+  'artifacts/output/05-execution/quality/qa-signoff.md': SIGNOFF_GO,
+});
+
+const REAL_ROLLBACK =
+  '## Rollback\n\nIf error rate exceeds 2% for 5 minutes, @devops-engineer reverts the deploy to the\nprevious image. Takes about 4 minutes. Verified in rehearsal 2026-10-08.\n';
+
+test('F-8: a go/no-go with no rollback section fails', () => {
+  const r = run(withGoNoGo('Approved.'));
+  assert.strictEqual(r.json.verdict, 'FAIL');
+  assert.ok(r.failures.some((f) => /records no rollback plan/.test(f)),
+    `expected the missing plan to be named, got: ${JSON.stringify(r.failures)}`);
+});
+
+test('F-8: a rollback heading with no body is not a plan', () => {
+  const r = run(withGoNoGo('## Rollback\n\nTBD\n'));
+  assert.strictEqual(r.json.verdict, 'FAIL',
+    'naming the word is not a plan — same token-versus-substance problem as F-5');
+});
+
+test('F-8: a real rollback plan passes', () => {
+  const r = run(withGoNoGo(REAL_ROLLBACK));
+  assert.ok(!r.failures.some((f) => /rollback plan/.test(f)),
+    `a substantive plan must be accepted: ${JSON.stringify(r.failures)}`);
 });

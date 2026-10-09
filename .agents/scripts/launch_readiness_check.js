@@ -159,6 +159,27 @@ const CONTRADICTION_TOKENS = /\b(pending|outstanding|unresolved|incomplete|todo|
 const NEGATOR_NEAR = /\b(no|not|never|zero|none|nothing|without|nil)\b/i;
 const RESOLUTION_WORDS = /\b(resolved|fixed|closed|complete|completed|done|shipped|landed|verified|retested|green|passed|passing|cleared)\b/i;
 
+/**
+ * Is there a rollback plan with actual content in the go/no-go record?
+ *
+ * Requires a rollback heading AND at least a few words beneath it. The word count matters: a
+ * heading called "Rollback" followed by "TBD" satisfies a heading check while providing nothing,
+ * which is the same token-versus-substance problem as F-5.
+ */
+function rollbackPlanPresent(text) {
+  const t = String(text || '');
+  const m = t.match(/^#{1,4}\s*.*rollback.*$/im);
+  if (!m) return false;
+  const rest = t.slice(m.index + m[0].length);
+  // Stop at the next heading of the same or higher level: the plan is the section's body.
+  const nextHeading = rest.search(/^#{1,4}\s+/m);
+  const body = (nextHeading === -1 ? rest : rest.slice(0, nextHeading))
+    .replace(/^\s*[-*+]?\s*\|?\s*/gm, ' ')
+    .replace(/[`*_#>|-]/g, ' ')
+    .trim();
+  return body.split(/\s+/).filter(Boolean).length >= 4;
+}
+
 function evidenceContradicts(evidence) {
   const e = String(evidence || '').trim();
   if (!e) return null; // handled separately: empty evidence is its own failure
@@ -304,6 +325,16 @@ function checkReadiness(text, root) {
       'go-nogo-decision.md states no verdict. Record it explicitly — `**Verdict:** GO`, ' +
         '`NO-GO`, or `CONDITIONAL`, or `VERDICT: [GO]` — with the reasoning. A heading that ' +
         'mentions the options is not a decision, and `skipped` must never be read as approval.'
+    );
+  } else if (!rollbackPlanPresent(goNoGo)) {
+    // F-8 (blind /launch run 2026-10-08): SKILL.md:54 names a missing rollback plan as a hard NO-GO
+    // and step-01:123 asks for rollback CRITERIA — what triggers one and who executes it. Nothing
+    // checked any of it, so a five-line go/no-go with no rollback passed unchanged. A contract stated
+    // in prose that no gate can falsify is the defect this whole pass has been removing.
+    failures.push(
+      'go-nogo-decision.md records no rollback plan. A release that cannot be undone has no ' +
+        'failure path — add a `## Rollback` section stating what triggers a rollback, who executes ' +
+        'it, and how long it takes. Naming the word is not a plan.'
     );
   } else if (goNoGoVerdict !== 'GO') {
     // F-2: a recorded NO-GO is not a formatting problem, it is a human decision not to ship. The

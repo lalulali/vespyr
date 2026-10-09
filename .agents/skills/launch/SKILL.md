@@ -50,8 +50,14 @@ Any one is a hard NO-GO on deployment:
 - A scan pass is quoted as wider than it is — the scan covers the **product scope** declared in `security/audit-spec.json`
   (`scope.product_roots`), not the whole repository, and `verdict` is `SKIPPED` rather than `PASS` when launch is out of scope.
   Branch on `verdict`, never on `ok` alone
-- A Critical or High security finding is open
-- A rollback plan does not exist for the release
+- **Any** security finding is open. This line previously said "a Critical or High security finding",
+  which was WEAKER than what the gate actually enforces — it fails on every finding. A live Stripe
+  key scores `medium`, so anyone who "corrected" the gate to match the old prose would have let a
+  hardcoded production credential through. Do not narrow the gate to a severity tier: a credential
+  in shipped source is a blocker whatever the scanner's label says.
+- A rollback plan does not exist for the release — **checked**, as a `## Rollback` section in
+  `go-nogo-decision.md` stating the trigger, the owner, and the time to revert. A heading with no
+  body is not a plan.
 
 ## Done when
 - `launch_readiness_check.js check --require-readiness --require-scan` exits 0 **and** reports `verdict: PASS`
