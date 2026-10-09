@@ -156,14 +156,15 @@
       "id": "INJ-SECRET",
       "label": "INJ-SECRET",
       "path": "**",
-      "pattern": "AKIA[0-9A-Z]{16}|ghp_[A-Za-z0-9]{36}|sk-[A-Za-z0-9_-]{20,}|xox[baprs]-[A-Za-z0-9-]{10,}|AIza[0-9A-Za-z_-]{35}|(api[_-]?key|secret|token|password)\\s*[:=]\\s*[\"'][A-Za-z0-9_\\-./+]{16,}[\"']",
+      "pattern": "AKIA[0-9A-Z]{16}|ghp_[A-Za-z0-9]{36}|sk[-_][A-Za-z0-9_-]{20,}|xox[baprs]-[A-Za-z0-9-]{10,}|AIza[0-9A-Za-z_-]{35}|(api[_-]?key|secret|token|password)\\s*[:=]\\s*[\"'][A-Za-z0-9_\\-./+]{16,}[\"']",
       "severity": "medium",
       "mode": "regex+entropy",
       "entropy": {
         "min_shannon_per_char": 2.6,
         "window": 8,
         "note": "P2: window is integer 8 (was '8-char sliding' string parsed by accident). threshold 2.6 (max achievable for 8 distinct chars is 3.0; 3.5 was unreachable \u2014 rule could never fire). Regex match with entropy < threshold is NOT a finding (negative fixture: AKIA + repeated chars -> ~0.0)."
-      }
+      },
+      "note": "F-1 (blind /launch run 2026-10-08): the branch read `sk-` with a hyphen while Stripe uses `sk_`, and the entropy check measured the fixed `sk_live_` prefix as if it were secret material \u2014 so every Stripe key in every codebase was undetectable by construction. Proven: a live Stripe key planted in src/ produced ZERO findings and the launch gate returned PASS. The sibling `ghp_` branch in this same rule already used an underscore, so the hyphen was a typo-class error. The literal key is deliberately not reproduced here: a rule table that matches its own patterns is the same class of problem as a scanner scanning its own fixtures."
     },
     {
       "id": "INJ-CONFIG",

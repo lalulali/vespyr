@@ -231,7 +231,10 @@ function applyProductScope(fileList, spec) {
   // 'exclude-list' rather than 'none', because 'none' reads like "unfiltered and therefore risky"
   // when the truth is "no exclusions were declared, so none applied". `applied:false` already
   // carries the first fact; `mode` carries the direction.
-  if (!scope) return { kept: fileList, excludedCounts: {}, excludedByTree: {}, applied: false, mode: 'exclude-list' };
+  if (!scope) {
+    return { kept: fileList, excludedCounts: {}, excludedByTree: {}, applied: false,
+             mode: 'exclude-list', examined: fileList.length };
+  }
 
   // DEFAULT MODE IS `exclude-list`, AND THAT IS THE WHOLE POINT.
   //
@@ -285,12 +288,20 @@ function applyProductScope(fileList, spec) {
     const top = String(f.rel).split('/')[0];
     excludedCounts[top] = (excludedCounts[top] || 0) + 1;
   }
-  return { kept, excludedCounts, excludedByTree, applied: true, mode };
+  return { kept, excludedCounts, excludedByTree, applied: true, mode, examined: kept.length };
 }
 
 // ---------------------------------------------------------------------------
 // Shannon entropy (INJ-SECRET regex+entropy mode)
 // ---------------------------------------------------------------------------
+
+/**
+ * A provider/format prefix at the start of a credential: letters, optionally split by `_` or `-`.
+ * Matches `AKIA`, `ghp`, `sk_live`, `sk`, `xoxb`, `AIza`. Deliberately conservative — it must not
+ * eat into the random material, so it stops at the first separator-run that is followed by a
+ * non-letter, and it requires the remainder to still be substantial.
+ */
+const PROVIDER_PREFIX_RE = /^(?:[A-Za-z]+[_-])+[A-Za-z]*[_-]?|^[A-Za-z]{2,8}(?=[0-9])/;
 
 function shannonEntropy(str) {
   const counts = new Map();
@@ -875,8 +886,22 @@ function main() {
           const rawWin = rule.entropy && rule.entropy.window;
           const win = typeof rawWin === 'number' ? rawWin : parseInt(rawWin, 10) || 8;
           const candidate = matches[0];
-          // regex match below threshold is NOT a finding (negative fixture)
-          if (minWindowEntropy(candidate, win) < threshold) continue;
+          // F-1 (blind /launch run 2026-10-08): strip the PROVIDER PREFIX before measuring entropy.
+          //
+          // The check is a sliding-window MINIMUM, so one low-entropy 8-char window suppresses the
+          // whole candidate. Every Stripe key begins with the fixed literal `sk_live_`, whose window
+          // entropy is 2.75 against a 2.6 threshold — meaning every Stripe secret in every codebase
+          // was undetectable BY CONSTRUCTION, not by bad luck. Measured on the key planted in the
+          // blind run: the window minimum of a real Stripe live key measured 2.500 before the prefix was
+          // stripped and 2.750 after, against a 2.6 threshold.
+          //
+          // The prefix is structure, not secret material. Measuring it as if it were material is what
+          // made a real credential look like a placeholder. The documented negative fixture still
+          // works: `AKIA` + repeated characters strips to a run of one repeated character, ~0.0.
+          const measurable = candidate.replace(PROVIDER_PREFIX_RE, '');
+          // Guard the degenerate case: never measure an empty string, which would read as 0 entropy
+          // and suppress a match that is nothing but prefix.
+          if (minWindowEntropy(measurable || candidate, win) < threshold) continue;
         }
 
         // Known-FP suppression (02f §10): token-fragment guard — see the
@@ -965,6 +990,27 @@ function main() {
   }
   const uniqueFindings = Array.from(seen.values());
 
+  // F-3: AN EMPTY SCAN IS NOT A CLEAN SCAN.
+  //
+  // Measured (blind /launch run 2026-10-08): a spec whose `excluded_trees` covered `src/**`
+  // examined zero files and reported `exit: 0, findings: []`. The launch gate read that as a clean
+  // scan and returned `verdict: PASS, ok: true, warnings: []` — over a tree holding a live Stripe
+  // secret. An empty scan and a clean scan produced the same output; nothing in the result
+  // distinguished "I looked at everything and found nothing" from "I looked at nothing".
+  //
+  // This is fail-closed (exit 2), the same treatment a scanner fault already gets, because it is
+  // the same class of thing: the tool cannot produce a verdict. It is emphatically NOT exit 1 —
+  // exit 1 means "I found problems", which is a different and much milder claim.
+  const filesExamined = scoped.examined != null ? scoped.examined : walked.length;
+  if (filesExamined === 0) {
+    return failClosed(
+      `scanned 0 files — every candidate was excluded by the scope, so this is not a clean result ` +
+      `(declared exclusions: ${JSON.stringify(scoped.excludedByTree || {})}). An empty scan and a ` +
+      `clean scan must never look identical.`,
+      jsonMode
+    );
+  }
+
   // P0-2: skipped node_modules are EXPLICIT in output (never silent).
   const skipped = [...skippedNodeModules].sort();
   if (jsonMode) {
@@ -992,6 +1038,9 @@ function main() {
             // Files removed BY each declared tree. A declared tree that matches nothing is itself a
             // signal (typo, or a scope written for a tree that no longer exists).
             excluded_by_tree: scoped.excludedByTree || {},
+            // How many files the scan actually opened. Without this, "0 findings" and "0 files"
+            // are the same output and an over-broad scope reads as a clean bill of health.
+            files_examined: filesExamined,
           },
         },
         null,

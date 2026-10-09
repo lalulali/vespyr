@@ -330,3 +330,48 @@ test('the scan scope reaches the report even when the gate is skipped', () => {
   assert.strictEqual(r.json.verdict, 'SKIPPED',
     'ok:true on a skip must be distinguishable from a pass by a consumer reading one field');
 });
+
+/**
+ * F-2: a recorded NO-GO must fail the gate.
+ *
+ * Found by a blind /launch run (2026-10-08) whose agent was forbidden from reading any script under
+ * `.agents/scripts/`. `declaredVerdict` returned a BOOLEAN — it asked "is a verdict present", never
+ * "which verdict" — so a `go-nogo-decision.md` reading `**Verdict:** NO-GO`, with the sentence
+ * "We are not shipping" beneath it, satisfied the gate exactly as GO does. Measured on the fixed
+ * tree before this change: `verdict: PASS, ok: true, failures: 0, warnings: []`.
+ *
+ * The gate's own PASS and the release's NO-GO are different signals. A gate that reports PASS over
+ * a recorded decision not to ship is worse than no gate, because it is trusted.
+ */
+const NO_GO_RECORD = `# Go/No-Go
+
+**Verdict:** NO-GO
+
+We are not shipping. The retry storm under load is still open.
+`;
+
+test('F-2: a recorded NO-GO is a hard failure, not a formality', () => {
+  const r = run({ ...COMPLETE, 'artifacts/output/06-launch/go-nogo-decision.md': NO_GO_RECORD });
+  assert.strictEqual(r.json.verdict, 'FAIL');
+  assert.strictEqual(r.code, 1);
+  assert.ok(
+    r.failures.some((f) => /records \*\*NO-GO\*\*/.test(f)),
+    `expected a failure naming the recorded NO-GO, got: ${JSON.stringify(r.failures)}`
+  );
+});
+
+test('F-2: GO still passes, so the new check is not a blanket rejection', () => {
+  const r = run(COMPLETE);
+  assert.ok(r.failures.every((f) => !/records \*\*NO-GO\*\*/.test(f)),
+    'the NO-GO check must fire only on a recorded NO-GO');
+});
+
+test('F-2: CONDITIONAL is also not GO and must not pass silently', () => {
+  const r = run({
+    ...COMPLETE,
+    'artifacts/output/06-launch/go-nogo-decision.md':
+      '# Go/No-Go\n\n**Verdict:** CONDITIONAL\n\nShipping once the load test reruns.\n',
+  });
+  assert.strictEqual(r.json.verdict, 'FAIL',
+    'CONDITIONAL on the go/no-go record is not a ship decision');
+});

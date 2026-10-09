@@ -118,13 +118,15 @@ function fixture() {
  * means fail-closed (bad spec, unreadable allowlist) and IS an error. execFileSync would have
  * thrown on the finding exit and made every test in this file fail for the wrong reason.
  */
-function runScan(args, cwd) {
+function runScan(args, cwd, { allowFailClosed = false } = {}) {
   const r = spawnSync('node', [SCAN, ...args, '--json'], {
     encoding: 'utf8',
     maxBuffer: 64 * 1024 * 1024,
     cwd: cwd || REPO,
   });
-  if (r.status === 2) {
+  // Exit 2 is a tool failure and throws by default — a test that expects a clean run must not be
+  // able to proceed through one. A test that is specifically ABOUT the fail-closed path opts in.
+  if (r.status === 2 && !allowFailClosed) {
     throw new Error(`scanner fail-closed: ${r.stdout || r.stderr}`);
   }
   return JSON.parse(r.stdout);
@@ -319,5 +321,68 @@ test('a scope block WITHOUT product_roots still scans src/ (the actual fail-open
     'declared exclusions are the ONLY thing allowed to remove a file — a missing product_roots ' +
     'must not silently reduce the scan to nothing');
   assert.strictEqual(r.scope.excluded_by_tree['legacy/**'], 1);
+  fs.rmSync(dir, { recursive: true, force: true });
+});
+
+/**
+ * F-1, F-3 and F-2 regressions from the blind /launch run of 2026-10-08.
+ *
+ * These three were found by an agent that was forbidden from reading any script under
+ * `.agents/scripts/`. It could run them and read the declared rule table, and nothing else. Every
+ * one of them is a defect that a source-reading review had missed across the whole session — which
+ * is the argument for running the gates blind rather than reading them carefully.
+ */
+const ruleWith = (over) => Object.assign(spec(), {});
+
+test('F-1: a Stripe live key is detected (sk_ + a low-entropy fixed prefix)', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'secret-'));
+  const specPath = specPathFor(dir, (() => {
+    const s = spec();
+    s.rules = [{
+      id: 'S-1', label: 'SECRET', path: '**', severity: 'high', mode: 'regex+entropy',
+      pattern: 'sk[-_][A-Za-z0-9_-]{20,}',
+      entropy: { min_shannon_per_char: 2.6, window: 8 },
+      note: 'fixture',
+    }];
+    return s;
+  })());
+  const mk = (name, body) => {
+    fs.mkdirSync(path.join(dir, 'src'), { recursive: true });
+    fs.writeFileSync(path.join(dir, 'src', name), body);
+  };
+  // Built at runtime so this file never contains a literal credential-shaped string.
+  const stripe = ['sk', 'live', '4eC39HqLyjWDarjtT1zdp7dc'].join('_');
+  const awsExample = ['AKIA', 'IOSFODNN7EXAMPLE'].join('');
+  const awsRepeated = ['AKIA', 'A'.repeat(16)].join('');
+  mk('a-live.js', `const K = "${stripe}";\n`);
+  mk('b-example.js', `const K = "${awsExample}";\n`);
+  mk('c-repeated.js', `const K = "${awsRepeated}";\n`);
+
+  const r = runScan(['--dir', dir, '--spec', specPath]);
+  assert.deepStrictEqual(NAMES(r), ['src/a-live.js'],
+    'a real Stripe key must be found, and the two documented non-secrets must stay suppressed');
+  fs.rmSync(dir, { recursive: true, force: true });
+});
+
+test('F-3: a scope that excludes EVERY file is fail-closed, never a clean scan', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'empty-scan-'));
+  fs.mkdirSync(path.join(dir, 'src'), { recursive: true });
+  fs.writeFileSync(path.join(dir, 'src', 'a.js'), 'const K = 1;\n');
+  const r = runScan(['--dir', dir, '--spec', specPathFor(dir, spec({
+    excluded_trees: [{ path: '**', reason: 'claims nothing is in scope' }],
+  }))], REPO, { allowFailClosed: true });
+  assert.strictEqual(r.exit, 2, 'an empty scan must be a tool failure (exit 2), not exit 0');
+  assert.match(r.fault || '', /scanned 0 files/);
+  fs.rmSync(dir, { recursive: true, force: true });
+});
+
+test('F-3: files_examined is reported so "0 findings" can be told from "0 files"', () => {
+  const dir = fixture();
+  const r = runScan(['--dir', dir, '--spec', specPathFor(dir, spec({
+    excluded_trees: [{ path: 'docs/**', reason: 'historical output' }],
+  }))]);
+  assert.strictEqual(typeof r.scope.files_examined, 'number');
+  assert.ok(r.scope.files_examined > 0);
+  assert.deepStrictEqual(NAMES(r).sort(), ['app/main.md', 'app/pattern-table.md']);
   fs.rmSync(dir, { recursive: true, force: true });
 });

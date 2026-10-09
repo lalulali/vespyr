@@ -95,12 +95,24 @@ const readIf = (p) => (fs.existsSync(p) ? fs.readFileSync(p, 'utf8') : null);
  * check was `\b(GO|NO-GO|CONDITIONAL)\b` over the whole file, which a `# Go/No-Go` heading
  * satisfied on its own.
  */
+/**
+ * Return the DECLARED VERDICT, normalised — or null when none is stated.
+ *
+ * F-2 (blind /launch run 2026-10-08): this returned a BOOLEAN. It asked "is a verdict present",
+ * never "which verdict". Measured: a `go-nogo-decision.md` reading `**Verdict:** NO-GO` — with the
+ * sentence "We are not shipping" underneath it — satisfied the gate exactly as GO does, and the
+ * gate printed `verdict: PASS, ok: true, failures: 0`. PASS and GO are different signals and the
+ * gate was conflating them: the gate's own PASS meant "no rule was broken", while the release's
+ * NO-GO meant "a human decided not to ship". A gate that reports PASS over a recorded NO-GO is
+ * worse than no gate, because it is trusted.
+ */
 function declaredVerdict(text) {
   const field = String(text || '').match(
     /\*\*(?:Verdict|Decision|Recommendation):\*\*\s*`?\[?(GO|NO-GO|CONDITIONAL)\]?`?/i);
-  if (field) return true;
+  if (field) return field[1].toUpperCase();
   const bracketed = String(text || '').match(/VERDICT:\s*\[(GO|NO-GO|CONDITIONAL)\]/i);
-  return Boolean(bracketed);
+  if (bracketed) return bracketed[1].toUpperCase();
+  return null;
 }
 
 function teamGateRows(text) {
@@ -185,9 +197,10 @@ function checkReadiness(text, root) {
 
   // 3. The go/no-go decision must exist and be a decision, not a blank.
   const goNoGo = readIf(path.resolve(root, DEFAULTS.goNoGo));
+  const goNoGoVerdict = goNoGo ? declaredVerdict(goNoGo) : null;
   if (!goNoGo) {
     failures.push(`go-nogo-decision.md is absent at ${DEFAULTS.goNoGo}. Readiness without a recorded decision is not a decision.`);
-  } else if (!declaredVerdict(goNoGo)) {
+  } else if (!goNoGoVerdict) {
     // A bare word anywhere is not a decision. Measured: a document titled `# Go/No-Go`, whose
     // only content was "still thinking about it", satisfied /\b(GO|NO-GO|CONDITIONAL)\b/ purely
     // from its own heading. A document's title is not its verdict — and a readiness check that
@@ -196,6 +209,15 @@ function checkReadiness(text, root) {
       'go-nogo-decision.md states no verdict. Record it explicitly — `**Verdict:** GO`, ' +
         '`NO-GO`, or `CONDITIONAL`, or `VERDICT: [GO]` — with the reasoning. A heading that ' +
         'mentions the options is not a decision, and `skipped` must never be read as approval.'
+    );
+  } else if (goNoGoVerdict !== 'GO') {
+    // F-2: a recorded NO-GO is not a formatting problem, it is a human decision not to ship. The
+    // gate reporting PASS over one means the gate's verdict and the release's verdict are different
+    // signals and only one of them is being read.
+    failures.push(
+      `go-nogo-decision.md records **${goNoGoVerdict}**, not GO. A recorded decision to hold is a ` +
+        'hard NO-GO on deployment — the gate cannot ship a release its own decision record declines ' +
+        'to ship. Flip the record only when the decision itself genuinely changes.'
     );
   }
 
