@@ -65,6 +65,51 @@ The template handles both branches; you choose the output filename and drop the 
 
 > Usability testing not yet conducted. Recommend running usability tests before finalizing design specs.
 
+## Done when — checked mechanically
+
+This skill compiles five discovery artifacts into one report for stakeholders. Four were gated
+(`discovery_canvas_check.js`) and the fifth (`research-plan.md`) is gated too. **The compiler had
+zero gate references** — which is the worst place for a gap: it consumed verified inputs and emitted an
+unverified output. A reader of the consolidated report had no assurance that ANY underlying artifact
+conformed, because the report laundered their status.
+
+```bash
+node .agents/scripts/discovery_report_check.js check \
+  --report artifacts/output/02-research/user-research-report.md --root . --json
+```
+
+It requires:
+- every **present** gated input to actually **PASS its gate, re-verified at compile time** — an
+  artifact can change after it was written, so a green result from an earlier run is not evidence
+  about the file on disk now
+- a **`## Sources`** section naming each input with a machine-readable status: `PASS`, `FAIL`,
+  `absent`, or `not-gated`
+- **every absent input to be disclosed.** An undisclosed absence means a reader cannot tell missing
+  research from research that found nothing
+- the **usability caveat** when no usability data was compiled. The skill instructs the author to
+  note it in prose; nothing checked it
+
+Measured, the laundering it stops: a report whose Sources row claimed `PASS` for an
+`empathy-map.md` that was **verbatim its own unfilled template** — 8 placeholder failures — was
+reported to stakeholders as a verified finding.
+
+**What it does not check:** whether the synthesis is any good, whether the connections drawn between
+findings are real, or whether the report is fit to show a stakeholder. A gate cannot verify a
+narrative. What it can do is stop the narrative implying a verification that never happened.
+
+### Known gap — declared inputs with no producer
+
+`problem-space-brief.md` and usability testing data are declared inputs that **no skill in this repo
+produces**. They are disclosed rather than required, deliberately: a hard requirement with no producer
+makes the skill permanently unsatisfiable, which is the `qa-signoff.md` deadlock. Usability testing in
+particular is a **real capability gap, not a wiring bug** — nothing here runs a usability study.
+
+Note on output naming: this skill emits `usability-report.md` **or** `user-research-report.md`,
+depending on whether usability data exists. They are mutually exclusive outputs of this skill, not
+inputs — and a consumer must read the skill to know which file to open.
+
+Exit 0 conformant · 1 failures · 2 usage/IO error, fail-closed.
+
 ## State machine integration
 At start: Run `node .agents/scripts/orchestrator_state.js status`
 At end: Run `node .agents/scripts/orchestrator_state.js complete --agent product-manager --artifact 02-research/{report-type}.md`
