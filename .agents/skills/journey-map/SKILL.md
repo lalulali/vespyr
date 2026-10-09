@@ -52,6 +52,7 @@ Write `artifacts/output/02-research/journey-map.md`:
 ```markdown
 # Journey Map — {journey name}
 **Date:** YYYY-MM-DD
+**Evidence basis:** {interviewed N / observed / analytics / support-tickets / survey / hypothesis — pick one, and label unvalidated content in the body}
 **User segment:** {who}
 **Scope:** {start} → {end}
 
@@ -78,6 +79,37 @@ Write `artifacts/output/02-research/journey-map.md`:
 ## Priority Opportunities
 1. **{stage}:** {opportunity} — Effort: {High/Med/Low}, Impact: {High/Med/Low}
 ```
+
+## Done when — checked mechanically
+
+These canvases shipped for the whole life of this repo with **no gate at all**: the template in the
+Output step could be written to disk verbatim and nothing would notice. `discovery_canvas_check.js`
+now checks form and evidence declaration:
+
+```bash
+node .agents/scripts/discovery_canvas_check.js check --kind journey-map --file artifacts/output/02-research/journey-map.md --json
+```
+
+It requires:
+- **no unfilled template placeholders** — `{direct quotes}` and `{pain point}` are the template, not
+  an artifact
+- **`**Evidence basis:**` declared** — one of `interviewed` / `observed` / `analytics` /
+  `support-tickets` / `survey` / `hypothesis`. A canvas that does not say where it came from cannot be
+  read as research, and nothing downstream can tell your finding from your guess
+- **when the basis is `hypothesis`, the body must say so too** — announced only in a header, a
+  hypothesis reads as a finding three paragraphs later
+- the kind's structural minimum, below
+
+**A green result is not a research finding.** The gate checks form and one declaration. It cannot
+tell you whether the analysis is correct, and it does not pretend to.
+
+**Exit 0** conformant · **1** failures · **2** usage/IO error, fail-closed, never a silent pass.
+
+Run this **before** the `complete` call below, so a non-conformant canvas is never recorded as
+delivered.
+**Journey-map minimums:** at least 3 stages, because a short map hides the middle where friction
+actually lives; every stage cell carrying real content (an emoji alone is padding, and padding reads as
+coverage); an Emotional Arc with a summary sentence; and named Key Friction Points.
 
 ## State machine integration
 At start: Run `node .agents/scripts/orchestrator_state.js status`

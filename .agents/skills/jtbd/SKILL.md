@@ -54,9 +54,10 @@ Write `artifacts/output/02-research/jtbd-hmw.md`:
 ```markdown
 # Jobs-to-be-Done + HMW Canvas — {product/feature}
 **Date:** YYYY-MM-DD
+**Evidence basis:** {interviewed N / observed / analytics / support-tickets / survey / hypothesis — pick one, and label unvalidated content in the body}
 
 ## Job Stories
-| # | When {context} | I want to {functional job} | So I can {outcome} | Type |
+| # | When | I want to | So I can | Type |
 |---|---------------|---------------------------|-------------------|------|
 | 1 | {situation} | {action} | {motivation} | Functional/Emotional/Social |
 
@@ -71,6 +72,37 @@ Write `artifacts/output/02-research/jtbd-hmw.md`:
 | **Low Effort** | {quick wins} | {fill-ins} |
 | **High Effort** | {strategic bets} | {money pits} |
 ```
+
+## Done when — checked mechanically
+
+These canvases shipped for the whole life of this repo with **no gate at all**: the template in the
+Output step could be written to disk verbatim and nothing would notice. `discovery_canvas_check.js`
+now checks form and evidence declaration:
+
+```bash
+node .agents/scripts/discovery_canvas_check.js check --kind jtbd --file artifacts/output/02-research/jtbd-hmw.md --json
+```
+
+It requires:
+- **no unfilled template placeholders** — `{direct quotes}` and `{pain point}` are the template, not
+  an artifact
+- **`**Evidence basis:**` declared** — one of `interviewed` / `observed` / `analytics` /
+  `support-tickets` / `survey` / `hypothesis`. A canvas that does not say where it came from cannot be
+  read as research, and nothing downstream can tell your finding from your guess
+- **when the basis is `hypothesis`, the body must say so too** — announced only in a header, a
+  hypothesis reads as a finding three paragraphs later
+- the kind's structural minimum, below
+
+**A green result is not a research finding.** The gate checks form and one declaration. It cannot
+tell you whether the analysis is correct, and it does not pretend to.
+
+**Exit 0** conformant · **1** failures · **2** usage/IO error, fail-closed, never a silent pass.
+
+Run this **before** the `complete` call below, so a non-conformant canvas is never recorded as
+delivered.
+**JTBD minimums:** at least one job statement with three substantive clauses; every job typed
+Functional/Emotional/Social, without which the canvas collapses into a feature list; and at least one
+How Might We row.
 
 ## State machine integration
 At start: Run `node .agents/scripts/orchestrator_state.js status`

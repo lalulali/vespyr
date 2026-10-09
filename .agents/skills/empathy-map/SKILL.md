@@ -48,6 +48,7 @@ Write `artifacts/output/02-research/empathy-map.md`:
 ```markdown
 # Empathy Map — {user segment} in {scenario}
 **Date:** YYYY-MM-DD
+**Evidence basis:** {interviewed N / observed / analytics / support-tickets / survey / hypothesis — pick one, and label unvalidated content in the body}
 
 ## User & Scenario
 - **Segment:** {description}
@@ -68,6 +69,37 @@ Write `artifacts/output/02-research/empathy-map.md`:
 ## Gains
 1. {opportunity for delight}
 ```
+
+## Done when — checked mechanically
+
+These canvases shipped for the whole life of this repo with **no gate at all**: the template in the
+Output step could be written to disk verbatim and nothing would notice. `discovery_canvas_check.js`
+now checks form and evidence declaration:
+
+```bash
+node .agents/scripts/discovery_canvas_check.js check --kind empathy-map --file artifacts/output/02-research/empathy-map.md --json
+```
+
+It requires:
+- **no unfilled template placeholders** — `{direct quotes}` and `{pain point}` are the template, not
+  an artifact
+- **`**Evidence basis:**` declared** — one of `interviewed` / `observed` / `analytics` /
+  `support-tickets` / `survey` / `hypothesis`. A canvas that does not say where it came from cannot be
+  read as research, and nothing downstream can tell your finding from your guess
+- **when the basis is `hypothesis`, the body must say so too** — announced only in a header, a
+  hypothesis reads as a finding three paragraphs later
+- the kind's structural minimum, below
+
+**A green result is not a research finding.** The gate checks form and one declaration. It cannot
+tell you whether the analysis is correct, and it does not pretend to.
+
+**Exit 0** conformant · **1** failures · **2** usage/IO error, fail-closed, never a silent pass.
+
+Run this **before** the `complete` call below, so a non-conformant canvas is never recorded as
+delivered.
+**Empathy-map minimums:** all four quadrants populated; the `Says` quadrant carrying quoted material or
+a source link — if there was no interview, declare the basis as a hypothesis rather than writing a
+plausible paraphrase and presenting it as something a person said; non-empty Pains and Gains.
 
 ## State machine integration
 At start: Run `node .agents/scripts/orchestrator_state.js status`
