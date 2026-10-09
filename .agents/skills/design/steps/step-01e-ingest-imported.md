@@ -48,7 +48,27 @@ The same five criteria as `step-01d` apply — real content topology, the 3 crit
    brief that asks "what is deliberate rather than accident" is asking exactly this question.
 2. `@product-designer` walks the imported prototype: every screen, flow, behavior, state, interaction.
 3. Record one row per observation in `prototype-inventory.md` (template: `.agents/templates/product/prototype-inventory-template.md`): stable row id (`INV-NN`), kind (`screen` | `flow` | `behavior` | `state` | `interaction`), name, anchor `path#id`, observable fact.
-   - Frozen anchor grammar (A11): repo-relative POSIX path + one `#` + anchor token. For imported HTML/SVG, anchors are `id="<id>"` attributes; multi-file exports anchor to the specific exported file's `path#id`.
+Anchor grammar (A11 + AM1): repo-relative POSIX path + one `#` + anchor token.
+
+   - `path#id` — **A11, frozen.** For HTML/SVG the token is an `id="<id>"` attribute; for other files
+     a word-boundary symbol occurrence. Multi-file exports anchor to the specific exported file.
+   - `path#css=<selector>` — **AM1, added 2026-10-09.** A CSS selector subset: tag, `.class`, `#id`,
+     `[attr]`, `[attr="v"]`, and the descendant (space) and child (`>`) combinators.
+   - `path#text=<phrase>` — **AM1, added 2026-10-09.** A verbatim phrase, at least 8 characters, which
+     must actually occur in the file.
+
+   **Why AM1 exists.** A11 could not address an id-less file at all. `prototype.html#anything` fails
+   because no `id` exists, and the only other sanctioned form — anchoring to
+   `prototype-inventory.md#INV-NN` — is reserved for NON-file prototypes and is a self-reference that
+   proves nothing about the prototype. Measured on a real reverse-mode run: 28 of 41 ledger rows rested
+   on a human-only pointer for exactly this reason. AM1 is **additive**: every existing `path#id`
+   anchor keeps its exact meaning.
+
+   **Do not add `id` attributes to an imported export in order to make it auditable.** A multi-file
+   export frequently ships without them, and mutating the export changes the artifact under audit.
+
+   Anything outside the selector subset — pseudo-classes, sibling combinators — is a non-match, never a
+   silent pass. An ambiguous anchor (matching more than once) resolves but is reported as ambiguous.
 4. **Extraction only** — record what the prototype does, verbatim where copy matters. No requirements language ("should", "must"), no interpretation, no design opinions.
 5. Record the **import baseline hash** frontmatter (hash, source tool, import date) as described above.
 6. **Designer–tech collaboration checkpoint** — before Step 2, `@product-designer` and `@tech-lead` review the inventory and walkable prototype together (add `@architect` when a system/data boundary appears). Record `artifacts/output/03-strategy/prototype-collaboration.md` using `.agents/templates/product/prototype-collaboration-template.md`, noting the imported source and the import-baseline limitation.

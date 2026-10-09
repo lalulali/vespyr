@@ -47,7 +47,24 @@ const DEFAULTS = {
   report: 'artifacts/output/03-strategy/parity-report.md',
 };
 
-const ANCHOR_RE = /^[A-Za-z0-9._/-]+#[A-Za-z][A-Za-z0-9._:-]*$/;
+// A11 (frozen) + A11/AM1 amendment, 2026-10-09.
+//
+// The frozen grammar was `path#id`, and for HTML it resolved only against an `id="…"` attribute.
+// Measured consequence: a local prototype with NO id attributes — the normal case for a hand-written
+// static HTML file — had NO sanctioned machine-readable anchor at all. `prototype.html#anything`
+// failed because no id existed, and the only alternative, anchoring to `prototype-inventory.md#INV-NN`,
+// is reserved for NON-FILE prototypes (Figma, live code) and is a self-reference that proves nothing
+// about the prototype. Measured on a real reverse-mode run: 28 of 41 ledger rows rested on a
+// human-only pointer because of this gap.
+//
+// AM1 adds two forms, ADDITIVELY — every existing `path#id` anchor keeps its exact meaning:
+//   path#css=<selector>   a CSS selector subset: tag, .class, #id, [attr], [attr="v"], and the
+//                         descendant and child combinators
+//   path#text=<phrase>    a verbatim phrase, which must actually occur in the file
+// Neither requires editing the artifact to be anchorable, which is the whole point: requiring an agent
+// to inject ids into a delivered prototype changes the thing being audited.
+const ANCHOR_RE =
+  /^(?:[A-Za-z0-9._/-]+#[A-Za-z][A-Za-z0-9._:-]*|[A-Za-z0-9._/-]+#(?:css|text)=.+)$/;
 const OPEN = '[OPEN]';
 const DEFERRED = '[DEFERRED TO SPEC]';
 
@@ -90,21 +107,189 @@ function serializeFrontmatter(data, body) {
 // ---------------------------------------------------------------------------
 // Anchor resolution (frozen A11 grammar)
 // ---------------------------------------------------------------------------
+/**
+ * A deliberately small CSS-selector subset: comma-separated selector lists, each a chain of simple
+ * selectors joined by descendant (space) or child (`>`) combinators. A simple selector is a tag
+ * name, `.class`, `#id`, `[attr]`, or `[attr="value"]`.
+ *
+ * Not a CSS engine, and it does not try to be. It exists so an id-less HTML prototype has a
+ * machine-checkable anchor, which the frozen grammar could not provide. Anything outside the subset
+ * is a non-match, never a silent pass.
+ */
+const VOID_ELEMENTS = new Set([
+  'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta',
+  'param', 'source', 'track', 'wbr',
+]);
+
+/**
+ * Parse tags into a flat list carrying REAL parent links.
+ *
+ * The first version kept a flat list and treated "the immediately preceding tag" as the parent, which
+ * broke `<form class="checkout-form"> <input …> <button class="pay-btn">` — the input sits between
+ * them, so `form > button` failed on markup that is obviously correct. Siblings between a parent and
+ * its child are ordinary HTML, so a child combinator has to consult an actual tree.
+ *
+ * Void elements never take children and never close. Unclosed tags are tolerated: a malformed
+ * prototype should still be anchorable, and a parser that gives up would silently turn a real
+ * prototype into an unresolvable one.
+ */
+function tagsOf(content) {
+  const out = [];
+  const stack = [];
+  const re = /<(\/?)([a-zA-Z][\w-]*)((?:\s+[^<>]*?)?)(\/?)>/g;
+  let m;
+  while ((m = re.exec(content)) !== null) {
+    const closing = m[1] === '/';
+    const tag = m[2].toLowerCase();
+    if (closing) {
+      for (let i = stack.length - 1; i >= 0; i--) {
+        if (stack[i].tag === tag) { stack.length = i; break; }
+      }
+      continue;
+    }
+    const attrs = {};
+    const ar = /([\w:-]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+)))?/g;
+    let a;
+    while ((a = ar.exec(m[3] || '')) !== null) {
+      attrs[a[1].toLowerCase()] =
+        a[2] !== undefined ? a[2] : a[3] !== undefined ? a[3] : a[4] !== undefined ? a[4] : '';
+    }
+    const node = { tag, attrs, pos: m.index, parent: stack.length ? stack[stack.length - 1].idx : -1 };
+    out.push(node);
+    if (!VOID_ELEMENTS.has(tag) && m[4] !== '/') {
+      stack.push({ tag, idx: out.length - 1 });
+    }
+  }
+  return out;
+}
+function matchesSimple(node, sel) {
+  const m = sel.match(/^([a-zA-Z][\w-]*)?((?:[.#][\w-]+|\[[^\]]+\])*)$/);
+  if (!m) return false;
+  if (m[1] && node.tag !== m[1].toLowerCase()) return false;
+  const rest = m[2] || '';
+  const part = /[.#][\w-]+|\[[^\]]+\]/g;
+  let p;
+  while ((p = part.exec(rest)) !== null) {
+    const tok = p[0];
+    if (tok[0] === '.') {
+      const cls = (node.attrs.class || '').split(/\s+/);
+      if (!cls.includes(tok.slice(1))) return false;
+    } else if (tok[0] === '#') {
+      if (node.attrs.id !== tok.slice(1)) return false;
+    } else {
+      const inner = tok.slice(1, -1);
+      const eq = inner.match(/^([\w:-]+)(?:\s*=\s*"([^"]*)"|\s*=\s*'([^']*)')$/);
+      if (eq) {
+        const v = eq[2] !== undefined ? eq[2] : eq[3];
+        if (node.attrs[eq[1].toLowerCase()] !== v) return false;
+      } else if (!(inner.toLowerCase() in node.attrs)) return false;
+    }
+  }
+  return true;
+}
+
+/** Resolve one comma-free chain, left to right. Returns the number of matches (0 = no match). */
+function countChain(tags, chain) {
+  const parts = chain.filter(Boolean);
+  if (!parts.length) return 0;
+  const last = parts[parts.length - 1];
+  const isAncestor = (fromIdx, sel) => {
+    for (let p = tags[fromIdx].parent; p !== -1; p = tags[p].parent) {
+      if (matchesSimple(tags[p], sel)) return true;
+    }
+    return false;
+  };
+  let found = 0;
+  for (let i = 0; i < tags.length; i++) {
+    if (!matchesSimple(tags[i], last.sel)) continue;
+    let ok = true;
+    let cursor = i;
+    for (let k = parts.length - 2; k >= 0 && ok; k--) {
+      const want = parts[k];
+      if (want.comb === '>') {
+        const p = tags[cursor].parent;
+        if (p === -1 || !matchesSimple(tags[p], want.sel)) ok = false;
+        else cursor = p;
+      } else if (!isAncestor(cursor, want.sel)) {
+        ok = false;
+      }
+    }
+    if (ok) found++;
+  }
+  return found;
+}
+function cssMatches(content, selector) {
+  const tags = tagsOf(content);
+  const lists = String(selector).split(',').map((s) => s.trim()).filter(Boolean);
+  let total = 0;
+  for (const list of lists) {
+    // Split into {sel, comb} pairs, recording whether each link is ' ' or '>'.
+    const raw = list.split(/\s*(>)\s*|\s+/).filter((x) => x !== undefined && x !== '');
+    const chain = [];
+    for (let i = 0; i < raw.length; i++) {
+      if (raw[i] === '>') continue;
+      chain.push({ sel: raw[i], comb: raw[i + 1] === '>' ? '>' : ' ' });
+    }
+    total += countChain(tags, chain);
+  }
+  return total;
+}
+
+// Anchor resolution (frozen A11 grammar + AM1 amendment)
+// ---------------------------------------------------------------------------
 function resolveAnchor(root, anchor) {
-  if (!ANCHOR_RE.test(anchor)) return { ok: false, reason: `anchor does not match the frozen path#id grammar` };
+  if (!ANCHOR_RE.test(anchor)) {
+    return {
+      ok: false,
+      reason:
+        'anchor matches neither `path#id` (A11) nor `path#css=<selector>` / `path#text=<phrase>` (AM1)',
+    };
+  }
   const i = anchor.indexOf('#');
   const rel = anchor.slice(0, i);
-  const id = anchor.slice(i + 1);
-  if (path.isAbsolute(rel) || rel.includes('..')) return { ok: false, reason: 'anchor path must be repo-relative' };
+  let frag = anchor.slice(i + 1);
+  let form = 'id';
+  if (frag.startsWith('css=')) { form = 'css'; frag = frag.slice(4); }
+  else if (frag.startsWith('text=')) { form = 'text'; frag = frag.slice(5); }
+
+  if (path.isAbsolute(rel) || rel.includes('..')) return { ok: false, reason: 'anchor path must be repo-relative without `..`' };
   const file = path.join(root, rel);
   if (!fs.existsSync(file)) return { ok: false, reason: `file not found: ${rel}` };
   const content = fs.readFileSync(file, 'utf8');
-  if (/\.(html?|svg)$/i.test(file)) {
-    const ok = new RegExp(`id=["']${escapeRe(id)}["']`).test(content);
-    return ok ? { ok: true } : { ok: false, reason: `id="${id}" not found in ${rel}` };
+
+  if (form === 'text') {
+    const phrase = frag.trim();
+    if (phrase.length < 8) {
+      return { ok: false, reason: `#text= phrase is too short (${phrase.length} chars) to be an anchor` };
+    }
+    const n = content.split(phrase).length - 1;
+    if (n === 0) return { ok: false, reason: `#text= phrase not found in ${rel}` };
+    return { ok: true, ambiguous: n > 1, matches: n };
   }
-  const ok = new RegExp(`(^|[^A-Za-z0-9_-])${escapeRe(id)}([^A-Za-z0-9_-]|$)`).test(content);
-  return ok ? { ok: true } : { ok: false, reason: `symbol "${id}" not found in ${rel}` };
+
+  if (form === 'css') {
+    const n = cssMatches(content, frag);
+    if (n === 0) return { ok: false, reason: `#css= selector matched nothing in ${rel}` };
+    return { ok: true, ambiguous: n > 1, matches: n };
+  }
+
+  if (/\.(html?|svg)$/i.test(file)) {
+    const ok = new RegExp(`id=["']${escapeRe(frag)}["']`).test(content);
+    if (ok) return { ok: true };
+    // AM1: an HTML/SVG file with no id attributes has no `path#id` anchor available. Say so and name
+    // the alternative, rather than reporting a bare "id not found" that looks like a typo.
+    const hasIds = /\sid=["'][^"']+["']/.test(content);
+    return {
+      ok: false,
+      reason: hasIds
+        ? `id="${frag}" not found in ${rel}`
+        : `${rel} declares no id attributes, so \`path#id\` cannot address it. Use ` +
+          `\`${rel}#css=<selector>\` or \`${rel}#text=<phrase>\` (AM1) — do not add ids to the ` +
+          'artifact in order to make it auditable.',
+    };
+  }
+  const ok = new RegExp(`(^|[^A-Za-z0-9_-])${escapeRe(frag)}([^A-Za-z0-9_-]|$)`).test(content);
+  return ok ? { ok: true } : { ok: false, reason: `symbol "${frag}" not found in ${rel}` };
 }
 
 // ---------------------------------------------------------------------------

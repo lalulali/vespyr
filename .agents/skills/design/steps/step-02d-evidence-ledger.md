@@ -22,7 +22,7 @@ Initialize `requirements.md` from the complete `.agents/templates/product/prd-te
 
 1. `@product-manager` reads the inventory and the kernel; the inventory is fixed input — it is not re-interpreted.
 2. For each inventory row, write one ledger row in `requirements.md` §14 (template: `.agents/templates/product/prd-template.md`): `ID` (`L-NN`), `Statement`, `Anchor (path#id)`, `Type` (`prototype` | `user` | `owner`), `Status` (`confirmed` | `[OPEN]` | `[DEFERRED TO SPEC]`).
-3. **Anchors come from the inventory** — reuse the inventory row's `path#id` verbatim; never re-derive an anchor by hand. Non-file prototypes: anchor to `prototype-inventory.md#INV-NN`.
+3. **Anchors come from the inventory** — reuse the inventory row's anchor **verbatim** (`path#id`, or `path#css=` / `path#text=` per AM1); never re-derive an anchor by hand. Non-file prototypes: anchor to `prototype-inventory.md#INV-NN`.
 4. **No anchor, no fact.** A statement the prototype does not support is `[OPEN]` with the question put to the owner (mirrored to §12). Owner answers land as `owner`-type rows with the decision record as anchor, or the statement is dropped — never inferred.
 5. **Fidelity Partition (Review 10 §4):** infrastructure, telemetry, persistence, and DB-bound statements that a prototype cannot prove are marked `[DEFERRED TO SPEC]` — still anchored to the prototype fact that motivates them.
 6. Never rewrite an inventory fact into stronger spec language (`should`/`must` is synthesis, step-3). The ledger records what is true and where it is witnessed.

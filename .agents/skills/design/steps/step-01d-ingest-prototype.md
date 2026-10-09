@@ -59,7 +59,28 @@ discovered from a gate's error message.
 
 1. `@product-designer` walks the prototype: every screen, flow, behavior, state, interaction.
 2. Record one row per observation in `prototype-inventory.md` (template: `.agents/templates/product/prototype-inventory-template.md`): stable row id (`INV-NN`), kind (`screen` | `flow` | `behavior` | `state` | `interaction`), name, anchor `path#id`, observable fact.
-   - Frozen anchor grammar (A11): repo-relative POSIX path + one `#` + anchor token. HTML/SVG anchors are `id="<id>"` attributes; other files use a word-boundary symbol occurrence.
+   - Anchor grammar (A11 + AM1): repo-relative POSIX path + one `#` + anchor token.
+
+- `path#id` — **A11, frozen.** For HTML/SVG the token is an `id="<id>"` attribute; for other files a
+  word-boundary symbol occurrence.
+- `path#css=<selector>` — **AM1, added 2026-10-09.** A CSS selector subset: tag, `.class`, `#id`,
+  `[attr]`, `[attr="v"]`, and the descendant (space) and child (`>`) combinators.
+- `path#text=<phrase>` — **AM1, added 2026-10-09.** A verbatim phrase, at least 8 characters, which
+  must actually occur in the file.
+
+**Why AM1 exists.** A11 could not address an id-less file at all. `prototype.html#anything` fails
+because no `id` exists, and the only other sanctioned form — anchoring to `prototype-inventory.md#INV-NN`
+— is reserved for NON-file prototypes and is a self-reference that proves nothing about the prototype.
+Measured on a real reverse-mode run: 28 of 41 ledger rows rested on a human-only pointer for exactly
+this reason. AM1 is **additive**: every existing `path#id` anchor keeps its exact meaning.
+
+**Do not add `id` attributes to a delivered prototype in order to make it auditable.** That changes
+the artifact under audit, and the audit is supposed to describe what was handed over. An id-less
+static HTML file is the normal case, not an exception.
+
+Anything outside the selector subset — pseudo-classes, sibling combinators — is a non-match, never a
+silent pass. An ambiguous anchor (matching more than once) resolves but is reported as ambiguous, so a
+reviewer can tighten it.
 3. **Extraction only** — record what the prototype does, verbatim where copy matters. No requirements language ("should", "must"), no interpretation, no design opinions.
 4. **Designer–tech collaboration checkpoint** — before Step 2, `@product-designer` and `@tech-lead` review the inventory and walkable prototype together. Add `@architect` when the prototype creates a system or data boundary. Use `.agents/templates/product/prototype-collaboration-template.md` to record `artifacts/output/03-strategy/prototype-collaboration.md` with the selected track/runtime, prototype hash, track-gate evidence, separate reviewer sign-offs, reviewed states, token and responsive mapping, static-to-component mapping (static track) or component/API boundary (component track), feasibility/accessibility risks, decisions, open questions, and `SATISFIED` or `BLOCKED`.
 5. **Collaboration gate** — run the fail-closed validator; a missing, stale, mismatched, or unsigned record halts R2:
