@@ -1124,10 +1124,8 @@ function mainDispatch(args) {
     if (cmd === 'init') {
       let name = 'Untitled';
       let type = 'startup';
-      for (let i = 1; i < args.length; i += 2) {
-        if (args[i] === '--name') name = args[i + 1];
-        if (args[i] === '--type') type = args[i + 1];
-      }
+      ({ name, type: typeArg } = parseFlagArgs(args, ['--name', '--type'], [], 'begin'));
+      if (typeArg) type = typeArg;
       const state = createInitialState(name, type);
       writeState(state);
 
@@ -1338,11 +1336,7 @@ function mainDispatch(args) {
       let agent = null;
       let domain = null;
       let goal = null;
-      for (let i = 1; i < args.length; i += 2) {
-        if (args[i] === '--agent') agent = args[i + 1];
-        if (args[i] === '--domain') domain = args[i + 1];
-        if (args[i] === '--goal') goal = args[i + 1];
-      }
+          ({ agent, domain, goal } = parseFlagArgs(args, ['--agent', '--domain', '--goal'], [], 'session-start'));
       if (!agent) {
         console.error('Missing --agent');
         process.exit(1);
@@ -1408,13 +1402,8 @@ function mainDispatch(args) {
       let decisions = '';
       let nextStep = '';
       let blockers = 'none';
-      for (let i = 1; i < args.length; i += 2) {
-        if (args[i] === '--agent') agent = args[i + 1];
-        if (args[i] === '--worked-on') workedOn = args[i + 1];
-        if (args[i] === '--decisions') decisions = args[i + 1];
-        if (args[i] === '--next-step') nextStep = args[i + 1];
-        if (args[i] === '--blockers') blockers = args[i + 1];
-      }
+          ({ agent, 'worked-on': workedOn, decisions, 'next-step': nextStep, blockers } =
+    parseFlagArgs(args, ['--agent', '--worked-on', '--decisions', '--next-step', '--blockers'], [], 'session-write'));
       if (!agent) {
         console.error('Missing --agent');
         process.exit(1);
@@ -1495,14 +1484,8 @@ function mainDispatch(args) {
 
     if (cmd === 'file-cr') {
       let from = null, to = null, target = null, issue = null, proposedFix = null, impact = null;
-      for (let i = 1; i < args.length; i += 2) {
-        if (args[i] === '--from') from = args[i + 1];
-        if (args[i] === '--to') to = args[i + 1];
-        if (args[i] === '--target') target = args[i + 1];
-        if (args[i] === '--issue') issue = args[i + 1];
-        if (args[i] === '--proposed-fix') proposedFix = args[i + 1];
-        if (args[i] === '--impact') impact = args[i + 1];
-      }
+          ({ from, to, target, issue, 'proposed-fix': proposedFix, impact } =
+    parseFlagArgs(args, ['--from', '--to', '--target', '--issue', '--proposed-fix', '--impact'], [], 'change-request'));
       if (!from || !to || !target || !issue) {
         console.error('Missing required args: --from, --to, --target, --issue');
         process.exit(1);
@@ -1657,9 +1640,7 @@ function mainDispatch(args) {
 
     if (cmd === 'set-phase') {
       let phase = null;
-      for (let i = 1; i < args.length; i += 2) {
-        if (args[i] === '--phase') phase = args[i + 1];
-      }
+          ({ phase } = parseFlagArgs(args, ['--phase'], [], cmd));
       if (!phase) {
         console.error('Missing --phase');
         process.exit(1);
@@ -1736,9 +1717,7 @@ function mainDispatch(args) {
 
     if (cmd === 'validate') {
       let phase = null;
-      for (let i = 1; i < args.length; i += 2) {
-        if (args[i] === '--phase') phase = args[i + 1];
-      }
+          ({ phase } = parseFlagArgs(args, ['--phase'], [], cmd));
       if (!phase) {
         console.error('Missing --phase');
         process.exit(1);
@@ -1764,6 +1743,42 @@ const MUTATING_COMMANDS = new Set([
   'init', 'update', 'session-start', 'session-write', 'complete',
   'advance', 'set-phase', 'compact', 'sync-context', 'file-cr'
 ]);
+
+/**
+ * Parse `--flag value` arguments without consuming the argument that follows an unrecognised flag.
+ *
+ * Six command parsers in this file used to step `i += 2`, assuming every flag carries a value. That
+ * silently ate the next argument after ANY flag the loop did not handle, so `session-write --json
+ * --agent x` lost `--agent` and reported a missing value while running with neither. Measured
+ * (blind /launch run 4, 2026-10-08) on `complete`; the same shape was present six more times.
+ *
+ * One implementation, not seven. Every command now walks by ONE and consumes a value only for a flag
+ * declared to take one. Unknown flags are reported rather than swallowing their neighbour, and a
+ * value flag with no value is a usage error (exit 2) rather than a confusing downstream message.
+ */
+function parseFlagArgs(argv, valueFlags, booleanFlags, label) {
+  const values = new Set(valueFlags);
+  const bools = new Set(booleanFlags || []);
+  const out = {};
+  for (let i = 0; i < argv.length; i++) {
+    const a = argv[i];
+    if (!a.startsWith('--')) continue; // positional: every command here is flag-only
+    const key = a.slice(2);
+    if (bools.has(a)) { out[key] = true; continue; }
+    if (values.has(a)) {
+      const v = argv[i + 1];
+      if (v === undefined) {
+        console.error(`Missing value for ${a}`);
+        process.exit(2);
+      }
+      out[key] = v;
+      i += 1;
+      continue;
+    }
+    console.error(`Unknown flag for '${label}': ${a} (ignored)`);
+  }
+  return out;
+}
 
 function main() {
   const args = process.argv.slice(2);

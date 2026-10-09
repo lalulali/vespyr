@@ -126,3 +126,51 @@ test('CONTROL: without --dry-run the artifact IS recorded (the test can detect w
   assert.ok(!/"dry_run": true/.test(r.out));
   fs.rmSync(dir, { recursive: true, force: true });
 });
+
+/**
+ * One parser, seven commands.
+ *
+ * Six command handlers in `orchestrator_state.js` used the same step-by-two loop as `complete`, so
+ * `session-write --json --agent x` silently lost `--agent` the same way `complete --dry-run --agent x`
+ * did. Fixing only the one the blind run happened to exercise would have left six copies of the same
+ * defect, which is the incomplete fix this session has been criticising everywhere else.
+ *
+ * `parseFlagArgs` is now the single implementation. These tests pin the three behaviours that matter
+ * and are cheap to regress: a value flag is read, an unknown flag does not eat its neighbour, and a
+ * value flag with no value is a usage error rather than a confusing message from further downstream.
+ */
+const O = ORCH;
+
+test('parseFlagArgs: a value flag is read regardless of position', () => {
+  const dir = sandbox();
+  // --agent first, then an unrelated value flag. If the parser ate arguments, one of these is lost.
+  const r = run(dir, ['--agent', 'x', '--artifact', 'p/q.md', '--dry-run']);
+  assert.match(r.out, /"agent": "x"/);
+  assert.match(r.out, /"artifact": "p\/q\.md"/);
+  fs.rmSync(dir, { recursive: true, force: true });
+});
+
+test('parseFlagArgs: an unknown flag does not swallow the value that follows it', () => {
+  const dir = sandbox();
+  const r = run(dir, ['--agent', 'x', '--totally-unknown', '--artifact', 'p/q.md', '--dry-run']);
+  assert.match(r.out, /Unknown flag for 'complete': --totally-unknown/);
+  assert.match(r.out, /"artifact": "p\/q\.md"/,
+    'the flag AFTER the unknown one must still be read — this is the whole defect');
+  assert.doesNotMatch(r.out, /Missing --agent/);
+  fs.rmSync(dir, { recursive: true, force: true });
+});
+
+test('parseFlagArgs: a value flag with no value is exit 2, not a downstream message', () => {
+  const dir = sandbox();
+  const r = run(dir, ['--artifact']);
+  assert.strictEqual(r.code, 2);
+  assert.match(r.out, /Missing value for --artifact/);
+  fs.rmSync(dir, { recursive: true, force: true });
+});
+
+test('parseFlagArgs: no command handler still steps i += 2 (the shape that caused all of this)', () => {
+  const src = fs.readFileSync(O, 'utf8');
+  const offenders = src.split('\n').filter((l) => /for \(let i = \d+; i < args\.length; i \+= 2\)/.test(l));
+  assert.deepStrictEqual(offenders, [],
+    'a step-by-two arg loop reappeared; it eats the argument after any unhandled flag');
+});
