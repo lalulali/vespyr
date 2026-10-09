@@ -75,7 +75,27 @@ Any one is a hard NO-GO on deployment:
 - `qa-signoff.md` exists with GO/CONDITIONAL
 - `artifacts/output/06-launch/release-readiness.md` contains the completed UTTERLY SATISFIED team gate
 
-**All four are checked by `launch_readiness_check.js` at step 01**, with `--require-readiness`.
+**Three of these four are checked by `launch_readiness_check.js` at step 01**, with `--require-readiness`.
+
+`execution-plan.md` is **not** checked. This line previously said "all four", which a blind /launch run
+(2026-10-08) disproved by shipping a release with no plan and a PASS. Corrected rather than papered
+over: requiring a plan for every release is a policy question, not obviously right for a small fix, so
+it is recorded as an unchecked prerequisite instead of being invented as a gate here. `DEFAULTS.plan`
+exists in the checker and is unused — a declaration that reads like an implemented check, which is the
+defect class this gate has been removing all session.
+
+**What a PASS does not prove**, recorded here because every blind run that reached GO said the same
+thing in its own words:
+
+- It does not prove any credential was **revoked**. Removing a secret from source is not rotating it.
+  A live key stays compromised, and no gate in this repository can tell those two apart.
+- It does not prove the code **works**. A `charge()` that returns a bare GET passes every check here.
+- It does not prove anyone **reviewed** anything. The gate reads dispositions and evidence cells; the
+  words in those cells are written by whoever is under pressure to ship.
+- It does not prove **security**. Eleven regex rules are not a security assessment.
+
+A GO means: the recorded decisions are internally consistent, no planted defect survived, and nothing
+in the scanned scope was silently skipped. That is worth something. It is not a launch approval.
 Until that gate existed they were prose on a page nobody could falsify — and `security-scan.js`,
 a real 11-rule scanner including `INJ-SECRET`, was invoked by **zero skills**.
 
