@@ -25,7 +25,7 @@ Based on iteration results:
 
 ### 6b. Enforce iteration limit
 
-Maximum 5 iteration cycles before a mandatory `retro` to assess whether the iteration strategy is working. This prevents endless polish on a feature that may need a fundamentally different approach.
+Maximum 5 iteration cycles before a mandatory `retro` to assess whether the iteration strategy is working. Counted in `artifacts/output/07-iteration/iteration-state.md` and enforced by `cycle_state_check.js --kind iterate` — at 5 cycles a sixth cannot start until a retro is recorded. This prevents endless polish on a feature that may need a fundamentally different approach.
 
 ## Memory closeout
 - `@memory-controller session-write` — record step 6 next action decision.

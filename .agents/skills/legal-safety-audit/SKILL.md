@@ -99,6 +99,34 @@ Open the report with one plain sentence stating overall risk posture and how man
 
 ---
 
+## Done when — checked mechanically
+
+Six guardrails and 20 checks were specified in prose, and almost none could be falsified. Nothing
+checked that all 20 checks were accounted for, so **G6 — "never skip silently" — was a promise rather
+than a property**: an audit could run two checks, skip eighteen without a word, and satisfy every
+written rule.
+
+```bash
+node .agents/scripts/legal_safety_audit_check.js check \
+  --report artifacts/output/legal-safety-audit/audit-report.md \
+  --drafts artifacts/output/legal-safety-audit/drafts --json
+```
+
+It checks four invariants that are genuinely mechanical:
+
+| Guardrail | Check |
+|---|---|
+| **G1** | every generated document carries the `DRAFT — requires human/lawyer review` header, and none is marked final/approved/done |
+| **G3** | the report names the region(s) it resolved — there is no default to fall back on |
+| **G5/G6** | all 20 checks (A1-A7, B1-B13) are accounted for as ran, skipped, or flagged; none appears as both |
+| **G6** | every skipped check carries a reason and evidence, not a bare id |
+
+**What it does not check:** whether a legal judgement was correct, whether a finding is real, or
+whether the drafts are adequate. Those need a lawyer, and G1's own header says so on every document.
+A green result means the audit was **conducted and disclosed completely** — nothing more.
+
+Exit 0 conformant · 1 failures · 2 usage/IO error, fail-closed.
+
 ## Output Artifacts
 
 - `artifacts/output/legal-safety-audit/audit-report.md` — the consolidated report.

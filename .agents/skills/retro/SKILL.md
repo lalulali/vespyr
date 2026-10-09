@@ -20,7 +20,7 @@ This skill runs in sequential steps. Each step is a self-contained file with its
 - After completing a development cycle or shipping a launch
 - After resolving an incident
 - At regular intervals (every 2-4 weeks)
-- After 5 iteration cycles (mandatory trigger)
+- After 5 iteration cycles (mandatory trigger) — recorded as `lastRetroCycle` in `artifacts/output/07-iteration/iteration-state.md`, which is what `cycle_state_check.js --kind iterate` checks before a sixth cycle can start
 
 ## Prerequisites
 - Completed phase artifact (launch-log.md, incident-postmortem.md, or iteration report)
@@ -64,7 +64,8 @@ Blockers: {unresolved patterns or "none"}
 ```
 
 ## Done when
-- All steps in `stepsCompleted`
-- `retro-digest.md` written to `artifacts/output/09-retro/`
+- `cycle_state_check.js check --kind retro` exits 0 — the three bullets below are what it verifies
+- All five steps in `stepsCompleted`, no gaps
+- `retro-digest.md` written to `artifacts/output/09-retro/` with real substance
 - Memory compacted (or skip recorded)
 

@@ -21,13 +21,14 @@ Any one halts the cycle and escalates instead of looping:
 - The same hypothesis is tested twice with no measurable movement — loop variance, not signal; escalate to `@product-manager` to re-scope
 - An iteration would break backwards compatibility for existing users — halt; preserving live behavior outranks the improvement
 - A change turns out to be architectural rather than additive — halt and route to `/design` for the architecture impact, then `/develop`; do not improvise a data-model change inside an iteration
-- 5 iteration cycles have been consumed — `retro` is mandatory before continuing, not optional
+- 5 iteration cycles have been consumed — `retro` is mandatory before continuing, not optional. **Enforced** by `cycle_state_check.js --kind iterate`, which requires `lastRetroCycle` to be recorded
 
 ## Done when
 - `analytics-insights.md`, `iteration-backlog.md`, `iteration-spec.md`, `iteration-plan.md`, and `iteration-results.md` all exist
 - The hypothesis has a recorded before/after measurement — an unmeasured iteration is not shipped, it is guessed
 - A `[LESSON]` entry is written to `lessons-learned.md` via `@memory-controller`
 - The next action is decided by the Step 6 gate (continue / re-scope / roll back / `retro`), not left implicit
+- `cycle_state_check.js check --kind iterate` exits 0 — see Loop closure below
 - `@memory-controller session-write` has run
 
 ## Prerequisites
@@ -157,7 +158,7 @@ Based on results:
 - **Negative signal:** Roll back if needed, reanalyze → back to Step 1 with new data
 - **Feature stabilized:** Move on to next feature or load `retro`
 
-**Iteration limit:** Maximum 5 iteration cycles before a mandatory `retro` to assess whether the iteration strategy is working. This prevents endless polish on a feature that may need a fundamentally different approach.
+**Iteration limit:** Maximum 5 iteration cycles before a mandatory `retro` to assess whether the iteration strategy is working. This prevents endless polish on a feature that may need a fundamentally different approach. The count lives in `artifacts/output/07-iteration/iteration-state.md` and is **checked** by `cycle_state_check.js --kind iterate` — see Loop closure below.
 
 ## Output artifacts
 - `artifacts/output/07-iteration/analytics-insights.md`
@@ -183,9 +184,38 @@ Use this when:
 - Need to ship a completely new feature? → load `develop`
 - Production incident? → load `incident`
 - Want to review how the team is working? → load `retro`
-- Hit 5 iteration cycles? → **mandatory** `retro` before continuing
+- Hit 5 iteration cycles? → **mandatory** `retro` before continuing. The count is in `artifacts/output/07-iteration/iteration-state.md` and `cycle_state_check.js --kind iterate` blocks a sixth cycle until `lastRetroCycle` is recorded
 
 ---
+
+## Loop closure — checked mechanically
+
+The 5-cycle limit is stated in four places across two skills and was, until now, enforced in none of
+them: there was no counter, no state file, and nothing that read a number. A limit with no mechanism
+is not a limit, it is a sentence.
+
+Copy `templates/iteration-state.md` to `artifacts/output/07-iteration/iteration-state.md` on the
+**first** cycle and increment it as cycles complete. Then:
+
+```bash
+node .agents/scripts/cycle_state_check.js check --kind iterate \
+  --state artifacts/output/07-iteration/iteration-state.md --root . --json
+```
+
+It requires:
+- the counter to agree with the cycle table beneath it — a counter that drifts from its own history is
+  one nobody can audit
+- every counted cycle to carry a `positive` / `neutral` / `negative` result. **Counting attempts is how
+  a limit stops limiting**, so a cycle with no recorded signal does not count
+- `iteration-results.md` to record a before/after measurement. The Done-when above already said an
+  unmeasured iteration is not shipped, it is guessed — this checks it
+- **at 5 cycles, `lastRetroCycle` must be recorded before a sixth can start.** `retro` is mandatory at
+  5, not optional and not deferrable
+
+**What it does not check:** whether five was the right number, or whether the hypotheses were sound.
+Those need a human who was there.
+
+Exit 0 conformant · 1 failures · 2 usage/IO error, fail-closed.
 
 ## State Machine Integration
 

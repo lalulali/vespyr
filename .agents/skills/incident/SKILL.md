@@ -168,6 +168,31 @@ Use this when:
 
 ---
 
+## Done when — checked mechanically
+
+`/incident` shipped for its whole life with no gate: an incident directory could hold a triage record
+and nothing else, and nothing noticed. The skill's own principle — "close the loop, every incident
+must produce at least one prevention action item" — was a sentence nobody could falsify, and the
+SEV1 SLA promised a 15-minute response with nothing that reads a clock.
+
+Run this for every incident directory, before it is treated as closed:
+
+```bash
+node .agents/scripts/incident_record_check.js check \
+  --dir artifacts/output/08-incidents/INC-NNN --json
+```
+
+It requires a recorded SEV1-SEV4 severity, all five named artifacts present and substantial (a stub
+satisfies "the file exists" while recording nothing), a post-incident review — **mandatory at SEV1 and
+SEV2** — at least one prevention action item carrying **both an owner and a date**, and blameless
+phrasing.
+
+**What it does not check:** whether mitigation met the SLA, whether the RCA is correct, or whether the
+severity was honestly classified. Those need someone who was there. A green result means the record is
+complete and the loop was closed — not that the response was good.
+
+Exit 0 conformant · 1 failures · 2 usage/IO error, fail-closed.
+
 ## State Machine Integration
 
 The pipeline state machine (`node .agents/scripts/orchestrator_state.js`) is the canonical record of project state. This skill must wire its work into it so other skills, the dashboard, and the code-graph see what happened.
