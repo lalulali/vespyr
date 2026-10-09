@@ -58,6 +58,7 @@ Write `artifacts/output/02-research/research-plan.md`:
 # Research Plan — {topic}
 **Date:** YYYY-MM-DD
 **Methodology:** {approach}
+**Hypothesis:** {the claim being validated — or "no prior hypothesis; exploratory"}
 
 ## Research Goals
 1. {goal} — falsifiable? Yes/No
@@ -84,7 +85,35 @@ Write `artifacts/output/02-research/research-plan.md`:
 - [ ] Questions ask about past behavior, not future intent
 - [ ] No solution pitching in questions
 - [ ] Commitment signals are probed
+
+## Sampling Bias
+{who is deliberately NOT being asked, and why}
 ```
+
+## Done when — checked mechanically
+
+This skill shipped with no gate, and three of its own rules were pure self-certification: goals
+recorded as `falsifiable? Yes/No` filled in by the plan's own author, a Mom Test checkbox block the
+same author ticks, and a sample-size floor nothing read. All three are checkable.
+
+```bash
+node .agents/scripts/research_plan_check.js check \
+  --file artifacts/output/02-research/research-plan.md --json
+```
+
+| Rule | What is checked |
+|---|---|
+| **What it validates** | a `**Hypothesis:**` field or a named upstream artifact (`validation-brief.md`) — or an explicit statement that this is exploratory. The skill exists to validate hypotheses and previously never linked to one, so a plan could validate nothing |
+| **Goals** | 1–3, each carrying an observable — a quantity, a direction, or a threshold. A self-declared `falsifiable? Yes` with nothing behind it is rejected |
+| **Cohort** | segment, a **numeric** sample size at the floor this skill itself sets (5 qualitative / 30 quantitative, by method), and a recruitment method |
+| **Interview guide** | both halves present, at least two questions each |
+| **The Mom Test — on the questions, not the checkbox** | no future-intent phrasing ("would you", "do you think you would", "how much would you pay"), no solution pitching, and a past-behaviour probe actually present in Part 2. Ticking the boxes does not help; the boxes are verified against the questions |
+| **Sampling bias** | a statement of who is deliberately **not** being asked. A cohort of people who already like the idea produces findings that confirm it, and nothing in the document distinguished that from a result |
+
+**What it does not check:** whether the questions are any good, whether the cohort is reachable, or
+whether the study would actually settle the question. Those need a researcher.
+
+Exit 0 conformant · 1 failures · 2 usage/IO error, fail-closed.
 
 ## State machine integration
 At start: Run `node .agents/scripts/orchestrator_state.js status`
