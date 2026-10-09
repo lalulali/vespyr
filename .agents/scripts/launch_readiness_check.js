@@ -401,6 +401,12 @@ function runScan(root, args) {
     const j = JSON.parse(res.stdout || '{}');
     info.findings = Array.isArray(j.findings) ? j.findings.length : 0;
     info.rules = j.findings;
+    // F-11: what the allowlist HID. A clean scan that silently suppressed eight findings and a
+    // clean scan that found nothing are the same output unless the suppressed set is on the record.
+    // Measured (blind /launch run 4): a two-line allowlist naming src/payments.js turned a release
+    // carrying a live Stripe credential into a clean scan, and the output looked reviewed because
+    // the allowlist PATH was printed — never the findings it suppressed.
+    info.suppressed = Array.isArray(j.suppressed) ? j.suppressed : [];
     // The scope travels with the result. A launch gate that prints `ok:true` without saying what
     // it scanned is indistinguishable from one that scanned everything — which is the whole
     // finding that motivated the scope in the first place.
@@ -467,6 +473,18 @@ function main() {
   // This repository is unaffected: it drops 0 source files, because artifacts/ and sandbox/ are
   // removed earlier by excluded_trees and never reach the inclusion filter.
   const scanScope = scan.scope || {};
+  if ((scan.suppressed || []).length) {
+    const sup = scan.suppressed;
+    warnings.push(
+      `The scan reported 0 findings but SUPPRESSED ${sup.length} via the reviewed allowlist ` +
+      `(${scan.allowlist || 'no allowlist recorded'}): ` +
+      sup.slice(0, 3).map((f) => `${f.rule} ${f.path}${f.line ? ':' + f.line : ''}`).join('; ') +
+      (sup.length > 3 ? `; +${sup.length - 3} more` : '') +
+      '. A clean scan with suppressed findings is not a clean scan. Each entry is a claim that a ' +
+      'human read it — verify that claim.'
+    );
+  }
+
   if (scanScope.mode === 'include-list' && (scanScope.dropped_source_files || 0) > 0) {
     failures.push(
       `The scan scope silently dropped ${scanScope.dropped_source_files} source file(s) ` +

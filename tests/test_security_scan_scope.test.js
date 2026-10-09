@@ -386,3 +386,58 @@ test('F-3: files_examined is reported so "0 findings" can be told from "0 files"
   assert.deepStrictEqual(NAMES(r).sort(), ['app/main.md', 'app/pattern-table.md']);
   fs.rmSync(dir, { recursive: true, force: true });
 });
+
+/**
+ * F-11: allowlist suppression must not be silent.
+ *
+ * Found by the fourth blind /launch run (2026-10-08), which reported a forgery cheaper than any it
+ * had found before: a two-line `security/reviewed-allowlist.json` naming `src/payments.js` turned a
+ * release carrying a live Stripe credential into a clean scan. It looked reviewed because the gate
+ * printed the PATH of the allowlist — never the findings it suppressed.
+ *
+ * Suppression itself stays legitimate: a reviewed allowlist is a real mechanism, and the fixtures in
+ * this repo depend on it. What cannot stay is the silence. A clean scan with suppressed findings must
+ * be visibly different from a clean scan that found nothing.
+ */
+test('F-11: an allowlisted finding is reported as SUPPRESSED, not silently dropped', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'suppressed-'));
+  fs.mkdirSync(path.join(dir, 'src'), { recursive: true });
+  fs.writeFileSync(path.join(dir, 'src', 'pay.js'), MARKER + '\n');
+  fs.writeFileSync(path.join(dir, 'other.js'), MARKER + '\n');
+  const allowPath = path.join(`${dir}-spec`, 'allow.json');
+  fs.mkdirSync(path.dirname(allowPath), { recursive: true });
+  fs.writeFileSync(allowPath, JSON.stringify({ rules: { 'T-1': ['src/pay.js'] } }, null, 2));
+
+  const r = runScan(['--dir', dir, '--spec', specPathFor(dir, spec()), '--allowlist-file', allowPath]);
+  assert.deepStrictEqual(NAMES(r), ['other.js'], 'the allowlisted file must leave the reported set');
+  assert.strictEqual(r.suppressed.length, 1, 'and must appear on the record as suppressed');
+  assert.strictEqual(r.suppressed[0].path, 'src/pay.js');
+  assert.strictEqual(r.suppressed[0].rule, 'T-1');
+  fs.rmSync(dir, { recursive: true, force: true });
+});
+
+test('F-11: with no allowlist, suppressed is empty (the common case stays quiet)', () => {
+  const dir = fixture();
+  const r = runScan(['--dir', dir, '--spec', specPathFor(dir, spec({
+    mode: 'include-list', product_roots: ['app'], root_files: [],
+  }))]);
+  assert.deepStrictEqual(r.suppressed, [], 'no allowlist means nothing was suppressed');
+  fs.rmSync(dir, { recursive: true, force: true });
+});
+
+test('F-11: the human-readable output names what it suppressed', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'suppressed-text-'));
+  fs.mkdirSync(path.join(dir, 'src'), { recursive: true });
+  fs.writeFileSync(path.join(dir, 'src', 'pay.js'), MARKER + '\n');
+  const allowPath = path.join(`${dir}-spec`, 'allow.json');
+  fs.mkdirSync(path.dirname(allowPath), { recursive: true });
+  fs.writeFileSync(allowPath, JSON.stringify({ rules: { 'T-1': ['src/pay.js'] } }, null, 2));
+  const specPath = specPathFor(dir, spec());
+  const r = spawnSync('node', [SCAN, '--dir', dir, '--spec', specPath, '--allowlist-file', allowPath], {
+    encoding: 'utf8', maxBuffer: 16 * 1024 * 1024,
+  });
+  assert.match(r.stdout, /SUPPRESSED by the reviewed allowlist/);
+  assert.match(r.stdout, /src\/pay\.js/, 'the suppressed path must be printed, not just the count');
+  assert.match(r.stdout, /not the same as a clean scan/);
+  fs.rmSync(dir, { recursive: true, force: true });
+});

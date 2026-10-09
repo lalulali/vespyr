@@ -688,7 +688,9 @@ function main() {
   // known_fp_excludes) OR { "excludes": [{ "rule": "<RULE>", "path": "<glob>" }] }.
   // Unreadable/invalid allowlist → exit 2 (fail-closed, never silent ignore).
   const allowlist = {};
+  let allowlistActive = false;
   if (allowlistFlag !== -1) {
+    allowlistActive = true;
     const allowPath = args[allowlistFlag + 1];
     let allowRaw;
     try {
@@ -832,7 +834,22 @@ function main() {
       if (knownFp[rule.id] && knownFp[rule.id].some((m) => m.test(rel))) continue;
 
       // P1-2: --allowlist-file suppression (human-reviewed allowlist).
-      if (allowlist[rule.id] && allowlist[rule.id].some((m) => m.test(rel))) continue;
+      //
+      // F-11 (blind /launch run 4, 2026-10-08): suppression used to be SILENT. The allowlist's
+      // existence was reported, but not what it hid — so a two-line allowlist naming
+      // `src/payments.js` turned a release carrying a live Stripe credential into a clean scan, and
+      // the output looked reviewed because the allowlist PATH was printed. The gate printed the path
+      // of the thing doing the suppressing, never the findings it suppressed.
+      //
+      // The rule now still RUNS; the finding is recorded as `suppressed` instead of being dropped.
+      // Suppression becomes visible at the point of use, which is the only place it can be audited.
+      // It is still suppression — nothing here makes an allowlist trustworthy — but it can no longer
+      // be silent, and silence is what made it a forgery rather than a decision.
+      // NOTE: --allowlist-file does NOT skip here. F-11: suppression used to `continue` silently, so
+      // a two-line allowlist naming src/payments.js turned a release carrying a live Stripe
+      // credential into a clean scan while the output looked reviewed. The rule now runs and the
+      // finding is partitioned into `suppressed` after collection, which puts what was hidden on the
+      // record at the only place it can be audited.
 
       // INJ-PATH (P1-3 narrowed): filename-scoped ONLY — applied to the
       // FILENAME during the walk, never to content lines or interpolated
@@ -1002,6 +1019,19 @@ function main() {
   }
   const uniqueFindings = Array.from(seen.values());
 
+  // F-11: split off anything the allowlist covers. Suppression stays possible — a reviewed allowlist
+  // is a legitimate mechanism — but it is no longer silent. The gate reports both counts, so a
+  // clean scan with suppressed findings can never be mistaken for a clean scan.
+  const suppressedFindings = allowlistActive
+    ? uniqueFindings.filter((f) => {
+        const globs = allowlist[f.rule];
+        return globs && globs.some((m) => m.test(f.path));
+      })
+    : [];
+  const reportedFindings = allowlistActive
+    ? uniqueFindings.filter((f) => !suppressedFindings.includes(f))
+    : uniqueFindings;
+
   // F-3: AN EMPTY SCAN IS NOT A CLEAN SCAN.
   //
   // Measured (blind /launch run 2026-10-08): a spec whose `excluded_trees` covered `src/**`
@@ -1029,8 +1059,9 @@ function main() {
     process.stdout.write(
       JSON.stringify(
         {
-          exit: uniqueFindings.length ? 1 : 0,
-          findings: uniqueFindings,
+          exit: reportedFindings.length ? 1 : 0,
+          findings: reportedFindings,
+          suppressed: suppressedFindings,
           skipped_node_modules: skipped,
           compose: composeMode,
           // Printed on EVERY run. A green that silently omitted these would read as "the
@@ -1063,8 +1094,16 @@ function main() {
       ) + '\n'
     );
   } else {
-    if (uniqueFindings.length) {
-      console.log(`\n${uniqueFindings.length} finding(s):`);
+    if (suppressedFindings.length) {
+      console.log(`\n${suppressedFindings.length} finding(s) SUPPRESSED by the reviewed allowlist:`);
+      for (const f of suppressedFindings) {
+        console.log(`  [${f.severity}] ${f.rule} ${f.path}${f.line ? ':' + f.line : ''} — ${f.detail}`);
+      }
+      console.log('  Each was read and accepted by a human. A clean scan with suppressed findings is');
+      console.log('  not the same as a clean scan — check this list before trusting the result.');
+    }
+    if (reportedFindings.length) {
+      console.log(`\n${reportedFindings.length} finding(s):`);
       for (const f of uniqueFindings) {
         console.log(
           `  [${f.severity}] ${f.rule} (${f.label}) ${f.path}${f.line ? ':' + f.line : ''} — ${f.detail}`
@@ -1081,7 +1120,7 @@ function main() {
     if (composeMode) console.error('notice: --compose checks ran (npm audit subprocess + pin/install-script policy)');
   }
 
-  process.exitCode = uniqueFindings.length ? 1 : 0;
+  process.exitCode = reportedFindings.length ? 1 : 0;
   return { exitCode: process.exitCode, findings: uniqueFindings };
 }
 

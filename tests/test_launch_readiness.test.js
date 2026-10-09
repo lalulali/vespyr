@@ -624,3 +624,51 @@ test('F-10: a scope that drops source files fails the gate and names them', () =
     `expected the dropped-file failure, got: ${JSON.stringify(r.failures)}`);
   assert.ok(r.json.scan.scope.dropped_source_files > 0);
 });
+
+/**
+ * F-11 at the gate: a clean scan with suppressed findings must not read as a clean scan.
+ *
+ * The fourth blind run's cheapest forgery was a two-line self-authored allowlist. Nothing can make an
+ * allowlist trustworthy from inside the repository — that needs a trust boundary the repo does not
+ * have. What the gate CAN do is refuse to present suppression as cleanliness, so the forgery is
+ * conspicuous instead of invisible.
+ */
+test('F-11: the gate warns when the scan reported clean but suppressed findings', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'gate-sup-'));
+  for (const [rel, body] of Object.entries({
+    'artifacts/output/06-launch/release-readiness.md':
+      '# Release Readiness\n\n## UTTERLY SATISFIED team gate\n\n| Reviewer | Disposition | Evidence |\n|---|---|---|\n| @product-manager | `SATISFIED` | scope agreed |\n| @tech-lead | `SATISFIED` | plan approved |\n| @qa-engineer | `SATISFIED` | qa-signoff.md |\n| @security-engineer | `SATISFIED` | scan clean |\n| @devops-engineer | `SATISFIED` | rollback rehearsed |\n',
+    'artifacts/output/06-launch/go-nogo-decision.md': GO_NOGO,
+    'artifacts/output/05-execution/quality/qa-signoff.md': SIGNOFF_GO,
+    'src/pay.js': 'const K = 1;\n',
+  })) {
+    const full = path.join(dir, rel);
+    fs.mkdirSync(path.dirname(full), { recursive: true });
+    fs.writeFileSync(full, body);
+  }
+  // The spec lives OUTSIDE the scanned root and is passed by absolute path. A rule table written
+  // inside the scan root matches its own `pattern` field, which is the same self-reference that made
+  // `security/supply-chain-audit-spec.md` need excluding, and it would add a finding unrelated to
+  // what this test measures.
+  const specDir = fs.mkdtempSync(path.join(os.tmpdir(), 'gate-sup-spec-'));
+  const base = JSON.parse(fs.readFileSync(path.join(ROOT, 'security/audit-spec.json'), 'utf8'));
+  delete base.scope;
+  base.rules = [{ id: 'T-1', label: 'SECRET', path: '**', pattern: 'const K = 1', severity: 'high', mode: 'regex', note: 'f' }];
+  const specPath = path.join(specDir, 'audit-spec.json');
+  fs.writeFileSync(specPath, JSON.stringify(base, null, 2));
+  fs.mkdirSync(path.join(dir, 'security'), { recursive: true });
+  fs.writeFileSync(path.join(dir, 'security/self-authored.json'),
+    JSON.stringify({ rules: { 'T-1': ['src/pay.js'] } }, null, 2));
+
+  let out = {};
+  try {
+    out = JSON.parse(execFileSync('node', [SCRIPT, 'check', '--root', dir, '--require-scan',
+      '--spec', specPath,
+      '--scan-allowlist', 'security/self-authored.json', '--json'], { encoding: 'utf8' }));
+  } catch (e) { out = JSON.parse(`${e.stdout || ''}`); }
+  assert.strictEqual(out.scan.findings, 0, 'the forgery does suppress the finding');
+  assert.ok(out.warnings.some((w) => /SUPPRESSED/.test(w) && /src\/pay\.js/.test(w)),
+    `the gate must name what it suppressed, got: ${JSON.stringify(out.warnings)}`);
+  fs.rmSync(dir, { recursive: true, force: true });
+  fs.rmSync(specDir, { recursive: true, force: true });
+});
