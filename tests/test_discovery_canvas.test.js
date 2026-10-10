@@ -106,6 +106,7 @@ test('root-cause: no validation section fails — an uncheckable cause is a beli
 const GOOD_EMPATHY = `# Empathy Map — first-time trial admin in the weekly reporting workflow
 **Date:** 2026-10-09
 **Evidence basis:** interviewed (6 admins, 45 min each)
+**Inferred quadrants:** Thinks, Feels
 
 ## User & Scenario
 - **Segment:** Operations admin, 5–50 person team, no analyst
@@ -114,14 +115,14 @@ const GOOD_EMPATHY = `# Empathy Map — first-time trial admin in the weekly rep
 ## Empathy Canvas
 | Says | Thinks |
 |------|--------|
-| "I stopped trusting the number after week three." | If it is wrong in the first report, nobody will check the rest. |
+| "I stopped trusting the number after week three." | Inference: if it is wrong in the first report, nobody will check the rest. |
 
 | Does | Feels |
 |------|-------|
-| Screenshots the report into the team channel before sharing | Anxious about being the source of a wrong number |
+| Screenshots the report into the team channel before sharing | Inference: anxious about being the source of a wrong number |
 
 ## Pains
-1. Has no way to tell whether a number is right before it leaves their hands.
+1. Has no way to tell whether a number is right before it leaves their hands — high, hit by 6 of 6
 
 ## Gains
 1. A visible check step would let them share without hedging in the message.

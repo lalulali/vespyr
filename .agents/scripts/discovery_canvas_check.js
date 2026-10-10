@@ -54,11 +54,64 @@ const EVIDENCE_BASES = [
 const EVIDENCE_LINE_RE = /^\s*(?:[-*]\s*)?\*\*Evidence basis:?\*\*:?\s*(.+)$/im;
 
 /** Quote material, so a "Says" quadrant cannot be satisfied by a paraphrase alone. */
+/** A scenario word that stands in for having a scenario. */
+const VACUOUS_SCENARIO_RE = /^\s*(?:general|various|all|any|whenever|normal|usual|everyday|typical|ongoing|daily(?: use)?|regular use|use of (?:the )?(?:product|tool|app|platform)|anything|something|somewhere|normal use|\w+ time)\s*\.?\s*$/i;
+
+/** Severity, frequency, or priority - anything that makes one pain outrank another. */
+// An HONEST "unknown" counts as a mark. It has to: on a hypothesis canvas the author frequently does
+// not know how severe a pain is, and a check that accepts only high/medium/low would force them to
+// invent a number to get a green result. That is the F-13 defect — a gate that rewards fabrication —
+// rebuilt one rule later. Accepting `unknown` keeps the check asking the right question ("have you
+// ranked this at all?") instead of one that cannot be answered honestly yet.
+// NB: `TBD` is deliberately NOT in this list. The placeholder detector in this same file treats a
+// bare `TBD` as an unfilled template field, so accepting it here would make the gate contradict
+// itself — one rule would pass the document and the other would reject it, with no way for an author
+// to satisfy both. The other tokens carry the same meaning and collide with nothing.
+// Phrase-based rather than an enumerated word list: people write "severity unknown", "not yet
+// ranked", "unrated", "we do not know yet" and all of them are the same honest answer. An
+// enumerated list would reject the phrasing nobody thought of when it was written, and the cheapest
+// response to that is to invent a severity — which is the failure this rule exists to prevent.
+const UNKNOWN_SEVERITY_RE =
+  /\b(?:unknown|unclear|unsure|un(?:validated|rated|known|quantified)|not (?:yet )?(?:known|ranked|validated|measured|determined|established))\b/i;
+const SEVERITY_RE = new RegExp(
+  '\\b(?:high|medium|low|critical|severe|blocker|blocking|p1|p2|p3|frequent(?:ly)?|occasional(?:ly)?|' +
+  'rare(?:ly)?|top \\d+|\\d+\\s*(?:of|out of)\\s*\\d+|\\d+\\s*%|majority|most|nearly all)\\b|' +
+  UNKNOWN_SEVERITY_RE.source.slice(2),
+  'i'
+);
+
 const QUOTED_RE = /[""“][^""“”]{8,}[""”]|\[[^\]]*https?:\/\/[^\]]*\]|https?:\/\/\S+/;
 
 /** A sentence asserting a cause someone can act on and test. */
 const TESTABLE_RE =
   /\b(because|caused by|due to|driven by|results? from|leads? to|root cause)\b/i;
+
+const { items } = require('./lib/list_items');
+
+/**
+ * Strip a markdown label from a field line, returning the value.
+ *
+ * `**Segment:** admins` puts the bold markers around the LABEL AND COLON, not around the whole
+ * `Segment:` run. A pattern that expects the bold to wrap the whole run consumes `**Segment:` and
+ * leaves `** admins` behind, because the first colon ends the label and the closing `**` survives.
+ *
+ * The trailing `**` then made the value unrecognisable to every check downstream: the vacuous-
+ * scenario test was evaluating the string `"** general"` instead of `"general"`, so it never fired
+ * and the defect it was written to catch passed silently. A parser bug here does not crash — it
+ * quietly stops matching, which is the harder failure to notice.
+ *
+ * Strip leading decoration first, then the label plus any trailing markers, so all of
+ * `**Segment:**`, `**Segment**:`, `**Segment** :` and `- Segment:` yield the bare value.
+ */
+function fieldValue(line, labelRe) {
+  return String(line || '')
+    .replace(/^\s+/, '')
+    .replace(/^[-*+]\s+/, '')            // bullet, requiring trailing space so a value like
+    .replace(/^[#*\s]+/, '')            // "-50% discount" is not mistaken for a list marker
+    .replace(new RegExp(`^(?:${labelRe})\\b[\\*:\\s]*`, 'i'), '')
+    .replace(/[*\s:]+$/, '')
+    .trim();
+}
 
 function failClosed(msg, jsonMode) {
   if (jsonMode) {
@@ -220,6 +273,8 @@ const CHECKS = {
 
   'empathy-map': (text) => {
     const failures = [];
+    const caveats = [];
+
     const canvas = section(text, '(Empathy Canvas|Canvas)');
     if (!canvas) {
       failures.push('No `## Empathy Canvas` section. The four quadrants are the artifact.');
@@ -257,13 +312,119 @@ const CHECKS = {
         );
       }
     }
+    // ---- DEFECT: the canvas erases the distinction the skill itself draws ----
+    // SKILL.md says "Says - what the user verbalizes? direct quotes" and "Thinks - what does the
+    // user NOT say aloud? Inferred from behavior". It then renders all four quadrants as one table
+    // with identical formatting, so a quoted sentence and the researcher's imagination of what
+    // someone felt are visually and structurally indistinguishable.
+    //
+    // A map that cannot show which cells are evidence and which are inference is the exact failure
+    // the Mom Test warns about: a guess wearing a transcript costume. This does NOT require new
+    // content - it requires labelling what the author already knows is an inference.
+    const canvasDeclaresInference =
+      /^\s*\*\*(?:Inferred quadrants?|Inference|Inferred)\b/im.test(text) ||
+      /\binferred\b|\binference\b/i.test(canvas);
+    if (!canvasDeclaresInference) {
+      failures.push(
+        'The canvas never marks which quadrants are INFERENCE. This skill defines Thinks as "what ' +
+        'the user does not say aloud - inferred" and Feels as emotional state; both are inferences ' +
+        'about internal state, yet the table renders them beside the quoted material in `Says` with ' +
+        'identical formatting. A reader cannot tell a person\'s words from your guess about their ' +
+        'mind. Add `**Inferred quadrants:** Thinks, Feels` (or mark the cells inline). This asks for ' +
+        'a label, not for new content.'
+      );
+    }
+
+    // ---- DEFECT: "Segment: admins / Scenario: general" is not a persona ----
+    //
+    // The two checks below run UNCONDITIONALLY rather than inside an `else`. Gating them behind the
+    // section-exists test made the section test unproved: disabling `!persona` sent every document
+    // down the else branch, where an empty persona fails the segment check anyway, so the revert
+    // produced identical output and no test could tell the two paths apart. A revert-proof that
+    // cannot discriminate is not a revert-proof.
+    const persona = section(text, 'User & Scenario|User and Scenario') || '';
+    if (!persona) {
+      failures.push('No `## User & Scenario` section. A canvas with no subject describes everybody.');
+    }
+
+    const segLine = persona.split('\n').find((l) => /\bsegment\b/i.test(l)) || '';
+    const segBody = fieldValue(segLine, 'segment');
+    if (words(segBody).length < 4) {
+      failures.push(
+        `The segment is "${segBody.trim() || '(empty)'}" - too broad to design for. A role name ` +
+        'with nothing distinguishing it (size, tool, constraint, tenure) describes a population, not ' +
+        'a person, and every downstream decision inherits the vagueness. State enough to tell this ' +
+        'user from the neighbouring one.'
+      );
+    }
+
+    const scnLine = persona.split('\n').find((l) => /\bscenario\b|\bcontext\b/i.test(l)) || '';
+    const scnBody = fieldValue(scnLine, 'scenario|context');
+    if (!scnBody.trim()) {
+      failures.push('No **scenario**. A map without a specific moment is a portrait of nobody.');
+    } else if (VACUOUS_SCENARIO_RE.test(scnBody)) {
+      failures.push(
+        `The scenario is "${scnBody.trim()}" - a stand-in for having one. Name the actual moment: ` +
+        'when, doing what, with what at stake. "General" cannot be designed for.'
+      );
+    }
+
+    // ---- DEFECT: `interviewed 1` was a full segment map ----
+    // A low N is a REAL limitation, not a formatting failure - the interviews already happened and no
+    // gate can conjure five more. So a missing N is a failure (undeclared) and a low N is a CAVEAT
+    // (named limit). Failing on it would push authors to misstate the number, which is strictly worse.
+    const evN = ev && ev.basis === 'interviewed' ? (ev.raw.match(/interviewed\s*\(?\s*n\s*=\s*(\d+)|interviewed\s*\(?\s*(\d+)/i) || []).slice(1).find(Boolean) : null;
+    if (ev && ev.basis === 'interviewed' && !evN) {
+      failures.push(
+        'The evidence basis is `interviewed` but states no count. How many people is the whole basis ' +
+        'of this map. State it: `interviewed 5`.'
+      );
+    } else if (evN && parseInt(evN, 10) < 5) {
+      caveats.push(
+        `This map rests on ${evN} interview${evN === '1' ? '' : 's'}. Below five, it is a description ` +
+        'of those people, not of the segment - do not generalise from it without saying so. Recorded as ' +
+        'a limit, not a failure: the interviews already happened, and no check can produce more of them.'
+      );
+    }
+
+    // ---- DEFECT: four pains, no order of importance ----
+    // /discovery-report compiles this map, and any design work downstream has to choose what to fix.
+    // An unranked list hands that choice to whoever reads it first, silently.
+    const painsSec = section(text, 'Pains') || '';
+    const painLines = items(painsSec);
+    const unranked = painLines.filter((l) => !SEVERITY_RE.test(l));
+    if (painLines.length >= 2 && unranked.length === painLines.length) {
+      failures.push(
+        `${painLines.length} pains and not one carries a severity, frequency, or priority marker. ` +
+        'A plain numbered list is document order, not importance - it hands the decision of what to ' +
+        'fix first to whoever reads the list first. Mark each pain (high/medium/low, P1/P2, or how ' +
+        'many users hit it).'
+      );
+    } else if (unranked.length) {
+      failures.push(
+        `${unranked.length} of ${painLines.length} pains carry no severity, frequency, or priority ` +
+        `marker: ${unranked.slice(0, 2).map((l) => l.slice(0, 40)).join(' | ')}. Mark them all or the ` +
+        'ordering is only half-decided.'
+      );
+    }
+
+    const unknownSeverity = painLines.filter((l) => UNKNOWN_SEVERITY_RE.test(l) && !/\b(?:high|medium|low|critical|severe|p1|p2|p3)\b/i.test(l));
+    if (unknownSeverity.length) {
+      caveats.push(
+        `${unknownSeverity.length} of ${painLines.length} pains are marked severity unknown. That is ` +
+        'honest and it is allowed — but it means this map has not decided what matters most, and ' +
+        'anything downstream inherits that indecision. Recorded, not failed: the author may genuinely ' +
+        'not know yet.'
+      );
+    }
+
     if (words(section(text, 'Pains')).length < 5) {
       failures.push('The `## Pains` section is empty. A map with no pains describes a product nobody has.');
     }
     if (words(section(text, 'Gains')).length < 5) {
       failures.push('The `## Gains` section is empty. Without gains this is a complaints list.');
     }
-    return failures;
+    return { failures, caveats };
   },
 
   'journey-map': (text) => {
@@ -470,7 +631,12 @@ function main() {
     failClosed(`${args.file} is empty — an empty canvas is a failure, not a pass`, args.json);
   }
 
-  const failures = [...sharedChecks(text, args.kind), ...CHECKS[args.kind](text)];
+  // A kind check may return a bare failure array (the historical shape) or a richer
+  // { failures, caveats } when it has true-but-non-blocking limits to name.
+  const kindResult = CHECKS[args.kind](text);
+  const kindFailures = Array.isArray(kindResult) ? kindResult : kindResult.failures;
+  const caveats = Array.isArray(kindResult) ? [] : (kindResult.caveats || []);
+  const failures = [...sharedChecks(text, args.kind), ...kindFailures];
 
   const report = {
     kind: args.kind,
@@ -478,20 +644,33 @@ function main() {
     ok: failures.length === 0,
     exit: failures.length ? 1 : 0,
     failures,
+    caveats,
     note:
       'Form and evidence declaration only. A green result is not a research finding, and it says ' +
       'nothing about whether the analysis is correct.',
   };
 
   if (args.json) {
+    // stdout must be pure JSON here. An earlier version printed caveats to stderr unconditionally,
+    // which is harmless to a human reading a terminal and corrupting to anything parsing stdout —
+    // and the caveats are already IN the JSON payload, so it was duplicating them into the wrong
+    // channel rather than surfacing anything new.
     process.stdout.write(JSON.stringify(report, null, 2) + '\n');
   } else if (report.ok) {
     console.log(`✓ ${args.kind}: form and evidence declaration conformant — ${report.file}`);
+    if (report.caveats.length) {
+      const n = report.caveats.length;
+      console.log(`  ${n} named limit${n === 1 ? '' : 's'} carried forward (this result is still a pass):`);
+      for (const c of report.caveats) console.log(`  ! ${c}`);
+    }
     console.log('  This is not a research finding. Nothing here says the analysis is correct.');
   } else {
     const plural = failures.length === 1 ? '' : 's';
     console.error(`✗ ${args.kind}: ${failures.length} issue${plural} — ${report.file}`);
     for (const f of failures) console.error(`  - ${f}`);
+    // Caveats print on the RED path too. A caveat shown only on success is a caveat nobody reads
+    // while the document is being rewritten — which is exactly when it would be actionable.
+    for (const c of report.caveats) console.error(`  ! ${c}`);
   }
   process.exit(report.exit);
 }

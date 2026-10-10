@@ -59,6 +59,8 @@ const OBSERVABLE_RE = /\b\d+\s*%|\bat least\b|\bmore than\b|\bfewer than\b|\bund
 /** Words that mark a goal as pure exploration. */
 const EXPLORATORY_RE = /^\s*(?:to\s+)?(?:understand|learn|explore|investigate|discover)\b/i;
 
+const { items } = require('./lib/list_items');
+
 function failClosed(msg, jsonMode) {
   if (jsonMode) {
     process.stdout.write(JSON.stringify({ exit: 2, fault: msg, failures: [] }, null, 2) + '\n');
@@ -98,17 +100,6 @@ function section(text, headingRe) {
     body.push(lines[j]);
   }
   return body.join('\n');
-}
-
-/** Numbered or bulleted items in a block, excluding headers, separators and the checkbox list. */
-function items(text) {
-  return String(text || '')
-    .split('\n')
-    .map((l) => l.replace(/^\s*(?:\d+[.)]|[-*+])\s*/, '').trim())
-    .filter(Boolean)
-    .filter((l) => !/^#{1,6}\s/.test(l))
-    .filter((l) => !/^\|[\s:|-]+\|?$/.test(l))
-    .filter((l) => !/^\[[ xX]\]\s/.test(l));
 }
 
 function words(s) {

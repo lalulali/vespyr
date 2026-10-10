@@ -49,10 +49,11 @@ Write `artifacts/output/02-research/empathy-map.md`:
 # Empathy Map — {user segment} in {scenario}
 **Date:** YYYY-MM-DD
 **Evidence basis:** {interviewed N / observed / analytics / support-tickets / survey / hypothesis — pick one, and label unvalidated content in the body}
+**Inferred quadrants:** {which of Thinks / Feels are your inference rather than their words — usually both}
 
 ## User & Scenario
-- **Segment:** {description}
-- **Scenario:** {context}
+- **Segment:** {who specifically — role plus what distinguishes them: size, tool, constraint, tenure}
+- **Scenario:** {the actual moment: when, doing what, with what at stake}
 
 ## Empathy Canvas
 | Says | Thinks |
@@ -64,7 +65,7 @@ Write `artifacts/output/02-research/empathy-map.md`:
 | {observed behaviors} | {emotional states} |
 
 ## Pains
-1. {pain point}
+1. {pain point} — {severity: high/medium/low, or how many users hit it}
 
 ## Gains
 1. {opportunity for delight}
@@ -100,6 +101,22 @@ delivered.
 **Empathy-map minimums:** all four quadrants populated; the `Says` quadrant carrying quoted material or
 a source link — if there was no interview, declare the basis as a hypothesis rather than writing a
 plausible paraphrase and presenting it as something a person said; non-empty Pains and Gains.
+
+### Four defects the first version of this gate missed
+
+Re-audited after the gate shipped. A canvas that passes every check above can still be dishonest and
+still be useless downstream. Each of these greened a map that should not have:
+
+| Defect | What is now required |
+|---|---|
+| **The canvas erases the distinction this skill itself draws.** Step 2 defines `Says` as what the user verbalises and `Thinks` as what they *do not say aloud, inferred* — then renders all four quadrants as one table with identical formatting. A quoted sentence and your imagination of what someone felt are indistinguishable to the reader | `**Inferred quadrants:**` naming which quadrants are inference. This asks for a **label, not new content** — it requires labelling what you already know is an inference |
+| **`Segment: admins`, `Scenario: general` is not a persona.** A role name with nothing distinguishing it describes a population, and every downstream decision inherits the vagueness | The segment must carry enough to tell this user from the neighbouring one; the scenario must name a moment. `general`, `whenever`, `various` and friends are rejected as standing in for having one |
+| **`interviewed 1` was a full segment map.** The basis is now required to state its count. A count **below five is a named limit, not a failure** — printed as a caveat on both the pass and fail paths, and carried in the JSON | The interviews already happened; failing on a small N would only push an author to misstate the number, which is strictly worse |
+| **Four pains, no order of importance.** A numbered list is document order, not priority — it hands the decision of what to fix to whoever reads it first | Each pain carries a severity, frequency, or priority marker |
+
+**What this gate still cannot do:** judge whether an inference is *correct*, or whether the pain you
+ranked highest is the one that matters. It checks that the map tells the truth about its own
+provenance. Judging the analysis is a researcher's job.
 
 ## State machine integration
 At start: Run `node .agents/scripts/orchestrator_state.js status`
