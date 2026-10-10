@@ -82,9 +82,32 @@ const SEVERITY_RE = new RegExp(
 
 const QUOTED_RE = /[""“][^""“”]{8,}[""”]|\[[^\]]*https?:\/\/[^\]]*\]|https?:\/\/\S+/;
 
-/** A sentence asserting a cause someone can act on and test. */
+/**
+ * A sentence asserting a cause someone can act on and test.
+ *
+ * FOUND BY BLIND RUN 7, 2026-10-10 (Architect seat, confirmed by the orchestrator). The first
+ * version matched four keywords: `because`, `caused by`, `due to`, `driven by`. Two failures, both
+ * measured against real text:
+ *
+ *   "The export fails because someone was careless."                 -> ACCEPTED. Blame, passed.
+ *   "The export worker never emits the completion event, so the      -> REJECTED. A real cause,
+ *    client cannot distinguish success from failure."                   refused for using `so`.
+ *
+ * A keyword list is a proxy for "states a cause", and this proxy failed BOTH directions at once:
+ * it let blame through and it rejected perfectly good causation. `so`, `which means`, `leading to`,
+ * `therefore` and friends are causal connectives that engineers write every day.
+ */
 const TESTABLE_RE =
-  /\b(because|caused by|due to|driven by|results? from|leads? to|root cause)\b/i;
+  /\b(?:because|caused by|due to|driven by|results? from|results? in|leads? to|leading to|so that|so the|which means|meaning that|therefore|hence|as a result|that is why|which is why|root cause)\b/i;
+
+/**
+ * The opposite check, added for the same run. SKILL.md already says a chain ending at "someone was
+ * careless" has stopped early — but nothing enforced it, because blame phrased with `because`
+ * satisfied the keyword list above. A rule stated in prose and checked by nothing is a rule the
+ * cheapest path ignores.
+ */
+const BLAME_RE =
+  /\b(?:someone was careless|was careless|were careless|not careful|wasn'?t careful|human error|negligence|did not pay attention|didn'?t pay attention|lack of attention|an oversight by|lack of ownership|nobody was)\b/i;
 
 const { items } = require('./lib/list_items');
 
@@ -247,18 +270,33 @@ const CHECKS = {
       failures.push('No `## 5 Whys Chain` section. The chain is the analysis; without it this is an assertion.');
       return failures;
     }
-    const levels = (chain.match(/^\s*\d+\.\s*\*{0,2}Why\?/gim) || []).length;
+    // FOUND BY BLIND RUN 7 (Architect seat, confirmed by the orchestrator). The first version required
+    // the literal `\d+. Why?` with optional bold. A chain written in plain question form — `1. Why did
+    // the admin not know?` — counted ZERO levels and failed a perfectly good analysis, while the
+    // same chain in bold-arrow form passed. The counter was counting a formatting convention, not
+    // chain depth.
+    const levels = (chain.match(/^\s*\d+[.)]\s*\*{0,2}\s*Why\b/gim) || []).length;
     if (levels < 3) {
       failures.push(
         `The 5 Whys chain has ${levels} level(s). SKILL.md sets a floor of 3 — a single "why" is ` +
         'an opinion, and two is a coincidence.'
       );
     }
-    if (!TESTABLE_RE.test(section(text, 'Root Cause') || '')) {
+    const rootCause = section(text, 'Root Cause') || '';
+    if (!TESTABLE_RE.test(rootCause)) {
       failures.push(
         'The `## Root Cause` section never states a cause. It needs a causal claim ("because", ' +
         '"caused by", "driven by") — a symptom restated at greater depth is not a root cause, and a ' +
         'chain that ends at "someone was careless" has stopped early.'
+      );
+    } else if (BLAME_RE.test(rootCause)) {
+      // The keyword above was satisfied; this is the check that used to be missing. Blame is a cause
+      // in grammar and not a cause in engineering: nothing downstream can act on "because someone
+      // was careless", yet it passed this gate for the whole life of the rule.
+      failures.push(
+        'The `## Root Cause` section stops at blame. '+ BLAME_RE.exec(rootCause)[0].replace(/^\w/, (c) => c.toLowerCase()) +
+        ' names a person, not a mechanism. SKILL.md says a chain ending here "has stopped early" — ' +
+        'ask why the mechanism allowed it, and keep going until the answer is something you can change.'
       );
     }
     const validation = section(text, '(Validation|Confirms?|Test(ing)? the (root )?cause|Evidence)');

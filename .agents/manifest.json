@@ -1,6 +1,6 @@
 {
   "version": "2.0.11",
-  "generated_at": "2026-10-09T13:30:12.627Z",
+  "generated_at": "2026-10-10T04:03:55.375Z",
   "file_count": 376,
   "files": {
     ".gitignore": "02be8395c2a0b6cdfcf971daa5689776e2d98cc43603b22a45d8c2bd78c13772",
@@ -98,7 +98,7 @@
     "scripts/dedupe_validator.js": "1b7195574bd08cadceefd8aa3ab505306e3444fb4a07123d6a362bb28b038512",
     "scripts/delegation_audit.js": "58ebafd07ecb15d9686e269c95e8ec6b355ba6e756df5f17a48334a94b2aadf5",
     "scripts/develop_completion_check.js": "cc34dc0655c7f4c6f81b8d84c497bc2bbf9cd9b6adaabcbb5fb775eba24fb988",
-    "scripts/discovery_canvas_check.js": "d20ccaf491daea792b7f4f4e2a4ff99003e36dcedc35cf3d5a714eaf9079527c",
+    "scripts/discovery_canvas_check.js": "efab82486ee21e2192e28e6ca9801b6d4e5649432bdc247b0bfe8336c6951017",
     "scripts/discovery_report_check.js": "7439bbaf84e8cd85fc857bd3369bf00f21be5b80517757229fb9fbc41a915e23",
     "scripts/dispatch_ledger.js": "cf68b8ac4f55863108f045a8e574fb3a7d7dc8ef1035396323ba93b24e6cf7cd",
     "scripts/drift_monitor.js": "0426576fc152252364cf628a10f17d71e9e164c20b734085aca1bcfdaefec375",

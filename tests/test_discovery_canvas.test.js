@@ -343,3 +343,123 @@ test('the gate always states that form is not truth', () => {
   assert.match(r.stdout, /not a research finding/, 'a green gate must not read as a research result');
   fs.rmSync(dir, { recursive: true, force: true });
 });
+
+// ---------------------------------------------------------------------------------------------
+// BLIND RUN 7 (2026-10-10), Architect seat — two defects in this same gate that its own tests
+// missed, found by independent review and confirmed by the orchestrator with bare commands.
+//
+// D1b: the causal detector is a keyword list. Measured both directions at once:
+//        "The export fails because someone was careless."          -> ACCEPTED
+//        "…never emits the completion event, so the client cannot…" -> REJECTED
+//      A keyword list is a proxy for "states a cause", and this proxy failed both directions: it
+//      let blame through AND refused perfectly good causation phrased with `so`, `which means`,
+//      `leading to`, `therefore` — connectives engineers write every day.
+//
+// D1a: the chain-level counter matched only the literal `\d+. Why?` with optional bold, so it was
+//      counting a FORMATTING convention rather than chain depth. A chain written in plain question
+//      form counted zero levels and failed a perfectly good analysis.
+//
+// Both now have tests. Neither had one before, which is why a suite at 1337/1337 carried them.
+// ---------------------------------------------------------------------------------------------
+
+const RC = (rootCause, chainLines) => {
+  const chain = chainLines === undefined
+    ? ['1. **Why?** The admin did not know.', '   → The UI showed nothing.',
+       '2. **Why?** The UI showed nothing.', '   → The worker never emitted.',
+       '3. **Why?** The worker never emitted.', '   → The worker exits before the flush resolves.']
+    : chainLines;
+  return [
+    '# Root Cause — export completion silent',
+    '**Date:** 2026-10-10',
+    '**Evidence basis:** observed',
+    '',
+    '## 5 Whys',
+    ...chain,
+    '',
+    '## Root Cause',
+    rootCause,
+    '',
+    '## Validation',
+    'Reproduce with a fresh container and observe the missing event.',
+  ].join('\n');
+};
+
+test('BLIND RUN 7 D1b: blame phrased WITH a causal keyword is rejected', () => {
+  // Before this, `because someone was careless` passed: the keyword matched, nothing looked further.
+  const r = check('root-cause', RC('The export fails because someone was careless.'));
+  assert.strictEqual(r.code, 1);
+  assert.ok(has(r, /stops at blame/), JSON.stringify(r.json.failures));
+});
+
+test('BLIND RUN 7 D1b: human error phrased WITH a causal keyword is rejected', () => {
+  const r = check('root-cause', RC('The silent export is caused by human error in the release process.'));
+  assert.ok(has(r, /stops at blame/), JSON.stringify(r.json.failures));
+});
+
+test('BLIND RUN 7 D1b: an honest cause phrased with `so` is ACCEPTED', () => {
+  const r = check('root-cause',
+    RC('The export worker never emits the completion event, so the client cannot distinguish success from failure.'));
+  assert.ok(!has(r, /never states a cause|stops at blame/),
+    `a real cause must not be refused for using "so": ${JSON.stringify(r.json.failures)}`);
+});
+
+test('BLIND RUN 7 D1b: honest causes are accepted in every common connective', () => {
+  // The original list knew four keywords. Engineers write more than four.
+  for (const form of [
+    'The worker exits early, so the completion event never lands.',
+    'The worker exits early, which means the completion event never lands.',
+    'The worker exits early, leading to a completion event that never lands.',
+    'The worker exits early, therefore the completion event never lands.',
+    'The worker exits early, as a result the completion event never lands.',
+    'The worker exits early, which is why the completion event never lands.',
+  ]) {
+    const r = check('root-cause', RC(form));
+    assert.ok(!has(r, /never states a cause/),
+      `"${form}" is a causal claim: ${JSON.stringify(r.json.failures)}`);
+  }
+});
+
+test('BLIND RUN 7 D1a: a chain in plain question form is counted, not counted as zero', () => {
+  // `1. Why did the admin not know?` matched nothing; the counter demanded `1. Why?` with bold.
+  const flat = [
+    '1. Why did the admin not know? Because the UI showed nothing.',
+    '2. Why did the UI show nothing? Because the worker never emitted.',
+    '3. Why did the worker never emit? Because it exits before the flush resolves.',
+    '4. Why does it exit early? Because the process is killed when the handler returns.',
+  ];
+  const r = check('root-cause', RC('The export worker exits before the flush resolves, so the client cannot distinguish success from failure.', flat));
+  assert.strictEqual(r.code, 0,
+    `a plainly-written 4-link chain must pass: ${JSON.stringify(r.json.failures, null, 2)}`);
+});
+
+test('BLIND RUN 7 D1a: the level counter still enforces the floor of 3', () => {
+  // The fix must not turn the counter into a rubber stamp. One link is an opinion.
+  const oneLink = ['1. **Why?** The admin did not know.', '   → The UI showed nothing.'];
+  const r = check('root-cause', RC('The UI shows nothing, so the admin cannot tell success from failure.', oneLink));
+  assert.ok(has(r, /has 1 level\(s\)/), JSON.stringify(r.json.failures));
+});
+
+test('BLIND RUN 7: an honest root cause that legitimately names blame as ONE factor still passes', () => {
+  // Over-fitting guard: blaming must not become forbidden vocabulary. A real analysis may note that
+  // ownership was missing as long as it also names the mechanism.
+  const r = check('root-cause', RC(
+    'No test covers a non-UK postcode, so a new market inherits the same silent rejection. ' +
+    'The team was careless about market coverage, but the mechanism is the missing fixture.'
+  ));
+  assert.ok(!has(r, /stops at blame/),
+    'blame mentioned alongside a mechanism is not a blame-terminated chain');
+});
+
+test('BLIND RUN 7: the count of levels scales with the chain, not with a fixed formatting', () => {
+  const mk = (n) => {
+    const lines = [];
+    for (let i = 1; i <= n; i++) {
+      lines.push(`${i}. **Why?** Level ${i}.`, `   → Answer ${i}.`);
+    }
+    return RC('The worker exits before the flush resolves, so the completion event never lands.', lines);
+  };
+  const three = check('root-cause', mk(3));
+  const one = check('root-cause', mk(1));
+  assert.ok(!has(three, /level\(s\)/), 'three links satisfies the floor');
+  assert.ok(has(one, /has 1 level\(s\)/), 'one link does not');
+});
