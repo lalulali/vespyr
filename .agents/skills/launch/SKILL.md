@@ -60,10 +60,13 @@ Any one is a hard NO-GO on deployment:
   body is not a plan.
 
 ## Done when
-- `launch_readiness_check.js check --require-readiness --require-scan` exits 0 **and** reports `verdict: PASS`
-  (a `SKIPPED` run means `release-readiness.md` is absent — that is not a pass). Pass
-  `--scan-allowlist security/reviewed-allowlist.json` when the repo has one; omitting it scans
-  unfiltered, and a named-but-missing allowlist fails the gate.
+- `launch_readiness_check.js check --require-readiness --require-scan --scan-allowlist security/reviewed-allowlist.json`
+  exits 0 **and** reports `verdict: PASS` (a `SKIPPED` run means `release-readiness.md` is absent — that
+  is not a pass). **The `--scan-allowlist` flag is part of the command, not an optional extra.** Blind
+  /launch run 7 measured that omitting it makes this gate permanently red on any repo with a reviewed
+  allowlist: the 28 reviewed false positives read as 28 live findings, and a gate that can never go
+  green gets ignored. Omitting it is still fail-closed and never unsafe — it is a usability defect in
+  the documented path, not a broken check. A named-but-missing allowlist fails the gate.
 - All five step files are in `stepsCompleted`
 - `artifacts/output/06-launch/launch-log.md` exists
 - Post-launch monitoring thresholds are defined and the smoke test has passed against production

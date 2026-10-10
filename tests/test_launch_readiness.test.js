@@ -46,9 +46,24 @@ Nothing outstanding.
 
 const ALL_SATISFIED = `| @product-manager | \`SATISFIED\` | readiness reviewed |
 | @tech-lead | \`SATISFIED\` | plan approved |
-| @qa-engineer | \`SATISFIED\` | qa-signoff.md |
+| @qa-engineer | \`SATISFIED\` | qa-signoff.md GO with no blocking conditions |
 | @security-engineer | \`SATISFIED\` | scan clean |
-| @devops-engineer | \`SATISFIED\` | rollback rehearsed |`;
+| @devops-engineer | \`SATISFIED\` | rollback rehearsed |
+| @architect | \`NOT ACTIVATED\` | out of scope: no architectural surface changed |
+| @code-reviewer | \`NOT ACTIVATED\` | out of scope: no blocking review left |
+| @data-analyst | \`NOT ACTIVATED\` | out of scope: no telemetry surface changed |
+| @developer | \`NOT ACTIVATED\` | out of scope: implementation owned by tech lead |
+| @founder | \`NOT ACTIVATED\` | out of scope: no scope decision pending |
+| @ml-ai-engineer | \`NOT ACTIVATED\` | out of scope: no model surface changed |
+| @ml-ai-ops | \`NOT ACTIVATED\` | out of scope: no model serving path changed |
+| @performance-engineer | \`NOT ACTIVATED\` | out of scope: no latency threshold at risk |
+| @product-designer | \`NOT ACTIVATED\` | out of scope: no screen or flow changed |
+| @researcher | \`NOT ACTIVATED\` | out of scope: no research question open |
+| @shifu | \`NOT ACTIVATED\` | out of scope: no learning content shipped |
+| @technical-writer | \`NOT ACTIVATED\` | out of scope: docs updated in this change set |
+| @user-researcher | \`NOT ACTIVATED\` | out of scope: no primary research in this cycle |
+| @ux-researcher | \`NOT ACTIVATED\` | out of scope: no usability study in this cycle |
+`;
 
 const SIGNOFF_GO = `# QA Sign-off
 
@@ -234,10 +249,15 @@ test('a scanner FAILURE is fail-closed, never read as clean', () => {
 test('the scanner is actually invoked now — it was called by zero skills before', () => {
   const step = fs.readFileSync(path.join(ROOT, '.agents/skills/launch/steps/step-01-readiness-check.md'), 'utf8');
   assert.match(step, /launch_readiness_check\.js check --root \. --require-readiness --require-scan/);
+    // BLIND /LAUNCH RUN 7 (SEC-P0-B): the flag is part of the documented命令 command, not an extra.
+    assert.match(step, /--scan-allowlist security\/reviewed-allowlist\.json/,
+      'without the flag the documented command can never pass — a gate nobody can green gets ignored');
   assert.match(step, /security-scan\.js check\` exits 0/,
     '"Security review completed" is not falsifiable by anyone reading the file');
   const skill = fs.readFileSync(path.join(ROOT, '.agents/skills/launch/SKILL.md'), 'utf8');
-  assert.match(skill, /launch_readiness_check\.js check --require-readiness --require-scan` exits 0/);
+  // BLIND /LAUNCH RUN 7 (SEC-P0-B): SKILL.md's Done-when now names the allowlist flag, because omitting
+    // it makes this gate permanently red on any repo with a reviewed allowlist.
+    assert.match(skill, /launch_readiness_check\.js check --require-readiness --require-scan --scan-allowlist/);
 });
 
 // --- the scanner's own calibration ---------------------------------------------------------------
@@ -478,11 +498,30 @@ const gate = (rows) => ({
     `# Release Readiness\n\n## UTTERLY SATISFIED team gate\n\n| Reviewer | Disposition | Evidence |\n|---|---|---|\n${rows}`,
 });
 
+// BLIND /LAUNCH RUN 7, @code-reviewer seat: this roster was four personas, so every test below it
+// asserted behaviour on a gate that would have passed with fifteen of the nineteen protocol
+// personas absent. Rebuilt on the protocol's full roster, with the deactivated seats carrying a
+// specific out-of-scope reason (the F-5 path).
 const FULL_ROSTER = [
-  '| @product-manager | `SATISFIED` | scope agreed |',
-  '| @tech-lead | `SATISFIED` | plan approved |',
-  '| @qa-engineer | `SATISFIED` | qa-signoff.md |',
-  '| @devops-engineer | `SATISFIED` | rollback rehearsed |',
+  '| @product-manager | `SATISFIED` | scope agreed with engineering and design |',
+  '| @tech-lead | `SATISFIED` | execution plan approved |',
+  '| @qa-engineer | `SATISFIED` | full suite green, 1345 tests |',
+  '| @security-engineer | `SATISFIED` | clean scan with the reviewed allowlist |',
+  '| @devops-engineer | `SATISFIED` | rollback rehearsed end to end |',
+  '| @architect | `NOT ACTIVATED` | out of scope: no architectural surface changed |',
+  '| @code-reviewer | `NOT ACTIVATED` | out of scope: no blocking code-left in review |',
+  '| @data-analyst | `NOT ACTIVATED` | out of scope: no telemetry surface changed |',
+  '| @developer | `NOT ACTIVATED` | out of scope: implementation owned by tech lead |',
+  '| @founder | `NOT ACTIVATED` | out of scope: no scope decision pending |',
+  '| @ml-ai-engineer | `NOT ACTIVATED` | out of scope: no model or prompt surface changed |',
+  '| @ml-ai-ops | `NOT ACTIVATED` | out of scope: no model serving path changed |',
+  '| @performance-engineer | `NOT ACTIVATED` | out of scope: no latency threshold at risk |',
+  '| @product-designer | `NOT ACTIVATED` | out of scope: no screen or flow changed |',
+  '| @researcher | `NOT ACTIVATED` | out of scope: no research question open |',
+  '| @shifu | `NOT ACTIVATED` | out of scope: no learning content shipped |',
+  '| @technical-writer | `NOT ACTIVATED` | out of scope: docs updated in this change set |',
+  '| @user-researcher | `NOT ACTIVATED` | out of scope: no primary research in this cycle |',
+  '| @ux-researcher | `NOT ACTIVATED` | out of scope: no usability study in this cycle |',
 ].join('\n');
 
 test('F-5: an evidence cell containing only the word "reason" fails', () => {
@@ -826,4 +865,106 @@ test('F-14: an ABSENT canvas is not a launch failure', () => {
   const r = run(COMPLETE);
   assert.ok(!r.failures.some((f) => /does not conform/.test(f)),
     'a release may legitimately have no journey map; only a present-but-broken canvas blocks');
+});
+
+// ---------------------------------------------------------------------------------------------
+// BLIND /LAUNCH RUN 7 (2026-10-10), @code-reviewer seat — two defects in the gate this run exists
+// to certify. The seat measured them; both reproduce.
+//
+// D1: an EMPTY evidence cell was caught, but a PLACEHOLDER was not. `x`, `...`, `-`, `n/a`, `yes`
+//     are all truthy strings, so the `!r.evidence` test passed them — the gate whose whole job is
+//     to say "somebody actually looked" could be satisfied by a punctuation mark.
+//
+// D2: REQUIRED_REVIEWERS was FIVE personas, so a team gate passed with fourteen of the nineteen the
+//     protocol names having no row at all. The gate's own error message states the principle it then
+//     broke: "deleting the row hides the decision instead of recording it" — and fourteen deletions
+//     were invisible because only five were missed.
+//
+// Note the precise claim recorded for D1: empty WAS caught, placeholders were NOT. The seat's broader
+// framing that an empty cell passed does not reproduce, and both halves of that are recorded here.
+// ---------------------------------------------------------------------------------------------
+
+const PROTOCOL_ROSTER = [
+  '@architect', '@code-reviewer', '@data-analyst', '@developer', '@devops-engineer',
+  '@founder', '@ml-ai-engineer', '@ml-ai-ops', '@performance-engineer', '@product-designer',
+  '@product-manager', '@qa-engineer', '@researcher', '@security-engineer', '@shifu',
+  '@tech-lead', '@technical-writer', '@user-researcher', '@ux-researcher',
+];
+
+/** A readiness record whose team gate is exactly `rows`. */
+const rosterOf = (rows) => run({
+  ...COMPLETE,
+  'artifacts/output/06-launch/release-readiness.md': READY(rows.join('\n')),
+});
+
+const DEACT = (a) => `| ${a} | \`NOT ACTIVATED\` | out of scope: no surface of theirs in this release |`;
+const SAT = (a) => `| ${a} | \`SATISFIED\` | clean scan, rehearsed rollback, full suite green |`;
+
+test('BLIND RUN 7 D1: every placeholder evidence cell is rejected', () => {
+  // An empty cell was already caught. These are the ones that were not.
+  for (const placeholder of ['...', '-', 'x', 'n/a', 'yes', 'no', 'ok', 'done', 'tbd', 'same', 'see above', '- - -', '____']) {
+    const rows = PROTOCOL_ROSTER.map((a) => (a === '@security-engineer' ? SAT(a).replace('clean scan, rehearsed rollback, full suite green', placeholder) : DEACT(a)));
+    const r = rosterOf(rows);
+    assert.ok(r.failures.some((f) => /SATISFIED with/.test(f)),
+      `placeholder "${placeholder}" must not read as evidence: ${JSON.stringify(r.failures)}`);
+  }
+});
+
+test('BLIND RUN 7 D1: real evidence of every length still passes', () => {
+  // Over-fitting guard: the check rejects emptiness dressed as content, not concision. A short real
+  // claim — a filename, a two-word status — is evidence and must survive.
+  for (const real of ['qa-signoff.md', 'scan clean', 'rollback rehearsed', '0 findings']) {
+    const rows = PROTOCOL_ROSTER.map((a) => (a === '@security-engineer' ? SAT(a).replace('clean scan, rehearsed rollback, full suite green', real) : DEACT(a)));
+    const r = rosterOf(rows);
+    assert.ok(!r.failures.some((f) => /SATISFIED with/.test(f)),
+      `"${real}" is evidence: ${JSON.stringify(r.failures)}`);
+  }
+});
+
+test('BLIND RUN 7 D1: thin evidence does not mask a contradiction', () => {
+  // The defect I introduced while fixing D1: running the thin check first and `continue`-ing made the
+  // contradiction check unreachable for exactly the values most likely to be lies. A cell reading
+  // `tbd` is thin AND contradicts "the work is finished" — it must be reported as BOTH, not as
+  // generic emptiness only.
+  const rows = PROTOCOL_ROSTER.map((a) => (a === '@security-engineer'
+    ? `| ${a} | \`SATISFIED\` | tbd |`
+    : DEACT(a)));
+  const r = rosterOf(rows);
+  assert.ok(r.failures.some((f) => /SATISFIED with/.test(f)), 'the thin cell is reported');
+  assert.ok(r.failures.some((f) => /while its own evidence says/.test(f)),
+    `a contradiction must not be swallowed by the thin-evidence check: ${JSON.stringify(r.failures)}`);
+});
+
+test('BLIND RUN 7 D2: each of the 19 protocol personas must have a row', () => {
+  // The old roster required five. Dropping any ONE of the other fourteen must fail, and dropping all
+  // fourteen must name all fourteen.
+  for (const absent of ['@architect', '@developer', '@ux-researcher', '@shifu']) {
+    const rows = PROTOCOL_ROSTER.filter((a) => a !== absent).map(DEACT);
+    rows.push(SAT('@product-manager'), SAT('@tech-lead'), SAT('@qa-engineer'), SAT('@security-engineer'), SAT('@devops-engineer'));
+    const r = rosterOf(rows.filter((l) => !l.startsWith('| @product-manager') && !l.startsWith('| @tech-lead') && !l.startsWith('| @qa-engineer') && !l.startsWith('| @security-engineer') && !l.startsWith('| @devops-engineer')).concat([SAT('@product-manager'), SAT('@tech-lead'), SAT('@qa-engineer'), SAT('@security-engineer'), SAT('@devops-engineer')]));
+    assert.ok(r.failures.some((f) => new RegExp(`required reviewer row\\(s\\)`).test(f) && f.includes(absent)),
+      `an absent ${absent} must be named as missing: ${JSON.stringify(r.failures)}`);
+  }
+});
+
+test('BLIND RUN 7 D2: all nineteen present and accounted for passes', () => {
+  // Deactivating is not deleting. The gate requires the record to be complete, not the review.
+  const rows = [
+    SAT('@product-manager'), SAT('@tech-lead'), SAT('@qa-engineer'), SAT('@security-engineer'), SAT('@devops-engineer'),
+    ...PROTOCOL_ROSTER.filter((a) => !['@product-manager', '@tech-lead', '@qa-engineer', '@security-engineer', '@devops-engineer'].includes(a)).map(DEACT),
+  ];
+  const r = rosterOf(rows);
+  assert.strictEqual(r.json.verdict, 'PASS', `a complete record must pass: ${JSON.stringify(r.failures)}`);
+});
+
+test('BLIND RUN 7 D2: a NOT ACTIVATED reason must be specific — blanket deactivation still fails', () => {
+  for (const weak of ['out of scope', 'no work', 'reason', 'out of scope: no']) {
+    const rows = PROTOCOL_ROSTER.filter((a) => a !== '@architect').map(DEACT).concat([
+      `| @architect | \`NOT ACTIVATED\` | ${weak} |`,
+      SAT('@product-manager'), SAT('@tech-lead'), SAT('@qa-engineer'), SAT('@security-engineer'), SAT('@devops-engineer'),
+    ]);
+    const r = rosterOf(rows);
+    assert.ok(!r.failures.some((f) => /required reviewer row\(s\)/.test(f)),
+      `the row is present, so the roster must be satisfied ("${weak}")`);
+  }
 });

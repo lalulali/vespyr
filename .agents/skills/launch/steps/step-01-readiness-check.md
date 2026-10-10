@@ -17,8 +17,23 @@ Verify all pre-launch gates have passed. Any red item blocks launch.
 ### The readiness gate — run this first
 
 ```bash
-node .agents/scripts/launch_readiness_check.js check --root . --require-readiness --require-scan --json
+node .agents/scripts/launch_readiness_check.js check --root . --require-readiness --require-scan \
+  --scan-allowlist security/reviewed-allowlist.json --json
 ```
+
+**BLIND /LAUNCH RUN 7, @security-engineer seat (P0): the command above used to omit
+`--scan-allowlist`, and with it omitted the gate can never pass on a repository that has a reviewed
+allowlist.** Measured on the same tree, same everything, one flag apart:
+
+| Invocation | Result |
+|---|---|
+| as previously documented | `verdict: FAIL`, 28 findings — the 28 reviewed false positives read as live findings |
+| with `--scan-allowlist` | `verdict: PASS`, 28 suppressions, all reviewed |
+
+A gate whose documented invocation cannot go green is a gate that gets worked around, which is why
+this security leg had never actually run against this tree. Always pass the flag when the repo has a
+reviewed allowlist — and note that **omitting it is fail-closed** (an unfiltered scan finds *more*,
+never fewer), so this is a documentation defect that makes the honest path look broken.
 
 `/launch` had **no mechanical gate at all** until now, and two of its checklist items were
 unfalsifiable. This gate exists to make them falsifiable:

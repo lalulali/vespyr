@@ -115,6 +115,44 @@ function declaredVerdict(text) {
   return null;
 }
 
+/**
+ * BLIND /LAUNCH RUN 7 (2026-10-10), @code-reviewer seat — the gate this run exists to certify.
+ *
+ * An EMPTY evidence cell was already caught. A placeholder was not:
+ *
+ *   | @security-engineer | `SATISFIED` |  x   |  -> PASS
+ *   | @security-engineer | `SATISFIED` |  ... |  -> PASS
+ *   | @security-engineer | `SATISFIED` |  n/a |  -> PASS
+ *
+ * `x`, `n/a`, `yes`, `-` and `...` are all truthy strings, so the `!r.evidence` test passed them.
+ * That is the same class of defect as F-5, where the bare word `reason` satisfied a reason check:
+ * a check that accepts any non-empty value is not checking anything, and the gate whose whole job is
+ * to say "somebody actually looked" could be satisfied by a punctuation mark.
+ *
+ * Note the precise claim: empty WAS caught, placeholders were NOT. The seat's broader framing that
+ * an empty cell passed does not reproduce, and this records both what is true and what is not.
+ *
+ * MINIMUM: two tokens, eight characters, at least one real word, and not a bare non-answer. Short
+ * real evidence ("scan clean", "rollback rehearsed") still passes — this rejects emptiness dressed
+ * as content, not concision.
+ */
+function evidenceTooThin(evidence) {
+  const clean = String(evidence == null ? '' : evidence)
+    .replace(/[`*_>|]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (!clean) return 'no evidence';
+  if (/^[\W_]+$/.test(clean)) return `only punctuation ("${clean}")`;
+  if (/^(?:n\/?a|na|none|nil|null|yes|no|ok|okay|done|tbd|todo|fixme|x+|same|as above|see above|see below|see notes|pass(?:ed)?|green|clean|clean(?:er)?|\?+|-+|—+|_+|=+|\.+)$/i.test(clean)) {
+    return `a placeholder, not evidence ("${clean}")`;
+  }
+  const tokens = clean.split(' ').filter(Boolean);
+  const hasRealWord = tokens.some((t) => /[a-z0-9]{4,}/i.test(t));
+  if (!hasRealWord) return 'no substantive word ("' + clean.slice(0, 40) + '")';
+  if (clean.length < 8) return 'too short to check ("' + clean + '")';
+  return null;
+}
+
 function teamGateRows(text) {
   const rows = [];
   for (const line of String(text || '').split('\n')) {
@@ -267,13 +305,22 @@ function checkReadiness(text, root) {
       );
     }
     // F-4: a SATISFIED row needs evidence, and that evidence must not contradict the disposition.
+    //
+    // ORDER MATTERS AND THE ORIGINAL ORDER WAS WRONG. Running `evidenceTooThin` first and `continue`-
+    // ing made the contradiction check unreachable for exactly the values most likely to be lies: a
+    // cell reading `tbd` is thin AND contradicts a claim that the work is finished, but the thin check
+    // fired first, `continue` skipped the rest, and the specific lie was reported as generic
+    // emptiness. A test asserting that `tbd` is caught as a contradiction went red.
+    //
+    // Both checks now run and both report. They answer different questions — "is there anything to
+    // check?" and "does what is here say the opposite?" — and one being true does not answer the other.
     for (const r of rows.filter((x) => x.state === 'SATISFIED')) {
-      if (!r.evidence) {
+      const why = evidenceTooThin(r.evidence);
+      if (why) {
         failures.push(
-          `Team gate row "${r.agent}" is SATISFIED with no evidence. A disposition nobody can ` +
-            'check is an assertion, not a sign-off — and this gate is the only thing that ever reads it.'
+          `Team gate row "${r.agent}" is SATISFIED with ${why}. A disposition nobody can check is ` +
+            'an assertion, not a sign-off — and this gate is the only thing that ever reads it.'
         );
-        continue;
       }
       const contradiction = evidenceContradicts(r.evidence);
       if (contradiction) {
@@ -290,12 +337,24 @@ function checkReadiness(text, root) {
     // cheapest way to empty a gate was to delete nineteen rows. Deactivating a reviewer is allowed
     // and is recorded; deleting one is not the same act and must not be invisible.
     //
-    // The required roster is the five roles that own a release decision, which is also the set the
-    // skill's own worked example uses. KNOWN LIMIT, stated rather than hidden: a team with a
-    // legitimately different cast must either list these as NOT ACTIVATED with a real reason, or
-    // this list has to be edited. It is a deliberate floor, not a complete model of who matters.
+    // BLIND /LAUNCH RUN 7, @code-reviewer seat: the required roster was FIVE personas, so a team gate
+    // passed with fourteen of the nineteen the protocol names having no row whatsoever. The gate's own
+    // error message states the principle it then breaks — "deleting the row hides the decision instead
+    // of recording it" — and fourteen deletions were invisible because only five were missed.
+    //
+    // The fix is not to assert that all nineteen always matter. It is to require that each of the
+    // nineteen appears, either with a disposition or as NOT ACTIVATED with a specific out-of-scope
+    // reason (the F-5 path, which already demands a real explanation). A cast that genuinely differs
+    // records WHY, and a reader can see twelve deliberate deactivations rather than twelve silences.
+    //
+    // KNOWN LIMIT, stated rather than hidden: this is the protocol's roster, not a model of whose
+    // review this particular release needed. It is a completeness requirement on the RECORD, not a
+    // claim that domain review occurred.
     const REQUIRED_REVIEWERS = [
-      '@product-manager', '@tech-lead', '@qa-engineer', '@security-engineer', '@devops-engineer',
+      '@architect', '@code-reviewer', '@data-analyst', '@developer', '@devops-engineer',
+      '@founder', '@ml-ai-engineer', '@ml-ai-ops', '@performance-engineer', '@product-designer',
+      '@product-manager', '@qa-engineer', '@researcher', '@security-engineer', '@shifu',
+      '@tech-lead', '@technical-writer', '@user-researcher', '@ux-researcher',
     ];
     const present = new Set(rows.map((r) => String(r.agent).toLowerCase()));
     const missing = REQUIRED_REVIEWERS.filter((a) => !present.has(a));

@@ -283,7 +283,21 @@ function applyProductScope(fileList, spec) {
   // (2026-10-08), running this repository's own include-list spec against a product tree dropped
   // src/ and a live Stripe key vanished from the findings with `warnings: []`.
   const CODE_EXT = /\.(?:[cm]?js|jsx|ts|tsx|py|rb|go|rs|java|kt|php|sh|bash|zsh|cs|swift|scala|ex|erl|sql)$/i;
+  // ADDED BY BLIND /LAUNCH RUN 7 (2026-10-10), @security-engineer seat, confirmed by the orchestrator.
+  //
+  // `droppedSource` tracked code extensions ONLY. An inclusion allowlist fails open, and the
+  // disclosure of that failure was itself a partial blind spot: a `src/.env` carrying
+  // `STRIPE_SECRET_KEY=sk_live_…` was dropped by the inclusion filter and counted in NOTHING —
+  // not in `droppedSourceCount`, not in the sample. The `.js` file beside it was disclosed
+  // honestly, so the run read as "1 file disclosed, 0 found" while the credential was invisible.
+  //
+  // Config-shaped files are exactly where a credential leaks (`.env`, `.properties`, `Dockerfile`,
+  // kube manifests). They now get their own counter and sample, and the total drop count is
+  // surfaced so no extension class can disappear unaccounted.
+  const CONFIG_EXT = /(?:^|\/)(?:\.env|\.env\.[\w.-]+|Dockerfile[\w.-]*|docker-compose[\w.-]*|[\w.-]+\.(?:env|json|ya?ml|toml|ini|cfg|conf|config|properties|pem|key|crt|p12|jks))$/i;
   const droppedSource = [];
+  const droppedConfig = [];
+  let droppedTotal = 0;
   for (const f of fileList) {
     const hit = isExcludedTree(f.rel);
     if (hit) {
@@ -293,13 +307,20 @@ function applyProductScope(fileList, spec) {
     if (mode === 'exclude-list' || isProduct(f.rel)) { kept.push(f); continue; }
     const top = String(f.rel).split('/')[0];
     excludedCounts[top] = (excludedCounts[top] || 0) + 1;
+    droppedTotal += 1;
     if (CODE_EXT.test(f.rel)) droppedSource.push(f.rel);
+    else if (CONFIG_EXT.test(f.rel)) droppedConfig.push(f.rel);
   }
   return {
     kept, excludedCounts, excludedByTree, applied: true, mode,
     examined: kept.length,
+    droppedTotal,
     droppedSourceCount: droppedSource.length,
     droppedSourceSample: droppedSource.slice(0, 5),
+    // Not "0 when there are none": a config-shaped file dropped because nobody listed its tree is
+    // the shape of the F-1 failure, so it is always reported, never folded into a zero.
+    droppedConfigCount: droppedConfig.length,
+    droppedConfigSample: droppedConfig.slice(0, 5),
   };
 }
 
@@ -1055,6 +1076,41 @@ function main() {
 
   // P0-2: skipped node_modules are EXPLICIT in output (never silent).
   const skipped = [...skippedNodeModules].sort();
+
+  // BLIND /LAUNCH RUN 7, @security-engineer seat. An inclusion allowlist fails open, and the
+  // disclosure of that failure had its own blind spot: a config-shaped file dropped because nobody
+  // listed its tree was counted in NOTHING. It must be printed where a human reads the result, not
+  // merely present in the JSON a machine reads — the JSON is only read when someone already knows
+  // to look, which is not the situation in which this matters.
+  const printDropDisclosure = () => {
+    const lines = [];
+    const srcCount = scoped.droppedSourceCount || 0;
+    if (srcCount) {
+      lines.push(`  ${srcCount} code file(s) not scanned (not in product_roots):`);
+      for (const p of scoped.droppedSourceSample || []) lines.push(`    ${p}`);
+    }
+    const cfgCount = scoped.droppedConfigCount || 0;
+    if (cfgCount) {
+      lines.push(`  ${cfgCount} config file(s) not scanned (not in product_roots) — THIS IS WHERE CREDENTIALS LEAK:`);
+      for (const p of scoped.droppedConfigSample || []) lines.push(`    ${p}`);
+      lines.push('    An inclusion allowlist fails open. A clean scan with an unlisted config tree is');
+      lines.push('    not a clean scan — add the tree to product_roots or exclude it with a written reason.');
+    }
+    const total = scoped.droppedTotal || 0;
+    const accounted = srcCount + cfgCount;
+    if (total > accounted) {
+      // The bucketed counters must not become the new invisible class. Anything dropped that is
+      // neither code nor config-shaped is named as a residual, so the total always reconciles.
+      lines.push(`  ${total - accounted} further file(s) not scanned (neither code nor config-shaped):`);
+      lines.push('    no sample is printed for these; re-run with --json and read `scope.dropped_total`');
+      lines.push('    to see the reconciling count against dropped_source_files + dropped_config_files.');
+    }
+    if (lines.length) {
+      console.log('\nNot scanned — disclosed because an inclusion allowlist fails open:');
+      for (const l of lines) console.log(l);
+    }
+  };
+
   if (jsonMode) {
     process.stdout.write(
       JSON.stringify(
@@ -1087,6 +1143,14 @@ function main() {
             // Only meaningful in include-list mode, where dropping is the dangerous direction.
             dropped_source_files: scoped.droppedSourceCount || 0,
             dropped_source_sample: scoped.droppedSourceSample || [],
+            // Blind /launch run 7: an inclusion allowlist fails open, and its disclosure had its own
+            // blind spot. `src/.env` holding a live key was dropped and counted in NOTHING — so the
+            // run read as "1 file disclosed, 0 findings" while the credential was invisible. Config-
+            // shaped files now get their own count, and the total drop is surfaced so no extension
+            // class can disappear unaccounted for.
+            dropped_config_files: scoped.droppedConfigCount || 0,
+            dropped_config_sample: scoped.droppedConfigSample || [],
+            dropped_total: scoped.droppedTotal || 0,
           },
         },
         null,
@@ -1094,6 +1158,7 @@ function main() {
       ) + '\n'
     );
   } else {
+    printDropDisclosure();
     if (suppressedFindings.length) {
       console.log(`\n${suppressedFindings.length} finding(s) SUPPRESSED by the reviewed allowlist:`);
       for (const f of suppressedFindings) {
