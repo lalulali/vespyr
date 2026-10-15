@@ -233,7 +233,7 @@ Ambiguity is always handled — *how* scales with stakes. The unit is not "inten
 | 0 | Trivial; answer discoverable | Read ground truth silently (code, memory, artifacts) — act, no question |
 | 1 | Low-stakes ambiguity | One targeted clarifying question |
 | 2 | Medium stakes; multiple unknowns | Batch clarifications, each with your recommended answer |
-| 3 | Commitment gate: pre-ADR, pre-multi-day build, conflicting signals, irreversible or costly-to-reverse direction | Full `/grill-me` interview (eight moves, disposition ledger) |
+| 3 | Commitment gate: pre-ADR, pre-multi-day build, conflicting signals, irreversible or costly-to-reverse direction | Full `/grill-me` interview (each thread followed until it holds or breaks) |
 
 Rules:
 - Never skip Level 0 — asking what the codebase already answers is performative inquiry.

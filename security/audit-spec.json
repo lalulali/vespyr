@@ -159,7 +159,7 @@
       "id": "INJ-SECRET",
       "label": "INJ-SECRET",
       "path": "**",
-      "pattern": "AKIA[0-9A-Z]{16}|ghp_[A-Za-z0-9]{36}|sk[-_][A-Za-z0-9_-]{20,}|xox[baprs]-[A-Za-z0-9-]{10,}|AIza[0-9A-Za-z_-]{35}|(api[_-]?key|secret|token|password)\\s*[:=]\\s*[\"'][A-Za-z0-9_\\-./+]{16,}[\"']",
+      "pattern": "AKIA[0-9A-Z]{16}|ghp_[A-Za-z0-9]{36}|npm_[A-Za-z0-9]{36}|_authToken\\s*=\\s*\\S{16,}|sk[-_][A-Za-z0-9_-]{20,}|xox[baprs]-[A-Za-z0-9-]{10,}|AIza[0-9A-Za-z_-]{35}|(api[_-]?key|secret|token|password)\\s*[:=]\\s*[\"'][A-Za-z0-9_\\-./+]{16,}[\"']",
       "severity": "medium",
       "mode": "regex+entropy",
       "entropy": {
@@ -167,7 +167,7 @@
         "window": 8,
         "note": "P2: window is integer 8 (was '8-char sliding' string parsed by accident). threshold 2.6 (max achievable for 8 distinct chars is 3.0; 3.5 was unreachable \u2014 rule could never fire). Regex match with entropy < threshold is NOT a finding (negative fixture: AKIA + repeated chars -> ~0.0)."
       },
-      "note": "F-1 (blind /launch run 2026-10-08): the branch read `sk-` with a hyphen while Stripe uses `sk_`, and the entropy check measured the fixed `sk_live_` prefix as if it were secret material \u2014 so every Stripe key in every codebase was undetectable by construction. Proven: a live Stripe key planted in src/ produced ZERO findings and the launch gate returned PASS. The sibling `ghp_` branch in this same rule already used an underscore, so the hyphen was a typo-class error. The literal key is deliberately not reproduced here: a rule table that matches its own patterns is the same class of problem as a scanner scanning its own fixtures."
+      "note": "F-1 (blind /launch run 2026-10-08): the branch read `sk-` with a hyphen while Stripe uses `sk_`, and the entropy check measured the fixed `sk_live_` prefix as if it were secret material \u2014 so every Stripe key in every codebase was undetectable by construction. Proven: a live Stripe key planted in src/ produced ZERO findings and the launch gate returned PASS. The sibling `ghp_` branch in this same rule already used an underscore, so the hyphen was a typo-class error. The literal key is deliberately not reproduced here: a rule table that matches its own patterns is the same class of problem as a scanner scanning its own fixtures. EXTENDED 2026-10-15 (blind run 13, @security-engineer): added npm_ registry tokens and the _authToken= form. The scope fix made root .npmrc reachable, and it then matched nothing \u2014 a scope fix alone would have moved the hole, not closed it."
     },
     {
       "id": "INJ-CONFIG",
@@ -319,7 +319,13 @@
       "package-lock.json",
       "opencode.json",
       "AGENTS.md",
-      "CLAUDE.md"
+      "CLAUDE.md",
+      ".npmrc",
+      ".env",
+      ".env.local",
+      ".npmignore",
+      "index.js",
+      ".gitignore"
     ],
     "excluded_trees": [
       {
@@ -349,8 +355,13 @@
       {
         "path": "security/supply-chain-audit-spec.md",
         "reason": "Defines the INJ-* rule patterns as a table. A file that specifies the patterns matches them by construction, exactly like the adversarial corpus. It is a description of the defence, not the defence."
+      },
+      {
+        "path": "evals/security/mutation-payloads.json",
+        "reason": "Adversarial seed payloads for test_security_mutation.js. Moved OUT of .agents/scripts/test_security_mutation.js on 2026-10-13. CORRECTION 2026-10-13 (@qa-engineer seat, who built the tarball): the original reason said the script SHIPS. It does not \u2014 .agents/scripts/.npmignore excludes it as a repo/CI-only script and tests/cli/packaging.test.js:79 asserts its absence from the tarball. The functional rationale is unchanged and still holds: per-rule-per-file suppression meant a real payload added to that file would have been invisible, wherever the file ships. The fixtures also belong in the adversarial-fixtures tree semantically. Note evals/ IS in package.json files, so this file is kept out by the nested evals/.npmignore (line 1: security/) \u2014 nothing tests that file contents."
       }
     ],
-    "known_residual": "INJ-OBFUSC cannot distinguish high-entropy base64 from a filesystem path or a slash-separated\nTitleCase list. Its corpus fixture (\"tz0aBaTli/A1fE9yzobOmI3i+mAYW...\") and the false\npositive (\"Substitute/Combine/Adapt/Modify\") are the same shape. Narrowing the rule would\nchange what the adversarial corpus tests, so it was NOT narrowed. Tracked as a rule-table\ndefect owned by @security-engineer, not suppressed.\n\nINJ-PROMPT / INJ-TOOL / INJ-ROLE cannot distinguish an instruction from documentation that\nquotes one. Files such as .agents/TROUBLESHOOTING.md and .agents/skills.md name injection\npatterns while explaining the defence. Those files ARE in scope \u2014 they are loaded into agent\ncontext \u2014 so they are deliberately NOT excluded. The residual is real and stays visible."
+    "known_residual": "INJ-OBFUSC cannot distinguish high-entropy base64 from a filesystem path or a slash-separated\nTitleCase list. Its corpus fixture (\"tz0aBaTli/A1fE9yzobOmI3i+mAYW...\") and the false\npositive (\"Substitute/Combine/Adapt/Modify\") are the same shape. Narrowing the rule would\nchange what the adversarial corpus tests, so it was NOT narrowed. Tracked as a rule-table\ndefect owned by @security-engineer, not suppressed.\n\nINJ-PROMPT / INJ-TOOL / INJ-ROLE cannot distinguish an instruction from documentation that\nquotes one. Files such as .agents/TROUBLESHOOTING.md and .agents/skills.md name injection\npatterns while explaining the defence. Those files ARE in scope \u2014 they are loaded into agent\ncontext \u2014 so they are deliberately NOT excluded. The residual is real and stays visible.",
+    "root_files_note": "Credential-bearing root files are LISTED, not left to the drop counter. BLIND RUN 13 (@security-engineer, HIGH): the release scope named five root files, so a root `.npmrc` carrying an npm auth token, a root `.env` with a Stripe-shaped key, and a root `.npmignore` with a key were all DROPPED and the scan returned exit 0 with `clean \u2014 0 findings`. The same files moved to `src/` were detected. A root file is a deliberate, enumerable thing \u2014 there is no 'nobody remembered this tree' excuse at depth 0 \u2014 so the sensitive names are listed explicitly and `index.js` is listed because a root entry module is ordinary product code. The scanner additionally FAILS CLOSED when an include-list drops a config-shaped file at depth 0, so a name missing from this list cannot silently reintroduce the same hole."
   }
 }

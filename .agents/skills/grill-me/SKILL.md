@@ -1,22 +1,25 @@
 ---
 name: grill-me
-description: Relentless Socratic stress-test interview that uncovers truth and surfaces unseen risks in ANY plan, design, program, strategy, or decision — software or not. Runs an eight-move interrogation frame with dynamic ordering and auditable coverage. Use when you want to be grilled on anything before committing. Consult @ml-ai-engineer where eval design, judging rubrics, or benchmark interpretation are under review.
+description: Relentless Socratic interview that turns a loose idea into decisions you can defend — any plan, design, program, strategy, or decision, software or not. Follows each thread until it holds or breaks. Use when you want to be grilled on anything before committing. Consult @ml-ai-engineer where eval design, judging rubrics, or benchmark interpretation are under review.
 metadata:
-  version: "3.0"
-  last_updated: "2026-08-24"
+  version: "6.0"
+  last_updated: "2026-10-15"
 ---
 
-# Grill-Me — Universal Socratic Stress-Test
+# Grill-Me — Socratic Stress-Test
 
 ## What this skill does
 
-Runs a relentless Socratic interview over any plan, design, program, strategy, or decision — code or curriculum, product or policy. Eight interrogation moves guarantee nothing load-bearing goes unexamined; dynamic conversation order keeps the interview humane. Every move ends explicitly dispositioned in a decision log that survives the session.
+Interviews you until you can commit to an idea. **It's a conversation, not an interview** — you own
+the scope, the skill asks the questions, and the order follows your answers rather than a script.
 
-**Operating model: rigid about coverage, flexible about conversation.** The frame is a checklist the interviewer clears — not a script the user endures.
+**It is stateless.** It writes no files and leaves no workspace behind; the only result is a clearer
+version of the idea, in your head. It needs no repo and does not assume the subject is software —
+people use it for business calls, for writing, and for what to do next.
 
 ## When to use
 
-- User says "grill me on this …" — a plan, architecture, spec, training program, business idea, hiring decision, migration, launch, policy
+- "Grill me on this …" — a plan, architecture, spec, training program, business idea, hiring decision, migration, launch, policy
 - Before `/validate-idea` exits the loop phase
 - Before any ADR is written (forces decisions to be explicit)
 - After `/design` produces a PRD (sanity check before `/develop`)
@@ -24,133 +27,107 @@ Runs a relentless Socratic interview over any plan, design, program, strategy, o
 
 ## When NOT to use
 
-- For open-ended brainstorming (use `/validate-idea` first)
-- For technical debugging (use `/incident` instead)
-- For retrospective analysis (use `/retro` instead)
+- For open-ended brainstorming — use `/validate-idea` first
+- For technical debugging — use `/incident`
+- For retrospective analysis — use `/retro`
+- When you can already specify the thing precisely — you don't need to grill it
+- When the ask is a critique of *text* rather than a judgement on an *idea* — use `/elicitation`
 
 ## Prerequisites
 
 - A concrete artifact to interrogate (plan, spec, architecture, hypothesis, design, curriculum, proposal)
-- Its **ground-truth material** — for software: the actual codebase; for anything else: existing documents, data, metrics, prior attempts, audience information. If none exists, ask for the closest thing before starting; a grill without ground truth is opinions trading punches.
+- Its **ground-truth material** — for software the actual codebase; otherwise existing documents, data,
+  metrics, prior attempts, audience information. If none exists, ask for the closest thing first.
+  **A grill without ground truth is opinions trading punches.**
 
-## The eight moves
+## When invoked indirectly
 
-Each move is an interrogation **function**, not an engineering artifact. The software probes below are the default worked example — before interviewing, instantiate every move in the subject's own terms (Step 0).
+Most of the triggers above are other skills. When one of those calls this skill, **do not ask "What
+worries you most about this?"** — the caller has a specific question, so answer it. Do not open a
+chooser. Hand the caller your findings and stop; the caller owns its own artifact.
 
-| # | Move | Function | Default probes (software) |
-|---|---|---|---|
-| 1 | **Premise & Purpose** | Is the underlying need real — measured or assumed? Is this an XY distraction? | *"If the user couldn't use this feature at all, what would they do instead?"* · *"Real pain point or hypothetical?"* · *"What's the underlying problem the stated solution masks?"* |
-| 2 | **Mechanism & Structure** | How exactly does this cause the outcome? Where are the seams and boundaries? | *"If we ripped this out in 6 months, how painful?"* · *"Does this reach across a layer it shouldn't know about?"* · *"Which alternative did you reject, and why specifically?"* |
-| 3 | **State & Consistency** | What must stay true throughout — and where can it corrupt? | *"What becomes inconsistent if this crashes midway?"* · *"What invariant must hold after every operation, and what restores it?"* · *"Which data-shape/timing/ordering assumption is still unverified?"* |
-| 4 | **Consequences & Second-Order Effects** | What else moves when this moves? | *"Which 3 places have the highest blast radius — dependents checked?"* · *"What happens when the dependency is down 30 min? A day?"* · *"What existing behavior changes — intentionally or accidentally?"* |
-| 5 | **Adversarial & Exposure** | What can attack, game, abuse, or leak through this? | *"Where does untrusted input enter — every path escaped/parameterized?"* · *"What secrets/PII could reach logs, errors, responses?"* · *"What's the auth check on every action — including 'internal-only' ones?"* |
-| 6 | **Failure & Recovery** | When it breaks mid-flight, what then? | *"How would we know it's going badly before users tell us?"* · *"Is there a retry/idempotency story — or can retries duplicate effects?"* · *"Crash mid-operation: clean resume, manual repair, or corruption?"* |
-| 7 | **Cost & Sustainability** | Marginal cost at 10x and 100x — sustainable? | *"Cost per unit/request/user at 100x volume?"* · *"What ongoing maintenance burden does this create?"* · *"If this lands 3x late, what's cut first?"* |
-| 8 | **Reduction & Scope Lock** | Can 80% of the value ship in a day? Who actually asked for the rest? | *"Smallest increment that still delivers value — and how long?"* · *"Which part is speculative just-in-case engineering — who requested it?"* · *"What metric proves it was worth building?"* |
+## The stance
 
-### Worked instantiation — a training program (non-software)
+**Do not accept the first answer.** That is the whole mechanism. A perfect question list in the hands
+of an agreeable interviewer produces shallow answers and a nod.
 
-| Move | Instantiated question |
+Follow each thread until it either **holds** or **breaks**:
+
+- *"You said X — why X and not Y?"* then *"what would have to be true for Y to be better?"*
+- *"What's the strongest argument against that?"* — and don't accept a strawman.
+- *"You're confident. What would change your mind?"* — if nothing would, that is the finding.
+
+Give your own recommended answer with reasoning each time, so there is something to push against.
+**Depth is set by blast radius, not by remaining curiosity:** a low-stakes question closes in one
+honest exchange, a load-bearing one gets the full drill.
+
+**Before you close, read it back.** Scan what was said for contradictions — a later answer that
+undercuts an earlier one, a cost that rules out something the design assumed, a question you skipped
+that turned out to be load-bearing. **Surface them and make them resolve.** An interview that ends
+with two answers that cannot both be true has not finished; it has stopped.
+
+## The questions you will forget
+
+An interviewer defaults to the happy path. These are the questions that get skipped — check them
+before you close, and instantiate each in the subject's own terms rather than asking it verbatim.
+
+| Question | Ask it as |
 |---|---|
-| 1 Premise & Purpose | Is the skills gap measured, or assumed? Who says training solves it rather than better tooling or hiring? |
-| 2 Mechanism & Structure | Does this module sequence actually *cause* retention — or just attendance? |
-| 3 State & Consistency | Which prerequisite chains break when a learner misses a week? |
-| 4 Consequences | What workload lands on learners' teams? What expectations do managers raise post-certification? |
-| 5 Adversarial & Exposure | How does assessment gaming, proxy attendance, or content leakage manifest — and what detects it? |
-| 6 Failure & Recovery | The instructor drops out; a cohort falls three weeks behind. What's the recovery path? |
-| 7 Cost & Sustainability | Per-learner marginal cost — does quality survive a 10x cohort? |
-| 8 Reduction & Scope Lock | Would a 1-day workshop plus a reference doc deliver 80% of the outcome? |
+| **What must stay true?** | *"What invariant must hold after every operation — and what restores it if it doesn't?"* |
+| **What else moves?** | *"What breaks elsewhere when this changes — has anyone checked the dependents?"* |
+| **Who attacks it?** | *"Where does untrusted input enter, what could leak, and what's the check on the 'internal-only' path?"* |
+| **How does it fail?** | *"Crash mid-operation: clean resume, manual repair, or corruption? Can a retry duplicate the effect?"* |
+| **What does it cost at 100x?** | *"Marginal cost per unit at 100x volume — and what maintenance burden does this create?"* |
+| **What can we cut?** | *"Smallest increment that still delivers value — and who actually asked for the rest?"* |
+| **What does done mean?** | *"What metric moves, who declares it done, and what are we willing to sacrifice for it?"* |
 
-## Workflow
+**This list is not complete and is not meant to be.** If your subject has a risk that fits none of
+these — legal, ethical, a person who will be upset — **name it and drill it with the same rigor.** The
+list exists to catch what an agreeable interviewer skips, not to bound what may be asked.
 
-### Step 0: Subject framing (mandatory — no questions before this is done)
+**Worked instantiation — a training program** (not software, to show the questions travel). Each label
+below stays on one line so the wrapping cannot hide one:
+*What must stay true?* Prerequisite chains — a learner who misses week 2 can still pass week 4, or the sequence is decorative.
+*What else moves?* Learners' teams absorb the workload; the instructor's other cohorts lose prep time.
+*Who attacks it?* Assessment gaming and content leakage — and what detects either.
+*How does it fail?* The instructor drops out mid-cohort: who finishes it, and does the cohort repeat or skip?
+*What does it cost at 100x?* Per-learner marginal cost at ten cohorts, plus the instructor time each cohort permanently consumes.
+*What can we cut?* A one-day workshop plus a reference doc, delivering 80% of the outcome.
+*What does done mean?* Retention at 90 days, not attendance — and who signs off that it worked.
 
-1. Identify the subject type and stakes (reversible? who is exposed?)
-2. Gather the ground-truth material and **explore it before asking anything** — code for software, materials/data/prior attempts otherwise
-3. Instantiate all eight moves in the subject's own terms — one line each — and write them into the decision-log header. *You cannot silently skip a move you were forced to instantiate first.*
-4. Ask the user: *"What worries you most about this?"* — their answer opens the interview and is diagnostic data in itself
-5. **Enumerate the subject points (coverage contract — anti-tunnel; canon: `.agents/references/point-coverage.md`).** From the ground-truth material and the user's answer, list the subject's load-bearing claims/decision points plus every concern the user voiced — typically 3–7; merge or ask the user to rank if the list explodes. Write them into the decision-log header beside the move instantiation (`P1 <claim>`, `P2 <claim>`, …). The eight moves are the lens; these points are the subjects — neither may silently outrun the other.
+## Three boundaries
 
-### Step 1: Order selection
+### Some questions cannot be answered by talking
 
-Open at the user's hottest concern (it maps to one of the eight moves). Then steer toward the highest-risk moves still unexamined. **Sequence follows the conversation; coverage never does.**
+*"One long form or three pages?"* and *"how should this interaction feel?"* are **ungrillable** — you
+need something to react to. When you hit one, **stop grilling:** build the throwaway version, look at
+it, come back and answer in one line. Sessions grow too long when you try to talk through an
+ungrillable question, and **the scope grows with the uncertainty.**
 
-### Step 2: Question loop
+### Count rounds, not questions
 
-For each open question in the active move:
-1. Ask the question, ONE at a time
-2. Provide your recommended answer with reasoning
-3. Wait for the user's response (recommend / counter / refine)
-4. Update the running decision log
+*"Forty-six questions across four rounds is an ordinary session."* Two hundred questions usually means
+the **scope was too large** — break the work into smaller pieces and grill each. Very long sessions
+also drift into the **dumb zone**, where the context window fills and the questions get worse. Length
+is not thoroughness.
 
-**Proportional depth:** a low-stakes move closes in ONE honest exchange. High-stakes moves get the full drill. Depth is set by blast radius, not by remaining curiosity.
+### Passivity — you can be the sycophant
 
-**Stop asking in a move when:** resolved, or the user says "move on."
+> *"Answering 'agreed, agreed, agreed' for forty questions and coming out with a plan the agent wrote
+> and you nodded at. It feels productive because it was long. But you decided nothing."*
 
-### Step 3: Decision log + disposition ledger
+There is no coverage count that proves you thought. So: push back on a question less detailed than you
+need, say when the scope is drifting, and answer *"I don't know"* and mean it. An unanswerable question
+is usually a signal to prototype, not to guess.
 
-After each resolved question, write to `artifacts/memory/active-decisions.md`:
+**It's working if** you disagree with something, later rounds build on earlier answers, you end
+somewhere you didn't expect, and you could defend each choice to someone who wasn't there.
 
-```
-## AD-YYYY-MM-DD — <move> — <decision title>
+## Anti-patterns
 
-**Decision:** <the resolved choice, one line>
-
-**Rationale:**
-- <key trade-off that was weighed>
-- <what was rejected and why>
-
-**Status:** <Open | Complete>
-```
-
-One entry per resolved question. Keep entries terse — the log is read back in Step 4.
-
-**Disposition ledger (coverage contract):** the log header lists all eight moves, each ending in exactly one state:
-- **EXAMINED (n questions)** — probed and resolved
-- **SKIPPED — reason** — e.g., *"SKIPPED — subject has no external attack surface; internal-only material"*
-
-No third state exists. Skipping with a reason is knowledge; a silently dropped move is a blind spot that survives the session.
-
-### Step 4: Cross-move consistency check
-
-After all eight moves are dispositioned, scan the log for contradictions:
-- Does a Mechanism conclusion contradict the Premise findings?
-- Does a Failure & Recovery answer invalidate a Structure choice?
-- Does Cost rule out something Consequences assumed?
-- Did any Skipped move become load-bearing mid-interview?
-- Did any subject point end unexamined or contradicted by another point's conclusion?
-
-If contradictions surface, present them and ask which move to revisit.
-
-### Step 5: Lock + handoff
-
-Append a summary block to `artifacts/output/{current-phase}/grill-me-decisions.md` with:
-- Date
-- Subject type + instantiation table (or link to it)
-- Disposition ledger: examined/skipped counts with skip reasons
-- Point closure: every subject point → `covered (move N)` / `deferred (owner + reason)` / `out-of-scope ("boundary")` / `rejected (reason)` — a point with no disposition is a blind spot that survives the session (canon: `.agents/references/point-coverage.md`)
-- Number of decisions resolved
-- Cross-move contradictions found
-- Handoff recommendation (e.g., "ready for /design", "ready to author syllabus", "needs /validate-idea first")
-
-> **Path note:** `{current-phase}` maps to the active phase directory under `artifacts/output/`. If unknown, fall back to `artifacts/memory/grill-me-decisions.md`.
-
-## Output artifacts
-
-- `artifacts/memory/active-decisions.md` (running decision log + disposition ledger)
-- `artifacts/output/{current-phase}/grill-me-decisions.md` (final summary)
-
-## State machine integration
-
-At start: run `node .agents/scripts/orchestrator_state.js status`
-At end: run `node .agents/scripts/orchestrator_state.js complete --agent founder --artifact grill-me-decisions.md`
-
-## Anti-patterns to avoid
-
-- **Do not recite the moves in fixed order like a checklist.** Rigidity belongs in the coverage ledger, not the room.
-- **Do not let a move die silently.** Unasked ≠ skipped. A skip needs a logged reason or it hasn't happened.
-- **Do not let a subject point die silently.** A move can be EXAMINED while one of its subjects was never probed; the point ledger closes that gap at lock time.
-- **Do not ask multiple questions at once.** The interview loses depth if you bundle.
-- **Do not recommend the user's first answer uncritically.** *"That's interesting — what if the opposite is true?"* beats "yes, that works."
-- **Do not soften a probe to keep the mood warm.** The DNA applies double here: the interviewer's job is the uncomfortable question.
-- **Do not grill without ground truth.** No material, no interview — go collect it first.
+- **Reciting the questions in fixed order.** They are a coverage check, not a script.
+- **Accepting the first answer.** *"That's what you'd expect — what if the opposite is true?"* beats "yes, that works."
+- **Asking multiple questions at once.** The interview loses depth if you bundle.
+- **Softening a probe to keep the mood warm.** The DNA applies double here: the interviewer's job is the uncomfortable question.
+- **Grilling without ground truth.** No material, no interview — go collect it first.
+- **Grilling an ungrillable question.** If it needs something to react to, stop and prototype.

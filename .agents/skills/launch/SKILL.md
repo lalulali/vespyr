@@ -46,6 +46,12 @@ conditions are open with owners and dates, and here is who closes them before We
 Any one is a hard NO-GO on deployment:
 - The UTTERLY SATISFIED team gate has not passed — every active, relevant agent must record `SATISFIED`; an unresolved `CHANGES REQUESTED` or `BLOCKED` blocks the release
 - `qa-signoff.md` is missing or is not `GO`/`CONDITIONAL` — **checked** by `launch_readiness_check.js`
+- `NOT ACTIVATED` rows carry a **specific out-of-scope reason** — **checked**. A blanked or generic
+deactivation ("not applicable", "out of scope", "n/a", "reason") fails the gate, as does a reason with
+no information-bearing words in it. A reviewer can be deactivated; a reviewer cannot be deleted, and
+deactivating without a reason is deletion wearing a label. This was deleted once during this audit and
+restored after a blind review measured that every honest deactivation reason failed while the
+documentation still promised the check.
 - `security-scan.js` exits non-zero, or exits 2 (tool failure). A scanner failure is never read as clean
 - A scan pass is quoted as wider than it is — the scan covers the **product scope** declared in `security/audit-spec.json`
   (`scope.product_roots`), not the whole repository, and `verdict` is `SKIPPED` rather than `PASS` when launch is out of scope.

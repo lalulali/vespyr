@@ -65,49 +65,67 @@ test('MOCK-2: a mock run says plainly that it is not a quality gate and reports 
 });
 
 test('MOCK-3: a mock run still exits 2 on a genuine regression', () => {
-  // The control. Without this, "always exit 0" would pass MOCK-1 and the gate
-  // would have no signal at all. Plant a regression by claiming in the baseline
-  // that a benchmark which currently fails used to pass.
-  const baselinePath = path.join(ROOT, 'artifacts', 'evals', 'mock-baseline.json');
-  const backup = fs.readFileSync(baselinePath);
-  const baseline = JSON.parse(backup.toString('utf8'));
+  // The control. Without this, "always exit 0" would pass MOCK-1 and the gate would have no signal.
+  //
+  // REWRITTEN 2026-10-15 (blind run 13, @qa-engineer + @code-reviewer, BLOCKING). The original read
+  // `artifacts/evals/mock-baseline.json`, which `.gitignore:16` excludes — so on a clean checkout it
+  // SKIPPED, and `tests/run-all.js` propagates exit 0 through a skipped test. A clean clone could
+  // report a green suite without ever exercising the regression tripwire, which is the one control
+  // that proves the mock carve-out is not "always exit 0".
+  //
+  // It now builds its own baseline in a temp directory and passes `--baseline`. Nothing is read from
+  // gitignored state and nothing in the repository is mutated.
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'mock-regress-'));
+  const currentPath = path.join(dir, 'current.json');
 
-  // Pick a benchmark the mock run actually fails.
-  const probe = runCli(['run', '--mock', '--json']);
-  const parsed = (() => {
-    try { return JSON.parse(probe.stdout); } catch { return null; }
-  })();
-  let target = null;
-  if (parsed && Array.isArray(parsed.benchmarks)) {
-    target = parsed.benchmarks.find((b) => b && b.passed === false && b.id);
-  }
-  if (!target) {
-    // Fall back to a known-failing id so the test still means something.
-    target = { id: 'AGENT-FOUNDER-01' };
-  }
+  // 1. Establish the real current state through the JSON reporter. No assumptions about which
+  //    benchmarks fail — the previous version fell back to a hardcoded id when the run was unreadable.
+  const probe = runCli(['run', '--mock', '--reporter', 'json', '-o', currentPath]);
+  assert.ok(fs.existsSync(currentPath),
+    `the JSON reporter must write a report; exit ${probe.status}, stderr: ${(probe.stderr || '').slice(0, 300)}`);
+  const parsed = JSON.parse(fs.readFileSync(currentPath, 'utf8'));
+  // The JSON reporter nests them under `run`; the top level carries timestamp/run/diff.
+  const benches = (parsed.run && parsed.run.benchmarks) || parsed.benchmarks || [];
+  assert.ok(benches.length > 0, 'the mock run must report per-benchmark results');
+  const failing = benches.find((b) => b.passed === false && b.id);
+  assert.ok(failing, 'the mock run must contain at least one failing benchmark for this control to mean anything');
 
-  const entry = baseline.benchmarks.find((b) => b.id === target.id);
-  assert.ok(entry, `baseline must contain ${target.id} to plant a regression`);
-  const original = { passed: entry.passed, tier0_passed: entry.tier0_passed };
-  entry.passed = true;
-  entry.tier0_passed = true;
+  // The exact entry shape `recordBaseline` writes, so a synthetic baseline is indistinguishable
+  // from a recorded one to the differ.
+  const entry = (b, passed) => ({
+    id: b.id, name: b.name, suite: b.suite, agent: b.agent, skill: b.skill, dimension: b.dimension,
+    model_tier: b.modelTier || null, mock: b.mock === true, rubric_source: b.rubricSource || null,
+    tier1_coauthored: b.tier1Coauthored ?? null, token_source: b.tokenSource || 'local',
+    passed, tier0_passed: b.tier0Passed, tier1_score: b.tier1Score, tokens: b.tokens,
+    provider_tokens: b.providerTokens ?? null, duration_ms: b.durationMs,
+    failures: b.failures || [], output_excerpt: '',
+  });
+  const baselineWith = (pick, label) => {
+    const path_ = path.join(dir, label + '.json');
+    fs.writeFileSync(path_, JSON.stringify({
+      version: 1, generated_at: new Date().toISOString(), harness_version: 'test-fixture',
+      mock_mode: true, provenance: 'synthetic fixture built by MOCK-3',
+      summary: {}, dimensions: {}, benchmarks: benches.map(pick),
+    }, null, 2) + '\n');
+    return path_;
+  };
 
-  try {
-    fs.writeFileSync(baselinePath, JSON.stringify(baseline, null, 2) + '\n');
-    const res = runCli(['run', '--mock']);
-    const out = (res.stdout || '') + (res.stderr || '');
-    assert.strictEqual(res.status, 2,
-      `a planted PASS->FAIL regression must still exit 2; got ${res.status}\n${out.slice(-1500)}`);
-    assert.match(out, /REGRESSION DETECTED/i);
-  } finally {
-    // Always restore. A leaked mutation here would corrupt the committed
-    // baseline, which is exactly the class of bug this work is about.
-    fs.writeFileSync(baselinePath, backup);
-  }
+  // 2. A baseline claiming the currently-failing benchmark used to pass is a planted regression.
+  const regressedPath = baselineWith((b) => entry(b, b.id === failing.id ? true : b.passed === true), 'regressed');
+  const res = runCli(['run', '--mock', '--baseline', regressedPath]);
+  const out = (res.stdout || '') + (res.stderr || '');
+  assert.strictEqual(res.status, 2,
+    `a planted PASS->FAIL regression must exit 2; got ${res.status}\n${out.slice(-1200)}`);
+  assert.match(out, /REGRESSION DETECTED/i, 'the failure must name itself');
 
-  const after = runCli(['run', '--mock']);
-  assert.strictEqual(after.status, 0, 'restoring the baseline must return the run to exit 0');
-  void original;
+  // 3. The opposite direction, so this is not a blanket rejection: a baseline matching the current
+  //    state must still exit 0.
+  const honestPath = baselineWith((b) => entry(b, b.passed === true), 'honest');
+  const ok = runCli(['run', '--mock', '--baseline', honestPath]);
+  assert.strictEqual(ok.status, 0,
+    `a matching baseline must return to exit 0; got ${ok.status}\n${((ok.stdout || '') + (ok.stderr || '')).slice(-800)}`);
+
+  fs.rmSync(dir, { recursive: true, force: true });
 });
 
 test('MOCK-4: a real-adapter run is NOT excused — it still gates on benchmark failure', () => {

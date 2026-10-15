@@ -18,7 +18,13 @@ const path = require('path');
 const ROOT = path.resolve(__dirname, '..', '..');
 const SCRIPTS_DIR = path.join(ROOT, '.agents', 'scripts');
 const CLI = path.join(ROOT, 'bin', 'cli.js');
-const SPEC = path.join(ROOT, 'security', 'audit-spec.json');
+// BLIND REVIEW 2026-10-12 (@security-engineer seat). Use the RULE-ONLY spec, not the release spec.
+// security/audit-spec.json declares an include-list product scope whose roots are this engine repo's
+// directories. This harness scans a temp directory (and held_out), so walked paths match no
+// product_root and the scanner silently drops every candidate before any rule runs — measured as 0
+// of 64 mutations detected against an 85% threshold. The rules were never broken; the harness was
+// pointed at the wrong path. See evals/security/corpus-spec.json for the proof.
+const SPEC = path.join(ROOT, 'evals', 'security', 'corpus-spec.json');
 
 const SUITES = [];
 let passCount = 0;

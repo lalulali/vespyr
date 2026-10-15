@@ -254,7 +254,10 @@ function validatePromptBlock({ id, body }) {
     const ms = [...rmf.matchAll(/(\d{2,5})\s*ms/gi)].map((m) => Number(m[1]));
     const secs = [...rmf.matchAll(/(\d+(?:\.\d+)?)\s*s\b/gi)].map((m) => Number(m[1]) * 1000);
     const durations = [...ms, ...secs].filter((n) => Number.isFinite(n) && n > 0);
-    const FADE = /\b(cross-?fade|fade|transition|opacity\s+change|opacity\s+fade)\b/i;
+    // Stemmed, for the same reason the negation verbs are: `\bfade\b` does not match "fades", so
+    // "opacity fades gently over 400ms" escaped the 200ms bound entirely while "fade 400ms" was
+    // caught. A duration bound that a synonym evades is not a bound.
+    const FADE = /\b(?:cross-?fad\w*|fad\w*|transition\w*|opacity\s+(?:chang|fad)\w*)\b/i;
     const slowFade = FADE.test(rmf) && durations.some((d) => d > 200);
     if (slowFade) {
       failures.push(
@@ -276,13 +279,18 @@ function validatePromptBlock({ id, body }) {
           `it is never created.`
       );
     }
-    // Matched as PATTERNS, not an enumerated verb list. An enumerated list is how "never created"
-    // slipped through: the family is "a negation plus a verb", and any verb can appear.
+    // Matched as STEMS, not an enumerated list of inflections.
+    //
+    // The first version enumerated past participles — `created|started|run|ran|played|…` — and so
+    // rejected `the loop never starts`, which the SKILL.md documents as ACCEPTED and which is the
+    // most precise answer available. The list had `started` and not `starts`. Enumerating inflections
+    // of a verb is the same defect as enumerating the vocabulary of a concept: there is always another
+    // form, and the missing form rejects honest work. (Blind run 12, F3, both directions.)
     const benign =
       /\b(fade|cross-?fade|opacity|transparent|instant|immediate|absent|removed|omitted|disabled|static|snap|end\s+state)\b/i.test(rmf) ||
       /\b(?:no|not|never|without|isn't|aren't|won't)\b[^.;]{0,30}?\b(?:motion|animation|transition|loop|drift|scroll|marquee|auto-?play|spin|orbit)\b/i.test(rmf) ||
-      /\b(?:never|not|no|without)\s+(?:\w+\s+){0,2}?(?:created|started|run|ran|played|animated|shown|rendered|executed|performed|applied|scroll|exist|begin|begun)\b/i.test(rmf) ||
-      /\bdoes\s+not\s+(?:\w+\s+){0,2}?(?:run|start|play|animate|exist|scroll|render|appear|move)\b/i.test(rmf) ||
+      /\b(?:never|not|no|without)\s+(?:\w+\s+){0,2}?(?:creat|start|run|play|animat|show|render|execut|perform|appl|scroll|exist|begin|beg|appear|mov|happen|occur)\w*\b/i.test(rmf) ||
+      /\bdoes\s+not\s+(?:\w+\s+){0,2}?(?:run|start|play|animat|exist|scroll|render|appear|mov|happen|occur)\w*\b/i.test(rmf) ||
       /\bstays?\s+(?:put|still|fixed|in\s+place|static)\b/i.test(rmf);
 
     // A vestibular word is only a problem when it is NOT negated. "the loop never starts"

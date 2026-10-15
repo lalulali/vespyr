@@ -317,7 +317,7 @@ Rules: `.agents/references/vespyr-dna.md` + `.agents/references/socratic/product
 
 > "Before I start drafting the PRD — would you like me to grill you on the requirements first? I'll ask one tough question at a time to make sure the scope is solid before we commit it to paper."
 
-- **"grill me"** or equivalent → load and follow the `grill-me` skill. Resume PRD drafting only after the interview is complete and decisions are saved to `active-decisions.md`.
+- **"grill me"** or equivalent → load and follow the `grill-me` skill. Resume PRD drafting only after the interview is complete. The grill is **stateless** — it writes nothing — so **you, as the caller, capture what it surfaced**: fold the decisions into the PRD, and record the load-bearing ones in `active-decisions.md` yourself.
 - **"standard"** or impatient → proceed with Creation mode workflow.
 
 **Iteration mode (existing product / brownfield):** Skip the grill-me offer. Run the standard iteration workflow directly — the product has real data and users; Socratic grilling is a luxury you can't afford at this stage.

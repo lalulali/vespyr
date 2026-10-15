@@ -859,7 +859,9 @@ test("RT-P1-9/SPC: unanimous sound topic without red-team marker fails the gate"
   const dir = tmpDir();
   fs.writeFileSync(
     path.join(dir, "t_native_1.md"),
-    transcript({ verdicts: "[VERDICT: GO]\n[VERDICT: GO]", synthesis: "[SYNTHESIS: GO]" })
+    transcript({ verdicts: "[VERDICT: GO]\n[VERDICT: GO]", synthesis: "[SYNTHESIS: GO]" }) +
+      "\n[USER-DECISION: Ship this cycle, or hold it until the transcript-accuracy issue is fixed? " +
+      "Shipping now risks wrong notes in front of customers; holding costs one sprint.]\n"
   );
   const topics = path.join(dir, "topics.json");
   fs.writeFileSync(
@@ -871,7 +873,8 @@ test("RT-P1-9/SPC: unanimous sound topic without red-team marker fails the gate"
   assert.ok(JSON.parse(res.stdout).gate.failures.some((f) => f.includes("without red-team challenger")));
   fs.writeFileSync(
     path.join(dir, "t_native_1.md"),
-    "[RED-TEAM: @security-engineer]\n" + transcript({ verdicts: "[VERDICT: GO]\n[VERDICT: GO]", synthesis: "[SYNTHESIS: GO]" })
+      "[RED-TEAM: @security-engineer]\n" + transcript({ verdicts: "[VERDICT: GO]\n[VERDICT: GO]", synthesis: "[SYNTHESIS: GO]" }) +
+        "\n[USER-DECISION: Ship this cycle, or hold it until the transcript-accuracy issue is fixed? Shipping now risks wrong notes in front of customers; holding costs one sprint.]\n"
   );
   res = runCli("score", "--dir", dir, "--json", "--topics", topics);
   assert.strictEqual(res.status, 0, `stdout: ${res.stdout}\nstderr: ${res.stderr}`);
@@ -881,7 +884,9 @@ test("RT-P1-9/SPC: flawed-premise unanimity stays exempt", () => {
   const dir = tmpDir();
   fs.writeFileSync(
     path.join(dir, "t_native_1.md"),
-    transcript({ verdicts: "[VERDICT: NO-GO]\n[VERDICT: NO-GO]", synthesis: "[SYNTHESIS: NO-GO]" })
+    transcript({ verdicts: "[VERDICT: NO-GO]\n[VERDICT: NO-GO]", synthesis: "[SYNTHESIS: NO-GO]" }) +
+      "\n[USER-DECISION: Stop work on this idea entirely, or spend two days confirming the market " +
+      "is dead? Stopping frees the sprint; the spike will likely return the same answer.]\n"
   );
   const topics = path.join(dir, "topics.json");
   fs.writeFileSync(

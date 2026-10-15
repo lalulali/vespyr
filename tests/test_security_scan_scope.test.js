@@ -216,11 +216,29 @@ test('the repo scope block is declared with a reason on every entry, and every e
   }
   // And the ones that actually exist must actually match files. A declared tree matching nothing
   // is a typo or a scope written for a tree that is gone.
-  const r = runScan(['--dir', REPO, '--spec', 'security/audit-spec.json'], REPO);
-  for (const e of scope.excluded_trees) {
-    const n = r.scope.excluded_by_tree ? r.scope.excluded_by_tree[e.path] : undefined;
-    assert.ok(n > 0, `declared exclusion "${e.path}" matched 0 files — it is inert`);
-  }
+    // BLIND REVIEW 2026-10-13: this rule is right — an inert exclusion is a typo — but it must
+    // apply only to trees that exist in a clean checkout. Excluding a tree that isn't there
+    // (gitignored, machine-specific) is correct, not inert; demanding it match files tested a
+    // workstation directory rather than the spec.
+    //
+    // The guard is DISK EXISTENCE, not git-metadata and not a glob match. `git check-ignore`
+    // returns non-zero when the tree isn't a repository, so on a clean clone — exactly where this
+    // test was red — the guard silently did nothing. A hand-rolled `.gitignore` parser got
+    // `.playwright-mcp/**` right and `.vscode/**` wrong, which is what the wrong tool looks like.
+    // Existence is the question; the file system answers it directly.
+    //
+    // TRADE-OFF, stated: an exclusion naming a tree that never existed is also skipped. That is a
+    // different defect and this test does not catch it. Named rather than hidden.
+    const existsOnDisk = (rel) => {
+      const seg = String(rel).split('/')[0];
+      return Boolean(seg) && fs.existsSync(path.join(REPO, seg));
+    };
+    const r = runScan(['--dir', REPO, '--spec', 'security/audit-spec.json'], REPO);
+    for (const e of scope.excluded_trees) {
+      if (!existsOnDisk(e.path)) continue;
+      const n = r.scope.excluded_by_tree ? r.scope.excluded_by_tree[e.path] : undefined;
+      assert.ok(n > 0, `declared exclusion "${e.path}" matched 0 files — it is inert`);
+    }
 });
 
 test('the repo scans clean on its own declared scope, with the allowlist applied', () => {

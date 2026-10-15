@@ -77,11 +77,17 @@ test("RT-P2-3 follow-up: orphaned coverage fixtures are pinned, not dead", () =>
 
 // --- 02r: point-coverage canon shared across discussion surfaces ---
 
-test("02r: round-table, elicitation, and grill-me cite the point-coverage canon", () => {
-  const GRILL = read(".agents/skills/grill-me/SKILL.md");
-  for (const [name, skill] of [["round-table", ROUNDTABLE], ["elicitation", ELICITATION], ["grill-me", GRILL]]) {
+test("02r: the skills that enumerate points cite the point-coverage canon", () => {
+  // grill-me left this list 2026-10-14 (owner ruling): it returned to the original's thinking-tool
+  // framing and no longer enumerates subject points. A skill must not cite a canon it does not
+  // follow, so its absence is asserted rather than its presence. The canon survives in the two
+  // surfaces that do enumerate points.
+  for (const [name, skill] of [["round-table", ROUNDTABLE], ["elicitation", ELICITATION]]) {
     assert.match(skill, /point-coverage\.md/, `${name} must cite the shared point-coverage canon`);
   }
+  const GRILL = read(".agents/skills/grill-me/SKILL.md");
+  assert.ok(!/point-coverage\.md/.test(GRILL),
+    "grill-me must not cite a canon it no longer follows — that would be a false claim of coverage");
   assert.match(ELICITATION, /Critique coverage/);
   assert.match(ELICITATION, /exactly five lines/);
 });

@@ -18,7 +18,14 @@ const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..', '..');
 const SCANNER = path.join(ROOT, '.agents', 'scripts', 'security-scan.js');
-const SPEC = path.join(ROOT, 'security', 'audit-spec.json');
+// BLIND REVIEW 2026-10-12 (@security-engineer seat). This harness must NOT use the release spec.
+// security/audit-spec.json declares an include-list product scope whose roots are this ENGINE
+// repo's directories. Pointed at evals/security/corpus, walked paths become corpus-relative and
+// match no product_root, so the scanner silently dropped 13 of 14 fixtures before any rule ran --
+// leaving 10 of 11 rules unverified against their own payloads. The seat proved this is wiring, not
+// a detection regression: the same scanner and rules reproduce the baseline 14-for-14 with the
+// product scope removed. The corpus tests the RULES; repo scope policy is the release scan's job.
+const SPEC = path.join(ROOT, 'evals', 'security', 'corpus-spec.json');
 const CORPUS = path.join(ROOT, 'evals', 'security', 'corpus');
 const BASELINE = path.join(CORPUS, 'baseline-2026-08-10.json');
 
@@ -148,7 +155,21 @@ function main() {
     for (const f of failures) console.error('  - ' + f);
     process.exitCode = 1;
   } else {
-    console.log('corpus invariants OK: all rules have pos+neg fixtures; pos=1, neg=0, deterministic.');
+    // BLIND REVIEW 2026-10-12: this was a HARDCODED string reporting "pos=1, neg=0" whatever the
+    // real counts were — a summary that claimed specific numbers it never computed. It is the same
+    // false-assurance class as the corpus findings drift itself: a confident, specific, wrong
+    // number. It now reports the measured counts, so a reader can tell 14 detections from 1.
+    let posCount = -1;
+    try {
+      const frozen = JSON.parse(fs.readFileSync(BASELINE, 'utf8'));
+      posCount = (frozen.findings || []).length;
+    } catch { posCount = -1; }
+    // The negative scan already ran at line 93 into negScan; reuse it rather than inventing a name.
+    const negCount = negScan && negScan.exit === 0 ? 0 : -1;
+    const detail = posCount >= 0
+      ? `pos=${posCount} findings match the frozen baseline, neg=${negCount >= 0 ? negCount + ' findings' : 'n/a'}`
+      : 'baseline unavailable — counts not verified';
+    console.log(`corpus invariants OK: all rules have pos+neg fixtures; ${detail}; deterministic.`);
   }
 }
 

@@ -67,6 +67,10 @@ const GOOD_EMPATHY = `# Empathy Map — billing admin, refund workflow
 `;
 
 /** A report listing every declared input, with `pass` controlling the research-plan verdict. */
+/** The two sections the gate now requires — SKILL.md says never to drop them. */
+const METHODS_AND_OPEN = `\n## Research Methods Used\n\nSix 45-minute interviews with operations admins.\n\n## Open Questions\n\n1. Does the admin trust the preview as much as their own eye?\n`;
+
+
 function report({ rows = {}, caveat = true } = {}) {
   const table = ALL_INPUTS.map((f) => {
     const verdict = rows[f] || 'absent';
@@ -75,7 +79,7 @@ function report({ rows = {}, caveat = true } = {}) {
   const note = caveat
     ? '\nNote: usability testing not yet conducted. Recommend running usability tests before finalizing design specs.\n'
     : '';
-  return `# Discovery Report — checkout abandonment\n\nNarrative synthesis of what we learned.\n\n## Sources\n| Input | Status |\n|---|---|\n${table}\n${note}`;
+  return `# Discovery Report — checkout abandonment\n\nNarrative synthesis of what we learned.\n${METHODS_AND_OPEN}\n## Sources\n| Input | Status |\n|---|---|\n${table}\n${note}`;
 }
 
 function fixture({ files = {}, rows, caveat } = {}) {
@@ -238,5 +242,41 @@ test('a green result says it cannot verify the synthesis', () => {
   const r = spawnSync('node', [GATE, 'check', '--root', dir, '--report', 'user-research-report.md', '--json'], { encoding: 'utf8' });
   assert.match(r.stdout, /cannot verify the synthesis|does not check/i,
     'a green provenance gate must not read as a validated report');
+  fs.rmSync(dir, { recursive: true, force: true });
+});
+
+// ---------------------------------------------------------------------------------------------
+// BLIND RUN 8-10 (@code-reviewer seat): `## Research Methods Used` and `## Open Questions` were
+// declared inputs that SKILL.md says NEVER to drop, and the gate's own Done-when said "It requires:"
+// while omitting them. Measured: a report with a passing input, a complete `## Sources` table, and
+// both sections absent exited 0 clean. They are the report's reviewability — the provenance and the
+// unresolved-questions record.
+// ---------------------------------------------------------------------------------------------
+
+test('BLIND RUN 8-10: a report missing either required section fails and names it', () => {
+  for (const missing of ['Research Methods Used', 'Open Questions']) {
+    const dir = fixture({ files: { 'research-plan.md': GOOD_PLAN }, rows: { 'research-plan.md': 'PASS' } });
+    const f = path.join(dir, 'user-research-report.md');
+    const body = report({ rows: { 'research-plan.md': 'PASS' } });
+    fs.writeFileSync(f, body.replace(
+      new RegExp('\\n## ' + missing + '[\\s\\S]*?(?=\\n## )'), '\n'
+    ));
+    const r = run(dir);
+    const named = (r.json.failures||[]).some((x) => x.indexOf('## ' + missing) !== -1);
+    assert.ok(named,
+      `a report without ${missing} must fail and name it: ${JSON.stringify(r.json.failures)}`);
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('BLIND RUN 8-10: an empty required section is a failure, not a record', () => {
+  const rows = { 'research-plan.md': 'PASS' };
+  const dir = fixture({ files: { 'research-plan.md': GOOD_PLAN }, rows });
+  const f = path.join(dir, 'user-research-report.md');
+  fs.writeFileSync(f, report({ rows })
+    .replace(/## Open Questions\n\n1\. Does the admin trust[^\n]*\n/, '## Open Questions\n'));
+  const r = run(dir);
+  assert.ok((r.json.failures||[]).some((x) => /Open Questions` section is empty/.test(x)),
+    `an empty section is a heading, not a record: ${JSON.stringify(r.json.failures)}`);
   fs.rmSync(dir, { recursive: true, force: true });
 });

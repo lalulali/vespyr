@@ -420,3 +420,98 @@ test('/iterate ships the state template its gate requires', () => {
     assert.ok(src.includes(key), `the template must define ${key}, which the gate reads`);
   }
 });
+
+// ---------------------------------------------------------------------------------------------
+// BLIND REVIEW 2026-10-12 (@code-reviewer + @architect seats). `/incident` could not be gated at
+// all: three defects, each invisible to the suite because its fixture happened to dodge them.
+//
+//  1. UNGROUPED ALTERNATION. `section(pir, 'Action items?|Prevention')` compiled to
+//     `^(\s*)(#{1,6})\s*Action items?` OR `Prevention` — the second branch matching the bare word
+//     anywhere. `## 6. Prevention Mechanisms` matched with NO capture group 2, so `m[2].length` threw
+//     an uncaught TypeError. A template-faithful post-incident review crashed the gate with no verdict.
+//  2. NUMBERED HEADING. The repo's template writes `## 5. Action Items`; the pattern required the
+//     numberless form, so every truthful review was told it had no action items.
+//  3. TWO-WORD COLUMN NAME. The header filter required a cell matching `(#|action|item|task)`
+//     EXACTLY, so `| ID | Action Item | Owner | Deadline | Status |` survived and was itself counted
+//     as an ownerless, dateless action item. A four-column table happened to pass.
+// ---------------------------------------------------------------------------------------------
+
+test('/incident: the repo own 5-column template passes — BLIND REVIEW run', () => {
+  const root = incidentDir();
+  // Overwrite the fixture's post-incident review with the shape
+  // `.agents/templates/incident/post-incident-review-template.md` actually prescribes.
+  fs.writeFileSync(path.join(root, 'INC-001', 'post-incident-review.md'), [
+    '# Post-Incident Review INC-001',
+    '',
+    '## 1. What happened',
+    'Deploy 41 shipped at 14:01Z and threw on unlisted currency codes.',
+    '',
+    '## 2. What went well',
+    'The alert fired within a minute and the rollback was rehearsed.',
+    '',
+    '## 3. What could be improved',
+    'No canary stage, so all traffic received the fault.',
+    '',
+    '## 4. Action Items',
+    '',
+    '| ID | Action Item | Owner | Deadline | Status |',
+    '|----|------------|-------|----------|--------|',
+    '| AI-1 | Add a canary stage at 5% | @devops-engineer | 2026-10-23 | ⬜ |',
+    '| AI-2 | Currency fixture for every edge | @developer | 2026-10-20 | ⬜ |',
+    '',
+    '## 5. Prevention Mechanisms',
+    '',
+    'A post-deploy smoke test would have caught this before customers did.',
+    '',
+  ].join('\n'));
+  const r = run(INCIDENT, ['--dir', 'INC-001'], root);
+  assert.strictEqual(r.code, 0,
+    `the repo's own template must pass its own gate: ${JSON.stringify(r.json.failures, null, 2)}`);
+});
+
+test('/incident: the word "prevention" no longer crashes the gate — BLIND REVIEW run', () => {
+  // Defect 1. The crash meant a template-faithful review could not be checked AT ALL.
+  const root = incidentDir();
+  fs.writeFileSync(path.join(root, 'INC-001', 'post-incident-review.md'), [
+    '# Post-Incident Review INC-001',
+    '',
+    '## What happened',
+    'Deploy 41 shipped at 14:01Z and threw on unlisted currency codes.',
+    '',
+    '## Action items',
+    '| # | Action | Owner | Due |',
+    '|---|---|---|---|',
+    '| 1 | Add a canary stage | @devops-engineer | 2026-10-23 |',
+    '',
+    '## Prevention Mechanisms',
+    '',
+    'A post-deploy smoke test prevents this class of fault recurring.',
+    '',
+  ].join('\n'));
+  const r = run(INCIDENT, ['--dir', 'INC-001'], root);
+  // It must produce a VERDICT, not a stack trace.
+  assert.ok(r.json && typeof r.json === 'object' && r.json.exit !== undefined,
+    `the gate must emit JSON, not crash: ${(r.stderr || '').slice(0, 200)}`);
+  assert.strictEqual(r.code, 0, JSON.stringify(r.json.failures));
+});
+
+test('/incident: a numbered heading is found as readily as a numberless one', () => {
+  for (const heading of ['## Action Items', '## 5. Action Items', '## 4. Action items']) {
+    const root = incidentDir();
+    fs.writeFileSync(path.join(root, 'INC-001', 'post-incident-review.md'), [
+      '# Post-Incident Review INC-001',
+      '',
+      '## What happened',
+      'Deploy 41 shipped at 14:01Z and threw on unlisted currency codes.',
+      '',
+      heading,
+      '| # | Action | Owner | Due |',
+      '|---|---|---|---|',
+      '| 1 | Add a canary stage | @devops-engineer | 2026-10-23 |',
+      '',
+    ].join('\n'));
+    const r = run(INCIDENT, ['--dir', 'INC-001'], root);
+    assert.ok(!(r.json.failures || []).some((f) => /no action-items section/i.test(f)),
+      `"${heading}" must be found: ${JSON.stringify(r.failures)}`);
+  }
+});

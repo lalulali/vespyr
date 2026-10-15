@@ -375,6 +375,84 @@ function extractRedTeam(text) {
   return m ? m[1].trim() : null;
 }
 
+/**
+ * The topic's premise quality, DECLARED BY THE HOST — owner ruling 2026-10-14, option B.
+ *
+ * WHY THIS EXISTS. The SPC gate (below) exempts flawed-premise unanimity because a panel rightly
+ * rejecting a dead idea is unanimous, and blocking that would punish the correct answer. That
+ * exemption needs a judgement no regex can make, so it must be declared rather than inferred.
+ *
+ * The prior implementation inferred it from `evals/roundtable/topics.json` — and that inference
+ * FAILED OPEN. Measured 2026-10-14: a transcript with zero real disagreement, two instant `[GO]`
+ * verdicts, no evidence, and the flattery "Good call, I agree completely" scored
+ * `coverage compliance: 1`, `SPC advisory`, **exit 0** — because the topic was not registered in
+ * topics.json, so it was in neither `soundIds` nor `flawedIds` and the gate silently did not apply.
+ * An unregistered topic got no SPC enforcement at all, and nothing said so.
+ *
+ * The host now declares the premise in the transcript, where it is auditable and challengeable:
+ *   [TOPIC-PREMISE: sound]   — the panel may disagree; unanimity requires a red-team pass
+ *   [TOPIC-PREMISE: flawed]  — unanimity is expected and correct; exempt
+ *
+ * An UNDECLARED premise with unanimity is a FAILURE, not a pass. Fail-open is what this replaces.
+ */
+function extractTopicPremise(text) {
+  const prose = text.replace(/```[\s\S]*?```/g, '');
+  const m = prose.match(/\[TOPIC-PREMISE:\s*(sound|flawed)\s*(?:[—–-]\s*([^\]]*))?\]/i);
+  if (!m) return null;
+  return { quality: m[1].toLowerCase(), reason: (m[2] || '').replace(/\s+/g, ' ').trim() };
+}
+
+/**
+ * Where the premise declaration sits relative to the first verdict — the ANTI-RETRO-FIT check.
+ *
+ * Owner ruling 2026-10-14. Declaring `flawed` exempts unanimity from the red-team requirement, so a
+ * host who wants an uncontested consensus can simply declare the premise dead. Three paths were
+ * open; this closes the first two, and the SPC gate closes the third.
+ *
+ *   1. RETRO-FIT — declare `flawed` AFTER seeing that everyone agreed. A premise judgement made
+ *      with the verdicts in hand is not a judgement, it is a rationalisation. The declaration must
+ *      precede the first `[VERDICT:]` line; a declaration after it is rejected regardless of value.
+ *   2. NAKED CLAIM — declare `flawed` with no reason. "This premise is dead" is a claim about the
+ *      world; the engine's own rule is that a claim needs evidence. `flawed` now requires a
+ *      substantive reason, and it is recorded so a reader can disagree with it.
+ *
+ * The honest ceiling: a host can still declare `flawed` up front and write a plausible reason. No
+ * text check can tell a genuine judgement from a confident one. What this buys is that gaming the
+ * gate now requires a deliberate, dated, written claim that appears BEFORE the evidence and can be
+ * challenged by anyone reading the transcript — instead of a silent choice nobody sees.
+ */
+function premiseDeclaredBeforeVerdicts(text) {
+  const prose = text.replace(/```[\s\S]*?```/g, '');
+  const pIdx = prose.search(/\[TOPIC-PREMISE:/i);
+  if (pIdx === -1) return null;
+  const vIdx = prose.search(/\[VERDICT:/i);
+  if (vIdx === -1) return true;   // no verdicts yet — nothing to retro-fit against
+  return pIdx < vIdx;
+}
+
+/**
+ * The plain-language decision the panel is asking the owner to make.
+ *
+ * Owner ruling 2026-10-14, alongside option B: "the panel must give an easy-to-understand point to
+ * be confirmed and the user decides." A unanimous panel that hands the owner a bare `[SYNTHESIS: GO]`
+ * has made the decision FOR them — which is the failure SPC exists to prevent, arriving by a
+ * different door. The transcript must carry one plain sentence naming the choice and its
+ * consequence, in the owner's language, with no token in it:
+ *
+ *   [USER-DECISION: Ship the address preview this sprint, or hold it until the postcode fixture
+ *    lands? Shipping first means non-UK admins keep hitting the silent rejection for another week.]
+ *
+ * Required whenever the panel reached unanimity, because that is exactly when the owner is most
+ * likely to be handed a token instead of a choice.
+ */
+function extractUserDecision(text) {
+  const prose = text.replace(/```[\s\S]*?```/g, '');
+  const m = prose.match(/\[USER-DECISION:\s*([\s\S]*?)\]/);
+  if (!m) return null;
+  const body = m[1].replace(/\s+/g, ' ').trim();
+  return body.length ? body : null;
+}
+
 // ROSTER-line observer check (RT-P2-6): transcripts carrying a validated
 // ROSTER line get an observer-voice audit — every seat beyond the first 2
 // must appear as a CHALLENGER (being challenged is being spoken to, not
@@ -488,6 +566,10 @@ function cmdScore(flags) {
       concessions: extractConcessions(text),
       rounds: extractRounds(text),
       redTeam: extractRedTeam(text),
+      topicPremise: extractTopicPremise(text),
+      premiseBeforeVerdicts: premiseDeclaredBeforeVerdicts(text),
+      userDecision: extractUserDecision(text),
+      premiseOverride: /\[ROUTING-OVERRIDE:\s*registered-sound\s*(?:->|→)\s*transcript-flawed/i.test(text),
       rosterSeats: extractRosterLine(text),
       soloDisclosure: e.mode === 'solo' ? verifySoloDisclosure(text) : null,
       coverage: cov,
@@ -526,6 +608,11 @@ function cmdScore(flags) {
       rounds: e.rounds || [],
       maxRound: (e.rounds || []).length ? Math.max(...e.rounds) : 0,
       redTeam: e.redTeam || null,
+      topicPremise: e.topicPremise || null,
+      premiseBeforeVerdicts: e.premiseBeforeVerdicts,
+      premiseOverride: e.premiseOverride === true,
+      registeredPremise: null,   // filled below from topics.json when the topic is registered
+      userDecision: e.userDecision || null,
       rosterSeats: e.rosterSeats || null,
       soloDisclosure: e.soloDisclosure,
       badVerdictTags: e.verdicts ? e.verdicts.unknownTags : [],
@@ -671,11 +758,100 @@ function cmdScore(flags) {
       gateFailures.push(`flawed premise '${p.topic}' hint ${p.hint} contradicted by [${judged.join(', ')}]`);
     }
   }
-  // SPC red-team gate: unanimous decision verdicts on sound-premise topics
-  // must name the challenger. Flawed-premise unanimity is exempt (expected).
+  // SPC red-team gate — REWRITTEN 2026-10-14 (owner ruling, option B).
+  //
+  // WAS: unanimity failed only when the topic was registered in topics.json as `sound`. An
+  // unregistered topic was in neither set, so the gate silently did not apply — a fail-open that let
+  // a flattered, zero-evidence, unanimous `[GO]` pass with exit 0 (measured 2026-10-14).
+  //
+  // IS: the host declares `[TOPIC-PREMISE: sound|flawed]` in the transcript.
+  //   • sound + unanimity + no red-team  -> FAIL
+  //   • sound + unanimity + red-team     -> pass (the challenge happened)
+  //   • flawed + unanimity               -> pass, and REPORTED as expected rather than exempt-silent
+  //   • NO DECLARATION + unanimity       -> FAIL CLOSED. This is the case that used to pass silently.
+  //   • topics.json still supplies a default when a topic IS registered, so existing suites keep
+  //     working; the transcript marker wins over it because the transcript is the record.
   for (const r of rows) {
-    if (r.spcFlag && r.topic && soundIds.has(r.topic) && !r.redTeam) {
-      gateFailures.push(`unanimous sound topic '${r.topic}' without red-team challenger (${r.file})`);
+    if (!r.spcFlag) continue;
+    const registered = r.topic && soundIds.has(r.topic) ? 'sound'
+      : r.topic && flawedIds.has(r.topic) ? 'flawed' : null;
+    r.registeredPremise = registered;
+    // The transcript marker wins over the registry — the transcript is the record — but a
+    // disagreement between them is checked below rather than allowed to pass silently.
+    const declared = (r.topicPremise && r.topicPremise.quality) || registered;
+    if (declared === null) {
+      gateFailures.push(
+        `unanimous round-1 with NO declared premise (${r.file}) — add [TOPIC-PREMISE: sound|flawed]. ` +
+        'An undeclared premise used to disable this gate silently; it now fails closed.'
+      );
+      continue;
+    }
+    if (declared === 'flawed') {
+      // THREE CHECKS, added 2026-10-14 after the owner flagged that `flawed` was a free pass.
+      // (a) ANTI-RETRO-FIT: the declaration must precede the first verdict.
+      if (r.premiseBeforeVerdicts === false) {
+        gateFailures.push(
+          `premise declared AFTER the verdicts (${r.file}) — a premise judgement made with the ` +
+          'verdicts in hand is a rationalisation, not a judgement. Move [TOPIC-PREMISE: …] above ' +
+          'the first [VERDICT:] line, or declare it before dispatch.'
+        );
+      }
+      // (b) NAKED CLAIM: `flawed` is a claim about the world and needs a reason — but only when the
+      // TRANSCRIPT is the source. A topic registered as flawed in topics.json already carries its
+      // evidence there (premise_quality + expected_frictions), and demanding a duplicate reason in
+      // the transcript would be asking the same question twice and failing the honest answer.
+      const why = (r.topicPremise && r.topicPremise.reason) || '';
+      const transcriptDeclaredFlawed = Boolean(r.topicPremise && r.topicPremise.quality === 'flawed');
+      if (transcriptDeclaredFlawed && why.split(/\s+/).filter(Boolean).length < 6) {
+        gateFailures.push(
+          `[TOPIC-PREMISE: flawed] with no substantive reason (${r.file}) — declaring a premise ` +
+          'dead exempts unanimity from the red-team requirement, so it is a claim that needs ' +
+          'evidence. Write it as [TOPIC-PREMISE: flawed — <what makes it dead>].'
+        );
+      }
+      // (c) SELF-RECLASSIFY: a topic the registry calls sound cannot be reclassified here
+      // without an explicit, logged override.
+      if (r.registeredPremise === 'sound' && !r.premiseOverride) {
+        gateFailures.push(
+          `topic '${r.topic}' is registered as a SOUND premise but the transcript declares it ` +
+          `flawed (${r.file}) — a topic cannot be reclassified by the panel that wants unanimity. ` +
+          'Either accept the registered premise and run the red-team pass, or emit ' +
+          '[ROUTING-OVERRIDE: registered-sound → transcript-flawed — reason] to record the dissent.'
+        );
+      }
+      continue;   // unanimity is the correct answer for a genuinely dead idea
+    }
+    if (!r.redTeam) {
+      gateFailures.push(
+        `unanimous sound topic without red-team challenger (${r.file}) — the panel agreed on the ` +
+        'first round with no friction, which is the convergence this gate exists to catch. Assign ' +
+        'a challenger and emit [RED-TEAM: @agent], or declare [TOPIC-PREMISE: flawed] if the ' +
+        'premise is genuinely dead.'
+      );
+    }
+  }
+
+  // The owner must be handed a choice, not a token — required whenever the panel was unanimous,
+  // because that is exactly when a bare [SYNTHESIS: GO] makes the decision for them.
+  for (const r of rows) {
+    if (!r.spcFlag || r.refused || r.nameError) continue;
+    const d = r.userDecision || '';
+    if (!d) {
+      gateFailures.push(
+        `unanimous panel hands the owner no plain decision (${r.file}) — add a [USER-DECISION: …] ` +
+        'line naming the choice, its consequence, and what each option costs. A unanimous panel ' +
+        'that returns only [SYNTHESIS: GO] has decided for the owner.'
+      );
+    } else if (/(?:GO|RESHAPE|NO-GO|CONFIRMED|PARTIAL|FALSIFIED|SYNTHESIS|VERDICT)/.test(d)) {
+      gateFailures.push(
+        `the [USER-DECISION:] line in ${r.file} carries a gate token — it is the owner-facing ` +
+        'surface and must be plain language they can act on without knowing this engine.'
+      );
+    } else if (d.split(/\s+/).filter(Boolean).length < 8) {
+      gateFailures.push(
+        `the [USER-DECISION:] line in ${r.file} is too thin to act on ("${d.slice(0, 60)}") — name ` +
+        'the choice and what each option costs.'
+      );
     }
   }
   const zeroConcessionCompliant = rows

@@ -25,6 +25,7 @@ const SPEC = path.join(
   'security',
   'audit-spec.json'
 );
+const ALLOWLIST = path.join(ROOT, 'security', 'reviewed-allowlist.json');
 const BASELINE =
   process.env.BASELINE_FILE ||
   path.join(ROOT, 'evals', 'security', 'corpus', 'baseline-repo-2026-08-25.json');
@@ -77,7 +78,17 @@ function main() {
 
   let out;
   try {
-    out = execFileSync('node', [SCAN, '--dir', ROOT, '--spec', SPEC, '--json'], {
+    // BLIND TRIAGE 2026-10-12 (@security-engineer seat). This gate ran the scanner WITHOUT the
+    // reviewed allowlist, so it compared the frozen 145-finding baseline against a raw scan of 29
+    // findings and reported 17 as NEW -- when the identical scan WITH the allowlist reports 0 findings
+    // and 29 reviewed suppressions. Every one of those 17 was a test fixture or a mutation-runner
+    // payload that already had a reviewed per-rule-per-file allowlist entry. The gate was measuring
+    // suppression, not security.
+    //
+    // F-11 rule, applied: suppression is never silent. The allowlist is now loaded and the suppressed
+    // count is printed, so a reader can tell "29 reviewed and suppressed" from "0 found".
+    const allowlistArgs = fs.existsSync(ALLOWLIST) ? ['--allowlist-file', ALLOWLIST] : [];
+    out = execFileSync('node', [SCAN, '--dir', ROOT, '--spec', SPEC, '--json', ...allowlistArgs], {
       encoding: 'utf8',
       maxBuffer: 64 * 1024 * 1024,
     });

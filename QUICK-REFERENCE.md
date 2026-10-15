@@ -141,7 +141,7 @@ Discovery & Ideation:
   /root-cause          Socratic 5-Whys and Fishbone root cause analysis
 
 Socratic & Intelligence:
-  /grill-me            Relentless eight-move Socratic stress-test (any domain)
+  /grill-me            Relentless Socratic stress-test, any domain
   /elicitation         98 structured methods to critique & refine LLM output
   /round-table         Multi-agent roundtable discussions
   /humanize            AI-writing tell detector & style normalizer

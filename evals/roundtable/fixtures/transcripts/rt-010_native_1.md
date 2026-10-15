@@ -1,3 +1,4 @@
+[USER-DECISION: Stop work on the blockchain audit log entirely, or spend two days confirming the enterprise buyers do not want it? Stopping frees the sprint; the spike costs two days and will likely return the same answer.]
 Roundtable on rt-010 (blockchain-based audit log for enterprise) — native run 1.
 
 ### @product-manager (Sarah)

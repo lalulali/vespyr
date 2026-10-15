@@ -1,7 +1,7 @@
 {
   "date": "2026-08-10",
-  "scanner_sha256_prefix": "71a2f88fe7debd02",
-  "spec_sha256_prefix": "f6159bbaa797459b",
+  "scanner_sha256_prefix": "5672b38ad1ae5f0b",
+  "spec_sha256_prefix": "8dd6fac0fe8f60c8",
   "exit": 1,
   "findings": [
     {
@@ -50,7 +50,7 @@
       "severity": "medium",
       "path": "positive/inj-obfusc.md",
       "line": 3,
-      "detail": "tz0aBaTli/A1fE9yzobOmI3i+mAYWDItIbQjEuUQ66oP8wF2qqnJBJhWhYxmCLB3"
+      "detail": "tz0aBaTli/A1fE9yzobOmI3i+mAYW\u2026[redacted 39 chars]"
     },
     {
       "rule": "INJ-PATH",
@@ -82,7 +82,7 @@
       "severity": "medium",
       "path": "positive/inj-secret.md",
       "line": 1,
-      "detail": "ghp_ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+      "detail": "ghp_\u2026[redacted 66 chars]"
     },
     {
       "rule": "INJ-SYMLINK",
@@ -116,5 +116,49 @@
       "detail": "const query = \"SELECT * FROM users WHERE id = {{user_input}}\";"
     }
   ],
-  "note": "Regenerated 2026-09-08 round-table reshape (BEACON-1 hook-body fix +1 keywordless fixture; drift prefixes pinned and enforced). Reviewed: panel Victor/Scout/Rex, owner Chris. || Re-pin 2026-09-30 (02s): scanner_sha256_prefix only, e2d0c28d978ff114 -> 71a2f88fe7debd02. Cause: commit 64e659b added ONE comment line to security-scan.js and did not re-pin. Verified unreviewed, not unsound: comment-stripped + whitespace-normalized source hash is IDENTICAL (b42495ce1bb3875b both revisions), and a corpus-root scan with each revision produces byte-identical output (14 findings, same order). spec_sha256_prefix unchanged (f6159bbaa797459b) and the 14 findings below are unchanged. Findings were NOT regenerated. Reviewed: owner Chris (approved 'do 1 and 2'); evidence in artifacts/docs/review/10-canvas-discovery-audit.md and 02s plan correction log. Follow-up NOT done: gate still hashes raw bytes, so any comment edit re-trips it — see Fix B in the 02s plan."
+  "note": "Regenerated 2026-09-08 round-table reshape (BEACON-1 hook-body fix +1 keywordless fixture; drift prefixes pinned and enforced). Reviewed: panel Victor/Scout/Rex, owner Chris. || Re-pin 2026-09-30 (02s): scanner_sha256_prefix only, e2d0c28d978ff114 -> 71a2f88fe7debd02. Cause: commit 64e659b added ONE comment line to security-scan.js and did not re-pin. Verified unreviewed, not unsound: comment-stripped + whitespace-normalized source hash is IDENTICAL (b42495ce1bb3875b both revisions), and a corpus-root scan with each revision produces byte-identical output (14 findings, same order). spec_sha256_prefix unchanged (f6159bbaa797459b) and the 14 findings below are unchanged. Findings were NOT regenerated. Reviewed: owner Chris (approved 'do 1 and 2'); evidence in artifacts/docs/review/10-canvas-discovery-audit.md and 02s plan correction log. Follow-up NOT done: gate still hashes raw bytes, so any comment edit re-trips it \u2014 see Fix B in the 02s plan.",
+  "rebaseline_history": [
+    {
+      "date": "2026-10-12",
+      "reviewed_by": "owner ruling \"c a and b, re pin it again\", after blind-review investigation",
+      "previous_scanner_sha256_prefix": "71a2f88fe7debd02",
+      "previous_spec_sha256_prefix": "f6159bbaa797459b",
+      "new_scanner_sha256_prefix": "d9ca4ffc351fe469",
+      "new_spec_sha256_prefix": "db60ce8795a1afe3",
+      "what_changed": [
+        "scanner: several fixes landed since the 2026-08-10 baseline (F-1 sk_live_ prefix detection, fail-closed scan scope, config-file drop disclosure, entropy keyword branch).",
+        "spec: the corpus harness now points at evals/security/corpus-spec.json, a RULE-ONLY spec, instead of security/audit-spec.json."
+      ],
+      "why_this_is_not_silent_drift": [
+        "The corpus findings drift was investigated BEFORE this re-pin, on the owner's ruling. It was a harness-wiring fault, not a detection regression: security/audit-spec.json declares an include-list product scope whose roots are this engine repo's directories, so a corpus-relative path (positive/beacon-1.sh) matched no product_root and 13 of 14 fixtures were dropped before any rule ran \u2014 leaving 10 of 11 rules unverified against their own payloads.",
+        "Proof it was wiring and not dead rules: with the product scope removed, the SAME scanner and the SAME 11 rules reproduce the frozen baseline 14-for-14 with 0 missing and 0 new, and the negative corpus is still clean.",
+        "The fix routes the corpus self-test at the rule-only spec, so the corpus tests the RULES while the release scan keeps the include-list scope that is correct for it.",
+        "Corpus findings count is therefore UNCHANGED by this re-pin: 14 positive, 0 negative. Only the two file hashes move."
+      ],
+      "admitted_cost": [
+        "The corpus harness no longer verifies that the release spec's product scope admits the corpus. That policy is the release scan's job and is tested there.",
+        "The release spec security/audit-spec.json is no longer hash-pinned by the corpus harness at all. If it needs a pin, it needs its own gate."
+      ]
+    },
+    {
+      "date": "2026-10-15",
+      "reviewed_by": "agent-performed regen; OWNER CONFIRMATION PENDING",
+      "reason": "Blind run 13 fixes changed both pinned inputs. (1) INJ-SECRET gained npm_ registry tokens and the _authToken= form, because the root-file scope fix made a root .npmrc reachable and it then matched no rule \u2014 a scope fix alone would have moved the hole. (2) The scanner now redacts matched values from finding detail, so every baseline entry key changed. Findings count and rules are unchanged apart from the added INJ-SECRET alternatives.",
+      "previous": {
+        "scanner": "d9ca4ffc351fe469",
+        "spec": "db60ce8795a1afe3",
+        "findings": 14
+      },
+      "new": {
+        "scanner": "922e8ed2e7185d4d",
+        "spec": "8dd6fac0fe8f60c8",
+        "findings": 14
+      }
+    },
+    {
+      "date": "2026-10-15",
+      "reviewed_by": "agent-performed regen; OWNER CONFIRMATION PENDING",
+      "reason": "Second regen in the same change: the redaction rule was narrowed from \"mask the matched span\" to \"mask credential-shaped runs\", which changed every detail key again. Final state of the blind-run-13 security fixes."
+    }
+  ]
 }

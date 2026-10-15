@@ -27,8 +27,15 @@ allowlist.** Measured on the same tree, same everything, one flag apart:
 
 | Invocation | Result |
 |---|---|
-| as previously documented | `verdict: FAIL`, 28 findings — the 28 reviewed false positives read as live findings |
-| with `--scan-allowlist` | `verdict: PASS`, 28 suppressions, all reviewed |
+| as previously documented | `verdict: FAIL`, 24 findings — the reviewed false positives read as live findings |
+| with `--scan-allowlist` | `verdict: FAIL`, **5 findings**, 24 suppressions |
+
+**Numbers move; re-run rather than quote.** The table above was measured on 2026-10-12 at 29
+suppressions, when the second row read `PASS`. On 2026-10-13 the owner ruled five allowlist entries
+out — agent-context docs that ship to every install, where a suppressed finding would have been
+invisible — giving **5 findings and 24 suppressions**. That row is now a **deliberate, ruled FAIL**,
+and `launch_readiness_check.js check … --require-scan` fails on it by design. Do not read a stale
+`PASS` in this table as current state; run the scan.
 
 A gate whose documented invocation cannot go green is a gate that gets worked around, which is why
 this security leg had never actually run against this tree. Always pass the flag when the repo has a

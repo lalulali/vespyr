@@ -1,3 +1,4 @@
+[USER-DECISION: Ship the summarization feature this cycle, or hold it until the transcript-accuracy issue is fixed? Shipping now means meeting notes may be wrong in front of customers; holding costs one sprint of the roadmap.]
 Roundtable on rt-003 (LLM meeting-notes summarization via third-party API) — native run 2.
 
 [RED-TEAM: @security-engineer]

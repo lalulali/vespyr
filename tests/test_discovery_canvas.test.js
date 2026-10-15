@@ -88,13 +88,52 @@ test('root-cause: a chain that stops short of 3 levels fails', () => {
   assert.ok(has(r, /has 2 level\(s\)|has 1 level\(s\)/), JSON.stringify(r.json.failures));
 });
 
-test('root-cause: a root cause that states no cause fails (the "someone was careless" ending)', () => {
-  const r = check('root-cause', GOOD_ROOT_CAUSE.replace(
-    /Address validation is bound[^]*?inherits the same silent rejection\./,
-    'The team was not careful enough about international markets.'
-  ));
-  assert.ok(has(r, /never states a cause/), JSON.stringify(r.json.failures));
-});
+  test('root-cause: a blame-terminated root cause still fails — the "someone was careless" ending', () => {
+    // DELETED CHECK, replaced by this one, on the owner's ruling after blind run 9. The
+    // causal-keyword requirement is gone (19/19 honest causes rejected while `blah so blah`
+    // passed), but this fixture is blame-terminated too, so the STRUCTURAL blame check still
+    // catches it. The assertion moved from /never states a cause/ to /stops at blame/.
+    const r = check('root-cause', GOOD_ROOT_CAUSE.replace(
+      /Address validation is bound[^]*?inherits the same silent rejection\./,
+      'The team was not careful enough about international markets.'
+    ));
+    assert.strictEqual(r.code, 1);
+    assert.ok(has(r, /stops at blame/), JSON.stringify(r.json.failures));
+  });
+
+  test('BLIND RUN 9: honest causes in ordinary English now PASS — the check that never worked is gone', () => {
+    // Every one of these was rejected by the causal-keyword list with "never states a cause", while
+    // `blah so blah` was accepted. The list is deleted, so the gate no longer rejects honest prose.
+    for (const cause of [
+      'Validation bound to a single-market postcode table causes every new market to inherit the rejection.',
+      'The missing postcode fixture allows a new market to ship with the same silent rejection.',
+      'The worker exits before the flush resolves, which prevents any completion event reaching the client.',
+      'A UK-only postcode table drives the silent rejection of every other market.',
+      'The export worker exits early, thereby leaving the client unable to tell success from failure.',
+      'No coverage for non-UK postcodes gives rise to the same silent rejection in every new market.',
+      'The missing fixture is the mechanism that lets a new market inherit the silent rejection.',
+    ]) {
+      const r = check('root-cause', GOOD_ROOT_CAUSE.replace(
+        /Address validation is bound[^]*?inherits the same silent rejection\./,
+        cause
+      ));
+      assert.strictEqual(r.code, 0,
+        `honest cause was rejected: ${cause.slice(0, 60)}... -> ${JSON.stringify(r.json.failures)}`);
+    }
+  });
+
+  test('BLIND RUN 9: the structural checks survive — 5 Whys floor and validation still enforced', () => {
+    // Deleting the cause check must not delete the checks that DO work.
+    const weak = GOOD_ROOT_CAUSE.replace(/2\. \*\*Why\?\*\*/s, 'X. **Why?**')
+      .replace(/3\. \*\*Why\?\*\*/s, 'Y. **Why?**')
+      .replace(/4\. \*\*Why\?\*\*/s, 'Z. **Why?**');
+    const r = check('root-cause', weak);
+    assert.strictEqual(r.code, 1);
+    assert.ok(has(r, /level\(s\)/), JSON.stringify(r.json.failures));
+
+    const noValidation = check('root-cause', GOOD_ROOT_CAUSE.replace(/## Validation[\s\S]*$/, ''));
+    assert.ok(has(noValidation, /No validation section/), JSON.stringify(noValidation.json.failures));
+  });
 
 test('root-cause: no validation section fails — an uncheckable cause is a belief', () => {
   const r = check('root-cause', GOOD_ROOT_CAUSE.replace(/## Validation[\s\S]*$/, ''));
@@ -439,16 +478,22 @@ test('BLIND RUN 7 D1a: the level counter still enforces the floor of 3', () => {
   assert.ok(has(r, /has 1 level\(s\)/), JSON.stringify(r.json.failures));
 });
 
-test('BLIND RUN 7: an honest root cause that legitimately names blame as ONE factor still passes', () => {
-  // Over-fitting guard: blaming must not become forbidden vocabulary. A real analysis may note that
-  // ownership was missing as long as it also names the mechanism.
-  const r = check('root-cause', RC(
-    'No test covers a non-UK postcode, so a new market inherits the same silent rejection. ' +
-    'The team was careless about market coverage, but the mechanism is the missing fixture.'
-  ));
-  assert.ok(!has(r, /stops at blame/),
-    'blame mentioned alongside a mechanism is not a blame-terminated chain');
-});
+  test('BLIND RUN 7: an honest root cause that legitimately names blame as ONE factor still passes', () => {
+    // Over-fitting guard: blaming must not become forbidden vocabulary. A real analysis may note that
+    // ownership was missing as long as it also names the mechanism.
+    const r = check('root-cause', RC(
+      'No test covers a non-UK postcode, so a new market inherits the same silent rejection. ' +
+      'The team was careless about market coverage, but the mechanism is the missing fixture.'
+    ));
+    // FIXED AFTER BLIND RUN 8: the previous assertion only checked the absence of the blame message,
+    // NOT that the gate passed. Its fixture was failing exit 1 under a different check, so the test
+    // was green while the artifact it described was rejected — run 7's failure mode verbatim, in a
+    // test written to prevent it.
+    assert.strictEqual(r.code, 0,
+      `blame alongside a mechanism must PASS, not merely avoid the blame message: ${JSON.stringify(r.json.failures, null, 2)}`);
+    assert.ok(!has(r, /stops at blame/),
+      'blame mentioned alongside a mechanism is not a blame-terminated chain');
+  });
 
 test('BLIND RUN 7: the count of levels scales with the chain, not with a fixed formatting', () => {
   const mk = (n) => {
@@ -462,4 +507,81 @@ test('BLIND RUN 7: the count of levels scales with the chain, not with a fixed f
   const one = check('root-cause', mk(1));
   assert.ok(!has(three, /level\(s\)/), 'three links satisfies the floor');
   assert.ok(has(one, /has 1 level\(s\)/), 'one link does not');
+});
+
+// ---------------------------------------------------------------------------------------------
+// BLIND RUN 10 (@architect seat): the causal-keyword deletion removed the ONLY code that read the
+// `## Root Cause` section, so a root-cause document with no root cause at all now passes. Measured:
+//   • section deleted / renamed / lowercased / `###` / fenced / header-kept-empty → exit 0, ok:true
+//   • `## Root Cause` with an empty body → exit 0
+// And the SKILL.md written this session CLAIMED "the `## Root Cause` section exists" is checked.
+// That claim was false in a shipped document.
+//
+// Two bugs in my own first repair, both pinned:
+//   1. `section(text, 'Root Cause')` matches the document TITLE `# Root Cause Analysis — …`, so the
+//      existence check could never fail. A requireSection that matches nothing on a well-formed
+//      document is worse than no check.
+//   2. The blame guard used `BLAME_RE`, which had just been renamed — a ReferenceError at runtime,
+//      which showed up as a non-JSON failure rather than a test.
+// ---------------------------------------------------------------------------------------------
+
+test('BLIND RUN 10: a root-cause document with no Root Cause section fails', () => {
+  for (const shape of [
+    GOOD_ROOT_CAUSE.replace(/## Root Cause\n[\s\S]*?(?=## Validation)/, ''),
+    GOOD_ROOT_CAUSE.replace(/## Root Cause/, '### Deep Cause'),
+    GOOD_ROOT_CAUSE.replace(/## Root Cause/, '**Root Cause**'),
+  ]) {
+    const r = check('root-cause', shape);
+    assert.strictEqual(r.code, 1, `a document with no Root Cause section must fail`);
+    assert.ok(has(r, /No `## Root Cause` section/), JSON.stringify(r.json.failures));
+  }
+});
+
+test('BLIND RUN 10: an empty Root Cause section fails — a heading is not a cause', () => {
+  const r = check('root-cause', GOOD_ROOT_CAUSE.replace(
+    /Address validation is bound[^]*?inherits the same silent rejection\./, ''
+  ).replace(/## Root Cause\n[\s\S]*?## Validation/, '## Root Cause\n\n## Validation'));
+  assert.ok(has(r, /`## Root Cause` section is empty/), JSON.stringify(r.json.failures));
+});
+
+test('BLIND RUN 10: the existence check cannot be satisfied by the document title', () => {
+  // Bug 1 above. The title of every fixture begins "# Root Cause Analysis", which the loose section
+  // matcher accepts — so a check built on it passes on a document with no section at all.
+  const r = check('root-cause', GOOD_ROOT_CAUSE.replace(/## Root Cause\n[\s\S]*?(?=## Validation)/, ''));
+  assert.ok(has(r, /No `## Root Cause` section/),
+    `the title must not satisfy the check: ${JSON.stringify(r.json.failures)}`);
+});
+
+test('BLIND RUN 10: the blame guard is a KNOWN LIMIT — a structural rewrite was reverted', () => {
+  // I attempted the structural rewrite run 9 recommended (check the AGENT and the ACT rather than a
+  // list of manner words) and REVERTED it within the same session, because it caught the five
+  // phrasings the old list missed but regressed on a case runs 8 and 9 had verified passing.
+  //
+  // The gap is recorded rather than papered over: the current guard matches MANNER words only.
+  const MISSED = [
+    'Because someone forgot to run the smoke test.',
+    'The process was sloppy, so the defect shipped.',
+    'A designer made an error.',
+    'The developer neglected the check.',
+  ];
+  for (const blame of MISSED) {
+    const r = check('root-cause', GOOD_ROOT_CAUSE.replace(
+      /Address validation is bound[^]*?inherits the same silent rejection\./, blame
+    ));
+    // They are NOT caught. The test pins the gap rather than pretending it is closed, so a future
+    // change that closes it turns this red and someone has to look at it.
+    assert.strictEqual(r.code, 0,
+      `KNOWN GAP (recorded, not closed): "${blame}" is missed by the current manner-word guard.`);
+  }
+});
+
+test('BLIND RUN 10: an honest cause that names blame alongside a mechanism still PASSES', () => {
+  // The structural rewrite must not repeat the old guard's over-fit.
+  const r = check('root-cause', GOOD_ROOT_CAUSE.replace(
+    /Address validation is bound[^]*?inherits the same silent rejection\./,
+    'Someone was careless in the release process. That carelessness was possible only because the ' +
+    'pipeline has no post-deploy smoke test, so the break went unnoticed for 40 minutes.'
+  ));
+  assert.strictEqual(r.code, 0,
+    `blame next to a real mechanism must PASS: ${JSON.stringify(r.json.failures, null, 2)}`);
 });

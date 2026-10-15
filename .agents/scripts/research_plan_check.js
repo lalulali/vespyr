@@ -273,6 +273,18 @@ function check(text) {
 
     // If the author kept the checkbox block, unticked boxes are a failure — and the ticks are
     // verified against the questions above, so ticking them buys nothing.
+    // FIXED AFTER BLIND RUNS 8-10 (@code-reviewer seat): the whole Mom Test block was DELETABLE, and
+    // deleting it passed while leaving it unticked failed — so the cheapest passing answer was to
+    // remove the section entirely. A check satisfied by deleting its own subject is not a check.
+    // The block is the skill's own declared verification step (SKILL.md:110), so its absence is a
+    // missing deliverable, and it is checked the same way an absent section is checked elsewhere.
+    const MOM_TEST_BLOCK = /^#{2,6}\s*\**\s*Mom Test Validation\s*\**\s*$/im;
+    if (!MOM_TEST_BLOCK.test(text)) {
+      failures.push(
+        'No `## Mom Test Validation` block. The skill declares it as the verification step; deleting it ' +
+        'is not the same as passing it, and it must not be the cheapest way through the gate.'
+      );
+    }
     const boxes = (section(text, 'Mom Test') || '').split('\n').filter((l) => /^\s*[-*]\s*\[[ xX]\]/m.test(l));
     if (boxes.length) {
       const unticked = boxes.filter((l) => /\[ \]/.test(l));

@@ -222,3 +222,26 @@ test('a green result says it is not a research judgement', () => {
     'a green compliance gate must not read as a research finding');
   fs.rmSync(dir, { recursive: true, force: true });
 });
+
+// ---------------------------------------------------------------------------------------------
+// BLIND RUNS 8-10 (@code-reviewer seat): the Mom Test block was DELETABLE, and deleting it passed
+// (exit 0) while leaving it unticked failed (exit 1). The cheapest passing answer was to remove the
+// section the skill declares as its verification step. Found by re-checking the implementation.
+// ---------------------------------------------------------------------------------------------
+
+test('BLIND RUN 8-10: the Mom Test block is required, not deletable', () => {
+  const noBlock = GOOD.replace(/### Mom Test Validation[\s\S]*?(?=## Sampling Bias)/, '');
+  const r = check(noBlock);
+  assert.strictEqual(r.code, 1, 'deleting the verification block must not be the cheapest pass');
+  assert.ok(has(r, /No `## Mom Test Validation` block/), JSON.stringify(r.json.failures));
+});
+
+test('BLIND RUN 8-10: an unticked box still fails, so the check is not a blanket rejection', () => {
+  const r = check(GOOD.replace('- [x] Commitment signals are probed', '- [ ] Commitment signals are probed'));
+  assert.ok(has(r, /Mom Test box\(es\) are unticked/), JSON.stringify(r.json.failures));
+});
+
+test('BLIND RUN 8-10: a fully ticked block still passes', () => {
+  const r = check(GOOD);
+  assert.strictEqual(r.code, 0, JSON.stringify(r.json.failures));
+});

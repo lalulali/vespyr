@@ -142,12 +142,50 @@ function check(dir, jsonMode) {
 
   // ---- The close-the-loop invariant: at least one prevention action item WITH AN OWNER. ----
   if (pir !== null) {
-    const actionSection = section(pir, 'Action items?|Prevention') || '';
-    const rows = actionSection
-      .split('\n')
-      .filter((l) => /^\s*\|/.test(l))
-      .filter((l) => !/^\s*\|[\s:|-]+\|?\s*$/.test(l))
-      .filter((l) => !/\|\s*(#|action|item|task)\s*\|/i.test(l));
+    // BLIND REVIEW (2026-10-12, @code-reviewer + @architect seats): TWO bugs here, not one.
+    //
+    // 1. The alternation was UNGROUPED, so the compiled regex was `^(\s*)(#{1,6})\s*Action items?` OR
+    //    `Prevention` — the second branch matching the bare word anywhere. `## 6. Prevention
+    //    Mechanisms` matched it with NO capture group 2, `m[2].length` threw, and a template-faithful
+    //    post-incident review could not be checked AT ALL. Same alternation-precedence trap that has
+    //    bitten this session in three other files; this is the first time it crashed rather than
+    //    silently mis-parsing, which is the only reason it was caught.
+    //
+    // 2. With the crash fixed the section STILL did not match, because the repo's own template writes
+    //    `## 5. Action Items` — a NUMBERED heading. The pattern required the heading to begin with
+    //    "Action Items", so it never matched and every truthful review was told it had no action
+    //    items. Both bugs are invisible in the test suite because its fixture uses the un-numbered
+    //    form. The leading number is now allowed, with or without a separating dot or dash.
+    // 2. `section()` could not match `## 5. Action Items` at all, because the repo numbers its
+    //    headings and the pattern required the numberless form. The number is now OPTIONAL — making
+    //    `\d+` mandatory in the first cut broke the numberless `## Action items` used by the test
+    //    fixture and several skill docs, which is the regression that cut introduced.
+    const actionSection = section(pir, '(?:\\d+[.)]\\s*)?(?:Action items?|Prevention)') || '';
+    const tableLines = actionSection.split('\n');
+    const SEPARATOR_RE = /^\s*\|[\s:|-]+\|?\s*$/;
+    // BLIND REVIEW (2026-10-12, @code-reviewer seat): the repo's own template uses a FIVE-column
+    // `## Action Items` table — `| ID | Action Item | Owner | Deadline | Status |` — and the gate
+    // reported "no owner" and "no due date" for a correctly-populated one. Two causes:
+    //
+    //   1. The old header filter required a cell matching `(#|action|item|task)` EXACTLY, but the
+    //      header's second cell is `Action Item` — two words — so the header survived the filter and
+    //      was itself counted as an ownerless, dateless action item. A four-column table happened to
+    //      pass, so the suite never saw it.
+    //   2. `section()` could not match `## 5. Action Items` at all, because the repo numbers its
+    //      headings and the pattern required the numberless form.
+    //
+    // The structural rule replaces the keyword filter: in Markdown the header row is the one
+    // IMMEDIATELY FOLLOWED by a separator row. A data row never is. That cannot be defeated by a
+    // two-word column name and needs no vocabulary.
+    const rows = [];
+    for (let i = 0; i < tableLines.length; i++) {
+      const line = tableLines[i];
+      if (!/^\s*\|/.test(line)) continue;
+      const next = tableLines[i + 1];
+      if (next !== undefined && SEPARATOR_RE.test(next)) continue; // header row
+      if (SEPARATOR_RE.test(line)) continue;                       // separator itself
+      rows.push(line);
+    }
 
     if (!actionSection.trim()) {
       failures.push(

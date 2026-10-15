@@ -55,11 +55,31 @@ jobs:
         shell: bash
         run: |
           set -e
-          SPEC=security/audit-spec.json
+          # BLIND REVIEW 2026-10-12 (@security-engineer seat). This step used `if <scan>; then fail`,
+          # which treats exit 2 — a scanner FAULT — as a successful detection. A crash therefore read
+          # as "the corpus is working", which is the exact false-assurance class the rest of this
+          # workflow exists to remove. It now requires exit code EXACTLY 1 (findings present) and
+          # names exit 2 explicitly as a failure.
+          #
+          # It also now points at evals/security/corpus-spec.json, the rule-only spec, rather than the
+          # release spec. The release spec's include-list product scope has roots that are this engine
+          # repo's directories, so a corpus-relative path matches none of them and 13 of 14 fixtures
+          # are dropped before any rule runs. See evals/security/corpus-spec.json for the proof.
+          SPEC=evals/security/corpus-spec.json
           node .agents/scripts/security-scan.js --dir evals/security/corpus/negative --spec "$SPEC" --json > /dev/null
           echo "negative corpus clean (exit 0) ✓"
-          if node .agents/scripts/security-scan.js --dir evals/security/corpus/positive --spec "$SPEC" --json > /dev/null; then
-            echo "positive corpus MUST exit 1"; exit 1
+          set +e
+          node .agents/scripts/security-scan.js --dir evals/security/corpus/positive --spec "$SPEC" --json > /dev/null
+          CODE=$?
+          set -e
+          if [ "$CODE" -eq 0 ]; then
+            echo "positive corpus MUST exit 1 (findings present); got 0 (clean)"; exit 1
+          fi
+          if [ "$CODE" -eq 2 ]; then
+            echo "positive corpus FAULTED (exit 2) — a scanner crash must not read as a detection"; exit 1
+          fi
+          if [ "$CODE" -ne 1 ]; then
+            echo "positive corpus exit $CODE — expected exactly 1"; exit 1
           fi
           echo "positive corpus findings detected (exit 1) ✓"
 

@@ -176,6 +176,30 @@ function check(root, reportPath, jsonMode) {
   }
 
   // ---- the usability caveat, which was prose with nothing to check ----
+  // FIXED AFTER BLIND RUN 8-10 (@code-reviewer seat): `## Research Methods Used` and
+  // `## Open Questions` are declared inputs the SKILL.md says to NEVER drop — "They are the provenance
+  // and the unresolved-questions record; a report without them cannot be challenged, only believed" —
+  // and the gate's own Done-when said "It requires:" while omitting them. Measured: a report with a
+  // PASSING input, a complete `## Sources` table, and BOTH sections absent exits 0 clean.
+  //
+  // These two are the report's reviewability. A compiler gate already parses sections, so this is
+  // one extractor away, and it is mechanical: the heading is either present or it is not.
+  for (const required of ['Research Methods Used', 'Open Questions']) {
+    if (!new RegExp(`^#{2,6}\\s*${required}\\s*$`, 'im').test(report)) {
+      failures.push(
+        `The report has no \`## ${required}\` section. SKILL.md says never to drop it: it is the ` +
+        (required === 'Research Methods Used'
+          ? 'provenance — where these findings came from. Without it a reader cannot tell which ' +
+            'methods produced the synthesis, or challenge any of it.'
+          : 'unresolved-questions record. Without it a reader sees a settled conclusion where the ' +
+            'researcher saw open questions.') +
+        ' A report that cannot be challenged can only be believed.'
+      );
+    } else if (!String(section(report, required) || '').trim()) {
+      failures.push(`The \`## ${required}\` section is empty. A heading with no content under it is not a record.`);
+    }
+  }
+
   const hasUsability = sources.some((s) => s.present && /usability/i.test(s.file));
   if (!hasUsability) {
     const caveat = /\busability testing (?:not|has not)\b|\bno usability (?:testing|data)\b|\bUT scores? (?:not|are not)\b/i;

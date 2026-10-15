@@ -374,9 +374,24 @@ function checkReadiness(text, root) {
       // so an evidence cell containing exactly `reason` satisfied it and the gate returned PASS. A
       // check that rewards a token rather than a reason is not a check. The token is gone; a
       // substantive explanation is now required.
-      const SPECIFIC = /out.of.scope|not applicable|n\/a because|does not apply|no (work|surface|change)/i;
       const words = reason.replace(/[`*_]/g, '').trim().split(/\s+/).filter(Boolean);
-      if (!SPECIFIC.test(reason) || words.length < 4) {
+      // FIXED AFTER BLIND /LAUNCH RUN 8: the previous rule was a FINGERPRINT — ≥4 tokens plus one
+      // sanctioned phrase. `out of scope: a` and `out of scope: x` satisfied it, i.e. four characters
+      // of zero information passed as "a specific out-of-scope reason", while honest 8-token reasons
+      // (`no model or prompt surface in this release`) failed for lacking the magic phrase. The exact
+      // irony: the sibling fix rejects `x` as evidence while this accepted `out of scope: x` as a
+      // reason.
+      //
+      // The honest version asks what a specific reason actually does: it NAMES WHAT IS OUT OF SCOPE.
+      // So require at least two substantive tokens — words that describe a thing — after the stop
+      // words that carry no information (`out of scope: a` has none).
+      const STOP = /^(?:out|of|the|a|an|in|this|that|these|those|is|are|was|were|be|been|to|for|it|its|not|no|applicable|n\/?a|scope|reason|reasons|and|or|but|with|from|by|on|at|as|if|so|do|does|did|has|have|had|will|would|can|could|should|may|might|must|we|our|they|their|there|here|also|just|only|any|some|all|none|x+|n\/a|same|see|above|below)$/i;
+      const substantive = words.filter((w) => {
+        const clean = w.replace(/[^\w/-]/g, '');
+        return clean.length >= 4 && /[a-z]/i.test(clean) && !STOP.test(clean);
+      });
+      const namesWhat = substantive.length >= 2 || (substantive.length >= 1 && words.length >= 6);
+      if (words.length < 3 || !namesWhat) {
         failures.push(
           `Team gate row "${r.agent}" is NOT ACTIVATED without a specific out-of-scope reason — ` +
             `blanket deactivation is how a gate gets quietly emptied. Writing the word "reason" is ` +

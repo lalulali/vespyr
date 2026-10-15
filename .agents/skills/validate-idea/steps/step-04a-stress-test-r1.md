@@ -52,8 +52,14 @@ Push for: one feature, one workflow. Something shippable in days.
 Bonus: "What if the user needed zero setup — no login, no integration — to get value?"
 Red flag: "Need the full platform first." "Stripping it down removes differentiation." = attachment to architecture over value.
 
-## Halt condition
-If the user invokes the escape hatch after Q1+Q2, skip remaining Qs and proceed to step 05.
+## Halt condition — the only skip rule in this skill
+The escape hatch fires only after **Q1 and Q2 have both been answered**. It is the single skip authority for all three modes; no earlier step may invoke it.
+
+On skip:
+1. **Log the skip reason in the brief** — verbatim, in the Context section. This is required by the verdict owner's own mandate (`founder.md`: accept a skip only if the user demonstrates prior validation or explicitly accepts the risk on record).
+2. **Accept the skip only with one of:** the user shows prior validation of this concept, or the user explicitly accepts the risk on record. If neither, do not skip.
+3. **Mark every unearned criterion as unearned.** Skipping Q3/Q4 leaves the step-06a wedge criterion unevidenced. A criterion with no evidence is scored `not earned` — never silently passed. An unearned wedge criterion makes `[GO]` unavailable in step 06; issue `[RESHAPE]` naming the missing criterion.
+4. Proceed to step 05.
 
 ## SPC gate — before completing this step
 If every answer this round was uniformly positive (no red flag surfaced, no push cracked an assumption), inject one adversarial counter-hypothesis question (see SKILL.md "Anti-sycophancy gate") and record the outcome before running the tracker-complete. A zero-friction round has tested nothing.

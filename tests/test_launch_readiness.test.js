@@ -231,19 +231,39 @@ test('--require-scan turns an unrunnable scan into a failure', () => {
 });
 
 test('a scanner FAILURE is fail-closed, never read as clean', () => {
-  // The rule that matters most: "no answer" must not become "no findings".
-  const src = fs.readFileSync(SCRIPT, 'utf8');
-  assert.match(src, /A scanner failure is never read as clean/);
-  // Exit 2 must be routed to `failures` unconditionally, not gated on --require-scan.
-  assert.match(src, /failures\.push\(f\);/);
-  // The findings branch (exit 1) MAY be downgraded to a warning without --require-scan.
-  // The tool-failure branch (exit 2) may NOT: `failures.push(f);` there is unconditional.
-  const exit2Block = src.slice(src.indexOf('} else {', src.indexOf('scan.code === 1')));
-  const exit2Body = exit2Block.slice(0, exit2Block.indexOf('} else if'));
-  assert.match(exit2Body, /failures\.push\(f\)/,
-    'exit 2 must go straight to failures');
-  assert.ok(!/requireScan/.test(exit2Body),
-    'a tool failure must not be downgradable to a warning by any flag');
+  // FIXED AFTER BLIND RUN 8: these assertions read the SOURCE of a script the test is not allowed to
+  // read under blind rules, and were satisfied by a comment surviving. `assert.match(src,
+  // /failures\.push\(f\);/)` is true wherever that literal appears — including inside a string, or
+  // in the exit-1 branch. A scanner that crashed and returned ok:true passed this test as long as the
+  // prose survived. Now behavioural: point the gate at a tree whose scan cannot succeed, and assert
+  // the gate says FAIL.
+  // A spec that exists but is not valid JSON makes the scanner FAULT rather than merely find
+  // nothing. That is the distinction the old assertions never tested: "no findings" and "could not
+  // look" must not produce the same verdict.
+  const r = run({
+    ...{ 'artifacts/output/06-launch/release-readiness.md': READY(ALL_SATISFIED) },
+    'security/audit-spec.json': '{ not json',
+  }, ['--require-scan']);
+  assert.strictEqual(r.json.verdict, 'FAIL',
+    `a scanner that cannot run must fail the gate, not report clean: ${JSON.stringify(r.failures)}`);
+  assert.ok(r.failures.some((f) => /scan|scanner|spec|json|invalid/i.test(f)),
+    `the failure must name the scan as the cause: ${JSON.stringify(r.failures)}`);
+
+  // Behavioural replacement for the same defect: a tool fault must not be downgradable to a warning.
+  // Run without --require-scan at all — if exit 2 were treated like exit 1 it would become a warning,
+  // and this tree has no launch scope so SKIPPED would look legitimate.
+  const r2 = run({
+    ...{ 'artifacts/output/06-launch/release-readiness.md': READY(ALL_SATISFIED) },
+    'security/audit-spec.json': '{ not json',
+  });
+  // The fail-closed signal is `code: 2`, the defined usage error — not a `verdict` string, which the
+  // fault path does not populate. Asserting on the presence of a verdict field here would have been
+  // another assertion satisfied by nothing.
+  const scan2 = r2.json.scan || {};
+  assert.strictEqual(r2.json.verdict, 'FAIL',
+    `a scanner fault must fail even with --require-scan omitted: ${JSON.stringify(r2.failures)}`);
+  assert.strictEqual(scan2.code, 2,
+    `a scan that could not run must be exit 2 (fail-closed), never 0 or 1: ${JSON.stringify(scan2)}`);
 });
 
 test('the scanner is actually invoked now — it was called by zero skills before', () => {
@@ -957,14 +977,18 @@ test('BLIND RUN 7 D2: all nineteen present and accounted for passes', () => {
   assert.strictEqual(r.json.verdict, 'PASS', `a complete record must pass: ${JSON.stringify(r.failures)}`);
 });
 
-test('BLIND RUN 7 D2: a NOT ACTIVATED reason must be specific — blanket deactivation still fails', () => {
-  for (const weak of ['out of scope', 'no work', 'reason', 'out of scope: no']) {
-    const rows = PROTOCOL_ROSTER.filter((a) => a !== '@architect').map(DEACT).concat([
-      `| @architect | \`NOT ACTIVATED\` | ${weak} |`,
-      SAT('@product-manager'), SAT('@tech-lead'), SAT('@qa-engineer'), SAT('@security-engineer'), SAT('@devops-engineer'),
-    ]);
-    const r = rosterOf(rows);
-    assert.ok(!r.failures.some((f) => /required reviewer row\(s\)/.test(f)),
-      `the row is present, so the roster must be satisfied ("${weak}")`);
-  }
-});
+  test('BLIND RUN 7 D2: a NOT ACTIVATED reason must be specific — blanket deactivation still fails', () => {
+    // FIXED AFTER BLIND RUN 8: the previous assertion only checked the absence of a roster
+    // failure, which the fixture guarantees by construction — it could NOT fail, and verified
+    // nothing about reason specificity. @qa-engineer found it could never fail; @code-reviewer
+    // measured that `out of scope: no` PASSED the live gate.
+    for (const weak of ['out of scope', 'no work', 'reason', 'out of scope: no', 'out of scope: a']) {
+      const rows = PROTOCOL_ROSTER.filter((a) => a !== '@architect').map(DEACT).concat([
+        `| @architect | \`NOT ACTIVATED\` | ${weak} |`,
+        SAT('@product-manager'), SAT('@tech-lead'), SAT('@qa-engineer'), SAT('@security-engineer'), SAT('@devops-engineer'),
+      ]);
+      const r = rosterOf(rows);
+      assert.ok(r.failures.some((f) => /NOT ACTIVATED without a specific out-of-scope reason/.test(f)),
+        `"${weak}" must be rejected as a blanket deactivation: ${JSON.stringify(r.failures)}`);
+    }
+  });

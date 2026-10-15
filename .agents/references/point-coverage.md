@@ -28,7 +28,7 @@ Not every surface gates the same way. Match the closure to the stakes:
 |---|---|---|
 | Decision surface (debate → decision, high token cost) | `/round-table` | **Blocking gate** — synthesis cannot fire until every point is dispositioned; machine-validated (`.agents/scripts/roundtable_eval.js points`, exit 1 blocks) |
 | Refinement surface (user-driven, exits anytime) | `/elicitation` | **Disclosure** — the user may always proceed; the close itemizes covered/unexamined points. Never block a refinement session |
-| Interview surface (1-1, humane pace) | `/grill-me` | **Lock-time closure** — no mid-interview enforcement; the handoff summary dispositions every point |
+| ~~Interview surface (1-1, humane pace)~~ | *retired 2026-10-14* | `/grill-me` left this canon: the owner returned it to the original's thinking-tool framing. It is **stateless** — it writes no record and does not enumerate subject points. A caller that wants a record writes it under its own skill's rules |
 
 Machine gates exist only where the ledger is parseable (round-table transcripts). Prose surfaces carry the same vocabulary without a fake gate.
 

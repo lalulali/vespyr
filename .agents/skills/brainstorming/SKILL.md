@@ -87,6 +87,101 @@ Gate: {GO/RESHAPE/NO-GO} on {strongest idea}
 - Ideas and decisions written to `artifacts/memory/active-decisions.md`
 - Brainstorming feeds into subsequent skills (`/validate-idea`, `/shape-up`, `/design`, `/round-table` and `/grill-me` via Step 4b routing)
 
+## Done when — checked mechanically
+
+This skill has a real Decision Gate and a real routing rule, and until now **nothing checked any of
+it.** `grep -c _check.js` over this directory returned zero. The session artifact was written from a
+paragraph of instructions with no template, so the gate the skill defines could be absent, misspelled,
+or contradictory with the route it took, and nothing would notice.
+
+```bash
+node .agents/scripts/brainstorming_session_check.js check \
+  --file artifacts/output/01-discovery/brainstorming-session.md --json
+```
+
+| Rule | What is checked |
+|---|---|
+| **Session record** | no unfilled template placeholders; a `**Date:**` |
+| **Sharpened topic** | present and substantive — Step 1's restated target, or the session cannot be routed anywhere |
+| **Method exists** | the named method is **exactly** one of the 60 in `methods.csv`. Not a substring: "Six Thinking Hats Plus Deluxe" is not a method |
+| **Decision Gate** | the machine record carries a bracketed verdict from the declared closed set `[GO]` / `[RESHAPE]` / `[NO-GO]`. A session with no verdict is a chat log |
+| **Anti-sycophancy (SPC)** | **the record carries at least one tension, risk, open question or objection** — measured in the *substance* sections, never in a self-assessment section, and a line asserting the *absence* of tension does not count as tension. See below |
+| **Routing consistency** | the route must be one Step 4b permits for the recorded verdict. A `[NO-GO]` routed to roundtable fails |
+| **Outputs recorded** | `Key Ideas`, `Decisions`, `Open Questions` — Step 3 requires all three |
+
+### The SPC rule, and the trap it fell into first
+
+Step 3 asks the agent to judge its own output: *"if every generated idea is positive or agreeable —
+zero tension, zero risk, zero objection…"*. That is a self-assessment in the same field it fills in,
+which is the F-13 defect this repo has been repairing all session. So it is gated on the **record**.
+
+The first version of that check passed a sycophancy session whose own note read *"Zero tension. Zero
+risk. Zero objection. This is a great session."* — because the note **quoted the vocabulary the check
+counts**. A document that declares the absence of the thing you are looking for is telling you it
+knows what you are looking for. Two guards now: the self-assessment region is excluded from the
+count, and a line asserting absence does not count as presence.
+
+**An honest session must be able to pass.** `Risk:`, `Trade-off:`, `Unknown:`, `open question`,
+`unvalidated`, `no data`, `failure mode`, `could fail` all count — and the vocabulary is deliberately
+phrase-based, not an enumerated list, because an enumerated list rejects the honest phrasing nobody
+thought of and the cheapest response to a rejection is to change how you say it.
+
+**A session that found no tension may say so — if it says what it looked for.** The first version of
+this check REQUIRED a tension, which forced a session that honestly found none to write a
+fabricated `Risk:` to pass. That is F-13 with the sign flipped: a gate whose cheapest passing answer
+is to invent evidence is worse than no gate, whichever direction it invents in. The fix is the one
+`discovery_canvas_check.js` already uses for quoted material — check the *honesty of the
+declaration*, not its direction:
+
+| Session record | Result |
+|---|---|
+| Records a tension, risk, trade-off, open question or objection | **Pass** |
+| Records no tension **and declares what it looked for and did not find** — "we ran the Eliminate pass and found nothing to remove"; "we stress-tested the Combine pass by forcing a muscle-memory scenario that never occurs" | **Pass**, with a caveat printed so a reader knows the judgement is still theirs |
+| Records no tension with no basis — "Zero tension. This is a great session." | **Fail** |
+
+The sycophant's answer to *"is this sycophantic?"* is not acceptable just because an honest answer is
+now allowed. The distinction is not which way the session leans — it is whether the claim can be
+checked. Two further traps found while testing it: a section **heading** named after the vocabulary
+(`## Tension`) counted as an instance of it, because the word is in the list; and a line *quoting*
+the vocabulary to assert its absence ("Zero tension. Zero risk.") counted as presence.
+
+### What this gate does not check
+
+Whether the ideas are any good, whether the method was applied correctly, whether the verdict is
+right, or whether the session was worth having. Those need a human. It also cannot tell a session
+that honestly surfaced tension from one that performed it — only that the record does not claim
+effortless success.
+
+### Session template
+
+```markdown
+# Brainstorming Session — {topic}
+
+**Date:** YYYY-MM-DD
+**Sharpened topic:** {Step 1's restated target — what is under discussion, and what output is needed}
+**Method:** {one of the 60 method_name values in methods.csv}
+
+## Key Ideas
+1. {idea} — {why it could work}
+
+## Decisions
+- {what was decided, and on what basis}
+
+## Open Questions
+1. {unresolved question} — **Risk:** {what goes wrong if the assumption is false}
+2. **Trade-off:** {what you give up}
+3. **Unknown:** {what nobody has checked}
+
+[SPC: inversion-applied]
+
+**Verdict:** {plain sentence: build this / keep the why, replace the how / stop}
+
+**Gate:** `[{GO|RESHAPE|NO-GO}]`
+**Route:** {roundtable (≥2 tensions) | grill-me (single bet or one domain) | archive + ledger (NO-GO)}
+```
+
+Exit 0 conformant · 1 failures · 2 usage/IO error, fail-closed.
+
 ## State machine integration
 
 At start: Run `node .agents/scripts/orchestrator_state.js status`

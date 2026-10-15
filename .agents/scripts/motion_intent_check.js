@@ -114,9 +114,62 @@ function main() {
   }
   const prdPath = path.resolve(root, args.prd || PRD_DEFAULT);
 
+  // BLIND /LAUNCH RUN 8, @qa-engineer seat, confirmed by the orchestrator. An explicitly named
+  // `--brief` that does not exist — and a brief file that exists but is empty — both ran through to
+  // `process.exit(0)`, i.e. "no motion-led signal detected, proceed". A missing input was a PASS.
+  // That is the F-3 class (an empty scan reported clean) and the qa-signoff class (a named artifact
+  // with no producer): the tool could not look, and nothing distinguished that from looking and
+  // finding nothing.
+  if (args.brief && !fs.existsSync(path.resolve(root, args.brief))) {
+    process.stderr.write(
+      `✗ motion_intent_check: cannot read --brief ${args.brief} — a brief that cannot be read is not ` +
+        'a brief with no motion signal in it.\n'
+    );
+    process.exit(2);
+  }
+  // An explicitly named brief that EXISTS but is blank is not "not found" — the caller pointed at a
+  // real artifact that carries nothing. Reading that as "no signal" is the same fail-open as a
+  // missing file, and it is the shape the blind run actually planted. Distinguish existence from
+  // content, and fail closed on an empty one.
+  if (args.brief && briefPath && fs.existsSync(briefPath)) {
+    const raw = fs.readFileSync(briefPath, 'utf8');
+    if (!raw.trim()) {
+      process.stderr.write(
+        `✗ motion_intent_check: --brief ${args.brief} is empty — a blank brief is not a brief with no ` +
+          'motion signal in it.\n'
+      );
+      process.exit(2);
+    }
+  }
   const briefText = briefPath ? readIfExists(briefPath) : null;
   const prdText = readIfExists(prdPath);
   const combined = `${briefText || ''}\n${prdText || ''}`;
+  // BLIND RUN 9 correction, @qa-engineer seat. My first fix failed closed here too, which broke the
+  // gate's own self-test harness (8 passed / 1 failed against 9/9 on committed HEAD) and contradicted
+  // step-01a: "The script always exits 0 — it is advisory input to a human-gated decision, never a
+  // build failure."
+  //
+  // The distinction that matters is not "is a brief missing" but "did you ASK me to read one":
+  //
+  //   • `--brief <path>` named explicitly and unreadable  -> exit 2, a usage error. The caller
+  //     asserted a file exists and it does not; silently reporting "no motion signal" in its place is
+  //     the F-3 defect (an empty result reported as clean).
+  //   • no brief named, none of the candidates exist, no PRD -> exit 0 with an explicit
+  //     `decisionRequired: false` and `sources: []`. This is the documented advisory contract: nothing
+  //     to decide is a legitimate answer for a gate that feeds a human, and it is NOT the same as
+  //     having read inputs and found no signal. The result object distinguishes them.
+  if (!combined.trim()) {
+    const result = {
+      decisionRequired: false,
+      reason: 'no brief or PRD found to read',
+      scannedSources: [],
+      signals: [],
+      note: 'Nothing was scanned. This is not the same as having scanned and found no motion signal.',
+    };
+    if (args.json) process.stdout.write(JSON.stringify(result, null, 2) + '\n');
+    else process.stdout.write('no brief or PRD found to read — nothing was scanned.\n');
+    process.exit(0);
+  }
 
   const scannedSources = [];
   if (briefText) scannedSources.push(path.relative(root, briefPath));

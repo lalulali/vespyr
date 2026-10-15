@@ -4,6 +4,20 @@ All notable changes to the Vespyr project will be documented in this file.
 
 ---
 
+## [2.0.12] - 2026-10-15
+
+### `/grill-me` went back to being a conversation (2026-10-15)
+- **The skill had turned into an audit instrument.** Its stated purpose was a thinking tool, and it had grown a checklist of eight moves, a decision ledger, a coverage gate, and a 130-line reference file. It now states the mechanism instead — *do not accept the first answer, follow each thread until it holds or breaks* — and carries seven questions an agreeable interviewer skips, one sharp probe each. The boundaries that make it usable (some questions cannot be answered by talking, count rounds not questions, you can be the sycophant) are unchanged. 133 lines, and it writes nothing.
+- **The eight-move frame had quietly dropped the original's escape hatch.** The first committed version was a 7-branch decision tree plus branch 8, "Open floor — what haven't we covered?" A later rewrite replaced it with eight closed branches and deleted Open floor and Success criteria outright. The new list declares its own incompleteness and says to name and drill anything that fits none of it, so the frame can no longer read as a completeness claim.
+- **The gate was deleted rather than left as dead weight.** `critique_session_check.js` keeps its elicitation branch. The grill-me branch was removed after checking three things: it had never been committed, nothing invoked it, and nothing in the repo read a grill-me record. An implementation with no producer is the same defect as a documented gate with no implementation. *Not claimed:* this removes no verified coverage — the branch was never runnable in practice.
+- **Two capabilities restored after independent review, not silently dropped.** A contradiction scan before closing ("an interview that ends with two answers that cannot both be true has not finished; it has stopped"), and a worked non-software instantiation so the skill's domain-generality claim is demonstrated rather than asserted. Both are proven by revert: deleting them fails exactly two tests.
+
+### The canonical templates were silently reverting root documents (2026-10-15)
+- **Running the doc sync undid unrelated corrections.** `AGENTS.md.canonical` and `agent.md.canonical` are the sources `--sync-docs` regenerates `AGENTS.md`, `agent.md`, and `CLAUDE.md` from. They had fallen behind the hand-edited root files, so syncing reverted the `complete`-does-not-advance-the-phase lesson and the `/legal-safety-audit` entry. Both are restored in the canonical; the sync is now safe to run. The root docs and their source agree.
+- **Documentation that the deletion made false was corrected, not left standing.** `point-coverage.md` no longer names grill-me as an interview surface or links a deleted file; `product-manager.md` no longer promises that grill-me saves decisions to `active-decisions.md` — the caller captures what the grill surfaced; the surviving "eight moves" claims in `README.md`, `AGENTS.md`, `agent.md`, `CLAUDE.md`, both Guides, `QUICK-REFERENCE.md`, `workflow.md`, `skills.md`, and the skill catalog are updated. The `[2.0.7]` entry below is left as written, because a changelog records what was true at the time.
+
+---
+
 ## [2.0.11] - 2026-09-30
 
 ### New skill: legal-safety-audit (2026-09-30)

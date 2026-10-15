@@ -192,7 +192,13 @@ test('memory-controller.md documents decision-vs-lesson routing', () => {
   assert.ok(/reclassify/.test(doc), 'must document the sanctioned move command');
 });
 
-test('every live memory file is inside its derived budget', () => {
+test('every live memory file is inside its derived budget', (t) => {
+  // BLIND REVIEW 2026-10-13: artifacts/memory is gitignored live state. A clean clone has
+  // none, so the budget rule cannot be exercised — skip rather than fail.
+  if (!fs.existsSync(path.join(ROOT, 'artifacts', 'memory'))) {
+    t.skip('artifacts/memory absent (gitignored live state)');
+    return;
+  }
   const { countTokens } = require(path.join(ROOT, 'tools/eval/lib/tokenizer.js'));
   const over = [];
   for (const f of fs.readdirSync(MEM).filter((x) => x.endsWith('.md'))) {

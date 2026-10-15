@@ -286,11 +286,24 @@ exist until this phase runs.
   **Reduced-motion phrasings the gate accepts — and rejects.** The prose in
   `motion-design-guidelines.md` §6 ("cross-fades (≤ 200ms, opacity only)") is looser than the
   mechanical check, and a blind run lost two gate iterations to it. The gate wants a **named
-  endpoint**, not a description of a transition:
+  endpoint**, not a description of motion still in progress:
   - accepted: `instant state change`, `cross-fade 150ms`, `static pose from first paint`,
-    `the loop never starts`, `never created`, `does not run`
-  - rejected: `cross-fades from opacity 0 to 1` (a duration-bearing transition, not an endpoint),
-    and anything describing the motion as still running, however gently
+    `the loop never starts`, `never created`, `does not run`, `cross-fades from opacity 0 to 1`
+  - rejected: anything describing the motion as still running, however gently (`still running`,
+    `the loop continues`, `a gentle 900ms fade that is still running`), and any fade longer than
+    200ms — `cross-fade 900ms` is a slow transition wearing a fade's name
+
+  **A cross-fade is a cross-fade, with or without a duration.** This list used to reject
+  `cross-fades from opacity 0 to 1` while accepting `cross-fade 150ms`, and gave the reason "a
+  duration-bearing transition, not an endpoint" — which does not distinguish the two, because
+  `cross-fade 150ms` is duration-bearing as well. An agent could only pass by guessing. Both are
+  accepted now; the enforced bounds are the 200ms ceiling and the ban on describing motion as still
+  running.
+
+  **One hazard remains, and it is not gate-checkable:** if the element starts at `opacity: 0`, the
+  content is invisible until the fade runs. That is fine under `prefers-reduced-motion`, which still
+  runs CSS transitions — but state the *resting* endpoint (`settles at opacity 1`) so a reader can
+  tell the content ends up visible.
 
   When a gate rejects a fallback you believe is correct, do not weaken the gate — restate the
   fallback as an endpoint and keep the cross-fade as the *route* to it.

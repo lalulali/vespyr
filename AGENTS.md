@@ -296,7 +296,7 @@ Vespyr is defined by two differentiators that no other multi-agent framework com
 
 ### 1. Socratic methodology depth
 
-**What it is:** Every reasoning agent has a `## Socratic Stance` declaring what it challenges, what "change my mind" looks like, and when to escalate. The `/grill-me` skill runs an eight-move interrogation frame that stress-tests every assumption before anything is committed.
+**What it is:** Every reasoning agent has a `## Socratic Stance` declaring what it challenges, what "change my mind" looks like, and when to escalate. The `/grill-me` skill interviews relentlessly, following each thread until it holds or breaks before anything is committed.
 
 **Why it matters:** Without structured challenge, agent teams converge on consensus too quickly — missing edge cases, architectural conflicts, and hidden assumptions. Vespyr bakes challenge into the persona layer, not just a single skill.
 

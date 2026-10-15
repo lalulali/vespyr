@@ -97,8 +97,6 @@ const QUOTED_RE = /[""“][^""“”]{8,}[""”]|\[[^\]]*https?:\/\/[^\]]*\]|htt
  * it let blame through and it rejected perfectly good causation. `so`, `which means`, `leading to`,
  * `therefore` and friends are causal connectives that engineers write every day.
  */
-const TESTABLE_RE =
-  /\b(?:because|caused by|due to|driven by|results? from|results? in|leads? to|leading to|so that|so the|which means|meaning that|therefore|hence|as a result|that is why|which is why|root cause)\b/i;
 
 /**
  * The opposite check, added for the same run. SKILL.md already says a chain ending at "someone was
@@ -108,6 +106,65 @@ const TESTABLE_RE =
  */
 const BLAME_RE =
   /\b(?:someone was careless|was careless|were careless|not careful|wasn'?t careful|human error|negligence|did not pay attention|didn'?t pay attention|lack of attention|an oversight by|lack of ownership|nobody was)\b/i;
+
+/** The act attributed to the agent: an error, an omission, an oversight. */
+const BLAME_ACT_RE =
+  /\b(?:careless|carelessly|not careful|wasn'?t careful|sloppy|forgot|forgotten|neglected|overlooked|missed|omitted|skipped|dropped|made an error|errored|made a mistake|fumbled|botched|did not|didn'?t|failed to|wasn'?t|was not|didn'?t bother|no attention|did not pay attention|didn'?t pay attention|human error|an oversight|lack of ownership|assumed)\b/i;
+
+/**
+ * Does the section also name an attributable MECHANISM alongside its blame?
+ *
+ * FIXED AFTER BLIND /LAUNCH RUN 8: the first version of the blame guard was purely lexical — it
+ * matched the blame phrase and rejected the section — so it refused honest analyses that name blame
+ * ALONGSIDE a mechanism, which is exactly what a good 5 Whys does:
+ *
+ *   "The team was careless about market coverage, but the missing fixture is the mechanism because…"
+ *   "Someone was careless in the release process. That carelessness was possible only BECAUSE the
+ *    pipeline has no post-deploy smoke test, so the break went unnoticed for 40 minutes."
+ *
+ * Both were rejected as "stops at blame". Blame is only a stop when it is the WHOLE answer — when
+ * nothing explains why the blame was possible. So the guard now asks that question: blame plus no
+ * mechanism is a stop; blame plus a mechanism is an analysis.
+ */
+// Mechanism VOCABULARY, not a single marker word.
+//
+// The first repair used `because` as the mechanism marker, which rejected blame-only causes that also
+// say "because" — "The export fails because someone was careless." — so the check silently stopped
+// working on its own headline fixture. A keyword that the defect also produces cannot discriminate.
+// The vocabulary below names artifacts and absences, which a blame stop does not contain.
+const MECHANISM_RE =
+  /\b(?:fixture|pipeline|smoke test|validation test|no test|no checks?|no guard|no validation|no coverage|not covered|unchecked|unhandled|missing|absent|omitted|not extended|never extended|left out|dropped|no owner|unowned|no review|schema|constraint|migration|hook|listener|event|queue|worker|retry|timeout|flag|config|default|fallback|permission|role|scope|index|cache|dependency|library|version|build|deploy|runtime)\b/i;
+
+/**
+ * Is the blame the WHOLE answer, or one clause of a real analysis?
+ *
+ * Sentence-aware rather than lexical, for the same reason: a single regex cannot tell
+ * "X, because someone was careless." from "Someone was careless. That was possible only because the
+ * pipeline has no smoke test." Both contain `because` and blame; only the first stops early.
+ *
+ * The discriminator is position: if the blame appears and a LATER sentence names a mechanism, the
+ * analysis continued past the blame and the blame is context, not the conclusion. If the section
+ * ends at the blame, it stopped.
+ */
+function blameIsTerminal(text, blameAt) {
+  const sentences = String(text)
+    .split(/(?<=[.!?])\s+/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+  let blameIdx = -1;
+  for (let i = 0; i < sentences.length; i++) {
+    if (blameAt <= sentences[i].length) { blameIdx = i; break; }
+  }
+  if (blameIdx === -1) blameIdx = Math.max(0, sentences.length - 1);
+  for (let i = blameIdx + 1; i < sentences.length; i++) {
+    if (MECHANISM_RE.test(sentences[i])) return false;
+  }
+  // A contrastive pivot inside the same sentence also continues past the blame.
+  for (let i = blameIdx; i < sentences.length; i++) {
+    if (/\b(?:but|however|though|although|even though)\b/i.test(sentences[i]) && MECHANISM_RE.test(sentences[i])) return false;
+  }
+  return true;
+}
 
 const { items } = require('./lib/list_items');
 
@@ -282,14 +339,49 @@ const CHECKS = {
         'an opinion, and two is a coincidence.'
       );
     }
-    const rootCause = section(text, 'Root Cause') || '';
-    if (!TESTABLE_RE.test(rootCause)) {
+    // FIXED AFTER BLIND RUN 10 (@architect seat): the `## Root Cause` section must EXIST and be
+    // non-empty. Run 10 measured both holes — a document with the section deleted, renamed or
+    // fenced exits 0 with zero failures, and so does one with the heading present and an empty body.
+    // The causal-keyword deletion removed the only code that read this section, and the SKILL.md
+    // written this session claims "the `## Root Cause` section exists" is checked. That was false.
+    //
+    // This is mechanical and cannot over-fit: a section either exists or it does not. It is the
+    // cheapest honest check in this gate and it was missing.
+    // NB: `section(text, 'Root Cause')` is NOT used to answer "does the section exist" — its
+    // heading regex is `^(\s*)(#{1,6})\s*Root Cause`, which matches the document TITLE
+    // `# Root Cause Analysis — …`. So it always returns something and the check could never fail.
+    // A requireSection that matches nothing on a well-formed document is worse than no check. The
+    // heading must be at level 2+ and the word must END the heading line, not begin a longer title.
+    const hasRootCauseSection = /^#{2,6}\s*(?:The\s+)?Root Cause\s*$/im.test(text);
+    const rootCause = hasRootCauseSection ? (section(text, 'Root Cause') || '') : '';
+    if (!hasRootCauseSection) {
       failures.push(
-        'The `## Root Cause` section never states a cause. It needs a causal claim ("because", ' +
-        '"caused by", "driven by") — a symptom restated at greater depth is not a root cause, and a ' +
-        'chain that ends at "someone was careless" has stopped early.'
+        'No `## Root Cause` section. The section is the artifact — a chain of whys with no stated ' +
+        'root cause is a list of observations, and nothing downstream can act on it.'
       );
-    } else if (BLAME_RE.test(rootCause)) {
+    } else if (!String(rootCause).trim()) {
+      failures.push(
+        'The `## Root Cause` section is empty. A heading with no content under it is not a root ' +
+        'cause, and the gate read it as one.'
+      );
+    }
+    // DELETED AFTER BLIND /LAUNCH RUN 9, on the owner's ruling: the causal-keyword requirement.
+    //
+    // It never worked and every repair made it worse. The final measured state:
+    //   • 19 of 19 honest root causes in ordinary English REJECTED — `causes`, `allows`, `enables`,
+    //     `prevents`, `drives`, `thus`, `consequently`, `thereby`, `gives rise to`, `is the mechanism
+    //     that`, `is the reason`.
+    //   • `blah so blah` ACCEPTED as a root cause, alongside tautologies, symptoms and goals.
+    //   • The gate's own error text named its vocabulary ("because", "caused by", "driven by"),
+    //     which was the defect, stated by the gate.
+    //
+    // A keyword list is a proxy for "states a cause", and across three runs every proxy failed in
+    // BOTH directions at once. Deleting it is not giving up on depth — the structural checks below
+    // are the ones that actually caught real defects, and none of them pretends to parse prose.
+    // What is lost: a document that names no cause at all now passes. That is a documented limit in
+    // `.agents/skills/root-cause/SKILL.md`, where a reviewer can read it — not in this file, which a
+    // blind reviewer is forbidden to open.
+    if (BLAME_RE.test(rootCause) && blameIsTerminal(rootCause, BLAME_RE.exec(rootCause).index)) {
       // The keyword above was satisfied; this is the check that used to be missing. Blame is a cause
       // in grammar and not a cause in engineering: nothing downstream can act on "because someone
       // was careless", yet it passed this gate for the whole life of the rule.

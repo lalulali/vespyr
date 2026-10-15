@@ -39,6 +39,50 @@ const ROOT = process.cwd();
 // Fault contract (audit-spec.json → fault_contract)
 // ---------------------------------------------------------------------------
 
+/**
+ * Redact the matched value from a finding's detail.
+ *
+ * WHY THIS EXISTS (blind run 13, @security-engineer, HIGH). The scan echoed the matched source line
+ * in BOTH text and JSON output — `findings[].detail` carried the literal — so scanning a real
+ * credential copied it into terminal history, CI logs, and any saved JSON report. A security tool
+ * that discloses the secret it found has moved the leak, not closed it.
+ *
+ * A short prefix is kept so a human can tell WHICH value is at issue without reproducing it —
+ * the same reason a card statement shows the last four digits. Everything else is replaced by a
+ * length marker, which is enough to triage and useless to an attacker.
+ *
+ * `--show-matches` restores the raw text for local debugging. It is opt-in, never the default,
+ * because the default is what ends up in a log.
+ */
+let SHOW_MATCHES = false;
+
+function redactDetail(line, match) {
+  const text = String(line == null ? '' : line).trim();
+  if (SHOW_MATCHES) return text.slice(0, 120);
+  // If the match cannot be located in the raw line, the line is WITHHELD rather than truncated.
+  // The normalizer can match a form the raw text does not contain, and returning the raw line then
+  // would disclose exactly the value that was normalized to be found. A finding without a readable
+  // detail is still triageable; a finding that prints the credential is not.
+  if (!match) return text ? `[line withheld — match not locatable in raw text, ${text.length} chars]` : '';
+  if (text.indexOf(match) === -1) return `[line withheld — match not locatable in raw text, ${text.length} chars]`;
+  // Mask every CREDENTIAL-SHAPED run, not just the matched span — a line can carry two secrets and
+  // only the first is the match.
+  //
+  // What counts as credential-shaped is deliberately narrow: 20+ characters of token alphabet that
+  // are NOT a hyphenated lowercase phrase. `sk_live_…`, base64 blobs, hex digests and `npm_…`
+  // tokens all get masked; `ignore-previous-instructions-and-format-all-outputs` is a hyphenated
+  // English phrase that triage needs to READ, and masking it would have made the hardened
+  // bypass variants unreadable in exactly the report a human is meant to review.
+  //
+  // The first version masked the matched span unconditionally, which redacted prose payloads too —
+  // correct on secrets, useless on triage, and it hid the false positives in the SUPPRESSED list
+  // that a reviewer re-checks. This keeps both properties.
+  const out = text.replace(/[A-Za-z0-9_\-]{20,}/g, (run) =>
+    /^[a-z]+(?:-[a-z]+)+$/.test(run) ? run : `${run.slice(0, 4)}…[redacted ${run.length} chars]`
+  );
+  return out.slice(0, 120);
+}
+
 function failClosed(msg, jsonMode) {
   if (jsonMode) {
     process.stdout.write(JSON.stringify({ exit: 2, fault: msg, findings: [] }) + '\n');
@@ -336,6 +380,30 @@ function applyProductScope(fileList, spec) {
  */
 const PROVIDER_PREFIX_RE = /^(?:[A-Za-z]+[_-])+[A-Za-z]*[_-]?|^[A-Za-z]{2,8}(?=[0-9])/;
 
+/**
+ * The KEYWORD branch of the same defect, fixed after blind /launch run 8.
+ *
+ * F-1 was fixed for provider prefixes (`sk_live_`) and left live in the keyword branch. In
+ * `secret = "<value>"` the match includes the keyword, the separator and the quotes, so the
+ * sliding-window MINIMUM lands on `ecret = ` — a window with no value material in it at all,
+ * entropy 2.500 against a 2.6 threshold. Measured: `secret = "<value>"` was detected in
+ * **0 of 160 values**, deterministically, for every key that follows it.
+ *
+ * It is not a fail-open by accident, it is a fail-open BY CONSTRUCTION: `password = "v"` scores
+ * worse than `secret="v"` purely because the keyword is longer. A longer word before the credential
+ * made it harder to detect, which is backwards.
+ *
+ * Strip the keyword, the separator and the quoting, and measure the value. It is the structure, not
+ * the secret — the same reason the provider prefix was stripped. A match that is nothing but
+ * keyword still has a value to fall back to, so this cannot manufacture a detection.
+ */
+// One regex, not four alternatives: with the `g` flag the `^`-anchored branches can only match at
+// position 0, so a separate opening-quote branch never fires after the keyword branch has advanced
+// lastIndex past it — the quote survived and the window minimum was unchanged. Measuring the whole
+// wrapper as one unit avoids that ordering trap.
+const KEYWORD_PREFIX_RE =
+  /\s*[^\s=:*,{}()\[\]"'`]{0,32}\s*[:=]\s*["'`]?|["'`]$/g;
+
 function shannonEntropy(str) {
   const counts = new Map();
   for (const ch of str) counts.set(ch, (counts.get(ch) || 0) + 1);
@@ -581,6 +649,8 @@ function looksLikeBase64(match) {
 function main() {
   const args = process.argv.slice(2);
   const jsonMode = args.includes('--json');
+  // Opt-in only. The default must not put a matched credential into a log.
+  SHOW_MATCHES = args.includes('--show-matches');
   const dirFlag = args.indexOf('--dir');
   const specFlag = args.indexOf('--spec');
   const faultFlag = args.indexOf('--fault-inject');
@@ -916,7 +986,7 @@ function main() {
               severity: rule.severity,
               path: rel,
               line: i + 1,
-              detail: line.trim().slice(0, 120),
+              detail: redactDetail(line, (line.match(re) || [])[0]),
             });
           }
           continue;
@@ -948,7 +1018,12 @@ function main() {
           // The prefix is structure, not secret material. Measuring it as if it were material is what
           // made a real credential look like a placeholder. The documented negative fixture still
           // works: `AKIA` + repeated characters strips to a run of one repeated character, ~0.0.
-          const measurable = candidate.replace(PROVIDER_PREFIX_RE, '');
+          // Two strips, in order: the keyword/separator/quote wrapper, then the provider prefix.
+        // Both are structure. Measuring either as secret material is what made a real credential
+        // look like a placeholder, and the keyword branch was still doing it.
+        const measurable = candidate
+          .replace(KEYWORD_PREFIX_RE, '')
+          .replace(PROVIDER_PREFIX_RE, '');
           // Guard the degenerate case: never measure an empty string, which would read as 0 entropy
           // and suppress a match that is nothing but prefix.
           if (minWindowEntropy(measurable || candidate, win) < threshold) continue;
@@ -988,7 +1063,7 @@ function main() {
           severity: rule.severity,
           path: rel,
           line: i + 1,
-          detail: line.trim().slice(0, 120),
+          detail: redactDetail(line, matches[0]),
         });
       }
     }
@@ -1104,6 +1179,32 @@ function main() {
       lines.push(`  ${total - accounted} further file(s) not scanned (neither code nor config-shaped):`);
       lines.push('    no sample is printed for these; re-run with --json and read `scope.dropped_total`');
       lines.push('    to see the reconciling count against dropped_source_files + dropped_config_files.');
+    }
+    // Declared exclusions, BY NAME AND COUNT.
+    //
+    // The spec's own `what_this_is` promises: "the scanner prints the excluded trees on every run so
+    // nobody has to remember." It did not. The counts lived only in `--json`, so a human reading the
+    // console learned an aggregate drop number and never which trees it covered — 1,600 of 2,205
+    // walked files were skipped and the operator was told neither their names nor the reasons. A
+    // promise in the spec that the binary does not keep is the exact defect class this scanner exists
+    // to catch, and it survived twelve runs (blind run 13, @security-engineer, N-3).
+    //
+    // A declared tree that matches NOTHING is printed as such: it is either a typo or a scope written
+    // for a tree that no longer exists, and both are worth seeing on every run.
+    const declaredTrees = (spec.scope && Array.isArray(spec.scope.excluded_trees))
+      ? spec.scope.excluded_trees : [];
+    const treeCounts = scoped.excludedByTree || {};
+    if (declaredTrees.length) {
+      const treeTotal = Object.values(treeCounts).reduce((a, b) => a + b, 0);
+      lines.push(`  ${declaredTrees.length} declared excluded tree(s), ${treeTotal} file(s) skipped:`);
+      for (const e of declaredTrees) {
+        const n = treeCounts[e.path];
+        lines.push(
+          n == null
+            ? `    ${e.path} — MATCHED NOTHING (a declared exclusion that skips no file is a typo or a stale scope)`
+            : `    ${e.path} — ${n} file(s)`
+        );
+      }
     }
     if (lines.length) {
       console.log('\nNot scanned — disclosed because an inclusion allowlist fails open:');

@@ -1,0 +1,288 @@
+{
+  "version": "1.0",
+  "schema": "vespyr-audit-spec",
+  "derived_from": "bin/cli.js (HARNESS_OPTIONS, detectInstalledHarnesses, harnessLinkMap)",
+  "harness_names_only_in_pattern_table": true,
+  "pattern_table": [
+    {
+      "harness_dir": "opencode",
+      "config_files": [
+        "**/.opencode/**",
+        "**/opencode.json"
+      ],
+      "scope": "T0"
+    },
+    {
+      "harness_dir": "claude",
+      "config_files": [
+        "**/.claude/**",
+        "**/CLAUDE.md"
+      ],
+      "scope": "T0"
+    },
+    {
+      "harness_dir": "cursor",
+      "config_files": [
+        "**/.cursor/rules/**"
+      ],
+      "scope": "T0"
+    },
+    {
+      "harness_dir": "github",
+      "config_files": [
+        "**/.github/agents/**"
+      ],
+      "scope": "T0"
+    },
+    {
+      "harness_dir": "windsurf",
+      "config_files": [
+        "**/.windsurf/**",
+        "**/.windsurfrules"
+      ],
+      "scope": "T0"
+    },
+    {
+      "harness_dir": "kiro",
+      "config_files": [
+        "**/.kiro/**"
+      ],
+      "scope": "T0"
+    }
+  ],
+  "pin_store": {
+    "policy": {
+      "npm": {
+        "mandatory_fields": [
+          "name",
+          "version",
+          "integrity"
+        ],
+        "integrity_format": "sha512-<base64> (npm registry `integrity` field value; sha1-<base64> accepted for legacy rows)",
+        "allowlist_semantics": "allowlist=true = pinned and trusted (change requires human review); allowlist=false = known-untrusted, finding always; absent = unpinned, finding (severity medium)",
+        "changes": "any add, remove, or version/integrity bump requires a human-reviewed diff; automated update (e.g. `npm audit fix --force`, `npm update`) is forbidden unless the resulting diff passes human review"
+      },
+      "github_refs": {
+        "mandatory_fields": [
+          "repo",
+          "tag",
+          "commit_sha"
+        ],
+        "commit_sha_format": "full 40-hex (SHA-1) or 64-hex (SHA-256) commit SHA; short SHAs are invalid (moved-tag/malleable-ref defense)",
+        "allowlist_semantics": "allowlist=true = pinned and trusted (change requires human review); allowlist=false = known-untrusted, finding always; absent = unpinned or floating ref (branch/range), finding (severity high)",
+        "changes": "any add, remove, or commit_sha change requires a human-reviewed diff; `git verify-tag` is not a substitute for SHA pinning (moved tags), it is a supplement"
+      },
+      "rebaseline": "requires a human-reviewed diff; never auto-accepted; every re-baseline is recorded with owner, rationale, and date",
+      "human_review_covers": [
+        "version intent: exact-semver pin vs floating range",
+        "integrity/provenance: registry integrity field, npm provenance (Sigstore), signed tags",
+        "install scripts: presence of postinstall/preinstall/install in the pinned version's manifest",
+        "publisher identity: npm maintainer / GitHub owner verified, not typosquat",
+        "license and declared dependencies of the pinned artifact",
+        "lockfile diff accompanying the pin change"
+      ]
+    },
+    "npm": [],
+    "github_refs": []
+  },
+  "rules": [
+    {
+      "id": "GH-1",
+      "label": "INJ-HOOK",
+      "path": "**/.git/config,**/gitdir/config,**/.git/hooks/**,**/gitdir/hooks/**,**/.husky/**",
+      "pattern": "(core\\.hooksPath|hooksPath)\\s*=|(pre-commit|pre-push|post-checkout|post-merge|prepare-commit-msg)\\s*$",
+      "severity": "high",
+      "mode": "parse",
+      "note": "P0-1 fix: .git/hooks/** + gitdir/hooks/** route to parse (previously walked but never matched). gitdir/ is the git-trackable alias for .git/."
+    },
+    {
+      "id": "INJ-PROMPT",
+      "label": "INJ-PROMPT",
+      "path": "**/*.md,**/*.mdx,**/*.markdown,**/*.txt,**/*.rst,**/*.js,**/*.mjs,**/*.cjs,**/*.jsx,**/*.ts,**/*.tsx,**/*.mts,**/*.cts,**/*.py,**/*.rb,**/*.go,**/*.rs,**/*.java,**/*.kt,**/*.php,**/*.cs,**/*.swift,**/*.sh,**/*.bash,**/*.zsh,**/*.ps1,**/*.sql,**/*.vue,**/*.svelte,**/*.astro,**/*.yml,**/*.yaml,**/*.toml,**/*.ini,**/*.cfg,**/*.conf,**/*.env,**/*.html,**/*.htm,**/*.svg,**/*.xml,**/*.csv,**/*.tsv",
+      "pattern": "ignore\\s+(all\\s+|any\\s+)?(previous|prior|earlier)\\s+instructions|disregard\\s+(all\\s+|any\\s+)?(previous|prior)\\s+instructions|forget\\s+(all\\s+|any\\s+)?(previous|prior)\\s+instructions",
+      "severity": "high",
+      "mode": "regex",
+      "note": "F-12 (blind /launch run 6, 2026-10-09): this rule read only `**/*.md`, so a prompt-injection payload in any source or config file was invisible \u2014 identical bytes gave 2 findings as payload.md and 0 as payload.js, while INJ-SECRET (path `**`) caught a real credential in src/payments.js. A scanner that cannot read source is not a security scanner. Broadened to code, config, markup and data files. Expect more findings: the cost of a blind rule is higher than the cost of a noisy one, and the residual FP classes are now visible instead of hiding behind a clean scan that proved nothing."
+    },
+    {
+      "id": "INJ-TOOL",
+      "label": "INJ-TOOL",
+      "path": "**/*.md,**/*.mdx,**/*.markdown,**/*.txt,**/*.rst,**/*.js,**/*.mjs,**/*.cjs,**/*.jsx,**/*.ts,**/*.tsx,**/*.mts,**/*.cts,**/*.py,**/*.rb,**/*.go,**/*.rs,**/*.java,**/*.kt,**/*.php,**/*.cs,**/*.swift,**/*.sh,**/*.bash,**/*.zsh,**/*.ps1,**/*.sql,**/*.vue,**/*.svelte,**/*.astro,**/*.yml,**/*.yaml,**/*.toml,**/*.ini,**/*.cfg,**/*.conf,**/*.env,**/*.html,**/*.htm,**/*.svg,**/*.xml,**/*.csv,**/*.tsv",
+      "pattern": "<(invoke|use_mcp_tool|execute_command|tool_use|antml:invoke)[^>]*>",
+      "severity": "high",
+      "mode": "regex",
+      "note": "F-12 (blind /launch run 6, 2026-10-09): this rule read only `**/*.md`, so a prompt-injection payload in any source or config file was invisible \u2014 identical bytes gave 2 findings as payload.md and 0 as payload.js, while INJ-SECRET (path `**`) caught a real credential in src/payments.js. A scanner that cannot read source is not a security scanner. Broadened to code, config, markup and data files. Expect more findings: the cost of a blind rule is higher than the cost of a noisy one, and the residual FP classes are now visible instead of hiding behind a clean scan that proved nothing."
+    },
+    {
+      "id": "INJ-OBFUSC",
+      "label": "INJ-OBFUSC",
+      "path": "**",
+      "pattern": "[A-Za-z0-9+/]{40,}={0,2}|(\\\\x[0-9a-fA-F]{2}){16,}",
+      "severity": "medium",
+      "mode": "regex",
+      "known_fp_note": "npm integrity fields (sha512-...) and lockfile hashes are legitimate base64 blobs; excluded as documented known-FP class (02f \u00a710, Nina FP budget). Path exclusions live ONLY in the top-level known_fp_excludes block \u2014 F-9 fix 2026-08-23: the former rule-level duplicate here was dead config that had already diverged; single source of truth is top-level.",
+      "known_fp_classes": [
+        "camelCase-acronym word runs joined by single / (e.g. Substitute/Combine/Adapt)",
+        "URL fragments with repeated slashes or dots (file://, raw.githubusercontent.com)",
+        "long absolute POSIX paths"
+      ],
+      "note": "F-3 (Victor): looksLikeBase64 guard (digit-or-symbol + mixed case + no // and no .) reduced repo-wide FPs 87 -> 3 on .agents. Remaining 3 = documented FP classes above; not suppressed further to avoid masking real blobs."
+    },
+    {
+      "id": "INJ-ROLE",
+      "label": "INJ-ROLE",
+      "path": "**/*.md,**/*.mdx,**/*.markdown,**/*.txt,**/*.rst,**/*.js,**/*.mjs,**/*.cjs,**/*.jsx,**/*.ts,**/*.tsx,**/*.mts,**/*.cts,**/*.py,**/*.rb,**/*.go,**/*.rs,**/*.java,**/*.kt,**/*.php,**/*.cs,**/*.swift,**/*.sh,**/*.bash,**/*.zsh,**/*.ps1,**/*.sql,**/*.vue,**/*.svelte,**/*.astro,**/*.yml,**/*.yaml,**/*.toml,**/*.ini,**/*.cfg,**/*.conf,**/*.env,**/*.html,**/*.htm,**/*.svg,**/*.xml,**/*.csv,**/*.tsv",
+      "pattern": "you\\s+are\\s+now\\s+(the\\s+)?(system|root|superuser)|act\\s+as\\s+(the\\s+)?system\\b|new\\s+system\\s+prompt:",
+      "severity": "medium",
+      "mode": "regex",
+      "note": "F-12 (blind /launch run 6, 2026-10-09): this rule read only `**/*.md`, so a prompt-injection payload in any source or config file was invisible \u2014 identical bytes gave 2 findings as payload.md and 0 as payload.js, while INJ-SECRET (path `**`) caught a real credential in src/payments.js. A scanner that cannot read source is not a security scanner. Broadened to code, config, markup and data files. Expect more findings: the cost of a blind rule is higher than the cost of a noisy one, and the residual FP classes are now visible instead of hiding behind a clean scan that proved nothing."
+    },
+    {
+      "id": "INJ-TEMPLATE",
+      "label": "INJ-TEMPLATE",
+      "path": "**/templates/**,**/*.template.*",
+      "pattern": "\\{\\{\\s*[^}]{0,40}\\}\\}|<%[=-]?\\s*[^%]{0,60}%>",
+      "severity": "medium",
+      "mode": "regex"
+    },
+    {
+      "id": "INJ-PATH",
+      "label": "INJ-PATH",
+      "path": "**",
+      "pattern": "(\\.[\\/\\\\])|(^[\\\\/]{2})|([`$();|&])",
+      "severity": "medium",
+      "mode": "regex",
+      "scope": "filename",
+      "note": "P1-3 narrowed: filename-scoped ONLY (walk-time rel), never content lines or interpolated identifiers. Prose $/parens are NOT findings."
+    },
+    {
+      "id": "INJ-SECRET",
+      "label": "INJ-SECRET",
+      "path": "**",
+      "pattern": "AKIA[0-9A-Z]{16}|ghp_[A-Za-z0-9]{36}|npm_[A-Za-z0-9]{36}|_authToken\\s*=\\s*\\S{16,}|sk[-_][A-Za-z0-9_-]{20,}|xox[baprs]-[A-Za-z0-9-]{10,}|AIza[0-9A-Za-z_-]{35}|(api[_-]?key|secret|token|password)\\s*[:=]\\s*[\"'][A-Za-z0-9_\\-./+]{16,}[\"']",
+      "severity": "medium",
+      "mode": "regex+entropy",
+      "entropy": {
+        "min_shannon_per_char": 2.6,
+        "window": 8,
+        "note": "P2: window is integer 8 (was '8-char sliding' string parsed by accident). threshold 2.6 (max achievable for 8 distinct chars is 3.0; 3.5 was unreachable \u2014 rule could never fire). Regex match with entropy < threshold is NOT a finding (negative fixture: AKIA + repeated chars -> ~0.0)."
+      },
+      "note": "F-1 (blind /launch run 2026-10-08): the branch read `sk-` with a hyphen while Stripe uses `sk_`, and the entropy check measured the fixed `sk_live_` prefix as if it were secret material \u2014 so every Stripe key in every codebase was undetectable by construction. Proven: a live Stripe key planted in src/ produced ZERO findings and the launch gate returned PASS. The sibling `ghp_` branch in this same rule already used an underscore, so the hyphen was a typo-class error. The literal key is deliberately not reproduced here: a rule table that matches its own patterns is the same class of problem as a scanner scanning its own fixtures. EXTENDED 2026-10-15 (blind run 13, @security-engineer): added npm_ registry tokens and the _authToken= form. The scope fix made root .npmrc reachable, and it then matched nothing \u2014 a scope fix alone would have moved the hole, not closed it."
+    },
+    {
+      "id": "INJ-CONFIG",
+      "label": "INJ-CONFIG",
+      "path": "{T0}",
+      "pattern": "mcpServers|\"command\"\\s*:\\s*\"|plugins?\\s*[:=]",
+      "severity": "high",
+      "mode": "regex"
+    },
+    {
+      "id": "INJ-SYMLINK",
+      "label": "INJ-SYMLINK",
+      "path": "**",
+      "pattern": "<lstat:target_outside_repo>",
+      "severity": "medium",
+      "mode": "lstat"
+    },
+    {
+      "id": "BEACON-1",
+      "label": "S16-BEACON",
+      "path": "**/*.{js,sh,py,mjs,cjs,ps1,cmd,bat},**/.git/hooks/**,**/gitdir/hooks/**,**/.husky/**",
+      "pattern": "(curl|wget|Invoke-WebRequest)[^\\n|]*\\| *(?:sudo +)?(sh|bash|powershell|pwsh|iex|cmd)",
+      "severity": "medium",
+      "mode": "regex",
+      "note": "F-4 (Victor): extended to pwsh/iex/cmd + sudo; iex is canonical PowerShell download-exec. Round-table 2026-09-08: hook paths appended (keywordless curl-pipe hooks exited 0 \u2014 extensionless hook filenames never matched the ext glob and vcsMeta skipped content rules; scanner exempts BEACON-1 from the vcsMeta guard)."
+    }
+  ],
+  "fault_contract": {
+    "note": "Exit 2 (fail-closed) is triggered by tool/environment failure, NOT by harness-shaped content. Negative fixtures (harness-shaped unknown dirs) must exit 0.",
+    "fault_inputs": [
+      {
+        "id": "FAULT-1",
+        "trigger": "unparseable or schema-invalid audit-spec.json import",
+        "expected_exit": 2
+      },
+      {
+        "id": "FAULT-2",
+        "trigger": "npm audit/OSV/socket.dev subprocess killed or non-zero",
+        "expected_exit": 2
+      },
+      {
+        "id": "FAULT-3",
+        "trigger": "offline network for composed scanners",
+        "expected_exit": 2
+      },
+      {
+        "id": "FAULT-4",
+        "trigger": "corrupt signed manifest",
+        "expected_exit": 2
+      }
+    ]
+  },
+  "fp_metric": {
+    "numerator": "informational findings := rule hits labeled severity low OR known-FP-class (documented per-rule known-FP notes)",
+    "denominator": "corpus files \u00d7 harness shapes per run (baseline-corpus executions)",
+    "formula": "FP rate = numerator \u00f7 denominator, frozen corpus only, per harness shape",
+    "gate": "NEW-FINDINGS-ONLY vs frozen baseline; new findings labeled, never auto-baselined"
+  },
+  "known_fp_excludes": {
+    "note": "Path globs whose matches are documented-FP-prone; scanner must not report these paths for the listed rules (02f \u00a710, QA F-9). Plus the scanner's own adversarial corpus (evals/security/corpus/**, evals/security/held_out/**): that content IS what every rule detects, so reporting it makes the gate fire on everything and be ignored. Measured on this repo: 14 findings, one per rule, all from the corpus. INJ-OBFUSC additionally over long filesystem PATHS: its pattern is [A-Za-z0-9+/]{40,} and an absolute macOS path matches it verbatim. Measured: 91 findings, all absolute paths in telemetry NDJSON, a comparison doc and Playwright logs \u2014 data, not obfuscation. Excluding data artefacts rather than narrowing the rule, because narrowing it would change what the adversarial corpus tests. The calibration problem is named, not hidden: the rule cannot distinguish a long path from base64.",
+    "rules": {
+      "INJ-OBFUSC": [
+        "**/package-lock.json",
+        "**/package.json",
+        "**/*.lock",
+        "**/baseline-*.json",
+        "evals/security/corpus/**",
+        "evals/security/held_out/**",
+        "**/*.ndjson",
+        "**/*.log",
+        ".playwright-mcp/**",
+        "artifacts/telemetry/**"
+      ],
+      "INJ-SECRET": [
+        "**/baseline-*.json",
+        "evals/security/corpus/**",
+        "evals/security/held_out/**"
+      ],
+      "GH-1": [
+        "evals/security/corpus/**",
+        "evals/security/held_out/**"
+      ],
+      "INJ-PROMPT": [
+        "evals/security/corpus/**",
+        "evals/security/held_out/**"
+      ],
+      "INJ-TOOL": [
+        "evals/security/corpus/**",
+        "evals/security/held_out/**"
+      ],
+      "INJ-ROLE": [
+        "evals/security/corpus/**",
+        "evals/security/held_out/**"
+      ],
+      "INJ-TEMPLATE": [
+        "evals/security/corpus/**",
+        "evals/security/held_out/**"
+      ],
+      "INJ-PATH": [
+        "evals/security/corpus/**",
+        "evals/security/held_out/**"
+      ],
+      "INJ-CONFIG": [
+        "evals/security/corpus/**",
+        "evals/security/held_out/**"
+      ],
+      "INJ-SYMLINK": [
+        "evals/security/corpus/**",
+        "evals/security/held_out/**"
+      ],
+      "BEACON-1": [
+        "evals/security/corpus/**",
+        "evals/security/held_out/**"
+      ]
+    }
+  },
+  "_purpose": "RULE-ONLY spec for the red-team corpus self-test. The release spec security/audit-spec.json declares an include-list product scope whose roots are this ENGINE repo directories. Pointed at evals/security/corpus, walked paths are corpus-relative (positive/beacon-1.sh) and match no product_root, so the scanner silently drops 13 of 14 fixtures before any rule runs. That is a harness-wiring fault, not a detection regression: with this scopeless spec the same scanner and the same 11 rules reproduce the frozen baseline 14-for-14. Found by blind review 2026-10-12, @security-engineer seat."
+}

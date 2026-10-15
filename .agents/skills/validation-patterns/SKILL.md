@@ -63,6 +63,70 @@ Guide the user through execution. Record results:
 - Validation design and results written to `artifacts/memory/active-decisions.md`
 - If the validation produces a structured output (survey results, A/B data), write to `artifacts/output/02-research/validation-results.md`
 
+## Done when — checked mechanically
+
+This skill ships a catalog and a `match_methods.js`, and **no gate of any kind** — no Decision Gate
+step, no gate script, and nothing checks the verdict `@founder` is said to provide. The record format
+below is the entire artifact contract, and it is written from five lines of prose with no template.
+
+```bash
+node .agents/scripts/validation_record_check.js check \
+  --file artifacts/output/02-research/validation-results.md --json
+```
+
+| Rule | What is checked |
+|---|---|
+| **Record hygiene** | no unfilled template placeholders; a date in the declared `[date: YYYY-MM-DD]` form |
+| **Hypothesis** | stated, and substantive — the record format is `[VALIDATION] {method} — {hypothesis}`, and a validation with no hypothesis has no signal either |
+| **Method exists** | exactly one of the 30 in `methods.csv`. Exact, not substring: "Concierge MVP Extreme" is not a method |
+| **The signal, BOTH directions** | what validates **and** what invalidates. See below |
+| **A measure** | a duration or sample size containing a number — a signal without a denominator is not measurable |
+| **A confound** | at least one named confound, alternative explanation or edge case |
+| **Verdict** | present, and from the declared `GO` / `RESHAPE` / `NO-GO` set |
+
+### The signal is the centrepiece
+
+Step 3 says *"define the signal (what result validates the hypothesis?)"* and nothing ever checked it
+— so the cheapest passing record defined success and stopped. Measured against a record that did
+exactly that:
+
+> *"This validates the hypothesis if the click rate exceeds 15%. Demand exists… and we proceed to
+> build the concierge flow."*
+
+→ **3 failures**: no invalidation condition, no measure, no confound. A test that cannot fail is not a
+test, and a verdict reached by one is not a judgement — it is a preference. This is the same defect
+family as `research-plan`'s `{goal} — falsifiable? Yes/No`, and it is the reason this gate exists.
+
+### What this gate does not check
+
+Whether the test is a good test, whether the signal is the right signal, whether the confounds were
+the right confounds, or whether the verdict is correct. Those need a researcher. It stops a validation
+that was never designed from reading as one that was.
+
+### Record template
+
+```markdown
+@memory-controller write active-decisions.md
+### [VALIDATION] {method} — {hypothesis} [date: YYYY-MM-DD] [agent: @founder]
+
+**Hypothesis:** {the claim, in enough detail that a result could contradict it}
+
+**Method used:** {one of the 30 method_name values in methods.csv}.
+Test: {what you will actually do, with whom, over how long}
+
+**Signal.** This validates the hypothesis if {measurable result}. It invalidates the hypothesis if
+{the result that would make you stop} — in which case we are wrong about {what} and should not build.
+
+**Confounds.** {what else could explain the same result; selection bias; seasonal; promo; sample
+already engaged}
+
+**Verdict:** `[GO|RESHAPE|NO-GO]` — {the plain reason}
+
+**Status:** active
+```
+
+Exit 0 conformant · 1 failures · 2 usage/IO error, fail-closed.
+
 ## State machine integration
 
 At start: run `node .agents/scripts/orchestrator_state.js status`

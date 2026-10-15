@@ -5,25 +5,36 @@
     "allowlist for findings a human has looked at and accepted; it is NOT a way to make a gate",
     "green. If you add a glob here, you are asserting you read what it now suppresses.",
     "",
-    "Deliberately NOT here: documentation that names attack patterns (.agents/TROUBLESHOOTING.md,",
-    "  INJ-OBFUSC on tests/test_memory_consolidation.js is the jwt.io canonical example token (header alg HS256, payload sub 1234567890 / name John Doe / iat 1516239022), inside a test asserting the secret scrubber removes it.",
-    ".agents/skills.md, .agents/agents/security-engineer.md, security/supply-chain-audit-spec.md).",
-    "Those files are loaded into agent context, so scanning them is correct; the findings are a",
-    "rule-precision problem for the rule owner, not a finding to suppress. Suppressing them would",
-    "hide a real weakness in the rule table behind a green checkmark.",
-    "  tests/test_security_scan_scope.test.js and tests/test_launch_readiness.test.js contain credential-SHAPED strings on purpose: the first names the measured failure that motivated the fail-closed scope (a real AKIA key in src/config.js was silently dropped, 0 findings reported), and the second needs a token a rule will actually match in order to test the allowlist plumbing end to end. Neither is a credential. Both files were read before adding.",
-    "  F-12 broadened INJ-PROMPT/INJ-TOOL/INJ-ROLE from `**/*.md` to source, config, markup and data files, because a payload in payments.js was invisible while the same bytes in payload.md were caught. That added 13 findings, and all 13 were read individually: they are adversarial test fixtures \u2014 the mutation-payload table in test_security_mutation.js, the scrubber fixtures in test_memory_consolidation.js, the quarantine fixtures in test_memory_fixes.test.js, and the MARKER constant in test_security_scan_scope.test.js. Every one is a deliberately malicious string inside a test asserting it gets blocked. None is a live injection.",
-    "  This is the trade F-12 deliberately makes. A rule that cannot read source produces a clean scan that proves nothing; a noisy rule produces findings a human attributes in one pass. The residual false-positive classes are now visible instead of hiding behind a false green."
+    "CORRECTED 2026-10-12 (blind triage, @security-engineer seat). This comment previously said the",
+    "opposite of what the allowlist does.",
+    "",
+    "It stated that .agents/TROUBLESHOOTING.md, .agents/skills.md,",
+    ".agents/agents/security-engineer.md and security/supply-chain-audit-spec.md were 'Deliberately NOT",
+    "here' \u2014 i.e. not suppressed \u2014 and gave a good reason: those files load into agent context, so",
+    "scanning them is correct, and their findings are a rule-precision problem for the rule owner",
+    "rather than something to suppress.",
+    "",
+    "MEASURED: the runtime DOES suppress them \u2014 2 findings in TROUBLESHOOTING.md, 2 in",
+    ".agents/skills.md, and 1 in .agents/agents/security-engineer.md. The comment has contradicted the",
+    "behaviour for as long as the allowlist has existed, which is the same defect class this audit has",
+    "chased all session: a documented claim that does not survive execution. Nobody caught it because",
+    "nobody runs the comment against the runtime.",
+    "",
+    "What is TRUE now: those three files ARE suppressed. The original reasoning for NOT suppressing",
+    "them still stands and was never answered \u2014 it was simply contradicted. Coverage lost by the current",
+    "state: a real injection or credential added to agent-context documentation is suppressed rather",
+    "than reported. That is a genuine weakness and it is recorded here rather than hidden.",
+    "",
+    "NOT corrected, deliberately: the entries are not removed in this pass, because that would change",
+    "gate behaviour on the owner's tree without the owner's ruling, and the entries are referenced by",
+    "the F-12 review. This comment records the contradiction; removing the entries is a separate",
+    "decision for the rule owner."
   ],
   "rules": {
     "INJ-SECRET": [
       "tests/test_memory_consolidation.js",
-      ".agents/scripts/test_security_mutation.js",
       "tests/test_security_scan_scope.test.js",
       "tests/test_launch_readiness.test.js"
-    ],
-    "BEACON-1": [
-      ".agents/scripts/test_security_mutation.js"
     ],
     "INJ-OBFUSC": [
       "tests/test_memory_consolidation.js",
@@ -31,21 +42,11 @@
       ".agents/skills/unpack-problem/steps/step-02-analysis-execution.md"
     ],
     "INJ-PROMPT": [
-      ".agents/scripts/test_security_mutation.js",
       "tests/test_memory_consolidation.js",
       "tests/test_memory_fixes.test.js",
-      "tests/test_security_scan_scope.test.js",
-      ".agents/TROUBLESHOOTING.md",
-      ".agents/skills.md",
-      ".agents/agents/security-engineer.md"
-    ],
-    "INJ-TOOL": [
-      ".agents/scripts/test_security_mutation.js",
-      ".agents/TROUBLESHOOTING.md",
-      ".agents/skills.md"
+      "tests/test_security_scan_scope.test.js"
     ],
     "INJ-ROLE": [
-      ".agents/scripts/test_security_mutation.js",
       "tests/test_memory_consolidation.js"
     ]
   },
@@ -73,5 +74,35 @@
     "are the same shape (a base64 blob and a slash-separated TitleCase list are indistinguishable to a",
     "character-class rule). Narrowing either rule would change what the adversarial corpus tests. The",
     "honest options were reviewed findings or a weakened control, and this is the reviewed option."
+  ],
+  "_decision_log": [
+    {
+      "date": "2026-10-13",
+      "ruled_by": "owner, \"d oit\" \u2014 option 1 of three",
+      "what": "Removed INJ-PROMPT and INJ-TOOL suppression for the three agent-context docs that SHIP",
+      "reasoning": [
+        "The allowlist is per-rule-per-file with no granularity below the file, so these entries made ANY new INJ-PROMPT or INJ-TOOL in those files invisible \u2014 including a real injection.",
+        ".agents/ is in package.json `files`, so these docs ship to every install and load into agent context every session. That is the surface the scanner exists to protect, unlike test fixtures which are inert data.",
+        "The allowlist comment had claimed these were \"Deliberately NOT here\" for exactly this reason, while the runtime suppressed them. The comment was right and the behaviour was not."
+      ],
+      "accepted_cost": "The release scan now reports 5 findings instead of 0 (suppressed 29 -> 24), so launch_readiness_check --require-scan fails and /launch halts. Paid now, while no release is in flight, rather than later when it blocks one.",
+      "not_done": "The better fix \u2014 moving verbatim attack payloads out of agent-context docs into evals/security/corpus/ \u2014 is a content decision and is still open.",
+      "CORRECTION_2026-10-13": {
+        "what_was_wrong": "I wrote \"7 findings\" in the accepted_cost above and described the rationale as \"those docs load into agent context every session\". Both are imprecise. Measured: 5 findings, suppressed 29 -> 24.",
+        "file_by_file_reachability": [
+          "security-engineer.md \u2014 genuinely loads. A persona file is standing instructions.",
+          "skills.md \u2014 genuinely loaded. The canonical catalog agents consult (AGENTS.md \u00a76, QUICK-REFERENCE).",
+          "TROUBLESHOOTING.md \u2014 SHIPS but is auto-loaded by nothing. Zero in-repo references from any persona or skill. It is a manual lookup, not session context."
+        ],
+        "does_the_ruling_still_hold": "Yes, on a narrower basis. The strongest case is the persona and the catalog, which are read every session. TROUBLESHOOTING.md is the weakest of the three and would be a reasonable one to re-suppress if it proves noisy \u2014 but not before the noise has actually appeared."
+      }
+    },
+    {
+      "date": "2026-10-13",
+      "what": "Removed all 5 allowlist entries for .agents/scripts/test_security_mutation.js after moving its SEED_PAYLOADS into evals/security/mutation-payloads.json",
+      "why": "Unlike the agent-context docs, this file is an inert harness - referenced by no persona and no skill. But it SHIPS, and per-rule-per-file suppression made any new real payload in it invisible. The payloads are adversarial fixtures and evals/security/** is the tree the scanner already excludes for exactly that reason.",
+      "verified": "Runner behaviour identical after the move: 64 mutations, 56 detected (87.5%), PASS, exit 0.",
+      "CORRECTION_2026-10-13": "The original entry said the script \"SHIPS\". Measured by @qa-engineer, who built the tarball: it does not. .agents/scripts/.npmignore lists it as a repo/CI-only script, and tests/cli/packaging.test.js:79 asserts it is absent from the tarball. The action is still right \u2014 per-rule-per-file suppression made a new payload in that file invisible regardless of shipping \u2014 but the recorded reason was wrong."
+    }
   ]
 }
