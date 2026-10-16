@@ -153,6 +153,14 @@ Map the user journey and identify drop-off points:
 
 ## 5. Dashboard Specifications
 
+**This section names WHICH metrics to watch. The buildable spec is a separate artifact:**
+`artifacts/output/03-strategy/dashboard-specs.md` (`.agents/templates/quality/dashboard-specs-template.md`).
+
+They were the same document, and neither worked: a metric list here has no chart, source, query or
+layout, so nobody could build from it — and `dashboard-specs.md`, named only as an *optional* aside in
+the persona's Outputs table, had no defined home at all. Keep the metric selection here; put the
+panels, sources, queries and layout there.
+
 ### 5.1 Real-Time Monitoring
 Metrics that need immediate visibility:
 

@@ -66,6 +66,24 @@ function stripFencedBlocks(text) {
   return text.replace(/```[\s\S]*?```/g, '');
 }
 
+/**
+ * Every `artifacts/...` path the skill MENTIONS — which is not the same as the paths it WRITES.
+ *
+ * RECORDED LIMIT (found 2026-10-16, while regenerating the catalog after a skill deletion). This
+ * harvests the whole body by regex, so a skill that READS a file publishes it as an output:
+ * `/analyze-data` Mode 2 says "Load product requirements (`artifacts/output/03-strategy/requirements.md`)"
+ * and the catalog therefore claimed analyze-data PRODUCES requirements.md. A manual correction to the
+ * generated file was reverted the moment this ran again — which is how the defect surfaced.
+ *
+ * Scoping the harvest to the skill's `## Output artifacts` section was tried and REJECTED: 17 of 40
+ * skills have such a section, and scoping would drop real outputs for at least three of the other 23 —
+ * `/incident` *creates* `08-incidents/INC-NNN/`, `/iterate` *writes* `iteration-adr.md`, `/motion`
+ * produces its research files, and none of the three lists them under an Output heading.
+ *
+ * A phantom output is a smaller error than a missing one: the first misleads a reader, the second
+ * breaks a consumer. So the superset stays, and the field means what it says here — paths mentioned.
+ * Fixing it properly needs a machine-readable output declaration in the skill, not a better regex.
+ */
 function extractOutputs(text) {
   const outputs = new Set();
   const pattern = /(?:artifacts\/output\/|artifacts\/memory\/)[a-zA-Z0-9_.\/-]+/g;

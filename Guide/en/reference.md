@@ -12,7 +12,7 @@ Every agent performs file reads, writes, and command runs directly with its own 
 
 - **Load** — `@memory-controller load <agent> [task]`: progressive 3-tier context (see Memory System Architecture)
 - **Write** — `@memory-controller write <file>`: schema-validated entries into `artifacts/memory/`
-- **Session** — every session ends with `@memory-controller session-write`: updates `session-summaries/latest.md` and pipeline state
+- **Session** — every session ends with `@memory-controller session-write`: updates `session-summaries/latest.md`, `session-summaries/history.md`, pipeline state, **and `artifacts/memory/project-context.md`** (the `## Session Activity` line plus Phase / Blockers / footer, via `syncProjectContext`)
 - **Fallback** — if `@memory-controller` is unavailable, read/write memory files directly with your own tools and note it in the session summary
 
 Memory files live in `artifacts/memory/` (`project-context.md`, `active-decisions.md`, `lessons-learned.md`).

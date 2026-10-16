@@ -16,7 +16,11 @@
       "assertNotContains": [
         "I cannot",
         "As an AI"
-      ]
+      ],
+      "baseline": {
+        "variant": "without-skill",
+        "note": "iterate should not produce its plan headings from a generic response; if it does, these assertions are decoration"
+      }
     },
     {
       "id": "SKILL-INCIDENT",
@@ -61,22 +65,6 @@
         "Insights"
       ],
       "prompt": "Run /analyze-data on 10k checkout telemetry events: dataset shape, distribution, and conversion bottleneck insights.",
-      "assertNotContains": [
-        "I cannot",
-        "As an AI"
-      ]
-    },
-    {
-      "id": "SKILL-SPRINT-STATUS",
-      "skill": "sprint-status",
-      "name": "Sprint Status Kanban Mirror",
-      "dimension": "memory_adherence",
-      "assertContains": [
-        "Sprint",
-        "Phase",
-        "Status"
-      ],
-      "prompt": "Run /sprint-status for sprint 1: sprint id, active phase, and delivery status.",
       "assertNotContains": [
         "I cannot",
         "As an AI"

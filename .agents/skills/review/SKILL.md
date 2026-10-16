@@ -42,7 +42,7 @@ Run git diff --name-only HEAD~1 (or appropriate range)
 
 ### Step 3: Orphan-AC sweep (02o parity)
 
-Run the same coverage sweep the in-loop reviewer runs at `develop` step 07, so a standalone review is not weaker than the in-loop one:
+Run the same coverage sweep the in-loop reviewer runs at `develop` **step 06a (fidelity review)**, so a standalone review is not weaker than the in-loop one:
 
 ```bash
 node .agents/scripts/req_to_impl_check.js
@@ -67,6 +67,31 @@ Return findings organized by severity:
 - **Nit:** Style/preferences
 
 Include specific file:line references for each finding. Open with one plain sentence stating the overall disposition and the blocking count (DNA 8), then the findings as what's-wrong → why-it-matters → consequence.
+
+## Halt conditions
+
+Any one halts the review and escalates to `@tech-lead`:
+- **No changes to review.** `git diff --name-only` over the chosen range returns nothing. A review of
+  an empty diff is a green with nothing behind it.
+- **A security finding rated Critical or High.** Report it and stop; do not continue the checklist
+  past it as though it were one finding among many.
+- **The orphan-AC sweep cannot run.** `req_to_impl_check.js` exits **2** in two cases, and both are
+  fail-closed rather than a pass: `artifacts/output/03-strategy/user-stories.md` is **absent**, or it
+  is present but contains **no `AC-###` ids at all** — a sweep over zero criteria is not a clean
+  sweep. Report that the sweep did not run; never omit it silently, because "no orphan ACs" and "the
+  sweep never ran" read identically in a report that does not say which happened.
+
+## Done when
+
+- Every changed file reviewed against the five axes in Step 4
+- Every finding carries a `file:line` reference
+- The orphan-AC sweep has either reported its result **or** reported that it could not run
+- The report opens with the disposition sentence and the blocking count (DNA 8)
+- `@memory-controller session-write` has run
+
+**Not gated mechanically, and stated rather than implied.** This skill produces a *review*, not an
+artifact, so there is nothing on disk for a checker to read. Whether the review was thorough is a
+human judgement — the same limit `/code-reviewer` carries in the `develop` loop.
 
 ## State machine integration
 

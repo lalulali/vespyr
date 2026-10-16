@@ -602,7 +602,6 @@ These skills form the backbone of the product development lifecycle. Skills like
 |-------|-------|----------------|--------------------------|
 | `help-me` | Any | Harness (Direct) | Dynamic project navigator, phase readiness check, and command recommendations |
 | `status` | Any | @product-manager | Quick snapshot of project state, active phase, blockers, memory health |
-| `sprint-status` | Any | @product-manager, @tech-lead | Visualizes `sprint-status.yaml` pipeline state as an interactive Kanban table |
 | `phase` | Any | @product-manager | Display current phase, switch active phase, list phase artifacts |
 | `review` | Any | @code-reviewer | Standalone code review on current changes outside full development loop |
 | `test` | Any | @qa-engineer | Run test suite, summarize failures, enrich acceptance criteria, QA report |

@@ -4,7 +4,7 @@ description: Legal and compliance safety audit for an app so it does not get sue
 metadata:
   version: "1.0"
   last_updated: "2026-09-30"
-allowed-tools: Read Grep Glob
+allowed-tools: Read Grep Glob AskUserQuestion
 ---
 
 # Legal Safety Audit — compliance drafts + app audit
@@ -59,7 +59,7 @@ It orchestrates existing agents rather than re-implementing their expertise: `@t
 
 ### Step 0 — Region + app-profile gate (non-skippable)
 
-1. Resolve **region(s)** — ask the user where their users are. Load the matching regime(s) from `references/jurisdiction-map.md`. Multi-region loads the union. Do not assume a default (G3).
+1. Resolve **region(s)** — ask the user where their users are. This is why the frontmatter declares a question tool: a harness that reads `allowed-tools` restricts the skill to what it declares, and this step cannot be skipped by guessing — the wrong region produces the wrong jurisdiction's documents. Load the matching regime(s) from `references/jurisdiction-map.md`. Multi-region loads the union. Do not assume a default (G3).
 2. Capture the **app profile** via the intake in `references/applicability-map.md` (platform, monetization, audience, email, SDKs, reviews, sector, size).
 3. Corroborate the profile with **code inspection** — grep dependency manifests for analytics/ad SDKs, look for payment integrations, forms, age gates, deletion endpoints. Where code and interview disagree, trust code and flag it (D6).
 

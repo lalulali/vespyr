@@ -64,7 +64,6 @@ Vespyr organizes complex operations into atomic skills. Each skill is a folder w
 |---------|-------------|
 | `/help-me` | Conversational project navigator and co-pilot |
 | `/status` | Quick snapshot of current project state |
-| `/sprint-status` | Display pipeline status as an interactive Kanban table |
 | `/phase` | Show/switch phases and list phase artifacts |
 | `/kanban` | Display and update Kanban board |
 | `/memory` | Search archived project context |

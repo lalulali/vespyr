@@ -56,20 +56,23 @@ If not initialized, fall back to reading `artifacts/memory/project-context.md` f
 
 ### Step 2: Report
 
-Return a concise report reflecting the active pipeline state:
+Answer the question asked, and do not re-render the snapshot.
+
+**If the user asked "what phase are we in?"** — say the phase, its status, and the next action:
 
 ```
-## Current Phase: {phase name (validation / discovery / research / strategy / architecture / planning / execution / launch / iteration / documentation / retro)}
-**Active Phase:** {phase from pipeline-state.json}
-**Phase Status:** {status from pipeline-state.json's phases[phase]}
-**Operation Mode:** {from project-context.md}
-
-### Artifacts Produced
-{list of artifacts and their versions in the current phase from pipeline-state.json's artifacts mapping}
-
-### Next Phase Action
-{Run `node .agents/scripts/orchestrator_state.js next` to show the next logical action}
+## Current Phase: {phase name}
+**Status:** {status from pipeline-state.json's phases[phase]}
+**Next:** {Run `node .agents/scripts/orchestrator_state.js next`}
 ```
+
+**If the user asked "what's been produced?"** — list the current phase's artifacts and versions.
+
+**For anything wider** — blockers, change requests, the last session, memory health, artifacts across
+*all* phases — **point at `/status` rather than restating it.** This skill used to render a full report
+whose every field `/status` already produces, in a different shape, from the same file. Two renderings
+of one source drift, and a reader cannot tell which is current. `/status` is the snapshot; this skill
+owns exactly one thing it does not: **switching the phase** (Step 3).
 
 ### Step 3: Switch phase (on request)
 

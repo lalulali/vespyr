@@ -77,6 +77,32 @@ test("RT-P2-3 follow-up: orphaned coverage fixtures are pinned, not dead", () =>
 
 // --- 02r: point-coverage canon shared across discussion surfaces ---
 
+test("a skill that must ASK declares a question tool — the declaration must grant what the body requires", () => {
+  // Found 2026-10-16 on /shut-up and /legal-safety-audit. Both instruct the agent to ask the user —
+  // /shut-up for destructive-command confirmation, /legal-safety-audit to resolve the region before
+  // drafting any legal document — while declaring `allowed-tools` WITHOUT a question tool. In the one
+  // harness that reads that field, the skill is declared as not permitted to ask, so the step the
+  // skill treats as mandatory is unenforceable.
+  //
+  // Scope: only skills that declare `allowed-tools` at all. The other 37 make no declaration, so
+  // there is nothing to be inconsistent with.
+  const dir = path.join(__dirname, '..', '.agents', 'skills');
+  const offenders = [];
+  for (const s of fs.readdirSync(dir)) {
+    const f = path.join(dir, s, 'SKILL.md');
+    if (!fs.existsSync(f)) continue;
+    const src = fs.readFileSync(f, 'utf8');
+    const m = src.match(/^allowed-tools:\s*(.+)$/m);
+    if (!m) continue;
+    const tools = m[1];
+    const asks = /ask the user|confirmation prompt|question tool/i.test(src);
+    const declares = /AskUserQuestion|\bquestion\b/i.test(tools);
+    if (asks && !declares) offenders.push(s);
+  }
+  assert.deepStrictEqual(offenders, [],
+    `these skills require asking the user but do not declare a question tool: ${offenders.join(', ')}`);
+});
+
 test("02r: the skills that enumerate points cite the point-coverage canon", () => {
   // grill-me left this list 2026-10-14 (owner ruling): it returned to the original's thinking-tool
   // framing and no longer enumerates subject points. A skill must not cite a canon it does not

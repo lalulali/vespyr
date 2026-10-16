@@ -127,8 +127,8 @@ Based on results, what should happen next?
 
 ## 9. Next Steps
 
-- **Positive signal on most hypotheses** → Continue `product-iteration` cycle
-- **Mixed results, need design revision** → Load `product-iteration` with updated backlog
+- **Positive signal on most hypotheses** → Continue `/iterate` cycle
+- **Mixed results, need design revision** → Load `/iterate` with updated backlog
 - **Negative signal, need bigger rethink** → Load `product-design` for redesign
 - **Process deserves review** → Load `retrospective`
 

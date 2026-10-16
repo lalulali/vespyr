@@ -62,6 +62,22 @@ const FENCE_RE = /^\s*(`{3,}|~{3,})/;
 // wireframes, trees, or terminal simulations (DNA 6 permits those). Outside
 // one they are a rendering leak.
 const BOX_GLYPH_RE = /[─-╿▀-▟█░▓]/;
+
+/**
+ * Harness-neutrality checks (2026-10-16).
+ *
+ * A skill's BODY is executed by whatever agent product is running it; its frontmatter is a declaration
+ * a harness may or may not read. So the body must name CAPABILITIES, never tools — a name that resolves
+ * under one product points at nothing under another. Rules and reasoning:
+ * `.agents/skills/create-skill/references/harness-neutrality.md`. This is the mechanical half.
+ *
+ * The exemption is narrow and deliberate: `create-skill` is the skill whose JOB is to name these
+ * anti-patterns, so its body quotes them as examples of what not to write. A checker that cannot tell
+ * an instruction from a warning about the instruction would forbid the documentation of its own rule.
+ */
+const HARNESS_TOOL_RE = /\b(?:AskUserQuestion|present_files|TodoWrite|WebSearch|WebFetch)\b/;
+const HARNESS_BIN_RE = /\b(?:claude\s+-p|claude\s+--print|codex\s+(?:exec|run)|cursor-agent|gemini\s+-p)\b/;
+const NEUTRALITY_EXEMPT = new Set(['create-skill']);
 const WHEN_HEADING_RE = /^#{1,3}\s*(when to use|when to invoke|how to invoke|when to use this)/im;
 const WHAT_HEADING_RE = /^#{1,3}\s*what this skill does/im;
 const HALT_HEADING_RE = /^#{1,3}\s*halt conditions/im;
@@ -485,6 +501,47 @@ function checkBodyStructure(skillDir, dirName, data, body, report) {
     report.errors.push(
       `${dirName}: phantom resource reference "${bad.ref}" — no such file under .agents/`
     );
+  }
+
+  // --- harness neutrality -----------------------------------------------------------------------
+  if (!NEUTRALITY_EXEMPT.has(dirName)) {
+    // Tool names are checked in PROSE — outside fenced blocks, where an instruction lives rather than
+    // an example of one.
+    let inFence = false;
+    body.split('\n').forEach((line, i) => {
+      if (FENCE_RE.test(line)) { inFence = !inFence; return; }
+      if (inFence) return;
+      const m = line.match(HARNESS_TOOL_RE);
+      if (m) {
+        report.errors.push(
+          `${dirName}:${i + 1}: body names the harness tool "${m[0]}" — name the CAPABILITY instead ` +
+          '("ask the user", "run the command"). A tool name that resolves on one product points at ' +
+          'nothing on another. See .agents/skills/create-skill/references/harness-neutrality.md'
+        );
+      }
+    });
+    // Product binaries are checked everywhere — a command can live inside a fence.
+    body.split('\n').forEach((line, i) => {
+      const m = line.match(HARNESS_BIN_RE);
+      if (m) {
+        report.errors.push(
+          `${dirName}:${i + 1}: command requires the product binary "${m[0].trim()}" — it runs on no ` +
+          'other harness. Say what the call is FOR and let the harness supply it.'
+        );
+      }
+    });
+    // A rule that needs a question tool must have the declaration to grant it.
+    const allowed = data && typeof data['allowed-tools'] === 'string' ? data['allowed-tools'] : null;
+    if (allowed) {
+      const asks = /ask the user|confirmation prompt|question tool/i.test(body);
+      const declares = /AskUserQuestion|\bquestion\b/i.test(allowed);
+      if (asks && !declares) {
+        report.errors.push(
+          `${dirName}: the body requires asking the user but \`allowed-tools\` (${allowed}) declares ` +
+          'no question tool — in the harness that enforces the field, the rule is unenforceable'
+        );
+      }
+    }
   }
 
   // Step files carry resource references too, and they are where contract drift hides

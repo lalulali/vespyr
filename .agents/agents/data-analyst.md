@@ -332,5 +332,7 @@ See [GUARDRAILS.md](../GUARDRAILS.md) for the full guardrails specification that
 | Artifact | Location |
 |----------|----------|
 | Measurement plan | `artifacts/output/03-strategy/measurement-plan.md` |
-| Dashboard specs | Within measurement plan or separate `artifacts/output/03-strategy/dashboard-specs.md` |
+| Analytics insights (post-launch analysis, Mode 1) | `artifacts/output/07-iteration/analytics-insights.md` |
+| Dashboard specs (buildable: target, panels, sources, queries, charts) | `artifacts/output/03-strategy/dashboard-specs.md` |
+
 | Data dictionary | Within measurement plan |

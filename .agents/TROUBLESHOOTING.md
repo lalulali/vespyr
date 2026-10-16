@@ -253,6 +253,27 @@ If the chunk is in the archive (was compacted), use search instead:
 
 ---
 
+## A skill fails `spec_check.js` with an error you do not recognise
+
+**Problem:** `node .agents/scripts/spec_check.js` reports a violation on a skill you just wrote or edited. The document has never had a skill-authoring section, so the newer checks are explained nowhere.
+
+**Fix:** match the message to the cause.
+
+| Message | Cause | Fix |
+|---|---|---|
+| `body names the harness tool "X"` | The instruction names a product's tool — `AskUserQuestion`, `present_files`, `TodoWrite`. That name resolves on one harness and points at nothing on another, where the same capability is called something else | Name the **capability**: "ask the user", "run the command". Frontmatter (`allowed-tools`) may carry the name — it is a declaration; the body must not depend on it. Rules: `.agents/skills/create-skill/references/harness-neutrality.md` |
+| `command requires the product binary "claude -p"` | A command block starts with a product's CLI, so it runs nowhere else | Say what the call is **for** and let the harness supply it |
+| `the body requires asking the user but \`allowed-tools\` … declares no question tool` | The skill instructs the agent to ask while declaring a toolset that forbids it. In the one harness that enforces the field, the rule is unenforceable | Add the question tool to `allowed-tools`, or drop the declaration entirely — most skills declare neither and work |
+| `phantom step link — steps/X.md is cited but not on disk` | A citation names a filename that does not exist | Fix the citation to the real file. A phantom link makes the agent load nothing and report a false pass |
+| `unreachable step file steps/X.md` | A file in `steps/` that no citation path reaches | Cite it from the router, or delete it. A contract nothing loads reads as coverage that does not exist |
+| `non-standard top-level key "version"` | Only `name`, `description`, `license`, `compatibility`, `metadata`, `allowed-tools` are allowed | Move it under `metadata:` |
+| `phantom resource reference "references/x.md"` | A cited path does not exist — **including one written as an illustration**. The checker cannot tell an example from a citation | Write the example as a description ("an AWS file, a GCP file"), not as a path |
+| `metadata.last_updated missing` | The metadata block needs it | Add `last_updated: "YYYY-MM-DD"` |
+
+**Prevention:** run `spec_check.js` after every skill edit, not at the end — it takes a second and the messages name the file and line. `create-skill` Step 5 and `customize-skill` Step 5 both require 0 violations and 0 warnings.
+
+---
+
 *Canonical source files:*
 - *Workflow orchestration:* `workflow.md`
 - *Guardrails:* `GUARDRAILS.md`

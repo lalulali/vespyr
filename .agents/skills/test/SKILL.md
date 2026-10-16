@@ -21,7 +21,7 @@ For eval-bearing tracks (judge prompts, scoring rubrics, benchmark suites, harne
 - Steps 02a and 02b are parallelizable but both must complete before step 03.
 - Each step file is a contract. Read it fully before executing.
 - **Coverage sweep (02o):** every failure summary (feature and full-cycle) runs `node .agents/scripts/req_to_impl_check.js` and lists orphan ACs. An unreferenced AC is a defect, not a detail — cite the sweep in the test report and qa-signoff (honestly labeled prose; the phase-advance refusal mechanism is a separately filed defect).
-- **Metric validation (when `artifacts/output/03-strategy/measurement-plan.md` exists):** verify the declared success metrics are actually instrumented before certifying; an uninstrumented success metric is a coverage gap, not a pass.
+- **Metric validation (when `artifacts/output/03-strategy/measurement-plan.md` exists):** verify the declared success metrics are actually instrumented before certifying; an uninstrumented success metric is a coverage gap, not a pass. **The plan must conform first** — run `node .agents/scripts/analyze_data_check.js check --kind measurement-plan --file artifacts/output/03-strategy/measurement-plan.md --json`. A plan whose metric rows carry no target number declares nothing to instrument, so the sweep has nothing to check against. If a dashboard is in scope, `--kind dashboard-specs` on `artifacts/output/03-strategy/dashboard-specs.md` tells you which panels claim to display each metric.
 
 ## When to use
 - "Run the tests"

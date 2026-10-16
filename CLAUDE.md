@@ -163,7 +163,6 @@ Vespyr organizes complex, multi-agent operations into highly structured **skills
 *   `/customize-agent` — Guided authoring flow for agent customization — describe intent, map to override fields, write TOML, and verify it works
 *   `/elicitation` — Push the LLM to reconsider, refine, and improve its recent output (Socratic, first principles, pre-mortem, red team)
 *   `/round-table` — Orchestrate group discussions between Vespyr agents — real subagents with independent thinking
-*   `/sprint-status` — Display and update the sprint-status.yaml pipeline state as a Kanban table
 
 ---
 
@@ -248,7 +247,7 @@ Every agent session MUST end with a `@memory-controller session-write`. Agents t
 
 The two canonical paths for persistence:
 - **Via subagent (preferred):** `@memory-controller session-write [agent: @{agent-name}]` — delegates to the memory controller subagent for full validation + dedup.
-- **Via script (direct):** `node .claude/scripts/orchestrator_state.js session-write --agent {agent-name} --worked-on "..." --decisions "..." --next-step "..."` — writes directly to `session-summaries/latest.md` and `pipeline-state.json`.
+- **Via script (direct):** `node .claude/scripts/orchestrator_state.js session-write --agent {agent-name} --worked-on "..." --decisions "..." --next-step "..."` — writes five targets: `session-summaries/latest.md`, `session-summaries/history.md`, `artifacts/output/pipeline-state.json`, `artifacts/output/sprint-status.yaml` (its display mirror), and `artifacts/memory/project-context.md` (the `## Session Activity` line plus Phase / Blockers / footer, via `syncProjectContext`).
 
 The orchestrator emits a warning when `--check-memory` is set and no session-write has been recorded for the agent. Agents must treat this warning as a prompt to persist their session before completing.
 

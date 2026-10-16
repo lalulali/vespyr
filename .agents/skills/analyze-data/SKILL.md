@@ -110,7 +110,7 @@ Partner directly with `@product-manager` to define product metrics, driver trees
   1. *Business Objective*: Core purpose of the feature/product.
   2. *Goals*: Specific strategies supporting the objective.
   3. *KPIs*: Measurable metrics tracking each goal.
-  4. *Targets*: Explicit quantitative success benchmarks (e.g., $> 20\%$ weekly active usage).
+  4. *Targets*: Explicit quantitative success benchmarks (e.g. above 20% weekly active usage).
   5. *Segments*: Key user cohorts to analyze.
 
 #### Step 2: Construct Metric Drivers Tree
@@ -133,8 +133,8 @@ graph TD
 
 #### Step 3: Guardrail & Counter Metrics
 Pair every primary KPI with a guardrail metric to catch negative side effects:
-- *Primary KPI*: Increase free trial conversions $\rightarrow$ *Guardrail*: 30-day refund / chargeback rate.
-- *Primary KPI*: Reduce onboarding completion time $\rightarrow$ *Guardrail*: Profile completion accuracy rate.
+- *Primary KPI*: increase free trial conversions → *Guardrail*: 30-day refund / chargeback rate.
+- *Primary KPI*: reduce onboarding completion time → *Guardrail*: profile completion accuracy rate.
 
 #### Step 4: Telemetry Tracking Plan & Data Dictionary
 Produce an implementation-ready specification for `@developer`:
@@ -147,12 +147,45 @@ Produce an implementation-ready specification for `@developer`:
 
 ## Output Artifacts & Delivery
 
-Write:
+Both artifacts have a **template on disk**, and this skill referenced neither of them. The templates
+are 293 and 160 lines of declared structure; a run that never opened one produced an artifact with
+whatever shape it invented, and nothing noticed.
 
-1. **For General Data Analysis & Insights**:
-   - Location: `artifacts/output/07-iteration/data-analysis-report.md`
-2. **For PM Metric Strategy & Tracking Plans**:
-   - Location: `artifacts/output/03-strategy/measurement-plan.md`
+| Mode | Write to | Template to follow |
+|---|---|---|
+| **Mode 1** — general analysis & insights | `artifacts/output/07-iteration/analytics-insights.md` | `.agents/templates/quality/analytics-insights-template.md` |
+| **Mode 2** — PM metric strategy & tracking plan | `artifacts/output/03-strategy/measurement-plan.md` | `.agents/templates/quality/measurement-plan-template.md` |
+| **Dashboard wire** — when a dashboard is wanted | `artifacts/output/03-strategy/dashboard-specs.md` | `.agents/templates/quality/dashboard-specs-template.md` |
+
+### The wire from data to dashboard
+
+There was none. `measurement-plan-template.md` §5 says **which metrics** to watch;
+`analytics-insights-template.md` says **what the data showed**; sub-flow 3 below maps data shapes to
+chart types. None of the three could be built from — a dashboard spec contained a metric list and no
+chart, no source, no query, no layout, and `dashboard-specs.md` was named in exactly one place with
+nothing reading it.
+
+**Produce `dashboard-specs.md` whenever a dashboard is the ask** — the user says "dashboard", a panel
+set is wanted for ongoing monitoring, or sub-flow 3's encoding output has somewhere to go. The
+template declares a **target** (`grafana | metabase | looker | superset | in-app | sql-only | other`)
+and then carries the fields every target needs: panel, metric, source, query or definition, chart,
+layout, owner. `Query / definition` is PromQL in one target and a Metabase question ID in another —
+which is why the target is named first and the template picks no vendor for you.
+
+**The chart column is where sub-flow 3 lands.** The Encoding Matrix below is not advice that stays in
+this skill: each panel in the spec names the chart its data shape takes, so the mapping decided during
+analysis is the mapping the builder implements.
+
+**In-app dashboards do not stop here.** If the target is `in-app`, hand the spec to `/design` — the
+panels become screen states and the queries become data-layer work — and `/develop` builds it. Every
+other target is configured by `@devops-engineer` from the same tables, with no code shipped.
+
+**The Mode 1 path is `analytics-insights.md`, not `data-analysis-report.md`.** This skill used to name
+the second. Nothing read it: the template's own header says *"Save to:
+`artifacts/output/07-iteration/analytics-insights.md`"*, and `iteration-backlog-template.md`,
+`iteration-results-template.md`, `/iterate` and the agent contracts all consume that name. A run under
+the old path produced an artifact **the next skill in the pipeline could not find** — the analysis was
+done and the iteration loop never saw it.
 
 Save key measurement decisions to shared memory via `@memory-controller`:
 ```
@@ -161,3 +194,50 @@ Save key measurement decisions to shared memory via `@memory-controller`:
 {Key metric selection, visual spec, or telemetry decision}
 **Status:** active
 ```
+
+## Halt conditions
+
+Any one halts the run:
+- **Mode 2 with no requirements document.** Step 1 loads
+  `artifacts/output/03-strategy/requirements.md` or a PRD. If neither exists, say so and ask for the
+  business objective — a measurement plan built on a guessed objective measures the wrong thing.
+- **A metric audit with no decision to change.** The "So What?" test is the skill's own centrepiece:
+  if a 20% change in the number changes no decision, the honest output is "this is a vanity metric",
+  not a dashboard spec.
+- **Analysis with no denominator.** A rate without its sample size cannot be reproduced. State `n`,
+  or state that it is unknown.
+
+## Done when — checked mechanically
+
+```bash
+node .agents/scripts/analyze_data_check.js check \
+  --kind measurement-plan --file artifacts/output/03-strategy/measurement-plan.md --json
+node .agents/scripts/analyze_data_check.js check \
+  --kind insights --file artifacts/output/07-iteration/analytics-insights.md --json
+```
+
+| Rule | What is checked |
+|---|---|
+| **Template conformance** | the sections the template declares are present, matched by stem so numbering and `vs.` / `vs` do not defeat it. Conditional sections (`if applicable`) are not required |
+| **Record hygiene** | no unfilled template placeholders — an artifact still carrying `[Feature Name]` is the template |
+| **A metric carries a number or says it does not** | a target with no number is a wish. `n/a` is accepted *with a reason*; a bare blank is not |
+| **No decision-less dashboard** | the "So What?" action map is present: an observation, an insight and an action, not three observations |
+
+And the dashboard wire:
+
+```bash
+node .agents/scripts/analyze_data_check.js check \
+  --kind dashboard-specs --file artifacts/output/03-strategy/dashboard-specs.md --json
+```
+
+| Rule | What is checked |
+|---|---|
+| **Target declared** | `**Target:**` names one of the closed set, or `other: <name>`. An unnamed target cannot be built from — the same field is PromQL or a question ID depending on it |
+| **Live object field** | present, even when it reads `not yet built`. A spec with no field for the finished object is a spec that will be lost |
+| **Every panel is buildable** | each panel row names a **metric, a source, a query or definition, and a chart**. A row missing any of the four is a wish with a title |
+| **Alerts when real-time** | a spec with `Refresh: real-time` must carry an alert threshold and a channel. A real-time panel with no threshold is a screen nobody watches |
+| **Access named** | every data source names its access level. A spec that does not say who can read the data has not been designed, only drawn |
+
+**What the gate does not check:** whether the metric is the right metric, whether the analysis is
+sound, whether the visualization is honest, or whether the recommendation follows from the data.
+Those need an analyst. A green gate means the artifact is *structured*, not that it is *right*.

@@ -23,7 +23,7 @@ evals/suites/
 │   ├── meta-authoring.json      teach-me, craft-lesson, create-agent, create-skill,
 │   │                            customize-agent, customize-skill, kanban, memory, phase,
 │   │                            retro, status, round-table, help-me, humanize, elicitation
-│   ├── operations.json          analyze-data, incident, iterate, sprint-status, legal-safety-audit
+│   ├── operations.json          analyze-data, incident, iterate, legal-safety-audit
 │   └── research.json            explore-idea, discovery-report, research-plan,
 │                                empathy-map, journey-map, jtbd
 ├── invariants/
@@ -186,3 +186,55 @@ node -e "console.log(require('./evals/suites/skills/<group>.json').benchmarks.le
   so the benchmark is either always-green (useless) or arbitrary (noise).
 - **Do not rewrite a whole suite file to add one benchmark.** Append. A
   concurrent uncommitted suite edit is a real failure mode in this repo.
+
+---
+
+## The `baseline` block — measuring the DIFFERENCE a skill makes
+
+A benchmark that only asks *"did the output contain X?"* cannot tell you whether the **skill** did
+anything. The agent produces output either way. What matters is the difference, so a benchmark may
+declare a control run:
+
+```json
+{
+  "id": "SKILL-ITERATE",
+  "skill": "iterate",
+  "prompt": "Run /iterate on onboarding telemetry...",
+  "assertContains": ["Gather Signal", "Hypothesis"],
+  "baseline": {
+    "variant": "without-skill",
+    "note": "the assertions should fail without the skill, or they measure the output"
+  }
+}
+```
+
+**What the runner does.** It executes the same prompt a second time with `skill: null` — a real
+adapter sees `baselineOf` and omits the skill context; the mock path falls through to the generic
+no-skill fixture, which is what "without the skill" means. It then compares **Tier-0**, because that
+is where `assertContains` / `assertNotContains` live.
+
+**The finding it produces.** If the assertions pass in *both* runs, they are **non-discriminating** —
+they hold whether or not the skill ran, so they are decoration on a benchmark rather than evidence
+about a skill. That check is the analyst pass Anthropic's skill-creator does by hand, mechanised.
+
+| Field | Meaning |
+|---|---|
+| `variant` | `without-skill` (a new skill) or `previous-version` (an existing one) |
+| `note` | why this baseline — read by a human, never by the checker |
+
+**The control does not enter the pass-rate denominator.** It is evidence *about* a benchmark, not a
+benchmark. The run reports:
+
+```json
+"baseline": {
+  "compared": 2,
+  "nonDiscriminating": 1,
+  "nonDiscriminatingIds": ["SKILL-EXAMPLE"]
+}
+```
+
+**`nonDiscriminating` is the number to act on.** Zero means every baseline declared so far is pulling
+its weight. Anything above zero names a benchmark whose assertions should be replaced.
+
+**Recorded limit.** The mock path compares two *canned* fixtures, so it exercises the mechanism, not
+the skill. A real comparison needs a real adapter. The run says which it was.

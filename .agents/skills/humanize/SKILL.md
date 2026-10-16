@@ -45,7 +45,7 @@ When given text to humanize:
 3. **Preserve meaning** - Keep the core message intact
 4. **Maintain voice** - Match the intended tone (formal, casual, technical, etc.)
 5. **Add soul** - Don't just remove bad patterns; inject actual personality
-6. **Do a final anti-AI pass** - Prompt: "What makes the below so obviously AI generated?" Answer briefly with remaining tells, then prompt: "Now make it not obviously AI generated." and revise
+6. **Do a final anti-AI pass** - the four-step audit in PROCESS steps 7-10. Do not restate it here; the two copies drifted apart the moment one of them was edited.
 
 ## Tone Selection
 
@@ -78,7 +78,17 @@ Common purpose → tone mappings:
 
 ### Ask the user only when the purpose is unclear
 
-If you **cannot** infer the content's purpose or context — the text is ambiguous, mixes registers, is a fragment, or could plausibly serve several audiences — ask once using `AskUserQuestion` (single choice, one question, no follow-ups). Present this menu:
+If you **cannot** infer the content's purpose or context — the text is ambiguous, mixes registers, is a fragment, or could plausibly serve several audiences — ask once, using whatever question tool this harness provides (single choice, one question, no follow-ups). Present this menu:
+
+> **Why the prose says "your harness's question tool" and the frontmatter names one.** The
+> `allowed-tools` field is spec-validated and harness-declared: it carries the Claude-family name for
+> that capability, a harness that reads the field gets the declaration, and one that ignores it loses
+> nothing. The BODY must not carry the name, because this engine also runs under OpenCode, where the
+> same capability is called something else, and under Cursor, Windsurf and Aider, where it is called
+> something else again. Ten other places in this repo say "ask the user" for exactly this reason; this
+> skill and `/round-table` were the only two that named a tool in their instructions.
+>
+> `spec_check.js` enforces this — see `.agents/skills/create-skill/references/harness-neutrality.md`.
 
 | Tone | What it sounds like |
 |---|---|
@@ -171,20 +181,21 @@ Fast path: grep the input for the `**Words to watch:**` lists before reading any
 
 ## Process
 
-1. **Determine the tone** — (a) If the user named a tone, use it. (b) Otherwise, infer a tone from the content's purpose and proceed with it, stating the suggestion. (c) Ask once via `AskUserQuestion` only if the purpose is genuinely unclear (see TONE SELECTION). Read the input text carefully
-2. Identify all instances of the patterns above
-3. Rewrite each problematic section
-4. Ensure the revised text:
+1. **Read the input text carefully.** This was the tail of step 1's tone clause, where it read as part of "(c) ask only if unclear" — an action with nothing to do with tone, sitting inside a tone sub-clause.
+2. **Determine the tone** — (a) If the user named a tone, use it. (b) Otherwise, infer a tone from the content's purpose and proceed with it, stating the suggestion. (c) Ask the user once, using your harness's question tool, only if the purpose is genuinely unclear (see TONE SELECTION).
+3. Identify all instances of the patterns above
+4. Rewrite each problematic section
+5. Ensure the revised text:
    - Sounds natural when read aloud
    - Varies sentence structure naturally
    - Uses specific details over vague claims
    - Matches the selected tone consistently (word choice, contractions, sentence rhythm)
    - Uses simple constructions (is/are/has) where appropriate
-5. Present a draft humanized version
-6. Prompt: "What makes the below so obviously AI generated?"
-7. Answer briefly with the remaining tells (if any)
-8. Prompt: "Now make it not obviously AI generated."
-9. Present the final version (revised after the audit)
+6. Present a draft humanized version
+7. Prompt: "What makes the below so obviously AI generated?"
+8. Answer briefly with the remaining tells (if any)
+9. Prompt: "Now make it not obviously AI generated."
+10. Present the final version (revised after the audit)
 
 ## Output Format
 

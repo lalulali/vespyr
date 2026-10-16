@@ -48,6 +48,27 @@ This skill delegates pedagogical strategy, objective framing, content sequencing
 - `knowledge-map.md` and all approved deliverables exist under `artifacts/output/teaching/`
 - Step 5's three audit vectors (style fidelity, jargon clarity, pedagogical alignment) have run and the user has confirmed the final summary
 
+### Checked mechanically — and the part that cannot be
+
+```bash
+node .agents/scripts/teaching_artifact_check.js check \
+  --kind knowledge-map --file artifacts/output/teaching/knowledge-map.md --json
+```
+
+| Rule | What is checked |
+|---|---|
+| **Record hygiene** | no unfilled template placeholders — a map still carrying `{...}` is the template |
+| **Bloom's tagging** | Phase 3 requires every objective tagged, and **at least three distinct tiers**. A map whose every objective sits at `[REMEMBER]` is a list, not a Prerequisites → Core → Advanced sequence |
+| **Takeaway anchors** | an "If Nothing Else, Remember This" anchor is present, as Phase 3 declares |
+| **Sequencing** | at least one of the three declared bands is named. Naming only one prints a note rather than failing, because section naming is the author's |
+
+**What no gate can check, stated rather than implied: whether you paused.** The centrepiece of
+Phase 4 is "generate ONE format, present it, PAUSE for approval, only then continue" — and a script
+cannot see a pause. What it can see is the evidence a pause leaves behind: one
+`orchestrator_state.js complete` call per approved format. **Verify that sequence by reading the
+milestone records, not by reading a green line here.** The gate checks the artifacts, never the
+approvals.
+
 ## 2 Input Modes
 
 1. **Mode 1: Topic-Only (Research Path)**
@@ -109,7 +130,11 @@ flowchart TD
    - Establish the target audience profile upfront before doing ANY research or mapping.
    - **Step 1: Audience Scope**: Internal (Company/Team roles & topic level) vs. External (Public/Course target group & background).
    - **Step 2: Format-Specific Audience Mapping**: Determine if specific deliverable targets require audience differentiation (e.g., `handbook` for developers, `presentation` for executives, `cheatsheet` for architects).
-   - Load `artifacts/memory/teaching-style.md` via `@memory-controller`.
+   - Load `artifacts/memory/teaching-style.md` via `@memory-controller` and **use what it says**.
+     It already carries `Explanation Style`, `Primary Target Audience`, `Prerequisite Level`,
+     `Tone Style`, `Jargon Policy`, `Analogy Density` and per-format preferences. Present those as the
+     defaults and ask only for what the file does not answer — a load whose values are then re-asked
+     from the user is decoration, and it makes the learner answer the same question every run.
    - If `teaching-style.md` does NOT exist, run Guided Onboarding:
      - Prompt user for target audience profile & depth style (`Beginner`, `Intermediate`, or `Expert`).
      - Prompt user for preferred section patterns and default format selections.
@@ -252,4 +277,9 @@ Execute `step-05-review.md` (`.agents/skills/craft-lesson/steps/step-05-review.m
 - **Do NOT batch-produce all selected formats in one turn.** Generate one format, pause for human verification, and only continue after explicit approval. One at a time, always.
 - **Do NOT bypass Phase 3 Knowledge Map.** Formats MUST be generated from a single unified map, not ad-hoc per format.
 - **Do NOT mix explanation styles.** Maintain consistent style (Beginner vs Intermediate vs Expert) across all selected formats in a single run.
-- **Do NOT perform direct file writes from `@shifu`.** Always write files directly.
+- **Write files directly; do not delegate the write to a sub-agent.** This bullet used to read
+  *"Do NOT perform direct file writes from `@shifu`. Always write files directly"* — two opposite
+  instructions in one sentence, contradicting the Delegation Matrix above it, which lists
+  `Direct I/O` for Phases 2b, 3, 4 and 5. An agent following the first clause would route every
+  deliverable through `@memory-controller`; one following the second would write it itself. Both
+  cannot be the contract, so the matrix wins: `@shifu` writes, and only memory operations delegate.

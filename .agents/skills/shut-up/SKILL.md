@@ -2,7 +2,7 @@
 name: shut-up
 description: One-shot silent execution mode — executes tasks directly with zero unsolicited critique, no conversational filler, and ultra-minimal output. Use when the user says "shut up and just do it", "no commentary, just execute", "minimal output", or invokes /shut-up with scope already locked.
 compatibility: claude-code opencode kiro antigravity
-allowed-tools: Read Write Edit Grep Glob Bash
+allowed-tools: Read Write Edit Grep Glob Bash AskUserQuestion
 metadata:
   version: "1.0"
   last_updated: "2026-08-17"
@@ -33,12 +33,20 @@ When the requirements and scope are already locked, unsolicited Socratic feedbac
 ## Invariant Rules & Schema
 
 1. **Runtime Context Only:** `/shut-up` MUST NOT write flags or state to `project-context.md` or `active-decisions.md`.
-2. **Ultra-Minimal Output:** Responses must be ultra-minimal — direct edits and a single 1-line status summary only.
-3. **Schema Contract:** Output must contain ONLY:
+2. **Ultra-Minimal Output — the schema contract.** Output must contain ONLY:
    - Direct file edits (tool calls or diff blocks)
    - Exact shell command execution outputs
    - A single 1-line status summary
-4. **Destructive Safety Gate Exception:** If a requested command causes permanent data loss (e.g. `rm -rf`, `DROP TABLE`, uncommitted git wipe), the agent is permitted a single 1-line confirmation prompt before proceeding.
+
+   Rules 2 and 3 used to be separate and said the same thing: the old Rule 2 was a compressed
+   restatement of this list, missing only the shell-output line. One rule, stated once.
+3. **Destructive Safety Gate Exception:** If a requested command causes permanent data loss (e.g. `rm -rf`, `DROP TABLE`, uncommitted git wipe), the agent is permitted a single 1-line confirmation prompt before proceeding. **This is why the frontmatter declares a question tool** — the one harness that reads `allowed-tools` restricts the skill to what it declares, so a rule permitting a prompt is unenforceable under a declaration that forbids one. `/round-table` declared it; this skill did not, while being the only one of the two whose rules actually require asking.
+4. **The session-write still runs, and it DOES touch `project-context.md`.** Rule 1 forbids writing
+   *flags or state*; `session-write` writes an activity line and refreshes Phase / Blockers / footer
+   via `syncProjectContext`. Those overlap on one file, so — **the global rule wins. Run it.** Rule 1
+   is about *kind of write*, not *file*: `/shut-up` does not record itself as a mode or a flag.
+   *An earlier version of this rule claimed the two did not overlap at all. They do, and a claim that
+   a mechanism does not touch a file it touches is worse than no rule.*
 
 ## Response Template
 

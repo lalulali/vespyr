@@ -232,7 +232,7 @@ Run a health check to confirm all files are within thresholds:
 
 Based on retrospective findings:
 
-- **Continue iterating on this feature?** → Load `product-iteration` skill
+- **Continue iterating on this feature?** → Load the `/iterate` skill
 - **New features emerged from findings?** → Load `product-development` skill
 - **Strategic pivot needed?** → Load `product-exploration` skill
 - **Process changes only?** → Update memory and proceed with next cycle

@@ -12,7 +12,7 @@ Vespyr 的 20 个智能体分为三大功能类别（核心 Swarm、专门领域
 
 - **加载** — `@memory-controller load <agent> [task]`：渐进式三级上下文（见记忆系统架构）
 - **写入** — `@memory-controller write <file>`：经模式校验的条目写入 `artifacts/memory/`
-- **会话** — 每个会话以 `@memory-controller session-write` 结束：更新 `session-summaries/latest.md` 和流水线状态
+- **会话** — 每个会话以 `@memory-controller session-write` 结束：更新 `session-summaries/latest.md`、`session-summaries/history.md`、流水线状态，**以及 `artifacts/memory/project-context.md`**（通过 `syncProjectContext` 写入 `## Session Activity` 一行，并刷新 Phase / Blockers / 页脚）
 - **回退** — 若 `@memory-controller` 不可用，直接使用自己的工具读写记忆文件，并在会话摘要中注明
 
 记忆文件位于 `artifacts/memory/`（`project-context.md`、`active-decisions.md`、`lessons-learned.md`）。

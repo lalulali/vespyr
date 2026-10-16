@@ -35,8 +35,18 @@ describe('Skill /shut-up verification fixture', () => {
     assert.ok(content.includes('rm -rf'), 'Must explicitly mention destructive command examples');
   });
 
-  it('asserts zero persistent memory writing rule', () => {
+  it('pins Rule 1 — no flags or state — AND the rule that says the session-write still runs', () => {
+    // RENAMED 2026-10-16. This test was called "asserts zero persistent memory writing rule", which
+    // the skill no longer claims: `session-write` DOES touch `project-context.md` (measured — it
+    // appends the Session Activity line via syncProjectContext), and the skill now says so and says
+    // which rule wins. The old name asserted the opposite of the skill's own position while staying
+    // green, because it only checked that Rule 1's sentence was still present.
     const content = fs.readFileSync(skillPath, 'utf8');
-    assert.ok(content.includes('MUST NOT write flags or state to `project-context.md` or `active-decisions.md`'));
+    assert.ok(content.includes('MUST NOT write flags or state to `project-context.md` or `active-decisions.md`'),
+      'Rule 1 must survive — it forbids recording /shut-up itself as mode or state');
+    assert.ok(/session-write still runs/i.test(content),
+      'the rule that resolves the overlap must be present');
+    assert.ok(/global rule wins/i.test(content),
+      'and it must say which rule wins rather than leaving the reader to pick');
   });
 });

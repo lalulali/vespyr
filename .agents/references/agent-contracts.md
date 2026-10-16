@@ -102,7 +102,7 @@ Every frontmatter capability has exactly one row below with its own wiring. `tes
 | `@ux-researcher` | `usability-test-preparation` | `.agents/templates/research/usability-test-kit-template.md`, `.agents/skills/design/SKILL.md` |
 | `@ux-researcher` | `motion-usability-research` | `.agents/references/motion/motion-research-guide.md` |
 | `@data-analyst` | `telemetry` | `.agents/skills/analyze-data/SKILL.md`, `.agents/templates/quality/measurement-plan-template.md` |
-| `@data-analyst` | `dashboards` | `.agents/templates/quality/measurement-plan-template.md`, `.agents/templates/quality/analytics-insights-template.md` |
+| `@data-analyst` | `dashboards` | `.agents/templates/quality/dashboard-specs-template.md`, `.agents/templates/quality/analytics-insights-template.md` |
 | `@data-analyst` | `funnel-analysis` | `.agents/skills/analyze-data/SKILL.md`, `.agents/templates/quality/analytics-insights-template.md` |
 | `@data-analyst` | `experiment-design` | `.agents/skills/analyze-data/SKILL.md` |
 | `@data-analyst` | `data-analysis` | `.agents/skills/analyze-data/SKILL.md` |

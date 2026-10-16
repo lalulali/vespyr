@@ -1,3 +1,11 @@
+---
+metadata:
+  version: "2.6.0"
+  last_updated: "2026-09-30"
+  source_file: "https://github.com/blader/humanizer/blob/main/SKILL.md"
+  note: "The 29-pattern catalog is extracted from the upstream SKILL.md; the split into this file is local (02s)."
+---
+
 # AI Writing Patterns — the 29-pattern catalog
 
 Extracted verbatim from the upstream humanizer catalog by 02s so this skill body

@@ -1,7 +1,7 @@
 # Analytics Insights Template
 
 > **Used by:** Nova (@data-analyst)
-> **Feeds into:** Sarah (@product-manager), Sarah (@product-manager)
+> **Feeds into:** Sarah (@product-manager) for prioritisation, Iris (@researcher) for follow-up evidence
 > **Save to:** `artifacts/output/07-iteration/analytics-insights.md`
 
 Use this template to document post-launch analytics and user behavior data that informs iteration decisions.
@@ -132,6 +132,17 @@ Based on the data, what improvements should we test?
 
 ## 8. Recommendations
 
+### The "So What?" map
+
+`analyze-data/SKILL.md` Mode 1 sub-flow 4 declares an **Observation -> Insight -> Action** map, and the
+gate requires it. The template had no such block, so a template-faithful report could not pass the
+gate that checks it — the skill, the template and the checker disagreed. Fill all three lines; a label
+with no value is a heading, not a decision.
+
+- **Observation:** [what the data shows, with the number]
+- **Insight:** [why it is happening — the mechanism, not a restatement of the observation]
+- **Action:** [what changes as a result, and who owns it]
+
 ### Quick Wins (High impact, Low effort)
 1. [Recommendation 1]
 2. [Recommendation 2]
@@ -147,7 +158,7 @@ Based on the data, what improvements should we test?
 
 ## 9. Next Steps
 
-- [ ] Load `product-iteration` skill to act on these insights
+- [ ] Load the `/iterate` skill to act on these insights
 - [ ] @product-manager to prioritize iteration backlog based on hypotheses
 - [ ] @product-designer to design improvements for top hypotheses
 - [ ] Schedule next analytics review in [1/2/4 weeks]

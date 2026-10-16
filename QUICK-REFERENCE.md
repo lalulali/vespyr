@@ -19,7 +19,6 @@ Navigation:    /help-me [query]      (conversational navigator for project state
 Stress-test:   /grill-me             (Socratic alignment / Q&A pressure test)
 Elicit/refine: /elicitation          (Interactive output critique and improvement loop)
 Status:        /status               (Quick project state snapshot)
-Sprint state:  /sprint-status        (Pipeline state CLI Kanban table)
 
 PRIMARY AGENTS (by phase)
 ──────────────────────────────────────────────────
@@ -150,12 +149,12 @@ Socratic & Intelligence:
 Operations & Customization:
   /help-me             Conversational next-step navigator and co-pilot
   /status              Quick project state snapshot
-  /sprint-status       Pipeline state interactive CLI Kanban table
   /phase               Show/switch active phase & list phase artifacts
   /kanban              Interactive Kanban board display & updates
   /memory              Search archived project context & compacted memory
   /teach-me            Personal learning partner (Quick, Explain, Deep Dive)
   /craft-lesson        Multi-format educational content generator
+  /shut-up             One-shot silent execution mode (zero commentary, minimal output)
   /create-skill        Author new skills, modify workflows, create evals
   /customize-skill     Surgically customize existing skills (triggering, workflow, references)
   /create-agent        Author and register new agent personas

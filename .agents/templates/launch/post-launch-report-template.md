@@ -138,7 +138,7 @@ Use this template 24-72 hours after launch to document metrics, issues, and init
 
 ## 7. Next Steps
 
-- [ ] Load `product-iteration` skill to prioritize and address post-launch improvements
+- [ ] Load the `/iterate` skill to prioritize and address post-launch improvements
 - [ ] Load `retrospective` skill to review launch process (if major issues encountered)
 - [ ] Load `incident-response` skill if critical issues emerged (reference: INC-NNN)
 

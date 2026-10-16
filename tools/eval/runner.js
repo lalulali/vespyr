@@ -501,7 +501,11 @@ async function executeBenchmark(benchmark, options = {}) {
  * Runs a collection of benchmarks with concurrency control.
  */
 async function runEvaluation(options = {}) {
-  const suites = loadSuites(options.suite || "all");
+  // Testability seam (2026-10-16): a caller may supply benchmarks directly instead of loading the
+  // suite directory. `loadSuites` scans a fixed path, so before this a test of runner behaviour had
+  // to write a temporary suite INTO evals/suites/ and delete it — mutating the repository from inside
+  // the test suite, which is the hazard this repo's own test docs warn about.
+  const suites = options.benchmarks ? [{ data: { suite: "inline", benchmarks: options.benchmarks }, relPath: "inline" }] : loadSuites(options.suite || "all");
   let allBenchmarks = [];
 
   for (const s of suites) {
@@ -565,6 +569,64 @@ async function runEvaluation(options = {}) {
       if (index >= allBenchmarks.length) break;
       const benchmark = allBenchmarks[index];
       const res = await executeBenchmark(benchmark, options);
+
+      // ---- baseline comparison (2026-10-16) --------------------------------------------------
+      //
+      // WHY. A benchmark that only asks "did the output contain X" cannot tell you whether the
+      // SKILL did anything — the agent produces output either way. What matters is the DIFFERENCE
+      // the skill makes, so a benchmark may declare a `baseline` and the runner executes the same
+      // prompt a second time WITHOUT the skill, then compares.
+      //
+      // The control run is `{ ...benchmark, skill: null }`: a real adapter sees `baselineOf` and
+      // omits the skill context, and the mock path falls through to the generic no-skill fixture —
+      // which is exactly what "without the skill" means here.
+      //
+      // What it produces is the finding Anthropic's analyst pass looks for by hand: **assertions
+      // that pass in BOTH runs measure nothing.** They are decoration on a benchmark, and they are
+      // reported as such rather than counted as evidence.
+      //
+      // The control does NOT enter the pass-rate denominator. It is evidence about a benchmark,
+      // not a benchmark.
+      if (benchmark.baseline && typeof benchmark.baseline === "object") {
+        try {
+          const control = await executeBenchmark(
+            { ...benchmark, id: `${benchmark.id} [baseline]`, skill: null, baselineOf: benchmark.id, baseline: undefined },
+            options
+          );
+          // Compared on TIER-0, not the combined verdict. Tier-0 is where `assertContains` /
+          // `assertNotContains` live — the assertions this comparison is about. The combined
+          // `passed` also includes the Tier-1 rubric, which fails for any benchmark without one,
+          // so comparing it would have reported "discriminating" for every rubric-less benchmark
+          // whether or not the assertions did anything. Measured: a probe with `assertContains:
+          // ['MOCK']` showed tier0Passed true, passed false — the first version read that as a
+          // clean comparison and it was not one.
+          const nonDiscriminating = res.tier0Passed === true && control.tier0Passed === true;
+          // A THIRD state, found while wiring the worked example: when the WITH-skill run also fails
+          // its own Tier-0, there is nothing to compare — the assertions do not hold even with the
+          // skill, so the benchmark needs fixing before its baseline means anything. Reporting that
+          // as a clean `nonDiscriminating: 0` would read as "this baseline is pulling its weight"
+          // when in fact the comparison was never possible.
+          const inconclusive = res.tier0Passed !== true;
+          const discriminating = res.tier0Passed === true && control.tier0Passed !== true;
+          res.baseline = {
+            variant: benchmark.baseline.variant || "without-skill",
+            note: benchmark.baseline.note || null,
+            passed: control.passed === true,
+            tier0Passed: control.tier0Passed === true,
+            withSkillTier0Passed: res.tier0Passed === true,
+            nonDiscriminating,
+            discriminating,
+            inconclusive,
+            reason: nonDiscriminating
+              ? "these assertions pass WITH and WITHOUT the skill — they measure the output, not the skill"
+              : inconclusive
+                ? "the assertions do not hold even WITH the skill — fix the benchmark before its baseline means anything"
+                : null,
+          };
+        } catch (e) {
+          res.baseline = { variant: benchmark.baseline.variant || "without-skill", error: String(e.message || e) };
+        }
+      }
       results.push(res);
       if (options.failFast && !res.passed) {
         failFastStop = true;
@@ -598,6 +660,15 @@ async function runEvaluation(options = {}) {
   // prints so a reader can see the split instead of inferring it.
   const withOwnOutput = results.filter(r => r.outputSource && r.outputSource !== "canned").length;
   const fromCanned = results.length - withOwnOutput;
+
+  // Baseline comparison summary. A non-discriminating pair is the finding that matters: the
+  // benchmark's assertions held whether or not the skill ran, so the benchmark is not evidence
+  // about the skill. Reported here rather than left for a human to spot in the raw results.
+  const withBaseline = results.filter(r => r.baseline && !r.baseline.error);
+  const nonDiscriminating = withBaseline.filter(r => r.baseline.nonDiscriminating);
+  const discriminating = withBaseline.filter(r => r.baseline.discriminating);
+  const inconclusive = withBaseline.filter(r => r.baseline.inconclusive);
+  const baselineErrors = results.filter(r => r.baseline && r.baseline.error);
 
   // Token sums use LOCAL counts only (consistent units); provider figures
   // aggregate separately and never feed the inflation gate.
@@ -762,6 +833,22 @@ async function runEvaluation(options = {}) {
     unmeasuredDimensions,
     withOwnOutput,
     fromCanned,
+    // Baseline comparison: how many benchmarks ran a control, and how many of those controls
+    // showed the assertions pass whether or not the skill ran. `nonDiscriminating` is the
+    // number a reader should act on — those benchmarks are not evidence about their skill.
+    baseline: {
+      compared: withBaseline.length,
+      // The healthy case: the assertions hold WITH the skill and fail without it.
+      discriminating: discriminating.length,
+      discriminatingIds: discriminating.map(r => r.id),
+      // The finding: they hold either way, so they measure the output rather than the skill.
+      nonDiscriminating: nonDiscriminating.length,
+      nonDiscriminatingIds: nonDiscriminating.map(r => r.id),
+      // Not yet comparable: the benchmark does not pass on its own.
+      inconclusive: inconclusive.length,
+      inconclusiveIds: inconclusive.map(r => r.id),
+      errors: baselineErrors.map(r => ({ id: r.id, error: r.baseline.error })),
+    },
     benchmarks: results
   };
 }

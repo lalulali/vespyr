@@ -305,6 +305,25 @@ function cmdSweep(args) {
   }
 
   const acs = extractAcs(fs.readFileSync(storiesPath, 'utf8'));
+  // A stories file with NO acceptance criteria is a FAILURE, not a clean sweep.
+  //
+  // Found by blind review 2026-10-16 (@code-reviewer seat): the file existed, so the exit-2 guard
+  // above passed, `acs` was empty, the orphan loop ran zero times, and the gate printed
+  // `PASS — zero orphan ACs`. Measured: a stories file containing only a story title and a sentence
+  // exits 0, while the same file with one `AC-001` and no implementation exits 1.
+  //
+  // "Zero orphan ACs" and "there were no ACs to check" are indistinguishable in that output, and the
+  // second is the worse state — it means the coverage question was never asked. This is the same
+  // family as every other defect this audit has found: a green that means the check did not run.
+  if (!acs.length) {
+    console.error(
+      `req_to_impl_check: no acceptance criteria found in ${path.relative(root, storiesPath)}. ` +
+      'A sweep over zero ACs is not a pass — it means the coverage question was never asked. ' +
+      'Add AC ids (AC-001, or the AC-H/U/E families), or state that this project has no ' +
+      'acceptance criteria yet.'
+    );
+    process.exit(2);
+  }
   const files = collectFiles(root, targets, [storiesPath, reportPath]);
   const orphans = [];
   for (const ac of acs) {
