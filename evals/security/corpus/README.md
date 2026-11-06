@@ -11,7 +11,12 @@ Labeled attack fixtures for `security-scan.js`. Every rule has >=1 positive + >=
 - Every rule in `audit-spec.json` has >=1 positive fixture (in `positive/`) and >=1 negative fixture (in `negative/`).
 - Positive fixtures MUST produce a finding; negative fixtures MUST NOT (exit 0 on a negative-only scan).
 - Negative fixtures include: fake-harness name (must not match pattern table), low-entropy secret (regex matches, entropy < threshold -> NOT a finding).
-- Corpus files are scanned with `security-scan.js --dir evals/security/corpus --spec security/audit-spec.json`.
+- Corpus files are scanned with `security-scan.js --dir evals/security/corpus --spec evals/security/corpus-spec.json`.
+  **Not the release spec.** `security/audit-spec.json` declares an include-list product scope whose roots are this
+  engine's directories, so pointed at the corpus every walked path matches no product root and the scanner drops
+  the fixtures before a rule runs. Measured 2026-10-16 against the release spec: exit 2, `FAULT-5` on three
+  baseline JSONs at the repo root. Before the FAULT-5 backstop landed the same run was exit 2, `scanned 0 files`. The corpus tests the RULES; repo scope
+  policy is the release scan's job. `check_corpus_invariants.js` uses the corpus spec for this reason.
 
 ## Rule -> fixture map
 

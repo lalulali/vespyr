@@ -29,7 +29,13 @@ const path = require('path');
  */
 const ACQUIRE_GRACE_MS = 2000;
 const MAX_HOLD_MS = 60000; // max section duration before a waiter may steal
-const DEFAULT_TIMEOUT_MS = 30000;
+// Default wait before failing closed. Overridable ONLY so contention tests can prove
+// fail-fast behavior without sitting on the production 30s timeout. Production callers
+// pass no value and get the same 30s as before.
+const DEFAULT_TIMEOUT_MS = (() => {
+  const raw = Number(process.env.VESPYR_LOCK_TIMEOUT_MS);
+  return Number.isFinite(raw) && raw > 0 ? raw : 30000;
+})();
 const RETRY_DELAY_MS = 50;
 
 function sleep(ms) {

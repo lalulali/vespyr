@@ -1,12 +1,12 @@
 ---
 metadata:
-  version: "2.6.0"
-  last_updated: "2026-09-30"
+  version: "2.7.0"
+  last_updated: "2026-10-29"
   source_file: "https://github.com/blader/humanizer/blob/main/SKILL.md"
-  note: "The 29-pattern catalog is extracted from the upstream SKILL.md; the split into this file is local (02s)."
+  note: "The 29 upstream patterns + 4 Vespyr/Quirly Plain-Clarity & Anti-Circumlocution patterns (30-33); split into this file (02s)."
 ---
 
-# AI Writing Patterns — the 29-pattern catalog
+# AI Writing Patterns — the 33-pattern catalog
 
 Extracted verbatim from the upstream humanizer catalog by 02s so this skill body
 stays under the 500-line guideline. The operating rules (task, tone selection,
@@ -364,6 +364,52 @@ Bump `metadata.version` here and in `../SKILL.md` together when either changes.
 > ## Performance
 >
 > When users hit a slow page, they leave.
+
+---
+
+## PLAIN-WORD CLARITY & ANTI-CIRCUMLOCUTION PATTERNS
+
+### 30. Fancy / Pretentious Thesaurus Words (Sesquipedalian Slop)
+
+**Words to watch:** utilize/utilization (use), commence (start), endeavor (try), ascertain (find out), elucidate (explain), ameliorate (fix/improve), exacerbate (worsen), ubiquitous (everywhere/common), myriad/plethora (many), ephemeral (brief), juxtaposition (contrast), dichotomy (split), cognizant (aware), facilitate (help), paramount (first/vital), quintessential (classic), multifaceted (complex), conundrum (problem), labyrinthine (twisting), inexorable (unstoppable), coalesce (gather/merge), disseminate (spread), subsequently (later/then), furthermore/moreover (also)
+
+**Problem:** LLMs frequently substitute ornate, academic, or Latinate words where a short, everyday word hits harder and is immediately understood.
+
+**Before:**
+> We endeavored to utilize the ubiquitous caching layer to ameliorate the latency conundrum and facilitate faster page loads.
+
+**After:**
+> We used the shared cache to fix the latency problem and speed up page loads.
+
+### 31. Circumlocution & Circling Around the Point (Zombie Nominalizations)
+
+**Words to watch:** came to the realization that, made a decision to, in the process of, gave a nod, experienced a feeling of, exhibited a tendency to, at this point in time, due to the fact that, for the purpose of, in light of the fact that, with regard to, serves as an indication of
+
+**Problem:** AI talks *around* an action, emotion, or decision using multi-word noun wrappers ("zombie nouns") instead of stating what happened in one direct verb.
+
+**Before:**
+> The engineering team came to the realization that the queue was in the process of dropping messages, and made a decision to roll back the release.
+
+**After:**
+> The team realized the queue was dropping messages and rolled back the release.
+
+### 32. Foggy Abstraction (Explaining Simple Things in a Complicated Way)
+
+**Signs to watch:** Multi-clause sentences packed with abstract nouns (`institutionalization`, `methodologies`, `fragmentation`, `alignments`) where a reader has to read the sentence twice just to understand *who did what*.
+
+**Problem:** AI wraps simple actions or ideas in complicated, academic machinery. Every sentence must pass the **One-Read Windowpane Test**: the reader understands what happened or what the point is on the very first read.
+
+**Before:**
+> Organizations that institutionalize asynchronous communication protocols mitigate the cognitive fragmentation inherent in synchronous status alignments.
+
+**After:**
+> Teams that write updates down instead of calling status meetings get more deep work done.
+
+### 33. Wrong-Register Synonym Drift (Missing the Exact Word)
+
+**Signs to watch:** Decorative or "adjacent" synonyms that sound impressive on the surface but miss the exact physical, technical, or emotional truth.
+
+**Problem:** Trading accuracy for decoration confuses the reader. Always choose the single most accurate, concrete, everyday word that conveys the exact message.
 
 ---
 

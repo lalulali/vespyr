@@ -47,6 +47,42 @@ All notable changes to the Vespyr project will be documented in this file.
 - **`analyze_data_check.js`** — `/analyze-data` referenced neither of its own templates while `/design` and `/iterate` both did, and wrote to `data-analysis-report.md`, a path **nothing read**, while the template header, the iteration backlog, the results template and the contracts all consume `analytics-insights.md`. Three confirmation rounds found a crash on the templates' own conditional headings, an action map satisfied by empty labels, a target rule that accepted `Q3 2026`, and a header-only table that skipped the access check it exists to perform.
 - **`validation_record_check.js`** learned to read the `Signal` field instead of the whole body. The confound rule had been satisfied by the word `paid` in a Test line, and a record with the field deleted passed whenever the Verdict prose carried both directions.
 
+### Security (2026-10-17)
+
+- **INJ-SECRET missed 23-56% of random-shaped credentials** (@security-engineer, blind run 16): the
+  rule measured the window-MINIMUM entropy, so one repeated character anywhere suppressed the whole
+  credential. Fixed twice over: the statistic is now the window MAXIMUM **of the body after a bounded
+  strip** of the pattern's own fixed prefixes — the old greedy strip ate the leading letter run of the
+  secret body itself, which made the verdict depend on body composition and order (a model of it agreed
+    with the scanner on 61/61 tokens). Detection measured 99-100/100 per seeded branch; negatives and
+    order invariance enforced by a new seeded property test (`tests/test_inj_secret_detection.test.js`).
+- **The same change introduced a FALSE-POSITIVE class, and it is disclosed rather than left
+  unmentioned**: the maximum-window statistic is more sensitive AND more eager, so credential-SHAPED
+  PLACEHOLDERS whose value merely contains varied characters are now reported. Measured on 2026-10-22 by
+  FOUR independent seats, each on its own corpus of realistic placeholders: 2/24, 7/13, 18/25 and
+  21/25 reported — a span of 8% to 84%, and a property of the corpus rather than of the rule. The consequence is the part that
+  matters: the only remedy is a per-FILE allowlist entry, and silencing a placeholder in a file also
+  silences a live key in that file. The owner's ruling covered the MISS rate, not this class, so it is an
+  open owner item and not folded into the accepted residual.
+- **The launch gate shipped records that declined to ship**: a go/no-go verdict was read from the FIRST
+  decision line, so a genuine NO-GO later in the record was ignored when an earlier line said GO.
+  Verdict is now **any-NO-GO-wins**, conflicts are named, and the unedited option menu fails closed.
+- **The rollback-owner check accepted "must NOT page @devops-engineer"**: a negation-governed mention
+  no longer counts, and the failure message names the remedy.
+- The FAULT-5 message, the spec's entropy note and the fail-closed sentence now state what the code
+  does — three claims corrected after seats measured otherwise.
+- Two test fixtures that spelled credential-shaped literals now assemble them at runtime
+  (`tests/cli/cli-init.test.js` and `tests/test_memory_fixes.test.js`); one of them, the
+  `tests/cli/cli-init.test.js` canary, is now measurable — with the quotes that let INJ-SECRET's keyword
+  branch match it at all, and without the greedy strip that ate its prefix and dropped the remainder
+  below the entropy threshold.
+
+### A maintenance lane that cannot touch the product pipeline (2026-10-21)
+- **Two new skills run engine maintenance outside the product phases.** `/maintenance-plan` drafts one source-linked, revision-bound plan for an already approved maintenance run; `/maintenance-execute` executes exactly one owner-authorized plan revision and captures revision-bound evidence. The lane is internal to the engine: it is not a product phase, it never advances or completes the trial-to-paid product phase, and it never writes product pipeline state, product memory, or product session state. `.agents/references/phase-table.md` is unchanged — the lane has no phase row.
+- **The run state lives outside the repository, and the helper fails closed.** Every command takes an absolute external `--state-root` that must be a canonical, non-symlink, owner-only directory disjoint from the checkout. A rejected root stops the run. The lane never falls back to product state, never generates a run ID for the caller, and never reuses a session directory.
+- **A recorded claim is not authentication.** Plan drafts, technical review, and owner authorization are stored as events carrying an evidence reference plus the labels `claimStatus: recorded-claim` and `authentication: not-cryptographically-verified`. A checker that passes and a status that looks complete are evidence about a record — neither is a gate-green verdict, and neither resolves an open owner decision.
+- **Also done:** the skill catalog and the install manifest ARE regenerated for these two skills, and the checks are green — `spec_check.js` passes all 42 skills, `bin/cli.js verify` verifies every manifest file, and the full test suite passes. The documentation registers the skills; the generators and the manifest are regenerated by the same change.
+
 ---
 
 ## [2.0.11] - 2026-09-30

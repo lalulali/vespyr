@@ -274,6 +274,32 @@ If the chunk is in the archive (was compacted), use search instead:
 
 ---
 
+## The maintenance lane rejects the state root
+
+**Problem:** `maintenance_session.js` or `maintenance_state.js` exits with a `maintenance_session: --state-root ...` or `maintenance_state: External state root ...` message and the run never starts. The lane fails closed on the state root rather than falling back to product state.
+
+**Fix:** The external state root must satisfy every rule below, and every command must pass it explicitly — the helper reads no environment variable (`VESPYR_MAINTENANCE_STATE_ROOT` is not consulted, and there is no environment fallback: a missing `--state-root` fails closed) and generates no run ID for you:
+- an **absolute canonical path** that resolves to an existing **directory**;
+- **not a symlink**, and `realpath` must equal the path you passed (on macOS, `/tmp/...` resolves to `/private/tmp/...` and is rejected);
+- **owned by the current user**, with owner read/write/search set, and **not group- or world-writable**;
+- **disjoint from the repository root** — neither directory may contain the other;
+- the **same** `--state-root` on every `maintenance_session.js` and `maintenance_state.js` call of the run, with `--repo-root` resolving to this repository.
+
+To recover, create a fresh directory outside the checkout, lock it down, and re-run with the corrected path:
+
+```bash
+mkdir -p "$TMPDIR/vespyr-maintenance-state" && chmod 700 "$TMPDIR/vespyr-maintenance-state"
+node .agents/scripts/maintenance_session.js --scope maintenance --agent <agent> \
+  --repo-root "$(pwd)" --state-root "$TMPDIR/vespyr-maintenance-state" \
+  --run-id <run-id> --session-id <new-session-id>
+```
+
+Two adjacent failures have their own remedy. `Session ID already exists; refusing to reuse its directory` means a session directory is never reused — pass a **new** `--session-id`. `External state root must be disjoint from repository root` means the root sits inside the checkout; move it out, because that separation is what keeps maintenance state out of the product tree.
+
+**Prevention:** Treat the state root as part of the run's identity — set it once, pass it explicitly on every command (no environment variable is read), and never point it inside the repository. If `maintenance_state.js status` reports `eventCount: 0` for a run you know has events, the `--run-id` does not match the run in that state root: a missing run directory is reported as an empty run, not as an error. Check `<state-root>/runs/<run-id>/` before concluding that the run has no history.
+
+---
+
 *Canonical source files:*
 - *Workflow orchestration:* `workflow.md`
 - *Guardrails:* `GUARDRAILS.md`

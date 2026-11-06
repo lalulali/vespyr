@@ -46,8 +46,10 @@ Use this template before any production release. Every item must be verified bef
 ## 2. Security Review
 
 - [ ] @security-engineer audit completed (if applicable — required for auth, payments, PII)
-- [ ] Zero Critical or High severity findings
-- [ ] Medium/Low findings documented with risk acceptance or remediation plan
+- [ ] Zero open findings at **any** severity. The gate fails on every finding, not a severity tier:
+      a live credential scores `medium`, so "Zero Critical or High" was WEAKER than what is enforced.
+      Risk acceptance is not a way past this line — it is how the finding gets closed.
+- [ ] Any accepted residual is recorded in the findings report with the accepting human named
 - [ ] Secrets and credentials are not in code (scanned)
 - [ ] Dependency vulnerabilities checked and acceptable
 - [ ] OWASP Top 10 reviewed (if applicable)
@@ -166,6 +168,14 @@ owner, mitigation, and authorized acceptance.
 
 **Date:** ...
 **Decision:** GO / NO-GO / CONDITIONAL GO
+
+<!-- Exactly one of GO, NO-GO, or CONDITIONAL GO, directly after the label — no emoji,
+     and nothing else on the line. The line above is an UNEDITED MENU on purpose: the launch gate
+     treats a line carrying several decision tokens as a CONFLICT and fails it (blind run 16: the
+     unedited menu read as GO). Replace the whole line with one token before shipping.
+     NOTE: the launch gate reads the VERDICT from `go-nogo-decision.md`, not from this file. The
+     line below is the readiness record's own copy for the reader, and it must agree with the
+     decision record. -->
 
 **Conditions (if CONDITIONAL):**
 - [ ] Condition 1 must be resolved by [date]

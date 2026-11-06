@@ -459,3 +459,59 @@ test('F-11: the human-readable output names what it suppressed', () => {
   assert.match(r.stdout, /not the same as a clean scan/);
   fs.rmSync(dir, { recursive: true, force: true });
 });
+
+/**
+ * INJ-SCOPE (blind run 14, @security-engineer HIGH): `security/audit-spec.json` claimed the scanner
+ * "FAILS CLOSED when an include-list drops a config-shaped file at depth 0, so a name missing from
+ * this list cannot silently reintroduce the same hole." It did not. Measured against the spec's own
+ * release command: a root `secrets.json` holding a Stripe-shaped key and a root `.git-credentials`
+ * holding a `ghp_` token both reported `clean — 0 findings`, exit 0, and the launch gate's scan leg
+ * passed on the same tree. The run-13 fix enumerated root names by hand; depth 0 is exactly where an
+ * unlisted name lands, so this is the backstop that makes the enumeration safe.
+ */
+test('INJ-SCOPE: a credential-shaped file dropped at the repo root fails closed', () => {
+  for (const name of ['secrets.json', '.git-credentials', '.env.production', 'id_rsa']) {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'rootcred-'));
+    fs.mkdirSync(path.join(dir, 'app'), { recursive: true });
+    fs.writeFileSync(path.join(dir, 'app/main.md'), `# main\n\n${MARKER}\n`);
+    fs.writeFileSync(path.join(dir, name), '{"STRIPE_SECRET_KEY": "sk_live_placeholder"}\n');
+    const s = spec({ mode: 'include-list', product_roots: ['app'], root_files: [] });
+    const r = runScan(['--dir', dir, '--spec', specPathFor(dir, s)], undefined, { allowFailClosed: true });
+    assert.strictEqual(r.exit, 2, `${name} at the repo root must fail closed, not report clean`);
+    assert.match(String(r.fault), /FAULT-5/, `${name} must be named as the dropped root credential`);
+    // The message and the spec must use the same vocabulary. Run 15 caught them disagreeing: the
+    // message said "credential-shaped", the spec said "config-shaped", the behaviour was config-shaped.
+    assert.match(String(r.fault), /config- or credential-shaped/,
+      'the fault message must name the same trigger class the spec documents');
+    assert.match(String(r.fault), new RegExp(name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')),
+      `${name} must appear in the fault message so the fix is obvious`);
+  }
+});
+
+test('INJ-SCOPE: a root file that IS enumerated is scanned, not failed closed', () => {
+  // The other direction: the backstop must not fire on a file the spec did name. Otherwise the fix
+  // would trade a silent pass for a scanner that refuses to run at all.
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'rootlisted-'));
+  fs.mkdirSync(path.join(dir, 'app'), { recursive: true });
+  fs.writeFileSync(path.join(dir, 'app/main.md'), `# main\n\n${MARKER}\n`);
+  fs.writeFileSync(path.join(dir, 'secrets.json'), `# secrets\n\n${MARKER}\n`);
+  const s = spec({ mode: 'include-list', product_roots: ['app'], root_files: ['secrets.json'] });
+  const r = runScan(['--dir', dir, '--spec', specPathFor(dir, s)]);
+  // Two findings, not one: app/main.md AND the enumerated root file. Both carry MARKER, so a count
+  // of 2 is the proof the root file was actually read.
+  assert.strictEqual(r.findings.length, 2, 'an enumerated root file must be scanned and its finding reported');
+  assert.ok(NAMES(r).includes('secrets.json'), 'the root file must appear in the findings, not in a drop list');
+});
+
+test('INJ-SCOPE: an ordinary unlisted root file is not a fault', () => {
+  // LICENSE and README.md are dropped by the real repo's include-list on every run. If those failed
+  // closed the scanner would be permanently unusable, which is not a security property.
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'rootbenign-'));
+  fs.mkdirSync(path.join(dir, 'app'), { recursive: true });
+  fs.writeFileSync(path.join(dir, 'app/main.md'), `# main\n\n${MARKER}\n`);
+  fs.writeFileSync(path.join(dir, 'LICENSE'), 'MIT\n');
+  fs.writeFileSync(path.join(dir, 'README.md'), '# readme\n');
+  const s = spec({ mode: 'include-list', product_roots: ['app'], root_files: [] });
+  const r = runScan(['--dir', dir, '--spec', specPathFor(dir, s)]);
+  assert.strictEqual(r.findings.length, 1, 'benign root files are dropped quietly, as before');
+});

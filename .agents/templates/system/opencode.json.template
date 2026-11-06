@@ -39,6 +39,8 @@
       "jtbd": "allow",
       "kanban": "allow",
       "launch": "allow",
+      "maintenance-execute": "allow",
+      "maintenance-plan": "allow",
       "memory": "allow",
       "motion": "allow",
       "phase": "allow",

@@ -110,7 +110,7 @@ validate → explore → design → plan → develop → launch → iterate → 
 
 ## 🧩 Key Capabilities
 
-- **40 curated skills** — from `/validate-idea`, `/design`, and `/round-table` to `/shut-up`, `/motion`, `/develop`, `/launch`, `/legal-safety-audit`, `/customize-skill`, and `/create-skill` (all validated against the [agentskills.io](https://agentskills.io) spec via CI)
+- **42 curated skills** — from `/validate-idea`, `/design`, and `/round-table` to `/shut-up`, `/motion`, `/develop`, `/launch`, `/legal-safety-audit`, `/maintenance-plan`, `/maintenance-execute`, `/customize-skill`, and `/create-skill` (all 42 skills, including the two maintenance skills, are validated against the [agentskills.io](https://agentskills.io) spec via CI; the two maintenance skills have no separate benchmark suite)
 - **Prototype-first reverse mode** — `/design` turns a frozen prototype into an evidence-anchored PRD: every statement traces to a `path#id` anchor, and a recorded baseline hash blocks stale specs at the scope gate.
 - **Acceptance-criteria depth is gated, not advised** — every user story carries a self-audit across 16 risk categories, every feature carries a state model whose illegal transitions each name a real criterion, and in reverse mode every criterion is tagged `[prototype L-NN]` or `[derived]`. Criteria that point at nothing fail the build. Three reasoning smells print as warnings — they never block, but they mark coverage that was filled in rather than reasoned.
 - **Implementation coverage contract** — `/develop` sweeps every acceptance criterion for implementation evidence before QA: orphan ACs fail the build, and the 10 detail classes are audited or explicitly deferred.

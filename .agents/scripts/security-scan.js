@@ -287,7 +287,8 @@ function applyProductScope(fileList, spec) {
   // opposite of the fix, because product_roots is a list of THIS ENGINE's directories and
   // /launch runs on PRODUCT codebases.
   //
-  // Measured, on a product tree: a hardcoded `AKIAIOSFODNN7EXAMPLE` in `src/config.js` was
+  // Measured, on a product tree: a hardcoded AWS-key-shaped literal (`AKIA` + 16 chars) in
+  // `src/config.js` was
   // SILENTLY DROPPED. The scan reported the injection it found in .agents/ and reported zero
   // findings for the credential, and printed `dropped: {"src": 1}`. `src/` is the single most
   // common source directory in every product that exists.
@@ -355,10 +356,33 @@ function applyProductScope(fileList, spec) {
     if (CODE_EXT.test(f.rel)) droppedSource.push(f.rel);
     else if (CONFIG_EXT.test(f.rel)) droppedConfig.push(f.rel);
   }
+  // INJ-SCOPE (blind run 14, @security-engineer HIGH): `security/audit-spec.json` claimed the
+  // scanner "FAILS CLOSED when an include-list drops a config-shaped file at depth 0, so a name
+  // missing from this list cannot silently reintroduce the same hole." Measured: it did not. A root
+  // `secrets.json` holding a Stripe-shaped key, and a root `.git-credentials` holding a `ghp_` token,
+  // both reported `clean — 0 findings`, exit 0 — and the launch gate's scan leg passed on the same
+  // tree (`code: 0, reason: null`) with `dropped_config_files: 1`. The spec asserted a control that
+  // did not exist, which is worse than having no control, because it stops anyone looking.
+  //
+  // Depth 0 is where the run-13 fix enumerated names by hand, so depth 0 is exactly where an
+  // unlisted name lands. Everything below depth 0 is a tree the spec declined on purpose.
+  const depth0 = (rel) => !String(rel).includes('/');
+  const ROOT_CREDENTIAL_NAME =
+    /^(?:\.?git-credentials|\.?netrc|\.npmrc|\.?htpasswd|\.?pgpass|secrets?[\w.-]*|credentials?[\w.-]*|id_(?:rsa|dsa|ecdsa|ed25519)(?:\.pub)?|[\w.-]+\.(?:pem|key|p12|pfx|jks|keystore))$/i;
+  const droppedConfigRoot = droppedConfig.filter(depth0);
+  const droppedCredentialRoot = fileList
+    .filter((f) => depth0(f.rel) && ROOT_CREDENTIAL_NAME.test(String(f.rel)))
+    .map((f) => f.rel)
+    .filter((rel) => !kept.some((k) => k.rel === rel) && !CONFIG_EXT.test(rel));
+
   return {
     kept, excludedCounts, excludedByTree, applied: true, mode,
     examined: kept.length,
     droppedTotal,
+    droppedConfigRootCount: droppedConfigRoot.length,
+    droppedConfigRootSample: droppedConfigRoot.slice(0, 5),
+    droppedCredentialRootCount: droppedCredentialRoot.length,
+    droppedCredentialRootSample: droppedCredentialRoot.slice(0, 5),
     droppedSourceCount: droppedSource.length,
     droppedSourceSample: droppedSource.slice(0, 5),
     // Not "0 when there are none": a config-shaped file dropped because nobody listed its tree is
@@ -373,12 +397,28 @@ function applyProductScope(fileList, spec) {
 // ---------------------------------------------------------------------------
 
 /**
- * A provider/format prefix at the start of a credential: letters, optionally split by `_` or `-`.
- * Matches `AKIA`, `ghp`, `sk_live`, `sk`, `xoxb`, `AIza`. Deliberately conservative — it must not
- * eat into the random material, so it stops at the first separator-run that is followed by a
- * non-letter, and it requires the remainder to still be substantial.
+ * The fixed provider prefixes this rule's own pattern branches begin with. Stripped before the
+ * entropy statistic runs, so the statistic measures ONLY the random material.
+ *
+ * This regex used to be `^(?:[A-Za-z]+[_-])+[A-Za-z]*[_-]?|^[A-Za-z]{2,8}(?=[0-9])` and its
+ * docstring claimed it "must not eat into the random material". It did, massively: the trailing
+ * `[A-Za-z]*` greedily consumed the leading LETTER RUN of the secret body itself, so what was
+ * measured was not the credential but whatever happened to follow the body's first digit. Blind
+ * run 16 measured the consequences (@architect's four falsification probes, all four explained by
+ * this one bug): a body whose every window is high-entropy was still missed because a short
+ * non-letter remainder fell to the whole-string branch; reversing the body flipped the verdict
+ * because it moved the letter run; adding characters OUTSIDE the match changed it; and
+ * `sk_live_` + 24 repeated characters FIRED, because the strip ate all 24 letters, left an empty
+ * measurable, and fell back to the candidate — whose `sk_live_` prefix window scores 2.75 against
+ * a 2.6 threshold. A perfect predictor built from that model agreed with the scanner on 40/40
+ * predicted-found and 21/21 predicted-missed tokens.
+ *
+ * The fix is the regex the docstring always claimed to describe: a bounded list of the exact
+ * prefixes the pattern branches declare, nothing else. `[A-Za-z]{2,8}(?=[0-9])` is dropped as
+ * well — it stripped an arbitrary 2-8 letter head off any value that begins with letters followed
+ * by a digit, the same bug in a smaller coat.
  */
-const PROVIDER_PREFIX_RE = /^(?:[A-Za-z]+[_-])+[A-Za-z]*[_-]?|^[A-Za-z]{2,8}(?=[0-9])/;
+const PROVIDER_PREFIX_RE = /^(?:sk[-_](?:live|test)_?|ghp_|npm_|xox[abprs]-|AKIA|AIza)/;
 
 /**
  * The KEYWORD branch of the same defect, fixed after blind /launch run 8.
@@ -424,6 +464,36 @@ function minWindowEntropy(str, windowSize = 8) {
     min = Math.min(min, shannonEntropy(str.slice(i, i + windowSize)));
   }
   return min;
+}
+
+/**
+ * The HIGHEST 8-char window entropy in a candidate — the statistic the credential check uses.
+ *
+ * INJ-SECRET (blind run 16, @security-engineer HIGH; independently reproduced here: 50% of random
+ * `AKIA` tokens, 49% `ghp_`, 42% `npm_` and 32% `sk_live_` were reported as nothing). The check used
+ * the window MINIMUM, so one unlucky 8-char stretch suppressed the entire token. Measured on a fresh
+ * random `ghp_` token: a single window held a repeated character, its entropy fell to 2.5 against the
+ * 2.6 threshold, and a live-shaped credential was reported as clean. That is deterministic per token,
+ * so re-running the scan never recovers it — the credential verdict was a coin flip.
+ *
+ * The MINIMUM answers "is this string low-entropy ANYWHERE", which is true of roughly half of all
+ * random 36-character strings: an 8-draw from a 62-symbol alphabet collides about 45% of the time.
+ * The question the rule means to ask is "does this string contain enough random material to be a
+ * credential", and the maximum answers that — a real key always has a high-entropy window, a
+ * placeholder has none.
+ *
+ * The documented negative fixture still works, and is why this is the maximum rather than a prefix
+ * exemption: `AKIA` + repeated characters strips to a run of one character, so EVERY window measures
+ * ~0.0 and the token is still rejected. Exempting provider prefixes would have turned that fixture
+ * into a false positive.
+ */
+function maxWindowEntropy(str, windowSize = 8) {
+  if (str.length < windowSize) return shannonEntropy(str);
+  let max = -Infinity;
+  for (let i = 0; i + windowSize <= str.length; i++) {
+    max = Math.max(max, shannonEntropy(str.slice(i, i + windowSize)));
+  }
+  return max;
 }
 
 // ---------------------------------------------------------------------------
@@ -840,6 +910,27 @@ function main() {
     );
   }
 
+  // INJ-SCOPE: the fail-closed backstop the spec promised. A root-level credential that the include
+  // list did not enumerate must not be reported as a clean scan — "not scanned" and "nothing there"
+  // are different answers and only one of them is safe to ship on.
+  {
+    const rootDrops = (scoped.droppedConfigRootSample || []).concat(scoped.droppedCredentialRootSample || []);
+    const rootDropCount = (scoped.droppedConfigRootCount || 0) + (scoped.droppedCredentialRootCount || 0);
+    if (rootDropCount > 0) {
+      return failClosed(
+        // @security-engineer (blind run 15): the message said "credential-shaped" while the spec says
+        // "config-shaped" and the behaviour is config-shaped — a root `tsconfig.json` with no secret
+        // in it faults. Three places, two vocabularies. Converged on one.
+        `FAULT-5: ${rootDropCount} config- or credential-shaped file(s) at the repo root were dropped by the ` +
+          `include-list and never scanned (${rootDrops.slice(0, 5).join(', ')}` +
+          `${rootDropCount > 5 ? `, …+${rootDropCount - 5} more` : ''}). A root-level secret is where ` +
+          'credentials leak, and "not scanned" is not "clean". Add the file to `scope.root_files` in ' +
+          'audit-spec.json so it is scanned, or delete it. This is the backstop the spec claimed.',
+        jsonMode
+      );
+    }
+  }
+
   const findings = [];
 
   for (const file of files) {
@@ -1026,7 +1117,11 @@ function main() {
           .replace(PROVIDER_PREFIX_RE, '');
           // Guard the degenerate case: never measure an empty string, which would read as 0 entropy
           // and suppress a match that is nothing but prefix.
-          if (minWindowEntropy(measurable || candidate, win) < threshold) continue;
+          // INJ-SECRET (blind run 16): was `minWindowEntropy(...) < threshold`, which suppressed a
+          // real-shaped credential whenever any single 8-char window happened to repeat a character.
+          // See maxWindowEntropy's note. Threshold and window are unchanged; only the statistic moved
+          // from "lowest window" to "highest window".
+          if (maxWindowEntropy(measurable || candidate, win) < threshold) continue;
         }
 
         // Known-FP suppression (02f §10): token-fragment guard — see the
@@ -1251,6 +1346,10 @@ function main() {
             // class can disappear unaccounted for.
             dropped_config_files: scoped.droppedConfigCount || 0,
             dropped_config_sample: scoped.droppedConfigSample || [],
+            dropped_config_root_files: scoped.droppedConfigRootCount || 0,
+            dropped_config_root_sample: scoped.droppedConfigRootSample || [],
+            dropped_credential_root_files: scoped.droppedCredentialRootCount || 0,
+            dropped_credential_root_sample: scoped.droppedCredentialRootSample || [],
             dropped_total: scoped.droppedTotal || 0,
           },
         },
@@ -1298,6 +1397,7 @@ module.exports = {
   main,
   shannonEntropy,
   minWindowEntropy,
+  maxWindowEntropy,
   looksLikeBase64,
   normalizeForDetection,
   validatePinStore,

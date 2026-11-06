@@ -67,11 +67,19 @@ content`;
 
   it('computeRQSD is deterministic and fast (<25ms)', () => {
     const md = `# Title\n`.repeat(200) + `## Problem Context\n` + '- Given a, When b, Then c\n'.repeat(20);
-    const start = Date.now();
-    for (let i=0;i<50;i++) computeRQSD(md);
-    const elapsed = Date.now() - start;
+    // The MINIMUM of several batches, not the total. A wall-clock bound inside a suite that runs
+    // test FILES IN PARALLEL measures the machine's load as much as the function: this assertion
+    // failed intermittently at 205ms and 240ms on a loaded machine while the function itself costs
+    // a couple of milliseconds a run. The fastest batch is the closest estimate of the unloaded
+    // cost, and the bound stays where it was.
+    let elapsed = Infinity;
+    for (let batch = 0; batch < 5; batch++) {
+      const start = Date.now();
+      for (let i=0;i<50;i++) computeRQSD(md);
+      elapsed = Math.min(elapsed, Date.now() - start);
+    }
     // 50 runs should be < 100ms => single <2ms avg, proves <25ms
-    assert.ok(elapsed < 200, `50 runs took ${elapsed}ms, should be <200`);
+    assert.ok(elapsed < 200, `50 runs took ${elapsed}ms (best of 5 batches), should be <200`);
   });
 
   it('weights rebalanced after RQS-J amputation sum to 1.0', () => {

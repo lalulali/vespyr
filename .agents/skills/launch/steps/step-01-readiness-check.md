@@ -27,13 +27,13 @@ allowlist.** Measured on the same tree, same everything, one flag apart:
 
 | Invocation | Result |
 |---|---|
-| as previously documented | `verdict: FAIL`, 24 findings — the reviewed false positives read as live findings |
-| with `--scan-allowlist` | `verdict: FAIL`, **5 findings**, 24 suppressions |
+| as previously documented | `verdict: FAIL`, 26 findings — the reviewed false positives read as live findings |
+| with `--scan-allowlist` | `verdict: FAIL`, **5 findings**, 21 suppressions |
 
 **Numbers move; re-run rather than quote.** The table above was measured on 2026-10-12 at 29
 suppressions, when the second row read `PASS`. On 2026-10-13 the owner ruled five allowlist entries
 out — agent-context docs that ship to every install, where a suppressed finding would have been
-invisible — giving **5 findings and 24 suppressions**. That row is now a **deliberate, ruled FAIL**,
+invisible — giving **5 findings and 21 suppressions**. That row is now a **deliberate, ruled FAIL**,
 and `launch_readiness_check.js check … --require-scan` fails on it by design. Do not read a stale
 `PASS` in this table as current state; run the scan.
 
@@ -104,8 +104,11 @@ defect, fix the defect.
 - UTTERLY SATISFIED team gate is complete: every active, relevant agent is `SATISFIED` with evidence; `NOT ACTIVATED` rows have a specific out-of-scope reason
 - **`security-scan.js check` exits 0** against `security/audit-spec.json` — not "security review
   completed", which cannot be checked by anyone reading this file
-- Security review completed with **no open Critical/High finding**, and the findings report is
-  filed at `artifacts/output/05-execution/quality/findings-report.md` (`@security-engineer`)
+- Security review completed with **no open finding at any severity**, and the findings report is
+  filed at `artifacts/output/05-execution/quality/findings-report.md` (`@security-engineer`). This
+  said "no open Critical/High" until 2026-10-16 — WEAKER than the gate, which fails on every finding.
+  A live credential scores `medium`, so anyone who "corrected" the gate to match the old prose would
+  have let a hardcoded production key through
 - Performance benchmarks within thresholds (if applicable — see `@performance-engineer`)
 - **Every route in the release has an auth test, or is explicitly documented as public**
   (`@security-engineer`) — an unchecked route is an assumed-public route

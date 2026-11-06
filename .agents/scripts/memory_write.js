@@ -261,9 +261,20 @@ function runCompactionGuard(filePath) {
  * (creation rate x retention window) — a policy bound, which is the right kind of bound —
  * rather than by a cliff that an agent discovers only when it tries to finish work.
  *
+ * SCOPE, STATED HONESTLY. The policy is global: `orchestrator_state.js compact` always
+ * compacts `active-decisions.md`, regardless of which memory file the caller wrote. That
+ * is why this function takes no file argument — passing one used to imply a per-file
+ * scope the implementation never had.
+ *
+ * LOCK BOUNDARY. Callers run this AFTER releasing `.agents/state/memory.lock`, never
+ * inside it. `orchestrator_state.js` takes orchestrator.lock -> memory.lock; holding
+ * memory.lock here while the spawned child waits for orchestrator.lock would invert that
+ * order and deadlock against `advance`/`set-phase`. Running it after the release is safe:
+ * the append is already on disk, and the child's own memory.lock read sees it.
+ *
  * Best-effort by design: a compaction failure must never cost the caller their write.
  */
-function enforceRetentionPolicy(filePath) {
+function enforceRetentionPolicy() {
   const script = path.join(SCRIPTS_DIR, 'orchestrator_state.js');
   if (!fs.existsSync(script)) return;
   try {
@@ -358,7 +369,7 @@ function reclassifyEntry({ from, to, headerMatch, agent, reason }) {
 
   const scrubbed = sanitizeContent(contentBody || title);
 
-  return withLock(MEMORY_LOCK, () => {
+  const result = withLock(MEMORY_LOCK, () => {
     const sid = resolveSessionId();
 
     // Destination dedupe — refuse to create a second copy of the same lesson.
@@ -399,10 +410,13 @@ function reclassifyEntry({ from, to, headerMatch, agent, reason }) {
     } catch { /* ledger must never block the move */ }
 
     runCompactionGuard(toPath);
-    enforceRetentionPolicy(toPath);
 
     return { success: true, from, to, title, domain, date: entryDate, session_id: sid };
   });
+
+  // After the release, never inside the lock — see enforceRetentionPolicy().
+  if (result && result.success) enforceRetentionPolicy();
+  return result;
 }
 
 function main() {
@@ -619,11 +633,6 @@ function routingAdvisory(file, domain) {
 
       // --- Compaction guard (informational; may rewrite file → in-lock) ---
       runCompactionGuard(filePath);
-      // --- Retention policy (2026-10-05) ---
-      // Runs inside the same lock so a compaction can never interleave with a write and
-      // lose an entry. This is the write-path trigger that replaced the phase-transition
-      // trigger; see enforceRetentionPolicy() for why the trigger had to move.
-      enforceRetentionPolicy(filePath);
       return { duplicate: false, sessionId: sid };
     });
   } catch (e) {
@@ -645,6 +654,11 @@ function routingAdvisory(file, domain) {
     process.exit(1);
   }
   sessionId = sessionId.sessionId;
+
+  // Retention runs only AFTER memory.lock is released — see enforceRetentionPolicy().
+  // Calling it inside the lock would invert the orchestrator.lock -> memory.lock order
+  // and deadlock against advance/set-phase.
+  enforceRetentionPolicy();
 
   console.log(JSON.stringify({
     success: true,

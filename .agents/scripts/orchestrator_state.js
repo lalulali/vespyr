@@ -39,6 +39,14 @@ const STATE_FILE = path.join(process.cwd(), 'artifacts', 'output', 'pipeline-sta
 const OUTPUT_DIR = path.join(process.cwd(), 'artifacts', 'output');
 const TELEMETRY_DIR = path.join(process.cwd(), 'artifacts', 'telemetry');
 const PROJECT_ROOT = process.cwd();
+// The one lock that guards `artifacts/memory/active-decisions.md` (and the lessons file it
+// feeds). memory_write.js uses the same path. Every read-modify-write of those files must
+// hold it, otherwise a compactor can overwrite an append it never saw.
+//
+// LOCK ORDER: orchestrator.lock -> memory.lock. Never the reverse. memory_write.js takes
+// memory.lock only, and runs retention AFTER releasing it, so no process holds
+// memory.lock while waiting for orchestrator.lock.
+const MEMORY_LOCK = path.join(process.cwd(), '.agents', 'state', 'memory.lock');
 
 function countTokens(text) {
   // INV-TEL-04: single canonical estimator (tools/eval/lib/tokenizer).
@@ -114,7 +122,14 @@ const RETENTION_DAYS = 30;
  * clever: an owner can promote a candidate with one command, and nothing binding is
  * retired by a heuristic.
  */
-function flushDecisionsToLessons({ dryRun = false } = {}) {
+// Every live flush rewrites active-decisions.md (and lessons-learned.md), so it must hold
+// memory.lock. A dry run only reads; locking it would just add contention.
+function flushDecisionsToLessons(opts = {}) {
+  if (opts.dryRun) return flushDecisionsToLessonsUnlocked(opts);
+  return withLock(MEMORY_LOCK, () => flushDecisionsToLessonsUnlocked(opts));
+}
+
+function flushDecisionsToLessonsUnlocked({ dryRun = false } = {}) {
   const memoryDir = path.join(process.cwd(), 'artifacts', 'memory');
   const decisionsPath = path.join(memoryDir, 'active-decisions.md');
   const lessonsPath = path.join(memoryDir, 'lessons-learned.md');
@@ -225,7 +240,9 @@ function flushDecisionsToLessons({ dryRun = false } = {}) {
   }
 
   if (added.length > 0) {
-    fs.writeFileSync(lessonsPath, lessons, 'utf8');
+    // Atomic: a crash mid-write must leave the existing lessons file intact, never a
+    // truncated one. Same reason active-decisions.md below uses the atomic helper.
+    atomicWriteFileSync(lessonsPath, lessons, 'utf8');
     // Remove from active-decisions.md — from the bottom up so earlier indexes stay valid.
     const drop = new Set();
     for (const s of toTranslate) {
@@ -240,7 +257,15 @@ function flushDecisionsToLessons({ dryRun = false } = {}) {
   return result;
 }
 
+// Compaction is a read-modify-write of active-decisions.md: it snapshots the file, then
+// rewrites it. Without memory.lock, an append that lands inside that window is silently
+// overwritten. The lock is acquired HERE, not at the CLI layer, so every caller
+// (advance, set-phase, compact, and any future one) is covered.
 function compactActiveDecisions() {
+  return withLock(MEMORY_LOCK, compactActiveDecisionsUnlocked);
+}
+
+function compactActiveDecisionsUnlocked() {
   const memoryDir = path.join(process.cwd(), 'artifacts', 'memory');
   const decisionsPath = path.join(memoryDir, 'active-decisions.md');
   const archiveDir = path.join(memoryDir, 'archive');
@@ -1742,7 +1767,7 @@ function mainDispatch(args) {
 // concurrent agent sessions can no longer lose updates last-writer-wins.
 const MUTATING_COMMANDS = new Set([
   'init', 'update', 'session-start', 'session-write', 'complete',
-  'advance', 'set-phase', 'compact', 'sync-context', 'file-cr'
+  'advance', 'set-phase', 'compact', 'flush-decisions', 'sync-context', 'file-cr'
 ]);
 
 

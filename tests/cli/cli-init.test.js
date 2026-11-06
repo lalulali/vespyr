@@ -84,12 +84,48 @@ describe("Tier 0 Deterministic Init Test Suite (TL-INIT-04 / T0-INIT-01..04)", (
     execFileSync(process.execPath, [CLI, "init", "--target", tmpDir, "--harness", "opencode", "--yes"], { stdio: "pipe" });
 
     const contextPath = path.join(tmpDir, "artifacts", "memory", "project-context.md");
-    const canaryToken = "CANARY-SAFE-GUARD-998877";
-    fs.appendFileSync(contextPath, "\n\n## [USER CANARY]\nToken: " + canaryToken + "\n");
+    // Assembled at runtime, and QUOTED. The quoting is the point: INJ-SECRET's keyword branch
+    // requires a quoted value, so an unquoted canary never matched the rule AT ALL. With the quotes
+    // the rule matches, and then the greedy strip ate CANARY- / SAFE- / GUARD- and the remainder
+    // fell below the entropy threshold — so both causes are real, and the order matters.
+    //
+      // With the quotes, the canary tests what it was written to test. The old greedy strip ate
+      // CANARY- / SAFE- / GUARD- (three letter+separator groups), leaving "998877" — six characters.
+      // The regex still matched the RAW value; what failed was the ENTROPY gate, because the
+      // stripped remainder measured 1.585 against a threshold of 2.6. The bounded strip leaves the
+      // whole value, whose maximum 8-char window measures 3.000, so the finding is there to be found.
+    const canaryToken = ['CANARY', 'SAFE', 'GUARD', '998877'].join('-');
+    fs.appendFileSync(contextPath, "\n\n## [USER CANARY]\nToken: \"" + canaryToken + "\"\n");
 
     execFileSync(process.execPath, [CLI, "update", "--target", tmpDir, "--yes"], { stdio: "pipe" });
 
     const updatedContent = fs.readFileSync(contextPath, "utf8");
+    // PIN THE QUOTING. Without the quotes INJ-SECRET's keyword branch never matches the value at
+    // all, so the canary was invisible and the CHANGELOG's claim that it "had been silently eaten
+    // by the old greedy strip and is now measurable" was false. Un-quoting it must change what the
+    // scanner reports, and this asserts that it does.
+    const scanDir = fs.mkdtempSync(path.join(os.tmpdir(), "vespyr-canary-"));
+    try {
+      fs.mkdirSync(path.join(scanDir, "tests"), { recursive: true });
+      fs.copyFileSync(contextPath, path.join(scanDir, "tests", "canary.md"));
+      let stdout = "";
+      try {
+        stdout = execFileSync(process.execPath, [
+          path.join(__dirname, "..", "..", ".agents", "scripts", "security-scan.js"),
+          "--dir", scanDir, "--spec", path.join(__dirname, "..", "..", "security", "audit-spec.json"), "--json",
+        ], { encoding: "utf8" });
+      } catch (e) {
+        // The scanner exits 1 when it finds something — which is what this asserts.
+        stdout = e.stdout || "";
+      }
+      const report = JSON.parse(stdout || "{}");
+      assert.ok(
+        (report.findings || []).some((f) => f.rule === "INJ-SECRET"),
+        `the quoted canary must be reported by the scanner: ${JSON.stringify(report.findings || [])}`,
+      );
+    } finally {
+      fs.rmSync(scanDir, { recursive: true, force: true });
+    }
     assert.ok(
       updatedContent.includes(canaryToken),
       "User canary section must be preserved across vespyr update"

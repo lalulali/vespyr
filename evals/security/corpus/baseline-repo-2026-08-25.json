@@ -1,8 +1,8 @@
 {
   "date": "2026-08-25",
   "note": "Frozen repo-wide baseline v4 (2026-09-07, human-reviewed per owner approval 2026-09-07: absorbs 7 doc-prose FPs from 01-agents/03-security/07-roundtable reviews, rt-003 eval transcript, KILL-scoped-proposals \u2014 all audit/eval prose, zero payloads). Extends v3 (2026-08-25). Extend ONLY via human-reviewed commit. | Extended 2026-09-08 by @developer (Chris-approved review-03 fixes): +GH-1 hooks fixture (intentional positive) +INJ-CONFIG corpus-root (T0 **/ fix for prior false-negative). Human-reviewed true positives. | Extended 2026-09-08 round-table reshape (BEACON-1 hook paths; drift prefixes pinned and enforced). | Re-pin 2026-09-30 (02s): scanner_sha256_prefix ONLY, e2d0c28d978ff114 -> 71a2f88fe7debd02, in BOTH live baselines (this repo-wide one and baseline-2026-08-10.json). Cause: commit 64e659b added ONE comment line to security-scan.js and re-pinned neither. Verified unreviewed not unsound: comment-stripped + whitespace-normalized source hash IDENTICAL (b42495ce1bb3875b both revisions); corpus-root scan byte-identical (14 findings). spec_sha256_prefix unchanged (f6159bbaa797459b). The 136 findings below are NOT regenerated. Follow-up NOT done: this pin is duplicated across 2 scripts / 2 live baselines and all hash RAW BYTES, so any comment edit re-trips it and fixing one leaves the other red \u2014 see Fix B in the 02s plan. Absorbed 2026-09-30 (02s, owner-approved): 9 unbaselined findings that the fail-closed drift gate had masked since 2026-08-25. Each was verified individually before absorbing, not bulk-accepted. Class A (8, INJ-OBFUSC): every one matches a known_fp_class the rule itself declares - long absolute POSIX paths (review/11), and runs of words or acronyms joined by a single slash (review/12; reverse-prd \"API/persistence/authentication/telemetry\"; \"Annotation/backend/performance/accessibility/platform\"). 6 are dated historical records that must not be rewritten; 2 are lines in an untracked .playwright-mcp browser console log. Memory files were NOT edited - they go only through the memory pipeline. Class B (1, INJ-PROMPT, high, .agents/agents/security-engineer.md:284): the security persona own AI-application-security checklist must name the attack string in order to test for it, so the defender documents the attack. INJ-PROMPT declares no known_fp_classes, so this is a rule-metadata gap rather than a one-off. DURABLE FIX DEFERRED: give INJ-PROMPT a known_fp_classes entry covering security docs that quote attack strings. Absorbing this single instance treats the symptom; the next such document will fail again. SCOPE: a baseline hit is per FINDING, not per path - any other line in these files still fails. audit-spec.json untouched, so spec_sha256_prefix stays valid. Follow-ups: gitignore the stray .playwright-mcp log; collapse the triplicated drift pin per Fix B. || Same-day correction: the INJ-PROMPT entry for .agents/agents/security-engineer.md was absorbed WITH its line number, and the rule|path|LINE match key is content-blind - a real attack payload later written onto that exact line would have been silently treated as already-known. Proven by fault injection, then fixed by DROPPING the line field on that one entry so only the rule|path|detail-hash key can absorb it: identical text is known, different text is NEW again. Not applied to the other 8 absorbed entries because those are dated historical records or an untracked log - if edited, the line key misses and the finding resurfaces loudly, which is the safe direction. ROOT CAUSE NOT FIXED (follow-up): check_new_findings.js tries the position key before the content key, so every baseline entry is position-sensitive, not just this one.",
-  "scanner_sha256_prefix": "5672b38ad1ae5f0b",
-  "spec_sha256_prefix": "922fd3f8de3099f6",
+  "scanner_sha256_prefix": "4ada0629be719762",
+  "spec_sha256_prefix": "80816deeb9914dd1",
   "exit": 1,
   "findings": [
     {
@@ -100,6 +100,103 @@
       "date": "2026-10-15",
       "reviewed_by": "agent-performed regen; OWNER CONFIRMATION PENDING",
       "reason": "Second regen in the same change: the redaction rule was narrowed from \"mask the matched span\" to \"mask credential-shaped runs\", which changed every detail key again. Final state of the blind-run-13 security fixes."
+    },
+    {
+      "date": "2026-10-16",
+      "reviewed_by": "agent-performed re-pin on owner instruction 2026-10-16 (\"you do it\"); the complete scanner diff (48 insertions, 0 deletions, purely additive) was presented before the re-pin. NOT human-read \u2014 this pin is agent-satisfied for this revision, not human-reviewed.",
+      "reason": "Re-pin 2026-10-16 (blind runs 14-15 security fixes): scanner_sha256_prefix 5672b38ad1ae5f0b -> 46f4c60800cc2d99 in both baselines; spec_sha256_prefix 922fd3f8de3099f6 -> 4eb62d54e49d32b6 in this file only. Cause: the fixes added FAULT-5 (fail closed when the include-list drops a config-shaped or credential-named file at depth 0 \u2014 previously a root secrets.json holding a Stripe-shaped key reported 'clean, 0 findings', exit 0, and the launch gate's scan leg passed) and narrowed the fail-closed sentence in audit-spec.json so it stops claiming coverage the mechanism lacks. Additive only: 48 insertions, 0 deletions, no rule, pattern or detection path altered. Verified unchanged: corpus findings (14, identical rule|path|line set) and the release scan (5 findings, exit 1). NOT a findings re-baseline."
+    },
+    {
+      "date": "2026-10-16",
+      "reviewed_by": "agent-performed re-pin on owner instruction 2026-10-16 (standing \"you do it\" for this work stream); the scanner diff was presented before the re-pin. NOT human-read \u2014 this pin is agent-satisfied for this revision, not human-reviewed.",
+      "reason": "Second re-pin the same day, scanner 46f4c60800cc2d99 -> 2f50d024be0beb04 and spec 4eb62d54e49d32b6 -> 815e4a158f143d1d. Cause: the INJ-SECRET entropy statistic was changed from the window MINIMUM to the window MAXIMUM (blind run 16 @security-engineer HIGH: the minimum suppressed 32-50% of fresh random-shaped credentials per branch, deterministically). The spec's entropy note was updated to name the statistic. Verified unchanged: corpus findings still exactly 14 (identical rule|path|line set) and the release scan still 5 findings, exit 1. NOT a findings re-baseline."
+    },
+    {
+      "date": "2026-10-16",
+      "reviewed_by": "agent-performed re-pin on owner instruction 2026-10-16 (standing \"you do it\" for this work stream). NOT human-read \u2014 agent-satisfied for this revision, not human-reviewed.",
+      "reason": "Third re-pin today, scanner 2f50d024be0beb04 -> a247c0ae86290be2, spec 815e4a158f143d1d -> 6d81a0ce54a405f8. Cause: the four findings the INJ-SECRET statistic fix surfaced were closed honestly instead of allowlisted \u2014 the scanner's own comment and the spec's mode_note now DESCRIBE the credential shape instead of spelling a literal, and tests/test_memory_fixes.test.js assembles its fixture at runtime. All four were the repo's own self-references; none was a real credential. Verified unchanged: corpus findings 14 (identical set). NOT a findings re-baseline."
+    },
+    {
+      "date": "2026-10-16",
+      "reviewed_by": "agent-performed re-pin on owner instruction 2026-10-16 (standing \"you do it\" for this work stream). NOT human-read \u2014 agent-satisfied for this revision, not human-reviewed.",
+      "reason": "Fourth re-pin today, spec 6d81a0ce54a405f8 -> 3821ea509b365358 (scanner unchanged at a247c0ae86290be2). Cause: @architect (blind run 16) FALSIFIED the mechanism the previous entry documented \u2014 the rule is not any window-entropy statistic (probes: an all-windows-\u22652.75 token is still missed; reversing the body flips the verdict while preserving the window multiset; adding characters OUTSIDE the match flips it; sk_live_+repeats is reported while higher-ranked tokens are not). The spec note now records the falsification and says the statistic is NOT ESTABLISHED instead of claiming one. The detection improvement itself stands (23-56% -> ~1-4% missed). Verified unchanged: corpus findings 14, release scan 5/exit 1. NOT a findings re-baseline."
+    },
+    {
+      "date": "2026-10-17",
+      "reviewed_by": "agent-performed re-pin on owner instruction (standing \"you do it\" for this work stream). NOT human-read \u2014 agent-satisfied for this revision, not human-reviewed.",
+      "reason": "Re-pin 2026-10-17 (the run-16 fix round): scanner a247c0ae86290be2 -> 02a9fae7a1308edc; spec 3821ea509b365358 -> 43fd6c41674c4607. Cause: the INJ-SECRET prefix strip was replaced by a bounded list of the pattern's own fixed prefixes (\u2014 measured before the fix: a model built from the greedy strip agreed with the scanner on 61/61 tokens, i.e. the criterion then was opaque; after: detection 99-100/100 per branch, negatives rejected, order-invariant), the go/no-go verdict became any-NO-GO-wins (launch gate), and the spec's entropy note now states the mechanism that tests/test_inj_secret_detection.test.js enforces. Verified unchanged: corpus findings 14 (identical set), release scan 5 unsuppressed / 21 suppressed. NOT a findings re-baseline."
+    }
+  ,
+    {
+      "date": "2026-10-22",
+      "reviewed_by": "agent-performed re-pin on owner instruction (standing \"you do it\" for this work stream). NOT human-read - agent-satisfied for this lane; the diff was presented in the review panel record.",
+      "reason": "Re-pin 2026-10-22 (blind run 16 release-gate panel), BOTH prefixes: scanner_sha256_prefix 02a9fae7a1308edc -> 4ada0629be719762, spec_sha256_prefix 43fd6c41674c4607 -> a253242c24d7aad4. Two changes, both additive to behaviour. (1) security/audit-spec.json: the INJ-SECRET note now states the tested 95-per-100 floor and drops the 100% claim - the owner ruled that the spec must state the tested floor and must never claim 100%. (2) .agents/scripts/security-scan.js: maxWindowEntropy is now exported so the statistic the rule actually uses is reachable by a test, and tests/test_inj_secret_detection.test.js now indexes the per-branch miss counts by POSITION instead of by the branch's token length - the old line destructured the length as if it were the index, so the 95/100 floor asserted nothing and the suite stayed green when the statistic was reverted to the window minimum. The scanner's detection behaviour did not change: the export is additive, the corpus fixtures are unchanged, and the release scan still reports the same 5 findings and 21 suppressions. The scanner diff was presented in the review panel record before this re-pin."
+    }
+  ,
+    {
+      "date": "2026-10-22",
+      "reviewed_by": "agent-performed re-pin on owner instruction (standing \"you do it\" for this work stream). NOT human-read - agent-satisfied for this lane; the diff was presented in the review panel record.",
+      "reason": "Re-pin 2026-10-22 (second panel round), spec_sha256_prefix ONLY: a253242c24d7aad4 -> 1a369ae4c143d23f. One change, disclosure only: the INJ-SECRET note now records a KNOWN FALSE-POSITIVE CLASS that the move to the maximum-window statistic introduced - credential-SHAPED PLACEHOLDERS whose value merely contains varied characters are now reported (measured: password = \"your_password_here_change\", secret = \"correcthorsebatterystaple\", token = \"sk-proj-AAAA...\" are reported now and none of them was reported under the window-MINIMUM statistic). The owner's ruling was a MISS-rate residual; this false-positive class was not part of that ruling, so it is disclosed and recorded as an open item for the owner rather than folded into an accepted residual. The scanner and the detection behaviour are UNCHANGED, so scanner_sha256_prefix is deliberately unchanged."
+    }
+  ,
+    {
+      "date": "2026-10-22",
+      "reviewed_by": "agent-performed re-pin on owner instruction (standing \"you do it\" for this work stream). NOT human-read - agent-satisfied for this lane; the diff was presented in the review panel record.",
+      "reason": "Re-pin 2026-10-22 (second panel round), spec_sha256_prefix ONLY: 1a369ae4c143d23f -> 0d25ba189e25ce7d. One change, disclosure only: the INJ-SECRET note now records a KNOWN FALSE-POSITIVE CLASS that the move to the maximum-window statistic introduced - credential-SHAPED PLACEHOLDERS whose value merely contains varied characters are now reported (measured on 2026-10-22: an ordinary-word passphrase assigned to a password field, the well-known correcthorsebatterystaple example assigned to a secret field, and a provider-prefixed placeholder assigned to a token field are all reported now, and none of them was reported under the window-MINIMUM statistic). The examples are DESCRIBED rather than spelled out, because spelling them made this note itself a finding. The owner's ruling was a MISS-rate residual; this false-positive class was not part of that ruling, so it is disclosed and recorded as an open item for the owner rather than folded into an accepted residual. The scanner and the detection behaviour are UNCHANGED, so scanner_sha256_prefix is deliberately unchanged."
+    }
+  ,
+    {
+      "date": "2026-10-22",
+      "reviewed_by": "agent-performed re-pin on owner instruction (standing \"you do it\" for this work stream). NOT human-read - agent-satisfied for this lane; the diff was presented in the review panel record.",
+      "reason": "Re-pin 2026-10-22 (fifth panel round), spec_sha256_prefix ONLY: 0d25ba189e25ce7d -> ac3ecc0c0bc206d7. One change, disclosure only: the INJ-SECRET note now states the FALSE-POSITIVE RATE (two independent panel seats measured 21/25 and 18/25 realistic placeholders reported, 72-84%), the ALLOWLIST CONSEQUENCE (the entry that silences a placeholder is per-FILE and also silences a live key in that file, while the allowlist defines every entry as a human-read claim), the strip list accurately (the pattern has eight alternatives and the list is not one-per-alternative), and the seeded-branch coverage (the 95/100 floor is over FIVE of the eight branches, not all eight). No behaviour changed: the scanner and its detection are untouched, the release scan still reports the same 5 findings and 21 suppressions, and scanner_sha256_prefix is deliberately unchanged."
+    }
+  ,
+    {
+      "date": "2026-10-22",
+      "reviewed_by": "agent-performed re-pin on owner instruction (standing \"you do it\" for this work stream). NOT human-read - agent-satisfied for this lane; the diff was presented in the review panel record.",
+      "reason": "Re-pin 2026-10-22 (sixth panel round), spec_sha256_prefix ONLY: ac3ecc0c0bc206d7 -> 3b85777cad046293. One change, disclosure only: the strip-prefix list in the INJ-SECRET note now names xoxs- as well, because the scanner's own PROVIDER_PREFIX_RE strips xox[abprs]- and the note's list was short by one. No behaviour changed: the scanner and its detection are untouched, and scanner_sha256_prefix is deliberately unchanged."
+    }
+  ,
+    {
+      "date": "2026-10-22",
+      "reviewed_by": "agent-performed re-pin on owner instruction (standing \"you do it\" for this work stream). NOT human-read - agent-satisfied for this lane; the diff was presented in the review panel record.",
+      "reason": "Re-pin 2026-10-22 (seventh panel round), spec_sha256_prefix ONLY: 3b85777cad046293 -> 44b2d4548beb964c. One change, disclosure only: the INJ-SECRET note now gives the false-positive rate as FOUR corpus-specific measurements (2/24, 7/13, 18/25, 21/25, a span of 8-84%) and says plainly that no corpus fixture ships, so the rate is not reproducible by a reader. The previous wording named two measurements and left the other two out, which made the stated rate look tighter than it was. No behaviour changed: the scanner and its detection are untouched, and scanner_sha256_prefix is deliberately unchanged."
+    }
+  ,
+    {
+      "date": "2026-10-22",
+      "reviewed_by": "agent-performed re-pin on owner instruction (standing \"you do it\" for this work stream). NOT human-read - agent-satisfied for this lane; the diff was presented in the review panel record.",
+      "reason": "Re-pin 2026-10-22 (eighth panel round), spec_sha256_prefix ONLY: 44b2d4548beb964c -> 5b0ebb0acaa8df8d. One change, disclosure only: the INJ-SECRET note said 'no corpus fixture ships in the repository, so the rate is NOT reproducible by a reader'. That is false - the repository ships credential-shaped placeholders in its own baseline files and test fixtures, and one panel seat assembled a corpus from three shipped strings and measured 3 of 3, ABOVE the disclosed 8-84% span. The note now says the rate is a property of the corpus rather than of the rule, and that no number here should be quoted as a calibrated rate. No behaviour changed: the scanner is untouched and scanner_sha256_prefix is deliberately unchanged."
+    }
+  ,
+    {
+      "date": "2026-10-22",
+      "reviewed_by": "agent-performed re-pin on owner instruction (standing \"you do it\" for this work stream). NOT human-read - agent-satisfied for this lane; the diff was presented in the review panel record.",
+      "reason": "Re-pin 2026-10-22 (ninth panel round), spec_sha256_prefix ONLY: 5b0ebb0acaa8df8d -> d2e105b5873928d8. One change, coverage only: the release scope's root_files list now includes README.md, CHANGELOG.md and LICENSE. The @security-engineer seat measured that README.md is SHIPPED by `npm pack` and was outside the scan scope, so a credential-shaped value in it returned the launch gate `exit 0, verdict PASS, failures 0` with `dropped_total: 1` - a live fail-open on the release path. Measured: scanning the three files reports 0 findings, so no rule-level exclusion was needed and no detection behaviour changed. The scanner's bytes are UNCHANGED, so scanner_sha256_prefix is deliberately unchanged; the corpus spec is unchanged too."
+    }
+  ,
+    {
+      "date": "2026-10-22",
+      "reviewed_by": "agent-performed re-pin on owner instruction (standing \"you do it\" for this work stream). NOT human-read - agent-satisfied for this lane; the diff was presented in the review panel record.",
+      "reason": "Re-pin 2026-10-22 (tenth panel round), spec_sha256_prefix ONLY: d2e105b5873928d8 -> 0f6e8851c1980b76. One change, coverage only: the scope's excluded_trees no longer excludes security/supply-chain-audit-spec.md, which IS shipped by `npm pack` and was therefore a credential-shaped value dropped from the scan with the launch gate returning `exit 0, verdict PASS, failures 0`. Measured: with the exclusion removed the file scans with 0 findings, so the exclusion was not needed. Every entry on the exclusion list was checked the same way against `npm pack --dry-run --json`: it is the only shipped one. The scope now carries an excluded_trees_note recording the check. The scanner's bytes are UNCHANGED, so scanner_sha256_prefix is deliberately unchanged; the corpus spec is unchanged too."
+    }
+  ,
+    {
+      "date": "2026-10-22",
+      "reviewed_by": "agent-performed re-pin on owner instruction (standing \"you do it\" for this work stream). NOT human-read - agent-satisfied for this lane; the diff was presented in the review panel record.",
+      "reason": "Re-pin 2026-10-22 (tenth panel round), spec_sha256_prefix ONLY: 0f6e8851c1980b76 -> e1e480b377edf98b. One change, coverage only, in two parts. (1) The scope's excluded_trees no longer excludes security/supply-chain-audit-spec.md, which IS shipped by `npm pack` and was therefore a credential-shaped value dropped from the scan with the launch gate returning `exit 0, verdict PASS, failures 0`. Measured: with the exclusion removed the file scans with 0 findings against a rule table that does not contain its own pattern text, so the exclusion was not needed. (2) The file DOES match the INJ-ROLE rule, because it DESCRIBES the role pattern in prose, so it is now in INJ-ROLE's documented-FP list - per-rule, not per-tree, so INJ-SECRET still scans the file and a credential in it is a finding. Every entry on the exclusion list was checked the same way against `npm pack --dry-run --json`: it is the only shipped one. The scope now carries an excluded_trees_note recording the check. The scanner's bytes are UNCHANGED, so scanner_sha256_prefix is deliberately unchanged; the corpus spec is unchanged too."
+    }
+  ,
+    {
+      "date": "2026-10-23",
+      "reviewed_by": "agent-performed re-pin on owner instruction (standing \"you do it\" for this work stream). NOT human-read - agent-satisfied for this lane; the diff was presented in the review panel record.",
+      "reason": "Re-pin 2026-10-23 (tenth panel round), spec_sha256_prefix ONLY: e1e480b377edf98b -> 80816deeb9914dd1. One change, prose only: the scope's root_files_note had a spliced sentence - the justification for listing `index.js` (a root entry module is ordinary product code) had been deleted mid-sentence, leaving '`index.js` is listed because a 2026-10-23 ... the list was still short'. The @security-engineer seat flagged it LOW and exactly right: that note is the disclosure surface a future maintainer reads to understand the include-list hole, and a broken sentence there invites misreading the scope. The sentence is repaired and nothing else changed. The scanner's bytes are UNCHANGED, so scanner_sha256_prefix is deliberately unchanged."
+    }
+  ,
+    {
+      "date": "2026-10-22",
+      "reviewed_by": "agent-performed re-pin on owner instruction (standing \"you do it\" for this work stream). NOT human-read - agent-satisfied for this lane; the diff was presented in the review panel record.",
+      "reason": "Re-pin 2026-10-22 (tenth panel round), spec_sha256_prefix ONLY: 80816deeb9914dd1 -> 80816deeb9914dd1. One change, coverage only: the scope's excluded_trees no longer excludes security/supply-chain-audit-spec.md, which IS shipped by `npm pack` and was therefore a credential-shaped value dropped from the scan with the launch gate returning `exit 0, verdict PASS, failures 0`. Measured: with the exclusion removed the file scans with 0 findings, so the exclusion was not needed. Every entry on the exclusion list was checked the same way against `npm pack --dry-run --json`: it is the only shipped one. The scope now carries an excluded_trees_note recording the check. The scanner's bytes are UNCHANGED, so scanner_sha256_prefix is deliberately unchanged; the corpus spec is unchanged too."
     }
   ]
 }

@@ -60,7 +60,19 @@ function fixture(entries) {
   return dir;
 }
 
-const ent = (domain, title, date = '2026-10-05') =>
+// Fixture dates MUST be relative to today, never hardcoded. The reclassify write path
+// calls the retention policy (orchestrator_state.js compact), which retires any
+// active-decisions entry older than RETENTION_DAYS (30) into artifacts/memory/archive/.
+// With a fixed date this suite passed until the real clock moved 30 days past it, then
+// "remaining entries must survive" started failing because retention — not the block
+// removal under test — had moved them. Measured 2026-11-06: 2026-10-05 was 32 days old.
+const daysAgo = (n) => {
+  const d = new Date();
+  d.setUTCDate(d.getUTCDate() - n);
+  return d.toISOString().split('T')[0];
+};
+
+const ent = (domain, title, date = daysAgo(0)) =>
   `### [${domain}] ${title} [date: ${date}] [agent: @tester]\nBody for ${title}.\n**Status:** active\n`;
 
 const headersIn = (dir, file) =>
@@ -99,7 +111,7 @@ test('reclassify matching works on a title prefix, not just the full header', ()
   // A stored header carries trailing [date:] / [agent:] tags. Demanding exact equality
   // rejected the obvious spelling of the title and pushed operators toward pasting
   // machine metadata by hand.
-  const dir = fixture([ent('PROCESS', 'A very long audit title that continues', '2026-10-04')]);
+  const dir = fixture([ent('PROCESS', 'A very long audit title that continues', daysAgo(1))]);
   try {
     {
       const r = reclassify(dir, ['--from', 'active-decisions.md', '--to', 'lessons-learned.md',
@@ -149,12 +161,13 @@ test('reclassify refuses to duplicate an entry the destination already has', () 
 });
 
 test('reclassify preserves the original date and agent', () => {
-  const dir = fixture([ent('PROCESS', 'Dated work log', '2026-09-01')]);
+  const originalDate = daysAgo(7);
+  const dir = fixture([ent('PROCESS', 'Dated work log', originalDate)]);
   try {
     reclassify(dir, ['--from', 'active-decisions.md', '--to', 'lessons-learned.md',
       '--header', '[PROCESS] Dated work log']);
     const dst = fs.readFileSync(path.join(dir, 'artifacts/memory/lessons-learned.md'), 'utf8');
-    assert.ok(dst.includes('[date: 2026-09-01]'), 'date preserved');
+    assert.ok(dst.includes(`[date: ${originalDate}]`), 'date preserved');
     assert.ok(dst.includes('@tester'), 'agent preserved');
   } finally { fs.rmSync(dir, { recursive: true, force: true }); }
 });

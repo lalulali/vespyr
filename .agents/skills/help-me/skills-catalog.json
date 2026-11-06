@@ -70,7 +70,7 @@
   },
   {
     "name": "create-skill",
-    "description": "Create new skills and design lightweight skill evals. Make sure to use this skill whenever the user mentions creating a skill, adding a new skill, authoring workflow instructions, turning a conversation/workflow into a skill, building custom skill logic, or doing a major rewrite of an existing skill. For surgical tweaks to an existing skill's triggering, description, or workflow steps, use /customize-skill instead.",
+    "description": "Create new skills, modify and improve existing skills, and measure whether they work. Use when the user says \"create a new skill\", \"turn what we just did into a skill\", \"package this workflow\", \"rebuild this skill\", \"write an eval suite for this skill\", \"why isn't this skill triggering\", or invokes /create-skill. Covers scaffolding, frontmatter, harness neutrality, benchmarks, and trigger verification. For surgical tweaks to an existing skill use /customize-skill instead.",
     "prerequisites": [],
     "outputs": [
       "artifacts/memory/active-decisions.md"
@@ -412,6 +412,50 @@
     ]
   },
   {
+    "name": "maintenance-execute",
+    "description": "Execute one owner-authorized maintenance plan inside an existing maintenance run. Use when the user invokes `/maintenance-execute`, asks to execute an approved maintenance plan, or asks to carry out the tasks of an authorized closeout plan. Do not use for product planning, product phase transitions, or gate-green claims.",
+    "prerequisites": [
+      "The caller supplies an absolute external --state-root, an existing runId, the absolute path of the plan revision to execute, and the active agent name. Pass --state-root explicitly on every command: the helper reads no environment variable, so VESPYR_MAINTENANCE_STATE_ROOT is not a fallback and a missing flag fails closed. Do not substitute an environment fallback, generate a run ID, or fall back to product state.",
+      "The plan is the canonical revision file directly under artifacts/output/maintenance/<run-id>/, named maintenance-plan-<plan-id>-r<revision>.md, with recordStatus: DRAFT and a dirtyManifest that matches the computed fingerprint for its relevant paths.",
+      "The documented plan-check command passes for that exact plan file. The checker always reports executionAuthorized: false; its result is a recorded claim about the record contract, never a permission to execute.",
+      "The external state holds a plan_drafted event and a plan_approved event for the same plan identity, and the approval carries an owner evidence reference. Both are unverified claims until that evidence is read.",
+      "B1, O-4, B10, and credential-residual are visible with their own status. No agent resolves them."
+    ],
+    "outputs": [
+      "artifacts/output/maintenance/",
+      "artifacts/output/pipeline-state.json",
+      "artifacts/output/sprint-status.yaml",
+      "artifacts/memory/project-context.md"
+    ],
+    "key_agents": [
+      "@qa-engineer",
+      "@security-engineer",
+      "@code-reviewer",
+      "@architect"
+    ]
+  },
+  {
+    "name": "maintenance-plan",
+    "description": "Create a source-linked, revision-bound plan for one approved maintenance run. Use when the user invokes `/maintenance-plan`, asks to plan an approved maintenance run, or requests bounded closeout tasks from that run's maintenance brief, spec, and work items. Do not use for product planning or code execution.",
+    "prerequisites": [
+      "The caller supplies an absolute external --state-root and an existing approved runId. Pass --state-root explicitly on every command: the helper reads no environment variable, so VESPYR_MAINTENANCE_STATE_ROOT is not a fallback and a missing flag fails closed. Do not substitute an environment variable, generate a run ID, or fall back to product state.",
+      "The maintenance startup and state scripts are available. Step 0 must confirm the state root is canonical, outside the repository, and bound to the supplied run ID.",
+      "The returned artifact root contains maintenance-bootstrap-plan.md, maintenance-brief.md, maintenance-spec.md, maintenance-work-items.md, and maintenance-plan-contract.md. The external state must contain a recorded T005 completion claim. Treat all state events and approval entries as unverified claims, not authenticated facts.",
+      "The caller or an external run-state record supplies the exact base revision. After Step 1 reconciles the inputs, record working-tree identity from repository metadata and, for a dirty tree, a sorted content-hash manifest of only the relevant files inspected or required by the plan. Do not hash the whole checkout or read product runtime state to build it. If the base revision or relevant-file identity cannot be established within this boundary, stop.",
+      "The plan carries a dirtyManifest identity field: one single-line JSON object with schema dirty-manifest-v1 and a files array of per-file fingerprints. It is generated by the documented manifest command, never hand-written. A dirty relevant set must be declared; a clean relevant set is an empty files array.",
+      "The maintenance plan checker exists and documents two read-only commands. maintenance_plan_check.js manifest computes the dirty-manifest fingerprint for the plan's relevant paths; maintenance_plan_check.js check validates one draft plan. Both require --scope maintenance, --repo-root, --state-root, --run-id, --plan, and --json, both write nothing, and both emit executionAuthorized: false. Use the exact command shapes in Step 2 and Step 3. Do not guess a command shape, rename a flag, or substitute another checker."
+    ],
+    "outputs": [
+      "artifacts/output/maintenance/",
+      "artifacts/output/pipeline-state.json",
+      "artifacts/output/sprint-status.yaml",
+      "artifacts/memory/project-context.md"
+    ],
+    "key_agents": [
+      "@tech-lead"
+    ]
+  },
+  {
     "name": "memory",
     "description": "Search archived memory entries — retrieve historical context that has been compacted. Use when the user says \"what was the decision we made about X\", \"show me past lessons on Y\", \"find the architecture decision for Z\", or invokes /memory to search project history.",
     "prerequisites": [],
@@ -536,7 +580,8 @@
       "artifacts/output/02-research/root-cause-analysis.md"
     ],
     "key_agents": [
-      "@product-manager"
+      "@product-manager",
+      "@code-reviewer"
     ]
   },
   {

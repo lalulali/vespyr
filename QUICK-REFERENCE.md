@@ -160,6 +160,11 @@ Operations & Customization:
   /create-agent        Author and register new agent personas
   /customize-agent     Guided TOML authoring for agent settings, permissions, and models
 
+Internal Engine Maintenance (separate lane, outside the product pipeline):
+  /maintenance-plan     Draft one bounded, revision-bound plan for an approved maintenance run
+  /maintenance-execute  Execute one owner-authorized plan revision and capture evidence
+                        (never advances or completes a product phase)
+
 ──────────────────────────────────────────────────
 
 SHARED MEMORY (artifacts/memory/)

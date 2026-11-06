@@ -1,6 +1,6 @@
 # Workflows & Skills
 
-Vespyr organizes multi-agent execution into **20 specialized personas**, structured **skills** (40 curated workflows located in `.agents/skills/`), and a **shared persistent memory layer** (`artifacts/memory/`).
+Vespyr organizes multi-agent execution into **20 specialized personas**, structured **skills** (42 curated workflows located in `.agents/skills/`), and a **shared persistent memory layer** (`artifacts/memory/`).
 
 The canonical pipeline consists of 11 phases (Phase -1…9, see [phase-table.md](./references/phase-table.md)); the core milestone groupings below provide rapid orientation.
 
@@ -64,7 +64,7 @@ Every agent persona adheres to the core system principle:
 
 ---
 
-## 4. Curated Skills Catalog (40 Skills)
+## 4. Curated Skills Catalog (42 Skills)
 
 Skills are invoked via `/skill-name` or by referencing `.agents/skills/[name]/SKILL.md`.
 
@@ -106,6 +106,12 @@ Skills are invoked via `/skill-name` or by referencing `.agents/skills/[name]/SK
 - **`/incident`**: Production incident triage, mitigation, root-cause analysis, and post-mortem.
 - **`/retro`**: Post-cycle review, estimate calibration, and memory compaction.
 - **`/legal-safety-audit`**: Legal/compliance safety audit — generates policy drafts (privacy, terms, refund, cookie, consent banner, email footer) and audits the app for consent, data minimization, third-party SDKs, dark patterns, hidden fees, unsupported claims, accessibility, kids-data consent, and data deletion. Produces drafts and flags, never legal advice.
+
+### 🔧 Internal Engine Maintenance (separate lane)
+- **`/maintenance-plan`**: Draft one source-linked, revision-bound maintenance plan for an already approved maintenance run. Planning only — it never executes code changes.
+- **`/maintenance-execute`**: Execute exactly one owner-authorized maintenance plan revision and capture revision-bound evidence. It never plans, never authorizes, and never decides.
+
+> **Not part of the product pipeline.** This lane is internal engine maintenance: it runs outside the 11-phase product pipeline against its own external state root, and it never advances or completes a product phase — including the trial-to-paid phase. It does not write product pipeline state, product memory, or product session state, and it never produces a gate-green verdict.
 
 ### 🧭 Swarm Co-Pilot & Challenge
 - **`/help-me`**: Conversational project navigator and recommended slash command router.

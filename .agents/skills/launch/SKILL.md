@@ -62,7 +62,9 @@ documentation still promised the check.
   hardcoded production credential through. Do not narrow the gate to a severity tier: a credential
   in shipped source is a blocker whatever the scanner's label says.
 - A rollback plan does not exist for the release — **checked**, as a `## Rollback` section in
-  `go-nogo-decision.md` stating the trigger, the owner, and the time to revert. A heading with no
+  `go-nogo-decision.md` with a substantive body naming an owner (`@handle`). The trigger and the
+  time to revert are asked for by step-01 and are NOT checked by the gate — this line used to
+  claim they were. A heading with no
   body is not a plan.
 
 ## Done when
@@ -70,9 +72,17 @@ documentation still promised the check.
   exits 0 **and** reports `verdict: PASS` (a `SKIPPED` run means `release-readiness.md` is absent — that
   is not a pass). **The `--scan-allowlist` flag is part of the command, not an optional extra.** Blind
   /launch run 7 measured that omitting it makes this gate permanently red on any repo with a reviewed
-  allowlist: the 28 reviewed false positives read as 28 live findings, and a gate that can never go
+  allowlist: every reviewed false positive reads as a live finding (21 of them at the 2026-10-22 measurement), and a gate that can never go
   green gets ignored. Omitting it is still fail-closed and never unsafe — it is a usability defect in
   the documented path, not a broken check. A named-but-missing allowlist fails the gate.
+    **In THIS repository the command does not exit 0**, and that is deliberate: the scan leg reports
+    five prose findings (INJ-PROMPT and INJ-TOOL in `.agents/TROUBLESHOOTING.md`, `.agents/skills.md`
+    and `.agents/agents/security-engineer.md`) that the owner has reviewed and ruled as known.
+    `steps/step-01-readiness-check.md` records that ruling. The condition above describes what the
+    gate must do on a clean tree, not what it does here.
+    **AND the five scan findings are not the failure that fires here**: the documented command exits 1
+    with ONE failure — `release-readiness.md is absent`, because the check returns before the scan leg
+    becomes a failure. The five findings are in the output, not in the exit reason.
 - All five step files are in `stepsCompleted`
 - `artifacts/output/06-launch/launch-log.md` exists
 - Post-launch monitoring thresholds are defined and the smoke test has passed against production
@@ -89,9 +99,9 @@ documentation still promised the check.
 `execution-plan.md` is **not** checked. This line previously said "all four", which a blind /launch run
 (2026-10-08) disproved by shipping a release with no plan and a PASS. Corrected rather than papered
 over: requiring a plan for every release is a policy question, not obviously right for a small fix, so
-it is recorded as an unchecked prerequisite instead of being invented as a gate here. `DEFAULTS.plan`
-exists in the checker and is unused — a declaration that reads like an implemented check, which is the
-defect class this gate has been removing all session.
+it is recorded as an unchecked prerequisite instead of being invented as a gate here. A declaration
+that reads like an implemented check is the defect class this gate has been removing all session, and
+that is why it was removed rather than left standing.
 
 **What a PASS does not prove**, recorded here because every blind run that reached GO said the same
 thing in its own words:

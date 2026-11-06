@@ -745,6 +745,23 @@ function detectMethod(targetDir, isGlobal) {
 const MANIFEST_EXCLUDE_FILES = new Set([
 	".DS_Store",
 	"manifest.json",
+	// Files the repository's own ignore rules exclude. They exist in one developer's tree and in
+	// NO clean checkout, so pinning them made the integrity gate permanently red off the author's
+	// machine — and `.github/workflows/publish.yml` runs `bin/cli.js verify` on every tag, so the
+	// publish gate could never pass. Measured 2026-10-22 on a clean checkout of the candidate:
+	// exit 1, "2 missing file(s): .gitignore, package-lock.json". `.agents/.gitignore` self-ignores
+	// (its own line 5) and the root `.gitignore` ignores `package-lock.json` (its line 9).
+	// LIMIT, stated rather than hidden: this is a name list, not a general "skip everything git
+	// ignores" rule, and the exclusion matches by BASE NAME at ANY DEPTH under .agents/. A future
+	// gitignored file would have to be added here, and a future TRACKED file with one of these names
+	// would be skipped without ever being verified.
+	".gitignore",
+	"package-lock.json",
+	// `.agents/.gitignore` ignores these three too (its lines 2-4). A file the repository ignores
+	// and a clean checkout does not have cannot be pinned by a manifest.
+	"pnpm-lock.yaml",
+	"bun.lock",
+	"yarn.lock",
 ]);
 const MANIFEST_EXCLUDE_DIRS = new Set(["node_modules", ".git", ".bak"]);
 function isBackupLitter(name) {

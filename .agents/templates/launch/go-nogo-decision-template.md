@@ -79,6 +79,8 @@ Issues that are known but are acceptable to ship with.
 - Critical user-facing bug discovered
 - Any Critical security vulnerability
 
+**Rollback owner:** `@[agent]` — the person who runs the procedure below. A plan with no owner is a plan nobody runs; the launch gate rejects a rollback section that names none.
+
 **Rollback procedure:**
 1. [Step 1]
 2. [Step 2]
@@ -116,7 +118,13 @@ Issues that are known but are acceptable to ship with.
 
 ## 7. Decision
 
-**Decision:** ✅ GO / ❌ NO-GO / 🟡 CONDITIONAL GO
+**Decision:** GO / NO-GO / CONDITIONAL GO
+
+<!-- Write exactly one of GO, NO-GO, or CONDITIONAL GO directly after the label — no emoji, and
+     nothing else on the line. The line above is an UNEDITED MENU on purpose: the launch gate treats
+     a line carrying several decision tokens as a CONFLICT and fails it, so a copied template that
+     nobody edited cannot read as an approval. Replace the whole line with one token before
+     shipping. -->
 
 **Decision date:** ...
 **Decision made by:** @product-manager, @product-manager, @tech-lead

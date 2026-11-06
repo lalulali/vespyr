@@ -76,10 +76,16 @@ test('memory_check: runs against the memory tree and reports a verdict per file'
   // `--file`, and it DOES NOT SUPPORT `--json`: it prints human `[PASS]/[FAIL]` lines regardless and
   // exits on the worst file. Assuming the common `--file`+`--json` interface here was my own error,
   // and it is recorded because every gate has its own CLI and the only way to learn it is to run it.
-  const r = runGate('memory_check.js', ['check', '--dir', path.join(REPO, 'artifacts/memory')]);
+  // A FIXTURE, not the repository's own memory tree. `artifacts/` is gitignored, so it does not
+  // exist in a fresh checkout — running the gate against it made this test fail on a clean clone.
+  const dir = tmp();
+  fs.writeFileSync(path.join(dir, 'project-context.md'), '# Project Context\n\n## [CORE]\nProject: Test\n');
+  fs.writeFileSync(path.join(dir, 'active-decisions.md'), '# Active Decisions\n');
+  const r = runGate('memory_check.js', ['check', '--dir', dir]);
   assert.ok(/\[PASS\]|\[FAIL\]/.test(r.stdout),
     `it must report a verdict per file, got: ${(r.stdout || r.stderr).slice(0, 160)}`);
   assert.match(r.stdout, /Summary: \d+ file\(s\) checked/, 'it must summarise what it checked');
+  fs.rmSync(dir, { recursive: true, force: true });
 });
 
 test('memory_check: a missing memory directory is a failure, not a pass', () => {

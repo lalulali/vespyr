@@ -86,6 +86,15 @@ Vespyr organizes complex operations into atomic skills. Each skill is a folder w
 | `/create-agent` | Scaffold and register new agent personas |
 | `/customize-agent` | Preview TOML customization declarations for agents |
 
+### Internal Engine Maintenance
+
+Separate from the product pipeline. These skills run engine maintenance against their own external state root, and they never advance or complete a product phase — including the trial-to-paid phase.
+
+| Command | Description |
+|---------|-------------|
+| `/maintenance-plan` | Draft one source-linked, revision-bound maintenance plan for an already approved maintenance run |
+| `/maintenance-execute` | Execute exactly one owner-authorized maintenance plan revision and capture revision-bound evidence |
+
 ## Pipeline Phase Table
 
 Vespyr's 11-phase pipeline. `.agents/references/phase-table.md` is the canonical source.

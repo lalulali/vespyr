@@ -1,28 +1,28 @@
 ---
 name: humanize
-description: Remove signs of AI-generated writing from text with user-selectable tone. Use when editing or reviewing text to make it sound more natural and human-written. Supports tone selection (casual, formal, professional, technical, and more) — ask the user for a tone only if they haven't specified one. Based on Wikipedia's comprehensive Signs of AI writing guide. Detects and fixes patterns such as inflated symbolism, promotional language, superficial -ing analyses, vague attributions, em dash overuse, rule of three, AI vocabulary words, passive voice, negative parallelisms, and filler phrases.
+description: Core Deslop & Plain-Clarity Engine — removes signs of AI-generated writing, replaces fancy/thesaurus words with plain words, and eliminates circumlocution (circling around the point) with user-selectable tone. Use when editing or reviewing text to make it sound natural, simple, and human-written.
 license: MIT
 allowed-tools: Read Write Edit Grep Glob AskUserQuestion
 metadata:
-  version: "2.6.0"
-  last_updated: "2026-09-30"
+  version: "2.7.0"
+  last_updated: "2026-10-29"
   source_file: "https://github.com/blader/humanizer/blob/main/SKILL.md"
 ---
 
 > **Source:** [github.com/blader/humanizer](https://github.com/blader/humanizer) — MIT license.
-> Upstream repo: `github.com/blader/humanizer`, file `SKILL.md` at the repo root, branch `main`. Version tracked: 2.6.0.
+> Upstream repo: `github.com/blader/humanizer`, file `SKILL.md` at the repo root, branch `main`. Version tracked: 2.7.0.
 > **To update:** fetch upstream and diff it against this file *and* `references/patterns.md`. The pattern
 > catalog was split out of this file in 02s to keep the body under 500 lines — replacing only this file
 > from upstream would drop the extracted catalog and silently undo the split. Re-apply any new upstream
 > pattern to `references/patterns.md`, and bump `metadata.version` on both files together.
 
-# Humanizer: Remove AI Writing Patterns
+# Humanizer: Core Deslop & Plain-Clarity Engine
 
 ## What this skill does
 
-You are a writing editor that identifies and removes signs of AI-generated text to make writing sound more natural and human. This guide is based on Wikipedia's "Signs of AI writing" page, maintained by WikiProject AI Cleanup.
+You are a writing editor and the **Core Deslop & Plain-Clarity Engine** of Vespyr (`DNA 7 §6`). You identify and remove signs of AI-generated text, replace pretentious/fancy vocabulary with direct everyday words, eliminate circumlocution (circling around the point), and make writing easy to understand on the very first read. This guide is based on Wikipedia's "Signs of AI writing" page (maintained by WikiProject AI Cleanup) plus Vespyr's **Plain-Word Clarity & Anti-Circumlocution** rules.
 
-The 29-pattern catalog and the full worked example live in **`references/patterns.md`** — load that file when you need the exhaustive list or the before/after reference. This body carries the operating rules.
+The 33-pattern catalog and the full worked example live in **`references/patterns.md`** — load that file when you need the exhaustive list or the before/after reference. The deterministic linter lives in **`scripts/prose_linter.js`** (backed by **`references/anti-slop-lexicon.json`**). This body carries the operating rules.
 
 ## When to use
 - "Humanize this" / "make this sound less like AI" / "de-AI this text"
@@ -163,7 +163,7 @@ Avoiding AI patterns is only half the job. Sterile, voiceless writing is just as
 
 ## Pattern catalog
 
-The 29-pattern catalog and the full worked example live in **`references/patterns.md`**.
+The 33-pattern catalog and the full worked example live in **`references/patterns.md`**.
 Load it when you need the exhaustive list or the before/after reference. The sections
 below carry the operating rules — you do not need the catalog loaded to apply them.
 
@@ -174,8 +174,9 @@ below carry the operating rules — you do not need the catalog loaded to apply 
 | Style | 14–19 | em dash overuse, boldface, inline-header lists, title case, emojis, curly quotes |
 | Communication | 20–22 | chatbot artifacts pasted as content, knowledge-cutoff disclaimers, sycophantic tone |
 | Filler and hedging | 23–29 | filler phrases, excessive hedging, generic conclusions, hyphenated pairs, authority tropes, signposting, fragmented headers |
+| Plain-word clarity & anti-circumlocution | 30–33 | fancy/thesaurus words (`utilize` → `use`, `elucidate` → `explain`, `ameliorate` → `fix`), circumlocution & zombie nominalizations (`came to the realization that` → `realized`), foggy abstraction (explaining simple things in a complicated way), wrong-register synonym drift |
 
-Fast path: grep the input for the `**Words to watch:**` lists before reading anything else.
+Fast path: grep the input for the `**Words to watch:**` lists or run `node .agents/skills/humanize/scripts/prose_linter.js --file <path>` before reading anything else.
 
 ---
 
@@ -183,19 +184,21 @@ Fast path: grep the input for the `**Words to watch:**` lists before reading any
 
 1. **Read the input text carefully.** This was the tail of step 1's tone clause, where it read as part of "(c) ask only if unclear" — an action with nothing to do with tone, sitting inside a tone sub-clause.
 2. **Determine the tone** — (a) If the user named a tone, use it. (b) Otherwise, infer a tone from the content's purpose and proceed with it, stating the suggestion. (c) Ask the user once, using your harness's question tool, only if the purpose is genuinely unclear (see TONE SELECTION).
-3. Identify all instances of the patterns above
-4. Rewrite each problematic section
+3. Identify all instances of the patterns above (including fancy/thesaurus words and circumlocution that circles around the point)
+4. Rewrite each problematic section into plain, direct words that convey the exact message on the first read
 5. Ensure the revised text:
    - Sounds natural when read aloud
+   - Uses simple, everyday words instead of pretentious Latinate/thesaurus words
+   - Never circles around the point with zombie nominalizations (`in the process of`, `came to the realization that`)
    - Varies sentence structure naturally
    - Uses specific details over vague claims
    - Matches the selected tone consistently (word choice, contractions, sentence rhythm)
    - Uses simple constructions (is/are/has) where appropriate
 6. Present a draft humanized version
-7. Prompt: "What makes the below so obviously AI generated?"
+7. Prompt: "What makes the below so obviously AI generated, overly fancy, or circling around the point?"
 8. Answer briefly with the remaining tells (if any)
-9. Prompt: "Now make it not obviously AI generated."
-10. Present the final version (revised after the audit)
+9. Prompt: "Now make it plain, direct, and not obviously AI generated."
+10. Present the final version (revised after the audit, verified against `scripts/prose_linter.js` when editing a file)
 
 ## Output Format
 

@@ -8,6 +8,14 @@ on:
       - '.agents/**'
       - 'artifacts/**'
       - 'tests/**'
+      # `bin/**` is the manifest generator and `security/**` is the rule table: a change to either
+      # changes what the integrity gate and the scanner do, so it must trigger this workflow.
+      - 'bin/**'
+      - 'security/**'
+      # `tools/eval/lib/ast.js` is the DNA verdict parser and `opencode.json` is the harness
+      # configuration: `npm test` reads both, so a change to either must run the suite.
+      - 'tools/**'
+      - 'opencode.json'
       - 'package.json'
       - '.github/workflows/swarm-tests.yml'
   pull_request:
@@ -16,6 +24,14 @@ on:
       - '.agents/**'
       - 'artifacts/**'
       - 'tests/**'
+      # `bin/**` is the manifest generator and `security/**` is the rule table: a change to either
+      # changes what the integrity gate and the scanner do, so it must trigger this workflow.
+      - 'bin/**'
+      - 'security/**'
+      # `tools/eval/lib/ast.js` is the DNA verdict parser and `opencode.json` is the harness
+      # configuration: `npm test` reads both, so a change to either must run the suite.
+      - 'tools/**'
+      - 'opencode.json'
       - 'package.json'
       - '.github/workflows/swarm-tests.yml'
 
@@ -39,6 +55,12 @@ jobs:
 
       - name: Run test suite
         run: npm test
+      - name: Verify the install manifest (integrity gate)
+        # The publish workflow runs this too, but only on a tag. Running it on every pull request
+        # is what makes a manifest regression visible BEFORE a release: the manifest pins the files
+        # that are installed, and a file it pins that a clean checkout does not have makes the
+        # integrity gate permanently red off the author's machine.
+        run: node bin/cli.js verify --json
 
   install-smoke:
     name: Install smoke (real tarball, single leg)

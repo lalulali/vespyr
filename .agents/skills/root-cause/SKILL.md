@@ -94,9 +94,16 @@ tell you whether the analysis is correct, and it does not pretend to.
 
 Run this **before** the `complete` call below, so a non-conformant canvas is never recorded as
 delivered.
-**Root-cause minimums:** a 5-Whys chain of at least 3 levels; a Root Cause section stating an actual
-*cause* — not "someone was careless", which is where 5 Whys classically stops; and a Validation
-section saying how you would know.
+**What the gate requires — a 5-Whys chain of at least 3 levels; a `## Root Cause` section; a
+`## Validation` section saying how you would know; and a root cause that does not stop at blame**
+(the exact form "someone was careless" is rejected — the blame guard catches it).
+
+**What it asks for and does NOT enforce — that the stated root cause is a cause at all, rather than a
+symptom, a goal, or a restatement.** This paragraph used to head both lists under the word
+"minimums", which read as though the gate checked the second; the replacement first said the blame
+guard was unenforced too, which was also wrong (@code-reviewer, blind run 14, measured against the
+live checker). The blame half IS enforced. The cause-versus-symptom half is not, and cannot be — it
+is the judgement this whole exercise exists to leave to a human. See the known limits below.
 
 ## Known limits — recorded where a reviewer can read them
 

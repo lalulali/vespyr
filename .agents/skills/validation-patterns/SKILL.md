@@ -74,6 +74,13 @@ node .agents/scripts/validation_record_check.js check \
   --file artifacts/output/02-research/validation-results.md --json
 ```
 
+**The gate applies to a structured validation record, and that file is optional.** Step 4 writes the
+result to `active-decisions.md`; `validation-results.md` is produced only when the validation yields
+structured output (survey results, A/B data). This section used to invoke the gate against that path
+unconditionally, so a memory-only run — which followed every step — was told a required deliverable was
+missing. If there is no structured output, there is no record to check and the gate does not apply;
+say so in the memory entry rather than creating an empty file to satisfy a checker.
+
 | Rule | What is checked |
 |---|---|
 | **Record hygiene** | no unfilled template placeholders; a date in the declared `[date: YYYY-MM-DD]` form |

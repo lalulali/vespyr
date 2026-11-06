@@ -44,11 +44,11 @@ ${rows}
 Nothing outstanding.
 `;
 
-const ALL_SATISFIED = `| @product-manager | \`SATISFIED\` | readiness reviewed |
-| @tech-lead | \`SATISFIED\` | plan approved |
-| @qa-engineer | \`SATISFIED\` | qa-signoff.md GO with no blocking conditions |
-| @security-engineer | \`SATISFIED\` | scan clean |
-| @devops-engineer | \`SATISFIED\` | rollback rehearsed |
+const ALL_SATISFIED = `| @product-manager | \`SATISFIED\` | readiness reviewed 2026-10-16 |
+| @tech-lead | \`SATISFIED\` | plan approved | 2026-10-16 |
+| @qa-engineer | \`SATISFIED\` | qa-signoff.md GO with no blocking conditions | 2026-10-16 |
+| @security-engineer | \`SATISFIED\` | scan clean | 2026-10-16 |
+| @devops-engineer | \`SATISFIED\` | rollback rehearsed | 2026-10-16 |
 | @architect | \`NOT ACTIVATED\` | out of scope: no architectural surface changed |
 | @code-reviewer | \`NOT ACTIVATED\` | out of scope: no blocking review left |
 | @data-analyst | \`NOT ACTIVATED\` | out of scope: no telemetry surface changed |
@@ -100,6 +100,26 @@ If the error rate exceeds 2% for 5 minutes, @devops-engineer reverts the deploy 
 image and reopens billing. Takes about 4 minutes. Rehearsed 2026-10-08.
 `;
 
+/**
+ * Parse the gate's JSON output, or fail loudly.
+ *
+ * This harness used to swallow a spawn failure into `out = ''`, and `j = {}` made `failures` an
+ * empty array — so a test asserting "no failures" PASSED with the gate never having run, and a
+ * test asserting a failure saw `[]`. Under load the spawn fails and the suite goes red in ways
+ * that look like product defects. It is exported for its own test, because a guard that nothing
+ * tests is a guard that can be removed silently.
+ */
+function parseGateOutput(out, code) {
+  try {
+    return JSON.parse(out);
+  } catch {
+    throw new Error(
+      `the launch gate produced no JSON (exit ${code}); the harness must never treat a gate that ` +
+      `did not run as a pass: ${String(out).slice(0, 400)}`
+    );
+  }
+}
+
 function run(files, args = []) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'launchready-'));
   for (const [rel, body] of Object.entries(files)) {
@@ -112,8 +132,7 @@ function run(files, args = []) {
     out = execFileSync('node', [SCRIPT, 'check', '--root', dir, '--json', ...args], { encoding: 'utf8' });
   } catch (e) { code = e.status; out = `${e.stdout || ''}${e.stderr || ''}`; }
   fs.rmSync(dir, { recursive: true, force: true });
-  let j = {};
-  try { j = JSON.parse(out); } catch { /* non-JSON */ }
+  const j = parseGateOutput(out, code);
   return { code, json: j, failures: j.failures || [], warnings: j.warnings || [] };
 }
 
@@ -179,6 +198,135 @@ test('a NOT ACTIVATED reviewer needs a specific out-of-scope reason', () => {
     .concat(['| @ml-ai-ops | `NOT ACTIVATED` | out of scope: no model in this release |']).join('\n'));
   const r2 = run({ ...COMPLETE, 'artifacts/output/06-launch/release-readiness.md': ok });
   assert(!r2.failures.some((f) => /NOT ACTIVATED without/.test(f)), 'a reason must satisfy the check');
+});
+
+// --- the three live vectors from the run-12 B9 finding --------------------------------------------
+//
+// Each test below pins a vector that was MEASURED AS PASSING before the fix. A test that also
+// passes against the old behaviour is not a regression test, so each one names the shape it closes.
+//
+//   D1     an evidence cell that says nothing was checked ("not applicable", "nothing here",
+//          "no comment") satisfied a SATISFIED row.
+//   D2c    the evidence was read from EVERY remaining cell, so a row's DOMAIN column laundered a
+//          placeholder evidence cell.
+//   filler a deactivation reason made of connectives and no-ops ("out of scope: n/a because
+//          reasons") was accepted as a specific out-of-scope reason.
+
+// The same 19-persona roster, with a Domain column inserted before the disposition. The domain
+// text is deliberately substantive — it is exactly what laundered the placeholder evidence cell.
+const READY_DOMAIN = (rows) => `# Release Readiness
+
+Plain sentence: the feature is ready to ship.
+
+## UTTERLY SATISFIED team gate
+
+| Agent | Domain | State | Evidence |
+|---|---|---|---|
+${rows}
+
+## Notes
+
+Nothing outstanding.
+`;
+
+const ALL_SATISFIED_DOMAIN = ALL_SATISFIED.split('\n').map((line) => {
+  if (!/^\| @/.test(line)) return line;
+  const cells = line.split('|').slice(1, -1).map((c) => c.trim());
+  const [agent, disposition, ...rest] = cells;
+  return `| ${agent} | Test coverage and release certification | ${disposition} | ${rest.join(' | ')} |`;
+}).join('\n');
+
+const QA_EVIDENCE_CELL = '| @qa-engineer | `SATISFIED` | qa-signoff.md GO with no blocking conditions |';
+const MLOPS_REASON_CELL = '| @ml-ai-ops | `NOT ACTIVATED` | out of scope: no model serving path changed |';
+
+test('D1: an evidence cell that says nothing was checked is not a sign-off', () => {
+  const noOps = [
+    'not applicable',
+    'nothing here',
+    'no comment',
+    'none needed',
+    'not reviewed',
+    'not applicable to this release',
+  ];
+  for (const phrase of noOps) {
+    const rows = ALL_SATISFIED.replace(QA_EVIDENCE_CELL, `| @qa-engineer | \`SATISFIED\` | ${phrase} |`);
+    const r = run({ ...COMPLETE, 'artifacts/output/06-launch/release-readiness.md': READY(rows) });
+    assert(
+      r.failures.some((f) => /is SATISFIED with/.test(f) && /qa-engineer/.test(f)),
+      `"${phrase}" must not satisfy a SATISFIED row; failures: ${JSON.stringify(r.failures)}`
+    );
+  }
+});
+
+test('D1: a negative finding is still evidence — the no-op rule rejects only empty claims', () => {
+  const rows = ALL_SATISFIED.replace(QA_EVIDENCE_CELL, '| @qa-engineer | `SATISFIED` | no blocking issues found |');
+  const r = run({ ...COMPLETE, 'artifacts/output/06-launch/release-readiness.md': READY(rows) });
+  const nonScan = r.failures.filter((f) => !/security scan/.test(f));
+  assert.deepStrictEqual(nonScan, [], `a real finding must pass: ${JSON.stringify(nonScan)}`);
+});
+
+test('D2c: a neighbouring domain column cannot vouch for a placeholder evidence cell', () => {
+  // This guards the THINNESS path. It was already closed by A1b (the reason — and therefore the
+  // SATISFIED evidence — is read from the cell after the disposition); it is kept because a
+  // regression here would reopen the shape the B9 finding described.
+  const rows = ALL_SATISFIED_DOMAIN.replace(
+    '| @qa-engineer | Test coverage and release certification | `SATISFIED` | qa-signoff.md GO with no blocking conditions |',
+    '| @qa-engineer | Test coverage and release certification | `SATISFIED` | ... |'
+  );
+  const r = run({ ...COMPLETE, 'artifacts/output/06-launch/release-readiness.md': READY_DOMAIN(rows) });
+  assert(
+    r.failures.some((f) => /is SATISFIED with/.test(f) && /qa-engineer/.test(f)),
+    `the domain column must not supply the evidence; failures: ${JSON.stringify(r.failures)}`
+  );
+});
+
+test('D2c: a domain column containing a resolution word cannot launder a contradicting evidence cell', () => {
+  // The live D2c exposure was the CONTRADICTION path, not the thinness path. `evidenceContradicts`
+  // suppresses itself when the cell carries a resolution word ("resolved", "verified", "passed"),
+  // and that suppression was applied to the joined cell — domain included. A row whose own evidence
+  // said "pending" therefore passed, because the DOMAIN said "resolved".
+  //
+  // Measured with the joined read: this row produced no failure at all. With the evidence read from
+  // the cell after the disposition, the contradiction is reported.
+  const rows = ALL_SATISFIED_DOMAIN.replace(
+    '| @qa-engineer | Test coverage and release certification | `SATISFIED` | qa-signoff.md GO with no blocking conditions | 2026-10-16 |',
+    '| @qa-engineer | Billing incident resolved by the vendor | `SATISFIED` | refund reconciliation pending | 2026-10-16 |'
+  );
+  const r = run({ ...COMPLETE, 'artifacts/output/06-launch/release-readiness.md': READY_DOMAIN(rows) });
+  assert(
+    r.failures.some((f) => /its own evidence says/.test(f) && /qa-engineer/.test(f)),
+    `a contradicting evidence cell must be reported; failures: ${JSON.stringify(r.failures)}`
+  );
+});
+
+test('D2c: the four-column roster shape itself is fine — a real evidence cell passes', () => {
+  const r = run({ ...COMPLETE, 'artifacts/output/06-launch/release-readiness.md': READY_DOMAIN(ALL_SATISFIED_DOMAIN) });
+  const nonScan = r.failures.filter((f) => !/security scan/.test(f));
+  assert.deepStrictEqual(nonScan, [], `prerequisite failures: ${JSON.stringify(nonScan)}`);
+});
+
+test('a deactivation reason made of connectives and no-ops is not a reason', () => {
+  const filler = [
+    'out of scope: n/a because reasons',
+    'out of scope: n/a because the n/a applies here',
+  ];
+  for (const reason of filler) {
+    const rows = ALL_SATISFIED.replace(MLOPS_REASON_CELL, `| @ml-ai-ops | \`NOT ACTIVATED\` | ${reason} |`);
+    const r = run({ ...COMPLETE, 'artifacts/output/06-launch/release-readiness.md': READY(rows) });
+    assert(
+      r.failures.some((f) => /NOT ACTIVATED without a specific out-of-scope reason/.test(f)),
+      `"${reason}" must not be accepted; failures: ${JSON.stringify(r.failures)}`
+    );
+  }
+});
+
+test('a specific out-of-scope reason still passes after the filler rule', () => {
+  const rows = ALL_SATISFIED.replace(MLOPS_REASON_CELL, '| @ml-ai-ops | `NOT ACTIVATED` | out of scope: no billing surface changed |');
+  const r = run({ ...COMPLETE, 'artifacts/output/06-launch/release-readiness.md': READY(rows) });
+  assert(
+    !r.failures.some((f) => /NOT ACTIVATED without/.test(f)),
+    `a specific reason must satisfy the check; failures: ${JSON.stringify(r.failures)}`
+  );
 });
 
 // --- the sign-off ------------------------------------------------------------------------------
@@ -420,6 +568,82 @@ test('F-2: GO still passes, so the new check is not a blanket rejection', () => 
     'the NO-GO check must fire only on a recorded NO-GO');
 });
 
+// The A6 fixtures need a COMPLETE record: the go/no-go checks are an else-if chain, so a record with
+// no rollback section fails on the rollback branch and never reaches the verdict branch — the
+// reviewer's raw fixtures showed FAIL but named no NO-GO. These pair the record with the full gate.
+const withDecision = (record) => ({
+  ...gate(FULL_ROSTER),
+  'artifacts/output/06-launch/go-nogo-decision.md':
+    record + '\n## Rollback\n\nIf the error rate exceeds 2% for 5 minutes, @devops-engineer reverts ' +
+      'to the previous image in about 4 minutes.\n',
+});
+
+test('A6: a NO-GO recorded AFTER an earlier GO line is not shipped over', () => {
+  // @code-reviewer, blind run 16. The verdict was read from the FIRST decision line anywhere in the
+  // document: a history bullet saying GO silenced a genuine NO-GO in the Decision section. Measured
+  // on the reviewer's exact fixture, including this one.
+  const record = '# Go/No-Go\n\n' +
+    '- 2026-10-14: initial decision **Decision:** GO\n' +
+    '- 2026-10-15: load test failed\n\n' +
+    '## 7. Decision\n\n**Decision:** NO-GO\n';
+  const r = run(withDecision(record));
+  assert.strictEqual(r.json.verdict, 'FAIL',
+    'a record that declines to ship must not ship because an earlier line said GO');
+  assert.ok(r.failures.some((f) => /records \*\*NO-GO\*\*/.test(f)),
+    `expected the NO-GO to be named: ${JSON.stringify(r.failures)}`);
+});
+
+test('A6: a NO-GO recorded BEFORE a later GO line still fails', () => {
+  const record = '# Go/No-Go\n\n**Decision:** NO-GO\n\nAftermath notes said **Decision:** GO.\n';
+  const r = run({ ...COMPLETE, 'artifacts/output/06-launch/go-nogo-decision.md': record });
+  assert.strictEqual(r.json.verdict, 'FAIL', 'a later GO cannot overwrite an earlier NO-GO');
+});
+
+test('A6: a record carrying both GO and NO-GO is named as a conflict', () => {
+  const record = '# Go/No-Go\n\nSummary said **Decision:** GO.\n\nFinal: **Decision:** NO-GO\n';
+  const r = run(withDecision(record));
+  assert.strictEqual(r.json.verdict, 'FAIL');
+  assert.ok(r.failures.some((f) => /both GO and NO-GO|conflicting record/.test(f)),
+    `the conflict must be named, not just the token: ${JSON.stringify(r.failures)}`);
+});
+
+test('A6: the unedited option menu fails closed instead of reading as GO', () => {
+  // Recorded in run 15 as a fail-open limit; the any-NO-GO-wins rule flips it to fail-closed.
+  //
+  // The fixture carries a Rollback section on purpose. Without one the record also failed the
+  // rollback-owner check, so the test passed for the wrong reason: it did not pin the verdict
+  // branch. It now asserts that the failure is NOT the rollback check.
+  const record = '# Go/No-Go\n\n**Decision:** GO / NO-GO / CONDITIONAL GO\n\n' + REAL_ROLLBACK;
+  const r = run({ ...COMPLETE, 'artifacts/output/06-launch/go-nogo-decision.md': record });
+  assert.strictEqual(r.json.verdict, 'FAIL', 'an undecided menu must not read as an approval');
+  assert.ok(!r.failures.some((f) => /rollback/i.test(f)),
+    `the failure must come from the verdict, not the rollback check: ${JSON.stringify(r.failures)}`);
+});
+
+test('A1c: a negation-governed mention is not a rollback owner', () => {
+  // @architect, blind run 16: "must NOT page @devops-engineer" satisfied the owner check.
+  const r = run(withGoNoGo('## Rollback\n\nIf the error rate exceeds 2% for 5 minutes, must NOT page ' +
+    '@devops-engineer; the platform reverts automatically. Takes about 4 minutes.\n'));
+  assert.strictEqual(r.json.verdict, 'FAIL');
+  assert.ok(r.failures.some((f) => /names no owner/.test(f)),
+    `a negated mention must not count as an owner: ${JSON.stringify(r.failures)}`);
+});
+
+test('A1c: a real owner still passes, negation or not elsewhere in the section', () => {
+  const r = run(withGoNoGo('## Rollback\n\nIf the error rate exceeds 2% for 5 minutes, ' +
+    '@devops-engineer reverts to the previous image. Do not run the migration rollback twice.\n'));
+  assert.ok(!r.failures.some((f) => /names no owner/.test(f)),
+    `the owner must be found even with an unrelated negation later: ${JSON.stringify(r.failures)}`);
+});
+
+test('A1c: a negation check gives the remedy, not just a rejection', () => {
+  const r = run(withGoNoGo('## Rollback\n\nTrigger: error rate over 2%. No need to page ' +
+    '@devops-engineer. About 4 minutes.\n'));
+  assert.ok(r.failures.some((f) => /name the owner directly/.test(f)) &&
+            r.failures.some((f) => /names no owner/.test(f)),
+    `the failure must say what to write, not just reject: ${JSON.stringify(r.failures)}`);
+});
+
 test('F-2: CONDITIONAL is also not GO and must not pass silently', () => {
   const r = run({
     ...COMPLETE,
@@ -449,7 +673,7 @@ const gateWith = (evidence) => ({
 
 | Reviewer | Disposition | Evidence |
 |---|---|---|
-| @product-manager | \`SATISFIED\` | ${evidence} |
+| @product-manager | \`SATISFIED\` | ${evidence} | 2026-10-16 |
 `,
 });
 
@@ -523,11 +747,11 @@ const gate = (rows) => ({
 // personas absent. Rebuilt on the protocol's full roster, with the deactivated seats carrying a
 // specific out-of-scope reason (the F-5 path).
 const FULL_ROSTER = [
-  '| @product-manager | `SATISFIED` | scope agreed with engineering and design |',
-  '| @tech-lead | `SATISFIED` | execution plan approved |',
-  '| @qa-engineer | `SATISFIED` | full suite green, 1345 tests |',
-  '| @security-engineer | `SATISFIED` | clean scan with the reviewed allowlist |',
-  '| @devops-engineer | `SATISFIED` | rollback rehearsed end to end |',
+  '| @product-manager | `SATISFIED` | scope agreed with engineering and design 2026-10-16 |',
+  '| @tech-lead | `SATISFIED` | execution plan approved 2026-10-16 |',
+  '| @qa-engineer | `SATISFIED` | full suite green, 1345 tests 2026-10-16 |',
+  '| @security-engineer | `SATISFIED` | clean scan with the reviewed allowlist 2026-10-16 |',
+  '| @devops-engineer | `SATISFIED` | rollback rehearsed end to end 2026-10-16 |',
   '| @architect | `NOT ACTIVATED` | out of scope: no architectural surface changed |',
   '| @code-reviewer | `NOT ACTIVATED` | out of scope: no blocking code-left in review |',
   '| @data-analyst | `NOT ACTIVATED` | out of scope: no telemetry surface changed |',
@@ -558,7 +782,7 @@ test('F-5: a specific out-of-scope reason passes (so the check is not a blanket 
 });
 
 test('F-6: a one-row team gate fails and names who is missing', () => {
-  const r = run(gate('| @product-manager | `SATISFIED` | scope agreed |'));
+  const r = run(gate('| @product-manager | `SATISFIED` | scope agreed 2026-10-16 |'));
   assert.strictEqual(r.json.verdict, 'FAIL');
   const f = r.failures.find((x) => /missing .* required reviewer row/.test(x));
   assert.ok(f, `expected a missing-reviewer failure, got: ${JSON.stringify(r.failures)}`);
@@ -584,11 +808,11 @@ test('F-6: a deactivated reviewer still satisfies the roster (deactivate != dele
  * while providing nothing.
  */
 const ROSTER = [
-  '| @product-manager | `SATISFIED` | scope agreed |',
-  '| @tech-lead | `SATISFIED` | plan approved |',
-  '| @qa-engineer | `SATISFIED` | qa-signoff.md |',
-  '| @security-engineer | `SATISFIED` | scan clean |',
-  '| @devops-engineer | `SATISFIED` | rollback rehearsed |',
+  '| @product-manager | `SATISFIED` | scope agreed 2026-10-16 |',
+  '| @tech-lead | `SATISFIED` | plan approved 2026-10-16 |',
+  '| @qa-engineer | `SATISFIED` | qa-signoff.md 2026-10-16 |',
+  '| @security-engineer | `SATISFIED` | scan clean 2026-10-16 |',
+  '| @devops-engineer | `SATISFIED` | rollback rehearsed 2026-10-16 |',
 ].join('\n');
 
 const withGoNoGo = (body) => ({
@@ -621,6 +845,118 @@ test('F-8: a real rollback plan passes', () => {
 });
 
 /**
+ * A1 (blind run 13, @architect HIGH) — two ways a sign-off could be complete on paper and empty in
+ * fact, both measured against the gate as it stood:
+ *
+ *   1. The satisfaction protocol requires an "evidence-backed, DATED row" and the template prints a
+ *      Date column. Nothing read it, so a full nineteen-agent roster with every date cell blank
+ *      returned PASS.
+ *   2. The rollback check requires "a trigger, an owner, and a time to revert". `rollbackPlanPresent`
+ *      checked the heading and the word count, so a procedure with no responsible person passed.
+ */
+test('A1: a SATISFIED row with no date fails', () => {
+  const rows = ['@product-manager', '@tech-lead', '@qa-engineer', '@security-engineer', '@devops-engineer']
+    .map((a) => `| ${a} | \`SATISFIED\` | scope agreed, plan approved, suite green |`);
+  const r = rosterOf(rows);
+  assert.ok(r.failures.some((f) => /carry no date/.test(f)),
+    `an undated sign-off cannot be aged or superseded: ${JSON.stringify(r.failures)}`);
+});
+
+test('A1: a date does not launder a placeholder into evidence', () => {
+  // The date is metadata. If it is left inside the evidence string, ten date characters clear the
+  // thinness floor on their own and "..." stops reading as a placeholder.
+  const rows = ['@product-manager', '@tech-lead', '@qa-engineer', '@security-engineer', '@devops-engineer']
+    .map((a) => `| ${a} | \`SATISFIED\` | ... 2026-10-16 |`);
+  const r = rosterOf(rows);
+  assert.ok(r.failures.some((f) => /only punctuation|placeholder/.test(f)),
+    `"..." plus a date is still "...": ${JSON.stringify(r.failures)}`);
+});
+
+test('A1: a rollback plan with no owner fails', () => {
+  const r = run(withGoNoGo('## Rollback\n\nIf error rate exceeds 2% for 5 minutes, revert the deploy\nto the previous image. Takes about 4 minutes.\n'));
+  assert.strictEqual(r.json.verdict, 'FAIL');
+  assert.ok(r.failures.some((f) => /rollback plan names no owner/.test(f)),
+    `a plan nobody owns is a plan nobody runs: ${JSON.stringify(r.failures)}`);
+});
+
+test('A1b: a blank reason cell is not rescued by the domain column', () => {
+  // @architect HIGH, blind run 14. The reason check read EVERY remaining cell, so a row's Domain
+  // column supplied the words. Measured before the fix: 16 of 19 personas NOT ACTIVATED with an
+  // empty reason cell returned PASS. A gate that supervises roster narrowing must not be satisfiable
+  // by narrowing the roster.
+  const rows = PROTOCOL_ROSTER.map((a) =>
+    a === '@founder'
+      ? `| ${a} | Strategic direction | \`NOT ACTIVATED\` | out of scope: no surface of theirs in this release | 2026-10-16 |`
+      : `| ${a} | Test coverage and release certification | \`NOT ACTIVATED\` |  | 2026-10-16 |`);
+  const r = rosterOf(rows);
+  // Bound at the fixture's own size (18), not >= 5. @qa-engineer and @code-reviewer (blind run 15)
+  // both measured the loose bound: a partial regression reporting only five of eighteen would have
+  // passed while thirteen rows escaped unchecked.
+  assert.strictEqual(r.failures.filter((f) => /without a specific out-of-scope reason/.test(f)).length, 18,
+    `a blank reason must fail on its own row, not borrow its domain's words: ${JSON.stringify(r.failures.slice(0, 3))}`);
+});
+
+test('A1b: a blank evidence cell on a SATISFIED row fails', () => {
+  // Same defect, same fix: SKILL.md asks for a row "marked SATISFIED with evidence", and the evidence
+  // cell is where that lives — not the domain column beside it.
+  const rows = ['@product-manager', '@tech-lead', '@qa-engineer', '@security-engineer', '@devops-engineer']
+    .map((a) => `| ${a} | Readiness reviewed and approved by the owning domain | \`SATISFIED\` |  | 2026-10-16 |`);
+  const r = rosterOf(rows);
+  assert.ok(r.failures.some((f) => /SATISFIED with/.test(f)),
+    `an empty evidence cell must not borrow the domain's words: ${JSON.stringify(r.failures.slice(0, 3))}`);
+});
+
+/**
+ * Three assertions the register claimed but no test made.
+ *
+ * @qa-engineer and @code-reviewer (blind run 15) each grepped the suite and found the register's
+ * proof column claiming revert-proofs that did not exist: "assertion in the A1 pair" for the
+ * truncation, "DATE_SHAPE" for the date shape, and "covered by F-8 and the A1 pair" for the branch
+ * ordering. Reverting any of the three would have left the suite green. A register that claims
+ * proofs it does not have is the same defect as a gate that claims a control it does not have.
+ */
+test('A1: an impossible date fails, so the shape check is not a shape-only check', () => {
+  for (const bad of ['2026-13-99', '2026-00-10', '2026-10-00', '1899-01-01']) {
+    const rows = ['@product-manager', '@tech-lead', '@qa-engineer', '@security-engineer', '@devops-engineer']
+      .map((a) => `| ${a} | \`SATISFIED\` | scope agreed, plan approved, suite green | ${bad} |`);
+    const r = rosterOf(rows);
+    assert.ok(r.failures.some((f) => /carry no date/.test(f)),
+      `${bad} is not a date and must not satisfy a dated row: ${JSON.stringify(r.failures.slice(0, 2))}`);
+    // The message must state the accepted form: `October 16, 2026` fails too, and a reader who is
+    // only told the date is "missing" cannot tell an absent date from a malformed one.
+    assert.ok(r.failures.some((f) => /YYYY-MM-DD/.test(f)),
+      'the failure must name the accepted ISO form');
+  }
+});
+
+test('A1: a plan present with no owner emits ONE failure, not a false second one', () => {
+  // The bug this pins: the owner branch was inserted in front of the plan branch and inherited its
+  // body, so a go/no-go that DID record a rollback plan was told it recorded none.
+  const r = run(withGoNoGo('## Rollback\n\nIf error rate exceeds 2% for 5 minutes, revert the deploy\nto the previous image. Takes about 4 minutes.\n'));
+  const rollbackFailures = r.failures.filter((f) => /rollback/i.test(f));
+  assert.strictEqual(rollbackFailures.length, 1,
+    `a plan that exists must not be reported as missing: ${JSON.stringify(r.failures)}`);
+  assert.match(rollbackFailures[0], /names no owner/);
+  assert.ok(!r.failures.some((f) => /records no rollback plan/.test(f)),
+    'the plan is present — that message is false here');
+});
+
+test('A1: the undated-row message says how many names it left out', () => {
+  // Five undated rows used to print four names with no marker, so a reader had to diff the table.
+  const rows = ['@product-manager', '@tech-lead', '@qa-engineer', '@security-engineer', '@devops-engineer']
+    .map((a) => `| ${a} | \`SATISFIED\` | scope agreed, plan approved, suite green |`);
+  const r = rosterOf(rows);
+  assert.ok(r.failures.some((f) => /5 SATISFIED row\(s\) carry no date/.test(f) && /and 1 more/.test(f)),
+    `five rows must report four names plus "and 1 more": ${JSON.stringify(r.failures.slice(0, 2))}`);
+});
+
+test('A1: a rollback plan that names its owner passes', () => {
+  const r = run(withGoNoGo(REAL_ROLLBACK));
+  assert.ok(!r.failures.some((f) => /rollback plan names no owner/.test(f)),
+    `@devops-engineer is named in the plan: ${JSON.stringify(r.failures)}`);
+});
+
+/**
  * F-9 and F-10: two forgeries the third blind run (2026-10-08) performed successfully against the
  * hardened gate, both using nothing but text edits inside the release's own records.
  *
@@ -636,11 +972,11 @@ test('F-8: a real rollback plan passes', () => {
  * enforced. A scope that drops source-shaped files is now a hard failure instead of a documented risk.
  */
 const ROSTER_ALL = [
-  '| @product-manager | `SATISFIED` | scope agreed |',
-  '| @tech-lead | `SATISFIED` | plan approved |',
-  '| @qa-engineer | `SATISFIED` | qa-signoff.md |',
-  '| @security-engineer | `SATISFIED` | scan clean |',
-  '| @devops-engineer | `SATISFIED` | rollback rehearsed |',
+  '| @product-manager | `SATISFIED` | scope agreed 2026-10-16 |',
+  '| @tech-lead | `SATISFIED` | plan approved 2026-10-16 |',
+  '| @qa-engineer | `SATISFIED` | qa-signoff.md 2026-10-16 |',
+  '| @security-engineer | `SATISFIED` | scan clean 2026-10-16 |',
+  '| @devops-engineer | `SATISFIED` | rollback rehearsed 2026-10-16 |',
 ].join('\n');
 
 const READY_ALL = `# Release Readiness\n\n## UTTERLY SATISFIED team gate\n\n| Reviewer | Disposition | Evidence |\n|---|---|---|\n${ROSTER_ALL}`;
@@ -696,7 +1032,7 @@ test('F-11: the gate warns when the scan reported clean but suppressed findings'
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'gate-sup-'));
   for (const [rel, body] of Object.entries({
     'artifacts/output/06-launch/release-readiness.md':
-      '# Release Readiness\n\n## UTTERLY SATISFIED team gate\n\n| Reviewer | Disposition | Evidence |\n|---|---|---|\n| @product-manager | `SATISFIED` | scope agreed |\n| @tech-lead | `SATISFIED` | plan approved |\n| @qa-engineer | `SATISFIED` | qa-signoff.md |\n| @security-engineer | `SATISFIED` | scan clean |\n| @devops-engineer | `SATISFIED` | rollback rehearsed |\n',
+      '# Release Readiness\n\n## UTTERLY SATISFIED team gate\n\n| Reviewer | Disposition | Evidence |\n|---|---|---|\n| @product-manager | `SATISFIED` | scope agreed 2026-10-16 |\n| @tech-lead | `SATISFIED` | plan approved |\n| @qa-engineer | `SATISFIED` | qa-signoff.md |\n| @security-engineer | `SATISFIED` | scan clean |\n| @devops-engineer | `SATISFIED` | rollback rehearsed |\n',
     'artifacts/output/06-launch/go-nogo-decision.md': GO_NOGO,
     'artifacts/output/05-execution/quality/qa-signoff.md': SIGNOFF_GO,
     'src/pay.js': 'const K = 1;\n',
@@ -918,7 +1254,9 @@ const rosterOf = (rows) => run({
 });
 
 const DEACT = (a) => `| ${a} | \`NOT ACTIVATED\` | out of scope: no surface of theirs in this release |`;
-const SAT = (a) => `| ${a} | \`SATISFIED\` | clean scan, rehearsed rollback, full suite green |`;
+// A dated row is the protocol's contract (blind run 13, @architect HIGH): the gate now rejects a
+// SATISFIED row with no date, so the helper that builds a CONFORMANT row carries one.
+const SAT = (a) => `| ${a} | \`SATISFIED\` | clean scan, rehearsed rollback, full suite green 2026-10-16 |`;
 
 test('BLIND RUN 7 D1: every placeholder evidence cell is rejected', () => {
   // An empty cell was already caught. These are the ones that were not.
@@ -992,3 +1330,812 @@ test('BLIND RUN 7 D2: all nineteen present and accounted for passes', () => {
         `"${weak}" must be rejected as a blanket deactivation: ${JSON.stringify(r.failures)}`);
     }
   });
+
+
+// --- the panel findings, 2026-10-22 ----------------------------------------------------------
+//
+// Each of these was MEASURED AS PASSING before its fix. A test that also passes against the old
+// behaviour is a test gap, so each one is revert-proofed against the code it covers.
+
+test('F5: a domain column that mentions SATISFIED cannot hijack the disposition', () => {
+  // The disposition cell was found by scanning for a cell CONTAINING a state word, and the state
+  // was set to that whole cell. A domain cell that merely mentioned the word made the row match no
+  // filter, so it skipped the thinness check, the contradiction check AND the blocking check, while
+  // still counting for the roster. Measured: this row returned PASS with zero failures.
+  const rows = ALL_SATISFIED_DOMAIN.replace(
+    '| @product-manager | Test coverage and release certification | `SATISFIED` | readiness reviewed 2026-10-16 |',
+    '| @product-manager | Readiness SATISFIED last cycle | `SATISFIED` | refund reconciliation pending | 2026-10-16 |'
+  );
+  const r = run({ ...COMPLETE, 'artifacts/output/06-launch/release-readiness.md': READY_DOMAIN(rows) });
+  assert.ok(
+    r.failures.some((f) => /its own evidence says/.test(f) && /@product-manager/.test(f)),
+    `a hijacked disposition must still be checked; failures: ${JSON.stringify(r.failures)}`
+  );
+});
+
+test('F-D: a verdict spelled NO GO without the hyphen is still a NO-GO', () => {
+  // A SPACE is a word boundary, so the bare `GO` alternative matched inside "NO GO" and the line
+  // read as GO. Measured: `**Verdict:** NO GO` with a full 19-persona roster returned PASS.
+  const record = '# Go/No-Go\n\n**Verdict:** NO GO\n\n' + REAL_ROLLBACK;
+  const r = run({ ...COMPLETE, 'artifacts/output/06-launch/go-nogo-decision.md': record });
+  assert.strictEqual(r.json.verdict, 'FAIL', '"NO GO" must not read as an approval');
+});
+
+test('F2: a resolution word in a later cell cannot silence a contradicting evidence cell', () => {
+  // The evidence was the JOIN of every cell after the disposition, and the contradiction check
+  // suppresses itself when the cell carries a resolution word. So "re-verified" in the DATE cell
+  // silenced the contradiction in the EVIDENCE cell. Measured: this row returned PASS.
+  const rows = ALL_SATISFIED_DOMAIN.replace(
+    '| @qa-engineer | Test coverage and release certification | `SATISFIED` | qa-signoff.md GO with no blocking conditions | 2026-10-16 |',
+    '| @qa-engineer | Test coverage and release certification | `SATISFIED` | refund reconciliation pending | 2026-10-16, re-verified |'
+  );
+  const r = run({ ...COMPLETE, 'artifacts/output/06-launch/release-readiness.md': READY_DOMAIN(rows) });
+  assert.ok(
+    r.failures.some((f) => /its own evidence says/.test(f) && /@qa-engineer/.test(f)),
+    `a later cell must not vouch for the evidence; failures: ${JSON.stringify(r.failures)}`
+  );
+});
+
+test('F5/A1c: a mention that is not an owner is not an owner, in every ordinary phrasing', () => {
+  // The negator list was short and the window was 48 characters, so several ordinary ways of NOT
+  // naming an owner still counted as naming one. Measured as PASS before this fix:
+  const cases = [
+    '@devops-engineer should not be paged; the platform reverts automatically.',
+    'no one should page @devops-engineer; the platform reverts automatically.',
+    'avoid paging @devops-engineer; the platform reverts automatically.',
+    'skip paging @devops-engineer; the platform reverts automatically.',
+    'Do not, under any circumstances whatsoever, escalate this to @devops-engineer.',
+  ];
+  for (const body of cases) {
+    const r = run(withGoNoGo(`## Rollback\n\nIf the error rate exceeds 2% for 5 minutes, ${body}\n`));
+    assert.strictEqual(r.json.verdict, 'FAIL', `"${body}" must not pass as an owner`);
+    assert.ok(r.failures.some((f) => /names no owner/.test(f)),
+      `the owner failure must be named for "${body}": ${JSON.stringify(r.failures)}`);
+  }
+});
+
+test('F5/A1c: a real owner still passes — the negation check does not reject every mention', () => {
+  // This fixture carries a five-row roster, so the record has a roster failure of its own and the
+  // verdict is FAIL whatever the rollback says. What is asserted is the OWNER check specifically.
+  const r = run(withGoNoGo(`## Rollback\n\nIf the error rate exceeds 2% for 5 minutes, @devops-engineer ` +
+    'reverts the deploy to the previous image and reopens billing. Takes about 4 minutes.\n'));
+  assert.ok(!r.failures.some((f) => /names no owner/.test(f)),
+    `a named owner must not be reported as missing: ${JSON.stringify(r.failures)}`);
+});
+
+test('D1: a cell that says no review happened is not evidence', () => {
+  // Absence of a LOOK. A claim that the reviewer found nothing ("0 findings", "no outstanding
+  // issues") IS evidence — blind run 7 pinned that. A claim that nobody looked is not.
+  const noLook = [
+    'not applicable',
+    'nothing here',
+    'no comment',
+    'none needed',
+    'not reviewed',
+    'not applicable to this release',
+    'no action required',
+    'no comment from the reviewer',
+    'same as above',
+  ];
+  for (const phrase of noLook) {
+    const rows = ALL_SATISFIED.replace(QA_EVIDENCE_CELL, `| @qa-engineer | \`SATISFIED\` | ${phrase} |`);
+    const r = run({ ...COMPLETE, 'artifacts/output/06-launch/release-readiness.md': READY(rows) });
+    assert.ok(
+      r.failures.some((f) => /is SATISFIED with/.test(f) && /qa-engineer/.test(f)),
+      `"${phrase}" must not satisfy a SATISFIED row; failures: ${JSON.stringify(r.failures)}`
+    );
+  }
+});
+
+test('D1: a claim that the reviewer found nothing IS evidence', () => {
+  // The other half of the same distinction, and the half blind run 7 pinned. "0 findings" and
+  // "no outstanding issues" are what a reviewer writes when the review found nothing. Rejecting
+  // them would be incoherent: "no findings" and "0 findings" are the same claim.
+  const foundNothing = ['0 findings', 'no findings', 'no outstanding issues', 'nothing outstanding', 'no issues outstanding'];
+  for (const phrase of foundNothing) {
+    const rows = ALL_SATISFIED.replace(QA_EVIDENCE_CELL, `| @qa-engineer | \`SATISFIED\` | ${phrase} |`);
+    const r = run({ ...COMPLETE, 'artifacts/output/06-launch/release-readiness.md': READY(rows) });
+    assert.ok(
+      !r.failures.some((f) => /is SATISFIED with/.test(f) && /qa-engineer/.test(f)),
+      `"${phrase}" is a review outcome and must pass; failures: ${JSON.stringify(r.failures)}`
+    );
+  }
+});
+
+test('a deactivation reason must name what is out of scope, not that there is nothing to report', () => {
+  // A reason is held to a stricter bar than evidence: it must name WHAT IS OUT OF SCOPE. "nothing
+  // to report" is a review outcome, not a reason. Measured as accepted before this fix.
+  const filler = [
+    'out of scope: nothing to report',
+    'out of scope: nothing relevant owing to reasons',
+    'out of scope: no action required',
+  ];
+  for (const reason of filler) {
+    const rows = ALL_SATISFIED.replace(MLOPS_REASON_CELL, `| @ml-ai-ops | \`NOT ACTIVATED\` | ${reason} |`);
+    const r = run({ ...COMPLETE, 'artifacts/output/06-launch/release-readiness.md': READY(rows) });
+    assert.ok(
+      r.failures.some((f) => /NOT ACTIVATED without a specific out-of-scope reason/.test(f)),
+      `"${reason}" must not be accepted; failures: ${JSON.stringify(r.failures)}`
+    );
+  }
+});
+
+
+// --- panel findings, second round (2026-10-22) -----------------------------------------------
+
+// Replace one agent's row by name, so a test does not depend on the exact wording of the rest of
+// the roster.
+// The agent handle is matched CASE-INSENSITIVELY, like the gate's own roster check. A
+// case-sensitive helper made the case-handling test vacuous: it never replaced the row it meant to
+// replace, so the test passed against both the old and the new behaviour.
+const replaceRow = (rows, agent, line) => rows.split('\n').map((l) => {
+  const m = l.match(/^\|\s*(@[^|]*?)\s*\|/);
+  return m && m[1].toLowerCase() === agent.toLowerCase() ? line : l;
+}).join('\n');
+
+test('F5: a qualified disposition is still the disposition', () => {
+  // "`CHANGES REQUESTED` (not fixed)" is a CHANGES REQUESTED row. Reading it as "some cell that
+  // happens to contain the words" let a DOMAIN cell win instead, so the unresolved CHANGES
+  // REQUESTED never reached the blocking filter and the gate returned PASS with zero failures.
+  const rows = replaceRow(
+    ALL_SATISFIED_DOMAIN,
+    '@tech-lead',
+    '| @tech-lead | Prior verdict SATISFIED | `CHANGES REQUESTED` (not fixed) | estimate still optimistic | 2026-10-16 |'
+  );
+  const r = run({ ...COMPLETE, 'artifacts/output/06-launch/release-readiness.md': READY_DOMAIN(rows) });
+  assert.ok(
+    r.failures.some((f) => /unresolved/.test(f) && /@tech-lead/.test(f)),
+    `an unresolved CHANGES REQUESTED must be a hard NO-GO; failures: ${JSON.stringify(r.failures)}`
+  );
+});
+
+test('F5: a domain cell that names a prior verdict does not hijack the disposition', () => {
+  // The domain cell says SATISFIED; the row is NOT ACTIVATED with a filler reason. The disposition
+  // cell must win, and the deactivation-reason check must still run.
+  const rows = replaceRow(
+    ALL_SATISFIED_DOMAIN,
+    '@ml-ai-ops',
+    '| @ml-ai-ops | Prior verdict SATISFIED | `NOT ACTIVATED` | reason |'
+  );
+  const r = run({ ...COMPLETE, 'artifacts/output/06-launch/release-readiness.md': READY_DOMAIN(rows) });
+  assert.ok(
+    r.failures.some((f) => /NOT ACTIVATED without a specific out-of-scope reason/.test(f)),
+    `the reason check must still run; failures: ${JSON.stringify(r.failures)}`
+  );
+});
+
+test('F-D: every spelling of NO-GO is a NO-GO, and a GO that is not the declared token is not a GO', () => {
+  // Any separator between NO and GO is a separator. Measured as PASS on the candidate: "NO  GO",
+  // "NO - GO", the en dash, the em dash and the non-breaking hyphen.
+  const spellings = ['NO GO', 'NO  GO', 'NO-GO', 'NO - GO', 'NO\u2013GO', 'NO\u2014GO', 'NO\u2011GO'];
+  for (const spelling of spellings) {
+    const record = `# Go/No-Go\n\n**Verdict:** ${spelling}\n\n` + REAL_ROLLBACK;
+    const r = run({ ...COMPLETE, 'artifacts/output/06-launch/go-nogo-decision.md': record });
+    assert.strictEqual(r.json.verdict, 'FAIL', `"${spelling}" must not read as an approval`);
+  }
+  // The base commit's strictness: the token must be what FOLLOWS the label. "not a GO" states no
+  // verdict, so it must not be read as GO.
+  for (const phrasing of ['not a GO', 'never a GO', 'probably GO']) {
+    const record = `# Go/No-Go\n\n**Verdict:** ${phrasing}\n\n` + REAL_ROLLBACK;
+    const r = run({ ...COMPLETE, 'artifacts/output/06-launch/go-nogo-decision.md': record });
+    assert.strictEqual(r.json.verdict, 'FAIL', `"${phrasing}" states no verdict and must not read as an approval`);
+  }
+});
+
+test('D1: a cell that says no review happened is not evidence, in more of its phrasings', () => {
+  // Measured as evidence on the candidate: "no review performed", "did not review", "skipped
+  // review", "not looked at", "no observations", "no comments from anyone".
+  const noLook = [
+    'no review performed',
+    'did not review',
+    'skipped review',
+    'not looked at',
+    'no observations',
+    'no comments from anyone',
+  ];
+  for (const phrase of noLook) {
+    const rows = replaceRow(
+      ALL_SATISFIED_DOMAIN,
+      '@qa-engineer',
+      `| @qa-engineer | Test coverage and release certification | \`SATISFIED\` | ${phrase} | 2026-10-16 |`
+    );
+    const r = run({ ...COMPLETE, 'artifacts/output/06-launch/release-readiness.md': READY_DOMAIN(rows) });
+    assert.ok(
+      r.failures.some((f) => /is SATISFIED with/.test(f) && /qa-engineer/.test(f)),
+      `"${phrase}" must not satisfy a SATISFIED row; failures: ${JSON.stringify(r.failures)}`
+    );
+  }
+});
+
+
+// --- panel findings, third round (2026-10-22) ------------------------------------------------
+
+test('the harness fails loudly when the gate produces no JSON', () => {
+  // The guard that stops a test asserting "no failures" from passing with the gate never having
+  // run. It is load-bearing and it is tested, so it cannot be removed silently.
+  assert.throws(
+    () => parseGateOutput('', 1),
+    /produced no JSON/,
+    'a gate that did not run must never read as a pass'
+  );
+  assert.throws(() => parseGateOutput('Error: boom', 2), /produced no JSON/);
+  assert.doesNotThrow(() => parseGateOutput('{"verdict":"PASS","failures":[]}', 0));
+});
+
+test('F-D: a NO-GO in a second verdict field wins over a GO in the first', () => {
+  // Multi-field, so the test can tell "read as NO-GO" from "read as no verdict at all": with the
+  // separator family reverted to one character, "NO  GO" is not a token, that field contributes
+  // nothing, and the record reads as GO.
+  const record = '# Go/No-Go\n\n**Decision:** GO\n\n**Verdict:** NO  GO\n\n' + REAL_ROLLBACK;
+  const r = run({ ...COMPLETE, 'artifacts/output/06-launch/go-nogo-decision.md': record });
+  assert.strictEqual(r.json.verdict, 'FAIL', 'a NO-GO in any verdict field must win');
+  assert.ok(
+    r.failures.some((f) => /NO-GO/.test(f)),
+    `the failure must name the NO-GO; failures: ${JSON.stringify(r.failures)}`
+  );
+});
+
+test('F5: a row whose disposition is ambiguous fails closed', () => {
+  // Two cells both claim the disposition. The gate does not guess which one was meant.
+  const rows = replaceRow(
+    ALL_SATISFIED_DOMAIN,
+    '@tech-lead',
+    '| @tech-lead | SATISFIED | `CHANGES REQUESTED` (not fixed) | estimate still optimistic | 2026-10-16 |'
+  );
+  const r = run({ ...COMPLETE, 'artifacts/output/06-launch/release-readiness.md': READY_DOMAIN(rows) });
+  assert.ok(
+    r.failures.some((f) => /disposition the gate cannot read or cannot pin to one cell/.test(f)),
+    `an ambiguous disposition must fail closed; failures: ${JSON.stringify(r.failures)}`
+  );
+});
+
+test('F2: a disposition spelled with any separator is still the disposition', () => {
+  const spellings = ['CHANGES-REQUESTED', 'CHANGES – REQUESTED', 'CHANGES—REQUESTED'];
+  for (const spelling of spellings) {
+    const rows = replaceRow(
+      ALL_SATISFIED_DOMAIN,
+      '@tech-lead',
+      `| @tech-lead | Test coverage and release certification | \`${spelling}\` | estimate still optimistic | 2026-10-16 |`
+    );
+    const r = run({ ...COMPLETE, 'artifacts/output/06-launch/release-readiness.md': READY_DOMAIN(rows) });
+    assert.ok(
+      r.failures.some((f) => /unresolved/.test(f) && /@tech-lead/.test(f)),
+      `"${spelling}" must still be an unresolved request; failures: ${JSON.stringify(r.failures)}`
+    );
+  }
+  // NOT ACTIVATED is not a blocking state, so the check that applies to it is the deactivation
+  // reason check. It must still run, which it cannot if the disposition was never read.
+  const rows = replaceRow(
+    ALL_SATISFIED_DOMAIN,
+    '@ml-ai-ops',
+    '| @ml-ai-ops | Test coverage and release certification | `NOT-ACTIVATED` | reason |'
+  );
+  const r = run({ ...COMPLETE, 'artifacts/output/06-launch/release-readiness.md': READY_DOMAIN(rows) });
+  assert.ok(
+    r.failures.some((f) => /NOT ACTIVATED without a specific out-of-scope reason/.test(f)),
+    `a NOT-ACTIVATED row must still be checked for its reason; failures: ${JSON.stringify(r.failures)}`
+  );
+});
+
+test('F3: an evidence cell that reads exactly a disposition token is an ambiguous row, and it fails closed', () => {
+  // The whole content of the cell is a disposition token, so the row does not say which cell meant
+  // the disposition. The gate does not guess: the row is malformed and the record fails.
+  const rows = replaceRow(
+    ALL_SATISFIED_DOMAIN,
+    '@qa-engineer',
+    '| @qa-engineer | Test coverage and release certification | `SATISFIED` | CHANGES REQUESTED (not fixed) | 2026-10-16 |'
+  );
+  const r = run({ ...COMPLETE, 'artifacts/output/06-launch/release-readiness.md': READY_DOMAIN(rows) });
+  assert.strictEqual(r.json.verdict, 'FAIL', 'an ambiguous row must not pass');
+  assert.ok(
+    r.failures.some((f) => /@qa-engineer/.test(f)),
+    `the row must be named; failures: ${JSON.stringify(r.failures)}`
+  );
+});
+
+test('F4: a contradiction in the Domain column is a contradiction', () => {
+  // The Domain column sits BEFORE the State column in the shipped template, and a Domain that says
+  // "billing reconciliation pending" is a contradiction like any other. Reading only the cells
+  // after the disposition dropped it.
+  const rows = replaceRow(
+    ALL_SATISFIED_DOMAIN,
+    '@qa-engineer',
+    '| @qa-engineer | billing reconciliation pending | `SATISFIED` | qa-signoff.md GO with no blocking conditions | 2026-10-16 |'
+  );
+  const r = run({ ...COMPLETE, 'artifacts/output/06-launch/release-readiness.md': READY_DOMAIN(rows) });
+  assert.ok(
+    r.failures.some((f) => /its own evidence says/.test(f) && /qa-engineer/.test(f)),
+    `a contradiction in the Domain column must be reported; failures: ${JSON.stringify(r.failures)}`
+  );
+});
+
+test('F3: a negated resolution word does not silence a contradiction', () => {
+  // The token is RECOGNISED and then suppressed by the rule's own logic — not an unrecognised
+  // phrasing, so the word-level limit does not cover it.
+  const cells = [
+    'pending items not resolved',
+    'unresolved, not complete',
+    'the earlier CHANGES REQUESTED was not fixed',
+  ];
+  for (const cell of cells) {
+    const rows = replaceRow(
+      ALL_SATISFIED_DOMAIN,
+      '@qa-engineer',
+      `| @qa-engineer | Test coverage and release certification | \`SATISFIED\` | ${cell} | 2026-10-16 |`
+    );
+    const r = run({ ...COMPLETE, 'artifacts/output/06-launch/release-readiness.md': READY_DOMAIN(rows) });
+    assert.ok(
+      r.failures.some((f) => /its own evidence says/.test(f) && /qa-engineer/.test(f)),
+      `"${cell}" must be reported as a contradiction; failures: ${JSON.stringify(r.failures)}`
+    );
+  }
+});
+
+
+// --- panel findings, fourth round (2026-10-22) ----------------------------------------------
+
+test('C2: a status token in ANOTHER table is not a reviewer disposition', () => {
+  // The shipped readiness template has a second table with a Status column. A disposition token in
+  // it is not a reviewer row, and reading it as one made the shipped template — filled in exactly
+  // as printed — FAIL the gate.
+  const record = READY(ALL_SATISFIED) + `
+## 6. Release checklist
+
+| Item | Status | Notes |
+|---|---|---|
+| @product-manager sign-off | SATISFIED | ready |
+| QA | SATISFIED | ... |
+`;
+  const r = run({ ...COMPLETE, 'artifacts/output/06-launch/release-readiness.md': record });
+  assert.ok(
+    !r.failures.some((f) => /@product-manager|QA/.test(f)),
+    `only the team-gate table may be read as dispositions; failures: ${JSON.stringify(r.failures)}`
+  );
+});
+
+test('F4: a disposition spelled with any separator is READ, not skipped', () => {
+  // The assertion is on the MECHANISM, not on the verdict. An earlier version of this test
+  // asserted only "verdict === FAIL" and "the agent is named" — and the ROSTER failure satisfied
+  // both, because the row had been skipped and the reviewer therefore looked missing. The test
+  // passed with the fix removed.
+  const spellings = ['CHANGES_REQUESTED', 'CHANGES/REQUESTED', 'CHANGES.REQUESTED', 'CHANGES;REQUESTED', 'CHANGES-REQUESTED', 'CHANGES–REQUESTED'];
+  for (const spelling of spellings) {
+    const rows = replaceRow(
+      ALL_SATISFIED_DOMAIN,
+      '@tech-lead',
+      `| @tech-lead | Test coverage and release certification | \`${spelling}\` | estimate still optimistic | 2026-10-16 |`
+    );
+    const r = run({ ...COMPLETE, 'artifacts/output/06-launch/release-readiness.md': READY_DOMAIN(rows) });
+    assert.ok(
+      r.failures.some((f) => /unresolved/.test(f) && /@tech-lead/.test(f)),
+      `"${spelling}" must be read as an unresolved request; failures: ${JSON.stringify(r.failures)}`
+    );
+    assert.ok(
+      !r.failures.some((f) => /missing .*required reviewer row/.test(f)),
+      `the row must not be skipped and the reviewer reported missing; failures: ${JSON.stringify(r.failures)}`
+    );
+  }
+});
+
+test('F4: a second row for the same reviewer carrying a disposition is not skipped', () => {
+  // The forgery the panel measured: a complete roster, plus a SECOND row for one reviewer whose
+  // disposition is spelled with an underscore. Before the fix the row vanished and the gate
+  // returned PASS with zero failures.
+  const rows = ALL_SATISFIED_DOMAIN +
+    '\n| @qa-engineer | Refund reconciliation | `CHANGES_REQUESTED` | refund reconciliation pending | 2026-10-16 |';
+  const r = run({ ...COMPLETE, 'artifacts/output/06-launch/release-readiness.md': READY_DOMAIN(rows) });
+  assert.ok(
+    r.failures.some((f) => /unresolved/.test(f) && /qa-engineer/.test(f)),
+    `the second row must be read; failures: ${JSON.stringify(r.failures)}`
+  );
+});
+
+test('C2: a sub-heading between the gate heading and the table does not hide the table', () => {
+  // The gate section ends at the next heading of the SAME OR HIGHER level. Ending it at ANY
+  // heading made a `#### Roster` sub-heading read as "no team gate table" — a false diagnosis on
+  // a record that had one.
+  const record = `# Release Readiness
+
+## UTTERLY SATISFIED team gate
+
+### Roster
+
+| Reviewer | Disposition | Evidence |
+|---|---|---|
+${ALL_SATISFIED}
+
+## Notes
+
+Nothing outstanding.
+`;
+  const r = run({ ...COMPLETE, 'artifacts/output/06-launch/release-readiness.md': record });
+  assert.ok(
+    !r.failures.some((f) => /no UTTERLY SATISFIED team gate table/.test(f)),
+    `the gate table must still be found; failures: ${JSON.stringify(r.failures)}`
+  );
+});
+
+test('F1: a negator in another clause does not cancel a contradiction', () => {
+  const cells = [
+    'no findings; remediation outstanding',
+    'no outstanding issues; key rotation pending',
+    'reviewed nothing; key rotation pending',
+  ];
+  for (const cell of cells) {
+    const rows = replaceRow(
+      ALL_SATISFIED_DOMAIN,
+      '@qa-engineer',
+      `| @qa-engineer | Test coverage and release certification | \`SATISFIED\` | ${cell} | 2026-10-16 |`
+    );
+    const r = run({ ...COMPLETE, 'artifacts/output/06-launch/release-readiness.md': READY_DOMAIN(rows) });
+    assert.ok(
+      r.failures.some((f) => /its own evidence says/.test(f) && /qa-engineer/.test(f)),
+      `"${cell}" must be reported as a contradiction; failures: ${JSON.stringify(r.failures)}`
+    );
+  }
+});
+
+test('F2: a negator that belongs to a resolution word never cancels the contradiction', () => {
+  const cells = [
+    'pending items not yet resolved',
+    'pending items have not been resolved',
+    'still pending, not remediated',
+  ];
+  for (const cell of cells) {
+    const rows = replaceRow(
+      ALL_SATISFIED_DOMAIN,
+      '@qa-engineer',
+      `| @qa-engineer | Test coverage and release certification | \`SATISFIED\` | ${cell} | 2026-10-16 |`
+    );
+    const r = run({ ...COMPLETE, 'artifacts/output/06-launch/release-readiness.md': READY_DOMAIN(rows) });
+    assert.ok(
+      r.failures.some((f) => /its own evidence says/.test(f) && /qa-engineer/.test(f)),
+      `"${cell}" must be reported as a contradiction; failures: ${JSON.stringify(r.failures)}`
+    );
+  }
+});
+
+test('C1: an out-of-scope reason naming a two-letter acronym is accepted', () => {
+  // "no UI in this release" is an honest, checkable reason. A four-character floor rejected it, so
+  // a backend-only release could never go green.
+  const rows = replaceRow(
+    ALL_SATISFIED_DOMAIN,
+    '@ml-ai-ops',
+    '| @ml-ai-ops | Test coverage and release certification | `NOT ACTIVATED` | no UI in this release | 2026-10-16 |'
+  );
+  const r = run({ ...COMPLETE, 'artifacts/output/06-launch/release-readiness.md': READY_DOMAIN(rows) });
+  assert.ok(
+    !r.failures.some((f) => /NOT ACTIVATED without/.test(f)),
+    `an honest reason must be accepted; failures: ${JSON.stringify(r.failures)}`
+  );
+});
+
+test('C3: a token that merely STARTS with GO is not a GO', () => {
+  for (const token of ['GOING', 'GONE', 'GOOD']) {
+    const record = `# Go/No-Go\n\n**Verdict:** ${token}\n\n` + REAL_ROLLBACK;
+    const r = run({ ...COMPLETE, 'artifacts/output/06-launch/go-nogo-decision.md': record });
+    assert.strictEqual(r.json.verdict, 'FAIL', `"${token}" states no verdict and must not read as an approval`);
+  }
+});
+
+
+// --- panel findings, sixth round (2026-10-22) -----------------------------------------------
+
+test('F1: a QA sign-off carrying GO and later NO-GO is a NO-GO', () => {
+  // The sign-off leg read the FIRST bracketed verdict, so a sign-off carrying [GO] and later
+  // [NO-GO] passed with zero failures — while the message two lines below says "a NO-GO cannot
+  // launch". Measured 2026-10-22: exit 0, zero failures.
+  const signoff = `# QA Sign-off
+
+**Verdict:** \`VERDICT: [GO]\`
+
+The review is complete.
+
+## Re-review
+
+**Verdict:** \`VERDICT: [NO-GO]\`
+
+## Conditions
+
+| # | Condition | Owner | Due | Blocking? |
+|---|---|---|---|---|
+| — | — | — | — | — |
+
+## Open findings carried forward
+
+| Finding | Severity | Owner | Notes |
+|---|---|---|---|
+| — | — | — | — |
+`;
+  const r = run({ ...COMPLETE, 'artifacts/output/05-execution/quality/qa-signoff.md': signoff });
+  assert.strictEqual(r.json.verdict, 'FAIL', 'a sign-off carrying a NO-GO must not launch');
+  assert.ok(
+    r.failures.some((f) => /NO-GO cannot launch/.test(f)),
+    `the NO-GO must be named; failures: ${JSON.stringify(r.failures)}`
+  );
+});
+
+test('F1: a qualifier in the disposition cell is part of the row, not deleted from it', () => {
+  // The qualifier was deleted before the cell was read, so the gate was strictly weaker than the
+  // base commit on this input: `SATISFIED (CHANGES REQUESTED)` passed with zero failures, and the
+  // base failed it. The verdict turned on a punctuation character.
+  const forgeries = [
+    '| @tech-lead | `SATISFIED` (CHANGES REQUESTED) | plan approved | 2026-10-16 |',
+    '| @tech-lead | `SATISFIED` (BLOCKED) | plan approved | 2026-10-16 |',
+    '| @tech-lead | `NOT ACTIVATED` (CHANGES REQUESTED) | out of scope: no surface changed | 2026-10-16 |',
+  ];
+  for (const row of forgeries) {
+    const rows = ALL_SATISFIED_DOMAIN.replace(
+      '| @tech-lead | Test coverage and release certification | `SATISFIED` | plan approved | 2026-10-16 |',
+      row
+    );
+    const r = run({ ...COMPLETE, 'artifacts/output/06-launch/release-readiness.md': READY_DOMAIN(rows) });
+    assert.strictEqual(r.json.verdict, 'FAIL', `"${row}" must not pass the gate`);
+    assert.ok(
+      r.failures.some((f) => /@tech-lead/.test(f)),
+      `the row must be named for "${row}"; failures: ${JSON.stringify(r.failures)}`
+    );
+  }
+});
+
+test('F5: the gate heading is found whatever its spelling', () => {
+  // The literal form was a false-diagnosis generator: a record whose heading was reworded was told
+  // it contained no team gate table while its table was right there.
+  for (const heading of ['## UTTERLY SATISFIED team gate', '## UTTERLY SATISFIED Team-Gate', '### 6.1 Team Gate (UTTERLY SATISFIED)']) {
+    const record = `# Release Readiness
+
+${heading}
+
+| Reviewer | Disposition | Evidence |
+|---|---|---|
+${ALL_SATISFIED}
+
+## Notes
+
+Nothing outstanding.
+`;
+    const r = run({ ...COMPLETE, 'artifacts/output/06-launch/release-readiness.md': record });
+    assert.ok(
+      !r.failures.some((f) => /no UTTERLY SATISFIED team gate table/.test(f)),
+      `"${heading}" must be recognised; failures: ${JSON.stringify(r.failures)}`
+    );
+  }
+});
+
+
+// --- panel findings, seventh round (2026-10-22) ----------------------------------------------
+
+test('F1: the contradiction path reads a cell the same way the disposition path does', () => {
+  // The disposition path normalised every non-alphanumeric run to a space; the contradiction path
+  // did not. So the SAME spelling was caught in one cell and missed in the other. Measured
+  // 2026-10-22: `| @qa-engineer | SATISFIED | CHANGES-REQUESTED by security |` returned PASS with
+  // zero failures, while the same spelling in the disposition column was caught.
+  const cells = [
+    'CHANGES-REQUESTED by security',
+    'CHANGES_REQUESTED by security',
+    'CHANGES/REQUESTED by security',
+    'not-done pending',
+    'refund_reconciliation_pending',
+    'refundReconciliationPending',
+  ];
+  for (const cell of cells) {
+    const rows = replaceRow(
+      ALL_SATISFIED_DOMAIN,
+      '@qa-engineer',
+      `| @qa-engineer | Test coverage and release certification | \`SATISFIED\` | ${cell} | 2026-10-16 |`
+    );
+    const r = run({ ...COMPLETE, 'artifacts/output/06-launch/release-readiness.md': READY_DOMAIN(rows) });
+    assert.ok(
+      r.failures.some((f) => /its own evidence says/.test(f) && /qa-engineer/.test(f)),
+      `"${cell}" must be reported as a contradiction; failures: ${JSON.stringify(r.failures)}`
+    );
+  }
+});
+
+test('F1: a negation at the head of a claim does not cancel a later contradiction', () => {
+  // The old code took the FIRST contradiction token and let its negation dismiss the whole cell, so
+  // the second token was never looked at. Measured 2026-10-22: "no outstanding issues, the refund
+  // reconciliation is pending" returned PASS with zero failures.
+  const cells = [
+    'no outstanding issues, the refund reconciliation is pending',
+    'no outstanding issues - the refund reconciliation is pending',
+    'no outstanding issues but the refund reconciliation is pending',
+    'no findings; remediation outstanding',
+  ];
+  for (const cell of cells) {
+    const rows = replaceRow(
+      ALL_SATISFIED_DOMAIN,
+      '@qa-engineer',
+      `| @qa-engineer | Test coverage and release certification | \`SATISFIED\` | ${cell} | 2026-10-16 |`
+    );
+    const r = run({ ...COMPLETE, 'artifacts/output/06-launch/release-readiness.md': READY_DOMAIN(rows) });
+    assert.ok(
+      r.failures.some((f) => /its own evidence says/.test(f) && /qa-engineer/.test(f)),
+      `"${cell}" must be reported as a contradiction; failures: ${JSON.stringify(r.failures)}`
+    );
+  }
+});
+
+test('F3: a roster in which nobody signed off is reported', () => {
+  // Every reviewer deactivated with the identical two-word reason returned exit 0, verdict PASS,
+  // zero failures. The shared REASON is not the defect — the shipped template's own deactivation
+  // shape is one shared reason, and the repository pins that as a passing record. What makes the
+  // blanket case a forgery is that there is no SATISFIED row at all.
+  const shared = 'out of scope: alpha beta';
+  const rows = PROTOCOL_ROSTER.map((a) => `| ${a} | \`NOT ACTIVATED\` | ${shared} |`).join('\n');
+  const r = run({ ...COMPLETE, 'artifacts/output/06-launch/release-readiness.md': READY(rows) });
+  assert.ok(
+    r.failures.some((f) => /none of the 19 required reviewers signed off/.test(f)),
+    `a roster nobody signed off must be reported; failures: ${JSON.stringify(r.failures)}`
+  );
+});
+
+test('F3: an extra NON-ROSTER row does not satisfy the "somebody signed off" rule', () => {
+  // The invariant is over the REQUIRED reviewers, not over the parsed rows. The first version of
+  // this check compared `notActivated.length` with `rows.length`, so ONE added line restored the
+  // forgery: a complete roster of deactivations plus `| @ghost-reviewer | SATISFIED | ... |`
+  // returned exit=0, verdict=PASS, failures=0 — zero of nineteen reviewers signed off.
+  for (const extra of [
+    '| @ghost-reviewer | `SATISFIED` | readiness reviewed 2026-10-16 |',
+    '| Notes | `SATISFIED` | everything looks fine |',
+  ]) {
+    const shared = 'out of scope: no surface of theirs in this release';
+    const rows = PROTOCOL_ROSTER.map((a) => `| ${a} | \`NOT ACTIVATED\` | ${shared} |`).join('\n') + '\n' + extra;
+    const r = run({ ...COMPLETE, 'artifacts/output/06-launch/release-readiness.md': READY(rows) });
+    assert.ok(
+      r.failures.some((f) => /none of the 19 required reviewers signed off/.test(f)),
+      `an extra non-roster row must not satisfy it (${extra}); failures: ${JSON.stringify(r.failures)}`
+    );
+  }
+});
+
+test('F3: a roster with some reviewers signed off still passes', () => {
+  // The legitimate shape: five reviewers signed off, the rest deactivated with one shared reason.
+  // The repository has pinned this as a passing record since blind run 7.
+  const rows = [
+    SAT('@product-manager'), SAT('@tech-lead'), SAT('@qa-engineer'), SAT('@security-engineer'), SAT('@devops-engineer'),
+    ...PROTOCOL_ROSTER.filter((a) => !['@product-manager', '@tech-lead', '@qa-engineer', '@security-engineer', '@devops-engineer'].includes(a)).map(DEACT),
+  ];
+  const r = rosterOf(rows);
+  assert.strictEqual(r.json.verdict, 'PASS', `a complete record must pass: ${JSON.stringify(r.failures)}`);
+});
+
+
+// --- panel findings, eighth round (2026-10-22) -----------------------------------------------
+
+test('N1: the suppressed-findings warning reports the real finding count', () => {
+  // The warning computed `(scan.findings || []).length` while `scan.findings` is a NUMBER, so it
+  // printed "The scan reported undefined findings and SUPPRESSED 21". No test pinned the count:
+  // F-11 asserts only /SUPPRESSED/ and a path, and its fixture suppresses EVERY finding — so the
+  // count is 0 and `(0 || []).length` happens to be 0 too. This fixture has BOTH a finding and a
+  // suppression, which is the only shape that tells the two expressions apart.
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'gate-count-'));
+  const specDir = fs.mkdtempSync(path.join(os.tmpdir(), 'gate-count-spec-'));
+  try {
+    for (const [rel, body] of Object.entries({
+      ...COMPLETE,
+      'src/suppressed.js': 'const A = 1;\n',
+      'src/reported.js': 'const A = 1;\n',
+    })) {
+      const full = path.join(dir, rel);
+      fs.mkdirSync(path.dirname(full), { recursive: true });
+      fs.writeFileSync(full, body);
+    }
+    const base = JSON.parse(fs.readFileSync(path.join(ROOT, 'security/audit-spec.json'), 'utf8'));
+    delete base.scope;
+    base.rules = [{ id: 'T-1', label: 'SECRET', path: '**', pattern: 'const A = 1', severity: 'high', mode: 'regex', note: 'f' }];
+    const specPath = path.join(specDir, 'audit-spec.json');
+    fs.writeFileSync(specPath, JSON.stringify(base, null, 2));
+    fs.mkdirSync(path.join(dir, 'security'), { recursive: true });
+    fs.writeFileSync(path.join(dir, 'security/self-authored.json'),
+      JSON.stringify({ rules: { 'T-1': ['src/suppressed.js'] } }, null, 2));
+
+    let out = {};
+    try {
+      out = JSON.parse(execFileSync('node', [SCRIPT, 'check', '--root', dir, '--require-scan',
+        '--spec', specPath,
+        '--scan-allowlist', 'security/self-authored.json', '--json'], { encoding: 'utf8' }));
+    } catch (e) { out = JSON.parse(`${e.stdout || ''}`); }
+    assert.strictEqual(out.scan.findings, 1, 'one finding is reported and one is suppressed');
+    const warning = (out.warnings || []).find((w) => /SUPPRESSED/.test(w)) || '';
+    assert.ok(warning, `a suppressed-findings warning must be present: ${JSON.stringify(out.warnings)}`);
+    assert.ok(!/undefined/.test(warning), `the warning must not print undefined: ${warning}`);
+    assert.match(warning, /reported 1 findings/, `the warning must name the real count: ${warning}`);
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+    fs.rmSync(specDir, { recursive: true, force: true });
+  }
+});
+
+test('N2: a dot is a word separator in evidence, not a claim boundary', () => {
+  // Splitting the raw cell on '.' before normalising it made a dot do two jobs: `work.remains`
+  // and `follow.up` passed, while `no.outstanding.issues` was rejected.
+  const caught = ['work.remains', 'follow.up', 'still.open', 'not.done'];
+  for (const cell of caught) {
+    const rows = replaceRow(
+      ALL_SATISFIED_DOMAIN,
+      '@qa-engineer',
+      `| @qa-engineer | Test coverage and release certification | \`SATISFIED\` | ${cell} | 2026-10-16 |`
+    );
+    const r = run({ ...COMPLETE, 'artifacts/output/06-launch/release-readiness.md': READY_DOMAIN(rows) });
+    assert.ok(
+      r.failures.some((f) => /its own evidence says/.test(f) && /qa-engineer/.test(f)),
+      `"${cell}" must be reported as a contradiction; failures: ${JSON.stringify(r.failures)}`
+    );
+  }
+  // and the honest negated form is still accepted
+  const rows = replaceRow(
+    ALL_SATISFIED_DOMAIN,
+    '@qa-engineer',
+    '| @qa-engineer | Test coverage and release certification | `SATISFIED` | no.outstanding.issues | 2026-10-16 |'
+  );
+  const r = run({ ...COMPLETE, 'artifacts/output/06-launch/release-readiness.md': READY_DOMAIN(rows) });
+  assert.ok(
+    !r.failures.some((f) => /its own evidence says/.test(f) && /qa-engineer/.test(f)),
+    `a negated claim must still be accepted; failures: ${JSON.stringify(r.failures)}`
+  );
+});
+
+
+// --- panel findings, ninth round (2026-10-22) ------------------------------------------------
+
+test('V2: a credential in a SHIPPED root file is scanned, not dropped', () => {
+  // The release scope is an INCLUDE-LIST, so a root file that is not on the list is DROPPED and the
+  // scan reports it clean. README.md and LICENSE are shipped by `npm pack` and were not on the list:
+  // a credential-shaped value in the README returned the gate `exit 0, verdict PASS, failures 0`
+  // with `dropped_total: 1`. The scope now lists every shipped root file.
+  const token = 'ghp_' + 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz' + '0123456789';
+  const spec = JSON.parse(fs.readFileSync(path.join(ROOT, 'security', 'audit-spec.json'), 'utf8'));
+  const r = run({
+    ...COMPLETE,
+    'security/audit-spec.json': JSON.stringify(spec),
+    'README.md': `# Project\n\nA token for the docs: ${token}\n`,
+  }, ['--require-scan']);
+  assert.notStrictEqual(r.json.verdict, 'PASS', 'a credential in a shipped root file must not pass the gate');
+  assert.ok(
+    r.failures.some((f) => /finding/i.test(f)),
+    `the scan finding must be reported; failures: ${JSON.stringify(r.failures)}`
+  );
+});
+
+test('V3: a reviewer handle written in another case still counts as having signed off', () => {
+  // The sign-off count compared the handle case-SENSITIVELY while the missing-row check lowercased
+  // it, so `@QA-ENGINEER` counted as PRESENT (no missing-row failure) but not as having signed off.
+  // The symptom needs the other eighteen reviewers deactivated: the gate then reported "none of the
+  // 19 required reviewers signed off" for a record in which one reviewer HAD signed off.
+  const deactivated = 'out of scope: no surface of theirs in this release';
+  const rows = PROTOCOL_ROSTER
+    .filter((a) => a !== '@qa-engineer')
+    .map((a) => `| ${a} | \`NOT ACTIVATED\` | ${deactivated} |`)
+    .concat('| @QA-ENGINEER | `SATISFIED` | qa-signoff.md GO with no blocking conditions | 2026-10-16 |')
+    .join('\n');
+  const r = run({ ...COMPLETE, 'artifacts/output/06-launch/release-readiness.md': READY(rows) });
+  assert.ok(
+    !r.failures.some((f) => /none of the 19 required reviewers signed off/.test(f)),
+    `a reviewer handle in another case must still count; failures: ${JSON.stringify(r.failures)}`
+  );
+  assert.ok(
+    !r.failures.some((f) => /missing .*required reviewer row/.test(f)),
+    `the uppercase handle must count as present; failures: ${JSON.stringify(r.failures)}`
+  );
+});
+
+
+test('V4: a credential in the shipped security spec file is scanned, not dropped', () => {
+  // The scope is an INCLUDE-LIST, so an excluded tree is dropped and the scan reports it clean.
+  // `security/supply-chain-audit-spec.md` was excluded AND shipped by `npm pack`, so a credential in
+  // it returned the launch gate `exit 0, verdict PASS, failures 0`. The exclusion is gone: measured,
+  // the file scans with 0 findings, so it never needed to be excluded.
+  const token = 'ghp_' + 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz' + '0123456789';
+  const spec = JSON.parse(fs.readFileSync(path.join(ROOT, 'security', 'audit-spec.json'), 'utf8'));
+  const r = run({
+    ...COMPLETE,
+    'security/audit-spec.json': JSON.stringify(spec),
+    'security/supply-chain-audit-spec.md': `# Rule table\n\nA live value: ${token}\n`,
+  }, ['--require-scan']);
+  assert.notStrictEqual(r.json.verdict, 'PASS', 'a credential in a shipped excluded file must not pass the gate');
+  assert.ok(
+    r.failures.some((f) => /finding/i.test(f)),
+    `the scan finding must be reported; failures: ${JSON.stringify(r.failures)}`
+  );
+});

@@ -535,7 +535,7 @@ Optional agents add time to the schedule. Planning guidance:
 
 ## 8. Workflows & Skills
 
-Vespyr organizes complex product building operations into 43 specialized skills. Skills can function as **structured lifecycle workflow steps** that advance the 11-phase pipeline, or as **flexible standalone entry points** invoked on demand.
+Vespyr organizes complex product building operations into 42 specialized skills. Skills can function as **structured lifecycle workflow steps** that advance the 11-phase pipeline, as **flexible standalone entry points** invoked on demand, or as **internal engine-maintenance steps** that run outside the pipeline entirely (see §8.9).
 
 ### 8.1 Lifecycle Workflows & Idea Shaping Bridges
 
@@ -617,6 +617,17 @@ These skills form the backbone of the product development lifecycle. Skills like
 | `create-skill` | Any | Harness / Any | Author new skills, modify existing workflows, build lightweight skill evals |
 | `customize-skill` | Any | Harness / Any | Surgical edits to existing skills: triggering, workflow, references, spec compliance |
 | `incident` | Any | @devops-engineer, @developer | Production incident triage, mitigation, root cause analysis, and post-mortem |
+
+### 8.9 Internal Engine Maintenance (Outside the Pipeline)
+
+The maintenance lane is internal engine maintenance, not a product phase. It has no row in `.agents/references/phase-table.md`, it never advances or completes a product phase — including the trial-to-paid phase — and it never writes product pipeline state, product memory, or product session state. Each run keeps its own state in an absolute external state root outside the repository, and its artifacts under `artifacts/output/maintenance/<run-id>/`.
+
+| Skill | Phase | Primary Agents | Key Output / Description |
+|-------|-------|----------------|--------------------------|
+| `maintenance-plan` | External (not a product phase) | @tech-lead, @developer | Source-linked, revision-bound maintenance plan draft. The plan stays `DRAFT` for its whole life; repository-owner authorization is recorded separately, bound to one revision and its digest |
+| `maintenance-execute` | External (not a product phase) | @developer, @qa-engineer, @security-engineer, @code-reviewer, @architect | Execution report for exactly one owner-authorized plan revision, with per-task evidence, blocked tasks, and one four-seat panel disposition |
+
+Both skills fail closed: the external state root must be a canonical, non-symlink, owner-only directory disjoint from the checkout, and the lane never falls back to product state, product phase commands, or shared session helpers. Recorded plan, review, and authorization events are claims with evidence references — never a gate-green verdict.
 
 ---
 

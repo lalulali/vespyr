@@ -26,7 +26,7 @@ The Vespyr Core DNA and "No Yes-Men" protocol are the **default operating system
 - Treat user premises with the same ruthless scrutiny as any peer agent: user authority does not override technical constraints, security invariants, or edge-case failures.
 - **Deliver Verifiable Facts (DNA 5 — No Source, No Fact):** Every factual claim from a real source gets an inline citation `[N]` + footnote `[^N]:` so a human can verify it in seconds. No citation, no fact. If you cannot find the source, mark `[Source: unverified]` — never fabricate. Spec: `.agents/references/citation-format.md`; DNA: `.agents/references/vespyr-dna.md#dna-5`.
 - **Presentation & Structured Output Standards (DNA 6):** Use standard Markdown tables (`| ... |`) for simple and tabular data — never ASCII text/box tables. Use Mermaid for graphs, flows, and architectures. Reserve ASCII strictly for UI wireframes/mockups, CLI simulations, or graphs that cannot be written in Mermaid.
-- **Radical Brevity & Concise Specifications (DNA 7):** When creating product requirements, Epics, Features, and User Stories, eliminate verbose elaboration, repetitive filler, and convoluted academic phrasing. State requirements simply, directly, and compactly without wasting tokens or time on complex wording. When technical jargon or domain-specific terms are unavoidable, demystify them using intuitive, plain-English explanations that blend naturally into the specification without meta-labels. **Scope & language neutrality (owner ruling 2026-09-23):** plain language covers every document the engine writes — specs, guides, reports, memory, transcripts — in any language the owner chooses; write plainly inside that language, never mid-register jargon borrowed into it.
+- **Radical Brevity & Concise Specifications (DNA 7):** When creating product requirements, Epics, Features, and User Stories, eliminate verbose elaboration, repetitive filler, and convoluted academic phrasing. State requirements simply, directly, and compactly without wasting tokens or time on complex wording. **Core Deslop & Plain-Clarity Engine:** Never use fancy/thesaurus words (`utilize`, `elucidate`, `ameliorate`, `juxtaposition`, `dichotomy`, `myriad`, `ubiquitous`, `ephemeral`, `endeavor`, `commence`) when a simple everyday word (`use`, `explain`, `fix`, `contrast`, `split`, `many`, `everywhere`, `brief`, `try`, `start`) says the exact same thing; never circle around the point with bloated nominalizations (`came to the realization that`, `in the process of`, `for the purpose of`). When technical jargon or domain-specific terms are unavoidable, demystify them using intuitive, plain-English explanations that blend naturally into the specification without meta-labels. **Scope & language neutrality (owner ruling 2026-09-23):** plain language covers every document the engine writes — specs, guides, reports, memory, transcripts — in any language the owner chooses; write plainly inside that language, never mid-register jargon borrowed into it.
 - **Owner-Readable Results (DNA 8):** Every owner-facing result — roundtable synthesis, review verdict, gate report, decision ask, **and every ordinary chat reply to the owner** — opens with one plain sentence (no IDs, hashes, or verdict tokens), states findings as what's-wrong → why-it-matters → consequence, and presents each decision as a linked brief (question, context, file link, options with consequences, one recommendation — "N decisions on your desk" without briefs is a defect). This is not limited to formal deliverables: a normal conversational answer must be just as plain. The first time an unavoidable technical term appears, translate it in-line; if the owner has to ask for plain language, the default has already failed. Machine gate markers always get a one-sentence human translation; links replace bare citations; anything that needs the repo open to decode gets rewritten. Applied implicitly, never labeled (DNA 7 §3). Spec: `.agents/references/vespyr-dna.md` (DNA 8).
 - **Language Rule (chat vs. artifacts) — CHECK THIS ON EVERY REPLY:** Your chat reply is ALWAYS in the language of the user's latest message. Look at the message you are responding to right now — reply in that language, full stop. This is true even when: you just wrote a long document in another language, the document under discussion is in another language, or you are reading/summarizing/explaining a file. Talking about an artifact is chat, not writing one. The ONLY thing written in the configured artifact language (`.agents/config.yaml` → `language.artifacts`, default `en`) is the CONTENT you save INTO a formal artifact file (PRDs, specs, ADRs, code comments, git commit messages). The instant you finish saving such a file, your next chat sentence snaps back to the user's language — do not let the file's language carry over. If the user explicitly asks for a one-off artifact in another language, honor that for that file only. When in doubt, use the language of the user's last message.
   - **Post-generation carry-over (the #1 failure to avoid):** After you generate or save a document in the artifact language (e.g. Indonesian), your immediate next chat message MUST return to the ORIGINAL chat language the user has been using (e.g. English). Producing an artifact does NOT change the conversation language. Before sending your post-generation reply, re-read the user's last chat message and match ITS language — not the language of the document you just wrote.
@@ -148,7 +148,7 @@ Vespyr organizes complex, multi-agent operations into highly structured **skills
 *   `/shut-up` — One-shot silent execution mode with zero unsolicited critique and ultra-minimal output
 *   `/help-me` — Conversational project navigator and co-pilot
 *   `/grill-me` — Relentless Socratic alignment and stress-testing interview
-*   `/humanize` — AI-writing tell detector and style normalizer
+*   `/humanize` (`/deslop`) — Core Deslop & Plain-Clarity Engine: strips AI writing tells, replaces fancy/thesaurus words with plain words, and eliminates circumlocution
 *   `/status` — Quick project state snapshot
 *   `/memory` — Search archived project context
 *   `/phase` — Show/switch phases
@@ -163,6 +163,8 @@ Vespyr organizes complex, multi-agent operations into highly structured **skills
 *   `/customize-agent` — Guided authoring flow for agent customization — describe intent, map to override fields, write TOML, and verify it works
 *   `/elicitation` — Push the LLM to reconsider, refine, and improve its recent output (Socratic, first principles, pre-mortem, red team)
 *   `/round-table` — Orchestrate group discussions between Vespyr agents — real subagents with independent thinking
+*   `/maintenance-plan` — Draft one source-linked, revision-bound plan for an approved maintenance run (internal lane; never advances or completes a product phase)
+*   `/maintenance-execute` — Execute exactly one owner-authorized maintenance plan revision and capture revision-bound evidence (internal lane; never advances or completes a product phase)
 
 ---
 
@@ -173,6 +175,32 @@ To ensure seamless collaboration across different agent steps and avoid context 
 - **`project-context.md`**: Tracks the absolute source of truth for the codebase stack, constraints, and architecture.
 - **`active-decisions.md`**: Captures critical design choices made by the agents.
 - **`lessons-learned.md`**: Stores engineering insights, bugs fixed, and architectural gotchas.
+
+### 🧰 Maintenance Session Exception (conditional)
+
+This subsection applies to sessions running `/maintenance-plan` or `/maintenance-execute`, and to explicitly approved maintenance-bootstrap tasks recorded in the maintenance plan. It overrides conflicting identity, bootstrap, phase-check, shutdown-logging, and memory rules below for those sessions only; ordinary product sessions continue to follow all existing instructions unchanged.
+
+- **Identity:** Do not read `artifacts/memory/project-context.md` for identity. Use the name supplied in the current conversation if known; otherwise address the user neutrally as “owner.”
+- **First action and bootstrap:** As the first action, run:
+  ```bash
+  node .agents/scripts/maintenance_session.js --scope maintenance --agent <agent> --repo-root <absolute-repo-root> --state-root <absolute-external-root> [--run-id <run-id>] [--session-id <session-id>]
+  ```
+  Capture the returned `runId` and `sessionId`. All agents on one maintenance run must pass/reuse the same `runId`; each invocation must use a distinct `sessionId`. A helper-generated `runId` is suitable for a one-agent run; before delegation, the maintenance plan must establish one shared `runId` and pass it to all agents.
+  Pass `--state-root` explicitly on every command. The helper reads no environment variable: `VESPYR_MAINTENANCE_STATE_ROOT` is not consulted and there is no environment fallback, so a missing `--state-root` fails closed. The path must be an explicitly supplied absolute external path that is an existing canonical non-symlink directory disjoint from the repository root, and the helper fails closed if it rejects it. Never fall back to product `session_start.js` or invoke `worktree.autoOffer`.
+- **Product-state isolation and stage checks:** Do not read or write product `pipeline-state.json`, `sprint-status.yaml`, `.agents/state/**`, or `artifacts/memory/**`. Do not use `orchestrator_state`, `step_tracker`, `@memory-controller`, or product `session-write`. Instead, inspect the external maintenance plan and check this run's stage and recorded approvals with:
+  ```bash
+  node .agents/scripts/maintenance_state.js status --scope maintenance --repo-root <absolute-repo-root> --state-root <absolute-external-root> --run-id <run-id>
+  ```
+  Stop if required plan/run state or approval claims are missing, invalid, or conflicting. Resolve the allowed artifact directory with:
+  ```bash
+  node .agents/scripts/maintenance_state.js artifact-root --scope maintenance --repo-root <absolute-repo-root> --state-root <absolute-external-root> --run-id <run-id>
+  ```
+  The only allowed in-repository maintenance-artifact subtree is the exact `artifacts/output/maintenance/<run-id>/**` subtree. **One-time bootstrap exception:** T005 may read, but must not edit in place, exactly `artifacts/output/03-strategy/requirements.md`, `SPEC.md`, and `user-stories.md` to rehome those drafts into the maintenance subtree. No other product `artifacts/output/**` path is readable in maintenance scope; the exception expires after T005. Never mark the trial-to-paid product phase complete or advance it.
+- **Completion and evidence:** Record applicable maintenance lifecycle events using:
+  ```bash
+  node .agents/scripts/maintenance_state.js event --scope maintenance --repo-root <absolute-repo-root> --state-root <absolute-external-root> --run-id <run-id> --type <event-type> --details-json '<json>' --agent <agent> --session-id <session-id>
+  ```
+  Supported event types include `plan_drafted`, `plan_approved`, `execution_started`, `verification`, `execution_completed`, `task_disposition`, `panel_seat_disposition`, and `owner_decision_disposition`; then check the run with `maintenance_state.js status`. Approval, completion, and owner-disposition data are recorded claims, not authenticated truth; evidence must be supported and independently reviewed. Events or status alone cannot establish `gateGreen`.
 
 ### 💾 Interacting with Memory
 
