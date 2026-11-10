@@ -1310,7 +1310,7 @@ async function executeMigration(targetDir) {
 	log(`\n  Migration complete.\n`);
 }
 
-function performSyncDocs(targetDir) {
+function performSyncDocs(targetDir, harnesses) {
 	if (R.dryRun) {
 		logDry(`Would sync documentation entry points in ${targetDir}`);
 		return false;
@@ -1335,7 +1335,12 @@ function performSyncDocs(targetDir) {
 	// which would delete .agents/ as a "failed install". Log and continue.
 	try {
 		const { execFileSync } = require("child_process");
-		execFileSync(process.execPath, [syncScript], { cwd: targetDir, stdio: "inherit" });
+		// The selected harnesses travel with the call so the sync can skip
+		// docs for harnesses that were not installed (a Kiro-only project
+		// used to receive a CLAUDE.md pointing at a non-existent .claude/).
+		const args = [syncScript];
+		if (Array.isArray(harnesses)) args.push(`--harnesses=${harnesses.join(",")}`);
+		execFileSync(process.execPath, args, { cwd: targetDir, stdio: "inherit" });
 	} catch (e) {
 		logWarn(`Docs sync failed (non-fatal, .agents/ preserved): ${e.message}`);
 		return false;

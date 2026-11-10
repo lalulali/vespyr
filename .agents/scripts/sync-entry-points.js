@@ -13,9 +13,16 @@ const CANONICAL = fs.existsSync(CANONICAL_PATH) ? CANONICAL_PATH : FALLBACK_CANO
 const TARGETS = [
   { file: 'AGENTS.md', dotfolder: '.agents/' },
   { file: 'agent.md',  dotfolder: '.agents/' },
-  { file: 'CLAUDE.md', dotfolder: '.claude/' },
-  { file: path.join('.kiro', 'steering', 'vespyr-steering.md'), dotfolder: '.kiro/', optional: true },
+  { file: 'CLAUDE.md', dotfolder: '.claude/', harness: 'claude' },
+  { file: path.join('.kiro', 'steering', 'vespyr-steering.md'), dotfolder: '.kiro/', optional: true, preserveLink: true },
 ];
+
+// Which harnesses the CLI actually installed. Absent flag (direct invocation)
+// keeps the historical write-everything behavior.
+const harnessFlag = process.argv.slice(2).find((arg) => arg.startsWith('--harnesses='));
+const selectedHarnesses = harnessFlag
+  ? harnessFlag.slice('--harnesses='.length).split(',').map((h) => h.trim()).filter(Boolean)
+  : null;
 
 const CANONICAL_SECTIONS = [
   'Core Behavioral Guidelines',
@@ -54,11 +61,32 @@ function main() {
   let allPassed = true;
 
   for (const target of TARGETS) {
+    // Never emit a doc for a harness the user did not install: CLAUDE.md
+    // rewrites .agents/ -> .claude/, and with Claude unselected that path
+    // does not exist.
+    if (selectedHarnesses && target.harness && !selectedHarnesses.includes(target.harness)) {
+      continue;
+    }
+
     const outPath = path.join(ROOT, target.file);
     const dirPath = path.dirname(outPath);
 
     if (target.optional && !fs.existsSync(dirPath)) {
       continue;
+    }
+
+    // Adapter-owned paths (Kiro steering) are created by the harness adapter,
+    // which also owns conflict handling and backup placement. This script only
+    // seeds the file when it is absent; rewriting an existing link into a real
+    // file made the adapter treat its own output as foreign and back it up on
+    // every update.
+    if (target.preserveLink) {
+      try {
+        fs.lstatSync(outPath);
+        continue;
+      } catch {
+        // absent — fall through and seed it
+      }
     }
 
     if (fs.existsSync(outPath) && fs.lstatSync(outPath).isSymbolicLink()) {

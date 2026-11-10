@@ -38,7 +38,7 @@ node bin/cli.js --yes --harness opencode,claude
 your-project/
 ├── .agents/              # 智能体角色、技能、脚本、配置、参考
 │   ├── agents/           # 20 个智能体角色 Markdown 文件
-│   ├── skills/           # 42 个原子化技能工作流
+│   ├── skills/           # 43 个原子化技能工作流
 │   ├── scripts/          # 编排器、记忆、遥测
 │   ├── config.yaml       # 项目配置
 │   └── references/       # 阶段表、术语表、契约
@@ -55,7 +55,7 @@ your-project/
 └── README.md             # 项目概览
 ```
 
-> **平台说明：** 规范配置目录为 `.agents/`。安装器会按你选择的平台创建对应链接（`.opencode`、`.claude`、`.kiro/skills`、`.github/skills`）——请勿重命名或移动 `.agents/`，否则链接会失效。
+> **平台说明：** 规范配置目录为 `.agents/`。安装器会按你选择的平台创建对应链接（`.opencode`、`.claude`、`.kiro/skills`、`.github/skills`）——请勿重命名或移动 `.agents/`，否则链接会失效。Kiro 的 `.kiro/agents/*.md` 由 `.agents/agents/` 生成：修改人格请改 `.agents/` 里的源文件，再运行 `vespyr update`；生成文件的 frontmatter 已注明这一点。
 
 ## 支持的开发工具
 
@@ -63,7 +63,7 @@ your-project/
 |---|---|---|
 | OpenCode | 一等支持 | `.opencode -> .agents` 符号链接 |
 | Claude Code | 一等支持 | `.claude -> .agents` 符号链接 + `CLAUDE.md` |
-| Kiro | 一等支持（混合） | `.kiro/skills` 符号链接 + `.kiro/steering/vespyr-steering.md` |
+| Kiro | 一等支持（混合） | `.kiro/skills` 符号链接 + `.kiro/steering/vespyr-steering.md` + `.kiro/agents/*.md`（每个人格对应一个 Kiro 自定义 agent） |
 | GitHub Copilot | 一等支持 | `.github/copilot-instructions.md` + `.github/skills -> .agents/skills`；人格通过根目录 `AGENTS.md` 生效 |
 | Google Antigravity | 无需安装 | 原生读取 `.agents/skills/`（及 `.agents/rules/`、`.agents/workflows/`） |
 | Codex | 无需安装 | 原生读取根目录 `AGENTS.md` 并扫描 `.agents/` 技能 |

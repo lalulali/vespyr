@@ -535,7 +535,7 @@ Optional agents add time to the schedule. Planning guidance:
 
 ## 8. Workflows & Skills
 
-Vespyr organizes complex product building operations into 42 specialized skills. Skills can function as **structured lifecycle workflow steps** that advance the 11-phase pipeline, as **flexible standalone entry points** invoked on demand, or as **internal engine-maintenance steps** that run outside the pipeline entirely (see §8.9).
+Vespyr organizes complex product building operations into 43 specialized skills. Skills can function as **structured lifecycle workflow steps** that advance the 11-phase pipeline, as **flexible standalone entry points** invoked on demand, or as **internal engine-maintenance steps** that run outside the pipeline entirely (see §8.9).
 
 ### 8.1 Lifecycle Workflows & Idea Shaping Bridges
 
@@ -593,6 +593,7 @@ These skills form the backbone of the product development lifecycle. Skills like
 | Skill | Phase | Primary Agents | Key Output / Description |
 |-------|-------|----------------|--------------------------|
 | `humanize` | Any | @technical-writer | AI-writing tell detector and natural language style normalizer |
+| `deslop` | Any | @technical-writer | Core deslop and plain-clarity engine (alias of `/humanize`) |
 | `elicitation` | Any | Harness / Any | 98 structured methods to push LLM to reconsider, refine, and improve output |
 | `round-table` | Any | Harness / Any | Multi-agent stage-based roundtable discussions with independent agent perspectives |
 

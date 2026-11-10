@@ -4,6 +4,25 @@ All notable changes to the Vespyr project will be documented in this file.
 
 ---
 
+## [Unreleased]
+
+### Kiro personas now reach the Kiro agent picker (2026-11-10)
+- **`.kiro/agents/` was never created.** Kiro discovers custom agents from `.kiro/agents/<name>.md` (or `.json`) only, and the adapter emitted just `.kiro/skills` and `.kiro/steering/vespyr-steering.md`. Every Kiro install therefore ended with an empty (or absent) agent folder and no way to pick a Vespyr persona from Kiro's UI. `bin/lib/harnesses/kiro.js` now transpiles one Kiro agent per persona from `.agents/agents/*.md`.
+- **Generated, not symlinked, because the schemas differ.** Personas carry `tools: {write: true}` and `permission:` (OpenCode shape); Kiro reads `tools` as an array and `permissions.rules`. A raw symlink would present 20 invalid picker entries. The emitter maps declared denials only (`edit: deny` / `write: false` → `fs_write: deny`), so Kiro keeps its confirm-before-act default instead of silently granting capabilities.
+- **User files survive.** Generated files carry a `# vespyr-generated` marker inside their frontmatter. Reinstall overwrites and uninstall deletes only marked files; a hand-written `.kiro/agents/*.md` is left alone. A pre-existing `.kiro/agents` symlink is unlinked before writing — otherwise generated files would land in `.agents/agents/` and rewrite the source personas.
+
+### Kiro backups moved out of the scanned tree (2026-11-10)
+- **Every Kiro update dropped a backup into `.kiro/steering/`.** The doc sync rewrote the adapter's steering symlink into a real file, then the adapter saw "foreign" content, backed it up as `vespyr-steering.md.backup.<ts>`, and recreated the link. One file per update, forever, inside a directory Kiro scans.
+- **Backups now go to `.kiro/.bak/`, mirroring the tree.** `.bak/steering/vespyr-steering.md.backup.<ts>`, `.bak/agents/<name>.md.backup.<ts>`, `.bak/skills.backup.<ts>` — the same relative-path convention `.agents/.bak/` already uses. `handleConflict` takes an optional `backupDir` plus the base to measure from; the Kiro adapter passes `.kiro`. Other harnesses keep their existing behavior — this change is Kiro-scoped.
+- **The churn is fixed, not just relocated.** `sync-entry-points.js` no longer writes an adapter-owned path (Kiro steering) when it already exists, so a clean update produces zero backups. A real file whose content equals the canonical template is replaced without a backup — backing up our own output was pure noise.
+- **Existing litter is migrated.** On the next install/update, any `*.backup.<digits>` entry sitting in `.kiro/`, `.kiro/steering/`, or `.kiro/agents/` is moved into `.kiro/.bak/` (collisions get a `-1`, `-2` suffix). Upgraded projects do not keep their old litter.
+- **Edited generated agents are no longer lost.** `.kiro/agents/*.md` carries a checksum in its `# vespyr-generated` marker. Reinstall compares it: output that is untouched since generation (a stale persona from an older version) is replaced silently, while a generated file edited by hand is copied to `.kiro/.bak/` before regeneration. Hand-written agents are skipped as before, so they are never overwritten and never backed up.
+
+### Harness selection now gates root docs (2026-11-10)
+- **A Kiro-only install shipped a `CLAUDE.md`.** The doc sync rewrote `.agents/` → `.claude/` for every install regardless of selection, so the file pointed at a `.claude/` directory that never existed. `performSyncDocs` now passes the installed harness list (`--harnesses=`) and `sync-entry-points.js` skips the Claude target when Claude is not installed. `update` and `reconfigure` also drop a stale `CLAUDE.md` once the harness is gone, keeping the content check that protects hand-written files.
+
+---
+
 ## [2.0.12] - 2026-10-16
 
 ### `/grill-me` went back to being a conversation (2026-10-15)

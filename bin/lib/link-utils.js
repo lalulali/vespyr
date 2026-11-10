@@ -8,7 +8,12 @@ const path = require("path");
 const { R } = require("./state.js");
 const { log, logDry, logWarn } = require("./logger.js");
 
-function handleConflict(linkPath, name, targetDir, method = "symlink") {
+function handleConflict(linkPath, name, targetDir, method = "symlink", options = {}) {
+	const backupDir = options.backupDir || null;
+	// Relative to backupDirBase, so `.kiro/.bak` mirrors `.kiro/` the way
+	// `.agents/.bak` mirrors `.agents/` (steering/vespyr-steering.md, not a
+	// flat pile at the root).
+	const backupDirBase = options.backupDirBase || null;
 	try {
 		const stat = fs.lstatSync(linkPath);
 		if (stat.isSymbolicLink()) {
@@ -56,11 +61,23 @@ function handleConflict(linkPath, name, targetDir, method = "symlink") {
 				// future verifies.
 				return;
 			}
-			const backupPath = `${linkPath}.backup.${Date.now()}`;
+			// Backups land beside the file by default. A caller that owns a
+			// directory scanned by a tool (Kiro reads .kiro/steering/ and
+			// .kiro/agents/) passes backupDir so the litter stays out of the
+			// scanned tree instead of masquerading as content. The original
+			// relative path is preserved under backupDir, matching the
+			// .agents/.bak convention.
+			const backupRel = backupDir
+				? path.relative(backupDirBase || path.dirname(linkPath), linkPath)
+				: null;
+			const backupPath = backupDir
+				? path.join(backupDir, `${backupRel}.backup.${Date.now()}`)
+				: `${linkPath}.backup.${Date.now()}`;
 			logWarn(
-				`Existing ${name} found. Backing up to ${path.basename(backupPath)}`,
+				`Existing ${name} found. Backing up to ${path.relative(path.dirname(backupDir || linkPath), backupPath)}`,
 			);
 			if (!R.dryRun) {
+				if (backupDir) fs.mkdirSync(path.dirname(backupPath), { recursive: true });
 				fs.renameSync(linkPath, backupPath);
 			}
 		}

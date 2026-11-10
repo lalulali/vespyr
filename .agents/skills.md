@@ -1,6 +1,6 @@
 # Workflows & Skills
 
-Vespyr organizes multi-agent execution into **20 specialized personas**, structured **skills** (42 curated workflows located in `.agents/skills/`), and a **shared persistent memory layer** (`artifacts/memory/`).
+Vespyr organizes multi-agent execution into **20 specialized personas**, structured **skills** (43 curated workflows located in `.agents/skills/`), and a **shared persistent memory layer** (`artifacts/memory/`).
 
 The canonical pipeline consists of 11 phases (Phase -1…9, see [phase-table.md](./references/phase-table.md)); the core milestone groupings below provide rapid orientation.
 
@@ -64,7 +64,7 @@ Every agent persona adheres to the core system principle:
 
 ---
 
-## 4. Curated Skills Catalog (42 Skills)
+## 4. Curated Skills Catalog (43 Skills)
 
 Skills are invoked via `/skill-name` or by referencing `.agents/skills/[name]/SKILL.md`.
 
@@ -117,6 +117,7 @@ Skills are invoked via `/skill-name` or by referencing `.agents/skills/[name]/SK
 - **`/help-me`**: Conversational project navigator and recommended slash command router.
 - **`/grill-me`**: Relentless Socratic stress-testing interview — follows each thread until it holds or breaks.
 - **`/humanize`**: AI-writing tell detector and style normalizer.
+- **`/deslop`**: Core deslop and plain-clarity engine — strips AI writing tells, replaces fancy/thesaurus words with plain words, and eliminates circumlocution (alias of `/humanize`).
 - **`/elicitation`**: 98-method deep critique and refinement flow (Socratic, pre-mortem, red-team).
 - **`/round-table`**: Orchestrated multi-agent panel discussions across development stages.
 - **`/status`**: Instant project health snapshot (phase, blockers, memory health).

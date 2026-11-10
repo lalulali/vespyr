@@ -38,7 +38,7 @@ After installation, your project root gets:
 your-project/
 ├── .agents/              # Agent personas, skills, scripts, config, references
 │   ├── agents/           # 20 agent persona markdown files
-│   ├── skills/           # 42 atomic skill workflows
+│   ├── skills/           # 43 atomic skill workflows
 │   ├── scripts/          # Orchestrator, memory, telemetry
 │   ├── config.yaml       # Project configuration
 │   └── references/       # Phase table, glossary, contracts
@@ -55,7 +55,7 @@ your-project/
 └── README.md             # Project overview
 ```
 
-> **Harness note:** The canonical configuration directory is `.agents/`. The installer creates the per-harness links your selections need (`.opencode`, `.claude`, `.kiro/skills`, `.github/skills`) — do not rename or move `.agents/`, or those links break.
+> **Harness note:** The canonical configuration directory is `.agents/`. The installer creates the per-harness links your selections need (`.opencode`, `.claude`, `.kiro/skills`, `.github/skills`) — do not rename or move `.agents/`, or those links break. Kiro's `.kiro/agents/*.md` files are generated from `.agents/agents/`, so edit the persona in `.agents/` and re-run `vespyr update`; the generated file says so in its frontmatter.
 
 ## Supported harnesses
 
@@ -63,7 +63,7 @@ your-project/
 |---|---|---|
 | OpenCode | First-class | `.opencode -> .agents` symlink |
 | Claude Code | First-class | `.claude -> .agents` symlink + `CLAUDE.md` |
-| Kiro | First-class (hybrid) | `.kiro/skills` symlink + `.kiro/steering/vespyr-steering.md` |
+| Kiro | First-class (hybrid) | `.kiro/skills` symlink + `.kiro/steering/vespyr-steering.md` + `.kiro/agents/*.md` (one Kiro custom agent per persona) |
 | GitHub Copilot | First-class | `.github/copilot-instructions.md` + `.github/skills -> .agents/skills`; personas ride the root `AGENTS.md` |
 | Google Antigravity | None needed | reads `.agents/skills/` (plus `.agents/rules/`, `.agents/workflows/`) natively |
 | Codex | None needed | reads root `AGENTS.md` and scans `.agents/` skills natively |

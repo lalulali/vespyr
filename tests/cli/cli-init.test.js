@@ -72,11 +72,51 @@ describe("Tier 0 Deterministic Init Test Suite (TL-INIT-04 / T0-INIT-01..04)", (
 
     assert.ok(fs.existsSync(path.join(tmpDir, ".claude")), "Claude harness folder must exist");
     assert.ok(fs.existsSync(path.join(tmpDir, ".kiro")), "Kiro harness folder must exist");
+    assert.ok(
+      fs.existsSync(path.join(tmpDir, ".kiro", "agents", "founder.md")),
+      "Kiro custom agents must be transpiled from .agents/agents"
+    );
 
     assert.strictEqual(
       fs.existsSync(path.join(tmpDir, ".agents", "commands")),
       false,
       ".agents/commands/ directory must not exist in scaffolding"
+    );
+  });
+
+  it("T0-INIT-05: Kiro-only install must not emit a CLAUDE.md for an absent harness", () => {
+    execFileSync(process.execPath, [CLI, "init", "--target", tmpDir, "--harness", "kiro", "--yes"], { stdio: "pipe" });
+
+    assert.strictEqual(
+      fs.existsSync(path.join(tmpDir, "CLAUDE.md")),
+      false,
+      "CLAUDE.md rewrites .agents/ -> .claude/; with Claude unselected it points at nothing"
+    );
+    assert.ok(fs.existsSync(path.join(tmpDir, "AGENTS.md")), "harness-agnostic docs must still be emitted");
+  });
+
+  it("T0-INIT-06: Kiro update leaves no backup litter inside .kiro", () => {
+    execFileSync(process.execPath, [CLI, "init", "--target", tmpDir, "--harness", "kiro", "--yes"], { stdio: "pipe" });
+    execFileSync(process.execPath, [CLI, "update", "--target", tmpDir, "--yes"], { stdio: "pipe" });
+
+    const steering = path.join(tmpDir, ".kiro", "steering", "vespyr-steering.md");
+    assert.strictEqual(
+      fs.lstatSync(steering).isSymbolicLink(),
+      true,
+      "update must not rewrite the adapter-managed steering link into a real file"
+    );
+
+    const walk = (dir) =>
+      fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+        const full = path.join(dir, entry.name);
+        if (entry.isDirectory()) return walk(full);
+        return entry.name.includes(".backup.") ? [full] : [];
+      });
+    assert.deepStrictEqual(walk(path.join(tmpDir, ".kiro")), [], "no backup files may accumulate in .kiro");
+    assert.strictEqual(
+      fs.existsSync(path.join(tmpDir, ".kiro", ".bak")),
+      false,
+      "a clean update must not create a .bak folder at all"
     );
   });
 

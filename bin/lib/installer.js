@@ -263,6 +263,31 @@ function bootstrapRootDocs(targetDir, projectName, selectedHarnesses) {
 	}
 }
 
+/**
+ * Remove a CLAUDE.md left behind by an earlier Claude install once that harness
+ * is gone. The content check keeps a hand-written CLAUDE.md untouched.
+ */
+function removeStaleClaudeMd(targetDir, selections) {
+	if (selections.includes("claude")) return;
+	const claudePath = path.join(targetDir, "CLAUDE.md");
+	try {
+		if (!fs.existsSync(claudePath)) return;
+		const content = fs.readFileSync(claudePath, "utf8");
+		if (
+			!content.includes(".claude/") &&
+			!content.includes(".agents/") &&
+			!content.includes("Vespyr")
+		) {
+			return;
+		}
+		if (R.dryRun) {
+			logDry(`Would remove stale CLAUDE.md (claude harness deselected)`);
+			return;
+		}
+		fs.unlinkSync(claudePath);
+	} catch {}
+}
+
 function writeVersionFile(targetDir) {
 	const versionPath = path.join(targetDir, ".agents", ".vespyr-version");
 	if (R.dryRun) {
@@ -732,7 +757,7 @@ async function performFreshInstall(targetDir, flags) {
 	scaffoldArtifacts(targetDir, projectName, userNickname, resolvedStack);
 	installGitHook(targetDir);
 	bootstrapRootDocs(targetDir, projectName, selections);
-	performSyncDocs(targetDir);
+	performSyncDocs(targetDir, selections);
 	await installHarnesses(targetDir, selections, method);
 
 	if (languageArtifacts) {
@@ -879,7 +904,8 @@ async function performUpdate(targetDir, flags) {
 
 	const projectName = path.basename(targetDir);
 	bootstrapRootDocs(targetDir, projectName, installedHarnesses);
-	performSyncDocs(targetDir);
+	performSyncDocs(targetDir, installedHarnesses);
+	removeStaleClaudeMd(targetDir, installedHarnesses);
 
 	await installHarnesses(targetDir, installedHarnesses, method);
 
@@ -1110,19 +1136,8 @@ async function performReconfigure(targetDir, flags) {
 	const projectName = path.basename(targetDir);
 	bootstrapRootDocs(targetDir, projectName, selections);
 	// Stale CLAUDE.md: claude harness deselected but doc left behind.
-	if (!selections.includes("claude")) {
-		const claudePath = path.join(targetDir, "CLAUDE.md");
-		try {
-			if (fs.existsSync(claudePath)) {
-				const content = fs.readFileSync(claudePath, "utf8");
-				if (content.includes(".claude/") || content.includes(".agents/") || content.includes("Vespyr")) {
-					if (!R.dryRun) fs.unlinkSync(claudePath);
-					else logDry(`Would remove stale CLAUDE.md (claude harness deselected)`);
-				}
-			}
-		} catch {}
-	}
-	performSyncDocs(targetDir);
+	removeStaleClaudeMd(targetDir, selections);
+	performSyncDocs(targetDir, selections);
 
 	await installHarnesses(targetDir, selections, method);
 
