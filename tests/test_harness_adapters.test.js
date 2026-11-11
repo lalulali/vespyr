@@ -316,22 +316,23 @@ describe('Kiro custom agents (.kiro/agents emission)', () => {
     cleanTempDir(tmpDir);
   });
 
-  it('emits a Kiro-shaped markdown agent per persona, not a symlink', () => {
+  it('emits a Kiro-shaped JSON agent per persona, not a symlink', () => {
     getAdapter('kiro').install(silentCtx(tmpDir));
 
-    const emitted = path.join(tmpDir, '.kiro', 'agents', 'founder.md');
-    assert.ok(fs.existsSync(emitted), '.kiro/agents/founder.md must exist');
+    const emitted = path.join(tmpDir, '.kiro', 'agents', 'founder.json');
+    assert.ok(fs.existsSync(emitted), '.kiro/agents/founder.json must exist (CLI discovers .json only)');
     assert.strictEqual(fs.lstatSync(emitted).isSymbolicLink(), false, 'generated agent must be a real file');
 
-    const content = fs.readFileSync(emitted, 'utf8');
-    assert.match(content, /^---\n/);
-    assert.match(content, /\nname: founder\n/);
-    assert.match(content, /\ntools: \["\*"\]\n/, 'tools must be an array, not a map');
-    assert.strictEqual(content.includes('\npermission:\n'), false, 'Vespyr singular permission block must not leak');
-    assert.match(content, /# vespyr-generated/, 'generated marker missing');
-    assert.ok(content.includes('# @founder'), 'persona body must be carried over');
+    const config = JSON.parse(fs.readFileSync(emitted, 'utf8'));
+    assert.strictEqual(config.name, 'founder');
+    assert.ok(Array.isArray(config.tools), 'tools must be an array, not a map');
+    assert.deepStrictEqual(config.tools, ['*']);
+    assert.strictEqual('permission' in config, false, 'Vespyr singular permission block must not leak');
+    assert.strictEqual(config._vespyr.generated, true, 'generated marker missing');
+    assert.match(config._vespyr.checksum, /^[a-f0-9]{16}$/);
+    assert.ok(config.prompt.includes('# @founder'), 'persona body must be carried in prompt');
     assert.ok(
-      content.includes('[GUARDRAILS.md](.agents/GUARDRAILS.md)'),
+      config.prompt.includes('[GUARDRAILS.md](.agents/GUARDRAILS.md)'),
       'persona-relative links must be rewritten to workspace paths'
     );
   });
@@ -341,17 +342,21 @@ describe('Kiro custom agents (.kiro/agents emission)', () => {
 
     getAdapter('kiro').install(silentCtx(tmpDir));
 
-    const content = fs.readFileSync(path.join(tmpDir, '.kiro', 'agents', 'security-engineer.md'), 'utf8');
-    assert.match(content, /permissions:\n {2}rules:\n {4}- capability: fs_write\n {6}effect: deny\n/);
+    const config = JSON.parse(
+      fs.readFileSync(path.join(tmpDir, '.kiro', 'agents', 'security-engineer.json'), 'utf8')
+    );
+    assert.deepStrictEqual(config.permissions, {
+      rules: [{ capability: 'fs_write', effect: 'deny' }],
+    });
   });
 
   it('is idempotent across reinstalls', () => {
     const ctx = silentCtx(tmpDir);
     getAdapter('kiro').install(ctx);
-    const first = fs.readFileSync(path.join(tmpDir, '.kiro', 'agents', 'founder.md'), 'utf8');
+    const first = fs.readFileSync(path.join(tmpDir, '.kiro', 'agents', 'founder.json'), 'utf8');
 
     getAdapter('kiro').install(ctx);
-    const second = fs.readFileSync(path.join(tmpDir, '.kiro', 'agents', 'founder.md'), 'utf8');
+    const second = fs.readFileSync(path.join(tmpDir, '.kiro', 'agents', 'founder.json'), 'utf8');
 
     assert.strictEqual(second, first, 'reinstall must not churn generated content');
   });
@@ -359,12 +364,15 @@ describe('Kiro custom agents (.kiro/agents emission)', () => {
   it('never overwrites a hand-written Kiro agent that shares a persona name', () => {
     const agentsDir = path.join(tmpDir, '.kiro', 'agents');
     fs.mkdirSync(agentsDir, { recursive: true });
-    const userFile = path.join(agentsDir, 'founder.md');
-    fs.writeFileSync(userFile, '---\nname: founder\n---\nmy own prompt\n');
+    const userFile = path.join(agentsDir, 'founder.json');
+    fs.writeFileSync(userFile, '{\n  "name": "founder",\n  "prompt": "my own prompt"\n}\n');
 
     getAdapter('kiro').install(silentCtx(tmpDir));
 
-    assert.strictEqual(fs.readFileSync(userFile, 'utf8'), '---\nname: founder\n---\nmy own prompt\n');
+    assert.strictEqual(
+      fs.readFileSync(userFile, 'utf8'),
+      '{\n  "name": "founder",\n  "prompt": "my own prompt"\n}\n'
+    );
   });
 
   it('replaces a pre-existing symlinked .kiro/agents without writing through it', {
@@ -384,13 +392,13 @@ describe('Kiro custom agents (.kiro/agents emission)', () => {
       sourceBefore,
       'source personas must never be rewritten through the link'
     );
-    assert.ok(fs.existsSync(path.join(linkPath, 'founder.md')));
+    assert.ok(fs.existsSync(path.join(linkPath, 'founder.json')));
   });
 
   it('uninstall removes generated agents but keeps hand-written ones', () => {
     getAdapter('kiro').install(silentCtx(tmpDir));
     const agentsDir = path.join(tmpDir, '.kiro', 'agents');
-    fs.writeFileSync(path.join(agentsDir, 'mine.md'), '---\nname: mine\n---\nmine\n');
+    fs.writeFileSync(path.join(agentsDir, 'mine.json'), '{\n  "name": "mine",\n  "prompt": "mine"\n}\n');
 
     getAdapter('kiro').uninstall({
       targetDir: tmpDir,
@@ -403,8 +411,8 @@ describe('Kiro custom agents (.kiro/agents emission)', () => {
       },
     });
 
-    assert.strictEqual(fs.existsSync(path.join(agentsDir, 'founder.md')), false);
-    assert.strictEqual(fs.existsSync(path.join(agentsDir, 'mine.md')), true);
+    assert.strictEqual(fs.existsSync(path.join(agentsDir, 'founder.json')), false);
+    assert.strictEqual(fs.existsSync(path.join(agentsDir, 'mine.json')), true);
   });
 });
 
@@ -588,8 +596,10 @@ describe('Kiro generated-agent replacement safety', () => {
     );
     getAdapter('kiro').install(silentCtx(tmpDir));
 
-    const generated = fs.readFileSync(path.join(tmpDir, '.kiro', 'agents', 'founder.md'), 'utf8');
-    assert.ok(generated.includes('second body'), 'regenerated body missing');
+    const generated = JSON.parse(
+      fs.readFileSync(path.join(tmpDir, '.kiro', 'agents', 'founder.json'), 'utf8')
+    );
+    assert.ok(generated.prompt.includes('second body'), 'regenerated body missing');
     assert.strictEqual(
       fs.existsSync(path.join(tmpDir, '.kiro', '.bak')),
       false,
@@ -599,14 +609,16 @@ describe('Kiro generated-agent replacement safety', () => {
 
   it('backs up a generated agent that was edited by hand before overwriting it', () => {
     getAdapter('kiro').install(silentCtx(tmpDir));
-    const generatedPath = path.join(tmpDir, '.kiro', 'agents', 'founder.md');
-    fs.appendFileSync(generatedPath, '\nmy local edit\n');
+    const generatedPath = path.join(tmpDir, '.kiro', 'agents', 'founder.json');
+    const edited = JSON.parse(fs.readFileSync(generatedPath, 'utf8'));
+    edited.prompt += '\nmy local edit\n';
+    fs.writeFileSync(generatedPath, `${JSON.stringify(edited, null, 2)}\n`);
 
     getAdapter('kiro').install(silentCtx(tmpDir));
 
     const bakDir = path.join(tmpDir, '.kiro', '.bak');
     const backups = listBackupsRelative(bakDir).filter((f) =>
-      f.startsWith('agents/founder.md.backup.')
+      f.startsWith('agents/founder.json.backup.')
     );
     assert.strictEqual(backups.length, 1, 'edited generated agent must be backed up once');
     assert.ok(
@@ -623,12 +635,174 @@ describe('Kiro generated-agent replacement safety', () => {
   it('leaves a hand-written agent untouched and never backs it up', () => {
     const agentsDir = path.join(tmpDir, '.kiro', 'agents');
     fs.mkdirSync(agentsDir, { recursive: true });
-    const userFile = path.join(agentsDir, 'founder.md');
-    fs.writeFileSync(userFile, '---\nname: founder\n---\nmine\n');
+    const userFile = path.join(agentsDir, 'founder.json');
+    fs.writeFileSync(userFile, '{\n  "name": "founder",\n  "prompt": "mine"\n}\n');
 
     getAdapter('kiro').install(silentCtx(tmpDir));
 
-    assert.strictEqual(fs.readFileSync(userFile, 'utf8'), '---\nname: founder\n---\nmine\n');
+    assert.strictEqual(
+      fs.readFileSync(userFile, 'utf8'),
+      '{\n  "name": "founder",\n  "prompt": "mine"\n}\n'
+    );
+    assert.strictEqual(fs.existsSync(path.join(tmpDir, '.kiro', '.bak')), false);
+  });
+});
+
+describe('Kiro legacy Markdown agent migration', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = makeTempDir();
+    fs.mkdirSync(path.join(tmpDir, '.agents', 'agents'), { recursive: true });
+    fs.mkdirSync(path.join(tmpDir, '.agents', 'skills'), { recursive: true });
+    fs.writeFileSync(path.join(tmpDir, '.agents', 'skills', '.keep'), '');
+    fs.writeFileSync(
+      path.join(tmpDir, '.agents', 'agents', 'founder.md'),
+      '---\nname: founder\ndescription: d\n---\nbody\n'
+    );
+  });
+
+  afterEach(() => {
+    cleanTempDir(tmpDir);
+  });
+
+  it('replaces generated .md agents with .json and leaves user files alone', () => {
+    const agentsDir = path.join(tmpDir, '.kiro', 'agents');
+    fs.mkdirSync(agentsDir, { recursive: true });
+    // Emitted by the previous Markdown version of this adapter.
+    fs.writeFileSync(
+      path.join(agentsDir, 'founder.md'),
+      '---\n# vespyr-generated: abcdef0123456789 - source .agents/agents/founder.md (do not edit)\nname: founder\ntools: ["*"]\n---\n\nbody\n'
+    );
+    // A user's own Markdown agent must survive the sweep.
+    fs.writeFileSync(path.join(agentsDir, 'notes.md'), '---\nname: notes\n---\nmine\n');
+
+    getAdapter('kiro').install(silentCtx(tmpDir));
+
+    assert.strictEqual(
+      fs.existsSync(path.join(agentsDir, 'founder.md')),
+      false,
+      'generated Markdown agent must be removed (Kiro ignores .md)'
+    );
+    assert.strictEqual(fs.existsSync(path.join(agentsDir, 'founder.json')), true);
+    assert.strictEqual(fs.existsSync(path.join(agentsDir, 'notes.md')), true, 'user Markdown must survive');
+  });
+});
+
+describe('Kiro uninstall: Vespyr backups go, owner documents stay', () => {
+  let tmpDir;
+  let warnings;
+
+  beforeEach(() => {
+    tmpDir = makeTempDir();
+    warnings = [];
+    fs.mkdirSync(path.join(tmpDir, '.agents', 'agents'), { recursive: true });
+    fs.mkdirSync(path.join(tmpDir, '.agents', 'skills', 'design'), { recursive: true });
+    fs.writeFileSync(path.join(tmpDir, '.agents', 'skills', 'design', 'SKILL.md'), '# design');
+    fs.mkdirSync(path.join(tmpDir, '.agents', 'templates', 'system'), { recursive: true });
+    fs.writeFileSync(
+      path.join(tmpDir, '.agents', 'templates', 'system', 'vespyr-steering.md.canonical'),
+      '# canonical steering\n'
+    );
+    fs.writeFileSync(
+      path.join(tmpDir, '.agents', 'agents', 'founder.md'),
+      '---\nname: founder\ndescription: d\n---\nbody\n'
+    );
+  });
+
+  afterEach(() => {
+    cleanTempDir(tmpDir);
+  });
+
+  function uninstall() {
+    getAdapter('kiro').uninstall({
+      targetDir: tmpDir,
+      isGlobal: false,
+      agentsSrc: path.join(tmpDir, '.agents'),
+      logWarn: (message) => warnings.push(message),
+      removeDirIfEmpty: (d) => {
+        try {
+          if (fs.readdirSync(d).length === 0) fs.rmdirSync(d);
+        } catch {}
+      },
+    });
+  }
+
+  it('removes backups of generated agents and leaves no .bak behind', () => {
+    getAdapter('kiro').install(silentCtx(tmpDir));
+    const generated = path.join(tmpDir, '.kiro', 'agents', 'founder.json');
+    const config = JSON.parse(fs.readFileSync(generated, 'utf8'));
+    config.prompt += '\nhand edit\n';
+    fs.writeFileSync(generated, `${JSON.stringify(config, null, 2)}\n`);
+    getAdapter('kiro').install(silentCtx(tmpDir));
+
+    assert.ok(fs.existsSync(path.join(tmpDir, '.kiro', '.bak', 'agents')));
+
+    uninstall();
+
+    assert.strictEqual(fs.existsSync(path.join(tmpDir, '.kiro', '.bak')), false, '.bak must be swept');
+    assert.strictEqual(fs.existsSync(path.join(tmpDir, '.kiro')), false, 'empty .kiro must be removed');
+    assert.deepStrictEqual(warnings, [], 'nothing was left behind, so nothing to report');
+  });
+
+  it("keeps the owner's steering document and says so", () => {
+    getAdapter('kiro').install(silentCtx(tmpDir));
+    const steering = path.join(tmpDir, '.kiro', 'steering', 'vespyr-steering.md');
+    fs.rmSync(steering);
+    fs.writeFileSync(steering, '# MY OWN STEERING DOC\n');
+    getAdapter('kiro').install(silentCtx(tmpDir));
+
+    uninstall();
+
+    const keptDir = path.join(tmpDir, '.kiro', '.bak', 'steering');
+    const kept = fs.readdirSync(keptDir);
+    assert.strictEqual(kept.length, 1);
+    assert.strictEqual(fs.readFileSync(path.join(keptDir, kept[0]), 'utf8'), '# MY OWN STEERING DOC\n');
+    assert.strictEqual(warnings.length, 1);
+    assert.match(warnings[0], /Kept 1 backup entry in \.kiro\/\.bak/);
+  });
+
+  it('removes a backup of the steering doc when it is Vespyr output', () => {
+    const backupDir = path.join(tmpDir, '.kiro', '.bak', 'steering');
+    fs.mkdirSync(backupDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(backupDir, 'vespyr-steering.md.backup.1700000000000'),
+      '# canonical steering\n'
+    );
+
+    uninstall();
+
+    assert.strictEqual(fs.existsSync(path.join(tmpDir, '.kiro', '.bak')), false);
+  });
+
+  it("keeps the owner's skills directory backup", () => {
+    fs.mkdirSync(path.join(tmpDir, '.kiro', 'skills', 'my-own-skill'), { recursive: true });
+    fs.writeFileSync(
+      path.join(tmpDir, '.kiro', 'skills', 'my-own-skill', 'SKILL.md'),
+      '# mine'
+    );
+    getAdapter('kiro').install(silentCtx(tmpDir));
+
+    uninstall();
+
+    const bakDir = path.join(tmpDir, '.kiro', '.bak');
+    const entries = fs.readdirSync(bakDir);
+    assert.strictEqual(entries.length, 1);
+    assert.match(entries[0], /^skills\.backup\.\d+$/);
+    assert.ok(
+      fs.existsSync(path.join(bakDir, entries[0], 'my-own-skill', 'SKILL.md')),
+      "owner's skill must survive"
+    );
+    assert.strictEqual(warnings.length, 1);
+  });
+
+  it('removes a skills backup that is only a copy of core skills', () => {
+    fs.mkdirSync(path.join(tmpDir, '.kiro', 'skills', 'design'), { recursive: true });
+    fs.writeFileSync(path.join(tmpDir, '.kiro', 'skills', 'design', 'SKILL.md'), '# design');
+    getAdapter('kiro').install(silentCtx(tmpDir));
+
+    uninstall();
+
     assert.strictEqual(fs.existsSync(path.join(tmpDir, '.kiro', '.bak')), false);
   });
 });

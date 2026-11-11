@@ -73,8 +73,8 @@ describe("Tier 0 Deterministic Init Test Suite (TL-INIT-04 / T0-INIT-01..04)", (
     assert.ok(fs.existsSync(path.join(tmpDir, ".claude")), "Claude harness folder must exist");
     assert.ok(fs.existsSync(path.join(tmpDir, ".kiro")), "Kiro harness folder must exist");
     assert.ok(
-      fs.existsSync(path.join(tmpDir, ".kiro", "agents", "founder.md")),
-      "Kiro custom agents must be transpiled from .agents/agents"
+      fs.existsSync(path.join(tmpDir, ".kiro", "agents", "founder.json")),
+      "Kiro custom agents must be transpiled from .agents/agents as .json"
     );
 
     assert.strictEqual(
@@ -93,6 +93,33 @@ describe("Tier 0 Deterministic Init Test Suite (TL-INIT-04 / T0-INIT-01..04)", (
       "CLAUDE.md rewrites .agents/ -> .claude/; with Claude unselected it points at nothing"
     );
     assert.ok(fs.existsSync(path.join(tmpDir, "AGENTS.md")), "harness-agnostic docs must still be emitted");
+  });
+
+  it("T0-INIT-07: update backs up a user-authored steering file before replacing it", () => {
+    execFileSync(process.execPath, [CLI, "init", "--target", tmpDir, "--harness", "kiro", "--yes"], { stdio: "pipe" });
+
+    // Replace the adapter-managed link with a real file the owner wrote.
+    const steering = path.join(tmpDir, ".kiro", "steering", "vespyr-steering.md");
+    fs.rmSync(steering);
+    fs.writeFileSync(steering, "# MY OWN STEERING DOC\n");
+
+    execFileSync(process.execPath, [CLI, "update", "--target", tmpDir, "--yes"], { stdio: "pipe" });
+
+    assert.strictEqual(
+      fs.lstatSync(steering).isSymbolicLink(),
+      true,
+      "adapter must re-own the steering path"
+    );
+
+    const bakSteering = path.join(tmpDir, ".kiro", ".bak", "steering");
+    const backups = fs.existsSync(bakSteering) ? fs.readdirSync(bakSteering) : [];
+    assert.strictEqual(backups.length, 1, "user-authored steering file must be backed up exactly once");
+    assert.match(backups[0], /^vespyr-steering\.md\.backup\.\d+$/);
+    assert.strictEqual(
+      fs.readFileSync(path.join(bakSteering, backups[0]), "utf8"),
+      "# MY OWN STEERING DOC\n",
+      "backup must preserve the owner's content verbatim"
+    );
   });
 
   it("T0-INIT-06: Kiro update leaves no backup litter inside .kiro", () => {

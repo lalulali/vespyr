@@ -353,6 +353,10 @@ function uninstallHarnesses(targetDir, harnesses, isGlobal) {
 		agentsSrc: AGENTS_SRC,
 		surgicallyCleanupAgentsDir,
 		removeDirIfEmpty,
+		// Adapters must be able to say what they deliberately left behind —
+		// otherwise "Uninstall complete" can be printed over user data.
+		log,
+		logWarn,
 	};
 	for (const h of harnesses) {
 		const adapter = getHarnessAdapter(h);

@@ -55,7 +55,7 @@ your-project/
 └── README.md             # Project overview
 ```
 
-> **Harness note:** The canonical configuration directory is `.agents/`. The installer creates the per-harness links your selections need (`.opencode`, `.claude`, `.kiro/skills`, `.github/skills`) — do not rename or move `.agents/`, or those links break. Kiro's `.kiro/agents/*.md` files are generated from `.agents/agents/`, so edit the persona in `.agents/` and re-run `vespyr update`; the generated file says so in its frontmatter.
+> **Harness note:** The canonical configuration directory is `.agents/`. The installer creates the per-harness links your selections need (`.opencode`, `.claude`, `.kiro/skills`, `.github/skills`) — do not rename or move `.agents/`, or those links break. Kiro's `.kiro/agents/*.json` files are generated from `.agents/agents/`, so edit the persona in `.agents/` and re-run `vespyr update`; each generated config records its source under `_vespyr`.
 
 ## Supported harnesses
 
@@ -63,7 +63,7 @@ your-project/
 |---|---|---|
 | OpenCode | First-class | `.opencode -> .agents` symlink |
 | Claude Code | First-class | `.claude -> .agents` symlink + `CLAUDE.md` |
-| Kiro | First-class (hybrid) | `.kiro/skills` symlink + `.kiro/steering/vespyr-steering.md` + `.kiro/agents/*.md` (one Kiro custom agent per persona) |
+| Kiro | First-class (hybrid) | `.kiro/skills` symlink + `.kiro/steering/vespyr-steering.md` + `.kiro/agents/*.json` (one Kiro custom agent per persona) |
 | GitHub Copilot | First-class | `.github/copilot-instructions.md` + `.github/skills -> .agents/skills`; personas ride the root `AGENTS.md` |
 | Google Antigravity | None needed | reads `.agents/skills/` (plus `.agents/rules/`, `.agents/workflows/`) natively |
 | Codex | None needed | reads root `AGENTS.md` and scans `.agents/` skills natively |
