@@ -98,6 +98,16 @@ This should produce a navigation report showing your current phase, available sk
 If you see errors, check that:
 - `.agents/config.yaml` exists
 - `artifacts/memory/project-context.md` exists
+
+### Kiro
+
+Kiro discovers custom agents from `.kiro/agents/*.json` and nowhere else — Markdown agent files are ignored by the CLI. Confirm your 20 personas are visible from the project root:
+
+```bash
+kiro-cli agent list
+```
+
+The workspace section should list `founder`, `architect`, `developer`, … (all 20). If it lists none, re-run `npx vespyr update`; that regenerates the JSON configs and removes stale Markdown ones. Each generated config carries `_vespyr.generated`, which is how reinstall and uninstall recognise their own files and leave anything else alone.
 - Your harness can read `.agents/agents/*.md` files
 
 ## Integrity & Security Verification

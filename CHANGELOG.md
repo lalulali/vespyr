@@ -4,7 +4,7 @@ All notable changes to the Vespyr project will be documented in this file.
 
 ---
 
-## [Unreleased]
+## [2.0.13] - 2026-11-11
 
 ### Kiro personas now reach the Kiro agent picker (2026-11-10)
 - **`.kiro/agents/` was never created.** Kiro discovers custom agents from `.kiro/agents/<name>.json` only (see the JSON bullet below for the proof), and the adapter emitted just `.kiro/skills` and `.kiro/steering/vespyr-steering.md`. Every Kiro install therefore ended with an empty (or absent) agent folder and no way to pick a Vespyr persona from Kiro's UI. `bin/lib/harnesses/kiro.js` now transpiles one Kiro agent per persona from `.agents/agents/*.md`.

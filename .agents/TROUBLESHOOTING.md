@@ -305,3 +305,24 @@ Two adjacent failures have their own remedy. `Session ID already exists; refusin
 - *Guardrails:* `GUARDRAILS.md`
 - *Skills orchestration:* `skills.md`
 - *This troubleshooting guide supplements them with practical resolution steps.*
+---
+
+## Kiro doesn't show the Vespyr agents
+
+**Problem:** You installed with the Kiro harness and the agent picker (or `kiro-cli agent list`) shows none of the 20 personas, or shows an outdated set.
+
+**Cause:** Kiro discovers custom agents only from `.kiro/agents/*.json`. Markdown agent files are ignored by the CLI, and older Vespyr versions emitted `.md` — or created no agent files at all.
+
+**Fix:**
+- Re-run the installer so the JSON configs are regenerated and stale Markdown is swept:
+  ```bash
+  npx vespyr update
+  ```
+- Confirm discovery from the project root:
+  ```bash
+  kiro-cli agent list
+  ```
+  The workspace section should list `founder`, `architect`, `developer`, … (all 20).
+- If a single name is missing, check `.kiro/agents/<name>.json` exists and still carries `_vespyr.generated`. A config without that marker is treated as hand-written and is never overwritten.
+
+**Prevention:** Edit personas in `.agents/agents/*.md` and let the installer regenerate the Kiro configs. Do not hand-edit `.kiro/agents/*.json` — a hand-edited generated config is backed up to `.kiro/.bak/agents/` and replaced on the next update.

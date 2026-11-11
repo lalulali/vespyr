@@ -54,7 +54,7 @@ Each row maps a harness adapter to the config files it produces/consumes, derive
 | cursor | `**/.cursor/rules/**` | T0 | transpiled `*.mdc` rules; global: `~/Library/Application Support/Cursor/User/globalRules` (darwin) or `~/.config/Cursor/User/globalRules` |
 | github | `**/.github/agents/**` | T0 | transpiled `*.yml` Copilot agents; global `~/.config/github-copilot` |
 | windsurf | `**/.windsurf/**`, `**/.windsurfrules` | T0 | `.windsurf/workflows` symlink + `.windsurfrules` symlink |
-| kiro | `**/.kiro/**` | T0 | `.kiro/steering/AGENTS.md` + `.kiro/skills` symlink |
+| kiro | `**/.kiro/**` | T0 | `.kiro/steering/vespyr-steering.md` + `.kiro/skills` symlink + `.kiro/agents/*.json` (one generated config per persona) |
 
 > `**/` prefix (P0 follow-up): matches both repo-root (`opencode.json`) and
 > nested (`positive/opencode.json`) paths. The pre-fix table (`opencode.json`

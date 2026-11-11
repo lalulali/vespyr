@@ -100,6 +100,16 @@ node bin/cli.js --yes --target /path/to/my-project
 - `artifacts/memory/project-context.md` 是否存在
 - 你的开发工具是否能读取 `.agents/agents/*.md` 文件
 
+### Kiro
+
+Kiro 只从 `.kiro/agents/*.json` 发现自定义 agent，Markdown 格式的 agent 文件会被 CLI 忽略。在项目根目录确认 20 个人格可见：
+
+```bash
+kiro-cli agent list
+```
+
+Workspace 区域应列出 `founder`、`architect`、`developer` 等全部 20 个。若一个都没有，重新运行 `npx vespyr update`：它会重新生成 JSON 配置并清理遗留的 Markdown 文件。每个生成的配置都带 `_vespyr.generated` 标记，安装与卸载据此只处理自己的文件，其他内容一律不动。
+
 ## 完整性与安全校验
 
 你可以验证安装的供应链完整性与安全合规性：

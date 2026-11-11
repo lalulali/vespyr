@@ -1,11 +1,11 @@
 {
-  "version": "2.0.12",
-  "generated_at": "2026-11-06T15:35:37.976Z",
+  "version": "2.0.13",
+  "generated_at": "2026-11-11T14:09:20.503Z",
   "file_count": 401,
   "files": {
     ".vespyr-manifest.json": "0ff8aaf9e73e41cfdf5edfd5ffb52aca10c0995a879f1b9dcc9d53c01fa10531",
     "GUARDRAILS.md": "8e4cff451956a6643ad8c6eb13a53b60fd3d8d1b3e54d409a3a8fa276b75c2be",
-    "TROUBLESHOOTING.md": "0a824039a0ee5fb0ffbca53e1c25c64852473ae0fa858786a963077b16487f47",
+    "TROUBLESHOOTING.md": "0ad6bc36572c440a947a81e6bdcfd083737d447cdcad8cf008530d09a28fa59d",
     "agents/architect.md": "969eb538e54b2b1a11c2677274bf26e75379bf30277ad1596a2139f84c097990",
     "agents/code-reviewer.md": "e004530a6be802cb9d40537a4dba859065ce9525875ae06efaa1464fdd2484ca",
     "agents/data-analyst.md": "9dc1fa22ff3eaf5fffa8ed5c2de5f2eb87078744374a47edae8305e532cb55dc",
@@ -39,7 +39,7 @@
     "references/finops-guidelines.md": "f1fc22a85497fd6816e8a419a493765a7da3e2e41b01f399e89df549ef61b03a",
     "references/founder-frameworks.md": "bfe0515f1e106b348bf32f94740c359b041760fdc571810b4de26ea1df75b3c2",
     "references/glossary.md": "90f907edc82441e4a3992a06f46c8b350052e4413d8dda1f42f8412235069806",
-    "references/harness-matrix.md": "424001ca60d42b4e930076d86a8f30b894eb12cf3c5a1d6c5320e3e87ffdbc81",
+    "references/harness-matrix.md": "3c9dec8b367d3fc5ee6a10958ae063c677da422e99e819fd74239f492f6894db",
     "references/launch-preflight-routing.md": "71fc32d3346f9dee1b85f2bb9ba7ed97717de7b98c92d41536033a466cd2a71e",
     "references/ml-ops-runbook.md": "463c354fa3d70b60ded06986a8f199f07bce31c1436bc8557cb765af5fb42b34",
     "references/motion/creative-site-playbook.md": "388be0c81bc85e5f9fbb2db37fdaf5b6023d42dd7fd1e998518a79bcdb999aef",
@@ -151,7 +151,7 @@
     "scripts/step0_staleness.js": "e0734809cafca94ec66e958dc0285069a68fc39116bdf956a6fe9407f0e8299b",
     "scripts/step_tracker.js": "067de4d598e027a6e0c9b429c0b1f082a10ca7121ae5841a5155d81be95841f9",
     "scripts/swarm_telemetry.js": "87ffedfa70d0496b90ee9b9dc01a8ca9cafb1ad2133043800105e7d8a8075260",
-    "scripts/sync-entry-points.js": "5e65ff9860e380e9b73a814c48b2cce3f8208950a0eafb4979f396b39808a74a",
+    "scripts/sync-entry-points.js": "0e821a27fea2444f8f3946c56f5c356bb04cc5105a32a5a38b53cf4e66757785",
     "scripts/teaching_artifact_check.js": "7bd78b0097f0e8fc1e71b7fb687197c4d87567db2552913f91a62d3d02ab052f",
     "scripts/template_conformance.js": "c325a2193b4019978e07792b1fb39d3445def3f180acfac71c43e06a4e70b819",
     "scripts/template_version_guard.js": "d7c1c711776204e5fc1b311021a435a19c44df8a83232213f90921224a2d5e4b",
@@ -406,6 +406,6 @@
     "workflow.md": "d416cf6998c12cc955738aad2e8dbd1e01a3e7f8824abf1dd7caba6e54f389f7"
   },
   "files_root": {
-    "bin/cli.js": "450fa831aeb0507b2c8db132e9b61e90cb9be320d5164116b494c359d9df63ca"
+    "bin/cli.js": "f052bc6604697707ff7ee7bb274dd3b641b14b051b09cb0010c077d1f3c52392"
   }
 }
