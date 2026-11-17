@@ -145,11 +145,19 @@ function list() {
 function remove(name, opts = {}) {
   const n = sanitizeName(name);
   const root = mainRoot();
-  const args = ['worktree', 'remove', defaultPath(n)];
+  const wtPath = defaultPath(n);
+  const args = ['worktree', 'remove', wtPath];
   if (opts.force) args.push('--force');
   if (!gitOk(args, root)) {
     // fall back: maybe created under a custom --path
-    git(['worktree', 'remove', path.resolve(opts.path || `./${n}`)], root);
+    const customPath = path.resolve(opts.path || `./${n}`);
+    git(['worktree', 'remove', customPath], root);
+    if (fs.existsSync(customPath)) fs.rmSync(customPath, { recursive: true, force: true });
+  } else if (fs.existsSync(wtPath)) {
+    // Windows can leave the directory behind after git unregisters it when the
+    // shared-state symlinks are inside. git has already removed the worktree,
+    // so only the empty leftover directory is being cleaned here.
+    fs.rmSync(wtPath, { recursive: true, force: true });
   }
   try { git(['branch', '-D', `wt/${n}`], root); } catch { /* branch may be merged or absent */ }
   return true;
@@ -190,6 +198,8 @@ function clean() {
     }
     try {
       git(['worktree', 'remove', '--force', wtPath], root);
+      // Windows may keep the directory after git unregisters the worktree.
+      if (fs.existsSync(wtPath)) fs.rmSync(wtPath, { recursive: true, force: true });
       try { git(['branch', '-D', name], root); } catch { /* best effort */ }
       removed.push({ name, path: wtPath });
     } catch {

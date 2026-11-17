@@ -1254,34 +1254,37 @@ function readCoreFileMode(repoRoot) {
   return String(result.stdout).trim() !== 'false';
 }
 
-function isGitWorkTree(repoRoot) {
-  const result = gitCommand(repoRoot, ['rev-parse', '--show-toplevel'], { allowFailure: true });
-  if (result.status !== 0) return false;
-  const toplevel = String(result.stdout).trim();
-  if (!toplevel) return false;
-  // Compare physical directories, not their spelled paths. On Windows the OS
-  // temp path can be an 8.3 short name while git reports the long path, so a
-  // string compare rejects a real work tree and every maintenance plan check
-  // fails with MANIFEST_UNVERIFIABLE. Device + inode identity survives short
-  // names, drive-letter case and / vs \ separators.
+// Compare physical directories, not their spelled paths. On Windows the OS
+// temp path can be an 8.3 short name while git reports the long path, so a
+// string compare rejects a real work tree and every maintenance plan check
+// fails closed with MANIFEST_UNVERIFIABLE. Device + inode identity survives
+// short names, drive-letter case and / vs \ separators.
+function sameDirectory(a, b) {
   try {
-    const top = fs.statSync(toplevel);
-    const root = fs.statSync(repoRoot);
-    if (top.ino && root.ino) return top.dev === root.dev && top.ino === root.ino;
+    const left = fs.statSync(a);
+    const right = fs.statSync(b);
+    if (left.ino && right.ino) return left.dev === right.dev && left.ino === right.ino;
   } catch {
     return false;
   }
-  // Filesystems without inode numbers: fall back to canonical paths, folding
-  // case on Windows where path spelling is case-insensitive.
+  // Filesystems without inode numbers: canonical paths, folding case on
+  // Windows where path spelling is case-insensitive.
   try {
     const canonical = (p) => {
       const resolved = path.resolve(fs.realpathSync(p));
       return process.platform === 'win32' ? resolved.toLowerCase() : resolved;
     };
-    return canonical(toplevel) === canonical(repoRoot);
+    return canonical(a) === canonical(b);
   } catch {
     return false;
   }
+}
+
+function isGitWorkTree(repoRoot) {
+  const result = gitCommand(repoRoot, ['rev-parse', '--show-toplevel'], { allowFailure: true });
+  if (result.status !== 0) return false;
+  const toplevel = String(result.stdout).trim();
+  return Boolean(toplevel) && sameDirectory(toplevel, repoRoot);
 }
 
 function compareManifestEntries(left, right) {
@@ -1413,13 +1416,7 @@ function computeDirtyEntries(repoRoot, relevantPaths, issues) {
     addIssue(issues, 'MANIFEST_UNVERIFIABLE', 'The repository root is not a Git work tree, so the dirty manifest cannot be computed');
     return null;
   }
-  let realRepoRoot;
-  try {
-    realRepoRoot = fs.realpathSync(repoRoot);
-  } catch {
-    realRepoRoot = repoRoot;
-  }
-  if (path.resolve(String(toplevel.stdout).trim()) !== path.resolve(realRepoRoot)) {
+  if (!sameDirectory(String(toplevel.stdout).trim(), repoRoot)) {
     addIssue(issues, 'MANIFEST_UNVERIFIABLE', 'The repository root must be the top level of the Git work tree so fingerprints stay repo-relative');
     return null;
   }

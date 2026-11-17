@@ -18,7 +18,9 @@ const crypto = require('crypto');
 const { spawnSync } = require('child_process');
 
 const TRACKER = path.join(__dirname, '..', '.agents', 'scripts', 'step_tracker.js');
-const STRATEGY = path.join('artifacts', 'output', '03-strategy');
+// Scope-lock artifact keys are POSIX-style, relative paths. On Windows
+// path.join produces backslashes, which would never match the recorded key.
+const STRATEGY = path.join('artifacts', 'output', '03-strategy').split(path.sep).join('/');
 
 function workspace() {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'tracker-route-'));

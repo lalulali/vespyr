@@ -174,6 +174,12 @@ const walkFaults = [];
 const skippedNodeModules = [];
 let includeNodeModules = false;
 
+// Rule paths and scope roots in the spec are POSIX globs. Keep every relative
+// path in that form on every OS: on Windows path.relative() emits backslashes,
+// which made isProduct() see `bin\file.js` as a top-level name and drop the
+// whole tree (the scanner then reported "scanned 0 files").
+const toRel = (base, full) => path.relative(base, full).split(path.sep).join('/');
+
 function walk(dir, fileList = [], base = dir) {
   let entries;
   try {
@@ -188,11 +194,11 @@ function walk(dir, fileList = [], base = dir) {
     // --include-node-modules. Symlinked node_modules routes to INJ-SYMLINK.
     if (ent.name === 'node_modules') {
       if (!includeNodeModules) {
-        skippedNodeModules.push(path.relative(base, full));
+        skippedNodeModules.push(toRel(base, full));
         continue;
       }
       if (ent.isSymbolicLink()) {
-        fileList.push({ full, rel: path.relative(base, full), symlink: true });
+        fileList.push({ full, rel: toRel(base, full), symlink: true });
         continue;
       }
       if (ent.isDirectory()) {
@@ -209,7 +215,7 @@ function walk(dir, fileList = [], base = dir) {
       // (INJ-SYMLINK), never silently skipped by the dir branch — a repo can
       // redirect its git dir outside the trust boundary.
       if (ent.isSymbolicLink()) {
-        fileList.push({ full, rel: path.relative(base, full), symlink: true });
+        fileList.push({ full, rel: toRel(base, full), symlink: true });
       } else if (ent.isDirectory()) {
         // O-2 (Victor): every syscall in this branch is guarded — a hostile or
         // unreadable hooks dir must land in walkFaults (exit 2), not throw an
@@ -220,7 +226,7 @@ function walk(dir, fileList = [], base = dir) {
             // F-10 (Victor): lstat the .git/config path — a symlinked .git/config
             // must be checked by INJ-SYMLINK, not silently read.
             const lstatd = fs.lstatSync(gitConfig);
-            fileList.push({ full: gitConfig, rel: path.relative(base, gitConfig), symlink: lstatd.isSymbolicLink(), vcsMeta: true });
+            fileList.push({ full: gitConfig, rel: toRel(base, gitConfig), symlink: lstatd.isSymbolicLink(), vcsMeta: true });
           }
           const hooksDir = path.join(full, 'hooks');
           if (fs.existsSync(hooksDir) && fs.statSync(hooksDir).isDirectory()) {
@@ -232,7 +238,7 @@ function walk(dir, fileList = [], base = dir) {
               if (h === 'README.sample' || h.endsWith('.sample')) continue;
               const hFull = path.join(hooksDir, h);
               const hLstat = fs.lstatSync(hFull);
-              fileList.push({ full: hFull, rel: path.relative(base, hFull), symlink: hLstat.isSymbolicLink(), vcsMeta: true });
+              fileList.push({ full: hFull, rel: toRel(base, hFull), symlink: hLstat.isSymbolicLink(), vcsMeta: true });
             }
           }
         } catch (e) {
@@ -242,11 +248,11 @@ function walk(dir, fileList = [], base = dir) {
       continue;
     }
     if (ent.isSymbolicLink()) {
-      fileList.push({ full, rel: path.relative(base, full), symlink: true });
+      fileList.push({ full, rel: toRel(base, full), symlink: true });
     } else if (ent.isDirectory()) {
       walk(full, fileList, base);
     } else {
-      fileList.push({ full, rel: path.relative(base, full), symlink: false });
+      fileList.push({ full, rel: toRel(base, full), symlink: false });
     }
   }
   return fileList;
