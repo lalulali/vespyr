@@ -57,7 +57,7 @@ const depBlockPattern = /const DEPRECATED_CORE_FILES\s*=\s*\[[\s\S]*?\];/g;
 const ignoredFiles = [
   '02h-phase-1-graph-shutup-and-cli.md',
   'active-decisions.md',
-  'changelog.md',
+  'CHANGELOG.md',
   'graph-deprecation.test.js',
   'session-summaries',
   'pipeline-state.json',

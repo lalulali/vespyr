@@ -56,13 +56,18 @@ describe('Install smoke (real tarball -> temp install)', { skip: !ENABLED ? 'set
 
   it('vespyr audit runs from the installed package (security-scan.js + audit-spec.json closure)', () => {
     const scratch = path.join(tmpRoot, 'scratch');
-    fs.mkdirSync(scratch);
-    fs.writeFileSync(path.join(scratch, 'ok.md'), 'benign prose\n');
+    // The shipped spec uses an include-list scope (fail-closed): a bare scratch
+    // dir is outside every product_root, so the scanner exits 2 with 0 files
+    // examined. Put the benign file under a declared root so a clean result is
+    // a real scan, and assert files_examined > 0 so an empty scan cannot pass.
+    fs.mkdirSync(path.join(scratch, 'bin'), { recursive: true });
+    fs.writeFileSync(path.join(scratch, 'bin', 'ok.md'), 'benign prose\n');
     const r = spawnSync(process.execPath, [path.join(pkgDir, 'bin', 'cli.js'), 'audit', '--target', scratch, '--json'], {
       encoding: 'utf8', timeout: 60000
     });
     assert.strictEqual(r.status, 0, `audit failed (FAULT-1?): ${r.stderr}`);
     const out = JSON.parse(r.stdout);
+    assert.ok(out.scope && out.scope.files_examined > 0, `audit must examine at least one file: ${JSON.stringify(out)}`);
     assert.strictEqual(out.exit, 0, `audit should be clean on scratch dir: ${JSON.stringify(out)}`);
   });
 

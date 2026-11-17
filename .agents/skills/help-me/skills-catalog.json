@@ -155,6 +155,13 @@
     ]
   },
   {
+    "name": "deslop",
+    "description": "Core Deslop and Plain-Clarity Engine (alias for /humanize) — removes AI writing patterns, replaces fancy/thesaurus words with plain words, and eliminates circumlocution. Use when polishing prose, specs, docs, or drafts to strip AI slop and make text easy to understand.",
+    "prerequisites": [],
+    "outputs": [],
+    "key_agents": []
+  },
+  {
     "name": "develop",
     "description": "Core MVP workflow — spec review, architecture, planning, implementation, coverage fidelity review, QA, verification, and documentation. Use when the user says \"build this\", \"implement the approved plan\", \"start development\", \"run the dev cycle\", or invokes /develop after planning is complete.",
     "prerequisites": [
@@ -275,7 +282,7 @@
   },
   {
     "name": "humanize",
-    "description": "Remove signs of AI-generated writing from text with user-selectable tone. Use when editing or reviewing text to make it sound more natural and human-written. Supports tone selection (casual, formal, professional, technical, and more) — ask the user for a tone only if they haven't specified one. Based on Wikipedia's comprehensive Signs of AI writing guide. Detects and fixes patterns such as inflated symbolism, promotional language, superficial -ing analyses, vague attributions, em dash overuse, rule of three, AI vocabulary words, passive voice, negative parallelisms, and filler phrases.",
+    "description": "Core Deslop & Plain-Clarity Engine — removes signs of AI-generated writing, replaces fancy/thesaurus words with plain words, and eliminates circumlocution (circling around the point) with user-selectable tone. Use when editing or reviewing text to make it sound natural, simple, and human-written.",
     "prerequisites": [],
     "outputs": [],
     "key_agents": []

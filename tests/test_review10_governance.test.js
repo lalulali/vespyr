@@ -46,6 +46,6 @@ test('Review 10 governance: GUARDRAILS carry the Freeze Boundary + Rule of Any O
 });
 
 test('Review 10 governance: changelog records the governance fold', () => {
-  const s = read('changelog.md');
+  const s = read('CHANGELOG.md');
   assert.match(s, /Freeze Boundary and Rule of Any One are now swarm-wide guardrails/);
 });

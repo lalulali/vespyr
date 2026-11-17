@@ -1,0 +1,8 @@
+# Check out text as LF on every OS. The security corpus baseline pins hashes of
+# LF-encoded files; a CRLF checkout fails the drift gate on Windows.
+* text=auto eol=lf
+
+# Adversarial fixtures must keep their exact committed bytes: their payloads are
+# what the rules detect, and symlink blobs hold target paths, not text.
+evals/security/corpus/** -text
+evals/security/held_out/** -text

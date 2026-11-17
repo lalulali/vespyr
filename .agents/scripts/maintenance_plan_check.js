@@ -1259,13 +1259,29 @@ function isGitWorkTree(repoRoot) {
   if (result.status !== 0) return false;
   const toplevel = String(result.stdout).trim();
   if (!toplevel) return false;
-  let realRepoRoot;
+  // Compare physical directories, not their spelled paths. On Windows the OS
+  // temp path can be an 8.3 short name while git reports the long path, so a
+  // string compare rejects a real work tree and every maintenance plan check
+  // fails with MANIFEST_UNVERIFIABLE. Device + inode identity survives short
+  // names, drive-letter case and / vs \ separators.
   try {
-    realRepoRoot = fs.realpathSync(repoRoot);
+    const top = fs.statSync(toplevel);
+    const root = fs.statSync(repoRoot);
+    if (top.ino && root.ino) return top.dev === root.dev && top.ino === root.ino;
   } catch {
-    realRepoRoot = repoRoot;
+    return false;
   }
-  return path.resolve(toplevel) === path.resolve(realRepoRoot);
+  // Filesystems without inode numbers: fall back to canonical paths, folding
+  // case on Windows where path spelling is case-insensitive.
+  try {
+    const canonical = (p) => {
+      const resolved = path.resolve(fs.realpathSync(p));
+      return process.platform === 'win32' ? resolved.toLowerCase() : resolved;
+    };
+    return canonical(toplevel) === canonical(repoRoot);
+  } catch {
+    return false;
+  }
 }
 
 function compareManifestEntries(left, right) {
