@@ -1,6 +1,6 @@
 {
   "date": "2026-08-10",
-  "scanner_sha256_prefix": "4ada0629be719762",
+  "scanner_sha256_prefix": "0c440f5393802abd",
   "spec_sha256_prefix": "8dd6fac0fe8f60c8",
   "exit": 1,
   "findings": [
@@ -190,6 +190,12 @@
       "date": "2026-10-22",
       "reviewed_by": "agent-performed re-pin on owner instruction (standing \"you do it\" for this work stream). NOT human-read - agent-satisfied for this lane; the diff was presented in the review panel record.",
       "reason": "Re-pin 2026-10-22 (blind run 16 release-gate panel), scanner_sha256_prefix ONLY: 02a9fae7a1308edc -> 4ada0629be719762. One change, additive to behaviour: .agents/scripts/security-scan.js now exports maxWindowEntropy, so the statistic the INJ-SECRET rule actually uses is reachable by a test. The scanner's detection behaviour did not change - the export is additive - and the corpus fixtures are unchanged. This file pins the CORPUS spec (evals/security/corpus-spec.json), which was NOT touched, so its spec_sha256_prefix is deliberately UNCHANGED at 8dd6fac0fe8f60c8."
+    }
+  ,
+    {
+      "date": "2026-11-17",
+      "reviewed_by": "owner Chris approved re-pin ('a') in chat after the drift root cause and verification proof were presented before the edit",
+      "reason": "Re-pin 2026-11-17, scanner_sha256_prefix ONLY, 4ada0629be719762 -> 0c440f5393802abd, in BOTH live baselines. Cause: commit 92da5f0 added a toRel() helper and switched 7 path.relative() call sites in .agents/scripts/security-scan.js to POSIX-separator output. On Windows the backslash separators made isProduct() treat bin/file.js-style relative paths as top-level names and drop whole trees, so the scanner reported 'scanned 0 files' -- a fail-open. Verified before re-pinning: corpus scan JSON is byte-identical between the pinned and live scanner (3756 bytes each, 14 findings, identical rule/path/line set); determinism, fixture, exit-code and findings-vs-baseline invariants all pass; spec_sha256_prefix still matches the pin (8dd6fac0fe8f60c8 here). This is a Windows fail-open FIX, not a detection weakening. Findings were NOT regenerated. NOT a findings re-baseline -- a scanner fingerprint re-pin only."
     }
   ]
 }
