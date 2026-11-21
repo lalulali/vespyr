@@ -339,10 +339,18 @@ switch (cmd) {
 
 ---
 
-## §8 — witness.js (Phase 2, F2.16, ~150 lines)
+## §8 — witness behavior (Phase 2, F2.16, ~150 lines)
 
-**Path:** `.agents/scripts/witness.js`
-**Usage:** `node .agents/scripts/witness.js check` | `sign <file>` | `verify <file>`
+**Target file:** `.agents/scripts/memory_check.js` (the live structure checker — extend it, do not create a new script).
+**Retired name:** `witness.js` (renamed 2026-09-30; the old name meant three unrelated things). Reconciliation 2026-11-19.
+**Usage:** `node .agents/scripts/memory_check.js check` | `sign <file>` | `verify <file>` | `list`
+
+Implemented 2026-11-19: `memory_check.js` now owns structure `check` plus `sign`,
+`verify`, `list`, with a warning-occurrence counter (first informational, second
+blocking). The code below is retained as the original reference for the fingerprint
+format; the shipped script is the source of truth.
+The `ARTIFACTS` list must also include release evidence (`qa-report.md`,
+`utter-satisfaction.json`) so `validate_satisfaction.js` rule 9 has a fingerprint source.
 
 ```javascript
 #!/usr/bin/env node
@@ -419,10 +427,12 @@ switch (cmd) {
 
 ---
 
-## §9 — self_learn.js (Phase 2, F2.12, ~280 lines)
+## §9 — self_learn.js (Phase 2, F2.12, ~895 lines shipped)
 
 **Path:** `.agents/scripts/self_learn.js`
-**Usage:** `node .agents/scripts/self_learn.js scan-episodes --since=30d` | `scan-patterns --since=30d` | `demote --pattern=<id> --reason=<reason>`
+**Usage:** `node .agents/scripts/self_learn.js {scan|scan-episodes|find-patterns|promote-pattern|scan-patterns|promote-instinct|demote-instinct|instinct-cost|citation-rate|suggest|episode|auto-capture|demote} [options]`
+
+**Reconciliation 2026-11-20:** The shipped script at `.agents/scripts/self_learn.js` is authoritative. Per `02i`, Tier-1 episodes live in `.agents/state/episodes.ndjson` (not `artifacts/memory/agent-notes/`, which is banned by the 4+1 memory layout). All writes acquire `.agents/state/memory.lock`, scrub secrets and `<HISTORICAL_MEMORY_DATA>` tags, sign `patterns-and-conventions.md` and `instincts.md` in `witness.json`, enforce `--occurrences >= 3`, `--agents >= 2`, `--approve` + 30d stability + word-boundary multi-token ADR refs for instinct promotion, and provide `suggest` for mid-session boost guidance (Instinct vs `/create-skill` vs `/create-agent`). The reference snippet below is retained for historical context.
 
 ```javascript
 #!/usr/bin/env node
@@ -559,7 +569,9 @@ switch (cmd) {
 ## §10 — delegation_audit.js (Phase 2, F2.21, ~110 lines)
 
 **Path:** `.agents/scripts/delegation_audit.js`
-**Usage:** `node .agents/scripts/delegation_audit.js [--since 7d] [--json]`
+**Usage:** `node .agents/scripts/delegation_audit.js [--since 7d] [--fail-below N] [--json]`
+
+**Reconciliation 2026-11-20:** The shipped script supports `--fail-below <pct>` gating and reads a bounded 10MB tail when `delegation-log.ndjson` exceeds 10MB.
 
 ```javascript
 #!/usr/bin/env node
@@ -567,16 +579,18 @@ switch (cmd) {
 const fs = require('fs');
 const path = require('path');
 
-const LOG = path.join(__dirname, '..', 'state', 'delegation-log.json');
-const AGENTS = [
-  'developer', 'code-reviewer', 'architect', 'tech-lead', 'qa-engineer',
-  'product-manager', 'product-designer', 'security-engineer', 'performance-engineer',
-  'data-analyst', 'devops-engineer', 'ml-engineer', 'researcher',
-];
+// Implemented 2026-11-19 (F2.21): append-only NDJSON is the canonical log,
+// legacy .json/.jsonl remain readable, and the roster below is derived from
+// .agents/agents/*.md. The shipped audit and delegation-policy.md were migrated.
+// This constant block is retained as reference; the shipped file is authoritative.
+const LOG = path.join(__dirname, '..', 'state', 'delegation-log.ndjson');
+const AGENTS = fs.readdirSync(path.join(__dirname, '..', 'agents'))
+  .filter((f) => f.endsWith('.md') && f !== 'memory-controller.md')
+  .map((f) => f.slice(0, -3));
 
 function loadLog() {
   if (!fs.existsSync(LOG)) return [];
-  return JSON.parse(fs.readFileSync(LOG, 'utf8'));
+  return fs.readFileSync(LOG, 'utf8').split('\n').filter(Boolean).map((line) => JSON.parse(line));
 }
 
 function summarize(entries) {
@@ -611,38 +625,19 @@ console.log(`\nLog entries: ${entries.length} | Log file: ${LOG}\n`);
 
 ---
 
-## §11 — qa_check.js (Phase 2, F2.26, ~60 lines)
+## §11 — qa_check.js (Phase 2, F2.23/F2.26, ~130 lines)
 
-**Path:** `.agents/scripts/qa_check.js`
-**Usage:** `node .agents/scripts/qa_check.js`
+**Path:** `.agents/scripts/qa_check.js` (module + CLI; source of truth is the shipped file, not a stub).
+**Usage:** `node .agents/scripts/qa_check.js [--root DIR] [--json]`. Importable as `require('./qa_check.js').checkQA(options)`.
 
-```javascript
-#!/usr/bin/env node
-// qa_check.js — pre-handoff QA gate verification
-const fs = require('fs');
-const path = require('path');
+**Contract (reconciliation 2026-11-19 — replaces the earlier file-existence stub, which could not satisfy F2.23):**
 
-const ARTIFACTS = [
-  'artifacts/output/06-quality/qa-report.md',
-  'artifacts/output/06-quality/qa-signoff.md',
-];
-const WORKING_DIR = process.cwd();
-
-let allOk = true;
-for (const rel of ARTIFACTS) {
-  const full = path.join(WORKING_DIR, rel);
-  if (!fs.existsSync(full)) { console.log(`[MISSING] ${rel}`); allOk = false; continue; }
-  const content = fs.readFileSync(full, 'utf8');
-  const isStale = /date:\s*(\d{4}-\d{2}-\d{2})/i.exec(content)?.[1] !== new Date().toISOString().split('T')[0];
-  console.log(`[${isStale ? 'STALE' : 'OK'}] ${rel}`);
-}
-
-if (!allOk) {
-  console.log('\n❌ QA gate FAILED. Invoke @qa-engineer via /develop Step 7a before claiming completion.');
-  process.exit(1);
-}
-console.log('\n✅ QA gate passed.');
-```
+- Canonical paths: `artifacts/output/05-execution/quality/qa-report.md` and `qa-signoff.md` (match the shipped template, `develop_completion_check.js`, and `step-07-quality-gates.md`; the earlier `06-quality/` paths were wrong).
+- Reuse `develop_completion_check.js`'s `checkSignoff()` / `checkFreshness()` for bracketed verdict, cited-artifact existence, GO-with-conditions contradiction, condition owner/date, open findings, and report freshness. Do not reimplement those regexes.
+- Additionally fail closed on: missing qa-report.md or qa-signoff.md; unparseable or mutually inconsistent verdict fields (frontmatter `verdict:`, `VERDICT: [X]`, `**Release recommendation:**`); sign-off verdict ≠ qa-report.md verdict; `Signature:` mismatch where signature = `sha256(reportContent + '\n' + String(reportStat.mtimeMs))`; sign-off `date:` not equal to today; `Mode:` not one of `M1|M2|M3` (missing Mode fails); `NO-GO`; unsubstituted template placeholders (`{...}`, `YYYY-MM-DD`) in a CONDITIONAL conditions table.
+- Accept `GO` or `CONDITIONAL` for dev-advance. `CONDITIONAL` never ships — that is Gate 2's job (F2.28).
+- Result: `{ ok, recommendation, failures[], warnings[], files }`. CLI prints human-readable or `--json`, exits 0 on pass, 1 on any failure.
+- Fixtures: T-GATE-1..9 (missing files, unparseable, verdict mismatch, freshness signature, stale date, solo/missing mode, NO-GO, forged signature, template placeholder). See §16.
 
 ---
 
@@ -650,6 +645,8 @@ console.log('\n✅ QA gate passed.');
 
 **Path:** `.agents/scripts/worktree.js`
 **Purpose:** Creates, lists, and cleans git worktrees for parallel agent isolation. Each worktree is a separate checkout on its own branch sharing repo history. Tracks active worktrees in `loop-state.json`.
+
+**Reconciliation 2026-11-20:** The shipped script at `.agents/scripts/worktree.js` uses `execFileSync('git', args)` (no shell interpolation) and validates branch names against `SAFE_BRANCH_RE` (`03 F2.30`).
 
 ```javascript
 #!/usr/bin/env node
@@ -1065,14 +1062,52 @@ risk is acceptable.
 
 ---
 
+## §16 — fixture test specifications (Phase 2/3)
+
+**Reconciliation 2026-11-19:** this section was referenced by 03 F2.14/F2.23/F2.29, 03c, and 04 F3.21 but did not exist. Added here. All fixtures are ESM (`*.mjs`) using `node:test` + `node:assert/strict`, discovered by `tests/run-all.js`.
+
+### T-GATE-1..9 — `tests/test_qa_gate.mjs`
+
+| ID | Case | Expected |
+|---|---|---|
+| T-GATE-1 | qa-report.md or qa-signoff.md absent | fail with both paths named |
+| T-GATE-2 | verdict field missing / unbracketed / contradictory fields | fail as unparseable |
+| T-GATE-3 | sign-off verdict ≠ qa-report.md verdict | fail with both values |
+| T-GATE-4 | recomputed `Signature:` ≠ stored value | fail as signature mismatch |
+| T-GATE-5 | sign-off `date:` ≠ today | fail as stale |
+| T-GATE-6 | `Mode:` missing or not M1/M2/M3 (solo mode) | fail |
+| T-GATE-7 | verdict `[NO-GO]` | fail |
+| T-GATE-8 | forged signature hash (tampered report, stale signature) | fail |
+| T-GATE-9 | `[CONDITIONAL]` with unsubstituted `{...}` / `YYYY-MM-DD` placeholders, or `[GO]` with conditions | fail |
+
+### T-SAT-1..5 — `tests/test_satisfaction.mjs`
+
+| ID | Case | Expected |
+|---|---|---|
+| T-SAT-1 | incomplete agent matrix (missing active agent row) | invalid, names missing row |
+| T-SAT-2 | `CHANGES REQUESTED` / `BLOCKED` / `revalidation_required: true` | failed release gate |
+| T-SAT-3 | `SATISFIED` with no evidence refs, or evidence file absent under `--strict` | invalid |
+| T-SAT-4 | `NOT ACTIVATED` with `scope: active` or empty reason | invalid |
+| T-SAT-5 | evidence fingerprint changed after signing / no witness registry under strict | invalid or explicit `witness: unavailable` warning (not implicit approval) |
+
+### T-HOOK-1..5 — `tests/test_hooks.test.mjs` (owned by F2.4, not F2.29)
+
+Disabled list, minimal profile = exactly 4 hooks, strict = 13, `pre:bash:delegation` blocks without `[DIRECT-IO-JUSTIFIED:]`, `pre:edit:delegation` logs justified events.
+
+### Session-start latency — `tests/test_session_latency.js` (F3.21)
+
+Measures the 4 canonical steps in 03 F2.14 (0.0 = 100ms, 0.1 = 250ms, 0.2 = 10ms, 0.3 = 150ms). Each within budget and total < 1000ms; non-blocking steps emit `[SKIPPED]` on timeout. Step 0.4 is deferred to 07 F6.10.
+
+---
+
 ## Completion Checklist
 
-**03e status: PLANNED (v2.1 Reference Specs — Implementation Pending in Phase 2/3).**
+**03e status: IMPLEMENTED (updated 2026-11-20 — Phase 2 scripts §1–§4, §9–§12, §15 and fixtures §16 shipped and verified; Phase 6 scripts §13–§14 remain planned).**
 
-- [ ] Script specs §1–§17 authored and reviewed
-- [ ] Test fixtures T-GATE-1..9 and T-SAT-1..5 specified
-- [ ] Safe git worktree isolation script patch back-ported
-- [ ] `validate_satisfaction.js` and `qa_check.js` ready for Phase 2 implementation
+- [x] Script specs §1–§16 authored and reviewed (§16 added 2026-11-19; §5–§6 removed by owner [NO-GO])
+- [x] Test fixtures T-GATE-1..9 and T-SAT-1..5 specified (§16)
+- [x] Safe git worktree isolation already present in the shipped script (03 F2.30 resolved)
+- [x] `validate_satisfaction.js` and `qa_check.js` ready for Phase 2 implementation — shipped and verified by T-GATE-1..9 and T-SAT-1..5 (2026-11-20)
 
 ---
 

@@ -272,4 +272,17 @@ function main() {
   process.exit(ok ? 0 : 1);
 }
 
-main();
+if (require.main === module) main();
+
+// F2.23: qa_check.js is the single QA gate. Reuse these parsers rather than
+// duplicating the bracketed-verdict / conditions / freshness logic.
+module.exports = {
+  parseArgs,
+  verdictOf,
+  checkSignoff,
+  checkFreshness,
+  readIf,
+  newestMtime,
+  DEFAULTS,
+  VERDICTS,
+};

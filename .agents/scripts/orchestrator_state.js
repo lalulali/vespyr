@@ -34,6 +34,9 @@ const { writeFileSync: atomicWriteFileSync, writeJsonSync, readJsonSync } = requ
 const { withLock } = require('./lib/lock.js');
 const { resolveSessionId, regenerateLatest } = require('./lib/session.js');
 const { syncProjectContext } = require('./session_start.js');
+// F2.23 / F2.28: release-affecting transitions are machine-gated, not advisory.
+const { checkQA } = require('./qa_check.js');
+const { validate: validateSatisfaction, loadRecord: loadSatisfactionRecord } = require('./validate_satisfaction.js');
 
 const STATE_FILE = path.join(process.cwd(), 'artifacts', 'output', 'pipeline-state.json');
 const OUTPUT_DIR = path.join(process.cwd(), 'artifacts', 'output');
@@ -742,6 +745,12 @@ function printNextDashboard(state, action) {
     console.log('');
   } else if (action.action === 'advance-phase') {
     console.log(`**Next phase:** ${action.to || 'unknown'}\n`);
+  } else if (String(action.action).endsWith('-gate-blocked')) {
+    // DNA 8: a machine gate marker needs a plain human translation. Without
+    // this branch `next` looked identical whether the gate passed or blocked.
+    console.log(`**Phase advance blocked:** ${action.reason}\n`);
+    for (const f of (action.failures || [])) console.log(`- ${f}`);
+    console.log('');
   }
   if (action.recommendations) {
     console.log(`### Recommendations\n`);
@@ -1052,6 +1061,47 @@ function resolveCurrentPhase(state) {
   return PHASE_ORDER[0];
 }
 
+/**
+ * F2.23/F2.28 — one enforcement point for release-affecting transitions.
+ * Both `next` (via determineNextAction) and `advance` call this so the gate
+ * cannot be skipped by choosing a different command. Returns blocked actions.
+ */
+function evaluateTransitionGates(fromPhase, toPhase) {
+  const blocked = [];
+
+  if (fromPhase === 'execution') {
+    const qa = checkQA({ root: PROJECT_ROOT });
+    if (!qa.ok) {
+      blocked.push({
+        action: 'qa-gate-blocked',
+        from: fromPhase,
+        to: toPhase,
+        reason: `QA sign-off gate failed: ${qa.failures[0]}`,
+        failures: qa.failures,
+      });
+    }
+  }
+
+  if (toPhase === 'launch') {
+    const recordPath = path.join(PROJECT_ROOT, 'artifacts', 'output', '06-launch', 'utter-satisfaction.json');
+    const loaded = loadSatisfactionRecord(recordPath);
+    const sat = loaded.error
+      ? { valid: false, failures: [loaded.error] }
+      : validateSatisfaction(loaded.record, { root: PROJECT_ROOT, strict: true });
+    if (!sat.valid) {
+      blocked.push({
+        action: 'satisfaction-gate-blocked',
+        from: fromPhase,
+        to: toPhase,
+        reason: `UTTERLY SATISFIED release gate failed: ${sat.failures[0]}`,
+        failures: sat.failures,
+      });
+    }
+  }
+
+  return blocked;
+}
+
 function determineNextAction(state) {
   const currentPhase = resolveCurrentPhase(state);
   const phaseIdx = PHASE_ORDER.indexOf(currentPhase);
@@ -1111,6 +1161,8 @@ function determineNextAction(state) {
       const phaseObj = state.phases[nextPhase];
       const status = typeof phaseObj === 'string' ? phaseObj : (phaseObj ? phaseObj.status : 'pending');
       if (status !== 'complete') {
+        const blocked = evaluateTransitionGates(currentPhase, nextPhase);
+        if (blocked.length > 0) return blocked[0];
         return {
           action: 'advance-phase',
           from: currentPhase,
@@ -1554,6 +1606,12 @@ function mainDispatch(args) {
       }
       const targetPhase = PHASE_ORDER[currentIdx + 1];
 
+      const blocked = evaluateTransitionGates(currentPhase, targetPhase);
+      if (blocked.length > 0) {
+        console.log(JSON.stringify(blocked[0], null, 2));
+        process.exit(1);
+      }
+
       // Mark current phase complete
       if (state.phases[currentPhase]) {
         state.phases[currentPhase].status = 'complete';
@@ -1683,6 +1741,13 @@ function mainDispatch(args) {
       }
 
       const oldPhase = resolveCurrentPhase(state);
+      if (oldPhase !== phase) {
+        const gateBlocks = evaluateTransitionGates(oldPhase, phase);
+        if (gateBlocks.length > 0) {
+          console.log(JSON.stringify({ blocked: true, ...gateBlocks[0] }));
+          process.exit(1);
+        }
+      }
       state.current_phase = phase;
 
       // Ensure the phase key exists in the map so next/status stay consistent

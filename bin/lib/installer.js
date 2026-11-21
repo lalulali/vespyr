@@ -11,6 +11,8 @@ const { R } = require("./state.js");
 const PKG = require("../../package.json");
 const linkUtils = require("./link-utils.js");
 const { detectStack } = require("./detector.js");
+// F2.3: hook configs are emitted per harness from the canonical registry.
+const { emitHarnessHooks, removeHarnessHooks } = require("./hooks.js");
 const {
 	ADAPTERS: HARNESS_ADAPTERS,
 	HARNESS_OPTIONS,
@@ -208,6 +210,7 @@ _(auto-populated on every session by @memory-controller / orchestrator_state.js)
 		"patterns-and-conventions.md": "# Patterns & Conventions\n\nNo patterns recorded yet.\n",
 		"lessons-learned.md": "# Lessons Learned\n\nNo lessons recorded yet.\n",
 		"blockers-and-risks.md": "# Blockers & Risks\n\nNo blockers or risks recorded yet.\n",
+		"instincts.md": "# Instincts\n\nHouse-style principles auto-applied by `@memory-controller` at session start (F2.11–F2.15). Instincts are promoted from stable patterns by a human, loaded with highest priority under a ~200 token cap, and demoted by explicit decision — never on age alone.\n\n## Active Instincts\n\n(None yet — promote a stable pattern with `self_learn.js promote-instinct --approve`.)\n\n## Demoted Instincts\n\n(None yet.)\n",
 	};
 
 	for (const [filename, content] of Object.entries(templateFiles)) {
@@ -339,6 +342,10 @@ async function installHarnesses(targetDir, selections, method) {
 		}
 	}
 
+	// F2.3: emit the 13-hook wiring for each selected harness after its adapter
+	// has created the config directory. No-op when no hooks-capable harness.
+	emitHarnessHooks(targetDir, selections, { dryRun: R.dryRun, logDry });
+
 	for (const adapter of HARNESS_ADAPTERS) {
 		if (typeof adapter.postInstall === "function") {
 			await adapter.postInstall(selections, ctx);
@@ -364,6 +371,8 @@ function uninstallHarnesses(targetDir, harnesses, isGlobal) {
 			adapter.uninstall(ctx);
 		}
 	}
+	// Remove only the hook files Vespyr emitted; user-authored hooks survive.
+	removeHarnessHooks(targetDir, harnesses);
 }
 
 function surgicallyCleanupAgentsDir(agentsTarget) {
@@ -448,6 +457,8 @@ function surgicallyCleanupAgentsDir(agentsTarget) {
 	const coreFolders = [
 		"commands",
 		"custom",
+		"hooks",     // F2.1: lifecycle hook registry + README
+		"plugins",   // F2.3: static OpenCode plugin
 		"references",
 		"scripts",
 		"templates",

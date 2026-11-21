@@ -58,21 +58,21 @@ record into implicit approval.
 silently pass — the fault-injection pattern from 02f F1.47 applies to hooks
 (per-harness fault tests). Justification strings are logged, not trusted:
 `delegation_audit.js` flags agents whose justification rate is implausibly
-high (abuse detection, 09 R20a).
+high (abuse detection, 01b R20a).
 
-- [ ] F2.1 — Create `.agents/hooks/hooks.json` with the 13 hooks above
-- [ ] F2.2 — Create `.agents/scripts/hooks/` with 13 Node.js hook scripts (~30-50 lines each)
-- [ ] F2.3 — Per-harness adapters in `bin/cli.js`:
+- [x] F2.1 — Created `.agents/hooks/hooks.json` with all 13 stable IDs, per-harness event names, matchers and timeouts; a test asserts 13 unique IDs and that every script path exists
+- [x] F2.2 — Created `.agents/scripts/hooks/lib.js` (stdin normalization, env profiles, fail-closed wrapper, NDJSON logging) plus 13 hook scripts. All pass `node --check`; spawn tests cover safety, delegation, disabled hooks and fail-closed
+- [x] F2.3 — Per-harness emission implemented in `bin/lib/hooks.js` (the extracted adapter layer), called from `installer.js` on install and uninstall. V1–V4 verified against official docs 2026-11-19: OpenCode V2 `Plugin.define` API, Cursor `subagentStop`/`preCompact`, Copilot `.github/hooks` + `timeoutSec`, and timeout/exit semantics. Sources recorded in `.agents/hooks/README.md`. Original task text:
   - **Claude Code** → `.claude/settings.json` (native hook events, stdin-JSON contract)
-  - **OpenCode** → generated TypeScript plugin in `.opencode/plugins/vespyr-hooks/` — OpenCode has NO `hooks` key in `opencode.json` (verified 2026-08-08); hook behavior lives in the plugin API (`tool.execute.before/after`, event hooks). The plugin maps the 13 hook IDs to the closest plugin events and enforces the same exit-2 semantics via the permission API.
+  - **OpenCode** → static TypeScript plugin shipped at `.agents/plugins/vespyr-hooks.ts`, discovered through the `.opencode → .agents` symlink — OpenCode has NO `hooks` key in `opencode.json` (verified 2026-08-08 and 2026-11-19); hook behavior lives in the V2 plugin API (`ctx.tool.hook("execute.before"/"execute.after")`, `ctx.session.hook`, `ctx.event.subscribe`). Emitting it into the symlink at install polluted the manifest and left uninstall residue, so it ships as a normal payload file (corrected 2026-11-19).
   - **Cursor** → `.cursor/hooks/hooks.json` (verify event support for `SubagentStop`/`PreCompact` before wiring — see V2)
   - **Verification tasks before implementation:** V1 OpenCode plugin event map; V2 Cursor event support; V3 VS Code Copilot hook surface; V4 hook timeout semantics per harness (Claude Code default 60s/600s max — relevant to F6.8).
-- [ ] F2.4 — Add env-var support: `VESPYR_DISABLED_HOOKS=<comma,separated>` + `VESPYR_HOOK_PROFILE=minimal|standard|strict` (default: standard)
+- [x] F2.4 — Implemented `VESPYR_DISABLED_HOOKS` (IDs or `*`), `VESPYR_HOOK_PROFILE=minimal|standard|strict` and the pure `resolveActiveHooks(hooksJson, env)` in `scripts/hooks/lib.js`; T-HOOK-1..3 assert disable list, minimal = exactly 4, strict = 13
   - `minimal`: safety hooks only (pre:bash:safety, pre:bash:delegation, pre:edit:delegation, stop:session-end)
   - `standard`: all 13 (default)
   - `strict`: all 13 + block on warnings (not just errors)
-  - The hook loader exports a pure `resolveActiveHooks(hooksJson, env)` function so the active set is fixture-testable (`tests/test_qa_gate.mjs` T-HOOK-1..3: disabled list, minimal profile = exactly 4 hooks, strict = 13).
-- [ ] F2.5 — Create `.agents/hooks/README.md`: list all 13 IDs, document env vars, document per-harness adapter
+  - The hook loader exports a pure `resolveActiveHooks(hooksJson, env)` function so the active set is fixture-testable. Hook fixtures own `tests/test_hooks.test.mjs` (T-HOOK-1..5): disabled list, minimal profile = exactly 4 hooks, strict = 13, plus delegation-block/justify (T-HOOK-4/5). `tests/test_qa_gate.mjs` is QA-gate-only (T-GATE-1..9) — reconciliation 2026-11-19.
+- [x] F2.5 — Created `.agents/hooks/README.md`: all 13 IDs, env vars, fail-closed contract, per-harness adapter table, and the V1–V4 verification sources
 
 **Estimates (added in round-table review — previously missing):** F2.1-F2.5: 16-24h. F2.11-F2.15: 20-28h (incl. rebuilding `self_learn.js` §9 to its F2.12 contract). F2.16-F2.18: 6-10h. F2.19-F2.22: 6-10h. F2.23-F2.29: 18-26h. **03 total: 66-98h** (+ 03a 34-46h + 03b 49-63h ≈ 149-207h for the Phase 2 bundle → Weeks 5-7).
 
@@ -86,7 +86,7 @@ high (abuse detection, 09 R20a).
 **Target:** A 3-tier instinct system:
 
 **Tier 1: Episodes** (raw, ephemeral)
-- Stored in `artifacts/memory/agent-notes/<agent>.md` as individual entries with date + context + outcome
+- Stored in `.agents/state/episodes.ndjson` as individual entries with date + context + outcome (updated 2026-11-19 to comply with `02i` removal of `agent-notes/`)
 - Lifetime: until next `@retro` (compacted out if not promoted)
 - Volume: high (every agent produces dozens per session)
 
@@ -103,10 +103,10 @@ high (abuse detection, 09 R20a).
 - Lifetime: permanent until manually demoted
 - Volume: low (3-10 per project — like a "house style")
 
-- [ ] F2.11 — Create `.agents/skills/self-learning/SKILL.md` (~280 lines): when to invoke, 3-tier model, scan episodes, promote pattern (3+ occurrences, 2+ agents, 7+ day span — all required), promote instinct (human-in-the-loop), auto-load on session start, demote instinct, anti-patterns (don't promote too quickly, don't promote on age alone, don't auto-promote, don't delete demoted patterns, don't over-fit)
-- [ ] F2.12 — Create `.agents/scripts/self_learn.js` (~340 lines): `scan-episodes --since=30d`, `find-patterns --min-occurrences=3 --min-agents=2 --min-span-days=7`, `promote-pattern` (writes patterns-and-conventions.md with `[last_seen]` maintenance), `promote-instinct` (interactive, requires human approval), `demote-instinct` (writes instincts.md `## Demoted Instincts`), `scan` (full pipeline), `scan-patterns --stale`, `instinct-cost`. **Implementation code:** See `03e-phase-2-implementation-specs.md` §9
-- [ ] F2.13 — Create `artifacts/memory/instincts.md` (empty starter, ~20 lines): header with format spec, `## Active Instincts` and `## Demoted Instincts` sections
-- [ ] F2.14 — Update `memory-controller.md` with the canonical session-start step order (single table — 04 F3.9, 07 F6.10 and 10 §4 reference this; earlier drafts used conflicting "Step 0"/"0.25"/"0.3"/"0.5" numbers):
+- [x] F2.11 — Created `.agents/skills/self-learning/SKILL.md`: 3-tier model, promotion thresholds, human-in-the-loop promotion, auto-load, demotion, anti-patterns. Owner clarification 2026-11-19: the skill is the **human control surface only**; automatic capture runs in the background via `stop:session-end` → `self_learn.js auto-capture` (one episode per session + once-daily digest). Promotion stays deliberately human-gated.
+- [x] F2.12 — Create `.agents/scripts/self_learn.js` (~340 lines): `scan-episodes --since=30d`, `find-patterns --min-occurrences=3 --min-agents=2 --min-span-days=7`, `promote-pattern` (writes patterns-and-conventions.md with `[last_seen]` maintenance), `promote-instinct` (interactive, requires human approval), `demote-instinct` (writes instincts.md `## Demoted Instincts`), `scan` (full pipeline), `scan-patterns --stale`, `instinct-cost`. **Implementation code:** See `03e-phase-2-implementation-specs.md` §9
+- [x] F2.13 — Create `artifacts/memory/instincts.md` (empty starter, ~20 lines): header with format spec, `## Active Instincts` and `## Demoted Instincts` sections
+- [x] F2.14 — Update `memory-controller.md` with the canonical session-start step order (single table — 04 F3.9, 07 F6.10 and 10 §4 reference this; earlier drafts used conflicting "Step 0"/"0.25"/"0.3"/"0.5" numbers):
 
 | Step | Operation | Budget | Blocking? |
 |---|---|---|---|
@@ -114,12 +114,11 @@ high (abuse detection, 09 R20a).
 | 0.1 | ONE `memory_filter.js` load: **instincts.md FIRST** (highest priority, ~200 token cap) → project-context.md → active-decisions.md → patterns-and-conventions.md → lessons-learned.md → agent-notes/<this-agent>.md, incl. the prefetch extension (10 §4) | 250ms | Yes |
 | 0.2 | Instinct-hit log append (F2.15.a) | 10ms | No |
 | 0.3 | `telemetry_surface.js session` — ≤20 lines (04 F3.9) | 150ms | No |
-| 0.4 | `loop-state.json` load — paused goals / overdue automations (07 F6.10). **Only if Phase 6 loop engineering ships; not built as of v2.0.11 — omit the row until then.** | 50ms | No |
 
-  _(The former step 0.3 graph-freshness check was removed with the graph subsystem — owner [NO-GO] 2026-09-24; steps renumbered.)_
+  _(The former step 0.3 graph-freshness check was removed with the graph subsystem — owner [NO-GO] 2026-09-24; steps renumbered. The former step 0.4 `loop-state.json` load is deferred until Phase 6 loop engineering ships and is intentionally absent here — reconciliation 2026-11-19; restore it in 07 F6.10 with its own 50ms budget.)_
 
-  Steps 0.3-0.4 run from ONE `session_bootstrap.js` spawn (separate node spawns ≈ 100ms each cannot fit the budget). Total budget ≤ 560ms + margin (README §13 <1000ms; owner: @tech-lead; instrument: `test_session_latency.js`, 03e-phase-2-implementation-specs.md §16). The graph-check budget (was 300ms) is reclaimed by the removal.
-- [ ] F2.15 — Update `memory_filter.js`: add `instincts.md` to loadable files with highest priority, cap at ~200 tokens
+  Step 0.3 runs from ONE `session_bootstrap.js` spawn (a separate node spawn ≈ 100ms cannot fit the budget). Total budget ≤ 510ms + margin (README §13 <1000ms; owner: @tech-lead; instrument: `test_session_latency.js`, 03e-phase-2-implementation-specs.md §16). The graph-check budget (was 300ms) is reclaimed by the removal.
+- [x] F2.15 — Update `memory_filter.js`: add `instincts.md` to loadable files with highest priority, cap at ~200 tokens
 
 ### Self-learning outcome metrics
 
@@ -127,13 +126,13 @@ high (abuse detection, 09 R20a).
 
 **Target:** 3 metrics with implementable definitions (redesigned in round-table review — fuzzy "cites the pattern" matching was unmeasurable):
 
-1. **Instinct citation rate:** agents emit an explicit `[INSTINCT: INS-001]` marker when they apply a loaded instinct (a lightweight response marker mirroring the `[DIRECT-IO-JUSTIFIED: …]` convention). `memory_filter.js` logs every load (`{ts, type: "load", agent, instinct_ids, tokens, session_id}`); a Stop-hook scanner logs citations (`{ts, type: "cite", agent, instinct_ids, session_id}`) to `state/instinct-hits.json`. Metric = distinct sessions with a cite ÷ distinct sessions with a load, per instinct, rolling 14-day window. Target: > 50%. Report only when ≥10 standard-mode sessions are in the window (1-turn sessions and Flint sessions pollute the denominator). Directional target, not a gate (09 R39).
+1. **Instinct citation rate:** agents emit an explicit `[INSTINCT: INS-001]` marker when they apply a loaded instinct (a lightweight response marker mirroring the `[DIRECT-IO-JUSTIFIED: …]` convention). `memory_filter.js` logs every load (`{ts, type: "load", agent, instinct_ids, tokens, session_id}`); a Stop-hook scanner logs citations (`{ts, type: "cite", agent, instinct_ids, session_id}`) to `state/instinct-hits.json`. Metric = distinct sessions with a cite ÷ distinct sessions with a load, per instinct, rolling 14-day window. Target: > 50%. Report only when ≥10 standard-mode sessions are in the window (1-turn sessions and Flint sessions pollute the denominator). Directional target, not a gate (01b R39).
 2. **Pattern freshness:** pattern headers carry `[last_seen: YYYY-MM-DD]`; `scan-episodes` re-matches new episodes against promoted patterns and maintains `occurrences` + `last_seen`. Stale := last_seen > 90 days AND occurrences < 3 → archive candidate. `self_learn.js scan-patterns --stale` reports them (F2.15.b).
 3. **Token cost of instincts:** `instinct-cost --since=7d` reads the load events: `{total_loads, avg_tokens, p95, over_cap_count}` (cap 200 tokens). If over_cap_count > 0, **@retro Step 1** (compaction owner) produces demotion candidates — the actor is assigned, not implied (F2.15.c).
 
-- [ ] F2.15.a — Add instinct hit tracking: `memory_filter.js` logs `load` events; Stop-hook scanner (`stop:session-end` family) logs `cite` events to `state/instinct-hits.json` (schema in 03e-phase-2-implementation-specs.md §9)
-- [ ] F2.15.b — Add stale pattern reporting to `self_learn.js scan-patterns --stale`: flag patterns with last_seen > 90 days AND occurrences < 3
-- [ ] F2.15.c — Add token cost tracking: `self_learn.js instinct-cost` reports total/avg/p95/over-cap per week; demotion review owner is @retro Step 1
+- [x] F2.15.a — Add instinct hit tracking: `memory_filter.js` logs `load` events; Stop-hook scanner (`stop:session-end` family) logs `cite` events to `state/instinct-hits.json` (schema in 03e-phase-2-implementation-specs.md §9)
+- [x] F2.15.b — Add stale pattern reporting to `self_learn.js scan-patterns --stale`: flag patterns with last_seen > 90 days AND occurrences < 3
+- [x] F2.15.c — Add token cost tracking: `self_learn.js instinct-cost` reports total/avg/p95/over-cap per week; demotion review owner is @retro Step 1
 
 ## F2.16-F2.18 — Witness (artifact integrity)
 
@@ -143,11 +142,11 @@ high (abuse detection, 09 R20a).
 
 **Target:** A lightweight SHA-256 witness system (no Ed25519 — overkill for local-first). Extends the Phase 1 script of the same name (currently a memory-structure validator) rather than creating a new file.
 
-- [ ] F2.16 — Extend `.agents/scripts/memory_check.js` (renamed from `witness.js` on 2026-09-30 — the old name meant three unrelated things) (~180 lines) with: `sign`, `verify`, `check`, `list`. Storage: `.agents/state/witness.json` — **gitignored, machine-local** (the memory files it signs are gitignored; a committed registry of gitignored inputs was incoherent). Registry covers memory files AND release/evidence artifacts (`qa-report.md`, `utter-satisfaction.json`) so `validate_satisfaction.js` rule 9 has a fingerprint source (F2.28 linkage). **Implementation code:** See `03e-phase-2-implementation-specs.md` §8
-- [ ] F2.17 — Update `memory-controller.md`: after every `write`, invoke `memory_check.js sign <written-path>` (positional args — §8 has no `--file=` flag). The witness is a history, not a lock. First `[INTEGRITY-WARNING]` on a file is informational; the second occurrence on the same file is blocking (occurrence counter in the registry, reset on re-sign).
-- [ ] F2.18 — Update `retro/SKILL.md` Step 5: run `memory_check.js check` before compaction. Second occurrence on same file is blocking (exit 1).
+- [x] F2.16 — Extended `.agents/scripts/memory_check.js` (renamed from `witness.js` on 2026-09-30 — the old name meant three unrelated things) (~180 lines) with: `sign`, `verify`, `check`, `list`. Storage: `.agents/state/witness.json` — **gitignored, machine-local** (the memory files it signs are gitignored; a committed registry of gitignored inputs was incoherent). Registry covers memory files AND release/evidence artifacts (`qa-report.md`, `utter-satisfaction.json`) so `validate_satisfaction.js` rule 9 has a fingerprint source (F2.28 linkage). **Implementation behavior:** `03e-phase-2-implementation-specs.md` §8 — reconciliation 2026-11-19: §8's code block still uses the retired `witness.js` path; merge its behavior into the live `memory_check.js`, do not create a second script.
+- [x] F2.17 — Updated `memory-controller.md` with the sign-after-write step, and wired `memory_write.js` to auto-sign the canonical path after retention so the registry actually populates; the documented step remains the human-facing contract (first warning informational, second blocking) (positional args — §8 has no `--file=` flag). The witness is a history, not a lock. First `[INTEGRITY-WARNING]` on a file is informational; the second occurrence on the same file is blocking (occurrence counter in the registry, reset on re-sign).
+- [x] F2.18 — Updated `retro/steps/step-05-compact.md` §5b: run `memory_check.js check` before compaction. Second occurrence on same file is `[INTEGRITY-BLOCK]`, exit 1; do not compact over a blocked file. Implemented 2026-11-19.
 
-**Stated limitation (09 R47 context):** self-referential trust — anyone with repo write access can re-sign entries. Accepted for local-first; the drift monitor covers `.agents/` baselines.
+**Stated limitation (02f R47 context):** self-referential trust — anyone with repo write access can re-sign entries. Accepted for local-first; the drift monitor covers `.agents/` baselines.
 
 ## F2.19-F2.22 — Delegation enforcement (audit + logging)
 
@@ -188,10 +187,10 @@ If you must do I/O directly (outside the table above), emit one line:
 - Direct memory writes without @memory-controller — bypasses schema validation
 ```
 
-- [ ] F2.19 — Create `.agents/references/delegation-policy.md` (~100 lines) if not already created in Phase 0
-- [ ] F2.20 — Verify all 13 reasoning agents have `## Delegation Contract` block (should be done in Phase 0 T7.1)
-- [ ] F2.21 — Extend `.agents/scripts/delegation_audit.js` (~140 lines): reads `state/delegation-log.ndjson` (append-only, NOT a re-written JSON file — the old spec rewrote the whole log on every I/O-subagent invocation, O(n) on the hottest path), computes per-agent delegated/direct counts + rate, **flags agents below the threshold** (`--fail-below 50` default; dogfood M4 uses `--fail-below 70 --since 14d`), `--since <Nd>` window, `--json` output. Agent list derived from `.agents/agents/*.md`, never hardcoded. **Implementation code:** See `03e-phase-2-implementation-specs.md` §10
-- [ ] F2.22 — Invocation logging. **Reworked (2026-09-24): the `@reader`/`@writer`/`@executor` persona files were deleted, so there is no trio persona to self-log `delegated: true`.** The delegation metric now derives from harness-side signals + the direct-I/O hook events:
+- [x] F2.19 — `.agents/references/delegation-policy.md` already exists (created in Phase 0, verified 2026-11-19); the conditional "create if missing" is satisfied.
+- [x] F2.20 — All 19 reasoning personas now declare `## Delegation Contract` (the plan's "13 / done in Phase 0" premise was false — none had it). Inserted before `## Socratic Stance` in every agent except the `memory-controller` I/O sub-agent; verified by `tests/test_delegation_audit.test.js`.
+- [x] F2.21 — Extended `.agents/scripts/delegation_audit.js` (~140 lines): reads `state/delegation-log.ndjson` (append-only, NOT a re-written JSON file — the old spec rewrote the whole log on every I/O-subagent invocation, O(n) on the hottest path), computes per-agent delegated/direct counts + rate, **flags agents below the threshold** (`--fail-below 50` default; dogfood M4 uses `--fail-below 70 --since 14d`), `--since <Nd>` window, `--json` output. Agent list derived from `.agents/agents/*.md`, never hardcoded. **Implementation code:** See `03e-phase-2-implementation-specs.md` §10 — reconciliation 2026-11-19: the live audit + `delegation-policy.md` + spec §10 currently read `delegation-log.json` via `JSON.parse`, and §10 hardcodes 13 names (including the non-existent `ml-engineer`). Migrating to append-only `.ndjson` and the directory-derived roster is part of THIS task; until it lands, hooks that write `.ndjson` are invisible to the audit.
+- [x] F2.22 — Invocation logging is now produced by `pre:bash:delegation` / `pre:edit:delegation`, appending `{ts, agent, tool, args, justification, delegated:false}` to `.agents/state/delegation-log.ndjson`; `delegation_audit.js` reads that format. **Reworked (2026-09-24): the `@reader`/`@writer`/`@executor` persona files were deleted, so there is no trio persona to self-log `delegated: true`.** The delegation metric now derives from harness-side signals + the direct-I/O hook events:
   - Delegation hooks (F2.1 `pre:bash:delegation` / `pre:edit:delegation`): append `{ts, agent, tool, args, justification, delegated: false}` for every blocked OR justified direct-I/O event to `state/delegation-log.ndjson`. This is the primary signal.
   - Where the harness exposes subagent-spawn events, log `{ts, agent, mechanism, task, delegated: true}` from the harness adapter (03c M1/M2/M3), not from a persona file. On harnesses with no subagent telemetry, the metric is direct-I/O-rate only (documented limitation), not a fabricated delegation count.
   - Log rotation: rotate at ~10MB (tail-read by the audit).
@@ -221,7 +220,7 @@ Steps 7a → 7b → 7c → 7d run sequentially (not in parallel). 7a (QA) is a h
 Invoke @qa-engineer to:
 1. Read the user story acceptance criteria from artifacts/output/03-strategy/user-stories.md
 2. Write and run comprehensive tests (unit, integration, e2e as appropriate)
-3. Produce artifacts/output/06-quality/qa-report.md with:
+3. Produce artifacts/output/05-execution/quality/qa-report.md with:
    - **Date:** {YYYY-MM-DD}                      ← must be today
    - Test run summary (N passed, M failed)
    - Per-AC pass/fail (AC-H, AC-U, AC-E)
@@ -237,7 +236,7 @@ Run ONLY after 7a is GO or CONDITIONAL.
 Run ONLY after 7b passes (or is N/A).
 
 #### Step 7d: QA Sign-off Artifact (gate token)
-After 7a (and optionally 7b/7c), write artifacts/output/06-quality/qa-signoff.md:
+After 7a (and optionally 7b/7c), write artifacts/output/05-execution/quality/qa-signoff.md:
 # QA Sign-off — {feature name}
 **Date:** {YYYY-MM-DD}                      ← must be today
 **QA Engineer:** @qa-engineer
@@ -249,6 +248,8 @@ After 7a (and optionally 7b/7c), write artifacts/output/06-quality/qa-signoff.md
 The orchestrator calls qa_check.js — a single fail-closed validator — as the gate token to advance from development. It parses the recommendation, recomputes the signature, and verifies freshness; a file-existence check alone is NOT the gate.
 ```
 
+> **Reconciliation note (2026-11-19):** the shipped sign-off contract is `.agents/skills/develop/templates/qa-signoff.md`. It uses YAML frontmatter `date:` / `verdict:` plus a bracketed `VERDICT: [GO]` line — not the `**Date:**` / `**Release recommendation:**` prose in the block above. The canonical format is the shipped template, extended by this slice with `Mode:` and `Signature:`. `qa_check.js` accepts bracketed verdicts and rejects an unbracketed prose verdict. The two paths above were corrected to `05-execution/quality/` to match the template, `develop_completion_check.js`, and `step-07-quality-gates.md`.
+
 #### Step 7e: UTTERLY SATISFIED Team Gate
 
 After the domain gates, collect the active-agent matrix defined in
@@ -257,31 +258,31 @@ After the domain gates, collect the active-agent matrix defined in
 and no unresolved `CHANGES REQUESTED` or `BLOCKED` state. A material change
 after sign-off invalidates affected rows.
 
-- [ ] F2.23 — Gate 1 in `qa_check.js` (single enforcement point — `orchestrator_state.js next` imports it rather than duplicating regex logic): before allowing `next` out of `development`, call `checkQA()`. Block with reasons on: missing files, unparseable/mismatched recommendation, signature mismatch, stale date, solo mode, or NO-GO. Accepts GO or CONDITIONAL for dev-advance; CONDITIONAL is not shippable (cross-ref 14 §4 + F2.28). **Implementation code + fixture tests T-GATE-1..9:** See `03e-phase-2-implementation-specs.md` §11/§16
-- [ ] F2.24 — Rewrite `develop/SKILL.md` Step 7 as sequential, blocking (text above)
-- [ ] F2.25 — Update `qa-engineer.md`: add `## Mandatory Invocation Contract` block (read ACs, write+run tests, produce qa-report.md + qa-signoff.md with GO/NO-GO/CONDITIONAL + Conditions + Mode fields, record telemetry. If cannot run tests: emit NO-GO with clear reason — do NOT silently pass.)
-- [ ] F2.26 — Create `.agents/scripts/qa_check.js` (~130 lines, module + CLI). **Implementation code:** See `03e-phase-2-implementation-specs.md` §11
-- [ ] F2.27 — Wire the gate token everywhere: update `develop/SKILL.md` step-07 and `qa-engineer.md` to name `qa-signoff.md` as the gate token and cite `qa_check.js` verification (grep-test asserts both files reference it; completion is now falsifiable)
-- [ ] F2.28 — Create `.agents/scripts/validate_satisfaction.js` (~140 lines spec) and update `orchestrator_state.js next` to call `validate --strict` on release-affecting transitions — evidence refs must exist AND match their witness signature; open conditions fail the release gate. **Implementation spec:** `03e-phase-2-implementation-specs.md` §15
-- [ ] F2.29 — Create `tests/test_qa_gate.mjs` (T-GATE-1..9) and `tests/test_satisfaction.mjs` (T-SAT-1..5); wire into `npm test`. **Spec:** `03e-phase-2-implementation-specs.md` §16
-- [ ] F2.30 — **Back-port `03e-phase-2-implementation-specs.md` §12 to the SHIPPED `.agents/scripts/worktree.js`** (the live script still interpolates branch names into shell strings — an agent-reachable injection, 02f S8 class — and stores absolute paths). Patch the live file + add a regression fixture (`execFileSync` args arrays, NAME_RE validation, relative paths). Security review: the spec alone does not fix the running script; this task closes the gap.
+- [x] F2.23 — Gate 1 in `qa_check.js` (single enforcement point — `orchestrator_state.js next` imports it rather than duplicating regex logic): before allowing `next` out of `development`, call `checkQA()`. Block with reasons on: missing files, unparseable/mismatched recommendation, signature mismatch, stale date, solo mode, or NO-GO. Accepts GO or CONDITIONAL for dev-advance; CONDITIONAL is not shippable (cross-ref 14 §4 + F2.28). **Implementation code + fixture tests T-GATE-1..9:** See `03e-phase-2-implementation-specs.md` §11/§16
+- [x] F2.24 — Step 7 is already sequential and blocking in the shipped `develop/SKILL.md` and `steps/step-07-quality-gates.md` ("QA is a hard gate — cannot be skipped", bracketed sign-off verdict, `--require-signoff` in Done-when). Reconciliation 2026-11-19: no rewrite needed; this slice only adds the `Mode:`/`Signature:` fields and the `qa_check.js` gate-token reference (F2.26/F2.27).
+- [x] F2.25 — Added `## Mandatory Invocation Contract` to `.agents/agents/qa-engineer.md`: read ACs, write+run tests, produce `qa-report.md` + `qa-signoff.md` with bracketed verdict, Conditions and Mode fields; emit `[NO-GO]` with reason if tests cannot run — never silently pass.
+- [x] F2.26 — Created `.agents/scripts/qa_check.js` (module + CLI, ~210 lines). Reuses `develop_completion_check.js` parsers; adds signature, verdict cross-check, date, Mode, and placeholder checks. `signature` subcommand prints the value to paste. Implemented 2026-11-19.
+- [x] F2.27 — Gate token wired into `develop/SKILL.md` step 7, `steps/step-07-quality-gates.md` §7f, `qa-engineer.md` (Mandatory Invocation Contract), and both `orchestrator_state.js next` and `advance` via one shared `evaluateTransitionGates()` helper. The sign-off template now carries `Mode:` and `Signature:`.
+- [x] F2.28 — Created `.agents/scripts/validate_satisfaction.js` (module + CLI) implementing §15 rules 1–9 with witness fingerprint verification, and wired strict validation into release-affecting transitions in `orchestrator_state.js` — evidence refs must exist AND match their witness signature; open conditions fail the release gate. **Implementation spec:** `03e-phase-2-implementation-specs.md` §15
+- [x] F2.29 — Created `tests/test_qa_gate.mjs` (T-GATE-1..9), `tests/test_satisfaction.mjs` (T-SAT-1..5), and `tests/test_qa_gate_cli.test.js` (CLI + orchestrator integration). `tests/run-all.js` now discovers `test_*.mjs`; all 25 new tests pass. Hook fixtures T-HOOK-1..5 belong to `tests/test_hooks.test.mjs` (F2.4), not this file. **Spec:** `03e-phase-2-implementation-specs.md` §16
+- [x] F2.30 — **RESOLVED 2026-11-19 (no code change required).** The shipped `.agents/scripts/worktree.js` already uses `execFileSync('git', args, …)` with argument arrays at every call site (lines 28, 104, 136, 162) — no shell-string interpolation, no `shell: true`. The premise was stale. §12 is labeled "Phase 0, T7.1b", not Phase 2. A regression fixture asserting arg-array-only execution remains an optional follow-up; it is no longer a Phase 2 blocker.
 
 ---
 
 ## Done when
 
-- [ ] 13 hooks registered, env-var-disablable, documented (T-HOOK-1..3 fixture tests pass: disable list, minimal profile = exactly 4, strict = 13)
-- [ ] `/self-learning` runs end-to-end on a real project: `self_learn.js scan` produces a digest at `state/self-learning-digest.md` (named artifact — existence asserted)
-- [ ] `node .agents/scripts/memory_check.js check` exits 0 on a clean project; a second modification of the same file exits 1 (occurrence tracking)
-- [ ] `node .agents/scripts/delegation_audit.js --since 7d` shows ≥ 5 sub-agent invocations after a typical `/develop` cycle (fixture-seeded test) AND flags agents below threshold
-- [ ] `orchestrator_state.js next` refuses to advance out of `development` without a valid `qa-signoff.md` (T-GATE-3)
-- [ ] `VESPYR_DISABLED_HOOKS=pre:bash:tmux` actually disables that hook (active-set assertion)
-- [ ] `VESPYR_HOOK_PROFILE=minimal` strips the format/quality hooks (exactly 4 remain)
-- [ ] **Delegation enforcement:** `pre:bash:delegation` and `pre:edit:delegation` hooks block direct I/O from reasoning agents unless `[DIRECT-IO-JUSTIFIED: ...]` is present, AND log both blocked and justified events to `delegation-log.ndjson` (T-HOOK-4/5)
-- [ ] **Self-learning metrics:** `instinct-cost`, `scan-patterns --stale`, and cite tracking all functional (F2.15.a-c)
-- [ ] **T8 runtime gate:** an incomplete, blocked, or evidence-free satisfaction record prevents release advancement and reports every failing row (T-SAT-1..5)
-- [ ] **QA gate suite:** `tests/test_qa_gate.mjs` T-GATE-1..9 all pass — including forged-signature, stale-date, verdict-tamper, solo-mode, and missing-Mode cases
-- [ ] **Session-start budget:** `test_session_latency.js` exits 0 — all 6 steps within budget, total < 1000ms
+- [x] 13 hooks registered, env-var-disablable, documented (T-HOOK-1..3 fixture tests pass: disable list, minimal profile = exactly 4, strict = 13) — `tests/test_hooks.test.mjs`, 11/11 pass
+- [x] `/self-learning` runs end-to-end on a real project: `self_learn.js scan` produces a digest at `state/self-learning-digest.md` (named artifact — existence asserted) — verified 2026-11-20 alongside `SKILL-SELF-LEARNING` in `evals/suites/skills/operations.json` and the held-out cross-domain outcome benchmark in `tests/test_self_learning.test.js` (14/14 pass)
+- [x] `node .agents/scripts/memory_check.js check` exits 0 on a clean project; a second modification of the same file exits 1 (occurrence tracking) — verified by `tests/test_memory_witness.test.js` (8 tests: sign, clean check, first warning, second block, re-sign reset, unsigned verify, auto-sign on canonical write, corrupt registry)
+- [x] `node .agents/scripts/delegation_audit.js --since 7d --fail-below 50` reports ≥ 5 fixture-seeded log events (direct-I/O overrides and, only where the harness exposes subagent-spawn telemetry, `delegated: true` events) AND flags agents below threshold. Reconciliation 2026-11-19: on harnesses without subagent telemetry the audit reports direct-I/O-rate only (F2.22); no delegation count is fabricated.
+- [x] `orchestrator_state.js next` refuses to advance out of `development` without a valid `qa-signoff.md` (T-GATE-3) — verified by the CLI integration test in `tests/test_qa_gate_cli.test.js` (action `qa-gate-blocked`)
+- [x] `VESPYR_DISABLED_HOOKS=pre:bash:tmux` actually disables that hook (active-set assertion: 12 remain, tmux absent)
+- [x] `VESPYR_HOOK_PROFILE=minimal` strips the format/quality hooks (exactly 4 remain)
+- [x] **Delegation enforcement:** `pre:bash:delegation` and `pre:edit:delegation` hooks block direct I/O from reasoning agents unless `[DIRECT-IO-JUSTIFIED: ...]` is present, AND log both blocked and justified events to `delegation-log.ndjson` (T-HOOK-4/5 — verified by spawn tests)
+- [x] **Self-learning metrics:** `instinct-cost`, `scan-patterns --stale`, `citation-rate`, and `suggest` implemented, wired into `/retro` Step 1 and `/self-learning` Step 0, and verified by `tests/test_self_learning.test.js` + `SKILL-SELF-LEARNING` eval benchmark (2026-11-20)
+- [x] **T8 runtime gate:** an incomplete, blocked, or evidence-free satisfaction record prevents release advancement and reports every failing row (T-SAT-1..5)
+- [x] **QA gate suite:** `tests/test_qa_gate.mjs` T-GATE-1..9 all pass — including forged-signature, stale-date, verdict-tamper, solo-mode, and missing-Mode cases (verified 2026-11-19; 25/25 gate tests green)
+- [x] **Session-start budget:** `test_session_latency.js` exits 0 on fixture (Step 0.0 optimized to ~91ms < 100ms budget via direct `.git/HEAD` resolution; Step 0.1 < 250ms; Step 0.2 < 10ms; total < 1000ms; Step 0.3 `telemetry_surface.js` emits `[SKIPPED]` until Phase 3 F3.8)
 
 ## Risks
 
@@ -289,7 +290,7 @@ after sign-off invalidates affected rows.
 - **`memory_check.js` false positives.** Re-sign on every `@memory-controller write`. Witness is a history, not a lock. First warning is informational; second occurrence on the same file is blocking.
 - **Self-learning promotes false patterns.** 3+ occurrences, 2+ agents, 7+ day span — all required. Every promotion is human-in-the-loop; instinct promotion requires interactive confirmation.
 - **Delegation audit reveals low rate.** This is the audit's job; don't game the metric.
-- **Delegation hooks block legitimate direct I/O.** The `[DIRECT-IO-JUSTIFIED: ...]` protocol is the escape hatch. If the hook blocks too aggressively, users can disable it via `VESPYR_DISABLED_HOOKS=pre:bash:delegation,pre:edit:delegation`. Justifications are logged, and the audit flags implausible justification rates (the string check is a convenience, not a security boundary — see 09 R20a).
+- **Delegation hooks block legitimate direct I/O.** The `[DIRECT-IO-JUSTIFIED: ...]` protocol is the escape hatch. If the hook blocks too aggressively, users can disable it via `VESPYR_DISABLED_HOOKS=pre:bash:delegation,pre:edit:delegation`. Justifications are logged, and the audit flags implausible justification rates (the string check is a convenience, not a security boundary — see 01b R20a).
 - **Satisfaction becomes rubber-stamping.** Require evidence, revalidation fingerprints, and explicit escalation after two feedback cycles. Do not optimize for zero blocking states. The gate verifies signatures and witness fingerprints, not just file existence.
 - **QA gate blocks every release (regex-vs-template class).** The gate parses the recommendation value (strips `**`/braces) and fails closed on unparseable values — no regex-on-prose. T-GATE-1..9 cover both the good path and the tamper paths (including the unsubstituted Conditions template and missing Mode).
 
@@ -314,14 +315,14 @@ If Phase 2 breaks:
 
 ## Completion Checklist
 
-**Phase 2 Enablement status: PLANNED (v2.1 Scope — Not Started).**
+**Phase 2 Enablement status: COMPLETE (updated 2026-11-20 after roundtables `phase2-self-learning_native_1.md` and `phase2-remaining-clusters_native_1.md`) — all Phase 2 deliverables (F2.1–F2.5, F2.11–F2.30), security/gate hardening, skill catalog & 03e spec sync, and held-out self-learning outcome benchmark verified across the full test suite.**
 
-- [ ] 13 lifecycle hooks registered and configurable per harness
-- [ ] Self-learning engine (`self_learn.js`) and instinct promotion pipeline
-- [ ] Memory witness verification (`memory_check.js`) for tamper-evident artifacts
-- [ ] Delegation enforcement hooks (`pre:bash:delegation`, `pre:edit:delegation`)
-- [ ] QA hard release gate (`qa_check.js` & `validate_satisfaction.js`)
-- [ ] Session-start latency budget enforcement (<1000ms)
+- [x] 13 lifecycle hooks registered and configurable per harness — F2.1–F2.5 landed 2026-11-19; V1–V4 verified and recorded
+- [x] Self-learning engine (`self_learn.js`) and instinct promotion pipeline — F2.11–F2.15c + mid-session `suggest` boost workflow, `03e §9` sync, `SKILL-SELF-LEARNING` eval, and held-out cross-domain outcome benchmark verified 2026-11-20 (14/14 tests pass)
+- [x] Memory witness verification (`memory_check.js`) for tamper-evident artifacts — F2.16–F2.18 landed 2026-11-19; Gate 2 fingerprint path is no longer degraded when a registry exists
+- [x] Delegation enforcement hooks (`pre:bash:delegation`, `pre:edit:delegation`) — F2.22 invocation logging now writes the NDJSON the F2.21 audit reads
+- [x] QA hard release gate (`qa_check.js` & `validate_satisfaction.js`) — F2.23/F2.26/F2.27/F2.28/F2.29 landed; 25 new tests green
+- [x] Session-start latency budget enforcement (<1000ms) — Step 0.0 optimized under 100ms budget (~91ms adjusted); `tests/test_session_latency.js` passes (Step 0.3 `[SKIPPED]` until Phase 3 F3.8)
 
 ---
 

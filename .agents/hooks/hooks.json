@@ -1,0 +1,164 @@
+{
+  "version": 1,
+  "description": "Vespyr lifecycle hooks — 13 stable IDs, env-var disablable (F2.1/F2.4)",
+  "profiles": {
+    "minimal": ["pre:bash:safety", "pre:bash:delegation", "pre:edit:delegation", "stop:session-end"],
+    "standard": "all",
+    "strict": "all + block on warnings"
+  },
+  "env": {
+    "VESPYR_DISABLED_HOOKS": "comma-separated IDs, or * to disable all",
+    "VESPYR_HOOK_PROFILE": "minimal | standard | strict (default: standard)"
+  },
+  "hooks": [
+    {
+      "id": "session:start:load-context",
+      "event": "SessionStart",
+      "cursorEvent": "sessionStart",
+      "copilotEvent": "sessionStart",
+      "opencode": "session.hook(context)",
+      "script": ".agents/scripts/hooks/session-start-load-context.js",
+      "blocking": false,
+      "timeout": 10,
+      "description": "Surface the last session summary via @memory-controller load."
+    },
+    {
+      "id": "session:start:detect-package-manager",
+      "event": "SessionStart",
+      "cursorEvent": "sessionStart",
+      "copilotEvent": "sessionStart",
+      "opencode": "session.hook(context)",
+      "script": ".agents/scripts/hooks/session-start-detect-package-manager.js",
+      "blocking": false,
+      "timeout": 10,
+      "description": "Detect npm/yarn/pnpm/poetry/cargo and surface it in project-context.md."
+    },
+    {
+      "id": "route:task",
+      "event": "UserPromptSubmit",
+      "cursorEvent": "beforeSubmitPrompt",
+      "copilotEvent": "userPromptSubmitted",
+      "opencode": "session.hook(prompt)",
+      "script": ".agents/scripts/hooks/route-task.js",
+      "blocking": false,
+      "timeout": 10,
+      "description": "Suggest a squad or agent for the submitted prompt."
+    },
+    {
+      "id": "pre:bash:safety",
+      "event": "PreToolUse",
+      "matcher": "Bash",
+      "cursorEvent": "beforeShellExecution",
+      "copilotEvent": "preToolUse",
+      "opencode": "tool.hook(execute.before)",
+      "script": ".agents/scripts/hooks/pre-bash-safety.js",
+      "blocking": true,
+      "timeout": 10,
+      "description": "Block destructive shell commands (GUARDRAILS at harness layer)."
+    },
+    {
+      "id": "pre:bash:tmux",
+      "event": "PreToolUse",
+      "matcher": "Bash",
+      "cursorEvent": "beforeShellExecution",
+      "copilotEvent": "preToolUse",
+      "opencode": "tool.hook(execute.before)",
+      "script": ".agents/scripts/hooks/pre-bash-tmux.js",
+      "blocking": false,
+      "timeout": 10,
+      "description": "Suggest tmux for long-running test commands."
+    },
+    {
+      "id": "pre:bash:delegation",
+      "event": "PreToolUse",
+      "matcher": "Bash",
+      "cursorEvent": "beforeShellExecution",
+      "copilotEvent": "preToolUse",
+      "opencode": "tool.hook(execute.before)",
+      "script": ".agents/scripts/hooks/pre-bash-delegation.js",
+      "blocking": true,
+      "timeout": 10,
+      "description": "Block reasoning-agent direct bash unless [DIRECT-IO-JUSTIFIED: ...]; log the event."
+    },
+    {
+      "id": "pre:edit:delegation",
+      "event": "PreToolUse",
+      "matcher": "Edit|Write",
+      "cursorEvent": "preToolUse",
+      "copilotEvent": "preToolUse",
+      "opencode": "tool.hook(execute.before)",
+      "script": ".agents/scripts/hooks/pre-edit-delegation.js",
+      "blocking": true,
+      "timeout": 10,
+      "description": "Block reasoning-agent direct writes over 50 lines unless justified; log the event."
+    },
+    {
+      "id": "post:edit:format",
+      "event": "PostToolUse",
+      "matcher": "Edit|Write",
+      "cursorEvent": "afterFileEdit",
+      "copilotEvent": "postToolUse",
+      "opencode": "tool.hook(execute.after)",
+      "script": ".agents/scripts/hooks/post-edit-format.js",
+      "blocking": false,
+      "timeout": 30,
+      "description": "Auto-format the edited file with the project formatter."
+    },
+    {
+      "id": "post:edit:dedupe",
+      "event": "PostToolUse",
+      "matcher": "Edit|Write",
+      "cursorEvent": "afterFileEdit",
+      "copilotEvent": "postToolUse",
+      "opencode": "tool.hook(execute.after)",
+      "script": ".agents/scripts/hooks/post-edit-dedupe.js",
+      "blocking": false,
+      "timeout": 15,
+      "description": "Run dedupe-validate on writes to artifacts/memory/."
+    },
+    {
+      "id": "stop:session-end",
+      "event": "Stop",
+      "cursorEvent": "stop",
+      "copilotEvent": "agentStop",
+      "opencode": "event.subscribe(session.idle)",
+      "script": ".agents/scripts/hooks/stop-session-end.js",
+      "blocking": false,
+      "timeout": 30,
+      "description": "Invoke @memory-controller session-write automatically."
+    },
+    {
+      "id": "stop:check-console-log",
+      "event": "Stop",
+      "cursorEvent": "stop",
+      "copilotEvent": "agentStop",
+      "opencode": "event.subscribe(session.idle)",
+      "script": ".agents/scripts/hooks/stop-check-console-log.js",
+      "blocking": false,
+      "timeout": 10,
+      "description": "Warn when a change added a console.log; strict profile blocks."
+    },
+    {
+      "id": "pre:compact:save-state",
+      "event": "PreCompact",
+      "cursorEvent": "preCompact",
+      "copilotEvent": "preCompact",
+      "opencode": "session.hook(compaction)",
+      "script": ".agents/scripts/hooks/pre-compact-save-state.js",
+      "blocking": false,
+      "timeout": 15,
+      "description": "Snapshot the state machine and session before compaction."
+    },
+    {
+      "id": "subagent:stop:telemetry",
+      "event": "SubagentStop",
+      "cursorEvent": "subagentStop",
+      "copilotEvent": "subagentStop",
+      "opencode": "event.subscribe(session.idle)",
+      "script": ".agents/scripts/hooks/subagent-stop-telemetry.js",
+      "blocking": false,
+      "timeout": 10,
+      "description": "Emit a telemetry event for a finished subagent."
+    }
+  ]
+}

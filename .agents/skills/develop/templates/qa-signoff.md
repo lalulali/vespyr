@@ -69,6 +69,22 @@ this gate rather than being signed off.
 - Newest source change: {YYYY-MM-DD}
 - Verdict on staleness: {fresh \| stale — refreshed before sign-off}
 
+## Gate metadata
+
+Filled by `@qa-engineer`. `qa_check.js` reads these three fields and fails closed on any
+missing, stale, or mismatched value — a file-existence check is not the gate.
+
+- **Mode:** {M1 | M2 | M3}
+- **Signature:** {sha256 of qa-report.md content + newline + mtimeMs}
+
+Compute the signature after the final `qa-report.md` write:
+
+```bash
+node .agents/scripts/qa_check.js signature
+```
+
+Paste the printed hash above. If the report changes afterwards, recompute and re-sign.
+
 ## Sign-off
 
 | Reviewer | Disposition | Date |

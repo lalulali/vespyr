@@ -623,6 +623,16 @@
     ]
   },
   {
+    "name": "self-learning",
+    "description": "Promote recurring lessons into house-style instincts. Use when the user says \"what have we learned\", \"promote this pattern\", \"review patterns\", \"run self-learning\", \"check instincts\", or invokes /self-learning. Reads episodes from agent notes, curates patterns, and promotes instincts with human approval.",
+    "prerequisites": [],
+    "outputs": [
+      "artifacts/memory/patterns-and-conventions.md",
+      "artifacts/memory/instincts.md"
+    ],
+    "key_agents": []
+  },
+  {
     "name": "shape-up",
     "description": "Structure and stress-test a semi-cooked idea into a design-ready brief with a fixed appetite, fenced scope boundaries, and named rabbit holes. No prerequisites — works at any point in the pipeline. Use when the user says \"shape this up\", \"turn these notes into a brief\", \"I have a rough pitch\", \"scope this down\", \"what should I cut\", or invokes /shape-up. Emits shaped-brief.md with the shaping gate. Do NOT use to stress-test whether a concept should exist at all (/validate-idea), to research market or competitors (/explore-idea), to frame a problem you have not stated yet (/unpack-problem), or to turn research into specs (/design).",
     "prerequisites": [],

@@ -49,7 +49,7 @@ This skill runs in sequential steps. Each step is a self-contained file with its
 5. **Spike** (optional) → `steps/step-05-spike.md`
 6. **Dev Loop** (worktrees from step 3b, multi-developer OR single) → `steps/step-06-dev-loop.md`
 6a. **Fidelity Review** (coverage contract + 10-class audit before QA — 02o) → `steps/step-06a-fidelity-review.md`
-7. **Quality Gates** (QA hard gate → security conditional → performance conditional) → `steps/step-07-quality-gates.md`
+7. **Quality Gates** (QA hard gate → security conditional → performance conditional) → `steps/step-07-quality-gates.md`. Gate token: `qa-signoff.md`, verified by `qa_check.js` (`node .agents/scripts/qa_check.js`) — the same validator `orchestrator_state.js next` runs before advancing out of `execution`.
 8. **PM Verification** → `steps/step-08-pm-verification.md`
 9. **Documentation** → `steps/step-09-documentation.md`
 10. **Completion** → `steps/step-10-completion.md`

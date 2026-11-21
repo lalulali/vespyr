@@ -206,6 +206,19 @@ The orchestrator command delegates to `session_start.js`, which (deterministical
 
 The orchestrator also records `last_session_start` in `pipeline-state.json`, so `complete --check-memory` can verify the session-start ran. **Enforcement backstop:** the `complete` command itself refreshes `project-context.md` (Phase/Blockers + marker), so even if an agent skips session-start, the mandatory `complete` call still updates context.
 
+### Canonical session-start step order (F2.14 — single source of truth)
+
+Run these steps in order. Step 0.3 is bundled into one `session_bootstrap.js` spawn; separate node spawns do not fit the latency budget.
+
+| Step | Operation | Budget | Blocking? |
+|---|---|---|---|
+| 0.0 | `orchestrator_state.js session-start` (phase/blocker refresh) | 100ms | Yes |
+| 0.1 | ONE `memory_filter.js` load: **instincts.md FIRST** (highest priority, ~200 token cap) → project-context.md → active-decisions.md → patterns-and-conventions.md → lessons-learned.md → `agent-notes/<this-agent>.md` | 250ms | Yes |
+| 0.2 | Instinct-hit log append (load event) | 10ms | No |
+| 0.3 | `telemetry_surface.js session` — ≤20 lines, via `session_bootstrap.js` | 150ms | No |
+
+Total budget ≤ 510ms + margin (project README target <1000ms). The former step 0.4 `loop-state.json` load is deferred with Phase 6 loop engineering. The graph-freshness step was removed with the graph subsystem (owner [NO-GO] 2026-09-24); do not reintroduce it.
+
 **Guardrails:**
 - Never rewrites the `[CORE]` header format — it stays machine-parseable
 - Never removes `[IDENTITY]` or other sections
@@ -275,6 +288,22 @@ node .agents/scripts/dedupe_validator.js --title "{entry title}" --target artifa
 Auto-create the file with your write tool if it doesn't exist (minimal header only).
 
 After writing, check word count. If over threshold, trigger compaction.
+
+### Witness the write (F2.17 — mandatory)
+
+Every successful `write` must be fingerprinted immediately after the append:
+
+```
+node .agents/scripts/memory_check.js sign artifacts/memory/{target-file}
+```
+
+`sign` takes positional paths (no `--file=` flag) and updates `.agents/state/witness.json`,
+which is gitignored and machine-local. Re-signing resets that file's warning counter.
+
+The witness is a **history, not a lock**. `memory_check.js verify <file>` reports the first
+unexpected change as `[INTEGRITY-WARNING]` (informational). A second modification of the same
+file since signing is `[INTEGRITY-BLOCK]` and exits 1 — investigate the change before
+re-signing. Never re-sign to make a warning disappear without reviewing what changed.
 
 ---
 

@@ -222,9 +222,30 @@ function parseSections(content, filename) {
   const lines = content.split('\n');
   let currentSection = null;
   let currentLines = [];
+  let inFence = false;
+  let inDemotedSection = false;
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
+    if (line.trim().startsWith('```')) {
+      inFence = !inFence;
+      if (currentSection) currentLines.push(line);
+      continue;
+    }
+    if (inFence) {
+      if (currentSection) currentLines.push(line);
+      continue;
+    }
+    if (filename === 'instincts.md' && /^##\s+/.test(line)) {
+      if (currentSection) {
+        currentSection.body = currentLines.join('\n');
+        sections.push(currentSection);
+        currentSection = null;
+        currentLines = [];
+      }
+      inDemotedSection = /^##\s+Demoted/i.test(line);
+      continue;
+    }
     if (line.startsWith('### ')) {
       if (currentSection) {
         currentSection.body = currentLines.join('\n');
@@ -240,7 +261,7 @@ function parseSections(content, filename) {
         file: filename,
         date,
         isCritical,
-        isResolved: false,
+        isResolved: inDemotedSection,
         lines: [],
         body: ''
       };
@@ -259,10 +280,13 @@ function parseSections(content, filename) {
   // it is resolved/superseded/archived. Scanning from the section's start to
   // EOF would mark every earlier section resolved when a later entry resolves.
   for (const section of sections) {
-    section.isResolved =
+    if (
       section.body.includes('**Status:** resolved') ||
       section.body.includes('**Status:** superseded') ||
-      section.body.includes('**Status:** archived');
+      section.body.includes('**Status:** archived')
+    ) {
+      section.isResolved = true;
+    }
   }
 
   return sections;
@@ -350,6 +374,28 @@ function quarantineEntry(entry, reason) {
   return record;
 }
 
+/**
+ * F2.15.a — record every instinct load. The Stop hook records cite events to
+ * the same file; the ratio is the directional "instinct citation rate" metric.
+ * Logging is best-effort and must never break a memory load.
+ */
+function logInstinctLoad(agent, ids, tokens) {
+  try {
+    const file = path.join(process.cwd(), '.agents', 'state', 'instinct-hits.json');
+    let sessionId = process.env.VESPYR_SESSION_ID || null;
+    if (!sessionId) {
+      try { sessionId = require('./lib/session.js').resolveSessionId(); } catch {}
+    }
+    const record = {
+      ts: new Date().toISOString(), type: 'load', agent,
+      instinct_ids: ids, tokens, session_id: sessionId,
+    };
+    // NDJSON — the Stop hook appends cite events to this same file.
+    fs.mkdirSync(path.dirname(file), { recursive: true });
+    fs.appendFileSync(file, JSON.stringify(record) + '\n', 'utf8');
+  } catch { /* non-blocking */ }
+}
+
 function formatT3Block(source, content, tier = 'T2', timestamp = new Date().toISOString()) {
   // Task 11.4 (implemented 2026-08-25): spec-mandated passive-context
   // encapsulation — the explicit trust boundary wraps the provenance
@@ -416,7 +462,12 @@ function filterMemory(agent, task, maxResults) {
         }
 
         const score = scoreSection(section, keywords, now);
-        if (score !== null && score >= 2) {
+        if (section.file === 'instincts.md') {
+          // F2.15: active instincts always load regardless of task keywords.
+          if (score !== null) {
+            allSections.push({ ...section, score: score + 10000, tier2: isTier2, instinct: true });
+          }
+        } else if (score !== null && score >= 2) {
           // Tier-2 files rank higher among keyword matches (post-threshold boost)
           allSections.push({ ...section, score: score + (isTier2 ? 2 : 0), tier2: isTier2 });
         }
@@ -426,8 +477,11 @@ function filterMemory(agent, task, maxResults) {
     }
   }
 
-  // Sort by score descending, then by date (newer first)
-  allSections.sort((a, b) => {
+  const activeInstinctSections = allSections.filter((s) => s.instinct);
+  const nonInstinctSections = allSections.filter((s) => !s.instinct);
+
+  // Sort non-instinct sections by score descending, then by date (newer first)
+  nonInstinctSections.sort((a, b) => {
     if (b.score !== a.score) return b.score - a.score;
     if (a.date && b.date) return b.date.localeCompare(a.date);
     return 0;
@@ -437,6 +491,7 @@ function filterMemory(agent, task, maxResults) {
   // under 1,000 tokens ("Lost in the Middle" / context-dilution defense).
   // Single canonical estimator (tools/eval/lib/tokenizer countTokens).
   const INJECTED_BUDGET_TOKENS = 1000;
+  const INSTINCT_CAP_TOKENS = 200;
   let canonicalCount = null;
   try {
     const { countTokens } = require('../../tools/eval/lib/tokenizer');
@@ -447,9 +502,58 @@ function filterMemory(agent, task, maxResults) {
     : Math.round(text.trim().split(/\s+/).filter(Boolean).length / 0.75);
 
   const results = [];
+  const instinctIds = [];
   let injectedTokens = 0;
+  let instinctTokens = 0;
+  let instinctOverCap = false;
   let budgetTruncated = false;
-  for (const s of allSections.slice(0, max)) {
+
+  // F2.15: instincts.md loads FIRST in one shared T3 block under a cumulative 200-token cap.
+  if (activeInstinctSections.length > 0 && max > 0) {
+    const provenanceDate = activeInstinctSections.find((s) => s.date)?.date || new Date().toISOString().slice(0, 10);
+    const packedLines = [];
+    for (const s of activeInstinctSections) {
+      const cleanLine = `- ${scrubSecrets(sanitizeContent(s.header))}`;
+      const candidate = [...packedLines, cleanLine].join('\n');
+      const cost = estTokens(formatT3Block('instincts.md', candidate, 'INSTINCT', provenanceDate));
+      if (packedLines.length === 0 && cost > INSTINCT_CAP_TOKENS) {
+        const words = cleanLine.split(/\s+/).filter(Boolean);
+        while (words.length > 3 && estTokens(formatT3Block('instincts.md', words.join(' '), 'INSTINCT', provenanceDate)) > INSTINCT_CAP_TOKENS) {
+          words.pop();
+        }
+        packedLines.push(words.join(' '));
+        const m = String(s.header || '').match(/INS-\d+/);
+        if (m && !instinctIds.includes(m[0])) instinctIds.push(m[0]);
+        break;
+      }
+      if (cost > INSTINCT_CAP_TOKENS) break;
+      packedLines.push(cleanLine);
+      const m = String(s.header || '').match(/INS-\d+/);
+      if (m && !instinctIds.includes(m[0])) instinctIds.push(m[0]);
+    }
+    const previewText = packedLines.join('\n');
+    const t3Block = formatT3Block('instincts.md', previewText, 'INSTINCT', provenanceDate);
+    const cost = estTokens(t3Block);
+    instinctTokens = cost;
+    instinctOverCap = cost > INSTINCT_CAP_TOKENS;
+    injectedTokens += cost;
+    results.push({
+      header: activeInstinctSections.length === 1
+        ? scrubSecrets(sanitizeContent(activeInstinctSections[0].header))
+        : `Active Instincts (${instinctIds.join(', ')})`,
+      file: 'instincts.md',
+      score: activeInstinctSections[0].score,
+      date: provenanceDate,
+      isCritical: activeInstinctSections.some((s) => s.isCritical),
+      tier2: false,
+      instinct: true,
+      preview: previewText,
+      t3_block: t3Block
+    });
+  }
+
+  const remainingMax = Math.max(0, max - results.length);
+  for (const s of nonInstinctSections.slice(0, remainingMax)) {
     // Read-time defense: neutralize secrets/injections from any
     // bypass-class write BEFORE wrapping and returning to the LLM.
     const previewText = sanitizeContent(
@@ -458,6 +562,7 @@ function filterMemory(agent, task, maxResults) {
     const provenanceDate = s.date || 'legacy-backfill-2026-08-08';
     const t3Block = formatT3Block(s.file, previewText, s.tier2 ? 'T2' : 'T3', provenanceDate);
     const cost = estTokens(t3Block);
+
     // Always return at least one result; stop before exceeding the ceiling.
     if (results.length > 0 && injectedTokens + cost > INJECTED_BUDGET_TOKENS) {
       budgetTruncated = true;
@@ -465,16 +570,19 @@ function filterMemory(agent, task, maxResults) {
     }
     injectedTokens += cost;
     results.push({
-      header: s.header,
+      header: scrubSecrets(sanitizeContent(s.header)),
       file: s.file,
       score: s.score,
       date: provenanceDate,
       isCritical: s.isCritical,
       tier2: s.tier2 || false,
+      instinct: false,
       preview: previewText,
       t3_block: t3Block
     });
   }
+
+  logInstinctLoad(agent, instinctIds, instinctTokens);
 
   return {
     agent,
@@ -486,6 +594,9 @@ function filterMemory(agent, task, maxResults) {
     injected_tokens: injectedTokens,
     injected_budget_tokens: INJECTED_BUDGET_TOKENS,
     budget_truncated: budgetTruncated,
+    instinct_ids: instinctIds,
+    instinct_tokens: instinctTokens,
+    instinct_over_cap: instinctOverCap,
     quarantined_count: quarantined.length,
     quarantined_entries: quarantined,
     results

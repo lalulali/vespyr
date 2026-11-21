@@ -6,10 +6,10 @@ const { spawnSync } = require('child_process');
 
 const ROOTS = [__dirname];
 
-// Both naming conventions are discovered: tests/test_*.js (legacy prefix)
-// and tests/**/*.test.js (node:test suffix).
+// Naming conventions discovered: tests/test_*.js (legacy prefix),
+// tests/**/*.test.js (node:test suffix), and tests/test_*.mjs (F2.29 gate suites).
 function isTestFixture(name) {
-  return name.endsWith('.test.js') || /^test_.+\.js$/.test(name);
+  return name.endsWith('.test.js') || name.endsWith('.test.mjs') || /^test_.+\.(js|mjs)$/.test(name);
 }
 
 function collect(dir, acc = []) {
@@ -24,7 +24,7 @@ function collect(dir, acc = []) {
 
 const files = [...new Set(ROOTS.flatMap((root) => (fs.existsSync(root) ? collect(root) : [])))].sort();
 if (files.length === 0) {
-  console.error('run-all: no *.test.js fixtures found under tests/');
+  console.error('run-all: no *.test.js / test_*.mjs fixtures found under tests/');
   process.exit(2);
 }
 console.log(`run-all: executing ${files.length} test files:`);

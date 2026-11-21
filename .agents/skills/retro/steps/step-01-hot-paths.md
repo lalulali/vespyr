@@ -39,6 +39,7 @@ Surfaces the top token consumers per phase, slowest agents, and optimization opp
 - QA metrics — bugs found, test coverage, regression rate
 - Security findings — count by severity, resolution time
 - Performance benchmarks — SLA adherence, regressions
+- Self-learning metrics (F2.15.a–c) — run `node .agents/scripts/self_learn.js instinct-cost --since=7d`, `node .agents/scripts/self_learn.js citation-rate --since=14d`, and `node .agents/scripts/self_learn.js scan-patterns --stale`; if `over_cap_count > 0`, list over-cap instincts as demotion candidates.
 
 **Deployment metrics:**
 - Launch success rate, rollback frequency, mean time to deploy

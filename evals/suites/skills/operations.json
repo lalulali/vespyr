@@ -101,6 +101,27 @@
         "I cannot",
         "As an AI"
       ]
+    },
+    {
+      "id": "SKILL-SELF-LEARNING",
+      "skill": "self-learning",
+      "name": "Self-Learning Pipeline & Mid-Session Boost Guide",
+      "dimension": "memory_adherence",
+      "assertContains": [
+        "episodes.ndjson",
+        "patterns-and-conventions.md",
+        "instincts.md",
+        "Boost Decision Guide"
+      ],
+      "prompt": "We noticed multiple agents keep repeating the same manual validation steps across recent sessions. Run /self-learning mid-session to review episodes, check pattern and instinct promotion candidates, and advise whether we should promote an instinct or create a skill/agent.",
+      "assertNotContains": [
+        "I cannot",
+        "As an AI"
+      ],
+      "baseline": {
+        "variant": "without-skill",
+        "note": "With /self-learning loaded, the agent inspects the 3-tier pipeline (episodes.ndjson -> patterns-and-conventions.md -> instincts.md) and applies the Boost Decision Guide; without the skill, it gives generic retrospective advice without the 3-tier files or boost matrix."
+      }
     }
   ]
 }

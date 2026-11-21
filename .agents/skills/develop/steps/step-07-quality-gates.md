@@ -115,6 +115,13 @@ node .agents/scripts/orchestrator_state.js complete --agent qa-engineer --artifa
 Write `artifacts/output/05-execution/quality/qa-signoff.md` from
 `.agents/skills/develop/templates/qa-signoff.md`.
 
+**Gate token:** `node .agents/scripts/qa_check.js` — the single fail-closed validator for this
+step (F2.23/F2.26). `orchestrator_state.js next` imports the same module before advancing out
+of `execution`, so a missing, stale, unsigned, or solo-mode sign-off blocks the advance. It
+parses the verdict, cross-checks it against `qa-report.md`, recomputes the content+mtime
+signature, checks today's date, and verifies cited evidence. Generate the signature with
+`node .agents/scripts/qa_check.js signature` after the final report write.
+
 **This file is the terminal gate of the pipeline, and until now nothing produced it.** `/develop`'s
 Done-when required it, `/launch` halts when it is "missing or is not `GO`/`CONDITIONAL`", and
 `qa-engineer.md` specified its contents — but no step, script, or template in the engine wrote

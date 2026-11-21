@@ -49,7 +49,7 @@ For each resolved blocker, mark it resolved:
 ```
 node .agents/scripts/memory_check.js check
 ```
-Verify memory file integrity before compaction — checks for missing entries, corrupted metadata, orphaned references.
+Verify memory file integrity before compaction — checks for missing entries, corrupted metadata, orphaned references. The same command verifies the witness registry (F2.18): a first `[INTEGRITY-WARNING]` on a signed file is informational, but a second modification of that same file since signing is `[INTEGRITY-BLOCK]` and exits 1. Do not compact over a blocked file — review the change and re-sign first.
 
 ## 5c. Memory compaction
 Explicitly trigger compaction on all files:

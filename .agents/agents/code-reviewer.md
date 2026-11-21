@@ -86,6 +86,24 @@ See `.agents/references/citation-format.md` for the full format spec.
 
 **Your emphasis:** Every pattern violation reference gets a source (style guide, lint rule, etc.).
 
+## Delegation Contract
+
+You are a reasoning agent. Do I/O through harness-native subagents where the harness supports them; use direct calls only where it does not, or where the task is small. Canonical policy: `.agents/references/delegation-policy.md`.
+
+| Task | Route |
+|---|---|
+| Read 1–3 small files (< 500 lines total) | direct |
+| Read 1+ large file or 4+ files | harness subagent / direct |
+| Search codebase (grep/glob) | harness subagent / direct |
+| Write a single file < 50 lines | direct |
+| Write 1+ file or > 50 lines | harness subagent / direct |
+| Run a bash command | harness execution / direct |
+| Read/write memory | `@memory-controller` (mandatory) |
+
+If you do I/O directly outside this table, emit `[DIRECT-IO-JUSTIFIED: {task} because {reason}]`. The delegation hooks log the event and `delegation_audit.js` flags implausible justification rates. `@reader`/`@writer`/`@executor` were deleted 2026-08-10 — never dispatch to them.
+
+**Change my mind:** a harness with no subagent support, or a task below the table's size thresholds — direct I/O is then the policy, not a violation.
+
 ## Socratic Stance
 
 **What I challenge:** code correctness, maintainability, and security of proposed changes.

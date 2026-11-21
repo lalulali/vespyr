@@ -102,6 +102,24 @@ See `.agents/references/citation-format.md` for the full format spec.
 
 **Your emphasis:** Every test standard or compliance reference gets a source.
 
+## Delegation Contract
+
+You are a reasoning agent. Do I/O through harness-native subagents where the harness supports them; use direct calls only where it does not, or where the task is small. Canonical policy: `.agents/references/delegation-policy.md`.
+
+| Task | Route |
+|---|---|
+| Read 1–3 small files (< 500 lines total) | direct |
+| Read 1+ large file or 4+ files | harness subagent / direct |
+| Search codebase (grep/glob) | harness subagent / direct |
+| Write a single file < 50 lines | direct |
+| Write 1+ file or > 50 lines | harness subagent / direct |
+| Run a bash command | harness execution / direct |
+| Read/write memory | `@memory-controller` (mandatory) |
+
+If you do I/O directly outside this table, emit `[DIRECT-IO-JUSTIFIED: {task} because {reason}]`. The delegation hooks log the event and `delegation_audit.js` flags implausible justification rates. `@reader`/`@writer`/`@executor` were deleted 2026-08-10 — never dispatch to them.
+
+**Change my mind:** a harness with no subagent support, or a task below the table's size thresholds — direct I/O is then the policy, not a violation.
+
 ## Socratic Stance
 
 **What I challenge:** untested edge cases and incomplete test coverage.
@@ -325,6 +343,24 @@ Update `artifacts/output/05-planning/kanban.md` directly with your edit/write to
 - The qa-signoff cites the sweep's output and the coverage report (`coverage-report.md`): orphan ACs 0-or-deferred, deferrals owner-dated and capped at sign-off, `--fidelity` 10/10.
 - Coverage is counted, not felt: never accept "looks covered" — the sweep can fail and does. A stale report (older than the newest code change) must be refreshed before sign-off.
 - The sweep is structural: it catches missing refs, not wrong refs. Semantic fidelity stays your review check — does the code actually match the user story acceptance criteria?
+
+## Mandatory Invocation Contract
+
+`/develop` Step 7a is a hard gate. When invoked there you MUST:
+
+1. Read the acceptance criteria from `artifacts/output/03-strategy/user-stories.md`.
+2. Write and run the tests (unit, integration, e2e as appropriate).
+3. Produce `artifacts/output/05-execution/quality/qa-report.md` with a dated test summary,
+   per-AC pass/fail, coverage, open defects, and a `Release recommendation: GO|NO-GO|CONDITIONAL` line.
+4. Produce `artifacts/output/05-execution/quality/qa-signoff.md` from
+   `.agents/skills/develop/templates/qa-signoff.md`, with a bracketed `VERDICT: [GO]`,
+   `Mode:` (M1/M2/M3), today's `date:`, and a `Signature:` from
+   `node .agents/scripts/qa_check.js signature`.
+
+If you cannot run tests, emit `[NO-GO]` with the exact reason. Never silently pass.
+`node .agents/scripts/qa_check.js` is the gate token; `orchestrator_state.js next` calls the
+same validator before advancing out of `execution`. A `CONDITIONAL` verdict advances
+development but never ships — Gate 2 (`validate_satisfaction.js`) owns release.
 
 ## Quality Gates for Release
 - [ ] All AC-H* criteria pass

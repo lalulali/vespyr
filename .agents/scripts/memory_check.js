@@ -1,27 +1,47 @@
 #!/usr/bin/env node
 /**
- * memory_check.js — Memory Structure Checker for Vespyr
+ * memory_check.js — Memory Structure Checker + artifact witness (Vespyr F2.16).
  *
- * Validates the structure of files under artifacts/memory/ against the memory
- * conventions in memory-controller.md:
- *   - Entry files: `### [DOMAIN] title [date: YYYY-MM-DD] [agent: @name]`
- *     headers with a `**Status:**` line per entry; every section non-empty
- *   - Session summaries: latest.md has `## Last Session`; history.md entries
- *     are `## [YYYY-MM-DD] Agent: @name` with a `- Worked on:` line
- *   - Archive: index.ndjson lines each parse as one JSON object
+ * Two independent jobs, one script (the old name `witness.js` was retired 2026-09-30):
  *
- * Reports per-file PASS/FAIL and exits non-zero if any file fails.
+ * 1. STRUCTURE (`check`, the default): validates files under artifacts/memory/
+ *    against memory-controller.md conventions — entry headers, `**Status:**`
+ *    lines, session summaries, and archive index.ndjson. Preserves the original
+ *    `[PASS]/[FAIL]` + `Summary:` output contract used by /retro and CI.
+ *
+ * 2. WITNESS (`sign`, `verify`, `list`, and the witness section of `check`):
+ *    SHA-256 fingerprints in `.agents/state/witness.json` — gitignored,
+ *    machine-local. Covers memory files AND release evidence (qa-report.md,
+ *    utter-satisfaction.json) so validate_satisfaction.js rule 9 has a source.
+ *    A witness is a history, not a lock: the first integrity warning on a file
+ *    is informational; the second occurrence on the same file blocks (exit 1).
+ *    Re-signing resets that file's occurrence counter.
  *
  * Usage:
- *   node memory_check.js check [--dir artifacts/memory]
+ *   node memory_check.js check [--dir artifacts/memory] [--root DIR]
+ *   node memory_check.js sign <file> [<file> ...] [--root DIR]
+ *   node memory_check.js verify <file> [<file> ...] [--root DIR]
+ *   node memory_check.js list [--root DIR]
  */
 
 'use strict';
 
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 
 const DEFAULT_DIR = path.join('artifacts', 'memory');
+const WITNESS_REL = path.join('.agents', 'state', 'witness.json');
+const DEFAULT_ARTIFACTS = [
+  'artifacts/memory/project-context.md',
+  'artifacts/memory/active-decisions.md',
+  'artifacts/memory/lessons-learned.md',
+  'artifacts/memory/patterns-and-conventions.md',
+  'artifacts/memory/blockers-and-risks.md',
+  'artifacts/output/05-execution/quality/qa-report.md',
+  'artifacts/output/05-execution/quality/qa-signoff.md',
+  'artifacts/output/06-launch/utter-satisfaction.json',
+];
 
 function checkEntryFile(filePath, relName) {
   let content;
@@ -208,29 +228,214 @@ function runCheck(dir) {
   return failed === 0 ? 0 : 1;
 }
 
+// ---------------------------------------------------------------------------
+// Witness registry (F2.16) — gitignored, machine-local, SHA-256 fingerprints.
+// ---------------------------------------------------------------------------
+
+function witnessPath(root) {
+  return path.join(root, WITNESS_REL);
+}
+
+function loadWitness(root) {
+  const file = witnessPath(root);
+  if (!fs.existsSync(file)) return {};
+  try {
+    const data = JSON.parse(fs.readFileSync(file, 'utf8'));
+    return data && typeof data === 'object' && !Array.isArray(data) ? data : null;
+  } catch (e) {
+    console.error(`[WITNESS-CORRUPT] ${file}: ${e.message}`);
+    return null; // fail closed — do not silently treat an unreadable registry as empty
+  }
+}
+
+function saveWitness(root, registry) {
+  const file = witnessPath(root);
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  const tmp = `${file}.tmp`;
+  fs.writeFileSync(tmp, JSON.stringify(registry, null, 2) + '\n', 'utf8');
+  fs.renameSync(tmp, file);
+}
+
+function normalizeRel(root, input) {
+  const abs = path.isAbsolute(input) ? input : path.resolve(root, input);
+  return path.relative(root, abs).split(path.sep).join('/');
+}
+
+function hashFile(abs) {
+  return crypto.createHash('sha256').update(fs.readFileSync(abs, 'utf8')).digest('hex');
+}
+
+function signFiles(root, inputs) {
+  const registry = loadWitness(root);
+  if (registry === null) return 2;
+  let signed = 0;
+  for (const input of inputs) {
+    const rel = normalizeRel(root, input);
+    const abs = path.resolve(root, rel);
+    if (!fs.existsSync(abs) || !fs.statSync(abs).isFile()) {
+      console.error(`[MISSING] ${rel} — nothing to sign`);
+      continue;
+    }
+    registry[rel] = {
+      sha256: hashFile(abs),
+      mtime: fs.statSync(abs).mtimeMs,
+      signedAt: new Date().toISOString(),
+      warnings: 0, // re-signing resets the occurrence counter (F2.17)
+    };
+    console.log(`[SIGNED] ${rel} (${registry[rel].sha256.slice(0, 8)}...)`);
+    signed++;
+  }
+  if (signed > 0) saveWitness(root, registry);
+  return signed === inputs.length ? 0 : 1;
+}
+
+/** Verify one signed path. Mutates the entry's warning counter; caller persists. */
+function verifyOne(root, registry, rel) {
+  const entry = registry[rel];
+  if (!entry) {
+    console.log(`[UNSIGNED] ${rel}`);
+    return { ok: true, unsigned: true, warning: false, blocked: false };
+  }
+  const abs = path.resolve(root, rel);
+  if (!fs.existsSync(abs)) {
+    console.log(`[INTEGRITY-BLOCK] ${rel} — signed file no longer exists`);
+    return { ok: false, unsigned: false, warning: false, blocked: true, missing: true };
+  }
+  const current = hashFile(abs);
+  if (current === entry.sha256) {
+    console.log(`[OK] ${rel}`);
+    return { ok: true, unsigned: false, warning: false, blocked: false };
+  }
+
+  const n = Number(entry.warnings || 0) + 1;
+  entry.warnings = n;
+  if (n >= 2) {
+    console.log(`[INTEGRITY-BLOCK] ${rel} — modification #${n} since signing (was ${String(entry.sha256).slice(0, 8)}, now ${current.slice(0, 8)}). Review the change and re-sign.`);
+    return { ok: false, unsigned: false, warning: false, blocked: true };
+  }
+  console.log(`[INTEGRITY-WARNING] ${rel} — first modification since signing (informational; a second occurrence blocks).`);
+  return { ok: false, unsigned: false, warning: true, blocked: false };
+}
+
+function verifyFiles(root, inputs) {
+  const registry = loadWitness(root);
+  if (registry === null) return 2;
+  let failed = 0, touched = false;
+  for (const input of inputs) {
+    const rel = normalizeRel(root, input);
+    const before = registry[rel] ? registry[rel].warnings : undefined;
+    const r = verifyOne(root, registry, rel);
+    if (registry[rel] && registry[rel].warnings !== before) touched = true;
+    if (r.blocked) failed++;
+  }
+  if (touched) saveWitness(root, registry);
+  return failed > 0 ? 1 : 0;
+}
+
+function runWitnessCheck(root) {
+  const registry = loadWitness(root);
+  if (registry === null) return 2;
+  let ok = 0, warnings = 0, unsigned = 0, blocked = 0, missing = 0, touched = false;
+
+  for (const rel of Object.keys(registry)) {
+    const before = registry[rel] ? registry[rel].warnings : undefined;
+    const r = verifyOne(root, registry, rel);
+    if (registry[rel] && registry[rel].warnings !== before) touched = true;
+    if (r.blocked) blocked++;
+    else if (r.warning) warnings++;
+    else if (r.unsigned) unsigned++;
+    else if (r.missing) missing++;
+    else if (r.ok) ok++;
+  }
+  for (const rel of DEFAULT_ARTIFACTS) {
+    if (!registry[rel] && fs.existsSync(path.resolve(root, rel))) {
+      console.log(`[UNSIGNED] ${rel}`);
+      unsigned++;
+    }
+  }
+  if (touched) saveWitness(root, registry);
+  console.log(`Witness: ${ok} OK, ${warnings} warning(s), ${unsigned} unsigned, ${missing} missing, ${blocked} blocking`);
+  return blocked > 0 ? 1 : 0;
+}
+
+function listWitness(root) {
+  const registry = loadWitness(root);
+  if (registry === null) return 2;
+  const keys = Object.keys(registry).sort();
+  if (keys.length === 0) console.log('Witness registry is empty.');
+  for (const rel of keys) {
+    const e = registry[rel] || {};
+    console.log(`${String(e.sha256 || '').slice(0, 8)}  warnings=${e.warnings || 0}  ${e.signedAt || ''}  ${rel}`);
+  }
+  return 0;
+}
+
+// ---------------------------------------------------------------------------
+// CLI
+// ---------------------------------------------------------------------------
+
 function main() {
   const args = process.argv.slice(2);
   if (args.includes('--help') || args.includes('-h')) {
     console.log(`Usage:
-  node memory_check.js check [--dir artifacts/memory]
+  node memory_check.js check [--dir artifacts/memory] [--root DIR]
+  node memory_check.js sign <file> [<file> ...] [--root DIR]
+  node memory_check.js verify <file> [<file> ...] [--root DIR]
+  node memory_check.js list [--root DIR]
 
-Checks every memory file (core, session-summaries, archive) against
-the memory-entry conventions. Exits non-zero if any file fails.`);
+\`check\` validates memory structure AND verifies the witness registry.
+Witness fingerprints live in .agents/state/witness.json (gitignored).
+First integrity warning is informational; the second on the same file blocks.`);
     process.exit(0);
   }
 
-  // `check` is the default subcommand; `--dir` overrides the memory directory.
+  const cmd = args[0] && !args[0].startsWith('--') ? args[0] : 'check';
   let dir = DEFAULT_DIR;
+  let root = process.cwd();
+  const files = [];
   for (let i = 0; i < args.length; i++) {
-    if (args[i] === '--dir') dir = args[i + 1];
+    if (args[i] === '--dir') dir = args[++i];
+    else if (args[i] === '--root') root = path.resolve(args[++i]);
+    else if (i > 0 && !args[i].startsWith('--')) files.push(args[i]);
+  }
+
+  if (cmd === 'sign' || cmd === 'verify') {
+    if (files.length === 0) {
+      console.error(`Usage: node memory_check.js ${cmd} <file> [<file> ...] [--root DIR]`);
+      process.exit(2);
+    }
+    process.exit(cmd === 'sign' ? signFiles(root, files) : verifyFiles(root, files));
+  }
+  if (cmd === 'list') process.exit(listWitness(root));
+  if (cmd !== 'check') {
+    console.error(`Unknown subcommand: ${cmd}`);
+    process.exit(2);
   }
 
   if (!fs.existsSync(dir)) {
     console.error(`Directory not found: ${dir}`);
     process.exit(1);
   }
-
-  process.exit(runCheck(dir));
+  const structureCode = runCheck(dir);
+  const witnessCode = runWitnessCheck(root);
+  process.exit(structureCode !== 0 ? structureCode : witnessCode);
 }
 
-main();
+if (require.main === module) main();
+
+module.exports = {
+  runCheck,
+  collectFiles,
+  signFiles,
+  verifyFiles,
+  verifyOne,
+  runWitnessCheck,
+  listWitness,
+  loadWitness,
+  saveWitness,
+  normalizeRel,
+  hashFile,
+  witnessPath,
+  DEFAULT_DIR,
+  DEFAULT_ARTIFACTS,
+};

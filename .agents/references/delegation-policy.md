@@ -34,9 +34,9 @@ If you must do I/O directly (outside the table above), emit one line:
 [DIRECT-IO-JUSTIFIED: {task} because {reason}]
 ```
 
-Allowed for tiny, low-risk operations. The justification is logged to `state/delegation-log.json` for audit.
+Allowed for tiny, low-risk operations. The justification is appended to `.agents/state/delegation-log.ndjson` for audit (F2.21/F2.22 — append-only, tail-read at ~10MB; the legacy `.json` log is still read for backward compatibility).
 
-**Cadence (02p R1.10, 2026-09-29):** run `node .agents/scripts/delegation_audit.js` weekly. The baseline log is `.agents/state/delegation-log.json` (baseline date 2026-09-29; post-v2.0.0 review date 2026-09-30). When the log is missing or empty, the audit falls back to session-summary mentions (patched 2026-09-29 so an empty baseline does not blind the report). No script writes `records[]` yet — until the `[DIRECT-IO-JUSTIFIED]` capture is wired into session-write, the audit stays informational-only (gap tracked in `02p` §12 F-6).
+**Cadence (02p R1.10, 2026-09-29; updated F2.21 2026-11-19):** run `node .agents/scripts/delegation_audit.js --since 7d --fail-below 50` weekly. The append-only log is `.agents/state/delegation-log.ndjson`; the legacy `.json` file remains readable for existing installs. The roster is derived from `.agents/agents/*.md`, never hardcoded. The audit reports per-agent delegated/direct counts and rate, flags agents below the threshold (exit 1), and flags implausible justification rates. When no log data exists it falls back to session-summary mentions, explicitly labeled lower confidence — no delegation count is fabricated. Hooks write the log events (F2.1); until a harness exposes subagent-spawn telemetry, direct-I/O rate is the only signal on that harness.
 
 ## Delegation-path lines (decision 2026-09-29, 02p R1.11 — DESCOPE)
 

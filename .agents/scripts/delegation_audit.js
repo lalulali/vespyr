@@ -1,162 +1,217 @@
 #!/usr/bin/env node
 /**
- * delegation_audit.js — Weekly Delegation Summary for Vespyr
+ * delegation_audit.js — weekly delegation audit (F2.21).
  *
- * Reports per-agent delegation activity for the last 7 days. Reads the
- * documented delegation log convention first (delegation-policy.md:
- * `state/delegation-log.json` — the justification log for direct-I/O
- * overrides), then falls back to scanning session summaries for delegation
- * sub-agent mentions. Exits 0 with an honest message when no data exists.
+ * Reads the append-only `.agents/state/delegation-log.ndjson` written by the
+ * delegation hooks (F2.1: pre:bash:delegation / pre:edit:delegation). Each line
+ * is one event:
+ *   { ts, agent, tool, args, justification, delegated: false }   direct I/O
+ *   { ts, agent, mechanism, task, delegated: true }              subagent spawn
+ *
+ * Per-agent delegated/direct counts and rate are computed from explicit
+ * `delegated` booleans only — no delegation count is fabricated on harnesses
+ * without subagent telemetry. Agents below `--fail-below` are flagged. Legacy
+ * `.json` / `.jsonl` logs and session-summary mentions remain as lower-
+ * confidence fallbacks so existing installs do not go blind during migration.
  *
  * Usage:
- *   node delegation_audit.js [--json]
+ *   node delegation_audit.js [--since 7d] [--fail-below 50] [--json]
+ * Exit 0 = no flagged agents (or no data). Exit 1 = agents below threshold.
  */
-
 'use strict';
 
 const fs = require('fs');
 const path = require('path');
 
 const ROOT = process.cwd();
-
-// Candidate log locations for the delegation log convention.
-// delegation-policy.md:37 logs justifications to `state/delegation-log.json`;
-// .agents/state/ is the canonical state dir (see loop-state.json on :27).
 const LOG_CANDIDATES = [
-  path.join(ROOT, '.agents', 'state', 'delegation-log.json'),
+  path.join(ROOT, '.agents', 'state', 'delegation-log.ndjson'),
   path.join(ROOT, '.agents', 'state', 'delegation-log.jsonl'),
+  path.join(ROOT, '.agents', 'state', 'delegation-log.json'),
+  path.join(ROOT, 'artifacts', 'state', 'delegation-log.ndjson'),
+  path.join(ROOT, 'artifacts', 'state', 'delegation-log.jsonl'),
   path.join(ROOT, 'artifacts', 'state', 'delegation-log.json'),
-  path.join(ROOT, 'artifacts', 'state', 'delegation-log.jsonl')
 ];
-
 const SESSION_DIR = path.join(ROOT, 'artifacts', 'memory', 'session-summaries');
-
-// Sub-agent handles that count as delegation targets.
-// Trio personas deleted 2026-08-10: counting them rewards violations. Only live target counted.
+const AGENT_DIR = path.join(ROOT, '.agents', 'agents');
 const DELEGATION_HANDLES = ['@memory-controller'];
+const MAX_LOG_BYTES = 10 * 1024 * 1024; // rotate at ~10MB; tail-read by the audit
+const JUSTIFICATION_RATE_LIMIT = 80;    // 01b R20a abuse detection
+const MIN_DIRECT_FOR_ABUSE = 5;
+
+function agentRoster() {
+  if (!fs.existsSync(AGENT_DIR)) return [];
+  return fs.readdirSync(AGENT_DIR)
+    .filter((f) => f.endsWith('.md') && f !== 'memory-controller.md')
+    .map((f) => f.slice(0, -3))
+    .sort();
+}
 
 function findLog() {
-  return LOG_CANDIDATES.find(p => fs.existsSync(p)) || null;
+  return LOG_CANDIDATES.find((p) => fs.existsSync(p)) || null;
+}
+
+/** Tail-read so a rotated-but-untrimmed log cannot exhaust memory. */
+function tailRead(file) {
+  const size = fs.statSync(file).size;
+  if (size <= MAX_LOG_BYTES) return fs.readFileSync(file, 'utf8');
+  const fd = fs.openSync(file, 'r');
+  try {
+    const buf = Buffer.alloc(MAX_LOG_BYTES);
+    fs.readSync(fd, buf, 0, MAX_LOG_BYTES, size - MAX_LOG_BYTES);
+    return buf.toString('utf8').split('\n').slice(1).join('\n');
+  } finally {
+    fs.closeSync(fd);
+  }
 }
 
 function parseDate(value) {
   if (!value) return null;
-  const s = String(value);
-  const m = s.match(/(\d{4}-\d{2}-\d{2})/);
+  const m = String(value).match(/(\d{4}-\d{2}-\d{2})/);
   return m ? m[1] : null;
 }
 
 function readRecords(logPath) {
-  const content = fs.readFileSync(logPath, 'utf8').trim();
-  if (!content) return [];
-
-  if (logPath.endsWith('.jsonl')) {
-    const records = [];
-    for (const line of content.split('\n')) {
-      const s = line.trim();
-      if (!s) continue;
-      try {
-        const obj = JSON.parse(s);
-        if (obj && typeof obj === 'object') records.push(obj);
-      } catch (e) {
-        // skip corrupt lines
-      }
+  if (logPath.endsWith('.json')) {
+    try {
+      const data = JSON.parse(tailRead(logPath));
+      if (Array.isArray(data)) return data;
+      if (data && Array.isArray(data.records)) return data.records;
+      return [];
+    } catch (e) {
+      return null; // corrupt legacy log
     }
-    return records;
   }
 
-  try {
-    const data = JSON.parse(content);
-    if (Array.isArray(data)) return data;
-    if (data && Array.isArray(data.records)) return data.records;
-    return [];
-  } catch (e) {
-    return null; // corrupt log
+  const records = [];
+  for (const line of tailRead(logPath).split('\n')) {
+    const s = line.trim();
+    if (!s) continue;
+    try {
+      const obj = JSON.parse(s);
+      if (obj && typeof obj === 'object') records.push(obj);
+    } catch (e) {
+      // skip corrupt lines; never fabricate a record from them
+    }
   }
+  return records;
 }
 
-function summarizeRecords(records, now) {
-  const perAgent = {};
-  const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+function inWindow(rec, cutoffDate) {
+  const date = parseDate(rec.ts || rec.timestamp || rec.date || rec.created_at || rec.createdAt);
+  return date !== null && date >= cutoffDate;
+}
+
+function newRow(agent) {
+  return {
+    agent,
+    delegated: 0,
+    direct: 0,
+    total: 0,
+    rate: null,
+    justified: 0,
+    justification_rate: null,
+    has_data: false,
+    below_threshold: false,
+    justification_abuse: false,
+    last_date: null,
+  };
+}
+
+function summarize(records, roster, days, failBelow) {
+  const rows = new Map(roster.map((a) => [a, newRow(a)]));
+  const cutoff = new Date(Date.now() - days * 86400000).toISOString().slice(0, 10);
 
   for (const rec of records) {
-    const agent = (rec.agent || '').replace(/^@+/, '');
+    const agent = String(rec.agent || '').replace(/^@+/, '');
     if (!agent) continue;
-    const date = parseDate(rec.timestamp || rec.date || rec.created_at || rec.createdAt);
-    if (!perAgent[agent]) {
-      perAgent[agent] = { agent, weekly: 0, total: 0, last_date: null };
+    if (!inWindow(rec, cutoff)) continue;
+    let row = rows.get(agent);
+    if (!row) {
+      row = newRow(agent);
+      rows.set(agent, row);
     }
-    perAgent[agent].total++;
-    if (date) {
-      if (date >= weekAgo) perAgent[agent].weekly++;
-      if (!perAgent[agent].last_date || date > perAgent[agent].last_date) {
-        perAgent[agent].last_date = date;
-      }
+    row.has_data = true;
+    row.total++;
+    if (rec.delegated === true) row.delegated++;
+    else row.direct++; // legacy justification records are direct I/O by definition
+    if (String(rec.justification || '').trim()) row.justified++;
+    const date = parseDate(rec.ts || rec.timestamp || rec.date || rec.created_at);
+    if (date && (!row.last_date || date > row.last_date)) row.last_date = date;
+  }
+
+  const result = [...rows.values()];
+  for (const row of result) {
+    if (row.total > 0) {
+      row.rate = Math.round((row.delegated / row.total) * 1000) / 10;
+      row.justification_rate = Math.round((row.justified / Math.max(1, row.direct)) * 1000) / 10;
+      row.below_threshold = row.rate < failBelow;
+      row.justification_abuse = row.direct >= MIN_DIRECT_FOR_ABUSE && row.justification_rate > JUSTIFICATION_RATE_LIMIT;
     }
   }
-  return Object.values(perAgent).sort((a, b) => b.total - a.total);
+  return result.sort((a, b) => b.total - a.total || a.agent.localeCompare(b.agent));
 }
 
-function scanSessionSummaries(now) {
-  const historyPath = path.join(SESSION_DIR, 'history.md');
-  const latestPath = path.join(SESSION_DIR, 'latest.md');
-  const files = [historyPath, latestPath].filter(p => fs.existsSync(p));
+/** Legacy fallback: scan session summaries for @memory-controller mentions. */
+function scanSessionSummaries(days) {
+  const files = [path.join(SESSION_DIR, 'history.md'), path.join(SESSION_DIR, 'latest.md')]
+    .filter((p) => fs.existsSync(p));
   if (files.length === 0) return null;
 
-  const perAgent = {};
+  const roster = new Set(agentRoster());
+  const rows = new Map();
+  const cutoff = new Date(Date.now() - days * 86400000).toISOString().slice(0, 10);
   let currentAgent = null;
   let currentDate = null;
-  let currentLines = [];
-
+  let lines = [];
   const flush = () => {
     if (!currentAgent) return;
-    const agent = currentAgent.replace(/^@+/, '');
-    if (!perAgent[agent]) {
-      perAgent[agent] = { agent, weekly: 0, total: 0, last_date: null };
-    }
-    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-    const body = currentLines.join('\n');
-    const mentions = DELEGATION_HANDLES.filter(h => body.includes(h)).length;
-    const record = mentions > 0 ? 1 : 0; // entry counts once if it delegated
-    perAgent[agent].total += record;
-    if (record > 0 && currentDate) {
-      if (currentDate >= weekAgo) perAgent[agent].weekly++;
-      if (!perAgent[agent].last_date || currentDate > perAgent[agent].last_date) {
-        perAgent[agent].last_date = currentDate;
-      }
-    }
+    const agent = String(currentAgent).replace(/^@+/, '');
+    if (!roster.has(agent)) return;
+    if (currentDate && currentDate < cutoff) return;
+    const mentions = DELEGATION_HANDLES.filter((h) => lines.join('\n').includes(h)).length;
+    if (mentions === 0) return;
+    const row = rows.get(agent) || newRow(agent);
+    row.has_data = true;
+    row.delegated += 1;
+    row.total += 1;
+    row.last_date = currentDate || row.last_date;
+    rows.set(agent, row);
   };
 
   for (const file of files) {
-    const content = fs.readFileSync(file, 'utf8');
     currentAgent = null;
     currentDate = null;
-    currentLines = [];
-    for (const line of content.split('\n')) {
-      const entryMatch = line.match(/^##\s+\[(\d{4}-\d{2}-\d{2})(?:\s+\d{2}:\d{2})?\]\s+Agent:\s*(@+[A-Za-z0-9_-]+)/);
-      if (entryMatch) {
+    lines = [];
+    for (const line of fs.readFileSync(file, 'utf8').split('\n')) {
+      const m = line.match(/^##\s+\[(\d{4}-\d{2}-\d{2})(?:\s+\d{2}:\d{2})?\]\s+Agent:\s*(@+[A-Za-z0-9_-]+)/);
+      if (m) {
         flush();
-        currentDate = entryMatch[1];
-        currentAgent = entryMatch[2];
-        currentLines = [line];
+        currentDate = m[1];
+        currentAgent = m[2];
+        lines = [line];
       } else if (currentAgent) {
-        currentLines.push(line);
+        lines.push(line);
       }
     }
     flush();
   }
 
-  const rows = Object.values(perAgent).filter(r => r.total > 0);
-  return rows.length > 0 ? rows.sort((a, b) => b.total - a.total) : null;
+  const result = [...rows.values()];
+  for (const row of result) row.rate = 100; // mentions count as delegated; no direct data
+  return result.length > 0 ? result : null;
 }
 
-function printReport(rows, source, now, useJson) {
-  const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+function report(rows, source, days, failBelow, useJson) {
+  const flagged = (rows || []).filter((r) => r.below_threshold || r.justification_abuse);
   const summary = {
-    generated: now.toISOString().split('T')[0],
-    period: `last 7 days (since ${weekAgo})`,
+    generated: new Date().toISOString().slice(0, 10),
+    period: `last ${days} days`,
     source,
-    agents: rows || []
+    fail_below: failBelow,
+    agent_count: (rows || []).length,
+    flagged: flagged.map((r) => r.agent),
+    agents: rows || [],
   };
 
   if (useJson) {
@@ -166,69 +221,98 @@ function printReport(rows, source, now, useJson) {
 
   console.log(`Delegation Audit — ${summary.period}`);
   console.log(`Source: ${source}`);
+  console.log(`Threshold: ${failBelow}% delegated`);
   console.log('');
   if (!rows || rows.length === 0) {
-    console.log('No delegation records found yet. Delegation is tracked via');
-    console.log('`[DIRECT-IO-JUSTIFIED: ...]` overrides logged to state/delegation-log.json');
-    console.log('and sub-agent mentions in session summaries. Nothing to report.');
+    console.log('No delegation records found. Nothing to report — no count is fabricated.');
     return;
   }
-  console.log('Agent                    Weekly  Total   Last date');
-  console.log('------------------------ ------  ------  ----------');
+  console.log('Agent                    Delegated  Direct    Rate  Justif%  Last date  Flag');
+  console.log('------------------------ ---------  ------   -----  -------  ---------  ----');
   for (const r of rows) {
+    const flags = [r.below_threshold ? 'LOW-RATE' : '', r.justification_abuse ? 'JUSTIFY-ABUSE' : ''].filter(Boolean).join(',') || '—';
     console.log(
       r.agent.padEnd(24) +
-      String(r.weekly).padStart(7) +
-      String(r.total).padStart(8) +
-      '  ' + (r.last_date || '—')
+      String(r.delegated).padStart(10) +
+      String(r.direct).padStart(8) +
+      String(r.rate === null ? '—' : r.rate + '%').padStart(7) +
+      String(r.justification_rate === null ? '—' : r.justification_rate + '%').padStart(9) +
+      '  ' + (r.last_date || '—').padEnd(10) +
+      '  ' + flags
     );
   }
   console.log('');
-  console.log(`${rows.length} agent(s) with delegation activity.`);
+  console.log(`${rows.length} agent(s) reported; ${flagged.length} flagged.`);
+  return;
+}
+
+function parseArgs(argv) {
+  const args = { since: 7, failBelow: 50, json: false };
+  for (let i = 0; i < argv.length; i++) {
+    const a = argv[i];
+    if (a === '--json') args.json = true;
+    else if (a === '--since') args.since = parseInt(String(argv[++i]).replace(/\D/g, ''), 10) || 7;
+    else if (a === '--fail-below') args.failBelow = Number(argv[++i]);
+    else if (a === '--help' || a === '-h') args.help = true;
+  }
+  return args;
 }
 
 function main() {
-  const args = process.argv.slice(2);
-  const useJson = args.includes('--json');
-  if (args.includes('--help') || args.includes('-h')) {
+  const args = parseArgs(process.argv.slice(2));
+  if (args.help) {
     console.log(`Usage:
-  node delegation_audit.js [--json]
+  node delegation_audit.js [--since 7d] [--fail-below 50] [--json]
 
-Reads state/delegation-log.json (or .jsonl) for per-agent delegation records;
-falls back to scanning artifacts/memory/session-summaries/ for delegation
-sub-agent mentions. Reports the weekly summary per agent and exits 0.`);
+Reads .agents/state/delegation-log.ndjson (append-only, tail-read at ~10MB).
+Per-agent delegated/direct counts and rate; flags agents below --fail-below.
+Agent roster is derived from .agents/agents/*.md, never hardcoded.
+Exit 1 when any agent is below threshold or has an implausible justification rate.`);
     process.exit(0);
   }
 
-  const now = new Date();
+  const roster = agentRoster();
   const logPath = findLog();
+  let rows = null;
+  let source = 'no delegation data';
 
   if (logPath) {
     const records = readRecords(logPath);
-    if (records === null) {
-      printReport(null, `delegation log (unreadable): ${logPath}`, now, useJson);
-      process.exit(0);
+    if (records !== null) {
+      rows = summarize(records, roster, args.since, args.failBelow);
+      source = `delegation log: ${path.relative(ROOT, logPath)} (append-only)`;
+    } else {
+      source = `delegation log UNREADABLE: ${path.relative(ROOT, logPath)}`;
     }
-    const rows = summarizeRecords(records, now);
-    if (rows.length > 0) {
-      printReport(rows, `delegation log: ${path.relative(ROOT, logPath)}`, now, useJson);
-      process.exit(0);
-    }
-    // Log exists but has no records yet: fall back to session-summary mentions
-    // so the weekly audit is not blinded by an empty baseline (02p fix 2026-09-29).
-    const fallbackRows = scanSessionSummaries(now);
-    printReport(
-      fallbackRows,
-      'session summaries (delegation log present but empty)',
-      now,
-      useJson
-    );
-    process.exit(0);
   }
 
-  const rows = scanSessionSummaries(now);
-  printReport(rows, 'session summaries (no delegation log exists yet)', now, useJson);
-  process.exit(0);
+  if (!rows || rows.every((r) => !r.has_data)) {
+    const fallback = scanSessionSummaries(args.since);
+    if (fallback) {
+      rows = fallback;
+      source = 'session summaries (lower confidence — no direct-I/O data)';
+    } else {
+      rows = roster.map((a) => newRow(a));
+      source = logPath
+        ? `delegation log present but empty: ${path.relative(ROOT, logPath)}`
+        : 'no delegation log exists yet';
+    }
+  }
+
+  report(rows, source, args.since, args.failBelow, args.json);
+  const flagged = rows.filter((r) => r.below_threshold || r.justification_abuse);
+  process.exit(flagged.length > 0 ? 1 : 0);
 }
 
-main();
+if (require.main === module) main();
+
+module.exports = {
+  agentRoster,
+  findLog,
+  readRecords,
+  summarize,
+  scanSessionSummaries,
+  report,
+  parseArgs,
+  LOG_CANDIDATES,
+};

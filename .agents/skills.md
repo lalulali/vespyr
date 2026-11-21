@@ -1,6 +1,6 @@
 # Workflows & Skills
 
-Vespyr organizes multi-agent execution into **20 specialized personas**, structured **skills** (43 curated workflows located in `.agents/skills/`), and a **shared persistent memory layer** (`artifacts/memory/`).
+Vespyr organizes multi-agent execution into **20 specialized personas**, structured **skills** (44 curated workflows located in `.agents/skills/`), and a **shared persistent memory layer** (`artifacts/memory/`).
 
 The canonical pipeline consists of 11 phases (Phase -1…9, see [phase-table.md](./references/phase-table.md)); the core milestone groupings below provide rapid orientation.
 
@@ -64,7 +64,7 @@ Every agent persona adheres to the core system principle:
 
 ---
 
-## 4. Curated Skills Catalog (43 Skills)
+## 4. Curated Skills Catalog (44 Skills)
 
 Skills are invoked via `/skill-name` or by referencing `.agents/skills/[name]/SKILL.md`.
 
@@ -105,6 +105,7 @@ Skills are invoked via `/skill-name` or by referencing `.agents/skills/[name]/SK
 - **`/iterate`**: Post-launch behavior analysis, metric optimization, and incremental shipping.
 - **`/incident`**: Production incident triage, mitigation, root-cause analysis, and post-mortem.
 - **`/retro`**: Post-cycle review, estimate calibration, and memory compaction.
+- **`/self-learning`**: Promote recurring lessons into house-style instincts (episodes → patterns → instincts) and surface mid-session skill/agent boost suggestions.
 - **`/legal-safety-audit`**: Legal/compliance safety audit — generates policy drafts (privacy, terms, refund, cookie, consent banner, email footer) and audits the app for consent, data minimization, third-party SDKs, dark patterns, hidden fees, unsupported claims, accessibility, kids-data consent, and data deletion. Produces drafts and flags, never legal advice.
 
 ### 🔧 Internal Engine Maintenance (separate lane)
@@ -144,6 +145,7 @@ All agents leverage the persistent memory system located in `artifacts/memory/` 
 4. **`lessons-learned.md`** — Non-obvious bugs, gotchas, and retrospective insights.
 5. **`blockers-and-risks.md`** — Active blockers and risk register.
 - **`session-summaries/latest.md`** — Single authoritative rolling live cursor.
+- **`instincts.md`** — Always-loaded Tier-3 house-style instincts (capped at ≤ 200 tokens, human-approved promotion only).
 - **`archive/`** — Append-only NDJSON index and quarterly archives.
 
 ### 3-Tier Progressive Loading

@@ -38,6 +38,9 @@
 const fs = require('fs');
 const { parseFlagArgs } = require('./lib/flag_args');
 const { writeFileSync: atomicWriteFileSync } = require('./lib/fs_atomic.js');
+// F2.17: fingerprint canonical memory writes automatically. Relying on agents
+// to remember a documented `sign` step leaves the witness registry empty.
+const { signFiles } = require('./memory_check.js');
 const { withLock } = require('./lib/lock.js');
 const { resolveSessionId } = require('./lib/session.js');
 const path = require('path');
@@ -111,6 +114,7 @@ const INJECTION_PATTERNS = [
 function sanitizeContent(text) {
   let clean = text
     .replace(/<\|im_start\|>|<\|im_end\|>|\[SYSTEM DIRECTIVE\]/gi, '')
+    .replace(/<\/?HISTORICAL_MEMORY_DATA[^>]*>/gi, '')
     .replace(/<!--[\s\S]*?-->/g, '')
     .replace(/[\u200B\u200C\uFEFF\u202E]/g, '');
   for (const pat of INJECTION_PATTERNS) {
@@ -659,6 +663,15 @@ function routingAdvisory(file, domain) {
   // Calling it inside the lock would invert the orchestrator.lock -> memory.lock order
   // and deadlock against advance/set-phase.
   enforceRetentionPolicy();
+
+  // F2.17: sign AFTER retention/compaction rewrites so the registry reflects the
+  // bytes actually on disk. Witness is a history, not a lock — never block a
+  // successful write because of a registry problem.
+  try {
+    if (fs.existsSync(filePath)) {
+      signFiles(process.cwd(), [path.relative(process.cwd(), filePath)]);
+    }
+  } catch { /* witness must never block a successful write */ }
 
   console.log(JSON.stringify({
     success: true,

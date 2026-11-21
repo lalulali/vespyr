@@ -59,23 +59,42 @@ function canonicalSprint() {
   }
 }
 
+function findGitDir(startDir = process.cwd()) {
+  let dir = path.resolve(startDir);
+  while (true) {
+    const candidate = path.join(dir, '.git');
+    if (fs.existsSync(candidate)) return candidate;
+    const parent = path.dirname(dir);
+    if (parent === dir) return null;
+    dir = parent;
+  }
+}
+
 function detectRepository() {
+  const gitPath = findGitDir();
+  if (!gitPath) return 'Not a git repository (local folder)';
   const { execSync } = require('child_process');
   try {
-    const inRepo = execSync('git rev-parse --is-inside-work-tree 2>/dev/null', { encoding: 'utf8' }).trim();
-    if (inRepo !== 'true') return 'Not a git repository (local folder)';
     const remote = execSync('git config --get remote.origin.url 2>/dev/null', { encoding: 'utf8' }).trim();
     return remote || 'Local git repository (no remote)';
   } catch {
-    return 'Not a git repository (local folder)';
+    return 'Local git repository (no remote)';
   }
 }
 
 function detectBranch() {
+  const gitPath = findGitDir();
+  if (!gitPath) return 'none';
+  try {
+    const headFile = fs.statSync(gitPath).isDirectory() ? path.join(gitPath, 'HEAD') : null;
+    if (headFile && fs.existsSync(headFile)) {
+      const head = fs.readFileSync(headFile, 'utf8').trim();
+      const m = head.match(/^ref:\s+refs\/heads\/(.+)$/);
+      if (m) return m[1];
+    }
+  } catch {}
   const { execSync } = require('child_process');
   try {
-    const inRepo = execSync('git rev-parse --is-inside-work-tree 2>/dev/null', { encoding: 'utf8' }).trim();
-    if (inRepo !== 'true') return 'none';
     const branch = execSync('git branch --show-current 2>/dev/null', { encoding: 'utf8' }).trim();
     if (branch) return branch;
     const ref = execSync('git rev-parse --abbrev-ref HEAD 2>/dev/null', { encoding: 'utf8' }).trim();

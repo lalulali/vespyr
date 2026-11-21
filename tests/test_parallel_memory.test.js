@@ -76,7 +76,8 @@ test('02o DoD#5: falsifiability — lock bypass reproduces corruption (planted-b
   const dir = makeSandbox('bypass');
   const sdir = path.join(dir, '.agents', 'scripts');
   fs.mkdirSync(path.join(sdir, 'lib'), { recursive: true });
-  for (const f of ['memory_write.js', 'dedupe_validator.js', 'compaction_guard.js']) {
+  // F2.17: memory_write.js now requires memory_check.js to auto-sign writes.
+  for (const f of ['memory_write.js', 'dedupe_validator.js', 'compaction_guard.js', 'memory_check.js']) {
     fs.copyFileSync(path.join(SCRIPTS, f), path.join(sdir, f));
   }
   // The whole lib directory, not an enumeration of it. This sandbox listed two files, and adding
